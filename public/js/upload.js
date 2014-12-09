@@ -90,7 +90,7 @@ $(document).ready(function(){
 
     $('#sign-in').click(function(e){
         e.preventDefault();
-        gopopup($(this).data('oauth'));
+        APP.googole_popup($(this).data('oauth'));
     })
 
 });

@@ -24,8 +24,6 @@ class glossaryController extends ajaxController {
     private $_TMS;
     private $job_info;
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();
@@ -124,9 +122,6 @@ class glossaryController extends ajaxController {
 
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $this->userMail == $this->job_info['owner'] ){
-            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'r', 'glos' );
-            $tm_keys = json_encode( $tm_keys );
         }
 
         //get TM keys with read grants
@@ -190,9 +185,6 @@ class glossaryController extends ajaxController {
 
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $this->userMail == $this->job_info['owner'] ){
-            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w', 'glos' );
-            $tm_keys = json_encode( $tm_keys );
         }
 
         //get TM keys with read grants
@@ -201,31 +193,62 @@ class glossaryController extends ajaxController {
         if ( empty( $tm_keys ) ) {
 
             $APIKeySrv = new TMSService();
-            $newUser   = $APIKeySrv->createMyMemoryKey(); //throws exception
+            $newUser   = (object)$APIKeySrv->createMyMemoryKey(); //throws exception
 
-            //TODO Replace with User Key Management
+            //TODO take only for hystorical reason
             updateTranslatorJob( $this->id_job, $newUser );
-            $config[ 'id_user' ] = $newUser->id;
 
+            //fallback
+            $config[ 'id_user' ] = $newUser->id;
+            
             $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
             $new_key->tm    = 1;
             $new_key->glos  = 1;
             $new_key->key   = $newUser->key;
-            $new_key->owner = 0;
-            $new_key->r     = 1;
-            $new_key->w     = 1;
+            $new_key->owner = ( $this->userMail == $this->job_info['owner'] );
+
+            if( !$new_key->owner ){
+                $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]} = 1;
+                $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]} = 1;
+            } else {
+                $new_key->r     = 1;
+                $new_key->w     = 1;
+            }
+
+            if( $new_key->owner ){
+                //do nothing, this is a greedy if
+            } elseif ( $this->userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+                $new_key->uid_transl = $this->uid;
+            } elseif ( $this->userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+                $new_key->uid_rev = $this->uid;
+            }
 
             //create an empty array
             $tm_keys   = array();
             //append new key
             $tm_keys[] = $new_key;
 
+            //put the key in the job
             TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->id_job, $this->password, $tm_keys );
+
+            //put the key in the user keiring
+            if( $this->userIsLogged  ){
+
+                $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
+                $newMemoryKey->tm_key = $new_key;
+                $newMemoryKey->uid    = $this->uid;
+
+                $mkDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+
+                $mkDao->create( $newMemoryKey );
+
+            }
 
         }
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
         //prepare the error report
         $set_code = array();
@@ -285,9 +308,6 @@ class glossaryController extends ajaxController {
 
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $this->userMail == $this->job_info['owner'] ){
-            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w', 'glos' );
-            $tm_keys = json_encode( $tm_keys );
         }
 
         //get TM keys with read grants
@@ -295,6 +315,7 @@ class glossaryController extends ajaxController {
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
         //prepare the error report
         $set_code = array();
@@ -339,9 +360,6 @@ class glossaryController extends ajaxController {
 
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $this->userMail == $this->job_info['owner'] ){
-            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w', 'glos' );
-            $tm_keys = json_encode( $tm_keys );
         }
 
         //get TM keys with read grants

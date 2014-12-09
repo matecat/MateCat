@@ -1,13 +1,3 @@
-
-function gopopup(url) {
-	//var rid=$('#rid').text();
-	//url=url+'&rid='+rid;
-	var newWindow = window.open(url, 'name', 'height=600,width=900');
-	if (window.focus) {
-		newWindow.focus();
-	}
-}
-
 function errorMsgReset(){
 	/*if($('#msg').text().length > 0)*/ $('#msg').text('');
 }
@@ -60,11 +50,6 @@ $(document).ready(function(){
 
     $('#emailToReset').on('keypress',function(){
         errorMsgReset()
-    })
-
-    $('#sign-in').click(function(e){
-        e.preventDefault();
-        gopopup($(this).data('oauth'));
     })
 
     $('#formReset').submit(function(event){

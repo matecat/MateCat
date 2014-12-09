@@ -2,20 +2,18 @@
 include_once INIT::$UTILS_ROOT."/CatUtils.php";
 
 
-class TmKeyManagement_LocalAPIKeyService {
-
-	public function __construct(){
-
-	}
+class TmKeyManagement_LocalAPIKeyService extends Engine {
 
     public function createMyMemoryKey(){
 
-        $newUser = json_decode( file_get_contents( 'http://api.mymemory.translated.net/api/createranduser' ) );
-        if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
+        //query db
+        $this->doQuery('api_key_create_user');
+
+        if ( empty( $this->raw_result ) || $this->raw_result['error'] || $this->raw_result['code'] != 200 ) {
             throw new Exception( "Private TM key .", -1 );
         }
 
-        return $newUser;
+        return $this->raw_result;
 
     }
 
@@ -29,38 +27,25 @@ class TmKeyManagement_LocalAPIKeyService {
      * @return bool|null
      * @throws Exception
      */
-    public function checkCorrectKey( $apiKey ){
+    public function checkCorrectKey( $apiKey ) {
 
-        $url = 'http://api.mymemory.translated.net/authkey?key=' . $apiKey;
-
-        $defaults = array(
-                CURLOPT_URL => $url,
-                CURLOPT_HEADER => 0,
-                CURLOPT_RETURNTRANSFER => TRUE,
-                CURLOPT_TIMEOUT => 2
+        $postFields = array(
+                'key' => trim($apiKey)
         );
 
-        Log::doLog( "Request: " . $url );
+        //query db
+        $this->doQuery( 'api_key_check_auth', $postFields );
 
-        $ch = curl_init();
-        curl_setopt_array( $ch, $defaults );
-        $result = curl_exec( $ch );
 
-        $curl_errno = curl_errno($ch);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        Log::doLog( "Response: " . $result );
-
-        if( $curl_errno > 0 ) {
-            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $curl_error . " ErrNum: " . $curl_errno );
-            throw new Exception( "Error: The check for correctness of the private TM key failed. Please check you inserted key.", -2 );
+        if ( @$this->raw_result['error']['code'] != 0 ) {
+            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $this->raw_result['error']['message'] . " ErrNum: " . $this->raw_result['error']['code'] );
+            throw new Exception( "Error: The private TM key you entered seems to be invalid. Please, check that the key is correct.", -2 );
         }
 
-        $isValidKey = filter_var( $result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+        $isValidKey = filter_var( $this->raw_result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
-        if( $isValidKey === null ){
-            throw new Exception( "Error: The check for correctness of the private TM key failed.", -3 );
+        if ( $isValidKey === null ) {
+            throw new Exception( "Error: The private TM key you entered seems to be invalid.", -3 );
         }
 
         return $isValidKey;

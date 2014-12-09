@@ -213,7 +213,10 @@ UI = {
 	},
 	createButtons: function() {
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        var nextSegment = this.currentSegment.next();
+        var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
+        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+		var buttons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
         buttonsOb.empty().append(buttons);
         buttonsOb.before('<p class="warnings"></p>');
@@ -683,6 +686,7 @@ UI = {
 				UI.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
+                if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 			}
 		});
@@ -841,7 +845,7 @@ UI = {
 		}
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {
@@ -1165,9 +1169,19 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
+/*
+                tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
+                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
+                    '</li>' +
+//                    '						   <li class="crunched">&lt;&gt;</li>' +
+//                    '						   <li class="extended">&lt;...&gt;</li>' +
+                    '						</ul>' : '';
+*/
+                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid">' + this.sid + '</span>' +
+						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +
 						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
 //						'			<h2 title="" class="percentuage"><span></span></h2>' + 
@@ -1188,12 +1202,16 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
+//                        tagModes +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-						'						<ul class="editToolbar">' +
-						'							<li class="uppercase" title="Uppercase"></li>' +
-						'							<li class="lowercase" title="Lowercase"></li>' +
-						'							<li class="capitalize" title="Capitalized"></li>' +
-						'						</ul>' +
+                        '                       <div class="toolbar">' +
+((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle">&lt;&rarr;<span>&gt;</span></a>' : '') +
+						'                           <ul class="editToolbar">' +
+						'                               <li class="uppercase" title="Uppercase"></li>' +
+						'                               <li class="lowercase" title="Lowercase"></li>' +
+						'                               <li class="capitalize" title="Capitalized"></li>' +
+						'                           </ul>' +
+                        '                       </div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1703,7 +1721,84 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+    downloadTM: function( tm, button_class ) {
+
+        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
+                src: ''
+            } );
+
+            $( "body" ).append( iFrameDownload );
+
+            iFrameDownload.ready( function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval( function () {
+
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        window.clearInterval( downloadTimer );
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        $( '#' + iFrameID ).remove();
+                    }
+
+                }, 2000 );
+            } );
+
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/',
+                'method': 'POST'
+            } ).append(
+                    //action to call
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'action',
+                        value: 'downloadTMX'
+                    } ),
+                    //we tell to the controller to check a field in the post named downloadToken
+                    // and to set a cookie named as it's value with it's value ( equals )
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'downloadToken',
+                        value: downloadToken
+                    } ),
+                    //set other values
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'tm_key',
+                        value: $( '.privatekey', tm ).text()
+                    } )
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
+
+        }
+
+    },
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
@@ -1721,7 +1816,7 @@ UI = {
             $("body").append( iFrameDownload );
 
             //generate a token download
-            var downloadToken = new Date().getTime();
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
             //set event listner, on ready, attach an interval that check for finished download
             iFrameDownload.ready(function () {
@@ -1730,14 +1825,14 @@ UI = {
                 downloadTimer = window.setInterval(function () {
 
                     //check for cookie
-                    var token = $.cookie('downloadToken');
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
                     }
 
@@ -1747,11 +1842,11 @@ UI = {
 
             //clone the html form and append a token for download
             var iFrameForm = $("#fileDownload").clone().append(
-                $( document.createElement( 'input' ) ).prop({
-                    type:'hidden',
-                    name:'downloadToken',
-                    value: downloadToken
-                })
+                    $( document.createElement( 'input' ) ).prop({
+                        type:'hidden',
+                        name:'downloadToken',
+                        value: downloadToken
+                    })
             );
 
             //append from to newly created iFrame and submit form post
@@ -1762,7 +1857,7 @@ UI = {
             //we are in download status
         }
 
-	},
+    },
 	/**
 	 * fill segments with relative errors from polling
 	 * 
@@ -1955,7 +2050,6 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
 					// check conditions for results discard
 					if (!d.total) {
@@ -2649,8 +2743,8 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
-				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
+			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
+				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
 			}
 
 			if (this.code == '-10') {
@@ -2935,8 +3029,15 @@ UI = {
 	 });
 	 },
 	 */
+    storeClientInfo: function () {
+        clientInfo = {
+            xRes: window.screen.availWidth,
+            yRes: window.screen.availHeight
+        };
+        $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
+    },
 
-	topReached: function() {
+    topReached: function() {
 //        var jumpto = $(this.currentSegment).offset().top;
 //        $("html,body").animate({
 //            scrollTop: 0
@@ -3026,7 +3127,41 @@ UI = {
 				$(this).addClass('current');
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
-	}
+	},
+    findCommonPartInSegmentIds: function () {
+        var a = config.first_job_segment;
+        var b = config.last_job_segment;
+        for(x=0;x<a.length;x++){
+            if(a[x] != b[x]) {
+                n = x;
+                break;
+            }
+        }
+
+        //when the job has one segment only
+        if( typeof n === 'undefined' ) {
+            n = a.length -1;
+        }
+
+//        console.log('n: ' + x);
+//        console.log(a.substring(0,n));
+//        var coso = a.substring(0,n);
+        this.commonPartInSegmentIds = a.substring(0,n);
+//        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
+    },
+    shortenId: function(id) {
+        return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    },
+    isCJK: function () {
+        var l = config.target_rfc;
+        if( (l=='zh-CN') || (l=='zh-TW') || (l=='ja-JP') || (l=='ko-KR') ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 };
 
 $(document).ready(function() {
@@ -3042,12 +3177,6 @@ $(document).ready(function() {
 	});
 	//launch segments check on opening
 	UI.checkWarnings(true);
-});
-
-$.extend($.expr[":"], {
-	"containsNC": function(elem, i, match) {
-		return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
-	}
 });
 
 $(window).resize(function() {

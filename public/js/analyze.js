@@ -551,6 +551,12 @@ UI = {
 
                                 var s_total = $( '.stat-payable', context );
                                 s_total_txt = s_total.text();
+//                                s_total_txt = "0";
+                                if(parseFloat(s_total_txt) < 1) {
+                                    $(context.parents('.jobcontainer').find('.splitbtn')).addClass('disabled').attr('title', 'You cannot split a job with 1 or 0 payable words.');
+                                } else {
+                                    $(context.parents('.jobcontainer').find('.splitbtn')).removeClass('disabled').attr('title', '');
+                                }
                                 s_total.text( tot.TOTAL_PAYABLE[1] );
                                 if ( s_total_txt != s.TOTAL_TM_WC_PRINT )
                                     s_total.effect( "highlight", {}, 1000 );
@@ -572,6 +578,12 @@ UI = {
                                 s_int.text( tot.INTERNAL_MATCHES[1] );
                                 if ( s_int_txt != tot.INTERNAL_MATCHES[1] )
                                     s_int.effect( "highlight", {}, 1000 );
+
+                                var s_tm50 = $( '.stat_tm50', context );
+                                s_tm50_txt = s_tm50.text();
+                                s_tm50.text( tot.TM_50_74[1] );
+                                if ( s_tm50_txt != tot.TM_50_74[1] )
+                                    s_tm50.effect( "highlight", {}, 1000 );
 
                                 var s_tm75 = $( '.stat_tm75', context );
                                 s_tm75_txt = s_tm75.text();
@@ -600,11 +612,11 @@ UI = {
 
                             } );
 
-                            $.each( files_group, function ( jobpassword, files_object ) {
+                            $.each( files_group, function ( jPassword, files_object ) {
 
                                 $.each( files_object, function ( id_file, file_details ) {
 
-                                    context = $( global_context ).find( '#file_' + job_id + '_' + jobpassword + '_' + id_file );
+                                    context = $( global_context ).find( '#file_' + job_id + '_' + jPassword + '_' + id_file );
 
                                     var s_payable = $( '.stat_payable strong', context );
                                     var s_payable_txt = s_payable.text();
@@ -629,6 +641,12 @@ UI = {
                                     s_int.text( file_details.INTERNAL_MATCHES[1] );
                                     if ( s_int_txt != file_details.INTERNAL_MATCHES[1] )
                                         s_int.effect( "highlight", {}, 1000 );
+
+                                    var s_tm50 = $( '.stat_tm50', context );
+                                    s_tm50_txt = s_tm50.text();
+                                    s_tm50.text( file_details.TM_50_74[1] );
+                                    if ( s_tm50_txt != file_details.TM_50_74[1] )
+                                        s_tm50.effect( "highlight", {}, 1000 );
 
                                     var s_tm75 = $( '.stat_tm75', context );
                                     s_tm75_txt = s_tm75.text();
@@ -664,9 +682,8 @@ UI = {
                     } catch ( e ){
                         //do Nothing and try again in next poll
                     }
-
 					if (d.data.summary.STATUS != 'DONE') {
-						$('.dosplit').addClass('disabled');
+//						$('.dosplit').addClass('disabled');
                         if( d.data.summary.TOTAL_SEGMENTS > UI.segmentsThreshold  ){
                             UI.pollingTime = parseInt( d.data.summary.TOTAL_SEGMENTS / 20 ) ;
                             console.log( 'Polling time: ' + UI.pollingTime );
@@ -675,7 +692,7 @@ UI = {
 							UI.pollData();
 						}, UI.pollingTime );
 					} else {
-						$('.dosplit').removeClass('disabled');
+//						$('.dosplit').removeClass('disabled');
 						$('#longloading .approved-bar').css('width', '100%');
 						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
 						setTimeout(function() {
@@ -765,7 +782,7 @@ $(document).ready(function() {
 	}
 	$('#sign-in').click(function(e) {
 		e.preventDefault();
-		gopopup($(e.target).data('oauth'));
+		APP.googole_popup($(e.target).data('oauth'));
 	});
 	UI.init();
 	UI.outsourceInit();

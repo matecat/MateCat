@@ -25,8 +25,6 @@ class setContributionController extends ajaxController {
 
     private $__postInput;
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();
@@ -116,20 +114,24 @@ class setContributionController extends ajaxController {
             return -1;
         }
 
-        $config = TMS::getConfigStruct();
-
-        $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->source );
-        $config[ 'translation' ] = CatUtils::view2rawxliff( $this->target );
-        $config[ 'source_lang' ] = $this->source_lang;
-        $config[ 'target_lang' ] = $this->target_lang;
-        $config[ 'email' ]       = "demo@matecat.com";
-//        $config[ 'id_user' ]     = $this->translator_username; // No more Used
 
         $id_tms  = $job_data[ 'id_tms' ];
         $tm_keys = $job_data[ 'tm_keys' ];
 
 
         if ( $id_tms != 0 ) {
+
+            $config = TMS::getConfigStruct();
+
+            $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->source );
+            $config[ 'translation' ] = CatUtils::view2rawxliff( $this->target );
+            $config[ 'source_lang' ] = $this->source_lang;
+            $config[ 'target_lang' ] = $this->target_lang;
+            $config[ 'email' ]       = "demo@matecat.com";
+
+            //Props
+            $config[ 'prop' ] = json_encode( CatUtils::getTMProps( $job_data ) );
+
             //instantiate TMS object
             $tms    = new TMS( $id_tms );
             $result = array();
@@ -143,9 +145,6 @@ class setContributionController extends ajaxController {
 
                 if ( $url_request ) {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-                } elseif( $this->userMail == $job_data['owner'] ){
-                    $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w' );
-                    $tm_keys = json_encode( $tm_keys );
                 }
 
                 //find all the job's TMs with write grants and make a contribution to them
@@ -206,6 +205,7 @@ class setContributionController extends ajaxController {
             $this->result[ 'data' ] = "NOCONTRIB_OK";
         }
     }
+
 }
 
 

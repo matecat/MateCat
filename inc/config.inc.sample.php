@@ -61,6 +61,12 @@ class INIT {
 	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
+     * Default Matecat user agent string
+     *
+     */
+    const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
+
+    /**
 	 * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
 	 */
 	const JOB_ARCHIVABILITY_THRESHOLD = 30;
@@ -74,6 +80,16 @@ class INIT {
      * @var bool
      */
     public static $ENABLE_OUTSOURCE = true;
+
+    public static $DEFAULT_PAYABLE_RATES = array(
+            'NO_MATCH'    => 100,
+            '50%-74%'     => 100,
+            '75%-99%'     => 60,
+            '100%'        => 30,
+            'REPETITIONS' => 30,
+            'INTERNAL'    => 60,
+            'MT'          => 85
+    );
 
 
 	public static function obtain() {
@@ -138,7 +154,7 @@ class INIT {
 
             register_shutdown_function( 'INIT::sessionClose' );
 
-            self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+            self::$PROTOCOL = isset($_SERVER['HTTPS']) ? "https" : "http";
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
 
         } else {
@@ -209,9 +225,7 @@ class INIT {
 			}
 		}
 
-		self::$AUTHCOOKIENAME='matecat_login';
-		self::$AUTHCOOKIEDURATION=86400*60;
-		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
+		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari'); //, 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
         // This occurs especially in mobile environment. As an example, when you try to open a link from within
@@ -234,8 +248,11 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.4.1.1';
-		self::$VOLUME_ANALYSIS_ENABLED = true;
+        self::$BUILD_NUMBER = '0.4.2';
+        self::$VOLUME_ANALYSIS_ENABLED = true;
+
+        self::$AUTHCOOKIENAME='matecat_login_v2';
+        self::$AUTHCOOKIEDURATION=86400*60;
 
         self::$FORCE_XLIFF_CONVERSION = false;
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds

@@ -24,8 +24,6 @@ class getContributionController extends ajaxController {
 
     private $__postInput = array();
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();
@@ -194,9 +192,6 @@ class getContributionController extends ajaxController {
 
                 if ( $url_request ) {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-                } elseif( $this->userMail == $jobData['owner'] ){
-                    $this->tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($this->tm_keys), 'r', 'tm' );
-                    $this->tm_keys = json_encode( $this->tm_keys );
                 }
 
                 $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->uid, $this->userRole );

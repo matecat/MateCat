@@ -75,7 +75,7 @@ class TMSService {
         $this->tmxServiceWrapper = new TmKeyManagement_SimpleTMX( 1 );
 
         //get MyMemory apiKey service
-        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService();
+        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService( 1 );
 
     }
 
@@ -86,11 +86,13 @@ class TMSService {
      */
     public function checkCorrectKey(){
 
+        $isValid = false;
+
         //validate the key
         //This piece of code need to be executed every time
         try {
 
-            $this->apiKeyService->checkCorrectKey( $this->tm_key );
+           $isValid = $this->apiKeyService->checkCorrectKey( $this->tm_key );
 
         } catch ( Exception $e ) {
 
@@ -99,6 +101,8 @@ class TMSService {
             throw $e;
 
         }
+
+        return $isValid;
 
     }
 
@@ -193,6 +197,9 @@ class TMSService {
 //        Log::doLog( $allMemories );
 
         if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
+
+            Log::doLog( "Can't find TMX files to check for status" );
+
             //what the hell? No memories although I've just loaded some? Eject!
             throw new Exception( "Can't find TMX files to check for status", -15);
         }
@@ -219,17 +226,21 @@ class TMSService {
                 //LOADING
                 Log::doLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
                 $result[ 'data' ]      = array(
-                        "done"  => $current_tm[ "temp_seg_ins" ],
-                        "total" => $current_tm[ "num_seg_tot" ],
+                        "done"        => $current_tm[ "temp_seg_ins" ],
+                        "total"       => $current_tm[ "num_seg_tot" ],
+                        "source_lang" => $current_tm[ "source_lang" ],
+                        "target_lang" => $current_tm[ "target_lang" ]
                 );
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
                 Log::doLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
-                $result[ 'data' ]      = array(
-                        "done"  => $current_tm[ "temp_seg_ins" ],
-                        "total" => $current_tm[ "num_seg_tot" ]
+                $result[ 'data' ] = array(
+                        "done"        => $current_tm[ "temp_seg_ins" ],
+                        "total"       => $current_tm[ "num_seg_tot" ],
+                        "source_lang" => $current_tm[ "source_lang" ],
+                        "target_lang" => $current_tm[ "target_lang" ]
                 );
                 $result[ 'completed' ] = true;
                 break;
@@ -280,6 +291,45 @@ class TMSService {
         return $this;
     }
 
+    /**
+     * Send a request for download
+     *
+     * First basic implementation
+     * TODO  in the future we would send a mail with link for direct prepared download
+     */
+    public function downloadTMX(){
+
+        $result = $this->tmxServiceWrapper->createExport( $this->tm_key );
+
+        if( @$result['status'] == 'QUEUED' && $result['responseStatus'] == 202 ){
+
+            do {
+
+                $result = $this->tmxServiceWrapper->checkExport( $this->tm_key );
+
+                usleep(1500000); // 1.5 seconds
+
+            } while( isset( $result['status'] ) && $result['status'] != 'READY' && $result['status'] != 'NO SEGMENTS' );
+
+            if( !isset( $result['status'] ) ) throw new Exception( "Status check failed. Export broken.", -16 );
+
+            if( $result['status'] == 'NO SEGMENTS' ) throw new DomainException( "No translation memories found to download.", -17 );
+
+            $_download_url = parse_url( $result['resourceLink'] );
+            parse_str( $_download_url['query'], $secrets );
+            list( $_key, $pass ) = array_values( $secrets );
+
+        } else {
+
+            throw new Exception( "Critical. Export Creation Failed.", -18 );
+
+        }
+
+        $resource_pointer = $this->tmxServiceWrapper->downloadExport( $this->tm_key, $pass );
+
+        return $resource_pointer;
+
+    }
 
 
 }

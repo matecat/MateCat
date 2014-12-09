@@ -23,6 +23,8 @@ UI = {
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
         this.initTM();
+        console.log($.cookie('tmpanel-open'));
+        if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
     },
     enableAnalyze: function() {
         enableAnalyze();
@@ -152,8 +154,21 @@ UI = {
                                     '</span>');
         }
     },
-
-
+    updateTMAddedMsg: function () {
+        var numTM = $('#activetm tr.mine').length;
+        if(numTM) {
+            $('.tm-added .num').text(numTM);
+            if(numTM > 1) {
+                $('.tm-added .msg').text(' TMs added');
+            } else {
+                $('.tm-added .msg').text(' TM added');
+            }
+            $('.tm-added').show();
+        } else {
+            $('.tm-added').hide();
+            $('.tm-added .num').text('');
+        }
+    },
 
 
 }
@@ -320,10 +335,10 @@ $(function () {
 			delete(UI.skipLangDetectArr[deletedFileName]);
 		}
 
-        if($('.error-message.no-more').length) {
+        if($('.wrapper-upload .error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
-				$('.error-message').empty().hide();
+				$('.wrapper-upload .error-message').empty().hide();
 		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
 		    	$('#add-files').removeClass('disabled');
 		    	$('#add-files input').removeAttr('disabled');
@@ -354,10 +369,10 @@ $(function () {
 	}).on('click', '.template-upload .cancel button', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file canceled');
-        if($('.error-message.no-more').length) {
+        if($('.wrapper-upload .error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
-				$('.error-message').empty().hide();
+				$('.wrapper-upload .error-message').empty().hide();
 		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
 		    	$('#add-files').removeClass('disabled');
 		    	$('#add-files input').removeAttr('disabled');
@@ -387,7 +402,7 @@ $(function () {
 		var maxnum = config.maxNumberFiles;
 		if($('.upload-table tr').length > (maxnum-1)) {
 			console.log('10 files loaded');
-			$('.error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			$('.wrapper-upload .error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
 		    $('#fileupload').fileupload('option', 'dropZone', null);
 		    $('#add-files').addClass('disabled');
 		    $('#add-files input').attr('disabled', 'disabled');
@@ -475,7 +490,7 @@ $(function () {
 
         } else if ( fileSpecs.error ) {
             disableAnalyze();
-            $( '.error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -533,7 +548,7 @@ $(function () {
 
     $('#clear-all-files').bind('click', function (e) {
         e.preventDefault();
-        $('.error-message').hide();
+        $('.wrapper-upload .error-message').hide();
         $('.template-download .delete button, .template-upload .cancel button').click();
 	});
 

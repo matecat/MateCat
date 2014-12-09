@@ -27,6 +27,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -60,6 +61,7 @@ $.extend(UI, {
         this.logEnabled = false;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
+        this.savingMemoryErrorNotificationEnabled = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -142,7 +144,7 @@ $.extend(UI, {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "alt+ctrl+c",
+					"standard": "alt+c",
 					"mac": "alt+meta+c",
 				}
 			},
@@ -154,6 +156,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+        this.storeClientInfo();
 
         // SET EVENTS
 		this.setEvents();

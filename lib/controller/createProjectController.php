@@ -69,8 +69,8 @@ class createProjectController extends ajaxController {
             $__postInput[ 'private_tm_key' ] = array();
         }
 
-        $array_keys = json_decode( $__postInput['private_keys_list'], true );
-        $array_keys = array_merge( $array_keys['owner'], $array_keys['mine'],$array_keys['anonymous'] );
+        $array_keys = json_decode( $_POST['private_keys_list'], true );
+        $array_keys = array_merge( $array_keys['ownergroup'], $array_keys['mine'],$array_keys['anonymous'] );
 
         if ( $array_keys ) {
             $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );
@@ -218,6 +218,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'tms_engine' ]        = $this->tms_engine;
         $projectStructure[ 'status' ]            = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'lang_detect_files' ] = $this->lang_detect_files;
+        $projectStructure[ 'skip_lang_validation' ] = true;
 
         //if user is logged in, set the uid and the userIsLogged flag
         $this->checkLogin();
@@ -233,7 +234,19 @@ class createProjectController extends ajaxController {
         $this->result = $projectStructure[ 'result' ];
 
         if ( !empty( $this->result[ 'errors' ] ) ) {
-            setcookie( "upload_session", "", time() - 10000 );
+
+
+            //FIXME THIS IS A WORKAROUND, AN WARNING LEVEL MESSAGE SHOULD BE RAISED INSTEAD OF ERROR
+            $delete_session = true;
+            foreach( $this->result[ 'errors' ] as $err ){
+                if( $err['code'] == -17 ){
+                    $delete_session = false;
+                }
+            }
+
+            if( $delete_session ){
+                setcookie( "upload_session", "", time() - 10000 );
+            }
         }
 
     }

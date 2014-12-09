@@ -2,6 +2,8 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/CatUtils.php";
+include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
+include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class getSearchController extends ajaxController {
@@ -18,6 +20,8 @@ class getSearchController extends ajaxController {
     private $exactMatch;
 
     private $queryParams = array();
+
+    protected $job_data = array();
 
     public function __construct() {
 
@@ -85,12 +89,12 @@ class getSearchController extends ajaxController {
             $this->result['error'][] = array("code" => -2, "message" => "missing id job");
             return;
         }
-        //get Job Infos
-        $job_data = getJobData((int) $this->job);
+        //get Job Info
+        $this->job_data = getJobData( (int) $this->job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if (!$pCheck->grantJobAccessByJobData($job_data, $this->password)) {
+        if (!$pCheck->grantJobAccessByJobData($this->job_data, $this->password)) {
             $this->result['error'][] = array("code" => -10, "message" => "wrong password");
             return;
         }
@@ -141,6 +145,78 @@ class getSearchController extends ajaxController {
          * @throws Exception
          */
         doReplaceAll( $this->queryParams );
+
+        //SKIPPED setContribution for all segments
+//        if ( $this->job_data['id_tms'] != 0 ) {
+//
+//            $config = TMS::getConfigStruct();
+//
+//            $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->source );
+//            $config[ 'translation' ] = CatUtils::view2rawxliff( $this->target );
+//            $config[ 'source_lang' ] = $this->source;
+//            $config[ 'target_lang' ] = $this->target;
+//            $config[ 'email' ]       = "demo@matecat.com";
+//
+//
+//            //instantiate TMS object
+//            $tms    = new TMS( $this->job_data['id_tms'] );
+//            $result = array();
+//
+//            $this->checkLogin();
+//
+//            try {
+//
+//                $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+//                $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+//
+//                if ( $url_request ) {
+//                    $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+//                }
+//
+//                //find all the job's TMs with write grants and make a contribution to them
+//                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys(  $this->job_data['tm_keys'], 'w', 'tm', $this->uid, $this->userRole  );
+//
+//                if ( !empty( $tm_keys ) ) {
+//
+//                    foreach ( $tm_keys as $i => $tm_info ) {
+//                        $config[ 'id_user' ][] = $tm_info->key;
+//                    }
+//
+//                    $res = $tms->set( $config );
+//
+//                    if ( !$res ) {
+//
+//                        $this->result[ 'error' ][ ] = array(
+//                                "code"    => -5,
+//                                "message" => "Set contribution error" );
+//
+//                        Log::doLog( "Set contribution error " . implode( ",", $config['id_user'] ) );
+//
+//                    }
+//
+//                } else {
+//
+//                    $res = $tms->set( $config );
+//
+//                    if ( !$res ) {
+//                        $result[ ]                  = $res;
+//                        $this->result[ 'error' ][ ] = array(
+//                                "code"    => -5,
+//                                "message" => "Set contribution error"
+//                        );
+//
+//                    }
+//
+//                }
+//
+//
+//            } catch ( Exception $e ) {
+//                $this->result[ 'error' ][ ] = array( "code" => -6, "message" => "Error while retrieving job's TM." );
+//                Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
+//            }
+//
+//        }
+
     }
 
 }

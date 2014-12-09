@@ -70,7 +70,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-        console.log('SET EVENTS');
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
@@ -147,6 +146,15 @@ $.extend(UI, {
             UI.openLanguageResourcesPanel();
         }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
+        }).bind('keydown', 'Meta+shift+s', function(e) {
+//            e.preventDefault();
+            UI.body.toggleClass('tagmode-default-extended');
+        }).on('click', '.tagModeToggle', function(e) {
+            e.preventDefault();
+            console.log('click su tagMode toggle');
+            UI.body.toggleClass('tagmode-default-extended');
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {
@@ -182,24 +190,45 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("http://mymemory.translated.net/api/createranduser",function(data){
-                //parse to appropriate type
-                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-                if(typeof data == 'string'){
-                    data=jQuery.parseJSON(data);
+//            $.get("https://mymemory.translated.net/api/createranduser",function(data){
+//                //parse to appropriate type
+//                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+//                if(typeof data == 'string'){
+//                    data=jQuery.parseJSON(data);
+//                }
+//                //put value into input field
+//                $('#addtm-tr-key').val(data.key);
+//                $('#addtm-create-key').removeClass('disabled');
+//                setTimeout(function() {
+//                    UI.checkAddTMEnable();
+//                    UI.checkManageTMEnable();
+//                }, 100);
+////                $('#private-tm-user').val(data.id);
+////                $('#private-tm-pass').val(data.pass);
+////                $('#create_private_tm_btn').attr('data-key', data.key);
+//                return false;
+//            });
+
+            //call API
+            APP.doRequest({
+                data: {
+                    action: 'createRandUser'
+                },
+                success: function(d) {
+                    //put value into input field
+                    $('#addtm-tr-key').val( d.data.key);
+                    $('#addtm-create-key').removeClass('disabled');
+                    setTimeout(function() {
+                        UI.checkAddTMEnable();
+                        UI.checkManageTMEnable();
+                    }, 100);
+                    //$('#private-tm-user').val(data.id);
+                    //$('#private-tm-pass').val(data.pass);
+                    //$('#create_private_tm_btn').attr('data-key', data.key);
+                    return false;
                 }
-                //put value into input field
-                $('#addtm-tr-key').val(data.key);
-                $('#addtm-create-key').removeClass('disabled');
-                setTimeout(function() {
-                    UI.checkAddTMEnable();
-                    UI.checkManageTMEnable();
-                }, 100);
-//                $('#private-tm-user').val(data.id);
-//                $('#private-tm-pass').val(data.pass);
-//                $('#create_private_tm_btn').attr('data-key', data.key);
-                return false;
             });
+
         }).on('change', '#addtm-tr-read, #addtm-tr-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
                 $('.addtm-tr .error-message').hide();
@@ -472,12 +501,11 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-//			console.log('a: ', UI.editarea.html());
+
+            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
 //            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//            console.log('a1: ', UI.editarea.html());
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -784,7 +812,11 @@ $.extend(UI, {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function() {
+		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
@@ -798,7 +830,6 @@ $.extend(UI, {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
-
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
@@ -831,7 +862,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
-			if (UI.debug)
+            UI.lockTags(UI.editarea);
+
+            if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
@@ -867,7 +900,6 @@ $.extend(UI, {
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
-            console.log('222222');
 /*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
@@ -880,7 +912,6 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -903,8 +934,12 @@ $.extend(UI, {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
                     // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+
+                    tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+                    UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+
+//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 //                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
 //                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
 
@@ -915,7 +950,16 @@ $.extend(UI, {
 					}
 					UI.checkAutocompleteTags();
 				}
-			}, 50);			
+			}, 50);
+            if (!UI.body.hasClass('searchActive')) {
+//                console.log('vediamo: ', e.which);
+                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                } else {
+                    setTimeout(function() {
+                        UI.lockTags(UI.editarea);
+                    }, 10);
+                }
+            }
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -1175,7 +1219,7 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-                    console.log('QQQQQQ: ', UI.editarea.html());
+//                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
@@ -1210,10 +1254,12 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);
 				}, 10);
+*/
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
@@ -1300,7 +1346,7 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-			UI.saveInUndoStack('drop');
+//			UI.saveInUndoStack('drop');
 //			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
@@ -1638,6 +1684,10 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
+        }).on('click', '.showExtendedTags', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+            $(this).remove();
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -1653,7 +1703,15 @@ $.extend(UI, {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
 			}
-		});
+		}).on('click', '.tagMode .crunched', function(e) {
+            e.preventDefault();
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
+        }).on('click', '.tagMode .extended', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
+        });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
@@ -1803,8 +1861,14 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
-				UI.updateSearchDisplayCount(segment);
+                segment_id = $(segment).attr('id').split('-')[1];
+                status = UI.getStatus(segment);
+                byStatus = 0;
+
+                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setContribution(segment_id, status, byStatus);
+
+                UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);

@@ -81,7 +81,7 @@ class TmKeyManagement_TmKeyManagement {
                 $tmKeys = array_filter( $tmKeys, array( $filter, 'byRevisor' ) );
                 break;
             default:
-                throw new Exception( "Filter type $user_role not allowed." );
+                throw new Exception( "Filter type '$user_role' not allowed." );
                 break;
         }
 
@@ -99,7 +99,6 @@ class TmKeyManagement_TmKeyManagement {
      * @return int|null Returns null if all is ok, otherwise it returns the error code of the mysql Query
      */
     public static function setJobTmKeys( $id_job, $job_pass, $tm_keys ) {
-        $tm_keys = str_replace("\"","'", $tm_keys);
         return setJobTmKeys( $id_job, $job_pass, json_encode( $tm_keys ) );
     }
 
@@ -291,7 +290,7 @@ class TmKeyManagement_TmKeyManagement {
             //create a reverse lookup
             $reverse_lookup_client_json[ 'pos' ][ $_j ]      = $_client_tm_key->key;
             $reverse_lookup_client_json[ 'elements' ][ $_j ] = $_client_tm_key;
-            $reverse_lookup_client_json[ 'unique' ][ $_j ] = $_client_tm_key->getCrypt();
+            $reverse_lookup_client_json[ 'unique' ][ $_j ]   = $_client_tm_key->getCrypt();
 
             if( empty( $_client_tm_key->r ) && empty( $_client_tm_key->w ) ){
                 throw new Exception( "Read and Write grants can not be both empty", 4 );
@@ -363,8 +362,8 @@ class TmKeyManagement_TmKeyManagement {
 
                 }
 
-                //choose a name instead of null
-                if ( empty( $_job_Key->name ) ) {
+                //change name if modified
+                if ( $_job_Key->name != $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name ) {
                     $_job_Key->name = $reverse_lookup_client_json[ 'elements' ][ $_index_position ]->name;
                 }
 

@@ -37,7 +37,7 @@ class newProjectController extends viewController {
     public function __construct() {
 
         parent::__construct( false );
-        parent::makeTemplate( "upload_tmx.html" );
+        parent::makeTemplate( "upload.html" );
 
         $this->guid            = Utils::create_guid();
         $this->lang_handler    = Languages::getInstance();
@@ -139,11 +139,6 @@ class newProjectController extends viewController {
         $intDir = INIT::$UPLOAD_REPOSITORY . '/' . $this->guid . '/';
         if ( !is_dir( $intDir ) ) {
             mkdir( $intDir, 0775, true );
-
-            // ANTONIO: le due istruzioni seguenti non funzionano
-            // ma sarebbe opportuno che i permessi fossero quelli indicati nelle istruzioni in oggetto
-            //chown($intDir, "matecat");
-            //chgrp($intDir, "matecat");
         }
 
         // check if user is logged and generate authURL for logging in
@@ -167,20 +162,12 @@ class newProjectController extends viewController {
                     $this->keyList[ ] = $memKey->tm_key;
                 }
 
-                Log::doLog( $this->keyList );
-
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
             }
 
         }
 
-    }
-
-    public function sortByOrder( $a, $b ) {
-        return strcmp( $a[ "name" ], $b[ "name" ] );
-
-        //    	return $b['name'] - $a['name'];
     }
 
     public function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
@@ -293,6 +280,7 @@ class newProjectController extends viewController {
 //            }
 //        }
 
+        $this->template->page = 'home';
         $this->template->source_languages = $source_languages;
         $this->template->target_languages = $target_languages;
         $this->template->subjects = $this->subjectArray;

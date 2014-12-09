@@ -213,7 +213,10 @@ UI = {
 	},
 	createButtons: function() {
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        var nextSegment = this.currentSegment.next();
+        var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
+        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+		var buttons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
         buttonsOb.empty().append(buttons);
         buttonsOb.before('<p class="warnings"></p>');
@@ -683,6 +686,7 @@ UI = {
 				UI.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
+                if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 			}
 		});
@@ -841,7 +845,7 @@ UI = {
 		}
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {
@@ -1165,9 +1169,19 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
+/*
+                tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
+                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
+                    '</li>' +
+//                    '						   <li class="crunched">&lt;&gt;</li>' +
+//                    '						   <li class="extended">&lt;...&gt;</li>' +
+                    '						</ul>' : '';
+*/
+                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid">' + this.sid + '</span>' +
+						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +
 						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
 //						'			<h2 title="" class="percentuage"><span></span></h2>' + 
@@ -1188,12 +1202,16 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
+//                        tagModes +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-						'						<ul class="editToolbar">' +
-						'							<li class="uppercase" title="Uppercase"></li>' +
-						'							<li class="lowercase" title="Lowercase"></li>' +
-						'							<li class="capitalize" title="Capitalized"></li>' +
-						'						</ul>' +
+                        '                       <div class="toolbar">' +
+((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle">&lt;&rarr;<span>&gt;</span></a>' : '') +
+						'                           <ul class="editToolbar">' +
+						'                               <li class="uppercase" title="Uppercase"></li>' +
+						'                               <li class="lowercase" title="Lowercase"></li>' +
+						'                               <li class="capitalize" title="Capitalized"></li>' +
+						'                           </ul>' +
+                        '                       </div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1703,7 +1721,84 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+    downloadTM: function( tm, button_class ) {
+
+        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
+                src: ''
+            } );
+
+            $( "body" ).append( iFrameDownload );
+
+            iFrameDownload.ready( function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval( function () {
+
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        window.clearInterval( downloadTimer );
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        $( '#' + iFrameID ).remove();
+                    }
+
+                }, 2000 );
+            } );
+
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/',
+                'method': 'POST'
+            } ).append(
+                    //action to call
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'action',
+                        value: 'downloadTMX'
+                    } ),
+                    //we tell to the controller to check a field in the post named downloadToken
+                    // and to set a cookie named as it's value with it's value ( equals )
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'downloadToken',
+                        value: downloadToken
+                    } ),
+                    //set other values
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'tm_key',
+                        value: $( '.privatekey', tm ).text()
+                    } )
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
+
+        }
+
+    },
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
@@ -1721,7 +1816,7 @@ UI = {
             $("body").append( iFrameDownload );
 
             //generate a token download
-            var downloadToken = new Date().getTime();
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
             //set event listner, on ready, attach an interval that check for finished download
             iFrameDownload.ready(function () {
@@ -1730,14 +1825,14 @@ UI = {
                 downloadTimer = window.setInterval(function () {
 
                     //check for cookie
-                    var token = $.cookie('downloadToken');
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
                     }
 
@@ -1955,7 +2050,6 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
 					// check conditions for results discard
 					if (!d.total) {
@@ -2649,8 +2743,8 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
-				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
+			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
+				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
 			}
 
 			if (this.code == '-10') {
@@ -2935,8 +3029,15 @@ UI = {
 	 });
 	 },
 	 */
+    storeClientInfo: function () {
+        clientInfo = {
+            xRes: window.screen.availWidth,
+            yRes: window.screen.availHeight
+        };
+        $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
+    },
 
-	topReached: function() {
+    topReached: function() {
 //        var jumpto = $(this.currentSegment).offset().top;
 //        $("html,body").animate({
 //            scrollTop: 0
@@ -3026,7 +3127,41 @@ UI = {
 				$(this).addClass('current');
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
-	}
+	},
+    findCommonPartInSegmentIds: function () {
+        var a = config.first_job_segment;
+        var b = config.last_job_segment;
+        for(x=0;x<a.length;x++){
+            if(a[x] != b[x]) {
+                n = x;
+                break;
+            }
+        }
+
+        //when the job has one segment only
+        if( typeof n === 'undefined' ) {
+            n = a.length -1;
+        }
+
+//        console.log('n: ' + x);
+//        console.log(a.substring(0,n));
+//        var coso = a.substring(0,n);
+        this.commonPartInSegmentIds = a.substring(0,n);
+//        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
+    },
+    shortenId: function(id) {
+        return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    },
+    isCJK: function () {
+        var l = config.target_rfc;
+        if( (l=='zh-CN') || (l=='zh-TW') || (l=='ja-JP') || (l=='ko-KR') ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 };
 
 $(document).ready(function() {
@@ -3044,12 +3179,6 @@ $(document).ready(function() {
 	UI.checkWarnings(true);
 });
 
-$.extend($.expr[":"], {
-	"containsNC": function(elem, i, match) {
-		return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
-	}
-});
-
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
 });
@@ -3062,7 +3191,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.1.1";
+		this.version = "0.4.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3085,6 +3214,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -3118,6 +3248,7 @@ $.extend(UI, {
         this.logEnabled = false;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
+        this.savingMemoryErrorNotificationEnabled = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -3200,7 +3331,7 @@ $.extend(UI, {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "alt+ctrl+c",
+					"standard": "alt+c",
 					"mac": "alt+meta+c",
 				}
 			},
@@ -3212,6 +3343,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+        this.storeClientInfo();
 
         // SET EVENTS
 		this.setEvents();
@@ -3228,6 +3360,7 @@ $.extend(UI, {
  */
 $.extend(UI, {
 	render: function(options) {
+        options = options || {};
 		firstLoad = (options.firstLoad || false);
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
@@ -3287,6 +3420,17 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
+//        console.log('options: ', options);
+//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+//        console.log('1: ', this.tagModesEnabled);
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+//        console.log('2: ', this.tagModesEnabled);
+
+        if(this.tagModesEnabled) {
+            UI.body.addClass('tagModes');
+        } else {
+            UI.body.removeClass('tagModes');
+        }
 
 
 
@@ -3305,7 +3449,8 @@ $.extend(UI, {
 		this.debug = false;
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
-
+        this.findCommonPartInSegmentIds();
+//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
@@ -3396,7 +3541,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-        console.log('SET EVENTS');
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
@@ -3473,6 +3617,15 @@ $.extend(UI, {
             UI.openLanguageResourcesPanel();
         }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
+        }).bind('keydown', 'Meta+shift+s', function(e) {
+//            e.preventDefault();
+            UI.body.toggleClass('tagmode-default-extended');
+        }).on('click', '.tagModeToggle', function(e) {
+            e.preventDefault();
+            console.log('click su tagMode toggle');
+            UI.body.toggleClass('tagmode-default-extended');
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {
@@ -3508,24 +3661,45 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("http://mymemory.translated.net/api/createranduser",function(data){
-                //parse to appropriate type
-                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-                if(typeof data == 'string'){
-                    data=jQuery.parseJSON(data);
+//            $.get("https://mymemory.translated.net/api/createranduser",function(data){
+//                //parse to appropriate type
+//                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+//                if(typeof data == 'string'){
+//                    data=jQuery.parseJSON(data);
+//                }
+//                //put value into input field
+//                $('#addtm-tr-key').val(data.key);
+//                $('#addtm-create-key').removeClass('disabled');
+//                setTimeout(function() {
+//                    UI.checkAddTMEnable();
+//                    UI.checkManageTMEnable();
+//                }, 100);
+////                $('#private-tm-user').val(data.id);
+////                $('#private-tm-pass').val(data.pass);
+////                $('#create_private_tm_btn').attr('data-key', data.key);
+//                return false;
+//            });
+
+            //call API
+            APP.doRequest({
+                data: {
+                    action: 'createRandUser'
+                },
+                success: function(d) {
+                    //put value into input field
+                    $('#addtm-tr-key').val( d.data.key);
+                    $('#addtm-create-key').removeClass('disabled');
+                    setTimeout(function() {
+                        UI.checkAddTMEnable();
+                        UI.checkManageTMEnable();
+                    }, 100);
+                    //$('#private-tm-user').val(data.id);
+                    //$('#private-tm-pass').val(data.pass);
+                    //$('#create_private_tm_btn').attr('data-key', data.key);
+                    return false;
                 }
-                //put value into input field
-                $('#addtm-tr-key').val(data.key);
-                $('#addtm-create-key').removeClass('disabled');
-                setTimeout(function() {
-                    UI.checkAddTMEnable();
-                    UI.checkManageTMEnable();
-                }, 100);
-//                $('#private-tm-user').val(data.id);
-//                $('#private-tm-pass').val(data.pass);
-//                $('#create_private_tm_btn').attr('data-key', data.key);
-                return false;
             });
+
         }).on('change', '#addtm-tr-read, #addtm-tr-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
                 $('.addtm-tr .error-message').hide();
@@ -3798,12 +3972,11 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-//			console.log('a: ', UI.editarea.html());
+
+            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
 //            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//            console.log('a1: ', UI.editarea.html());
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4110,7 +4283,11 @@ $.extend(UI, {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function() {
+		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
@@ -4124,7 +4301,6 @@ $.extend(UI, {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
-
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
@@ -4157,7 +4333,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
-			if (UI.debug)
+            UI.lockTags(UI.editarea);
+
+            if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
@@ -4193,7 +4371,6 @@ $.extend(UI, {
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
-            console.log('222222');
 /*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
@@ -4206,7 +4383,6 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -4229,8 +4405,12 @@ $.extend(UI, {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
                     // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+
+                    tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+                    UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+
+//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 //                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
 //                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
 
@@ -4241,7 +4421,16 @@ $.extend(UI, {
 					}
 					UI.checkAutocompleteTags();
 				}
-			}, 50);			
+			}, 50);
+            if (!UI.body.hasClass('searchActive')) {
+//                console.log('vediamo: ', e.which);
+                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                } else {
+                    setTimeout(function() {
+                        UI.lockTags(UI.editarea);
+                    }, 10);
+                }
+            }
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -4501,7 +4690,7 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-                    console.log('QQQQQQ: ', UI.editarea.html());
+//                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
@@ -4536,10 +4725,12 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);
 				}, 10);
+*/
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
@@ -4626,7 +4817,7 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-			UI.saveInUndoStack('drop');
+//			UI.saveInUndoStack('drop');
 //			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
@@ -4964,6 +5155,10 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
+        }).on('click', '.showExtendedTags', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+            $(this).remove();
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -4979,7 +5174,15 @@ $.extend(UI, {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
 			}
-		});
+		}).on('click', '.tagMode .crunched', function(e) {
+            e.preventDefault();
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
+        }).on('click', '.tagMode .extended', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
+        });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
@@ -5129,8 +5332,14 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
-				UI.updateSearchDisplayCount(segment);
+                segment_id = $(segment).attr('id').split('-')[1];
+                status = UI.getStatus(segment);
+                byStatus = 0;
+
+                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setContribution(segment_id, status, byStatus);
+
+                UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);
@@ -5187,7 +5396,7 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-console.log('translation 1: ', translation);
+// console.log('translation 1: ', translation);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -5197,7 +5406,7 @@ console.log('translation 1: ', translation);
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-				console.log('translation 2: ', translation);
+//				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
@@ -5206,10 +5415,10 @@ console.log('translation 1: ', translation);
 			this.saveInUndoStack('copysuggestion');
 //			translation = UI.decodePlaceholdersToText(translation, true);
 //			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-console.log('translation 3: ', translation);
+// console.log('translation 3: ', translation);
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 //			translation = UI.encodeSpacesAsPlaceholders(translation);
-console.log('translation 4: ', translation);
+// console.log('translation 4: ', translation);
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
@@ -5418,11 +5627,11 @@ console.log('translation 4: ', translation);
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
 			if (editareaLength === 0) {
-				console.log('translation AA: ', translation);
+//				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-				console.log($('#' + segment_id + ' .matches .graysmall'));
-				console.log('translation BB: ', translation);
+//				console.log($('#' + segment_id + ' .matches .graysmall'));
+//				console.log('translation BB: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -5740,7 +5949,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags: ', el);
+//		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -5761,7 +5970,7 @@ $.extend(UI, {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
             tx = tx.replace(/<span/gi, "<pl")
@@ -5801,6 +6010,28 @@ $.extend(UI, {
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+            segment = $(this).parents('section');
+            if($('span.locked', this).length) {
+                segment.addClass('hasTags');
+            } else {
+                segment.removeClass('hasTags');
+            }
+            $('span.locked', this).each(function () {
+//                console.log(segment.attr('id') + ' - ' + $(this).text());
+//                console.log($(this).text().startsWith('</'));
+                if($(this).text().startsWith('</')) {
+                    $(this).addClass('endTag')
+                } else {
+                    if($(this).text().endsWith('/>')) {
+                        $(this).addClass('selfClosingTag')
+                    } else {
+                        $(this).addClass('startTag')
+                    }
+                }
+            })
+
+
+//            UI.checkTagsInSegment();
 		});
 
 	},
@@ -5888,9 +6119,69 @@ $.extend(UI, {
 		}
 */
 	},
-	
-	// TAG MISMATCH
+/*
+    setExtendedTagMode: function (el) {
+        console.log('setExtendedTagMode');
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'extended');
+    },
+    setCrunchedTagMode: function (el) {
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'crunched');
+    },
+*/
+    setTagMode: function () {
+        if(this.custom.extended_tagmode) {
+            this.setExtendedTagMode();
+        } else {
+            this.setCrunchedTagMode();
+        }
+    },
+    setExtendedTagMode: function () {
+        this.body.addClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = true;
+        this.saveCustomization();
+    },
+    setCrunchedTagMode: function () {
+        this.body.removeClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = false;
+        this.saveCustomization();
+    },
+
+    /*
+        checkTagsInSegment: function (el) {
+            segment = el || UI.currentSegment;
+            hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+            if(hasTags) {
+                this.setExtendedTagMode(el);
+            } else {
+                this.setCrunchedTagMode(el);
+            }
+        },
+    */
+    enableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: true}
+        )
+    },
+    disableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: false}
+        )
+    },
+
+    // TAG MISMATCH
 	markTagMismatch: function(d) {
+        if($.parseJSON(d.warnings).length) {
+            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+//            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        }
+//        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
 //        d.tag_mismatch.order = 2;
         if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
@@ -5969,7 +6260,7 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -6713,8 +7004,11 @@ $.extend(UI, {
 			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p.source).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p.target).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            psource = p.source.replace(/(\W)/gi, "\\$1");
+            ptarget = p.target.replace(/(\W)/gi, "\\$1");
+
+			var regSource = new RegExp('(' + htmlEncode(psource).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(ptarget).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			txtSrc = p.source;
 			txtTrg = p.target;
 			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
@@ -6764,7 +7058,10 @@ $.extend(UI, {
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
-			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            regTxt = regTxt.replace(/(\W)/gi, "\\$1");
+//            console.log('regTxt: ', regTxt);
+//			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder).replace(/\W/gi, "$1" );
 			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 //			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
@@ -7618,7 +7915,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
+	if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
@@ -7803,6 +8100,18 @@ function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
+
+if (typeof String.prototype.startsWith != 'function') {
+    String.prototype.startsWith = function (str){
+        return this.indexOf(str) == 0;
+    };
+}
+
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
 /*
 	Component: ui.customization
  */
@@ -7812,7 +8121,8 @@ $.extend(UI, {
 			this.custom = $.parseJSON($.cookie('user_customization'));
 		} else {
 			this.custom = {
-				"extended_concordance": false
+				"extended_concordance": false,
+                "extended_tagmode": false
 			};
 			this.saveCustomization();
 		}
@@ -7851,28 +8161,21 @@ $.extend(UI, {
  Loaded by cattool and upload page.
  */
 
+
 $.extend(UI, {
     initTM: function() {
-        console.log('TM init vediamo');
-        $('.popup-tm').height($(window).height());
+//        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
 
 
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
-            $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").show();
-            $(".outer-tm").hide();
-            $('body').removeClass('side-popup');
+            UI.closeTMPanel();
         });
 
         $(".outer-tm").click(function() {
-            $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").show();
-            $(".outer-tm").hide();
-
-            $('body').removeClass('side-popup');
+            UI.saveTMdata(true);
         });
 
         $(".mgmt-tm").click(function() {
@@ -7892,28 +8195,45 @@ $.extend(UI, {
             //prevent double click
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
-            $(this).attr('disabled','');
-            $.get("http://mymemory.translated.net/api/createranduser", function(data){
-                //parse to appropriate type
-                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-                if(typeof data == 'string'){
-                    data=jQuery.parseJSON(data);
-                }
-                //put value into input field
-                $('#new-tm-key').val(data.key);
-                $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
-                $('#activetm tr.new').removeClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('').hide();
-                UI.checkTMAddAvailability();
+            $('#new-tm-key').attr('disabled','disabled');
+            //$.get("https://mymemory.translated.net/api/createranduser", function(data){
+            //    //parse to appropriate type
+            //    //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+            //    if(typeof data == 'string'){
+            //        data=jQuery.parseJSON(data);
+            //    }
+            //    //put value into input field
+            //    $('#new-tm-key').val(data.key);
+            //    $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
+            //    $('#activetm tr.new').removeClass('badkey');
+            //    $('#activetm tr.new .error .tm-error-key').text('').hide();
+            //    UI.checkTMAddAvailability();
+            //    return false;
+            //});
 
-                return false;
-            });
+            //call API
+            APP.doRequest( {
+                data: {
+                    action: 'createRandUser'
+                },
+                success: function ( d ) {
+                    data = d.data;
+                    //put value into input field
+                    $('#new-tm-key').val(data.key);
+//                    $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
+                    $('#activetm tr.new').removeClass('badkey');
+                    $('#activetm tr.new .error .tm-error-key').text('').hide();
+                    UI.checkTMAddAvailability();
+                    return false;
+                }
+            } );
+
         });
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
         $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
-            $(this).parents('tr').find('.action .addtmx').show();
+            $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
             /*
@@ -7921,18 +8241,14 @@ $.extend(UI, {
                         $(".addtmx").show();
                         UI.clearAddTMRow();
                         */
-        }).on('click', '.addtmx', function() {
-            $(this).hide();
+        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
+            $('#activetm tr.uploadpanel').addClass('hide');
+            $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
+        }).on('click', '.addtmx:not(.disabled)', function() {
+            $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-                     '  <div class="standard">' +
-                     '  <label class="fileupload">Select a TMX </label>' +
-                     '  <a class="pull-right canceladdtmx">' +
-                     '      <span class="icon-times-circle"></span>' +
-                     '  </a>' +
-                    '   <a class="existingKey pull-right btn-grey addtmxfile">' +
-                    '       <span class="text">Upload TMX</span>' +
-                    '   </a>' +
-                    '<form class="existing add-TM-Form" action="/" method="post">' +
+//                     '  <div class="standard">' +
+                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
@@ -7940,12 +8256,20 @@ $.extend(UI, {
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
-                    '  </div>' +
+                     '  <a class="pull-left btn-grey canceladdtmx">' +
+                     '      <span class="text">Cancel</span>' +
+                     '  </a>' +
+                    '   <a class="existingKey pull-left btn-ok addtmxfile">' +
+                    '       <span class="text">Confirm</span>' +
+                    '   </a>' +
+                    '   <span class="error"></span>' +
+//                    '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
                     '           <span class="inner"></span>' +
                     '       </span>' +
                     '       <span class="msgText">Uploading</span>' +
+                    '       <span class="error"></span>' +
                     '  </div>' +
                     '</td>';
 /*
@@ -7991,72 +8315,59 @@ $.extend(UI, {
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
+            $(this).addClass('disabled');
+            $(this).parents('.uploadfile').find('.error').text('').hide();
+
             UI.execAddTM(this);
-        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+//        }).on('click', '#activetm td.description', function() {
+//            console.log($(this).find())
+        }).on('click', '#activetm tr.mine td.description .edit-desc', function() {
+            console.log('.edit-desc');
+//            $(this).addClass('current');
+            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
+            $(this).attr('contenteditable', true);
+        }).on('blur', '#activetm td.description .edit-desc', function() {
+            console.log('blur');
+            $(this).removeAttr('contenteditable');
+            if(APP.isCattool) UI.saveTMdata(false);
+
+//            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+        }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
+            if(e.which == 13) {
+                e.preventDefault();
+                $(this).removeAttr('contenteditable');
+                if(APP.isCattool) UI.saveTMdata(false);
+            }
+         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+            $(this).addClass('disabled');
+
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
             e.preventDefault();
-            UI.saveTMdata();
+            UI.saveTMdata(true);
         }).on('click', '#activetm tr.new a.addtmxfile:not(.disabled)', function() {
             console.log('upload file');
             UI.checkTMKey('tm');
 
             $('#activetm tr.uploadpanel').removeClass('hide');
-            $(this).hide();
+            $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
-            var row = $(this).closest("tr");
-            if(row.find('td.uploadfile').length) {
-                row.find('td.uploadfile .canceladdtmx').click();
-                row.find('.addtmx').removeAttr('style');
-            }
-            row.detach();
-            $("#inactivetm").append(row);
-            row.find('a.disabletm .text').text('Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
-            row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
-            row.css('display', 'block');
-
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-            $(this).addClass("usetm").removeClass("disabletm");
-            $('.addtmxrow').hide();
-            // draft of hack for nodata row management from datatables plugin
-//            $('#inactivetm tr.odd:not(.mine)').hide();
+            UI.disableTM(this);
+        }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+            if(APP.isCattool) UI.saveTMdata(false);
+            UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
-            var row = $(this).closest("tr");
-            row.detach();
-            $("#activetm tr.new").before(row);
-            if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
-
-            //update datatable struct
-            $('#inactivetm' ).DataTable().row(row).remove().draw(false);
-
-            row.addClass('mine');
-            row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-            row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-            row.css('display', 'block');
-
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-            $(this).addClass("disabletm").removeClass("usetm");
-            $('.addtmxrow').hide();
-            // draft of hack for nodata row management from datatables plugin
- /*
-            if(!$('#inactivetm tbody tr.mine, #inactivetm tbody tr.inactive').length) {
-                console.log('aaa: ', $('#inactivetm tbody tr.odd'));
-                if(!$('#inactivetm tbody tr.odd').length) {
-                    $('#inactivetm tbody').append('<tr class="odd"><td valign="top" colspan="5" class="dataTables_empty">No data available in table</td></tr>');
-                }
-                $('#inactivetm tbody tr.odd').show();
-            }
-  */
+            UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            if(this.files[0].size > config.maxFileSize) {
+                numMb = config.maxFileSize/(1024*1024);
+                APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
+                return false;
+            };
             if($(this).val() == '') {
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
@@ -8068,18 +8379,55 @@ $.extend(UI, {
             } else {
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
-        });
+        }).on('keyup', '#filterInactive', function() {
+            if($(this).val() == '') {
+                $('#inactivetm').removeClass('filtering');
+                $('#inactivetm tbody tr.found').removeClass('found');
+            } else {
+                $('#inactivetm').addClass('filtering');
+                UI.filterInactiveTM($('#filterInactive').val());
+            }
+        }).on('click', '.mgmt-tm .downloadtmx', function(e){
+            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' ).addClass('downloading');
+        });;
 
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
         $(document).ready(function() {
-            console.log("$('#inactivetm'): ", $('#inactivetm'));
+//            console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
-            $('#inactivetm').dataTable({
-                "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+            $("#inactivetm").tablesorter({
+                textExtraction: function(node) {
+                    // extract data from markup and return it
+                    if($(node).hasClass('privatekey')) {
+                        return $(node).text();
+                    } else {
+                        return $(node).text();
+                    }
+                },
+                headers: {
+                    4: {
+                        sorter: false
+                    },
+                    5: {
+                        sorter: false
+                    },
+                    6: {
+                        sorter: false
+                    },
+                    7: {
+                        sorter: false
+                    }
+                }
             });
 
+            /*
+                        $('#inactivetm').dataTable({
+                            "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+                        });
+            */
         });
 
         $('tr').click(function() {
@@ -8094,6 +8442,7 @@ $.extend(UI, {
 
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
+            $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
             $(".add-tm").show();
             UI.clearAddTMRow();
@@ -8152,12 +8501,27 @@ $.extend(UI, {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
+        $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {
         console.log('div_id: ', div_id);
 
     },
     setTMsortable: function () {
+
+
+        var fixHelper = function(e, ui) {
+            ui.children().each(function() {
+                $(this).width($(this).width());
+            });
+            return ui;
+        };
+
+        $('#activetm tbody').sortable({
+            helper: fixHelper,
+            handle: '.dragrow',
+            items: '.mine'
+        });
 
  /*       console.log('setTMsortable');
         var fixHelperModified = function(e, tr) {
@@ -8170,8 +8534,21 @@ $.extend(UI, {
         };
         console.log('fixHelperModified: ', fixHelperModified);
         */
-        $("#activetm tbody.sortable").sortable({ items: ".mine" }).disableSelection();
+ /*
+        $(".dragrow" ).mouseover(function() {
+            $("#activetm tbody.sortable").sortable({ items: ".mine" }).sortable('enable').disableSelection();
+        });
+        $(".dragrow" ).mouseout(function() {
+            $("#activetm tbody.sortable").sortable('disable');
+        });
+*/
     },
+
+
+
+
+
+
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
@@ -8183,7 +8560,7 @@ $.extend(UI, {
             if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
                 console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 UI.checkTMAddAvailability(); //some enable/disable stuffs
                 keyIsAlreadyPresent = true;
                 return false;
@@ -8259,16 +8636,106 @@ $.extend(UI, {
             return true;
         }
     },
-/*
-    registerTMX: function () {
-        if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
-        item = {};
-        item.key = $('#new-tm-key').val();
-        item.description = $('#new-tm-description').val();
-        UI.TMKeysToAdd.push(item);
-        $(".canceladdtmx").click();
+    checkTMGrantsModifications: function (el) {
+        console.log('el: ', el);
+        tr = $(el).parents('tr.mine');
+        isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
+        if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
+            if(isActive) {
+                if(APP.isAnonymousUser()) {
+                    var data = {
+                        grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
+                        key: $(tr).find('.privatekey').text()
+                    }
+//                    $('.popup-tm .tm-warning-message').html('If you confirm this action, your Private TM key will be lost. If you want to avoid this, please, log in with your account now. <a href="#" class="continue-disable-tm">Continue</a> or <a href="#" class="cancel-disable-tm">Cancel</a>').show();
+                    APP.confirm({
+                        name: 'confirmTMDisable',
+                        cancelTxt: 'Cancel',
+                        onCancel: 'cancelTMDisable',
+                        callback: 'continueTMDisable',
+                        okTxt: 'Continue',
+//                        context: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
+                        context: JSON.stringify(data),
+                        msg: "If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now."
+                    });
+                    return false;
+                }
+                UI.disableTM(el);
+                $("#inactivetm").trigger("update");
+            }
+        } else {
+            if(!isActive) {
+                UI.useTM(el);
+                $("#inactivetm").trigger("update");
+            }
+        }
+//        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
+//        console.log('update: ', tr.find('.update input').is(':checked'));
     },
-*/
+    cancelTMDisable: function (context) {
+        options = $.parseJSON(context);
+        $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input').click();
+    },
+    continueTMDisable: function (context) {
+        options = $.parseJSON(context);
+        el = $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input');
+        UI.disableTM(el);
+        $("#inactivetm").trigger("update");
+    },
+
+    disableTM: function (el) {
+        var row = $(el).closest("tr");
+        if(row.find('td.uploadfile').length) {
+            row.find('td.uploadfile .canceladdtmx').click();
+            row.find('.addtmx').removeAttr('style');
+        }
+        row.detach();
+        $("#inactivetm").append(row);
+//        row.find('a.disabletm .text').text('Use').attr('class', 'text');
+//        row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
+//        row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
+        row.css('display', 'block');
+
+        // draw the user's attention to it
+        row.fadeOut();
+        row.fadeIn();
+//        $(el).addClass("usetm").removeClass("disabletm");
+        $('.addtmxrow').hide();
+        // draft of hack for nodata row management from datatables plugin
+//            $('#inactivetm tr.odd:not(.mine)').hide();
+    },
+
+    useTM: function (el) {
+        var row = $(el).closest("tr");
+        row.detach();
+        $("#activetm tr.new").before(row);
+        if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
+        row.addClass('mine');
+//        row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
+//        row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+//        row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+        row.css('display', 'block');
+
+        //update datatable struct
+//        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
+
+        // draw the user's attention to it
+        row.fadeOut();
+        row.fadeIn();
+//        $(el).addClass("disabletm").removeClass("usetm");
+        $('.addtmxrow').hide();
+    },
+
+    /*
+        registerTMX: function () {
+            if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
+            item = {};
+            item.key = $('#new-tm-key').val();
+            item.description = $('#new-tm-description').val();
+            UI.TMKeysToAdd.push(item);
+            $(".canceladdtmx").click();
+        },
+    */
     execAddTM: function(el) {
         existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
@@ -8280,7 +8747,7 @@ $.extend(UI, {
         form = $('#activetm tr.' + trClass + ' .add-TM-Form')[0];
         path = $(el).parents('.uploadfile').find('input[type="file"]').val();
         file = path.split('\\')[path.split('\\').length-1];
-        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=loadTMX','uploadCallback', file);
+        this.TMFileUpload(form, '/?action=loadTMX','uploadCallback', file);
     },
     addTMKeyToList: function (uploading) {
         var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
@@ -8288,18 +8755,21 @@ $.extend(UI, {
         var desc = $('#new-tm-description').val();
         var TMKey = $('#new-tm-key').val();
 
-        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
+        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + TMKey + '" data-owner="' + config.ownerIsMe + '">' +
+                '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
-                '    <td class="description">' + desc + '</td>' +
+                '    <td class="owner">You</td>' +
+                '    <td class="description"><div class="edit-desc">' + desc + '</div></td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '        <a class="btn-grey pull-left disabletm">' +
-                '            <span class="text stopuse">Stop Use</span>' +
-                '        </a>' +
+//                '        <a class="btn-grey pull-left disabletm">' +
+//                '            <span class="text stopuse">Stop Use</span>' +
+//                '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Add TMX</span>' +
+                '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
+                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Download</span></a>' +
                 '    </td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
@@ -8310,6 +8780,7 @@ $.extend(UI, {
         }
         UI.pulseTMadded($('#activetm tr.mine').last());
         UI.setTMsortable();
+        if(APP.isCattool) UI.saveTMdata(false);
     },
 
     pulseTMadded: function (row) {
@@ -8325,16 +8796,30 @@ $.extend(UI, {
     },
     clearTMUploadPanel: function () {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
+
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
         $('.mgmt-tm tr.new').removeClass('badkey badgrants');
         $('.mgmt-tm tr.new .message').text('');
         $('.mgmt-tm tr.new .error span').text('').hide();
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
+    clearTMPanel: function () {
+        $('.mgmt-container .tm-error-message').hide();
+        $('.mgmt-container .tm-warning-message').hide();
+        $('#activetm .edit-desc').removeAttr('contenteditable');
+        $('#activetm td.uploadfile').remove();
+        $('#activetm td.action .addtmx').removeClass('disabled');
+        $('#activetm tr.new .canceladdtmx').click();
+    },
+
     TMFileUpload: function(form, action_url, div_id, tmName) {
         console.log('div_id: ', div_id);
         console.log('form: ', form);
@@ -8405,7 +8890,7 @@ $.extend(UI, {
         TRcaller.addClass('startUploading');
         if(!existing) {
             UI.addTMKeyToList(true);
-            $('.popup-tm h1 .btn-ok').click();
+//            $('.popup-tm h1 .btn-ok').click();
         }
         UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
 
@@ -8428,15 +8913,15 @@ $.extend(UI, {
     pollForUploadCallback: function(TMKey, TMName, existing, TRcaller) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
+            TRcaller.removeClass('startUploading');
+//            msg.success = false;
+//            msg.errors = [{message: 'questo è un errore'}];
             if(msg.success === true) {
-                TRcaller.removeClass('startUploading');
                 UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
             } else {
-/*
-                APP.showMessage({
-                    msg: 'Error: ' + msg.errors[0].message
-                });
-*/
+                console.log('error');
+                $(TRcaller).find('.error').text(msg.errors[0].message).show();
+//                $(TRcaller).find('.addtmxfile').removeClass('disabled');
             }
         } else {
             setTimeout(function() {
@@ -8457,13 +8942,28 @@ $.extend(UI, {
             context: [TMKey, TMName, existing, TRcaller],
             error: function() {
                 existing = this[2];
-                if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                if(existing) {
+                    console.log('error');
+                } else {
+                    $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                }
             },
             success: function(d) {
                 console.log('progress success data: ', d);
                 existing = this[2];
+                TRcaller = this[3];
+//                d.errors = [{message: 'questo è un errore'}];
                 if(d.errors.length) {
-                    if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                    if(existing) {
+                        console.log('error');
+                        console.log($(TRcaller));
+//                        $(TRcaller).find('.standard').hide();
+//                        $(TRcaller).find('.uploadprogress').show();
+                        $(TRcaller).find('.error').text(d.errors[0].message).show();
+//                        $(TRcaller).find('.addtmxfile').removeClass('disabled');
+                    } else {
+                        $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                    }
 
                     /*
                                        APP.showMessage({
@@ -8471,9 +8971,8 @@ $.extend(UI, {
                                        });
                                        */
                 } else {
-                    TRcaller = this[3];
                     $(TRcaller).find('.uploadprogress .msgText').text('Uploading ' + this[1]);
-                    $(TRcaller).find('.standard').hide();
+//                    $(TRcaller).find('.standard').hide();
                     $(TRcaller).find('.uploadprogress').show();
 
 //                    $(TRcaller).html('<span class="progress"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
@@ -8485,17 +8984,25 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
+                                if(APP.isAnonymousUser()) {
+                                    console.log('anonimo');
+                                } else {
+                                    console.log('loggato');
+                                }
                                 var tr = $(TRcaller).parents('tr.mine');
-                                $(tr).find('.addtmx').show();
+                                $(tr).find('.addtmx').removeClass('disabled');
                                 UI.pulseTMadded(tr);
                             }
 //                            $(TRcaller).empty();
 
                             $(TRcaller).find('.uploadprogress').hide();
                             $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
-                            $(TRcaller).find('.standard').show();
+//                            $(TRcaller).find('.standard').show();
                             if(existing) {
-                                $(TRcaller).remove();
+                                $(TRcaller).addClass('tempTRcaller').append('<span class="msg">Import Complete</span>');
+                                setTimeout(function() {
+                                    $('.tempTRcaller').remove();
+                                }, 3000);
                             } else {
                                 $('.mgmt-tm tr.new .canceladdtmx').click();
                                 $('.mgmt-tm tr.new').removeClass('hide');
@@ -8530,7 +9037,7 @@ $.extend(UI, {
     },
 
     extractTMdataFromTable: function () {
-        categories = ['owner', 'mine', 'anonymous'];
+        categories = ['ownergroup', 'mine', 'anonymous'];
         var newArray = {};
         $.each(categories, function (index, value) {
             data = UI.extractTMDataFromRowCategory(this);
@@ -8568,7 +9075,17 @@ $.extend(UI, {
         return data;
     },
 
-    saveTMdata: function() {
+    saveTMdata: function(closeAfter) {
+        $('.popup-tm').addClass('saving');
+        if(closeAfter) {
+            UI.closeTMPanel();
+            UI.clearTMPanel();
+        }
+        if(!APP.isCattool) {
+            UI.updateTMAddedMsg();
+            return false;
+        }
+
         data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
@@ -8579,49 +9096,76 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error saving TM data!!');
-                $('.mgmt-panel-tm .warning-message').text('').hide();
-                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
+                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+
+//                $('.mgmt-panel-tm .warning-message').text('').hide();
+//                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
             },
             success: function(d) {
+                $('.popup-tm').removeClass('saving');
+
 //                d.errors = [];
                 if(d.errors.length) {
-                    $('.mgmt-panel-tm .warning-message').text('').hide();
-                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
+                    APP.showMessage({msg: d.errors[0].message});
+//                    $('.mgmt-panel-tm .warning-message').text('').hide();
+//                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
                 } else {
                     console.log('TM data saved!!');
+/*
                     $('.mgmt-panel-tm .error-message').text('').hide();
                     $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
-
-                    //set opacity to 0, then set height to 0
-                    //when the div is completely disappeared, reset css values to the default
                     setTimeout(function(){
-                        $('.mgmt-panel-tm .warning-message').animate({
-                            opacity: 0
-                        },300);
+                        UI.clearTMPanel();
+                    },1000);
+*/
+                    /*
+                                        setTimeout(function(){
+                                            $('.mgmt-panel-tm .warning-message').animate({
+                                                opacity: 0
+                                            },300);
+                                            UI.closeTMPanel();
 
-                        setTimeout(function(){
-                            $('.mgmt-panel-tm .warning-message' )
-                                    .animate({
-                                        height:0,
-                                        padding:0,
-                                        margin:0
-                                    },300);
+                                            setTimeout(function(){
+                                                $('.mgmt-panel-tm .warning-message' )
+                                                        .animate({
+                                                            height:0,
+                                                            padding:0,
+                                                            margin:0
+                                                        },300);
 
-                            setTimeout(function(){
-                                $('.mgmt-panel-tm .warning-message' )
-                                        .text("")
-                                        .animate({
-                                            opacity : 1,
-                                            height: 'auto',
-                                            padding: 'auto',
-                                            margin: 'auto'
-                                        },0 )
-                                        .hide()
-                            },300);
-                        }, 300);
-                    }, 2000);
+                                                setTimeout(function(){
+                                                    $('.mgmt-panel-tm .warning-message' )
+                                                        .text("")
+                                                        .animate({
+                                                            opacity : 1,
+                                                            height: 'auto',
+                                                            padding: 'auto',
+                                                            margin: 'auto'
+                                                        },0 )
+                                                        .hide()
+                                                },300);
+
+                                            }, 300);
+                                            console.log('ORA');
+                                        }, 2000);
+                    */
                 }
             }
         });
+    },
+    closeTMPanel: function () {
+        $('.mgmt-tm tr.uploadpanel').hide();
+        $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
+        $("#SnapABug_Button").show();
+        $(".outer-tm").hide();
+        $('body').removeClass('side-popup');
+        $.cookie('tmpanel-open', 0, { path: '/' });
+    },
+    filterInactiveTM: function (txt) {
+        $('#inactivetm tbody tr').removeClass('found');
+        $('#inactivetm tbody td.privatekey:containsNC("' + txt + '"), #inactivetm tbody td.description:containsNC("' + txt + '")').parents('tr').addClass('found');
     }
+
+
 });

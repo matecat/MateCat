@@ -38,6 +38,6 @@ class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSucces
      * @see extraInfoName::$extra_info
      * @var string
      */
-    protected $extraInfoName = 'extra';
+    protected $dataKeyName = 'data_key';
 
 } 

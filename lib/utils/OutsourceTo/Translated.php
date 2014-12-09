@@ -12,8 +12,6 @@
  * 
  */
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
-    private $currency;
-    private $change_rate;
     /**
      * Class constructor
      *
@@ -25,21 +23,14 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         //SESSION ENABLED
         INIT::sessionStart();
 
-
-        //$this->currency="EUR";
-        //$this->change_rate= 1;
-
-
-        // FORCE TO USD -- CHANGE RATE AT 2014-10-28
-        $this->currency="US$";
-        $this->change_rate= 1.2679;
-
+        $this->currency="EUR";
+        $this->change_rate= 1;
+        
         /**
          * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
          */
         $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
         $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
-
     }
 
     /**
@@ -67,7 +58,32 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 //Use the shop cart to add Projects info
                 //to the cache cart because of taking advantage of the cart cache invalidation on project split/merge
                 Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
-                $raw_volAnalysis = file_get_contents( $project_url_api );
+
+
+                $options = array(
+                        CURLOPT_HEADER => false,
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_HEADER => 0,
+                        CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                        CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                        CURLOPT_SSL_VERIFYPEER => true,
+                        CURLOPT_SSL_VERIFYHOST => 2
+                );
+
+                //prepare handlers for curl to quote service
+                $mh = new MultiCurlHandler();
+                $resourceHash = $mh->createResource( $project_url_api, $options );
+                $mh->multiExec();
+
+                if( $mh->hasError( $resourceHash ) ){
+                    Log::doLog( $mh->getError( $resourceHash ) );
+                }
+
+                $raw_volAnalysis = $mh->getSingleContent( $resourceHash );
+
+                $mh->multiCurlCloseAll();
+
+//                Log::doLog( "CURL RETRIEVED STATUS: " . $raw_volAnalysis );
 
                 $itemCart                = new Shop_ItemHTSQuoteJob();
                 $itemCart[ 'id' ]        = $project_url_api;
@@ -95,8 +111,10 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 2
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 10,
+		        CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
         );
 
         //prepare handlers for curl to quote service
@@ -127,13 +145,20 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
+            $url = "https://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
 
             if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
                 Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
                 $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" .$job['jpassword'] );
             }
 
+            else{
+                $cartElem = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
+                $cartElem[ "currency" ] = $this->currency;
+                $cartElem[ "timezone" ] = $this->timezone;
+                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
+                $cache_cart->addItem( $cartElem );
+            }
         }
 
         $mh->multiExec();
@@ -144,6 +169,10 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         //fetch contents and store in cache if there are
         foreach( $res as $jpid => $quote ){
+
+            if( $mh->hasError( $jpid ) ){
+                Log::doLog( $mh->getError( $jpid ) );
+            }
 
             /*
              * Quotes are plain text line feed separated fields in the form:
@@ -166,16 +195,12 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
             $itemCart[ 'price' ]         = ( $result_quote[ 4 ] ? $result_quote[ 4 ] : 0 );
-            $itemCart[ 'price_currency' ]= ( $result_quote[ 4 ] ? $result_quote[ 4 ] : 0 );
             $itemCart[ 'currency' ]      = $this->currency;
+            $itemCart[ 'timezone' ]      = $this->timezone;
             $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source']; //get the right language
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
-
-            if ($this->currency!="EUR"){
-                $itemCart[ 'price_currency' ]=$itemCart[ 'price' ]*$this->change_rate;
-            }
 
             $cache_cart->addItem( $itemCart );
 
@@ -194,8 +219,6 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
             $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
         }
-
-        $this->_outsource_login_url_ok .= '&extra=' . urlencode( $this->_quote_result[0]['id'] );
 
         //check for failures.. destroy the cache
         if( !empty( $failures ) ){

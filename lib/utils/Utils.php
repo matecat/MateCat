@@ -14,10 +14,13 @@ class Utils {
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, "Matecat-Cattool/v" . INIT::$BUILD_NUMBER);
+		curl_setopt($ch, CURLOPT_USERAGENT, INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $d);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
 		if (self::is_assoc($opt) and !empty($opt)) {
 			foreach ($opt as $k => $v) {
 
@@ -56,9 +59,9 @@ class Utils {
 			       ) as $key ) {
 			if ( array_key_exists( $key, $_SERVER ) === true) {
 				foreach ( explode(',', $_SERVER[$key]) as $ip ) {
-					if ( filter_var( trim($ip), FILTER_VALIDATE_IP ) !== false) {
-						return $ip;
-					}
+					if( filter_var( trim($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6 ) !== false ) {
+                        return $ip;
+                    }
 				}
 			}
 		}

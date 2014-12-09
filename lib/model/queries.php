@@ -488,7 +488,7 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  */
 function getJobData( $id_job, $password = null ) {
 
-    $query = "SELECT source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
+    $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
 		new_words, draft_words, translated_words, approved_words, rejected_words, id_project
 			FROM jobs
@@ -1646,6 +1646,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
     $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
+    $data[ 'payable_rates' ]     = json_encode($projectStructure[ 'payable_rates' ]);
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1819,7 +1820,7 @@ function getProjectJobData( $pid ) {
 function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
     $query = "
-		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
+		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis,
 
 			   SUM(s.raw_word_count) AS file_raw_word_count,
 			   SUM(st.eq_word_count) AS file_eq_word_count,
@@ -1858,7 +1859,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
     }
 
     if ( !empty( $jpassword ) ) {
-        $and_2 = " and j.password = '" . $db->escape( $jpassword ) . "' ";
+        $and_3 = " and j.password = '" . $db->escape( $jpassword ) . "' ";
     }
 
     $query = sprintf( $query, $and_1, $and_2, $and_3 );
@@ -1950,6 +1951,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
         $projects_filter_query[ ] = "j.id_project = " . $project_id;
     }
 
+    //FIXME: SESSION CALL SHOULD NOT BE THERE!!!
     $jobs_filter_query [ ]    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
     $projects_filter_query[ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
 
@@ -2675,6 +2677,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
             $ids   = trim( $ids, ',' );
             $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
             $db->query( $query );
+
         } else {
 
             $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;
@@ -2855,7 +2858,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
 function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
 		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
-		j.id_tms, j.id_mt_engine, p.id as pid
+		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid
 			from segments s
 			inner join segment_translations st on st.id_segment=s.id
 			inner join jobs j on j.id=st.id_job

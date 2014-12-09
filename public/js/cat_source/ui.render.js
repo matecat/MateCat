@@ -3,6 +3,7 @@
  */
 $.extend(UI, {
 	render: function(options) {
+        options = options || {};
 		firstLoad = (options.firstLoad || false);
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
@@ -62,6 +63,17 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
+//        console.log('options: ', options);
+//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+//        console.log('1: ', this.tagModesEnabled);
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+//        console.log('2: ', this.tagModesEnabled);
+
+        if(this.tagModesEnabled) {
+            UI.body.addClass('tagModes');
+        } else {
+            UI.body.removeClass('tagModes');
+        }
 
 
 
@@ -80,7 +92,8 @@ $.extend(UI, {
 		this.debug = false;
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
-
+        this.findCommonPartInSegmentIds();
+//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);

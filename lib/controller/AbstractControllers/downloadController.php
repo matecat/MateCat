@@ -12,16 +12,22 @@ abstract class downloadController extends controller {
     protected $content = "";
     protected $filename = "unknown";
 
+    protected function unlockToken(){
+
+        if( isset( $this->downloadToken ) && !empty( $this->downloadToken )){
+            setcookie(
+                    $this->downloadToken,
+                    $this->downloadToken,
+                    2147483647            // expires January 1, 2038
+            );
+        }
+
+    }
+
     public function finalize() {
         try {
 
-            if( isset( $this->downloadToken ) && !empty( $this->downloadToken )){
-                setcookie(
-                    'downloadToken',
-                    $this->downloadToken,
-                    2147483647            // expires January 1, 2038
-                );
-            }
+            $this->unlockToken();
 
             $buffer = ob_get_contents();
             ob_get_clean();

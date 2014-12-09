@@ -48,7 +48,7 @@ abstract class viewController extends controller {
      */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
+
 	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
@@ -93,8 +93,7 @@ log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
         }
         // finally get the correct version number
         $known   = array( 'Version', $ub, 'other' );
-        $pattern = '#(?<browser>' . join( '|', $known ) .
-                ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
         if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
             // we have no matching number just continue
         }
@@ -237,7 +236,7 @@ log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
-	log::doLog ("bname $browser_name");
+//	    log::doLog ("bname $browser_name");
 
 /*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
                 return -2;
@@ -245,7 +244,7 @@ log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
 */
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-		return 1;
+                return 1;
             }
         }
 

@@ -21,7 +21,7 @@ class Tests_MultiCurlHandlerTest extends Tests_AbstractTest {
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );
 
@@ -49,7 +49,7 @@ class Tests_MultiCurlHandlerTest extends Tests_AbstractTest {
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );
 
@@ -78,7 +78,7 @@ class Tests_MultiCurlHandlerTest extends Tests_AbstractTest {
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );
 

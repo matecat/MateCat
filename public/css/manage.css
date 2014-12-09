@@ -129,37 +129,45 @@ body.manage .actions a
 	display: block;
 	width: 18px;
 	height: 18px;
-	margin: -7px 0 0 16px !important;
+	margin: -17px 0 0 16px !important;
 	text-indent: -10000px;
 	position: absolute;
 	}
 
 	body.manage .actions a.change
 		{
-		margin-left: 5px !important;
+		margin-left: 8px !important;
 		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
-		margin-left: 33px !important;
+		margin-left: 35px !important;
 		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
-		margin-left: 61px !important;
+		margin-left: 63px !important;
 		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
-		margin-left: 33px !important;
+		margin-left: 35px !important;
 		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
 		{
-		margin-left: 61px !important;
+		margin-left: 63px !important;
 		background: url(../img/sprite.png) -13px -39px no-repeat;
 		}
+
+    body.manage .actions a.sdlxliff {
+        text-indent: 0;
+        width: 94px;
+        height: auto;
+        position: absolute;
+        margin: 2px 4px 0 -3px !important;
+    }
 
 	body.manage tr[data-status=active] .actions a.resume,
 	body.manage tr[data-status=active] .actions a.unarchive,
@@ -292,7 +300,7 @@ body.manage th.create-date
 	
 body.manage th.job-detail
 	{
-	width: 37%;
+	width: 33%;
 	}
 body.manage th.private-tm-key
 	{
@@ -311,7 +319,7 @@ body.manage th.progress
 
 body.manage th.actions
 	{
-	width: 8%;
+	width: 9%;
 	}
 
 body.manage tr.row
@@ -331,12 +339,14 @@ body.manage tr.row
     float:left;
     padding: 6px 4px;
     display: block;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 12px;
 }
 
 .tm-key .rgrant,
 .tm-key .wgrant{
-    min-width: 30px;
-    width: 30px;
+    min-width: 40px;
+    width: 40px;
 }
 
 .tm-key .clear{

@@ -44,8 +44,6 @@ class catController extends viewController {
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     /**
      * @var string
      */
@@ -106,26 +104,6 @@ class catController extends viewController {
 
         $this->generateAuthURL();
 
-	}
-
-	private function parse_time_to_edit($ms) {
-		if ($ms <= 0) {
-			return array("00", "00", "00", "00");
-		}
-
-		$usec = $ms % 1000;
-		$ms = floor($ms / 1000);
-
-		$seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
-
-		$minutes = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
-
-		$hours = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
-
-		return array($hours, $minutes, $seconds, $usec);
 	}
 
     private function doAuth() {
@@ -441,6 +419,8 @@ class catController extends viewController {
                 /*
                  * This user is anonymous or it has no keys in its keyring, obfuscate all
                  */
+                $jobKey->r = true;
+                $jobKey->w = true;
                 $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( -1 );
 
             }
@@ -450,7 +430,7 @@ class catController extends viewController {
         //clean unordered keys
         $this->_keyList[ 'totals' ] = array_values( $this->_keyList[ 'totals' ] );
 
-        Log::doLog( $this->_keyList );
+//        Log::doLog( $this->_keyList );
 
     }
 
@@ -471,7 +451,7 @@ class catController extends viewController {
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
         }
-
+        $this->template->page = 'cattool';
         $this->template->jid         = $this->jid;
         $this->template->password    = $this->password;
         $this->template->cid         = $this->cid;
@@ -514,6 +494,8 @@ class catController extends viewController {
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
+        $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
+
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
 		//check if it is a composite language, for cjk check that accepts only ISO 639 code
@@ -529,7 +511,7 @@ class catController extends viewController {
 
         //check if cjk
         if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
-            $this->template->taglockEnabled = 0;
+//            $this->template->taglockEnabled = 0;
         }
 
         /*

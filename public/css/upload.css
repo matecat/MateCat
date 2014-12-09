@@ -353,15 +353,23 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 
 
 .memory-mgmt {
-padding: 8px 10px 2px 10px;
-margin-top: 7px;
-color: #333;
-font-weight: bold;
-width: 255px;
+    padding: 8px 10px 1px 10px;
+    margin-top: 7px;
+    /*
+    color: #333;
+    font-weight: bold;
+    */
+    width: 300px;
+    text-decoration: none;
 }
-
+.memory-mgmt .text {
+    text-decoration: underline;
+}
+.memory-mgmt .tm-added {
+    display: none;
+}
 .memory-mgmt:hover {
-background:#F7F7F7;
+/* background:#F7F7F7; */
 }
 .memory-mgmt i {
 margin-right: 10px;
@@ -375,7 +383,9 @@ float: left;
   left: 0;
   margin: 0;
   border: solid transparent;
-  border-width:0px 0 50px 50px;
+  border-width:0 0 0 0;
+  /*width: 100%;*/
+  height: 100%;
   opacity: 0;
   filter: alpha(opacity=0);
   -moz-transform: translate(-300px, 0) scale(4);
@@ -387,7 +397,7 @@ float: left;
   margin-bottom: 5px;
 }
 .files .progress {
-  width: 300px;border:1px solid  #ccc;background:#fff;
+  border:1px solid  #ccc;background:#fff;
 }
 .files .progress,
 .fileupload-buttonbar .progress {
@@ -417,6 +427,8 @@ float: left;
  
   .name  {
     width: 50% !Important;
+    overflow: hidden;
+	text-overflow: ellipsis;
   }
   
   .cancel-btn{background:#f26522 url(../img/sprite.png) -4px -1157px no-repeat !Important}
@@ -481,13 +493,13 @@ float: left;
 .wrapper-upload h1{margin:0;padding:0;font-size:40px}
 .wrapper-claim {color: #fff;
 margin: -20px 0 10px 0;
-height: 130px;
+height: 123px;
 background-color: #1f7ead;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIGNvdW50PScxMDAlJyBoZWlnaHQ9JzEwMCUnPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPSc1JScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9JzUwJScgcj0nMTAlJyBmaWxsLW9wYWNpdHk9Jy4zJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPScxNSUnIGZpbGwtb3BhY2l0eT0nLjMnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzIwJScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9JzUwJScgcj0nMjUlJyBmaWxsLW9wYWNpdHk9Jy4zJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPSczMCUnIGZpbGwtb3BhY2l0eT0nLjMnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzM1JScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9JzUwJScgcj0nNDAlJyBmaWxsLW9wYWNpdHk9Jy4zJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPSc0NSUnIGZpbGwtb3BhY2l0eT0nLjMnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzIwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzMwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzQwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzUwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzYwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzcwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzgwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzkwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzEwMCUnIGZpbGwtb3BhY2l0eT0nLjInIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScwJyBjeT0nMCcgcj0nMTAlJyBmaWxsLW9wYWNpdHk9Jy4yJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMCcgY3k9JzAnIHI9JzIwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzAnIGN5PScwJyByPSczMCUnIGZpbGwtb3BhY2l0eT0nLjInIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScwJyBjeT0nMCcgcj0nNDAlJyBmaWxsLW9wYWNpdHk9Jy4yJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMCcgY3k9JzAnIHI9JzUwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzAnIGN5PScwJyByPSc2MCUnIGZpbGwtb3BhY2l0eT0nLjInIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScwJyBjeT0nMCcgcj0nNzAlJyBmaWxsLW9wYWNpdHk9Jy4yJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzAnIHI9JzEwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScwJyByPScyMCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMCcgcj0nMzAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzAnIHI9JzQwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScwJyByPSc1MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMCcgcj0nNjAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzAnIHI9JzcwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScxMDAlJyByPScxMCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMTAwJScgcj0nMjAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzEwMCUnIHI9JzMwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScxMDAlJyByPSc0MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMTAwJScgcj0nNTAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzEwMCUnIHI9JzYwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScxMDAlJyByPSc3MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScwJScgY3k9JzEwMCUnIHI9JzEwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzAlJyBjeT0nMTAwJScgcj0nMjAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMCUnIGN5PScxMDAlJyByPSczMCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScwJScgY3k9JzEwMCUnIHI9JzQwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzAlJyBjeT0nMTAwJScgcj0nNTAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMCUnIGN5PScxMDAlJyByPSc2MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScwJScgY3k9JzEwMCUnIHI9JzcwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KPC9zdmc+');
 background-size: cover;
 }
 .wrapper-claim h1 {
 font-size: 3em;
-padding: 10px;
+padding: 12px;
 margin: 0px;
 }
 h2{margin:0;padding:0;font-size:22px}
@@ -495,7 +507,7 @@ h2.payoff
 	{
 	color:#fff !important;
 	font-weight:normal !important;
-	font-size: 25px;
+	font-size: 24px;
 	}
 
 /*button*/
@@ -503,7 +515,7 @@ h2.payoff
 .uploadbtn{background: #09beec;width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !Important;min-width:250px; margin:20px 0px 8px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
 .uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
-.disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc !important}
+.disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc;}
 .uploadbtn-box{text-align:center;float:right; margin-bottom: 30px;}
 .uploadbtn-box p{text-align:center;margin:-2px 0 0 5px;font-size:13px;font-weight:normal;color:#999;display:none;text-align:center;}
 .uploadbtn-box:hover p{display:block;}
@@ -511,7 +523,7 @@ h2.payoff
 
 
 /*upload table*/
-.upload-table {width:100%;margin:0;}
+.upload-table {width:100%;margin:0;table-layout: fixed;}
 .upload-table td{height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc}
 .upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
@@ -535,7 +547,7 @@ h2.payoff
 
 
 /*UI buttons*/
-.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
+.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:12px 0px 4px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
 .upload-footer .fileinput-button 
 	{
 	position: relative;
@@ -561,7 +573,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 	{
 	margin: 0;
 	}
-.translate-box select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:1px 0 5px 0}
+.translate-box select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0}
 .upload-input{width:100%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
 {
@@ -630,15 +642,15 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 .uploaded.dragging .file-drop{display:none !important}
 .uploaded .upload-footer{display:block !important}
 .file-drop{margin:40px 0 50px 0!important}
-#fileupload{margin:0 !important; /* padding:0 !Important */ padding-bottom: 50px; }
+#fileupload{margin:0 !important; /* padding:0 !Important */ }
 .upload-files
 	{
 	
     position: relative;
 	border:1px dashed #ccc;
 margin-top: 20px;
-	min-height:150px;
-	padding-bottom: 0px !important;
+/*	min-height:150px;*/
+	min-height: 270px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	background:#fbfbfb;
@@ -646,6 +658,10 @@ margin-top: 20px;
 	-moz-transition: all  50ms ease-in;
 	}
 
+.upload-files.uploaded {
+padding-bottom: 50px !important;
+min-height: 220px;
+}
 
 .dragging {background:#e2e2e3 !important;border:1px dashed #000 !important;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;
 }
@@ -654,7 +670,7 @@ margin-top: 20px;
 
 .uploaded  .upload-files	{	height:auto !important;}
 
-.drag{text-align:center;padding-bottom:0px;overflow:hidden;}
+.drag{text-align:center;overflow:hidden;}
 .drag p{ text-align:center;margin:30px 0 10px 0;font-size:36px;line-height:50px;}
 .drag p span.min
 {
@@ -693,6 +709,9 @@ margin-top: 20px;
 
 
 .error-content {padding-left: 45px; padding-right: 10px;}
+.error-content a {
+color: white;
+}
 .error-message,
 .warning-message
 {
@@ -756,8 +775,8 @@ text-align: right!important; padding-right:20px;
 tr.ready .size span{visibility: visible;}
 
 .advanced-box{display:none;margin:0px 0 10px 0;float:left;width:auto;}
-.advanced-box h2{margin-top:-20px !important; padding-top:0 !important}
-.more{background: url(../img/sprite.png) 0 -259px no-repeat;background-size:12px;padding:0 0 5px 18px;margin-bottom:5px;float:left}
+.advanced-box h2{margin-top:-17px !important; padding-top:0 !important}
+.more{background: url(../img/sprite.png) 0 -260px no-repeat;background-size:12px;padding:0 0 5px 18px;margin-bottom:5px;float:left}
 .minus{background: url(../img/sprite.png) 0 -285px no-repeat;background-size:12px;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
 
@@ -843,6 +862,9 @@ top: 5%;
 	list-style:none;
 	font-size:14px;
 	}
+	.format-box ul {
+		width: 90px;
+	}
 	.popup-languages ul
 		{
         -webkit-column-count: 5;
@@ -909,12 +931,13 @@ top: 5%;
 	padding:1px 0 1px 0;
 	overflow:hidden !important;
 	border-bottom:1px dotted #ccc;
+	line-height:20px;
 	}
 	.listlang li.on
 		{
 		font-weight:bold;
 font-size:18px;
-line-height:28px;
+line-height:20px;
 padding-bottom:3px;
 		}		
 
@@ -925,6 +948,7 @@ padding-bottom:3px;
     cursor: pointer;
     width: 88%;
     padding-left: 0%;
+    padding-top:4px;
     }
 
 .listlang input
@@ -994,7 +1018,7 @@ footer a:hover{text-decoration:none}
 		background-image: none;
 width: 70px;
 margin-left: -30px;
-padding: 5px 0 4px 0;
+padding: 8px 0 1px 0;
 margin-top: 7px;
 	}    
 
@@ -1134,7 +1158,9 @@ width: 250px;
 float: left;
 width: 100%;
 }
-
+.nobrowser {
+display: none;
+}
 
 
 
