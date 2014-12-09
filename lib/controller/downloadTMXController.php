@@ -154,7 +154,7 @@ class downloadTMXController extends downloadController {
 
 
             $this->unlockToken();
-            header("HTTP/1.0 403 Forbidden");
+            header("HTTP/1.0 204 No Content");
 
             exit;
 
