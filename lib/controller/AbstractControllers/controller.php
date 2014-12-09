@@ -11,6 +11,8 @@
  */
 abstract class controller {
 
+    protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     /**
      * Controllers Factory
      *

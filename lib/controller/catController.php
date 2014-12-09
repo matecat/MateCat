@@ -44,8 +44,6 @@ class catController extends viewController {
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     /**
      * @var string
      */
@@ -106,26 +104,6 @@ class catController extends viewController {
 
         $this->generateAuthURL();
 
-	}
-
-	private function parse_time_to_edit($ms) {
-		if ($ms <= 0) {
-			return array("00", "00", "00", "00");
-		}
-
-		$usec = $ms % 1000;
-		$ms = floor($ms / 1000);
-
-		$seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
-
-		$minutes = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
-
-		$hours = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
-
-		return array($hours, $minutes, $seconds, $usec);
 	}
 
     private function doAuth() {
@@ -515,6 +493,8 @@ class catController extends viewController {
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
+
+        $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
 
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 

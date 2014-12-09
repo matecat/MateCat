@@ -17,8 +17,6 @@ class updateJobKeysController extends ajaxController {
 
     private $tm_keys;
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     private $jobData = array();
 
     public function __construct() {

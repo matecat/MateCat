@@ -152,9 +152,9 @@ class downloadTMXController extends downloadController {
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
 
-            $this->unlockToken();
 
-            header("HTTP/1.0 404 Not Found");
+            $this->unlockToken();
+            header("HTTP/1.0 204 No Content");
 
             exit;
 
@@ -168,7 +168,7 @@ class downloadTMXController extends downloadController {
 
         list( $file_name, $mx_domain) = explode( "@", $this->userMail );
 
-        $file_name .= "_" . uniqid() . ".tmx";
+        $file_name .= "_" . uniqid() . ".zip";
 
         $buffer = ob_get_contents();
         ob_get_clean();

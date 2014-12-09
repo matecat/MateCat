@@ -1721,7 +1721,84 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+    downloadTM: function( tm, button_class ) {
+
+        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
+                src: ''
+            } );
+
+            $( "body" ).append( iFrameDownload );
+
+            iFrameDownload.ready( function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval( function () {
+
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        window.clearInterval( downloadTimer );
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        $( '#' + iFrameID ).remove();
+                    }
+
+                }, 2000 );
+            } );
+
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/',
+                'method': 'POST'
+            } ).append(
+                    //action to call
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'action',
+                        value: 'downloadTMX'
+                    } ),
+                    //we tell to the controller to check a field in the post named downloadToken
+                    // and to set a cookie named as it's value with it's value ( equals )
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'downloadToken',
+                        value: downloadToken
+                    } ),
+                    //set other values
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'tm_key',
+                        value: $( '.privatekey', tm ).text()
+                    } )
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
+
+        }
+
+    },
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
@@ -1739,7 +1816,7 @@ UI = {
             $("body").append( iFrameDownload );
 
             //generate a token download
-            var downloadToken = new Date().getTime();
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
             //set event listner, on ready, attach an interval that check for finished download
             iFrameDownload.ready(function () {
@@ -1748,14 +1825,14 @@ UI = {
                 downloadTimer = window.setInterval(function () {
 
                     //check for cookie
-                    var token = $.cookie('downloadToken');
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
                     }
 
@@ -5255,8 +5332,14 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
-				UI.updateSearchDisplayCount(segment);
+                segment_id = $(segment).attr('id').split('-')[1];
+                status = UI.getStatus(segment);
+                byStatus = 0;
+
+                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setContribution(segment_id, status, byStatus);
+
+                UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);
@@ -5939,7 +6022,11 @@ $.extend(UI, {
                 if($(this).text().startsWith('</')) {
                     $(this).addClass('endTag')
                 } else {
-                    $(this).addClass('startTag')
+                    if($(this).text().endsWith('/>')) {
+                        $(this).addClass('selfClosingTag')
+                    } else {
+                        $(this).addClass('startTag')
+                    }
                 }
             })
 
@@ -7828,7 +7915,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
+	if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
@@ -8015,9 +8102,14 @@ function toTitleCase(str)
 }
 
 if (typeof String.prototype.startsWith != 'function') {
-    // see below for better implementation!
     String.prototype.startsWith = function (str){
         return this.indexOf(str) == 0;
+    };
+}
+
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
     };
 }
 /*
@@ -8083,7 +8175,7 @@ $.extend(UI, {
         });
 
         $(".outer-tm").click(function() {
-            UI.saveTMdata();
+            UI.saveTMdata(true);
         });
 
         $(".mgmt-tm").click(function() {
@@ -8238,11 +8330,14 @@ $.extend(UI, {
         }).on('blur', '#activetm td.description .edit-desc', function() {
             console.log('blur');
             $(this).removeAttr('contenteditable');
+            if(APP.isCattool) UI.saveTMdata(false);
+
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
         }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
                 $(this).removeAttr('contenteditable');
+                if(APP.isCattool) UI.saveTMdata(false);
             }
          }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
@@ -8251,7 +8346,7 @@ $.extend(UI, {
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
             e.preventDefault();
-            UI.saveTMdata();
+            UI.saveTMdata(true);
         }).on('click', '#activetm tr.new a.addtmxfile:not(.disabled)', function() {
             console.log('upload file');
             UI.checkTMKey('tm');
@@ -8261,12 +8356,18 @@ $.extend(UI, {
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
         }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+            if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            if(this.files[0].size > config.maxFileSize) {
+                numMb = config.maxFileSize/(1024*1024);
+                APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
+                return false;
+            };
             if($(this).val() == '') {
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
@@ -8286,7 +8387,10 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
-        });
+        }).on('click', '.mgmt-tm .downloadtmx', function(e){
+            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' ).addClass('downloading');
+        });;
 
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
@@ -8676,6 +8780,7 @@ $.extend(UI, {
         }
         UI.pulseTMadded($('#activetm tr.mine').last());
         UI.setTMsortable();
+        if(APP.isCattool) UI.saveTMdata(false);
     },
 
     pulseTMadded: function (row) {
@@ -8894,7 +8999,10 @@ $.extend(UI, {
                             $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
 //                            $(TRcaller).find('.standard').show();
                             if(existing) {
-                                $(TRcaller).remove();
+                                $(TRcaller).addClass('tempTRcaller').append('<span class="msg">Import Complete</span>');
+                                setTimeout(function() {
+                                    $('.tempTRcaller').remove();
+                                }, 3000);
                             } else {
                                 $('.mgmt-tm tr.new .canceladdtmx').click();
                                 $('.mgmt-tm tr.new').removeClass('hide');
@@ -8967,16 +9075,18 @@ $.extend(UI, {
         return data;
     },
 
-    saveTMdata: function() {
-        UI.closeTMPanel();
-        UI.clearTMPanel();
+    saveTMdata: function(closeAfter) {
+        $('.popup-tm').addClass('saving');
+        if(closeAfter) {
+            UI.closeTMPanel();
+            UI.clearTMPanel();
+        }
         if(!APP.isCattool) {
             UI.updateTMAddedMsg();
             return false;
         }
 
-
-            data = this.extractTMdataFromTable();
+        data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
                 action: 'updateJobKeys',
@@ -8987,10 +9097,14 @@ $.extend(UI, {
             error: function() {
                 console.log('Error saving TM data!!');
                 APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+
 //                $('.mgmt-panel-tm .warning-message').text('').hide();
 //                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
             },
             success: function(d) {
+                $('.popup-tm').removeClass('saving');
+
 //                d.errors = [];
                 if(d.errors.length) {
                     APP.showMessage({msg: d.errors[0].message});

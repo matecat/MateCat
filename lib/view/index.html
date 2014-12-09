@@ -16,6 +16,7 @@
             /*<![CDATA[*/
             var config = {
                 basepath: '${basepath | string:/}',
+                maxFileSize: ${maxFileSize},
                 id_translator: '${tid | nothing}',
                 private_translator: '${private_translator | string:0}',
                 id_customer: '${id_customer | string:unknown_customer}',
@@ -221,7 +222,7 @@
                         </tal:block>
 
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
-                        <li><a href="https://www.matecat.com/support" target="_blank">Support</a></li>
+                        <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">

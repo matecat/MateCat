@@ -16,7 +16,7 @@ abstract class downloadController extends controller {
 
         if( isset( $this->downloadToken ) && !empty( $this->downloadToken )){
             setcookie(
-                    'downloadToken',
+                    $this->downloadToken,
                     $this->downloadToken,
                     2147483647            // expires January 1, 2038
             );

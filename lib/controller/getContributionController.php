@@ -24,8 +24,6 @@ class getContributionController extends ajaxController {
 
     private $__postInput = array();
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();

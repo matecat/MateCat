@@ -862,7 +862,7 @@ width: 804px;
     display: block;
 }
 #inactivetm td.action .addtmx {
-    display: none;
+    visibility: hidden;
 }
 #activetm tr:hover td {
 background: #f1f8fc;
@@ -1459,6 +1459,11 @@ margin-top: 10px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
 }
+#activetm td.uploadfile .msg{
+    float: right;
+    margin-right: 100px;
+    color: green;
+}
 #activetm td.dragrow{
    position: relative;
 	padding: 5px 5px 5px 5px!important;
@@ -1508,7 +1513,7 @@ top: 17%;
 
 
 .mgmt-tm .downloadtmx {
-    display: none !important; /* temp */
+    /*display: none !important; */
 }
 
 tr.mine.ui-sortable-helper {
