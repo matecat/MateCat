@@ -893,6 +893,9 @@ form.add-TM-Form {
     float: left;
     margin-bottom: 6px;
 }
+
+
+
 .popup p
 {
 	font-size: 18px;
@@ -2108,11 +2111,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-s96yw7');
-	src:url('fonts/icomoon.eot?#iefix-s96yw7') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-s96yw7') format('woff'),
-		url('fonts/icomoon.ttf?-s96yw7') format('truetype'),
-		url('fonts/icomoon.svg?-s96yw7#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-b6jcjs');
+	src:url('fonts/icomoon.eot?#iefix-b6jcjs') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-b6jcjs') format('woff'),
+		url('fonts/icomoon.ttf?-b6jcjs') format('truetype'),
+		url('fonts/icomoon.svg?-b6jcjs#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2154,6 +2157,12 @@ color: #000;
 		padding: 0 10px 0 0;
 	vertical-align: text-top;
 
+}
+
+.icon-tag-expand:before {
+content: "...";
+margin-top: -5px;
+float: left;
 }
 
 .canceladdtmx.btn-grey .text:before {
@@ -2273,6 +2282,9 @@ cursor: pointer;
 .icon-chevron-right:before {
 	content: "\f054";
 }
+.icon-chevron-left:before {
+	content: "\f053";
+}
 .icon-plus-circle:before {
 	content: "\f055";
 }
@@ -2350,6 +2362,12 @@ cursor: pointer;
 }
 .icon-language:before {
 	content: "\f1ab";
+}
+.icon-chevron-right:before {
+	content: "\f054";
+}
+.icon-code:before {
+	content: "\f121";
 }
 .icon-paw:before {
 	content: "\f1b0";

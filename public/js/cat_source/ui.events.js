@@ -152,6 +152,7 @@ $.extend(UI, {
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
             console.log('click su tagMode toggle');
+            $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
 
