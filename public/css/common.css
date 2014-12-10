@@ -1039,7 +1039,7 @@ margin-left: 10px;
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
 
-.download-manage.btn-ok {
+.download-manage {
 margin-top: 10px;
 width: auto!important;
 padding: 8px 4px;
@@ -1047,12 +1047,7 @@ font-size: 14px;
 text-indent: 0!important;
 }
 
-.btn-ok:hover, .btn-cancel:hover {
-cursor: pointer;
--webkit-box-shadow: 0 1px 2px #ccc;
-box-shadow: 0 1px 2px #ccc;
-border: 1px solid #000;
-}
+
 
 
 .hide {
@@ -1114,8 +1109,7 @@ float: none!important;
 .popup .btn-ok:hover, 
 .popup .btn-cancel:hover,
 .popup-tm .btn-ok:hover, 
-.popup-tm .btn-cancel:hover,
-.download-manage.btn-ok:hover
+.popup-tm .btn-cancel:hover
 {
 	cursor: pointer;
 	-webkit-box-shadow: 0 1px 2px #ccc;
@@ -1127,8 +1121,7 @@ float: none!important;
     .popup .btn-ok:active,
     .popup .btn-cancel:active,
      .popup-tm .btn-ok:active,
-    .popup-tm .btn-cancel:active,
-    .download-manage.btn-ok:active
+    .popup-tm .btn-cancel:active
     {
 	    -moz-box-shadow: inset 0 0 1px 1px #888;
 	    -webkit-box-shadow: inset 0 0 1px 1px #888;
