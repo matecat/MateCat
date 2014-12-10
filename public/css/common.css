@@ -1022,7 +1022,8 @@ margin-left: 10px;
     .popup .btn-cancel,
     .popup-tm .btn-ok,
     .popup-tm .btn-cancel,
-    .uploadtm.disabled 
+    .uploadtm.disabled,
+    .download-manage.btn-ok 
     {
 	    color: #fff;
 	    background: #09beec;
@@ -1037,6 +1038,18 @@ margin-left: 10px;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.download-manage {
+margin-top: 10px;
+width: auto!important;
+padding: 8px 4px;
+font-size: 14px;
+text-indent: 0!important;
+}
+
+
+
+
 .hide {
     display: none;
 }
