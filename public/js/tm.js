@@ -233,6 +233,7 @@ $.extend(UI, {
         } ).on('click', '.mgmt-tm .downloadtmx', function(){
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
+            $(this).prepend('<span class="uploadloader"></span>');
         });
 
 

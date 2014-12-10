@@ -331,5 +331,60 @@ class TMSService {
 
     }
 
+    /**
+     * Export Job as Tmx File
+     *
+     * @param $jid
+     * @param $jPassword
+     * @param $sourceLang
+     * @param $targetLang
+     *
+     * @return SplTempFileObject $tmpFile
+     *
+     */
+    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ){
+
+        $tmpFile = new SplTempFileObject( 5 * 1024 * 1024 /* 5MB */ );
+
+        $tmpFile->fwrite( '<?xml version="1.0" ?>
+<tmx version="1.4">
+    <header
+            creationtool="Matecat-Cattool"
+            creationtoolversion="'. INIT::$BUILD_NUMBER .'"
+            creationid="Matecat"
+            datatype="PlainText"
+            segtype="sentence"
+            adminlang="en-US"
+            srclang="' . $sourceLang . '">
+    </header>
+    <body>' );
+
+
+        $result = getTranslationsForTMXExport( $jid, $jPassword );
+
+        foreach ( $result as $k => $row ){
+
+            $tmx = '	    <tu tuid = "' . $row['id'] . '" datatype = "plaintext">
+				<tuv xml:lang = "' . $sourceLang . '">
+				<seg>' . htmlspecialchars($row['segment']) . '</seg>
+				</tuv>
+				<tuv xml:lang = "' . $targetLang . '">
+				<seg>' . htmlspecialchars($row['translation']) . "</seg>
+				</tuv>
+				</tu>";
+
+            $tmpFile->fwrite($tmx);
+
+        }
+
+        $tmpFile->fwrite("
+    </body>
+	</tmx>");
+
+        $tmpFile->rewind();
+
+        return $tmpFile;
+
+    }
 
 }

@@ -48,6 +48,7 @@ class ProjectManager {
                             'file_references'      => array(),
                             'source_language'      => null,
                             'target_language'      => null,
+                            'job_subject'          => 'general',
                             'mt_engine'            => null,
                             'tms_engine'           => null,
                             'ppassword'            => null,

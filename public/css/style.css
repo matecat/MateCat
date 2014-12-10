@@ -2814,6 +2814,8 @@ float: left;
     float: left;
 }
 
+/*
+
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
 {
@@ -2866,11 +2868,40 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     width: 12px;
     background-size: 100%;
     opacity: 0.4;
-    background-position: 1px 9px;
+    background-position: 0px 9px;
     background-repeat: no-repeat;
 }
+*/
 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
+{
+visibility: hidden;
+text-indent: -9999px;
+display: inline-block;
+position: relative;
+margin: 0px 5px;
+height: 18px;
+padding-top: 10px;
+}
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag {
+ -ms-transform: rotate(-180deg); /* IE 9 */
+    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
+    transform: rotate(-180deg);
+}
 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab {
+	 -ms-transform: rotate(-45deg); /* IE 9 */
+    -webkit-transform: rotate(-45deg); /* Chrome, Safari, Opera */
+    transform: rotate(-45deg);
+
+}
 
 .tagModeToggle {
 padding: 10px 2px;
