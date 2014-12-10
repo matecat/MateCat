@@ -6113,6 +6113,42 @@ $.extend(UI, {
         )
     },
     checkTagProximity: function (w, range) {return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+
+        //check if there is a tag ahed
+        if($(nextEl).hasClass('locked')) {
+            if(range.endOffset == range.endContainer.length - 1) {
+                this.highlightCorrespondingTags(nextEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+            content = UI.editarea.html();
+            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.endOffset == range.endContainer.length) {
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        } else {
+            UI.removeHighlightCorrespondingTags();
+        }
+
+
+        if($(prevEl).hasClass('locked')) {
+            console.log("l'elemento precedente è un tag");
+
+        } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+            console.log("l'elemento precedente è un cursor placeholder, e quello ancora precedente un tag");
+
+        }
+
+
+            return false;
+
         if(w == 'right') {
             nextEl = $(range.endContainer.nextElementSibling);
 //            console.log('a: ', nextEl);
@@ -6218,7 +6254,7 @@ $.extend(UI, {
 //                console.log('il successivo non è un end tag');
                 num = 1;
                 ind = 0;
-                $(el).nextAll().each(function () {
+                $(el).nextAll('.locked').each(function () {
                     ind++;
 //                    console.log('ora stiamo valutando: ', $(this));
                     if($(this).hasClass('startTag')) {
@@ -6239,6 +6275,34 @@ $.extend(UI, {
 
             }
 //            console.log('next endTag: ', el.next('.endTag'));
+        } else if(el.hasClass('endTag')) {
+            console.log('is an end tag');
+            if(el.prev('.startTag').length) {
+                console.log('and the previous element is a start tag');
+                el.prev('.startTag').addClass('highlight');
+            } else {
+                console.log('and the previous element is not a start tag');
+                num = 1;
+                ind = 0;
+                $(el).prevAll('.locked').each(function () {
+                    ind++;
+                    console.log('start tag: ', $(this));
+
+                    if($(this).hasClass('endTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+
+                });
+            }
         }
         $(el).addClass('highlight');
         $(pairEl).addClass('highlight');
@@ -8466,6 +8530,7 @@ $.extend(UI, {
         } ).on('click', '.mgmt-tm .downloadtmx', function(){
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
+            $(this).prepend('<span class="uploadloader"></span>');
         });
 
 
