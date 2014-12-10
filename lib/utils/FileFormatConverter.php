@@ -15,6 +15,7 @@ class FileFormatConverter {
     private $opt = array(); //curl options
     private $lang_handler; //object that exposes language utilities
     private $storage_lookup_map;
+    private $segmentation_rule;
 
     private $conversionObject;
 
@@ -27,6 +28,7 @@ class FileFormatConverter {
 
     public static $Storage_Lookup_IP_Map = array();
     public static $converters = array();
+    public static $converter2segmRule = array();
 
     //http://stackoverflow.com/questions/2222643/php-preg-replace
     private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
@@ -63,11 +65,12 @@ class FileFormatConverter {
         ), ArrayObject::ARRAY_AS_PROPS );
 
         $db         = Database::obtain();
-        $converters = $db->fetch_array( "SELECT ip_converter, ip_storage FROM converters WHERE status_active = 1 AND status_offline = 0" );
+        $converters = $db->fetch_array( "SELECT ip_converter, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0" );
 
         foreach ( $converters as $converter_storage ) {
             self::$converters[ $converter_storage[ 'ip_converter' ] ]            = 1;
             self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
+            self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
         }
 
 //        self::$converters = array('10.11.0.106' => 1);//for debugging purposes
@@ -88,14 +91,18 @@ class FileFormatConverter {
     }
 
     //get a converter at random, weighted on number of CPUs per node
-    private function pickRandConverter() {
+    private function pickRandConverter( $segm_rule = null ) {
 
         $converters_map = array();
 
         $tot_cpu = 0;
         foreach ( self::$converters as $ip => $cpu ) {
-            $tot_cpu += $cpu;
-            $converters_map = array_merge( $converters_map, array_fill( 0, $cpu, $ip ) );
+
+            if ( self::$converter2segmRule[ $ip ] == $segm_rule ) {
+                $tot_cpu += $cpu;
+                $converters_map = array_merge( $converters_map, array_fill( 0, $cpu, $ip ) );
+            }
+
         }
 
         //pick random
@@ -296,7 +303,7 @@ class FileFormatConverter {
         return $output;
     }
 
-    public function convertToSdlxliff( $file_path, $source_lang, $target_lang, $chosen_by_user_machine = false ) {
+    public function convertToSdlxliff( $file_path, $source_lang, $target_lang, $chosen_by_user_machine = false, $segm_rule = null ) {
         if ( !file_exists( $file_path ) ) {
             throw new Exception( "Conversion Error : the file <$file_path> not exists" );
         }
@@ -328,7 +335,7 @@ class FileFormatConverter {
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
-            $this->ip = $this->pickRandConverter();
+            $this->ip = $this->pickRandConverter( $segm_rule );
         } else {
             $this->ip = $chosen_by_user_machine;
         }
@@ -429,7 +436,7 @@ class FileFormatConverter {
         $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
 
         log::doLog( $this->ip . " start conversion back to original" );
-        $start_time  = time();
+        $start_time = time();
 
         //TODO: this helper doesn't help!
         //How TODO: create a resource handler e return it, so it can be added to a MultiCurl Handler instance
@@ -465,8 +472,7 @@ class FileFormatConverter {
                 //add replace/regexp pattern because we have more than 1 replacement
                 //http://stackoverflow.com/questions/2222643/php-preg-replace
                 $xliffContent = self::replacedAddress( $storage, $xliffContent );
-            }
-            else {
+            } else {
                 $this->ip = $chosen_by_user_machine;
             }
 
@@ -507,9 +513,9 @@ class FileFormatConverter {
         }
 
         //Perform curl
-        Log::doLog("multicurl_start");
+        Log::doLog( "multicurl_start" );
         $multiCurlObj->multiExec();
-        Log::doLog("multicurl_end");
+        Log::doLog( "multicurl_end" );
 
         $multiResponses = $multiCurlObj->getAllContents();
 

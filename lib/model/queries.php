@@ -490,7 +490,7 @@ function getJobData( $id_job, $password = null ) {
 
     $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project
+		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject
 			FROM jobs
 			WHERE id = %u";
 
@@ -1678,6 +1678,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];
     $data[ 'id_mt_engine' ]      = $projectStructure[ 'mt_engine' ];
     $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
+    $data[ 'subject' ]           = $projectStructure[ 'job_subject' ];
     $data[ 'owner' ]             = $owner;
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
@@ -1856,7 +1857,7 @@ function getProjectJobData( $pid ) {
 function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
     $query = "
-		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis,
+		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,
 
 			   SUM(s.raw_word_count) AS file_raw_word_count,
 			   SUM(st.eq_word_count) AS file_eq_word_count,
@@ -2067,6 +2068,7 @@ function getJobsFromProjects(array $projectIDs, $search_source, $search_target, 
 				 j.job_last_segment,
 				 j.id_mt_engine,
 				 j.id_tms,
+				 j.subject,
 				(draft_words + new_words) AS DRAFT,
 				rejected_words AS REJECT,
 				translated_words AS TRANSLATED,

@@ -2142,7 +2142,8 @@ footer nav
 	color: #767676 !important;
 	font-size: 13px;
 	font-style: italic;
-	padding-bottom: 3px;
+	margin-top: -2px;
+	height: 32px;
 	vertical-align: middle;
 }
 .editor .footer .locked
@@ -2806,6 +2807,8 @@ float: left;
     float: left;
 }
 
+/*
+
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
 {
@@ -2824,6 +2827,28 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     background-image: url(../img/crunchedtagclose.png);
 }
 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab.order-error
+{
+    background-image: url(../img/crunchedtag-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag.order-error
+{
+    background-image: url(../img/crunchedtagopen-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag.order-error
+{
+    background-image: url(../img/crunchedtagclose-oe.png);
+    opacity: 1;
+}
+
+
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
@@ -2836,11 +2861,40 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     width: 12px;
     background-size: 100%;
     opacity: 0.4;
-    background-position: 1px 9px;
+    background-position: 0px 9px;
     background-repeat: no-repeat;
 }
+*/
 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
+{
+visibility: hidden;
+text-indent: -9999px;
+display: inline-block;
+position: relative;
+margin: 0px 5px;
+height: 18px;
+padding-top: 10px;
+}
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag {
+ -ms-transform: rotate(-180deg); /* IE 9 */
+    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
+    transform: rotate(-180deg);
+}
 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab {
+	 -ms-transform: rotate(-45deg); /* IE 9 */
+    -webkit-transform: rotate(-45deg); /* Chrome, Safari, Opera */
+    transform: rotate(-45deg);
+
+}
 
 .tagModeToggle {
 padding: 10px 2px;

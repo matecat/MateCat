@@ -154,6 +154,7 @@ $.extend(UI, {
             console.log('click su tagMode toggle');
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
+            console.log(typeof UI.currentSegment);
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
 
 //		}).bind('keydown', 'Backspace', function(e) {
@@ -1255,6 +1256,9 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+            if(!UI.editarea.find('.locked').length) {
+                UI.currentSegment.removeClass('hasTags');
+            }
 /*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {

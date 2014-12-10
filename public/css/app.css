@@ -2111,11 +2111,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-b6jcjs');
-	src:url('fonts/icomoon.eot?#iefix-b6jcjs') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-b6jcjs') format('woff'),
-		url('fonts/icomoon.ttf?-b6jcjs') format('truetype'),
-		url('fonts/icomoon.svg?-b6jcjs#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-uz2gvx');
+	src:url('fonts/icomoon.eot?#iefix-uz2gvx') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-uz2gvx') format('woff'),
+		url('fonts/icomoon.ttf?-uz2gvx') format('truetype'),
+		url('fonts/icomoon.svg?-uz2gvx#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2314,6 +2314,9 @@ cursor: pointer;
 }
 .icon-warning:before {
 	content: "\f071";
+}
+.icon-play:before {
+	content: "\f04b";
 }
 .icon-sign-in:before {
 	content: "\f090";
@@ -4607,7 +4610,8 @@ footer nav
 	color: #767676 !important;
 	font-size: 13px;
 	font-style: italic;
-	padding-bottom: 3px;
+	margin-top: -2px;
+	height: 32px;
 	vertical-align: middle;
 }
 .editor .footer .locked
@@ -5288,6 +5292,28 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 {
     background-image: url(../img/crunchedtagclose.png);
 }
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab.order-error
+{
+    background-image: url(../img/crunchedtag-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag.order-error
+{
+    background-image: url(../img/crunchedtagopen-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag.order-error
+{
+    background-image: url(../img/crunchedtagclose-oe.png);
+    opacity: 1;
+}
+
 
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,

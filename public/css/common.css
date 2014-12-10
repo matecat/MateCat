@@ -861,6 +861,19 @@ width: 804px;
 #activetm td.action .addtmx {
     display: block;
 }
+
+.downloading .uploadloader {
+	display: block;
+}
+
+.downloading .uploadloader {
+	right: 170px;
+	margin-top:0;
+}
+
+td.action {
+padding: 10px 5px!important;
+}
 #inactivetm td.action .addtmx {
     visibility: hidden;
 }
@@ -2111,11 +2124,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-b6jcjs');
-	src:url('fonts/icomoon.eot?#iefix-b6jcjs') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-b6jcjs') format('woff'),
-		url('fonts/icomoon.ttf?-b6jcjs') format('truetype'),
-		url('fonts/icomoon.svg?-b6jcjs#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-uz2gvx');
+	src:url('fonts/icomoon.eot?#iefix-uz2gvx') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-uz2gvx') format('woff'),
+		url('fonts/icomoon.ttf?-uz2gvx') format('truetype'),
+		url('fonts/icomoon.svg?-uz2gvx#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2138,7 +2151,14 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
-.sorting:after {
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
+.sorting:after,
+.sdlxliff:after {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -2151,6 +2171,9 @@ color: #000;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
+.sdlxliff:after {
+	content: "\e602";
+}
 
 .usetm .text:before {
 	content: "\f144";
@@ -2158,6 +2181,31 @@ color: #000;
 	vertical-align: text-top;
 
 }
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before, 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+{
+content: "\f04b";
+visibility: visible;
+position: absolute;
+font-size: 7px;
+transform: scaleY(1.4);
+ -webkit-transform: scaleY(1.4);
+ -ms-transform: scaleY(1.4);
+left: 10000px;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before {
+content: "\e603";	
+visibility: visible;
+position: absolute;
+font-size: 10px;
+top: 13px;
+left: 9999px;
+}
+
 
 .icon-tag-expand:before {
 content: "...";
@@ -2245,6 +2293,9 @@ cursor: pointer;
 
 }
 
+.icon-play:before {
+	content: "\f04b";
+}
 
 .icon-search:before {
 	content: "\f002";
@@ -2260,6 +2311,9 @@ cursor: pointer;
 }
 .icon-user:before {
 	content: "\f007";
+}
+.icon-stop:before {
+	content: "\e603";
 }
 .icon-check:before {
 	content: "\f00c";
@@ -2291,6 +2345,9 @@ cursor: pointer;
 .icon-minus-circle:before {
 	content: "\f056";
 }
+.icon-play:before {
+	content: "\f04b";
+}
 .icon-times-circle:before {
 	content: "\f057";
 }
@@ -2314,6 +2371,9 @@ cursor: pointer;
 }
 .icon-warning:before {
 	content: "\f071";
+}
+.icon-play:before {
+	content: "\f04b";
 }
 .icon-sign-in:before {
 	content: "\f090";
