@@ -2146,6 +2146,7 @@ footer nav
 	margin-top: -2px;
 	height: 32px;
 	vertical-align: middle;
+    border: 2px solid transparent;
 }
 .editor .footer .locked
 {
@@ -2168,7 +2169,9 @@ footer nav
 }
 .editor .editarea .locked.highlight
 {
-background: #ffff90;
+    border-radius: 8px;
+    border: 2px solid #7EB30C;
+/* background: #ffff90; */
 }
 
 .editor .editarea .locked.selected
