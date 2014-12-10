@@ -2810,7 +2810,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	width: auto !important;
 	position: absolute;	
 	top: 18px;
-	left: -2.8%;
+	left: -4.8%;
 	text-align: center;
 	display: block;
 	height: 10px;
@@ -2850,7 +2850,7 @@ section.currSearchSegment .sid
 	top:43px !Important;}
 
 span.sid .implicit {
-    display: none;
+/*    display: none; */
 }
 /*.comment{position:absolute;right:0;}*/
 /*
@@ -3100,13 +3100,14 @@ article
 {
 	border:1px solid #adadad;
 	border-top:none;
-	margin:20px auto 100px auto;
+	margin: 20px auto 100px auto;
 	background:#ccc;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	-moz-box-shadow: 0 1px 3px #ccc;
 	-webkit-box-shadow: 0 1px 3px #ccc;
-	position:relative;margin-left:3%;
+	position:relative;
+    margin-left:5%;
 	width:91.5%;
 	float:left;
 }
@@ -4633,7 +4634,10 @@ footer nav
 {
 	font-size: 13px;
 }
-
+.editor .editarea .locked.highlight
+{
+background: #ffff90;
+}
 
 .editor .editarea .locked.selected
 {
@@ -4727,6 +4731,9 @@ footer nav
 
 	.search-editarea {width:200px !Important}
 	.text .item,.white li{width: 44% !important}
+    article {margin-left: 6%;}
+    .sid {left: -6%;}
+
 }
 @media screen and (min-width: 1280px){
 	.alternatives .graysmall .sugg-target

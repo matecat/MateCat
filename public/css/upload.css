@@ -358,8 +358,8 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
     /*
     color: #333;
     font-weight: bold;
+    width: 230px;
     */
-    width: 300px;
     text-decoration: none;
 }
 .memory-mgmt .text {
