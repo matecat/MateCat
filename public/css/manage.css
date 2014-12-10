@@ -135,7 +135,7 @@ margin-left: 4px	}
 
 	body.manage .actions a.change
 		{
-		margin-left:10px!important;
+		margin-left:14px!important;
 		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
@@ -303,7 +303,7 @@ body.manage th.private-tm-key
 
 body.manage th.words
 	{
-	width: 110px;
+	width: 80px;
 	}
 	
 body.manage th.progress
@@ -313,7 +313,7 @@ body.manage th.progress
 
 body.manage th.actions
 	{
-	width: 9%;
+	width: 110px;
 	}
 
 body.manage tr.row
