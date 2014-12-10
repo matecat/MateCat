@@ -2164,14 +2164,15 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
+.sorting:after,
+.sdlxliff:after,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
-.sorting:after,
-.sdlxliff:after {
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+ {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -2215,7 +2216,7 @@ content: "\e603";
 visibility: visible;
 position: absolute;
 font-size: 10px;
-top: 13px;
+top: 10px;
 left: 9999px;
 }
 
