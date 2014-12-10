@@ -86,7 +86,7 @@ class exportTMXController extends downloadController {
          */
         $this->tmx = $tmsService->exportJobAsTMX( $this->jobID, $this->jobPass, $source, $target );
 
-        $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".zip";
+        $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".tmx";
 
     }
 
