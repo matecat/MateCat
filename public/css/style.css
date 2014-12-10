@@ -2888,8 +2888,8 @@ text-indent: -9999px;
 display: inline-block;
 position: relative;
 margin: 0px 5px;
-height: 18px;
-padding-top: 10px;
+height: 9px;
+padding-top: 0px;
 }
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag {
