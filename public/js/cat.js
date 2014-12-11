@@ -5206,7 +5206,7 @@ $.extend(UI, {
 
 			if (UI.searchMode == 'onlyStatus') {
 				
-			} else if (UI.searchMode == 'source&target') {
+	//		} else if (UI.searchMode == 'source&target') {
 
 			} else {
 				txt = $('#replace-target').val();
