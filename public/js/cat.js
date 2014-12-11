@@ -5850,6 +5850,7 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
+            UI.detectTagType(this);
         });
 		$('.footer .translation').each(function() {
             $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -5859,8 +5860,10 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
-	},
+            UI.detectTagType(this);
+        });
+
+    },
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
 //		UI.checkHeaviness(); 
@@ -5955,26 +5958,29 @@ $.extend(UI, {
             } else {
                 segment.removeClass('hasTags');
             }
-            $('span.locked', this).each(function () {
-//                console.log(segment.attr('id') + ' - ' + $(this).text());
-//                console.log($(this).text().startsWith('</'));
-                if($(this).text().startsWith('</')) {
-                    $(this).addClass('endTag')
-                } else {
-                    if($(this).text().endsWith('/>')) {
-                        $(this).addClass('selfClosingTag')
-                    } else {
-                        $(this).addClass('startTag')
-                    }
-                }
-            })
-
+            UI.detectTagType(this);
 
 //            UI.checkTagsInSegment();
 		});
 
 	},
-	unlockTags: function() {
+    detectTagType: function (area) {
+        $('span.locked', area).each(function () {
+//                console.log(segment.attr('id') + ' - ' + $(this).text());
+//                console.log($(this).text().startsWith('</'));
+            if($(this).text().startsWith('</')) {
+                $(this).addClass('endTag')
+            } else {
+                if($(this).text().endsWith('/>')) {
+                    $(this).addClass('selfClosingTag')
+                } else {
+                    $(this).addClass('startTag')
+                }
+            }
+        })
+    },
+
+    unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
 		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));

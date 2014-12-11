@@ -1022,7 +1022,8 @@ margin-left: 10px;
     .popup .btn-cancel,
     .popup-tm .btn-ok,
     .popup-tm .btn-cancel,
-    .uploadtm.disabled 
+    .uploadtm.disabled,
+    .download-manage.btn-ok 
     {
 	    color: #fff;
 	    background: #09beec;
@@ -1037,6 +1038,18 @@ margin-left: 10px;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.download-manage {
+margin-top: 10px;
+width: auto!important;
+padding: 8px 4px;
+font-size: 14px;
+text-indent: 0!important;
+}
+
+
+
+
 .hide {
     display: none;
 }
@@ -2151,14 +2164,15 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
+.sorting:after,
+.sdlxliff:after,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
-.sorting:after,
-.sdlxliff:after {
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+ {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -2202,7 +2216,7 @@ content: "\e603";
 visibility: visible;
 position: absolute;
 font-size: 10px;
-top: 13px;
+top: 10px;
 left: 9999px;
 }
 
@@ -5252,7 +5266,7 @@ section .toolbar .tagModeToggle {
     float: left;
     display: none;
     font-size: 60%;
-    margin-right: 10px;
+    margin-right: 5px;
 }
 section .toolbar span {
     font-size: 150%;
@@ -5413,23 +5427,17 @@ text-indent: -9999px;
 display: inline-block;
 position: relative;
 margin: 0px 5px;
-height: 18px;
-padding-top: 10px;
+height: 9px;
+padding-top: 0px;
 }
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag {
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
     transform: rotate(-180deg);
 }
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab {
-	 -ms-transform: rotate(-45deg); /* IE 9 */
-    -webkit-transform: rotate(-45deg); /* Chrome, Safari, Opera */
-    transform: rotate(-45deg);
 
-}
 
 .tagModeToggle {
 padding: 10px 2px;
@@ -5445,12 +5453,16 @@ color: #444!important;
 	display: none;
 }
 
+section .toolbar {
+margin-left: -15px;
+}
+
 .tagModeToggle span {
 	float: left;
 }
 
 .tagModeToggle span.icon-chevron-right {
-margin-left: 12px;
+margin-left: 5px;
 }
 
 .tagModeToggle.active span.icon-chevron-right {

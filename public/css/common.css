@@ -2195,10 +2195,14 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 	vertical-align: text-top;
 
 }
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before, 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before
 {
 content: "\f04b";
 visibility: visible;
@@ -2210,8 +2214,11 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before {
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab:before
+{
 content: "\e603";	
 visibility: visible;
 position: absolute;

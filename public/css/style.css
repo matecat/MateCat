@@ -2876,12 +2876,18 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 }
 */
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
 {
 visibility: hidden;
 text-indent: -9999px;
@@ -2891,8 +2897,8 @@ margin: 0px 5px;
 height: 9px;
 padding-top: 0px;
 }
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag {
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
     transform: rotate(-180deg);
