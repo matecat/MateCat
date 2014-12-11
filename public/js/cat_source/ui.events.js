@@ -1171,6 +1171,7 @@ $.extend(UI, {
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range when pressing right arrow key: ', range);
                 UI.checkTagProximity('right', range);
 
 				if (range.startOffset != range.endOffset) {
@@ -1856,15 +1857,18 @@ $.extend(UI, {
 			});
 		});
 		$("#exec-replace").click(function(e) {
+            console.log('ddd');
 			e.preventDefault();
+            console.log('a');
 			if ($('#search-target').val() == $('#replace-target').val()) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
+            console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
 				
-			} else if (UI.searchMode == 'source&target') {
+//			} else if (UI.searchMode == 'source&target') {
 
 			} else {
 				txt = $('#replace-target').val();
@@ -1884,7 +1888,9 @@ $.extend(UI, {
 
 				UI.gotoNextResultItem(true);
 			}
-		});
+            console.log('c');
+
+        });
 		$("#enable-replace").on('change', function() {
 			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');

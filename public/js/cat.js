@@ -4570,6 +4570,7 @@ $.extend(UI, {
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range when pressing right arrow key: ', range);
                 UI.checkTagProximity('right', range);
 
 				if (range.startOffset != range.endOffset) {
@@ -5255,15 +5256,18 @@ $.extend(UI, {
 			});
 		});
 		$("#exec-replace").click(function(e) {
+            console.log('ddd');
 			e.preventDefault();
+            console.log('a');
 			if ($('#search-target').val() == $('#replace-target').val()) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
+            console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
 				
-			} else if (UI.searchMode == 'source&target') {
+//			} else if (UI.searchMode == 'source&target') {
 
 			} else {
 				txt = $('#replace-target').val();
@@ -5283,7 +5287,9 @@ $.extend(UI, {
 
 				UI.gotoNextResultItem(true);
 			}
-		});
+            console.log('c');
+
+        });
 		$("#enable-replace").on('change', function() {
 			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
@@ -6125,15 +6131,30 @@ $.extend(UI, {
         //check if there is a tag ahed
         if($(nextEl).hasClass('locked')) {
             if(range.endOffset == range.endContainer.length - 1) {
+                console.log('1');
                 this.highlightCorrespondingTags(nextEl);
             } else {
                 UI.removeHighlightCorrespondingTags();
             }
         } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+            saveSelection();
+//            console.log('UI.editarea.html(): ', UI.editarea.html());
+/*
+            for(var key in range.startContainer) {
+                console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+            }
+            */
+            restoreSelection();
             content = UI.editarea.html();
             str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content: ', content);
+            console.log('str: ', str);
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            console.log('range.startOffset: ', range.startOffset);
+            console.log('range.startContainer.length: ', range.startContainer.length);
             if(content.indexOf(str) > -1) { // escape false positives
                 if(range.endOffset == range.endContainer.length) {
+                    console.log('2');
                     this.highlightCorrespondingTags($(nextEl).next());
                 } else {
                     UI.removeHighlightCorrespondingTags();
@@ -6142,16 +6163,34 @@ $.extend(UI, {
         } else {
             UI.removeHighlightCorrespondingTags();
         }
-
-
+/*
+        //check if there is a tag behind
         if($(prevEl).hasClass('locked')) {
             console.log("l'elemento precedente è un tag");
-
+//            console.log('range.startOffset: ', range.startOffset);
+//            console.log('range.startContainer.length: ', (range.startContainer.length));
+            if(range.startOffset == 1) {
+                this.highlightCorrespondingTags(prevEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
         } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
             console.log("l'elemento precedente è un cursor placeholder, e quello ancora precedente un tag");
 
+            content = UI.editarea.html();
+            console.log('content: ', content);
+            str = '&gt;</span><span class="undoCursorPlaceholder monad" contenteditable="false"></span>' + range.endContainer.wholeText;
+//            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.startOffset == 1) {
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
         }
-
+*/
 
             return false;
 
@@ -6278,6 +6317,8 @@ $.extend(UI, {
 //                    $(this).addClass('test-' + num);
 
                 })
+                $(pairEl).addClass('highlight');
+
 
             }
 //            console.log('next endTag: ', el.next('.endTag'));
@@ -6285,7 +6326,7 @@ $.extend(UI, {
             console.log('is an end tag');
             if(el.prev('.startTag').length) {
                 console.log('and the previous element is a start tag');
-                el.prev('.startTag').addClass('highlight');
+                el.prev('.startTag').first().addClass('highlight');
             } else {
                 console.log('and the previous element is not a start tag');
                 num = 1;
@@ -6308,10 +6349,14 @@ $.extend(UI, {
                     }
 
                 });
+                $(pairEl).addClass('highlight');
             }
         }
+//        console.log('$(el): ', $(el));
         $(el).addClass('highlight');
-        $(pairEl).addClass('highlight');
+
+
+//        console.log('$(pairEl).length: ', $(pairEl).length);
 
 //        UI.editarea.find('.locked')
 
@@ -6438,7 +6483,12 @@ $.extend(UI, {
 		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range) {
-		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+//        console.log('RANGE IN JUMPTAG: ', range);
+//        for(var key in range.endContainer) {
+//            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+//        }
+//        console.log('data: ', range.endContainer);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
 //			console.log('da saltare');
 			setCursorAfterNode(range, range.endContainer.nextElementSibling);
 		}
