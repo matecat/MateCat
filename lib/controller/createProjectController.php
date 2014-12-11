@@ -221,7 +221,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'skip_lang_validation' ] = true;
 
         //if user is logged in, set the uid and the userIsLogged flag
-        $this->checkLogin();
+        $this->checkLogin( false );
 
         if ( $this->userIsLogged ) {
             $projectStructure[ 'userIsLogged' ] = true;
