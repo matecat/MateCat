@@ -129,13 +129,12 @@ body.manage .actions a
 	display: inline-block;
 	width: 18px;
 	height: 18px;
-	float: left;
 	text-indent: -10000px;
 margin-left: 4px	}
 
 	body.manage .actions a.change
 		{
-		margin-left:14px!important;
+		
 		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		

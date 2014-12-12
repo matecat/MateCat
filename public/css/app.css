@@ -861,6 +861,19 @@ width: 804px;
 #activetm td.action .addtmx {
     display: block;
 }
+
+.downloading .uploadloader {
+	display: block;
+}
+
+.downloading .uploadloader {
+	right: 170px;
+	margin-top:0;
+}
+
+td.action {
+padding: 10px 5px!important;
+}
 #inactivetm td.action .addtmx {
     visibility: hidden;
 }
@@ -1009,7 +1022,8 @@ margin-left: 10px;
     .popup .btn-cancel,
     .popup-tm .btn-ok,
     .popup-tm .btn-cancel,
-    .uploadtm.disabled 
+    .uploadtm.disabled,
+    .download-manage.btn-ok 
     {
 	    color: #fff;
 	    background: #09beec;
@@ -1024,6 +1038,18 @@ margin-left: 10px;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.download-manage {
+margin-top: 10px;
+width: auto!important;
+padding: 8px 4px;
+font-size: 14px;
+text-indent: 0!important;
+}
+
+
+
+
 .hide {
     display: none;
 }
@@ -2138,7 +2164,15 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
-.sorting:after {
+.sorting:after,
+.sdlxliff:after,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+ {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -2151,6 +2185,9 @@ color: #000;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
+.sdlxliff:after {
+	content: "\e602";
+}
 
 .usetm .text:before {
 	content: "\f144";
@@ -2158,6 +2195,38 @@ color: #000;
 	vertical-align: text-top;
 
 }
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before
+{
+content: "\f04b";
+visibility: visible;
+position: absolute;
+font-size: 7px;
+transform: scaleY(1.4);
+ -webkit-transform: scaleY(1.4);
+ -ms-transform: scaleY(1.4);
+left: 10000px;
+}
+
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab:before
+{
+content: "\e603";	
+visibility: visible;
+position: absolute;
+font-size: 10px;
+top: 10px;
+left: 9999px;
+}
+
 
 .icon-tag-expand:before {
 content: "...";
@@ -2245,6 +2314,9 @@ cursor: pointer;
 
 }
 
+.icon-play:before {
+	content: "\f04b";
+}
 
 .icon-search:before {
 	content: "\f002";
@@ -2260,6 +2332,9 @@ cursor: pointer;
 }
 .icon-user:before {
 	content: "\f007";
+}
+.icon-stop:before {
+	content: "\e603";
 }
 .icon-check:before {
 	content: "\f00c";
@@ -2290,6 +2365,9 @@ cursor: pointer;
 }
 .icon-minus-circle:before {
 	content: "\f056";
+}
+.icon-play:before {
+	content: "\f04b";
 }
 .icon-times-circle:before {
 	content: "\f057";
@@ -4614,6 +4692,7 @@ footer nav
 	margin-top: -2px;
 	height: 32px;
 	vertical-align: middle;
+    border: 2px solid transparent;
 }
 .editor .footer .locked
 {
@@ -4636,7 +4715,9 @@ footer nav
 }
 .editor .editarea .locked.highlight
 {
-background: #ffff90;
+    border-radius: 8px;
+    border: 2px solid #7EB30C;
+/* background: #ffff90; */
 }
 
 .editor .editarea .locked.selected
@@ -5192,7 +5273,7 @@ section .toolbar .tagModeToggle {
     float: left;
     display: none;
     font-size: 60%;
-    margin-right: 10px;
+    margin-right: 5px;
 }
 section .toolbar span {
     font-size: 150%;
@@ -5282,6 +5363,8 @@ float: left;
     float: left;
 }
 
+/*
+
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
 {
@@ -5334,8 +5417,37 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     width: 12px;
     background-size: 100%;
     opacity: 0.4;
-    background-position: 1px 9px;
+    background-position: 0px 9px;
     background-repeat: no-repeat;
+}
+*/
+
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
+{
+visibility: hidden;
+text-indent: -9999px;
+display: inline-block;
+position: relative;
+margin: 0px 5px;
+height: 9px;
+padding-top: 0px;
+}
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag {
+ -ms-transform: rotate(-180deg); /* IE 9 */
+    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
+    transform: rotate(-180deg);
 }
 
 
@@ -5354,12 +5466,16 @@ color: #444!important;
 	display: none;
 }
 
+section .toolbar {
+margin-left: -15px;
+}
+
 .tagModeToggle span {
 	float: left;
 }
 
 .tagModeToggle span.icon-chevron-right {
-margin-left: 12px;
+margin-left: 5px;
 }
 
 .tagModeToggle.active span.icon-chevron-right {
@@ -5686,9 +5802,13 @@ padding: 10px!important;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;
 }
- .undoCursorPlaceholder {
-     display: none;
- }
+.undoCursorPlaceholder {
+ /*    width: 3px;
+     height: 3px;
+     background: orange;
+     display: inline-block;*/
+    display: none;
+}
 
 #uploadTMX .delete {
     background: url(../img/sprite2x.png) 0px -88px no-repeat;
