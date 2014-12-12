@@ -79,7 +79,7 @@ class convertFileController extends ajaxController {
 
         //if already present in database cache get the converted without convert it again
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
-            $xliffContent = getXliffBySHA1( $sha1, $this->source_lang, $this->target_lang, $this->cache_days );
+            $xliffContent = getXliffBySHA1( $sha1, $this->source_lang, $this->target_lang, $this->cache_days, $this->segmentation_rule );
         }
 
 
@@ -214,7 +214,7 @@ class convertFileController extends ajaxController {
 
                 //cache the converted file
                 if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
-                    $res_insert = insertFileIntoMap( $sha1, $this->source_lang, $this->target_lang, $original_content_zipped, $xliffContentZipped );
+                    $res_insert = insertFileIntoMap( $sha1, $this->source_lang, $this->target_lang, $original_content_zipped, $xliffContentZipped,$this->segmentation_rule );
                     if ( $res_insert < 0 ) {
                         //custom error message passed directly to javascript client and displayed as is
                         $convertResult[ 'errorMessage' ] = "Error: File too large";

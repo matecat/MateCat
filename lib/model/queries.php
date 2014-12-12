@@ -1697,15 +1697,16 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFileIntoMap( $sha1, $source, $target, $deflated_file, $deflated_xliff ) {
-    $db                       = Database::obtain();
-    $data                     = array();
-    $data[ 'sha1' ]           = $sha1;
-    $data[ 'source' ]         = $source;
-    $data[ 'target' ]         = $target;
-    $data[ 'deflated_file' ]  = $deflated_file;
-    $data[ 'deflated_xliff' ] = $deflated_xliff;
-    $data[ 'creation_date' ]  = date( "Y-m-d" );
+function insertFileIntoMap( $sha1, $source, $target, $deflated_file, $deflated_xliff, $segmentation_rule ) {
+    $db                          = Database::obtain();
+    $data                        = array();
+    $data[ 'sha1' ]              = $sha1;
+    $data[ 'source' ]            = $source;
+    $data[ 'target' ]            = $target;
+    $data[ 'deflated_file' ]     = $deflated_file;
+    $data[ 'deflated_xliff' ]    = $deflated_xliff;
+    $data[ 'creation_date' ]     = date( "Y-m-d" );
+    $data[ 'segmentation_rule' ] = $segmentation_rule;
 
     $db->insert( 'original_files_map', $data );
     $err   = $db->get_error();
@@ -1719,13 +1720,13 @@ function insertFileIntoMap( $sha1, $source, $target, $deflated_file, $deflated_x
     return 1;
 }
 
-function getXliffBySHA1( $sha1, $source, $target, $not_older_than_days = 0 ) {
+function getXliffBySHA1( $sha1, $source, $target, $not_older_than_days = 0, $segmentation_rule ) {
     $db                  = Database::obtain();
     $where_creation_date = "";
     if ( $not_older_than_days != 0 ) {
         $where_creation_date = " AND creation_date > DATE_SUB(NOW(), INTERVAL $not_older_than_days DAY)";
     }
-    $query = "select deflated_xliff from original_files_map where sha1='$sha1' and source='$source' and target ='$target' $where_creation_date";
+    $query = "select deflated_xliff from original_files_map where sha1='$sha1' and source='$source' and target ='$target' and segmentation_rule='$segmentation_rule' $where_creation_date";
     $res   = $db->query_first( $query );
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
