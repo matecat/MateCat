@@ -1040,10 +1040,11 @@ margin-left: 10px;
 }
 
 .download-manage {
-margin-top: 10px;
+/*margin-top: 10px;*/
 width: auto!important;
-padding: 8px 4px;
+/*padding: 8px 4px;*/
 font-size: 14px;
+    height: auto!important;
 text-indent: 0!important;
 }
 

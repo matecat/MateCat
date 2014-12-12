@@ -36,7 +36,7 @@ h3{margin:0px 0 0 0;padding:0;font-size:18px;color:#999999 !important;font-weigh
 .tablestats{border-right:1px solid #ccc;}
 .tablestats th{background-color:#efefef;}
 
-.tablestats td, .tablestats th{border-bottom:1px solid #ccc;border-left:1px solid #ccc;padding:8px;margin:1px 0;text-align:center}
+.tablestats td, .tablestats th{border-bottom:1px solid #ccc;border-left:1px solid #ccc;padding:6px 8px;margin:1px 0;text-align:center}
 .tablestats  tr:hover{background:#f7f8f9}
 .tablestats{border-top:1px solid #ccc;margin-bottom:40px;-moz-box-shadow: 0 1px 2px #ccc;background:#fff}
 .tablestats.continue{margin-bottom:4px !important;}

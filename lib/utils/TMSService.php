@@ -347,7 +347,7 @@ class TMSService {
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" ?>
-<tmx version="1.4">
+<tmx version="1.4b">
     <header
             creationtool="Matecat-Cattool"
             creationtoolversion="'. INIT::$BUILD_NUMBER .'"
@@ -386,7 +386,7 @@ class TMSService {
 
         $tmpFile->fwrite("
     </body>
-	</tmx>");
+</tmx>");
 
         $tmpFile->rewind();
 
