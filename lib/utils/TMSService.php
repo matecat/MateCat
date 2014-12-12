@@ -344,7 +344,7 @@ class TMSService {
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ){
 
-        $tmpFile = new SplTempFileObject( 5 * 1024 * 1024 /* 5MB */ );
+        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" ?>
 <tmx version="1.4">
@@ -364,14 +364,21 @@ class TMSService {
 
         foreach ( $result as $k => $row ){
 
-            $tmx = '	    <tu tuid = "' . $row['id'] . '" datatype = "plaintext">
-				<tuv xml:lang = "' . $sourceLang . '">
-				<seg>' . htmlspecialchars($row['segment']) . '</seg>
-				</tuv>
-				<tuv xml:lang = "' . $targetLang . '">
-				<seg>' . htmlspecialchars($row['translation']) . "</seg>
-				</tuv>
-				</tu>";
+            $dateCreate = new DateTime( $result['translation_date'], new DateTimeZone( 'UTC' ) );
+
+            $tmx = '
+    <tu tuid="' . $row['id'] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype = "plaintext" srclang=" ' . $sourceLang . '">
+        <prop type="x-MateCAT-id_job">' . $row['id_job'] . '</prop>
+        <prop type="x-MateCAT-id_segment">' . $row['id_segment'] . '</prop>
+        <prop type="x-MateCAT-filename">' . $row['filename'] . '</prop>
+        <tuv xml:lang="' . $sourceLang . '">
+            <seg>' . htmlspecialchars($row['segment']) . '</seg>
+        </tuv>
+        <tuv xml:lang="' . $targetLang . '">
+            <seg>' . htmlspecialchars($row['translation']) . '</seg>
+        </tuv>
+    </tu>
+';
 
             $tmpFile->fwrite($tmx);
 

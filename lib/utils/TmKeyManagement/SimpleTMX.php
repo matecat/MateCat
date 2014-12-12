@@ -123,25 +123,42 @@ class TmKeyManagement_SimpleTMX extends Engine {
 
         $isSSL = stripos( $parsed_url['scheme'], "https" ) !== false;
 
-        if( $isSSL ){
-            $fp = fsockopen( "ssl://" . $parsed_url['host'], 443, $errno, $err_str, 120 );
-        } else {
-            $fp = fsockopen( $parsed_url['host'], 80, $errno, $err_str, 120 );
-        }
+//        if( $isSSL ){
+//            $fp = fsockopen( "ssl://" . $parsed_url['host'], 443, $errno, $err_str, 120 );
+//        } else {
+//            $fp = fsockopen( $parsed_url['host'], 80, $errno, $err_str, 120 );
+//        }
+//
+//        if (!$fp) {
+//            throw new Exception( "$err_str ($errno)" );
+//        }
+//
+//        $out = "GET " . $parsed_url['path'] . "?" . $parsed_url['query'] .  " HTTP/1.1\r\n";
+//        $out .= "Host: {$parsed_url['host']}\r\n";
+//        $out .= "Connection: Close\r\n\r\n";
+//
+//        Log::doLog( "Download TMX: " . $this->url );
 
-        if (!$fp) {
-            throw new Exception( "$err_str ($errno)" );
-        }
+//        fwrite($fp, $out);
 
-        $out = "GET " . $parsed_url['path'] . "?" . $parsed_url['query'] .  " HTTP/1.1\r\n";
-        $out .= "Host: {$parsed_url['host']}\r\n";
-        $out .= "Connection: Close\r\n\r\n";
+        $streamFileName = tempnam("/tmp", "TMX");
 
-        Log::doLog( "Download TMX: " . $this->url );
+        $handle = fopen( $streamFileName, "w+");
 
-        fwrite($fp, $out);
+        $ch = curl_init();
 
-        return $fp;
+        // set URL and other appropriate options
+        curl_setopt( $ch, CURLOPT_URL, $this->url );
+        curl_setopt( $ch, CURLOPT_HEADER, 0 );
+        curl_setopt( $ch, CURLOPT_FILE, $handle ); // write curl response to file
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+
+        // grab URL and pass it to the browser
+        curl_exec($ch);
+
+        rewind( $handle );
+
+        return $handle;
 
     }
 

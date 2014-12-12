@@ -706,16 +706,19 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
     $jPassword = $db->escape( $jPassword );
 
     $sql = "
-            SELECT segments.id, segment,
-                IFNULL(
-                    IF( translation = '', NULL, translation ) , suggestion
-                ) as translation
-            FROM segment_translations
-            JOIN segments ON id = id_segment
-            JOIN jobs ON jobs.id = id_job AND password = '" . $db->escape( $jPassword ) ."'
-              WHERE id_job = " . (int)$jid . "
-              AND ( eq_word_count != 0 OR tm_analysis_status = 'DONE' )
-        ";
+        SELECT id_segment, segment_translations.id_job, filename, segment, translation, translation_date
+        FROM segment_translations
+        JOIN segments ON id = id_segment
+
+        JOIN files ON segments.id_file = files.id
+
+        JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE segment_translations.id_job = " . (int)$jid . "
+            AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+            AND show_in_cattool = 1
+";
+
 
     $results = $db->fetch_array( $sql );
 
