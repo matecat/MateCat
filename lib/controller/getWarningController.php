@@ -95,6 +95,13 @@ class getWarningController extends ajaxController {
 //        $msg = 'MateCat will be undergoing scheduled maintenance starting on Wednesday, July 2 at 08:00 PM CEST. MateCat will be unavailable for approximately 3 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
 //        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-07-02 23:30:00"}]';
 
+
+
+$msg = 'MateCat will be undergoing scheduled maintenance starting on Saturday, December 13 at 11:50 PM CEST. MateCat will be unavailable for approximately 4 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
+        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-12-14 04:00:00"}]';
+
+
+
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
 //        Log::doLog( $tMismatch );
