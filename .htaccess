@@ -41,7 +41,7 @@ RewriteRule ^api/docs$ lib/view/APIDoc.php [L]
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
-RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&forceXliff=1 [L]
+RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
 
 
 </IfModule>

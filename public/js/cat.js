@@ -5095,11 +5095,7 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
-        }).on('click', '.showExtendedTags', function(e) {
-            e.preventDefault();
-            UI.setExtendedTagMode();
-            $(this).remove();
-		}).on('keyup', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 
@@ -6367,8 +6363,7 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if(($.parseJSON(d.warnings).length)&&(!$('#segment-' + d.id_segment + ' .text .showExtendedTags').length)) {
-            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+        if(($.parseJSON(d.warnings).length)) {
 //            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
         }
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
@@ -9089,7 +9084,10 @@ $.extend(UI, {
             UI.addTMKeyToList(true);
 //            $('.popup-tm h1 .btn-ok').click();
         }
-        UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
+
+        setTimeout(function() {
+            UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
+        }, 3000);
 
         return false;
 /*

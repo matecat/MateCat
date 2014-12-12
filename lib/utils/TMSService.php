@@ -346,28 +346,26 @@ class TMSService {
 
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
-        $tmpFile->fwrite( '<?xml version="1.0" ?>
-<tmx version="1.4b">
+        $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
+<tmx version="1.4" xmlns="https://www.matecat.com">
     <header
             creationtool="Matecat-Cattool"
             creationtoolversion="'. INIT::$BUILD_NUMBER .'"
             creationid="Matecat"
-            datatype="PlainText"
+            datatype="xml"
             segtype="sentence"
             adminlang="en-US"
-            srclang="' . $sourceLang . '">
-    </header>
+            srclang="' . $sourceLang . '"/>
     <body>' );
-
 
         $result = getTranslationsForTMXExport( $jid, $jPassword );
 
         foreach ( $result as $k => $row ){
 
-            $dateCreate = new DateTime( $result['translation_date'], new DateTimeZone( 'UTC' ) );
+            $dateCreate = new DateTime( $row['translation_date'], new DateTimeZone( 'UTC' ) );
 
             $tmx = '
-    <tu tuid="' . $row['id'] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype = "plaintext" srclang=" ' . $sourceLang . '">
+    <tu tuid="' . $row['id_segment'] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row['id_job'] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row['id_segment'] . '</prop>
         <prop type="x-MateCAT-filename">' . $row['filename'] . '</prop>

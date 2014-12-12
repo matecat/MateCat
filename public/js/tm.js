@@ -736,7 +736,10 @@ $.extend(UI, {
             UI.addTMKeyToList(true);
 //            $('.popup-tm h1 .btn-ok').click();
         }
-        UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
+
+        setTimeout(function() {
+            UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
+        }, 3000);
 
         return false;
 /*

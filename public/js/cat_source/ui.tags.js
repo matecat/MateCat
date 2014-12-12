@@ -574,8 +574,7 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if(($.parseJSON(d.warnings).length)&&(!$('#segment-' + d.id_segment + ' .text .showExtendedTags').length)) {
-            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+        if(($.parseJSON(d.warnings).length)) {
 //            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
         }
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');

@@ -702,7 +702,7 @@ UI = {
 		            '            <a class="archive" href="#" title="Archive Job">Archive</a>'+
 		            '            <a class="resume" href="#" title="Resume Job">Resume</a>'+
 		            '            <a class="unarchive" href="#" title="Unarchive Job">Unarchive</a>'+
-		            '            <a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '" title="Export as SDLXLIFF"></a>'+
+		            '            <a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '/' + project.name + '.zip" title="Export as SDLXLIFF"></a>'+
 		            '            <a target="_blank" href="/TMX/' + this.id + '/' + this.password + '"" class="download-manage"><span>Export as TMX</span></a>'+
 		            '        </td>'+
 		            '    </tr>';

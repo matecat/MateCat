@@ -286,6 +286,8 @@ class Utils {
             if ( $fileInfo->isDir() ) {
                 self::deleteDir( $fileInfo->getPathname() );
             } else {
+                $fileName = $fileInfo->getFilename();
+                if( $fileName{0} == '.' ) continue;
                 unlink( $fileInfo->getPathname() );
             }
         }

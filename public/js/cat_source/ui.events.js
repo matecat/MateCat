@@ -1696,11 +1696,7 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
-        }).on('click', '.showExtendedTags', function(e) {
-            e.preventDefault();
-            UI.setExtendedTagMode();
-            $(this).remove();
-		}).on('keyup', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 
