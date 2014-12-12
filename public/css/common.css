@@ -2172,7 +2172,15 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.endTag:before
+
  {
 	font-family: 'icomoon';
 	speak: none;
