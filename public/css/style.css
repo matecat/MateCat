@@ -2546,12 +2546,18 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 #messageBar .msg
 {
     display: block;
-    position: absolute;
-    margin: 2px auto 0 auto;
+    /*position: absolute;*/
+    position: relative;
+    /*margin: 2px auto 0 auto;*/
+    margin: 0px auto 0 auto;
+
+    padding-top:2px;
+    padding-bottom:2px;
+    
     width: 100%;
     z-index: 999999;
     text-align: center;
-    margin: 7px 0;
+  /*  margin: 7px 0;*/
 }
 #messageBar .progress
 {
