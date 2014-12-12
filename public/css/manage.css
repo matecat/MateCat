@@ -36,7 +36,7 @@ h3{margin:0px 0 0 0;padding:0;font-size:18px;color:#999999 !important;font-weigh
 .tablestats{border-right:1px solid #ccc;}
 .tablestats th{background-color:#efefef;}
 
-.tablestats td, .tablestats th{border-bottom:1px solid #ccc;border-left:1px solid #ccc;padding:8px;margin:1px 0;text-align:center}
+.tablestats td, .tablestats th{border-bottom:1px solid #ccc;border-left:1px solid #ccc;padding:6px 8px;margin:1px 0;text-align:center}
 .tablestats  tr:hover{background:#f7f8f9}
 .tablestats{border-top:1px solid #ccc;margin-bottom:40px;-moz-box-shadow: 0 1px 2px #ccc;background:#fff}
 .tablestats.continue{margin-bottom:4px !important;}
@@ -126,33 +126,28 @@ body.manage a.copy
 
 body.manage .actions a
 	{
-	display: block;
+	display: inline-block;
 	width: 18px;
 	height: 18px;
-	margin: -17px 0 0 16px !important;
 	text-indent: -10000px;
-	position: absolute;
-	}
+margin-left: 4px	}
 
 	body.manage .actions a.change
 		{
-		margin-left: 8px !important;
+		
 		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
-		margin-left: 35px !important;
 		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
-		margin-left: 63px !important;
 		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
-		margin-left: 35px !important;
 		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
@@ -163,10 +158,8 @@ body.manage .actions a
 
     body.manage .actions a.sdlxliff {
         text-indent: 0;
-        width: 94px;
-        height: auto;
-        position: absolute;
-        margin: 2px 4px 0 -3px !important;
+text-decoration: none;
+color: #999;
     }
 
 	body.manage tr[data-status=active] .actions a.resume,
@@ -309,7 +302,7 @@ body.manage th.private-tm-key
 
 body.manage th.words
 	{
-	width: 110px;
+	width: 80px;
 	}
 	
 body.manage th.progress
@@ -319,7 +312,7 @@ body.manage th.progress
 
 body.manage th.actions
 	{
-	width: 9%;
+	width: 110px;
 	}
 
 body.manage tr.row

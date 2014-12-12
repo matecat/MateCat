@@ -19,8 +19,6 @@ class deleteContributionController extends ajaxController {
     private $password;
     private $tm_keys;
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();

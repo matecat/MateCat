@@ -63,6 +63,7 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
+            UI.detectTagType(this);
         });
 		$('.footer .translation').each(function() {
             $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -72,8 +73,10 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
-	},
+            UI.detectTagType(this);
+        });
+
+    },
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
 //		UI.checkHeaviness(); 
@@ -101,7 +104,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags: ', el);
+//		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -122,7 +125,7 @@ $.extend(UI, {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
             tx = tx.replace(/<span/gi, "<pl")
@@ -168,12 +171,29 @@ $.extend(UI, {
             } else {
                 segment.removeClass('hasTags');
             }
+            UI.detectTagType(this);
 
 //            UI.checkTagsInSegment();
 		});
 
 	},
-	unlockTags: function() {
+    detectTagType: function (area) {
+        $('span.locked', area).each(function () {
+//                console.log(segment.attr('id') + ' - ' + $(this).text());
+//                console.log($(this).text().startsWith('</'));
+            if($(this).text().startsWith('</')) {
+                $(this).addClass('endTag')
+            } else {
+                if($(this).text().endsWith('/>')) {
+                    $(this).addClass('selfClosingTag')
+                } else {
+                    $(this).addClass('startTag')
+                }
+            }
+        })
+    },
+
+    unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
 		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
@@ -257,6 +277,7 @@ $.extend(UI, {
 		}
 */
 	},
+/*
     setExtendedTagMode: function (el) {
         console.log('setExtendedTagMode');
         segment = el || UI.currentSegment;
@@ -266,15 +287,40 @@ $.extend(UI, {
         segment = el || UI.currentSegment;
         $(segment).attr('data-tagMode', 'crunched');
     },
-    checkTagsInSegment: function (el) {
-        segment = el || UI.currentSegment;
-        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
-        if(hasTags) {
-            this.setExtendedTagMode(el);
+*/
+    setTagMode: function () {
+        if(this.custom.extended_tagmode) {
+            this.setExtendedTagMode();
         } else {
-            this.setCrunchedTagMode(el);
+            this.setCrunchedTagMode();
         }
     },
+    setExtendedTagMode: function () {
+        this.body.addClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = true;
+        this.saveCustomization();
+    },
+    setCrunchedTagMode: function () {
+        this.body.removeClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = false;
+        this.saveCustomization();
+    },
+
+    /*
+        checkTagsInSegment: function (el) {
+            segment = el || UI.currentSegment;
+            hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+            if(hasTags) {
+                this.setExtendedTagMode(el);
+            } else {
+                this.setCrunchedTagMode(el);
+            }
+        },
+    */
     enableTagMode: function () {
         UI.render(
             {tagModesEnabled: true}
@@ -285,10 +331,253 @@ $.extend(UI, {
             {tagModesEnabled: false}
         )
     },
+    checkTagProximity: function (w, range) {return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+
+        //check if there is a tag ahed
+        if($(nextEl).hasClass('locked')) {
+            if(range.endOffset == range.endContainer.length - 1) {
+                console.log('1');
+                this.highlightCorrespondingTags(nextEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+            saveSelection();
+//            console.log('UI.editarea.html(): ', UI.editarea.html());
+/*
+            for(var key in range.startContainer) {
+                console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+            }
+            */
+            restoreSelection();
+            content = UI.editarea.html();
+            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content: ', content);
+            console.log('str: ', str);
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            console.log('range.startOffset: ', range.startOffset);
+            console.log('range.startContainer.length: ', range.startContainer.length);
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.endOffset == range.endContainer.length) {
+                    console.log('2');
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        } else {
+            UI.removeHighlightCorrespondingTags();
+        }
+/*
+        //check if there is a tag behind
+        if($(prevEl).hasClass('locked')) {
+            console.log("l'elemento precedente è un tag");
+//            console.log('range.startOffset: ', range.startOffset);
+//            console.log('range.startContainer.length: ', (range.startContainer.length));
+            if(range.startOffset == 1) {
+                this.highlightCorrespondingTags(prevEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+            console.log("l'elemento precedente è un cursor placeholder, e quello ancora precedente un tag");
+
+            content = UI.editarea.html();
+            console.log('content: ', content);
+            str = '&gt;</span><span class="undoCursorPlaceholder monad" contenteditable="false"></span>' + range.endContainer.wholeText;
+//            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.startOffset == 1) {
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        }
+*/
+
+            return false;
+
+        if(w == 'right') {
+            nextEl = $(range.endContainer.nextElementSibling);
+//            console.log('a: ', nextEl);
+//            console.log('b: ', nextEl.next());
+//            console.log('è quello dopo: ', (($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))));
+            if($(nextEl).hasClass('locked')) {
+                console.log('il prossimo è locked');
+//            if(($(nextEl).hasClass('locked'))||(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked')))) {
+//                console.log('entra');
+//                console.log('range.endOffset: ', range.endOffset);
+//                console.log('range.endContainer.length: ', range.endContainer.length);
+//                if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
+                if(range.endOffset == range.endContainer.length - 1) {
+                    this.highlightCorrespondingTags(nextEl);
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+                content = UI.editarea.html();
+                str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+                if(content.indexOf(str) > -1) { // escape false positives
+                    if(range.endOffset == range.endContainer.length) {
+                        this.highlightCorrespondingTags($(nextEl).next());
+                    } else {
+                        UI.removeHighlightCorrespondingTags();
+                    }
+                }
+
+//                console.log('il prossimo è placeholder e quello dopo è locked');
+//                console.log('content: ', content);
+//                console.log('str: ', str);
+//                console.log('str è contenuta nel content? ', content.indexOf(str));
+//                console.log('range: ', range);
+//                console.log('range.startOffset: ', range.startOffset);
+//                console.log('range.startContainer.data: ', range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked');
+//                console.log(UI.editarea.html());
+//                console.log(UI.editarea.html().indexOf(range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'));
+//                console.log('range.startContainer: ', range.startOffset);
+/*
+                for(var key in range.startContainer) {
+                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+                }
+*/
+//                console.log('range.commonAncestorContainer.innerHTML: ', range.commonAncestorContainer.innerHTML);
+
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+            /*
+                        console.log('range: ', range);
+                        if(range.endOffset == range.endContainer.length - 1) {
+            //            if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
+                            console.log('nextElementSibling: ', $(range.endContainer.nextElementSibling));
+                            if($(range.endContainer.nextElementSibling).hasClass('locked')) {
+                                this.highlightCorrespondingTags($(range.endContainer.nextElementSibling));
+                                console.log('tag nei pressi: ', $(range.endContainer.nextElementSibling));
+                            } else {
+                                UI.removeHighlightCorrespondingTags();
+                            }
+                        } else {
+                            UI.removeHighlightCorrespondingTags();
+                        }
+            */
+        } else {
+            prevEl = $(range.startContainer.previousElementSibling);
+            if($(prevEl).hasClass('locked')) {
+                if(range.startOffset == range.startContainer.length - 1) {
+                    this.highlightCorrespondingTags(prevEl);
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+//                content = UI.editarea.html();
+//                str = range.endContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+//                str = '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+
+
+
+            /*
+                        if(range.startOffset == 1) {
+            //            if((range.startOffset == 0)||(range.startOffset == 1)) {
+                            if($(range.startContainer.previousElementSibling).hasClass('locked')) {
+                                this.highlightCorrespondingTags($(range.startContainer.previousElementSibling));
+                                console.log('tag nei pressi: ', $(range.startContainer.previousElementSibling));
+                            } else {
+                                UI.removeHighlightCorrespondingTags();
+                            }
+                        } else {
+                            UI.removeHighlightCorrespondingTags();
+                        }
+            */
+        }
+    },
+    highlightCorrespondingTags: function (el) {
+        if(el.hasClass('startTag')) {
+//            console.log('has start tag');
+            if(el.next('.endTag').length) {
+                el.next('.endTag').addClass('highlight');
+            } else {
+//                console.log('il successivo non è un end tag');
+                num = 1;
+                ind = 0;
+                $(el).nextAll('.locked').each(function () {
+                    ind++;
+//                    console.log('ora stiamo valutando: ', $(this));
+                    if($(this).hasClass('startTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+//                    $(this).addClass('test-' + num);
+
+                })
+                $(pairEl).addClass('highlight');
+
+
+            }
+//            console.log('next endTag: ', el.next('.endTag'));
+        } else if(el.hasClass('endTag')) {
+            console.log('is an end tag');
+            if(el.prev('.startTag').length) {
+                console.log('and the previous element is a start tag');
+                el.prev('.startTag').first().addClass('highlight');
+            } else {
+                console.log('and the previous element is not a start tag');
+                num = 1;
+                ind = 0;
+                $(el).prevAll('.locked').each(function () {
+                    ind++;
+                    console.log('start tag: ', $(this));
+
+                    if($(this).hasClass('endTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+
+                });
+                $(pairEl).addClass('highlight');
+            }
+        }
+//        console.log('$(el): ', $(el));
+        $(el).addClass('highlight');
+
+
+//        console.log('$(pairEl).length: ', $(pairEl).length);
+
+//        UI.editarea.find('.locked')
+
+    },
+    removeHighlightCorrespondingTags: function () {
+        $(UI.editarea).find('.locked.highlight').removeClass('highlight');
+    },
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        if(($.parseJSON(d.warnings).length)&&(!$('#segment-' + d.id_segment + ' .text .showExtendedTags').length)) {
+            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+//            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        }
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
@@ -401,7 +690,12 @@ $.extend(UI, {
 		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range) {
-		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+//        console.log('RANGE IN JUMPTAG: ', range);
+//        for(var key in range.endContainer) {
+//            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+//        }
+//        console.log('data: ', range.endContainer);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
 //			console.log('da saltare');
 			setCursorAfterNode(range, range.endContainer.nextElementSibling);
 		}

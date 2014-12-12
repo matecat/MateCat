@@ -833,9 +833,11 @@ UI = {
 		}
 	},
 	
-	gotoOpenSegment: function() {
-		if ($('#segment-' + this.currentSegmentId).length) {
-			this.scrollSegment(this.currentSegment);
+	gotoOpenSegment: function(quick) {
+        quick = quick || false;
+
+        if ($('#segment-' + this.currentSegmentId).length) {
+			this.scrollSegment(this.currentSegment, false, quick);
 		} else {
 			$('#outer').empty();
 			this.render({
@@ -845,7 +847,7 @@ UI = {
 		}
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {
@@ -1099,7 +1101,7 @@ UI = {
 		}
 	},
 	pointToOpenSegment: function() {
-		this.gotoOpenSegment();
+        this.gotoOpenSegment(true);
 	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -1169,10 +1171,14 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
+/*
                 tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-                    '						   <li class="crunched">&lt;&gt;</li>' +
-                    '						   <li class="extended">&lt;...&gt;</li>' +
+                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
+                    '</li>' +
+//                    '						   <li class="crunched">&lt;&gt;</li>' +
+//                    '						   <li class="extended">&lt;...&gt;</li>' +
                     '						</ul>' : '';
+*/
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
@@ -1198,13 +1204,16 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-                        tagModes +
+//                        tagModes +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-						'						<ul class="editToolbar">' +
-						'							<li class="uppercase" title="Uppercase"></li>' +
-						'							<li class="lowercase" title="Lowercase"></li>' +
-						'							<li class="capitalize" title="Capitalized"></li>' +
-						'						</ul>' +
+                        '                       <div class="toolbar">' +
+((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
+						'                           <ul class="editToolbar">' +
+						'                               <li class="uppercase" title="Uppercase"></li>' +
+						'                               <li class="lowercase" title="Lowercase"></li>' +
+						'                               <li class="capitalize" title="Capitalized"></li>' +
+						'                           </ul>' +
+                        '                       </div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1271,7 +1280,8 @@ UI = {
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-	scrollSegment: function(segment, highlight) {
+	scrollSegment: function(segment, highlight, quick) {
+        quick = quick || false;
 		highlight = highlight || false;
 //		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
@@ -1316,12 +1326,13 @@ UI = {
 		}
 
 		$("html,body").stop();
+        pointSpeed = (quick)? 0 : 500;
 		$("html,body").animate({
 			scrollTop: destinationTop - 20
-		}, 500);
+		}, pointSpeed);
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, 500);
+		}, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
 		if ($('#segment-' + segmentId).length) {
@@ -1714,7 +1725,8 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
@@ -1732,7 +1744,7 @@ UI = {
             $("body").append( iFrameDownload );
 
             //generate a token download
-            var downloadToken = new Date().getTime();
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
             //set event listner, on ready, attach an interval that check for finished download
             iFrameDownload.ready(function () {
@@ -1741,14 +1753,14 @@ UI = {
                 downloadTimer = window.setInterval(function () {
 
                     //check for cookie
-                    var token = $.cookie('downloadToken');
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
                     }
 
@@ -1758,11 +1770,11 @@ UI = {
 
             //clone the html form and append a token for download
             var iFrameForm = $("#fileDownload").clone().append(
-                $( document.createElement( 'input' ) ).prop({
-                    type:'hidden',
-                    name:'downloadToken',
-                    value: downloadToken
-                })
+                    $( document.createElement( 'input' ) ).prop({
+                        type:'hidden',
+                        name:'downloadToken',
+                        value: downloadToken
+                    })
             );
 
             //append from to newly created iFrame and submit form post
@@ -1773,7 +1785,7 @@ UI = {
             //we are in download status
         }
 
-	},
+    },
 	/**
 	 * fill segments with relative errors from polling
 	 * 
@@ -3054,6 +3066,7 @@ UI = {
             }
         }
 
+        //when the job has one segment only
         if( typeof n === 'undefined' ) {
             n = a.length -1;
         }
@@ -3066,7 +3079,16 @@ UI = {
     },
     shortenId: function(id) {
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    },
+    isCJK: function () {
+        var l = config.target_rfc;
+        if( (l=='zh-CN') || (l=='zh-TW') || (l=='ja-JP') || (l=='ko-KR') ) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
 };
 
@@ -3097,7 +3119,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.2";
+		this.version = "0.4.2.1";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3120,6 +3142,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -3328,7 +3351,7 @@ $.extend(UI, {
 //        console.log('options: ', options);
 //        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
 //        console.log('1: ', this.tagModesEnabled);
-        this.tagModesEnabled = false; //(typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 //        console.log('2: ', this.tagModesEnabled);
 
         if(this.tagModesEnabled) {
@@ -3525,6 +3548,14 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+shift+s', function(e) {
 //            e.preventDefault();
             UI.body.toggleClass('tagmode-default-extended');
+        }).on('click', '.tagModeToggle', function(e) {
+            e.preventDefault();
+            console.log('click su tagMode toggle');
+            $(this).toggleClass('active');
+            UI.body.toggleClass('tagmode-default-extended');
+            console.log(typeof UI.currentSegment);
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {
@@ -3871,12 +3902,11 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-//			console.log('a: ', UI.editarea.html());
+
+            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
 //            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//            console.log('a1: ', UI.editarea.html());
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4201,11 +4231,12 @@ $.extend(UI, {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
-
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
-			if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+            UI.removeHighlightCorrespondingTags();
+
+            if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
 				if (operation == 'moving') {
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
 						UI.segmentToOpen = segment;
@@ -4234,7 +4265,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
-			if (UI.debug)
+            UI.lockTags(UI.editarea);
+
+            if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
@@ -4321,6 +4354,15 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
+            if (!UI.body.hasClass('searchActive')) {
+//                console.log('vediamo: ', e.which);
+                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                } else {
+                    setTimeout(function() {
+                        UI.lockTags(UI.editarea);
+                    }, 10);
+                }
+            }
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -4443,6 +4485,8 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+                UI.checkTagProximity('left', range);
+
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
 					r = range.startContainer.innerText;
@@ -4526,6 +4570,9 @@ $.extend(UI, {
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range when pressing right arrow key: ', range);
+                UI.checkTagProximity('right', range);
+
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
@@ -4580,7 +4627,7 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-                    console.log('QQQQQQ: ', UI.editarea.html());
+//                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
@@ -4615,10 +4662,15 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+            if(!UI.editarea.find('.locked').length) {
+                UI.currentSegment.removeClass('hasTags');
+            }
+/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);
 				}, 10);
+*/
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
@@ -5043,6 +5095,10 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
+        }).on('click', '.showExtendedTags', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+            $(this).remove();
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -5060,10 +5116,12 @@ $.extend(UI, {
 			}
 		}).on('click', '.tagMode .crunched', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'crunched');
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
         }).on('click', '.tagMode .extended', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'extended');
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
@@ -5198,15 +5256,18 @@ $.extend(UI, {
 			});
 		});
 		$("#exec-replace").click(function(e) {
+            console.log('ddd');
 			e.preventDefault();
+            console.log('a');
 			if ($('#search-target').val() == $('#replace-target').val()) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
+            console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
 				
-			} else if (UI.searchMode == 'source&target') {
+//			} else if (UI.searchMode == 'source&target') {
 
 			} else {
 				txt = $('#replace-target').val();
@@ -5214,13 +5275,21 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
-				UI.updateSearchDisplayCount(segment);
+                segment_id = $(segment).attr('id').split('-')[1];
+                status = UI.getStatus(segment);
+                byStatus = 0;
+
+                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setContribution(segment_id, status, byStatus);
+
+                UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);
 			}
-		});
+            console.log('c');
+
+        });
 		$("#enable-replace").on('change', function() {
 			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
@@ -5272,7 +5341,7 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-console.log('translation 1: ', translation);
+// console.log('translation 1: ', translation);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -5282,7 +5351,7 @@ console.log('translation 1: ', translation);
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-				console.log('translation 2: ', translation);
+//				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
@@ -5291,10 +5360,10 @@ console.log('translation 1: ', translation);
 			this.saveInUndoStack('copysuggestion');
 //			translation = UI.decodePlaceholdersToText(translation, true);
 //			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-console.log('translation 3: ', translation);
+// console.log('translation 3: ', translation);
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 //			translation = UI.encodeSpacesAsPlaceholders(translation);
-console.log('translation 4: ', translation);
+// console.log('translation 4: ', translation);
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
@@ -5503,11 +5572,11 @@ console.log('translation 4: ', translation);
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
 			if (editareaLength === 0) {
-				console.log('translation AA: ', translation);
+//				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-				console.log($('#' + segment_id + ' .matches .graysmall'));
-				console.log('translation BB: ', translation);
+//				console.log($('#' + segment_id + ' .matches .graysmall'));
+//				console.log('translation BB: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -5787,6 +5856,7 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
+            UI.detectTagType(this);
         });
 		$('.footer .translation').each(function() {
             $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -5796,8 +5866,10 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
-	},
+            UI.detectTagType(this);
+        });
+
+    },
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
 //		UI.checkHeaviness(); 
@@ -5825,7 +5897,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags: ', el);
+//		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -5846,7 +5918,7 @@ $.extend(UI, {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
             tx = tx.replace(/<span/gi, "<pl")
@@ -5892,12 +5964,29 @@ $.extend(UI, {
             } else {
                 segment.removeClass('hasTags');
             }
+            UI.detectTagType(this);
 
 //            UI.checkTagsInSegment();
 		});
 
 	},
-	unlockTags: function() {
+    detectTagType: function (area) {
+        $('span.locked', area).each(function () {
+//                console.log(segment.attr('id') + ' - ' + $(this).text());
+//                console.log($(this).text().startsWith('</'));
+            if($(this).text().startsWith('</')) {
+                $(this).addClass('endTag')
+            } else {
+                if($(this).text().endsWith('/>')) {
+                    $(this).addClass('selfClosingTag')
+                } else {
+                    $(this).addClass('startTag')
+                }
+            }
+        })
+    },
+
+    unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
 		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
@@ -5981,6 +6070,7 @@ $.extend(UI, {
 		}
 */
 	},
+/*
     setExtendedTagMode: function (el) {
         console.log('setExtendedTagMode');
         segment = el || UI.currentSegment;
@@ -5990,15 +6080,40 @@ $.extend(UI, {
         segment = el || UI.currentSegment;
         $(segment).attr('data-tagMode', 'crunched');
     },
-    checkTagsInSegment: function (el) {
-        segment = el || UI.currentSegment;
-        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
-        if(hasTags) {
-            this.setExtendedTagMode(el);
+*/
+    setTagMode: function () {
+        if(this.custom.extended_tagmode) {
+            this.setExtendedTagMode();
         } else {
-            this.setCrunchedTagMode(el);
+            this.setCrunchedTagMode();
         }
     },
+    setExtendedTagMode: function () {
+        this.body.addClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = true;
+        this.saveCustomization();
+    },
+    setCrunchedTagMode: function () {
+        this.body.removeClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = false;
+        this.saveCustomization();
+    },
+
+    /*
+        checkTagsInSegment: function (el) {
+            segment = el || UI.currentSegment;
+            hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+            if(hasTags) {
+                this.setExtendedTagMode(el);
+            } else {
+                this.setCrunchedTagMode(el);
+            }
+        },
+    */
     enableTagMode: function () {
         UI.render(
             {tagModesEnabled: true}
@@ -6009,10 +6124,253 @@ $.extend(UI, {
             {tagModesEnabled: false}
         )
     },
+    checkTagProximity: function (w, range) {return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+
+        //check if there is a tag ahed
+        if($(nextEl).hasClass('locked')) {
+            if(range.endOffset == range.endContainer.length - 1) {
+                console.log('1');
+                this.highlightCorrespondingTags(nextEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+            saveSelection();
+//            console.log('UI.editarea.html(): ', UI.editarea.html());
+/*
+            for(var key in range.startContainer) {
+                console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+            }
+            */
+            restoreSelection();
+            content = UI.editarea.html();
+            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content: ', content);
+            console.log('str: ', str);
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            console.log('range.startOffset: ', range.startOffset);
+            console.log('range.startContainer.length: ', range.startContainer.length);
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.endOffset == range.endContainer.length) {
+                    console.log('2');
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        } else {
+            UI.removeHighlightCorrespondingTags();
+        }
+/*
+        //check if there is a tag behind
+        if($(prevEl).hasClass('locked')) {
+            console.log("l'elemento precedente è un tag");
+//            console.log('range.startOffset: ', range.startOffset);
+//            console.log('range.startContainer.length: ', (range.startContainer.length));
+            if(range.startOffset == 1) {
+                this.highlightCorrespondingTags(prevEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+            console.log("l'elemento precedente è un cursor placeholder, e quello ancora precedente un tag");
+
+            content = UI.editarea.html();
+            console.log('content: ', content);
+            str = '&gt;</span><span class="undoCursorPlaceholder monad" contenteditable="false"></span>' + range.endContainer.wholeText;
+//            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.startOffset == 1) {
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        }
+*/
+
+            return false;
+
+        if(w == 'right') {
+            nextEl = $(range.endContainer.nextElementSibling);
+//            console.log('a: ', nextEl);
+//            console.log('b: ', nextEl.next());
+//            console.log('è quello dopo: ', (($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))));
+            if($(nextEl).hasClass('locked')) {
+                console.log('il prossimo è locked');
+//            if(($(nextEl).hasClass('locked'))||(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked')))) {
+//                console.log('entra');
+//                console.log('range.endOffset: ', range.endOffset);
+//                console.log('range.endContainer.length: ', range.endContainer.length);
+//                if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
+                if(range.endOffset == range.endContainer.length - 1) {
+                    this.highlightCorrespondingTags(nextEl);
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+                content = UI.editarea.html();
+                str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+                if(content.indexOf(str) > -1) { // escape false positives
+                    if(range.endOffset == range.endContainer.length) {
+                        this.highlightCorrespondingTags($(nextEl).next());
+                    } else {
+                        UI.removeHighlightCorrespondingTags();
+                    }
+                }
+
+//                console.log('il prossimo è placeholder e quello dopo è locked');
+//                console.log('content: ', content);
+//                console.log('str: ', str);
+//                console.log('str è contenuta nel content? ', content.indexOf(str));
+//                console.log('range: ', range);
+//                console.log('range.startOffset: ', range.startOffset);
+//                console.log('range.startContainer.data: ', range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked');
+//                console.log(UI.editarea.html());
+//                console.log(UI.editarea.html().indexOf(range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'));
+//                console.log('range.startContainer: ', range.startOffset);
+/*
+                for(var key in range.startContainer) {
+                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+                }
+*/
+//                console.log('range.commonAncestorContainer.innerHTML: ', range.commonAncestorContainer.innerHTML);
+
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+            /*
+                        console.log('range: ', range);
+                        if(range.endOffset == range.endContainer.length - 1) {
+            //            if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
+                            console.log('nextElementSibling: ', $(range.endContainer.nextElementSibling));
+                            if($(range.endContainer.nextElementSibling).hasClass('locked')) {
+                                this.highlightCorrespondingTags($(range.endContainer.nextElementSibling));
+                                console.log('tag nei pressi: ', $(range.endContainer.nextElementSibling));
+                            } else {
+                                UI.removeHighlightCorrespondingTags();
+                            }
+                        } else {
+                            UI.removeHighlightCorrespondingTags();
+                        }
+            */
+        } else {
+            prevEl = $(range.startContainer.previousElementSibling);
+            if($(prevEl).hasClass('locked')) {
+                if(range.startOffset == range.startContainer.length - 1) {
+                    this.highlightCorrespondingTags(prevEl);
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+//                content = UI.editarea.html();
+//                str = range.endContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+//                str = '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+
+
+
+            /*
+                        if(range.startOffset == 1) {
+            //            if((range.startOffset == 0)||(range.startOffset == 1)) {
+                            if($(range.startContainer.previousElementSibling).hasClass('locked')) {
+                                this.highlightCorrespondingTags($(range.startContainer.previousElementSibling));
+                                console.log('tag nei pressi: ', $(range.startContainer.previousElementSibling));
+                            } else {
+                                UI.removeHighlightCorrespondingTags();
+                            }
+                        } else {
+                            UI.removeHighlightCorrespondingTags();
+                        }
+            */
+        }
+    },
+    highlightCorrespondingTags: function (el) {
+        if(el.hasClass('startTag')) {
+//            console.log('has start tag');
+            if(el.next('.endTag').length) {
+                el.next('.endTag').addClass('highlight');
+            } else {
+//                console.log('il successivo non è un end tag');
+                num = 1;
+                ind = 0;
+                $(el).nextAll('.locked').each(function () {
+                    ind++;
+//                    console.log('ora stiamo valutando: ', $(this));
+                    if($(this).hasClass('startTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+//                    $(this).addClass('test-' + num);
+
+                })
+                $(pairEl).addClass('highlight');
+
+
+            }
+//            console.log('next endTag: ', el.next('.endTag'));
+        } else if(el.hasClass('endTag')) {
+            console.log('is an end tag');
+            if(el.prev('.startTag').length) {
+                console.log('and the previous element is a start tag');
+                el.prev('.startTag').first().addClass('highlight');
+            } else {
+                console.log('and the previous element is not a start tag');
+                num = 1;
+                ind = 0;
+                $(el).prevAll('.locked').each(function () {
+                    ind++;
+                    console.log('start tag: ', $(this));
+
+                    if($(this).hasClass('endTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+
+                });
+                $(pairEl).addClass('highlight');
+            }
+        }
+//        console.log('$(el): ', $(el));
+        $(el).addClass('highlight');
+
+
+//        console.log('$(pairEl).length: ', $(pairEl).length);
+
+//        UI.editarea.find('.locked')
+
+    },
+    removeHighlightCorrespondingTags: function () {
+        $(UI.editarea).find('.locked.highlight').removeClass('highlight');
+    },
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        if(($.parseJSON(d.warnings).length)&&(!$('#segment-' + d.id_segment + ' .text .showExtendedTags').length)) {
+            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+//            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        }
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
@@ -6125,7 +6483,12 @@ $.extend(UI, {
 		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range) {
-		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+//        console.log('RANGE IN JUMPTAG: ', range);
+//        for(var key in range.endContainer) {
+//            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+//        }
+//        console.log('data: ', range.endContainer);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
 //			console.log('da saltare');
 			setCursorAfterNode(range, range.endContainer.nextElementSibling);
 		}
@@ -6837,8 +7200,11 @@ $.extend(UI, {
 			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p.source).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p.target).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            psource = p.source.replace(/(\W)/gi, "\\$1");
+            ptarget = p.target.replace(/(\W)/gi, "\\$1");
+
+			var regSource = new RegExp('(' + htmlEncode(psource).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(ptarget).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			txtSrc = p.source;
 			txtTrg = p.target;
 			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
@@ -6888,7 +7254,10 @@ $.extend(UI, {
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
-			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            regTxt = regTxt.replace(/(\W)/gi, "\\$1");
+//            console.log('regTxt: ', regTxt);
+//			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder).replace(/\W/gi, "$1" );
 			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 //			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
@@ -7742,7 +8111,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
+    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
@@ -7927,6 +8296,18 @@ function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
+
+if (typeof String.prototype.startsWith != 'function') {
+    String.prototype.startsWith = function (str){
+        return this.indexOf(str) == 0;
+    };
+}
+
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
 /*
 	Component: ui.customization
  */
@@ -7936,7 +8317,8 @@ $.extend(UI, {
 			this.custom = $.parseJSON($.cookie('user_customization'));
 		} else {
 			this.custom = {
-				"extended_concordance": false
+				"extended_concordance": false,
+                "extended_tagmode": false
 			};
 			this.saveCustomization();
 		}
@@ -7989,7 +8371,7 @@ $.extend(UI, {
         });
 
         $(".outer-tm").click(function() {
-            UI.saveTMdata();
+            UI.saveTMdata(true);
         });
 
         $(".mgmt-tm").click(function() {
@@ -8144,11 +8526,14 @@ $.extend(UI, {
         }).on('blur', '#activetm td.description .edit-desc', function() {
             console.log('blur');
             $(this).removeAttr('contenteditable');
+            if(APP.isCattool) UI.saveTMdata(false);
+
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
         }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
                 $(this).removeAttr('contenteditable');
+                if(APP.isCattool) UI.saveTMdata(false);
             }
          }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
@@ -8157,7 +8542,7 @@ $.extend(UI, {
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
             e.preventDefault();
-            UI.saveTMdata();
+            UI.saveTMdata(true);
         }).on('click', '#activetm tr.new a.addtmxfile:not(.disabled)', function() {
             console.log('upload file');
             UI.checkTMKey('tm');
@@ -8167,12 +8552,18 @@ $.extend(UI, {
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
         }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+            if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            if(this.files[0].size > config.maxFileSize) {
+                numMb = config.maxFileSize/(1024*1024);
+                APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
+                return false;
+            };
             if($(this).val() == '') {
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
@@ -8192,6 +8583,10 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
+        } ).on('click', '.mgmt-tm .downloadtmx', function(){
+            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' ).addClass('downloading');
+            $(this).prepend('<span class="uploadloader"></span>');
         });
 
 
@@ -8439,10 +8834,29 @@ $.extend(UI, {
         }
     },
     checkTMGrantsModifications: function (el) {
+        console.log('el: ', el);
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
+                if(APP.isAnonymousUser()) {
+                    var data = {
+                        grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
+                        key: $(tr).find('.privatekey').text()
+                    }
+//                    $('.popup-tm .tm-warning-message').html('If you confirm this action, your Private TM key will be lost. If you want to avoid this, please, log in with your account now. <a href="#" class="continue-disable-tm">Continue</a> or <a href="#" class="cancel-disable-tm">Cancel</a>').show();
+                    APP.confirm({
+                        name: 'confirmTMDisable',
+                        cancelTxt: 'Cancel',
+                        onCancel: 'cancelTMDisable',
+                        callback: 'continueTMDisable',
+                        okTxt: 'Continue',
+//                        context: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
+                        context: JSON.stringify(data),
+                        msg: "If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now."
+                    });
+                    return false;
+                }
                 UI.disableTM(el);
                 $("#inactivetm").trigger("update");
             }
@@ -8454,6 +8868,16 @@ $.extend(UI, {
         }
 //        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
 //        console.log('update: ', tr.find('.update input').is(':checked'));
+    },
+    cancelTMDisable: function (context) {
+        options = $.parseJSON(context);
+        $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input').click();
+    },
+    continueTMDisable: function (context) {
+        options = $.parseJSON(context);
+        el = $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input');
+        UI.disableTM(el);
+        $("#inactivetm").trigger("update");
     },
 
     disableTM: function (el) {
@@ -8528,7 +8952,7 @@ $.extend(UI, {
         var desc = $('#new-tm-description').val();
         var TMKey = $('#new-tm-key').val();
 
-        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
+        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + TMKey + '" data-owner="' + config.ownerIsMe + '">' +
                 '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
@@ -8536,9 +8960,9 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '        <a class="btn-grey pull-left disabletm">' +
-                '            <span class="text stopuse">Stop Use</span>' +
-                '        </a>' +
+//                '        <a class="btn-grey pull-left disabletm">' +
+//                '            <span class="text stopuse">Stop Use</span>' +
+//                '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
                 '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
@@ -8553,6 +8977,7 @@ $.extend(UI, {
         }
         UI.pulseTMadded($('#activetm tr.mine').last());
         UI.setTMsortable();
+        if(APP.isCattool) UI.saveTMdata(false);
     },
 
     pulseTMadded: function (row) {
@@ -8568,10 +8993,15 @@ $.extend(UI, {
     },
     clearTMUploadPanel: function () {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
+
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
         $('.mgmt-tm tr.new').removeClass('badkey badgrants');
         $('.mgmt-tm tr.new .message').text('');
@@ -8579,8 +9009,8 @@ $.extend(UI, {
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
     clearTMPanel: function () {
-        $('.mgmt-container .error-message').hide();
-        $('.mgmt-container .warning-message').hide();
+        $('.mgmt-container .tm-error-message').hide();
+        $('.mgmt-container .tm-warning-message').hide();
         $('#activetm .edit-desc').removeAttr('contenteditable');
         $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
@@ -8751,6 +9181,11 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
+                                if(APP.isAnonymousUser()) {
+                                    console.log('anonimo');
+                                } else {
+                                    console.log('loggato');
+                                }
                                 var tr = $(TRcaller).parents('tr.mine');
                                 $(tr).find('.addtmx').removeClass('disabled');
                                 UI.pulseTMadded(tr);
@@ -8761,7 +9196,10 @@ $.extend(UI, {
                             $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
 //                            $(TRcaller).find('.standard').show();
                             if(existing) {
-                                $(TRcaller).remove();
+                                $(TRcaller).addClass('tempTRcaller').append('<span class="msg">Import Complete</span>');
+                                setTimeout(function() {
+                                    $('.tempTRcaller').remove();
+                                }, 3000);
                             } else {
                                 $('.mgmt-tm tr.new .canceladdtmx').click();
                                 $('.mgmt-tm tr.new').removeClass('hide');
@@ -8789,6 +9227,9 @@ $.extend(UI, {
     allTMUploadsCompleted: function () {
         if($('#activetm .uploadfile.uploading').length) {
             APP.alert({msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!'});
+            return false;
+        } else if( $( 'tr td a.downloading' ).length ){
+            APP.alert({msg: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.'});
             return false;
         } else {
             return true;
@@ -8834,16 +9275,18 @@ $.extend(UI, {
         return data;
     },
 
-    saveTMdata: function() {
-        UI.closeTMPanel();
-        UI.clearTMPanel();
+    saveTMdata: function(closeAfter) {
+        $('.popup-tm').addClass('saving');
+        if(closeAfter) {
+            UI.closeTMPanel();
+            UI.clearTMPanel();
+        }
         if(!APP.isCattool) {
             UI.updateTMAddedMsg();
             return false;
         }
 
-
-            data = this.extractTMdataFromTable();
+        data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
                 action: 'updateJobKeys',
@@ -8854,10 +9297,14 @@ $.extend(UI, {
             error: function() {
                 console.log('Error saving TM data!!');
                 APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+
 //                $('.mgmt-panel-tm .warning-message').text('').hide();
 //                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
             },
             success: function(d) {
+                $('.popup-tm').removeClass('saving');
+
 //                d.errors = [];
                 if(d.errors.length) {
                     APP.showMessage({msg: d.errors[0].message});
@@ -8918,7 +9365,88 @@ $.extend(UI, {
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
         $('#inactivetm tbody td.privatekey:containsNC("' + txt + '"), #inactivetm tbody td.description:containsNC("' + txt + '")').parents('tr').addClass('found');
-    }
+    },
+    downloadTM: function( tm, button_class ) {
 
+        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
+                src: ''
+            } );
+
+            $( "body" ).append( iFrameDownload );
+
+            iFrameDownload.ready( function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                var downloadTimer = window.setInterval( function () {
+
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        window.clearInterval( downloadTimer );
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        errorMsg = $('#' + iFrameID).contents().find('body').text();
+                        errorKey = $(tm).attr('data-key');
+                        if(errorMsg != '') {
+                            APP.alert('Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg);
+                        }
+
+                        $( '#' + iFrameID ).remove();
+                    }
+
+                }, 2000 );
+            } );
+
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/',
+                'method': 'POST'
+            } ).append(
+                    //action to call
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'action',
+                        value: 'downloadTMX'
+                    } ),
+                    //we tell to the controller to check a field in the post named downloadToken
+                    // and to set a cookie named as it's value with it's value ( equals )
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'downloadToken',
+                        value: downloadToken
+                    } ),
+                    //set other values
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'tm_key',
+                        value: $( '.privatekey', tm ).text()
+                    } )
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
+
+        }
+
+    }
 
 });

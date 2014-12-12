@@ -114,6 +114,11 @@ class changeJobsStatusController extends ajaxController {
 
     public function doAction() {
 
+        if( empty( $_SESSION['cid'] ) ){
+            //user not logged
+            throw new Exception( "User Not Logged." );
+        }
+
         if ( $this->res_type == "prj" ) {
             $old_status = getProjectJobData( $this->res_id );
             $strOld     = '';
@@ -124,7 +129,7 @@ class changeJobsStatusController extends ajaxController {
 
             $this->result[ 'old_status' ] = $strOld;
 
-            $st = updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo );
 
             $start = ( ( $this->page - 1 ) * $this->step ) + $this->step - 1;
 
@@ -138,9 +143,10 @@ class changeJobsStatusController extends ajaxController {
             $this->result[ 'newItem' ] = $projects;
             $this->result[ 'page' ]    = $this->page;
             $this->result[ 'pnumber' ] = $projnum[ 0 ][ 'c' ];
+
         } else {
 
-            $st = updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
 
             $this->result[ 'code' ]   = 1;
             $this->result[ 'data' ]   = "OK";

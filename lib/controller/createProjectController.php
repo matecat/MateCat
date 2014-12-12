@@ -14,6 +14,7 @@ class createProjectController extends ajaxController {
     private $project_name;
     private $source_language;
     private $target_language;
+    private $job_subject;
     private $mt_engine;
     private $tms_engine = 1;  //1 default MyMemory
     private $private_tm_key;
@@ -34,6 +35,7 @@ class createProjectController extends ajaxController {
                 'project_name'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'source_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'target_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'job_subject'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT ),
                 'disable_tms_engine' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
 
@@ -54,13 +56,13 @@ class createProjectController extends ajaxController {
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //if a string is sent by the client, transform it into a valid array
-        if( !empty($__postInput['private_tm_key'])) {
+        if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
             $__postInput[ 'private_tm_key' ] = array(
                     array(
-                        'key'  => $__postInput[ 'private_tm_key' ],
-                        'name' => null,
-                        'r'    => true,
-                        'w'    => true
+                            'key'  => $__postInput[ 'private_tm_key' ],
+                            'name' => null,
+                            'r'    => true,
+                            'w'    => true
                     )
             );
         } else {
@@ -76,7 +78,7 @@ class createProjectController extends ajaxController {
             $private_keyList = $__postInput[ 'private_tm_key' ];
         }
 
-        $__postPrivateTmKey = array_filter($private_keyList, array( "self", "sanitizeTmKeyArr" ));
+        $__postPrivateTmKey = array_filter( $private_keyList, array( "self", "sanitizeTmKeyArr" ) );
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
@@ -86,6 +88,7 @@ class createProjectController extends ajaxController {
         $this->project_name            = $__postInput[ 'project_name' ];
         $this->source_language         = $__postInput[ 'source_language' ];
         $this->target_language         = $__postInput[ 'target_language' ];
+        $this->job_subject             = $__postInput[ 'job_subject' ];
         $this->mt_engine               = $__postInput[ 'mt_engine' ];       // null è ammesso
         $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
@@ -108,11 +111,17 @@ class createProjectController extends ajaxController {
         if ( empty( $this->target_language ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "Missing target language." );
         }
+
+        if ( empty( $this->job_subject ) ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Missing job subject." );
+        }
     }
 
     public function doAction() {
         //check for errors. If there are, stop execution and return errors.
-        if( count( @$this->result[ 'errors' ] ) ) return false;
+        if ( count( @$this->result[ 'errors' ] ) ) {
+            return false;
+        }
 
         $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
         $default_project_name = $arFiles[ 0 ];
@@ -191,7 +200,7 @@ class createProjectController extends ajaxController {
 
         setcookie( "targetLang", $newCookieVal, time() + ( 86400 * 365 ) );
 
-        $projectManager = new ProjectManager( );
+        $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();
 
@@ -204,6 +213,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'array_files' ]       = $arFiles; //list of file name
         $projectStructure[ 'source_language' ]   = $this->source_language;
         $projectStructure[ 'target_language' ]   = explode( ',', $this->target_language );
+        $projectStructure[ 'job_subject' ]       = $this->job_subject;
         $projectStructure[ 'mt_engine' ]         = $this->mt_engine;
         $projectStructure[ 'tms_engine' ]        = $this->tms_engine;
         $projectStructure[ 'status' ]            = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
@@ -213,7 +223,7 @@ class createProjectController extends ajaxController {
         //if user is logged in, set the uid and the userIsLogged flag
         $this->checkLogin( false );
 
-        if($this->userIsLogged) {
+        if ( $this->userIsLogged ) {
             $projectStructure[ 'userIsLogged' ] = true;
             $projectStructure[ 'uid' ]          = $this->uid;
         }

@@ -158,6 +158,11 @@ UI = {
         var numTM = $('#activetm tr.mine').length;
         if(numTM) {
             $('.tm-added .num').text(numTM);
+            if(numTM > 1) {
+                $('.tm-added .msg').text(' TMs added');
+            } else {
+                $('.tm-added .msg').text(' TM added');
+            }
             $('.tm-added').show();
         } else {
             $('.tm-added').hide();
@@ -679,7 +684,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
             action: 'convertFile',
             file_name: fname,
             source_lang: $('#source-lang').val(),
-            target_lang: $('#target-lang').val()
+            target_lang: $('#target-lang').val(),
+            segmentation_rule: $('#segm_rule' ).val()
         },
         type: 'POST',
         dataType: 'json',
@@ -705,7 +711,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         success: function(d){
 
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
-			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
+			falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
             filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if( d.code == 1 ) {

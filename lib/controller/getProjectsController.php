@@ -100,6 +100,7 @@ class getProjectsController extends ajaxController {
         if ( is_null( $postInput[ 'step' ] ) || empty( $postInput[ 'step' ] ) ) {
             $postInput[ 'step' ] = 25;
         }
+
         if ( is_null( $postInput[ 'status' ] ) || empty( $postInput[ 'status' ] ) ) {
             $postInput[ 'status' ] = Constants_JobStatus::STATUS_ACTIVE;
         }

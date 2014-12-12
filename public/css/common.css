@@ -861,8 +861,21 @@ width: 804px;
 #activetm td.action .addtmx {
     display: block;
 }
+
+.downloading .uploadloader {
+	display: block;
+}
+
+.downloading .uploadloader {
+	right: 170px;
+	margin-top:0;
+}
+
+td.action {
+padding: 10px 5px!important;
+}
 #inactivetm td.action .addtmx {
-    display: none;
+    visibility: hidden;
 }
 #activetm tr:hover td {
 background: #f1f8fc;
@@ -893,6 +906,9 @@ form.add-TM-Form {
     float: left;
     margin-bottom: 6px;
 }
+
+
+
 .popup p
 {
 	font-size: 18px;
@@ -1006,7 +1022,8 @@ margin-left: 10px;
     .popup .btn-cancel,
     .popup-tm .btn-ok,
     .popup-tm .btn-cancel,
-    .uploadtm.disabled 
+    .uploadtm.disabled,
+    .download-manage.btn-ok 
     {
 	    color: #fff;
 	    background: #09beec;
@@ -1021,6 +1038,19 @@ margin-left: 10px;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.download-manage {
+/*margin-top: 10px;*/
+width: auto!important;
+/*padding: 8px 4px;*/
+font-size: 14px;
+    height: auto!important;
+text-indent: 0!important;
+}
+
+
+
+
 .hide {
     display: none;
 }
@@ -1456,6 +1486,11 @@ margin-top: 10px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
 }
+#activetm td.uploadfile .msg{
+    float: right;
+    margin-right: 100px;
+    color: green;
+}
 #activetm td.dragrow{
    position: relative;
 	padding: 5px 5px 5px 5px!important;
@@ -1505,7 +1540,7 @@ top: 17%;
 
 
 .mgmt-tm .downloadtmx {
-    display: none !important; /* temp */
+    /*display: none !important; */
 }
 
 tr.mine.ui-sortable-helper {
@@ -1923,12 +1958,14 @@ section .graysmall mark
 }
 section mark.searchMarker
 {
-	background: #9ef5f5;
+    background: yellow;
+/*	background: #9ef5f5; */
 }
 section mark.searchMarker.currSearchItem,
 section.currSearchSegment mark.searchMarker
 {
-	background: #00c1e6;
+    background: #F7D315;
+/*	background: #00c1e6; */
 }
 
 .offline {padding:0;}
@@ -2101,11 +2138,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-s96yw7');
-	src:url('fonts/icomoon.eot?#iefix-s96yw7') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-s96yw7') format('woff'),
-		url('fonts/icomoon.ttf?-s96yw7') format('truetype'),
-		url('fonts/icomoon.svg?-s96yw7#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-uz2gvx');
+	src:url('fonts/icomoon.eot?#iefix-uz2gvx') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-uz2gvx') format('woff'),
+		url('fonts/icomoon.ttf?-uz2gvx') format('truetype'),
+		url('fonts/icomoon.svg?-uz2gvx#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2128,7 +2165,15 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
-.sorting:after {
+.sorting:after,
+.sdlxliff:after,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before
+ {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -2141,12 +2186,53 @@ color: #000;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
+.sdlxliff:after {
+	content: "\e602";
+}
 
 .usetm .text:before {
 	content: "\f144";
 		padding: 0 10px 0 0;
 	vertical-align: text-top;
 
+}
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before
+{
+content: "\f04b";
+visibility: visible;
+position: absolute;
+font-size: 7px;
+transform: scaleY(1.4);
+ -webkit-transform: scaleY(1.4);
+ -ms-transform: scaleY(1.4);
+left: 10000px;
+}
+
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab:before
+{
+content: "\e603";	
+visibility: visible;
+position: absolute;
+font-size: 10px;
+top: 10px;
+left: 9999px;
+}
+
+
+.icon-tag-expand:before {
+content: "...";
+margin-top: -5px;
+float: left;
 }
 
 .canceladdtmx.btn-grey .text:before {
@@ -2229,6 +2315,9 @@ cursor: pointer;
 
 }
 
+.icon-play:before {
+	content: "\f04b";
+}
 
 .icon-search:before {
 	content: "\f002";
@@ -2244,6 +2333,9 @@ cursor: pointer;
 }
 .icon-user:before {
 	content: "\f007";
+}
+.icon-stop:before {
+	content: "\e603";
 }
 .icon-check:before {
 	content: "\f00c";
@@ -2266,11 +2358,17 @@ cursor: pointer;
 .icon-chevron-right:before {
 	content: "\f054";
 }
+.icon-chevron-left:before {
+	content: "\f053";
+}
 .icon-plus-circle:before {
 	content: "\f055";
 }
 .icon-minus-circle:before {
 	content: "\f056";
+}
+.icon-play:before {
+	content: "\f04b";
 }
 .icon-times-circle:before {
 	content: "\f057";
@@ -2295,6 +2393,9 @@ cursor: pointer;
 }
 .icon-warning:before {
 	content: "\f071";
+}
+.icon-play:before {
+	content: "\f04b";
 }
 .icon-sign-in:before {
 	content: "\f090";
@@ -2343,6 +2444,12 @@ cursor: pointer;
 }
 .icon-language:before {
 	content: "\f1ab";
+}
+.icon-chevron-right:before {
+	content: "\f054";
+}
+.icon-code:before {
+	content: "\f121";
 }
 .icon-paw:before {
 	content: "\f1b0";

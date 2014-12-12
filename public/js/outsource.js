@@ -209,7 +209,7 @@ $.extend(UI, {
             $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
         }
 
-		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + extendedTimeZone;
+		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm") + ' ' + extendedTimeZone;
 	}
 //	showOutsourceChoice: function() {
 //		$('.outsourcemodal h1').text('Here is the link to your new translation job');
@@ -245,7 +245,7 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
 function changeTimezone( date, timezoneFrom, timezoneTo ){
     var dd = new Date(date);
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
-    $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + dd.getUTCHours() + ":" + $.format.date(dd, "mm a") );
+    $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + dd.getUTCHours() + ":" + $.format.date(dd, "mm") );
 
     $( "span.time").attr("data-timezone", timezoneTo);
     $( "span.time").attr("data-rawtime", dd.toUTCString());

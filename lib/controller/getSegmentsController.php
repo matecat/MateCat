@@ -62,26 +62,6 @@ class getSegmentsController extends ajaxController {
         return $text;
     }
 
-    private function parse_time_to_edit($ms) {
-        if ($ms <= 0) {
-            return array("00", "00", "00", "00");
-        }
-
-        $usec = $ms % 1000;
-        $ms = floor($ms / 1000);
-
-        $seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        $minutes = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        $hours = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-        $ms = floor($ms / 60);
-
-        return array($hours, $minutes, $seconds, $usec);
-    }
-
     public function doAction() {
 
         //get Job Infos
@@ -205,7 +185,7 @@ class getSegmentsController extends ajaxController {
             //log::doLog( "2 - ".$seg['translation']);
             //exit;
 
-            $seg['parsed_time_to_edit'] = $this->parse_time_to_edit($seg['time_to_edit']);
+            $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
 
             $this->data["$id_file"]['segments'][] = $seg;
         }

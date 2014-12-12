@@ -105,7 +105,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
     $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -488,9 +488,9 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  */
 function getJobData( $id_job, $password = null ) {
 
-    $query = "SELECT source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
+    $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project
+		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject
 			FROM jobs
 			WHERE id = %u";
 
@@ -567,7 +567,7 @@ function getJobTmKeys( $job_id, $job_password ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -591,7 +591,7 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
         throw new Exception( $err, -$errno );
     }
 }
@@ -694,6 +694,46 @@ function getEngines( $type = "MT" ) {
     return $results;
 }
 
+/**
+ * @param $jid
+ * @param $jPassword
+ *
+ * @return array
+ */
+function getTranslationsForTMXExport( $jid, $jPassword ){
+
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, segment_translations.id_job, filename, segment, translation, translation_date
+        FROM segment_translations
+        JOIN segments ON id = id_segment
+
+        JOIN files ON segments.id_file = files.id
+
+        JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE segment_translations.id_job = " . (int)$jid . "
+            AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+            AND show_in_cattool = 1
+";
+
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
+
+}
+
 function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
     if ( !$no_status_new ) {
         $select_translation = " st.translation ";
@@ -722,7 +762,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -755,7 +795,7 @@ function getSegmentsInfo( $jid, $password ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -1013,7 +1053,7 @@ function addTranslation( array $_Translation ) {
 //    Log::doLog( $db->affected_rows );
 
     if ( $errno != 0 ) {
-        log::doLog( "$errno: " . var_export( $err, true ) );
+        Log::doLog( "$errno: " . var_export( $err, true ) );
 
         return $errno * -1;
     }
@@ -1125,7 +1165,7 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
 	$errno = $err[ 'error_code' ];
 
 	if ( $errno != 0 ) {
-		log::doLog( "$errno: " . var_export( $err, true ) );
+		Log::doLog( "$errno: " . var_export( $err, true ) );
 		return $errno * -1;
 	}
 
@@ -1159,7 +1199,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 
 	if ( $errno != 0 ) {
 		if ( $errno != 1062 ) {
-			log::doLog( "$errno: " . var_export( $err, true ) );
+			Log::doLog( "$errno: " . var_export( $err, true ) );
 		}
 		return $errno * -1;
 	}
@@ -1198,7 +1238,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -1232,7 +1272,7 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
         if ( $errno != 1062 ) {
-            log::doLog( $err );
+            Log::doLog( $err );
         }
 
         return $errno * -1;
@@ -1252,7 +1292,7 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -1472,7 +1512,7 @@ function getUpdatedTranslations( $timestamp, $first_segment, $last_segment ) {
 		id_segment BETWEEN $first_segment AND $last_segment
 		AND translation_date > FROM_UNIXTIME($timestamp)";
 
-    //log::doLog($query);
+    //Log::doLog($query);
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
@@ -1641,6 +1681,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];
     $data[ 'id_mt_engine' ]      = $projectStructure[ 'mt_engine' ];
     $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
+    $data[ 'subject' ]           = $projectStructure[ 'job_subject' ];
     $data[ 'owner' ]             = $owner;
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
@@ -1670,7 +1711,7 @@ function insertFileIntoMap( $sha1, $source, $target, $deflated_file, $deflated_x
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 and $errno != 1062 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -1689,7 +1730,7 @@ function getXliffBySHA1( $sha1, $source, $target, $not_older_than_days = 0 ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -1721,10 +1762,10 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $con
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno == 1153 ) {
-        log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
+        Log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
 
         $maxp = $db->query_first( 'SELECT @@global.max_allowed_packet' );
-        log::doLog( "max_allowed_packet: " . $maxp . " > try Upgrade to 500MB" );
+        Log::doLog( "max_allowed_packet: " . $maxp . " > try Upgrade to 500MB" );
         // to set the max_allowed_packet to 500MB
         //FIXME User matecat has no superuser privileges
         //ERROR 1227 (42000): Access denied; you need (at least one of) the SUPER privilege(s) for this operation
@@ -1740,7 +1781,7 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $con
             throw new Exception( "Database insert Large file error: $errno ", -$errno );
         }
     } elseif ( $errno > 0 ) {
-        log::doLog( "Database insert Large file error: $errno " );
+        Log::doLog( "Database insert Large file error: $errno " );
         throw new Exception( "Database insert Large file error: $errno ", -$errno );
     }
 
@@ -1819,7 +1860,7 @@ function getProjectJobData( $pid ) {
 function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
     $query = "
-		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis,
+		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,
 
 			   SUM(s.raw_word_count) AS file_raw_word_count,
 			   SUM(st.eq_word_count) AS file_eq_word_count,
@@ -1950,6 +1991,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
         $projects_filter_query[ ] = "j.id_project = " . $project_id;
     }
 
+    //FIXME: SESSION CALL SHOULD NOT BE THERE!!!
     $jobs_filter_query [ ]    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
     $projects_filter_query[ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
 
@@ -2029,6 +2071,7 @@ function getJobsFromProjects(array $projectIDs, $search_source, $search_target, 
 				 j.job_last_segment,
 				 j.id_mt_engine,
 				 j.id_tms,
+				 j.subject,
 				(draft_words + new_words) AS DRAFT,
 				rejected_words AS REJECT,
 				translated_words AS TRANSLATED,
@@ -2064,7 +2107,7 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
     $owner       = $_SESSION[ 'cid' ];
     $owner_query = " j.owner='$owner' and";
 
-    //log::doLog('OWNER QUERY:',$owner);
+    //Log::doLog('OWNER QUERY:',$owner);
 
     //    $owner_query = $owner;
     //	$owner_query = "";
@@ -2080,7 +2123,7 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
     $status_query = " (j.status_owner='ongoing' or j.status_owner='cancelled' or j.status_owner='archived') and";
     }
     //	$status_query = (!$search_showarchived && !$search_showcancelled)? "j.status='ongoing' or j.status='cancelled' and" : "";
-    log::doLog('STATUS QUERY:',$status_query);
+    Log::doLog('STATUS QUERY:',$status_query);
 
     //	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
     //	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
@@ -2145,7 +2188,7 @@ function getProjectStatsVolumeAnalysis2( $pid, $groupby = "job" ) {
     $err     = $db->get_error();
     $errno   = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2194,7 +2237,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
     $err     = $db->get_error();
     $errno   = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2227,7 +2270,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2250,7 +2293,7 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
     $err     = $db->get_error();
     $errno   = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2281,7 +2324,7 @@ function getSegmentsForTMVolumeAnalysys( $jid ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2370,7 +2413,7 @@ function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2558,7 +2601,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
         $db->query( 'ROLLBACK' );
         $db->query( 'SET autocommit=1' );
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2586,7 +2629,7 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2674,6 +2717,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
             $ids   = trim( $ids, ',' );
             $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
             $db->query( $query );
+
         } else {
 
             $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;
@@ -2745,7 +2789,7 @@ function setSegmentTranslationError( $sid, $jid ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2816,7 +2860,7 @@ function resetLockSegment() {
     $db->useDb( INIT::$DB_DATABASE );
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return -1;
     }
@@ -2843,7 +2887,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
     $db->useDb( INIT::$DB_DATABASE );
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return -1;
     }
@@ -2871,7 +2915,7 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2890,7 +2934,7 @@ function getNumSegmentsInQueue( $currentPid ) {
     $errno = $err[ 'error_code' ];
     $db->useDb( INIT::$DB_DATABASE );
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2931,7 +2975,7 @@ function getNextSegmentForTMVolumeAnalysys() {
     $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2952,7 +2996,7 @@ function lockUnlockTable( $table, $lock_unlock = "unlock", $mode = "READ" ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -2970,7 +3014,7 @@ function lockUnlockSegment( $sid, $jid, $value ) {
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -3002,7 +3046,7 @@ function countSegments( $pid ) {
     $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        Log::doLog( $err );
 
         return $errno * -1;
     }
@@ -3056,7 +3100,7 @@ function getProjectSegmentsTranslationSummary( $pid ) {
     $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( "$errno: " . var_export( $err, true ) );
+        Log::doLog( "$errno: " . var_export( $err, true ) );
 
         return $errno * -1;
     }
@@ -3094,7 +3138,7 @@ function countSegmentsTranslationAnalyzed( $pid ) {
     $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( "$errno: " . var_export( $err, true ) );
+        Log::doLog( "$errno: " . var_export( $err, true ) );
 
         return $errno * -1;
     }
@@ -3111,7 +3155,7 @@ function setJobCompleteness( $jid, $is_completed ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( "$errno: " . var_export( $err, true ) );
+        Log::doLog( "$errno: " . var_export( $err, true ) );
 
         return $errno * -1;
     }

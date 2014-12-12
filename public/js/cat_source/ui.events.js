@@ -149,6 +149,14 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+shift+s', function(e) {
 //            e.preventDefault();
             UI.body.toggleClass('tagmode-default-extended');
+        }).on('click', '.tagModeToggle', function(e) {
+            e.preventDefault();
+            console.log('click su tagMode toggle');
+            $(this).toggleClass('active');
+            UI.body.toggleClass('tagmode-default-extended');
+            console.log(typeof UI.currentSegment);
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {
@@ -495,12 +503,11 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-//			console.log('a: ', UI.editarea.html());
+
+            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
 //            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//            console.log('a1: ', UI.editarea.html());
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -825,11 +832,12 @@ $.extend(UI, {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
-
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
-			if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+            UI.removeHighlightCorrespondingTags();
+
+            if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
 				if (operation == 'moving') {
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
 						UI.segmentToOpen = segment;
@@ -858,7 +866,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
-			if (UI.debug)
+            UI.lockTags(UI.editarea);
+
+            if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
@@ -945,6 +955,15 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
+            if (!UI.body.hasClass('searchActive')) {
+//                console.log('vediamo: ', e.which);
+                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                } else {
+                    setTimeout(function() {
+                        UI.lockTags(UI.editarea);
+                    }, 10);
+                }
+            }
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -1067,6 +1086,8 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+                UI.checkTagProximity('left', range);
+
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
 					r = range.startContainer.innerText;
@@ -1150,6 +1171,9 @@ $.extend(UI, {
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range when pressing right arrow key: ', range);
+                UI.checkTagProximity('right', range);
+
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
@@ -1204,7 +1228,7 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-                    console.log('QQQQQQ: ', UI.editarea.html());
+//                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
@@ -1239,10 +1263,15 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+            if(!UI.editarea.find('.locked').length) {
+                UI.currentSegment.removeClass('hasTags');
+            }
+/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);
 				}, 10);
+*/
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
@@ -1667,6 +1696,10 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
+        }).on('click', '.showExtendedTags', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+            $(this).remove();
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -1684,10 +1717,12 @@ $.extend(UI, {
 			}
 		}).on('click', '.tagMode .crunched', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'crunched');
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
         }).on('click', '.tagMode .extended', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'extended');
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
@@ -1822,15 +1857,18 @@ $.extend(UI, {
 			});
 		});
 		$("#exec-replace").click(function(e) {
+            console.log('ddd');
 			e.preventDefault();
+            console.log('a');
 			if ($('#search-target').val() == $('#replace-target').val()) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
+            console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
 				
-			} else if (UI.searchMode == 'source&target') {
+//			} else if (UI.searchMode == 'source&target') {
 
 			} else {
 				txt = $('#replace-target').val();
@@ -1838,13 +1876,21 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
-				UI.updateSearchDisplayCount(segment);
+                segment_id = $(segment).attr('id').split('-')[1];
+                status = UI.getStatus(segment);
+                byStatus = 0;
+
+                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setContribution(segment_id, status, byStatus);
+
+                UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);
 			}
-		});
+            console.log('c');
+
+        });
 		$("#enable-replace").on('change', function() {
 			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');

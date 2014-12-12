@@ -509,7 +509,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
+    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
@@ -693,4 +693,16 @@ function capitaliseFirstLetter(string)
 function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+if (typeof String.prototype.startsWith != 'function') {
+    String.prototype.startsWith = function (str){
+        return this.indexOf(str) == 0;
+    };
+}
+
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
 }

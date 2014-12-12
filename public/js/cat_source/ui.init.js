@@ -27,6 +27,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -60,7 +61,7 @@ $.extend(UI, {
         this.logEnabled = false;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
-        this.savingMemoryErrorNotificationEnabled = true;
+        this.savingMemoryErrorNotificationEnabled = false;
 
 		/**
 		 * Global Warnings array definition.

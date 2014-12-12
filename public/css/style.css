@@ -342,7 +342,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	width: auto !important;
 	position: absolute;	
 	top: 18px;
-	left: -2.8%;
+	left: -4.8%;
 	text-align: center;
 	display: block;
 	height: 10px;
@@ -382,7 +382,7 @@ section.currSearchSegment .sid
 	top:43px !Important;}
 
 span.sid .implicit {
-    display: none;
+/*    display: none; */
 }
 /*.comment{position:absolute;right:0;}*/
 /*
@@ -632,13 +632,14 @@ article
 {
 	border:1px solid #adadad;
 	border-top:none;
-	margin:20px auto 100px auto;
+	margin: 20px auto 100px auto;
 	background:#ccc;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	-moz-box-shadow: 0 1px 3px #ccc;
 	-webkit-box-shadow: 0 1px 3px #ccc;
-	position:relative;margin-left:3%;
+	position:relative;
+    margin-left:5%;
 	width:91.5%;
 	float:left;
 }
@@ -2142,8 +2143,10 @@ footer nav
 	color: #767676 !important;
 	font-size: 13px;
 	font-style: italic;
-	padding-bottom: 3px;
+	margin-top: -2px;
+	height: 32px;
 	vertical-align: middle;
+    border: 2px solid transparent;
 }
 .editor .footer .locked
 {
@@ -2164,7 +2167,12 @@ footer nav
 {
 	font-size: 13px;
 }
-
+.editor .editarea .locked.highlight
+{
+    border-radius: 8px;
+    border: 2px solid #7EB30C;
+/* background: #ffff90; */
+}
 
 .editor .editarea .locked.selected
 {
@@ -2258,6 +2266,9 @@ footer nav
 
 	.search-editarea {width:200px !Important}
 	.text .item,.white li{width: 44% !important}
+    article {margin-left: 6%;}
+    .sid {left: -6%;}
+
 }
 @media screen and (min-width: 1280px){
 	.alternatives .graysmall .sugg-target
@@ -2718,7 +2729,18 @@ del.diff
 	top: -4px;
 */
 }
-
+section .toolbar .tagModeToggle {
+    float: left;
+    display: none;
+    font-size: 60%;
+    margin-right: 5px;
+}
+section .toolbar span {
+    font-size: 150%;
+}
+.tagModeToggle span:before {
+float: left;
+}
 .editToolbar
 {
 	/*float: left;*/	
@@ -2726,6 +2748,7 @@ del.diff
 	display: block;
 	visibility: hidden;
 	margin-top: -6px;
+	padding-top:10px;
 }
 .editToolbar.visible
 {
@@ -2800,16 +2823,127 @@ del.diff
     float: left;
 }
 
+/*
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
+{
+    background-image: url(../img/crunchedtag.png);
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag
+{
+    background-image: url(../img/crunchedtagopen.png);
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
+{
+    background-image: url(../img/crunchedtagclose.png);
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab.order-error
+{
+    background-image: url(../img/crunchedtag-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag.order-error
+{
+    background-image: url(../img/crunchedtagopen-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag.order-error
+{
+    background-image: url(../img/crunchedtagclose-oe.png);
+    opacity: 1;
+}
+
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
 {
     text-indent: -9999px;
     display: inline-block;
     width: 12px;
-    background: url(../img/crunchedtag.png) 1px 12px no-repeat;
-    background-size: 80%;
-    opacity: 0.2;
+    background-size: 100%;
+    opacity: 0.4;
+    background-position: 0px 9px;
+    background-repeat: no-repeat;
+}
+*/
+
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
+{
+visibility: hidden;
+text-indent: -9999px;
+display: inline-block;
+position: relative;
+margin: 0px 5px;
+height: 9px;
+padding-top: 0px;
+}
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.endTag {
+ -ms-transform: rotate(-180deg); /* IE 9 */
+    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
+    transform: rotate(-180deg);
+}
+
+
+
+.tagModeToggle {
+padding: 10px 2px;
+border: 1px solid #fff;
+color: #444!important;
+}
+
+.tagModeToggle:hover, .tagModeToggle.active {
+	color:#808080!important;
+}
+
+.icon-tag-expand {
+	display: none;
+}
+
+section .toolbar {
+margin-left: -15px;
+}
+
+.tagModeToggle span {
+	float: left;
+}
+
+.tagModeToggle span.icon-chevron-right {
+margin-left: 5px;
+}
+
+.tagModeToggle.active span.icon-chevron-right {
+	margin-left: 0px;
+}
+
+.tagModeToggle.active .icon-tag-expand {
+	display: inline-block;
 }
 
 .textarea-container .tagMode {
@@ -2819,9 +2953,21 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     text-align: right;
     margin-top: -23px;
 }
+
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
+body.tagModes .editor.hasTags .toolbar .tagModeToggle {
+    display: block;
+}
+
+.tagModeToggle span.icon-expand, .tagModeToggle span.icon-compress {
+-ms-transform: rotate(45deg);
+-webkit-transform: rotate(45deg);
+transform: rotate(45deg);
+display: inline-block;
+}
+
 .textarea-container .tagMode li {
     display: inline-block;
     width: 40px;
@@ -2962,6 +3108,17 @@ body.editlog .breadcrumbs #pname {
 }
 .warnings {
 	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
+}
+a.showExtendedTags {
+    position: relative;
+    display: block;
+    float: left;
+    clear: left;
+    left: 52%;
+    top: -20px;
+}
+body.tagmode-default-extended a.showExtendedTags {
+    display: none;
 }
 .close {
 	background: url(../img/sprite2x.png) -11px -156px no-repeat;
@@ -3105,9 +3262,13 @@ padding: 10px!important;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;
 }
- .undoCursorPlaceholder {
-     display: none;
- }
+.undoCursorPlaceholder {
+ /*    width: 3px;
+     height: 3px;
+     background: orange;
+     display: inline-block;*/
+    display: none;
+}
 
 #uploadTMX .delete {
     background: url(../img/sprite2x.png) 0px -88px no-repeat;

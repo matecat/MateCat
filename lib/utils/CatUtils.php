@@ -239,7 +239,7 @@ class CatUtils {
         return $s;
     }
 
-    private static function parse_time_to_edit($ms) {
+    public static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
             return array("00", "00", "00", "00");
         }
@@ -1083,6 +1083,42 @@ class CatUtils {
         $converted = iconv( $charset, $toEncoding . "//IGNORE", $documentContent );
 
         return array( $charset, $converted );
+
+    }
+
+    public static function getTMProps( $job_data ){
+
+        try {
+            $memcacheHandler = MemcacheHandler::getInstance();
+        } catch ( Exception $e ) {
+            Log::doLog( $e->getMessage() );
+            Log::doLog( "No Memcache server(s) configured." );
+        }
+
+        if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
+            $_existingResult = $memcacheHandler->get( "project_data_for_job_id:" . $job_data['id'] );
+            if ( !empty( $_existingResult ) ) {
+                return $_existingResult;
+            }
+        }
+
+        $projectData = getProjectJobData( $job_data['id_project'] );
+
+        $result = array(
+                'project_id'   => $projectData[ 0 ][ 'pid' ],
+                'project_name' => $projectData[ 0 ][ 'pname' ],
+                'job_id'       => $job_data[ 'id' ],
+        );
+
+        if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
+            $memcacheHandler->set(
+                    "project_data_for_job_id:" . $job_data['id'],
+                    $result,
+                    60 * 60 * 24 * 15 /* 15 days of lifetime */
+            );
+        }
+
+        return $result;
 
     }
 

@@ -36,7 +36,8 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'show_info'      => null,
             'delivery_date'  => null,
             'currency'       => 'EUR',
-            'timezone'       => '0'
+            'timezone'       => '0',
+            'subject'        => 'general'
     );
 
     /**

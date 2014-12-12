@@ -7,7 +7,8 @@ $.extend(UI, {
 			this.custom = $.parseJSON($.cookie('user_customization'));
 		} else {
 			this.custom = {
-				"extended_concordance": false
+				"extended_concordance": false,
+                "extended_tagmode": false
 			};
 			this.saveCustomization();
 		}

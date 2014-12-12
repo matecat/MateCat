@@ -833,9 +833,11 @@ UI = {
 		}
 	},
 	
-	gotoOpenSegment: function() {
-		if ($('#segment-' + this.currentSegmentId).length) {
-			this.scrollSegment(this.currentSegment);
+	gotoOpenSegment: function(quick) {
+        quick = quick || false;
+
+        if ($('#segment-' + this.currentSegmentId).length) {
+			this.scrollSegment(this.currentSegment, false, quick);
 		} else {
 			$('#outer').empty();
 			this.render({
@@ -845,7 +847,7 @@ UI = {
 		}
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {
@@ -1099,7 +1101,7 @@ UI = {
 		}
 	},
 	pointToOpenSegment: function() {
-		this.gotoOpenSegment();
+        this.gotoOpenSegment(true);
 	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -1169,10 +1171,14 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
+/*
                 tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-                    '						   <li class="crunched">&lt;&gt;</li>' +
-                    '						   <li class="extended">&lt;...&gt;</li>' +
+                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
+                    '</li>' +
+//                    '						   <li class="crunched">&lt;&gt;</li>' +
+//                    '						   <li class="extended">&lt;...&gt;</li>' +
                     '						</ul>' : '';
+*/
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
@@ -1198,13 +1204,16 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-                        tagModes +
+//                        tagModes +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-						'						<ul class="editToolbar">' +
-						'							<li class="uppercase" title="Uppercase"></li>' +
-						'							<li class="lowercase" title="Lowercase"></li>' +
-						'							<li class="capitalize" title="Capitalized"></li>' +
-						'						</ul>' +
+                        '                       <div class="toolbar">' +
+((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
+						'                           <ul class="editToolbar">' +
+						'                               <li class="uppercase" title="Uppercase"></li>' +
+						'                               <li class="lowercase" title="Lowercase"></li>' +
+						'                               <li class="capitalize" title="Capitalized"></li>' +
+						'                           </ul>' +
+                        '                       </div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1271,7 +1280,8 @@ UI = {
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-	scrollSegment: function(segment, highlight) {
+	scrollSegment: function(segment, highlight, quick) {
+        quick = quick || false;
 		highlight = highlight || false;
 //		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
@@ -1316,12 +1326,13 @@ UI = {
 		}
 
 		$("html,body").stop();
+        pointSpeed = (quick)? 0 : 500;
 		$("html,body").animate({
 			scrollTop: destinationTop - 20
-		}, 500);
+		}, pointSpeed);
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, 500);
+		}, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
 		if ($('#segment-' + segmentId).length) {
@@ -1714,7 +1725,8 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
@@ -1732,7 +1744,7 @@ UI = {
             $("body").append( iFrameDownload );
 
             //generate a token download
-            var downloadToken = new Date().getTime();
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
             //set event listner, on ready, attach an interval that check for finished download
             iFrameDownload.ready(function () {
@@ -1741,14 +1753,14 @@ UI = {
                 downloadTimer = window.setInterval(function () {
 
                     //check for cookie
-                    var token = $.cookie('downloadToken');
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
                     }
 
@@ -1758,11 +1770,11 @@ UI = {
 
             //clone the html form and append a token for download
             var iFrameForm = $("#fileDownload").clone().append(
-                $( document.createElement( 'input' ) ).prop({
-                    type:'hidden',
-                    name:'downloadToken',
-                    value: downloadToken
-                })
+                    $( document.createElement( 'input' ) ).prop({
+                        type:'hidden',
+                        name:'downloadToken',
+                        value: downloadToken
+                    })
             );
 
             //append from to newly created iFrame and submit form post
@@ -1773,7 +1785,7 @@ UI = {
             //we are in download status
         }
 
-	},
+    },
 	/**
 	 * fill segments with relative errors from polling
 	 * 
@@ -3067,7 +3079,16 @@ UI = {
     },
     shortenId: function(id) {
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    },
+    isCJK: function () {
+        var l = config.target_rfc;
+        if( (l=='zh-CN') || (l=='zh-TW') || (l=='ja-JP') || (l=='ko-KR') ) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
 };
 

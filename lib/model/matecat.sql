@@ -43,13 +43,14 @@ CREATE TABLE `converters` (
   `status_offline` tinyint(4) NOT NULL DEFAULT '0',
   `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
   `conversion_api_version` varchar(100) DEFAULT '2011',
+  `segmentation_type` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
   UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +69,7 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=InnoDB AUTO_INCREMENT=1168094 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -101,12 +102,11 @@ CREATE TABLE `engines` (
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
   KEY `active_idx` (`active`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `gloss_get_relative_url`, `gloss_set_relative_url`, `gloss_update_relative_url`, `gloss_delete_relative_url`, `tmx_import_relative_url`, `tmx_status_relative_url`, `others`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`) VALUES ('0', 'NONE', 'NONE', 'No MT', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '{}', NULL, NULL, '100', '0');
-INSERT INTO `engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `gloss_get_relative_url`, `gloss_set_relative_url`, `gloss_update_relative_url`, `gloss_delete_relative_url`, `tmx_import_relative_url`, `tmx_status_relative_url`, `others`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`) VALUES ('1', 'MyMemory (All Pairs)', 'TM', 'MyMemory: next generation Translation Memory technology', 'http://api.mymemory.translated.net', 'get', 'set', 'delete', 'glossary/get', 'glossary/set', 'glossary/update', 'glossary/delete', 'tmx/import', 'tmx/status', '{\"gloss_get_relative_url\":\"glossary\\/get\",\"gloss_set_relative_url\":\"glossary\\/set\",\"gloss_update_relative_url\":\"glossary\\/update\",\"gloss_delete_relative_url\":\"glossary\\/delete\",\"tmx_import_relative_url\":\"tmx\\/import\",\"tmx_status_relative_url\":\"tmx\\/status\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}', NULL, '1', '0', '1');
-
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`others`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (0,'NONE','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'{}',NULL,NULL,100,0);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`others`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete','tmx/import','tmx/status','{\"gloss_get_relative_url\":\"glossary\\/get\",\"gloss_set_relative_url\":\"glossary\\/set\",\"gloss_update_relative_url\":\"glossary\\/update\",\"gloss_delete_relative_url\":\"glossary\\/delete\",\"tmx_import_relative_url\":\"tmx\\/import\",\"tmx_status_relative_url\":\"tmx\\/status\",\"tmx_export_create_url\":\"tmx\\/export\\/create\",\"tmx_export_check_url\":\"tmx\\/export\\/check\",\"tmx_export_download_url\":\"tmx\\/export\\/download\",\"tmx_export_list_url\":\"tmx\\/export\\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}',NULL,'1',0,1);
 
 --
 -- Table structure for table `file_references`
@@ -124,7 +124,7 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,7 +147,7 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM AUTO_INCREMENT=81747 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -220,7 +220,7 @@ CREATE TABLE `jobs` (
   KEY `password` (`password`),
   KEY `source` (`source`),
   KEY `target` (`target`)
-) ENGINE=InnoDB AUTO_INCREMENT=61296 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -275,7 +275,10 @@ CREATE TABLE `original_files_map` (
   `deflated_file` longblob,
   `deflated_xliff` longblob,
   `creation_date` date DEFAULT NULL,
-  PRIMARY KEY (`sha1`,`source`,`target`)
+  PRIMARY KEY (`sha1`,`source`,`target`),
+  KEY `creation_date` (`creation_date`),
+  KEY `source` (`source`),
+  KEY `target` (`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -306,7 +309,7 @@ CREATE TABLE `projects` (
   KEY `for_debug` (`for_debug`),
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=50701 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -381,7 +384,7 @@ CREATE TABLE `segments` (
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
-) ENGINE=InnoDB AUTO_INCREMENT=32422824 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -440,7 +443,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`) USING BTREE,
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=1193 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -487,8 +490,4 @@ CREATE TABLE `segment_translations_analysis_queue` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-20 21:44:39
-CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-GRANT ALL ON matecat.* TO 'matecat'@'localhost';
-GRANT ALL ON matecat_analysis.* TO 'matecat'@'localhost';
-FLUSH PRIVILEGES;
+-- Dump completed on 2014-12-12 13:37:39

@@ -59,9 +59,9 @@ class Utils {
 			       ) as $key ) {
 			if ( array_key_exists( $key, $_SERVER ) === true) {
 				foreach ( explode(',', $_SERVER[$key]) as $ip ) {
-					if ( filter_var( trim($ip), FILTER_VALIDATE_IP ) !== false) {
-						return $ip;
-					}
+					if( filter_var( trim($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6 ) !== false ) {
+                        return $ip;
+                    }
 				}
 			}
 		}

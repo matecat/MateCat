@@ -10,24 +10,29 @@ class TMS_RESULT {
     public $responseData = "";
     public $matches = array();
 
-    public function __construct($result) {
-        $this->responseData = $result['responseData'];
-        $this->responseDetails = isset($result['responseDetails']) ? $result['responseDetails'] : '';
-        $this->responseStatus = $result['responseStatus'];
+    public function __construct( $result ) {
 
-        if (is_array($result) and !empty($result) and array_key_exists('matches', $result)) {
-            $matches = $result['matches'];
-            if (is_array($matches) and !empty($matches)) {
-                foreach ($matches as $match) {
-                    $match['raw_segment'] = $match['segment'];
-                    $match['segment'] = CatUtils::rawxliff2view($match['segment']);
-                    $match['raw_translation'] = $match['translation'];
-                    $match['translation'] = CatUtils::rawxliff2view($match['translation']);
+        $this->responseData    = $result[ 'responseData' ];
+        $this->responseDetails = isset( $result[ 'responseDetails' ] ) ? $result[ 'responseDetails' ] : '';
+        $this->responseStatus  = $result[ 'responseStatus' ];
 
-                    $currMatch = new TMS_GET_MATCHES($match);
-                    $this->matches[] = $currMatch;
+        if ( is_array( $result ) and !empty( $result ) and array_key_exists( 'matches', $result ) ) {
+
+            $matches = $result[ 'matches' ];
+            if ( is_array( $matches ) and !empty( $matches ) ) {
+
+                foreach ( $matches as $match ) {
+                    $match[ 'raw_segment' ]     = $match[ 'segment' ];
+                    $match[ 'segment' ]         = CatUtils::rawxliff2view( $match[ 'segment' ] );
+                    $match[ 'raw_translation' ] = $match[ 'translation' ];
+                    $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'translation' ] );
+
+                    $currMatch        = new TMS_GET_MATCHES( $match );
+                    $this->matches[ ] = $currMatch;
                 }
+
             }
+
         }
     }
 

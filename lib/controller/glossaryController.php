@@ -24,8 +24,6 @@ class glossaryController extends ajaxController {
     private $_TMS;
     private $job_info;
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();
@@ -250,6 +248,7 @@ class glossaryController extends ajaxController {
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
         //prepare the error report
         $set_code = array();
@@ -316,6 +315,7 @@ class glossaryController extends ajaxController {
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
         //prepare the error report
         $set_code = array();
