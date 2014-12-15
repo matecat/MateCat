@@ -905,6 +905,13 @@ form.add-TM-Form {
     width: 80%;
     color: #F00;
 }
+
+.notify td {
+background: #FFFA8B !important;
+padding: 5px 25px;
+text-align: right;
+}
+
 #activetm tr.new .error span {
     display: none;
     width: 100%;
@@ -2175,16 +2182,15 @@ color: #000;
 .sdlxliff:after,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
-
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.endTag:before
 
  {
@@ -2229,18 +2235,19 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab:before
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
 {
 content: "\e603";	
 visibility: visible;
 position: absolute;
 font-size: 10px;
-top: 10px;
+top: -2px;
 left: 9999px;
 }
+
 
 
 .icon-tag-expand:before {
