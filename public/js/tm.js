@@ -429,6 +429,7 @@ $.extend(UI, {
                     console.log('adding a tm');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
+                    $('#activetm tr.new .error').hide();
                     UI.checkTMAddAvailability();
 
                     if(this == 'key') {
@@ -442,6 +443,7 @@ $.extend(UI, {
                     console.log('key is bad');
                     $('#activetm tr.new').addClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
+                    $('#activetm tr.new .error').show();
                     UI.checkTMAddAvailability();
                 }
             }

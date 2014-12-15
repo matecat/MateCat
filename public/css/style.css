@@ -734,7 +734,8 @@ article
 
 
 .cl{clear:both}
-.disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
+
+.disabled, .disabled:hover, .disabled:active{background: #d6d6d6;opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
 
 
 
@@ -2903,6 +2904,39 @@ margin: 0px 5px;
 height: 9px;
 padding-top: 0px;
 }
+
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .suggestion_source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .suggestion_source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) .suggestion_source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section:not(.editor) å.translation .locked.endTag
+{
+	top: 9px;
+}
+
+body.tagModes:not(.tagmode-default-extended) .sub-editor .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .suggestion_source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .suggestion_source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .suggestion_source .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .sub-editor .translation .locked.endTag
+{
+	top: 3px;
+}
+
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag ,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag ,
@@ -2921,7 +2955,7 @@ color: #444!important;
 }
 
 .tagModeToggle:hover, .tagModeToggle.active {
-	color:#808080!important;
+	color:#999!important;
 }
 
 .icon-tag-expand {
@@ -3083,13 +3117,7 @@ body.tagmode-default-extended .textarea-container .tagMode li.extended,
 	z-index: 999999999999999;
 }
 /* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (in-resolution: 2dppx) { 
-
+@media only screen and (-webkit-min-device-pixel-ratio: 2),only screen and (min--moz-device-pixel-ratio: 2),only screen and (-o-min-device-pixel-ratio: 2/1),only screen and (min-device-pixel-ratio: 2),only screen and (min-resolution: 192dpi),only screen and (in-resolution: 2dppx) {
 
 .breadcrumbs #pname {
 	background: url(../img/sprite2x.png) -15px -434px no-repeat;
@@ -3111,6 +3139,20 @@ body.editlog .breadcrumbs #pname {
 .warnings {
 	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
 }
+.editToolbar li.capitalize {
+background: url(../img/edit-capitalize@2x.png) center 1px no-repeat;
+background-size: 12px 12px;
+}
+.editToolbar li.lowercase {
+background: url(../img/edit-lowercase1@2x.png) center center no-repeat;
+background-size: 28px; 
+}
+
+.editToolbar li.uppercase {
+background: url(../img/edit-uppercase1@2x.png) center center no-repeat;
+background-size: 28px;
+}
+
 a.showExtendedTags {
     position: relative;
     display: block;
