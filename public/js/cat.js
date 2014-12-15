@@ -3088,24 +3088,28 @@ UI = {
         } else {
             return false;
         }
-    }
-
-
+    },
+    start: function () {
+        APP.init();
+        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        setBrowserHistoryBehavior();
+        $("article").each(function() {
+            APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
+        });
+        UI.render({
+            firstLoad: true
+        });
+        //launch segments check on opening
+        UI.checkWarnings(true);
+    },
+    restart: function () {
+        $('#outer').empty();
+        this.start();
+    },
 };
 
 $(document).ready(function() {
-
-	APP.init();
-	APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-	setBrowserHistoryBehavior();
-	$("article").each(function() {
-		APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
-	});
-	UI.render({
-		firstLoad: true
-	});
-	//launch segments check on opening
-	UI.checkWarnings(true);
+    UI.start();
 });
 
 $(window).resize(function() {
