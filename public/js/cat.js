@@ -1100,8 +1100,9 @@ UI = {
 			});
 		}
 	},
-	pointToOpenSegment: function() {
-        this.gotoOpenSegment(true);
+	pointToOpenSegment: function(quick) {
+        quick = quick || false;
+        this.gotoOpenSegment(quick);
 	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -3554,7 +3555,7 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             console.log(typeof UI.currentSegment);
-            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 
 //		}).bind('keydown', 'Backspace', function(e) {
 

@@ -155,7 +155,7 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             console.log(typeof UI.currentSegment);
-            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 
 //		}).bind('keydown', 'Backspace', function(e) {
 
