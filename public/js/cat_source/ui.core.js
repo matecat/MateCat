@@ -1100,8 +1100,9 @@ UI = {
 			});
 		}
 	},
-	pointToOpenSegment: function() {
-        this.gotoOpenSegment(true);
+	pointToOpenSegment: function(quick) {
+        quick = quick || false;
+        this.gotoOpenSegment(quick);
 	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
