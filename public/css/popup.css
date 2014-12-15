@@ -259,9 +259,9 @@ clear:both;
 margin-top: 15px;
 float:left;
 }
-.pricebox .copytext p {
+/*.pricebox .copytext p {
     font-size:20px;
-}
+}*/
 .pricebox .copytext p:first-child {
 margin-top: 0!important;
 }
@@ -430,7 +430,7 @@ cursor: pointer;
 
 @media screen and ( max-height: 770px ) and (min-height: 650px) {
     .outsource.modal .popup {
-top: 0px;
+top: 4%;
 margin: 0 0 0 -400px;
 }
 
@@ -457,7 +457,7 @@ margin: 10px 0;
 }
 
  .outsource.modal .popup {
-top: 0px;
+top: 2%;
 margin: 0 0 0 -400px;
 }
 
@@ -470,7 +470,7 @@ margin: 0 0 0 -400px;
 @media screen and (max-height: 580px) {
  .outsource.modal .popup  {
 zoom: 0.8;
-top: 0px;
+top: 2%;
 margin: 0 0 0 -400px;
 }
 
