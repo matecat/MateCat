@@ -146,7 +146,7 @@ class getSearchController extends ajaxController {
          */
         doReplaceAll( $this->queryParams );
 
-        //SKIPPED setContribution for all segments
+        //SKIPPED setContribution for all segments ( Un-Completed )
 //        if ( $this->job_data['id_tms'] != 0 ) {
 //
 //            $config = TMS::getConfigStruct();
