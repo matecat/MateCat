@@ -829,6 +829,9 @@ top: 25%;
 	max-height: 250px;
 	overflow: auto;
 }
+
+
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
