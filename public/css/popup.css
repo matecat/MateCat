@@ -111,8 +111,12 @@ color: #333;
 height: 43px;
 width: 82%;
 }
+
+.outsource.modal p {
+    margin-top: 0;
+}
 .outsource.modal h2 {
-	font-size: 20px;
+	font-size: 23px;
 	font-weight: bold;
 	margin: 10px 0;
 }
@@ -271,7 +275,6 @@ width: 35%;
 padding: 1% 2%;
 border: 1px solid #ccc;
 border-radius: 4px;
-margin: 10px 0;
 text-align: center;
 background: #FAFAFA;}
 .pricebox .continuebtn {clear: both;
@@ -291,23 +294,22 @@ margin-top: -10px;
 }
 
 .references {
-margin-top: 35px;
+margin-top: 20px;
 text-align: center;
+float: left;
 }
 
 .references > img {
-width: 23%;
-padding-left: 1.5%;
-padding-right: 1.5%;
+    width: 15%;
+/*padding-left: 1.5%;*/
+padding-right: 9%;
 -webkit-filter: grayscale(100%);
 -moz-filter: grayscale(100%);
 filter: grayscale(100%);
 }
 
 .references > img:hover {
-width: 23%;
-padding-left: 1.5%;
-padding-right: 1.5%;
+
 -webkit-filter: grayscale(0%);
 -moz-filter: grayscale(0%);
 filter: grayscale(0%);
@@ -335,11 +337,11 @@ font-weight:normal;
 	width: auto; 
 	margin-top: 15px! important;
 }
-.pricebox .paybox {
+/*.pricebox .paybox {
 border-radius: 4px;
 background: url(../img/card.png) no-repeat 330px 37px;
 background-size: 170px;
-}
+}*/
 
 
 .paybox, .trustbox{
