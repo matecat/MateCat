@@ -226,7 +226,7 @@
 	,
 		{
 			"localized":[{
-				"en":"Chinese Simplified (Beta)"
+				"en":"Chinese Simplified"
 			}],
 			"isocode":"zh",
 			"enabled":true,
@@ -237,7 +237,7 @@
 	,
 		{
 			"localized":[{
-				"en":"Chinese Traditional (Beta)"
+				"en":"Chinese Traditional"
 			}],
 			"isocode":"zh",
 			"enabled":true,
@@ -635,7 +635,7 @@
 	,
 		{
 			"localized":[{
-				"en":"Japanese (Beta)"
+				"en":"Japanese"
 			}],
 			"isocode":"ja",
 			"enabled":true,
@@ -726,7 +726,7 @@
 	,
 		{
 			"localized":[{
-				"en":"Korean (Beta)"
+				"en":"Korean"
 			}],
 			"isocode":"ko",
 			"enabled":true,
@@ -1090,7 +1090,7 @@
 	,
 		{
 			"localized":[{
-				"en":"Polish (Beta)"
+				"en":"Polish"
 			}],
 			"isocode":"pl",
 			"enabled":true,
