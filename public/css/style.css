@@ -2826,8 +2826,8 @@ float: left;
 
 /*
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag
 {
     background-image: url(../img/crunchedtag.png);
 }
@@ -2844,8 +2844,8 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     background-image: url(../img/crunchedtagclose.png);
 }
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab.order-error,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab.order-error
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag.order-error
 {
     background-image: url(../img/crunchedtag-oe.png);
     opacity: 1;
@@ -2868,8 +2868,8 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
 {
@@ -2887,10 +2887,10 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
@@ -2899,43 +2899,14 @@ body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
 visibility: hidden;
 text-indent: -9999px;
 display: inline-block;
+overflow: hidden;
 position: relative;
 margin: 0px 5px;
 height: 9px;
 padding-top: 0px;
 }
 
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .editarea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .suggestion_source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .translation .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .suggestion_source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .translation .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .editarea .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) .suggestion_source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) section:not(.editor) å.translation .locked.endTag
-{
-	top: 9px;
-}
 
-body.tagModes:not(.tagmode-default-extended) .sub-editor .editarea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .suggestion_source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .translation .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .suggestion_source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .translation .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .editarea .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .suggestion_source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .sub-editor .translation .locked.endTag
-{
-	top: 3px;
-}
 
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag ,
@@ -2963,7 +2934,7 @@ color: #444!important;
 }
 
 section .toolbar {
-margin-left: -15px;
+margin-left: -10px;
 }
 
 .tagModeToggle span {
@@ -3141,16 +3112,16 @@ body.editlog .breadcrumbs #pname {
 }
 .editToolbar li.capitalize {
 background: url(../img/edit-capitalize@2x.png) center 1px no-repeat;
-background-size: 12px 12px;
+background-size: 12px 11px;
 }
 .editToolbar li.lowercase {
 background: url(../img/edit-lowercase1@2x.png) center center no-repeat;
-background-size: 28px; 
+background-size: 27px; 
 }
 
 .editToolbar li.uppercase {
 background: url(../img/edit-uppercase1@2x.png) center center no-repeat;
-background-size: 28px;
+background-size: 27px;
 }
 
 a.showExtendedTags {
