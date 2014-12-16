@@ -4214,7 +4214,8 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
-		}).on('mouseup', '.editarea', function() {
+		}).on('mouseup', '.editarea', function() { //mouseupeditarea
+            console.log('aaa: ', $(window.getSelection().getRangeAt(0)));
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
@@ -4232,7 +4233,7 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-		}).on('click', '.editarea', function(e, operation, action) {
+		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
@@ -8782,6 +8783,7 @@ $.extend(UI, {
                     console.log('adding a tm');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
+                    $('#activetm tr.new .error').hide();
                     UI.checkTMAddAvailability();
 
                     if(this == 'key') {
@@ -8795,6 +8797,7 @@ $.extend(UI, {
                     console.log('key is bad');
                     $('#activetm tr.new').addClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
+                    $('#activetm tr.new .error').show();
                     UI.checkTMAddAvailability();
                 }
             }
