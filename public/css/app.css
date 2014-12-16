@@ -864,12 +864,20 @@ width: 804px;
 
 .downloading .uploadloader {
 	display: block;
+	z-index: 10;
 }
 
 .downloading .uploadloader {
-	right: 170px;
-	margin-top:0;
+	right: 126px;
+margin-top: -2px;
+background-size: 15px;
+background-color: #D6D6D6;
 }
+
+
+
+.uploadloader{background:url(../img/loader.gif) center center no-repeat;display:block;width:20px;height:20px;float:right;margin-top:35px;display:none;position:absolute;right:260px;background-size: 20px 20px;}
+
 
 td.action {
 padding: 10px 5px!important;
@@ -892,13 +900,18 @@ form.add-TM-Form {
 }
 
 #activetm tr.new .error {
-    display: block;
+    display: none;
     float: left;
     width: 80%;
     color: #F00;
-    margin-top: 15px;
-	padding: 2px 5px;
 }
+
+.notify td {
+background: #FFFA8B !important;
+padding: 5px 25px;
+text-align: right;
+}
+
 #activetm tr.new .error span {
     display: none;
     width: 100%;
@@ -2169,16 +2182,15 @@ color: #000;
 .sdlxliff:after,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
-
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.selfClosingTab:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.endTag:before
 
  {
@@ -2223,18 +2235,19 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab:before,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab:before
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
 {
 content: "\e603";	
 visibility: visible;
 position: absolute;
 font-size: 10px;
-top: 10px;
+top: -2px;
 left: 9999px;
 }
+
 
 
 .icon-tag-expand:before {
@@ -3290,7 +3303,8 @@ article
 
 
 .cl{clear:both}
-.disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
+
+.disabled, .disabled:hover, .disabled:active{background: #d6d6d6;opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
 
 
 
@@ -5381,8 +5395,8 @@ float: left;
 
 /*
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag
 {
     background-image: url(../img/crunchedtag.png);
 }
@@ -5399,8 +5413,8 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     background-image: url(../img/crunchedtagclose.png);
 }
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab.order-error,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab.order-error
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag.order-error
 {
     background-image: url(../img/crunchedtag-oe.png);
     opacity: 1;
@@ -5423,8 +5437,8 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
 {
@@ -5442,10 +5456,10 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTab,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
@@ -5454,11 +5468,15 @@ body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
 visibility: hidden;
 text-indent: -9999px;
 display: inline-block;
+overflow: hidden;
 position: relative;
 margin: 0px 5px;
 height: 9px;
 padding-top: 0px;
 }
+
+
+
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag ,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag ,
@@ -5477,7 +5495,7 @@ color: #444!important;
 }
 
 .tagModeToggle:hover, .tagModeToggle.active {
-	color:#808080!important;
+	color:#999!important;
 }
 
 .icon-tag-expand {
@@ -5485,7 +5503,7 @@ color: #444!important;
 }
 
 section .toolbar {
-margin-left: -15px;
+margin-left: -10px;
 }
 
 .tagModeToggle span {
@@ -5639,13 +5657,7 @@ body.tagmode-default-extended .textarea-container .tagMode li.extended,
 	z-index: 999999999999999;
 }
 /* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (in-resolution: 2dppx) { 
-
+@media only screen and (-webkit-min-device-pixel-ratio: 2),only screen and (min--moz-device-pixel-ratio: 2),only screen and (-o-min-device-pixel-ratio: 2/1),only screen and (min-device-pixel-ratio: 2),only screen and (min-resolution: 192dpi),only screen and (in-resolution: 2dppx) {
 
 .breadcrumbs #pname {
 	background: url(../img/sprite2x.png) -15px -434px no-repeat;
@@ -5667,6 +5679,20 @@ body.editlog .breadcrumbs #pname {
 .warnings {
 	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
 }
+.editToolbar li.capitalize {
+background: url(../img/edit-capitalize@2x.png) center 1px no-repeat;
+background-size: 12px 11px;
+}
+.editToolbar li.lowercase {
+background: url(../img/edit-lowercase1@2x.png) center center no-repeat;
+background-size: 27px; 
+}
+
+.editToolbar li.uppercase {
+background: url(../img/edit-uppercase1@2x.png) center center no-repeat;
+background-size: 27px;
+}
+
 a.showExtendedTags {
     position: relative;
     display: block;

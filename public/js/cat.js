@@ -3305,6 +3305,7 @@ $.extend(UI, {
 //		this.isChrome = $.browser.webkit && !!window.chrome;
 //		this.isFirefox = $.browser.mozilla;
 //		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isSafari = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
 		this.isChrome = (typeof window.chrome != 'undefined');
 		this.isFirefox = (typeof navigator.mozApps != 'undefined');
 //		console.log('body.scrollTop: ', $('body').scrollTop());
@@ -4028,7 +4029,9 @@ $.extend(UI, {
                 return false;
             }
 
-            if(!$('.editor .rangySelectionBoundary.focusOut').length) saveSelection();
+            if(!$('.editor .rangySelectionBoundary.focusOut').length) {
+                if(!UI.isSafari) saveSelection();
+            }
             $('.editor .rangySelectionBoundary').addClass('focusOut');
             hasFocusBefore = UI.editarea.is(":focus");
             setTimeout(function() {
@@ -4214,10 +4217,10 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
-		}).on('mouseup', '.editarea', function() {
-			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				if(!UI.isFirefox) UI.showEditToolbar();
-			}
+		}).on('mouseup', '.editarea', function() { //mouseupeditarea
+            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                if(!UI.isFirefox) UI.showEditToolbar();
+            }
 		}).on('mousedown', '.editarea', function(e) {
             if(e.which == 3) {
                 e.preventDefault();
@@ -4232,8 +4235,8 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-		}).on('click', '.editarea', function(e, operation, action) {
-			if (typeof operation == 'undefined')
+		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
+            if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
             this.onclickEditarea = new Date();
@@ -8782,6 +8785,7 @@ $.extend(UI, {
                     console.log('adding a tm');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
+                    $('#activetm tr.new .error').hide();
                     UI.checkTMAddAvailability();
 
                     if(this == 'key') {
@@ -8795,6 +8799,7 @@ $.extend(UI, {
                     console.log('key is bad');
                     $('#activetm tr.new').addClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
+                    $('#activetm tr.new .error').show();
                     UI.checkTMAddAvailability();
                 }
             }
