@@ -239,7 +239,8 @@ class createProjectController extends ajaxController {
             //FIXME THIS IS A WORKAROUND, AN WARNING LEVEL MESSAGE SHOULD BE RAISED INSTEAD OF ERROR
             $delete_session = true;
             foreach( $this->result[ 'errors' ] as $err ){
-                if( $err['code'] == -17 ){
+                //these are error for tmx load error because of languages, skip these
+                if( $err['code'] == -17 || $err['code'] == -16 ){
                     $delete_session = false;
                 }
             }
