@@ -290,7 +290,12 @@ function fileUpload(form, action_url, div_id) {
 console.log('TMKey 1: ', TMKey);
     console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
-    UI.pollForUploadCallback(TMKey, TMName);
+
+    //delay because server can take some time to process large file
+    setTimeout(function() {
+        UI.pollForUploadCallback(TMKey, TMName);
+    }, 3000);
+
 }
 
 function stripHTML(dirtyString) {

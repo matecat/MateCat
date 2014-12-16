@@ -762,13 +762,17 @@ $.extend(UI, {
     pollForUploadCallback: function(TMKey, TMName, existing, TRcaller) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
-            TRcaller.removeClass('startUploading');
 //            msg.success = false;
 //            msg.errors = [{message: 'questo è un errore'}];
             if(msg.success === true) {
-                UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
+                setTimeout(function() {
+                    //delay because server can take some time to process large file
+                    TRcaller.removeClass('startUploading');
+                    UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
+                }, 3000);
             } else {
                 console.log('error');
+                TRcaller.removeClass('startUploading');
                 $(TRcaller).find('.error').text(msg.errors[0].message).show();
 //                $(TRcaller).find('.addtmxfile').removeClass('disabled');
             }
@@ -779,7 +783,6 @@ $.extend(UI, {
         }
 
     },
-
     pollForUploadProgress: function(TMKey, TMName, existing, TRcaller) {
         APP.doRequest({
             data: {
