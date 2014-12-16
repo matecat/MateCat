@@ -124,23 +124,33 @@ class deleteContributionController extends ajaxController {
 
         /**
          * @var $tm_key TmKeyManagement_TmKeyStruct
-         */
-        foreach ( $tm_keys as $tm_key ) {
-            $config[ 'id_user' ] = $tm_key->key;
-            $TMS_RESULT = $tms->delete( $config );
-            $set_code[ ] = $TMS_RESULT;
-        }
+		 */
 
-        $set_successful = true;
-        if( array_search( false, $set_code, true ) ){
-            //There's an error
-            $set_successful = false;
-        }
+		//if there's no key
+		if(empty($tm_keys)){
+			//try deleting anyway, it may be a public segment and it may work
+			$TMS_RESULT = $tms->delete( $config );
+			$set_code[ ] = $TMS_RESULT;
+		}else{
+			//loop over the list of keys
+			foreach ( $tm_keys as $tm_key ) {
+				//issue a separate call for each key
+				$config[ 'id_user' ] = $tm_key->key;
+				$TMS_RESULT = $tms->delete( $config );
+				$set_code[ ] = $TMS_RESULT;
+			}
+		}
 
-        $this->result[ 'data' ] = ( $set_successful ? "OK" : null );
-        $this->result[ 'code' ] = $set_successful;
+		$set_successful = true;
+		if( array_search( false, $set_code, true ) ){
+			//There's an error
+			$set_successful = false;
+		}
 
-    }
+		$this->result[ 'data' ] = ( $set_successful ? "OK" : null );
+		$this->result[ 'code' ] = $set_successful;
+
+	}
 
 
 }
