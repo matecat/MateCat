@@ -15,6 +15,7 @@ $.extend(UI, {
 //		this.isChrome = $.browser.webkit && !!window.chrome;
 //		this.isFirefox = $.browser.mozilla;
 //		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isSafari = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
 		this.isChrome = (typeof window.chrome != 'undefined');
 		this.isFirefox = (typeof navigator.mozApps != 'undefined');
 //		console.log('body.scrollTop: ', $('body').scrollTop());

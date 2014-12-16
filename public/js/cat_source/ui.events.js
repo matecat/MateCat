@@ -624,7 +624,9 @@ $.extend(UI, {
                 return false;
             }
 
-            if(!$('.editor .rangySelectionBoundary.focusOut').length) saveSelection();
+            if(!$('.editor .rangySelectionBoundary.focusOut').length) {
+                if(!UI.isSafari) saveSelection();
+            }
             $('.editor .rangySelectionBoundary').addClass('focusOut');
             hasFocusBefore = UI.editarea.is(":focus");
             setTimeout(function() {
@@ -811,10 +813,9 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
-            console.log('aaa: ', $(window.getSelection().getRangeAt(0)));
-			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				if(!UI.isFirefox) UI.showEditToolbar();
-			}
+            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                if(!UI.isFirefox) UI.showEditToolbar();
+            }
 		}).on('mousedown', '.editarea', function(e) {
             if(e.which == 3) {
                 e.preventDefault();
@@ -830,7 +831,7 @@ $.extend(UI, {
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
-			if (typeof operation == 'undefined')
+            if (typeof operation == 'undefined')
 				operation = 'clicking';
             UI.saveInUndoStack('click');
             this.onclickEditarea = new Date();
