@@ -36,10 +36,10 @@ function doSearchQuery( ArrayObject $queryParams ) {
      * Escape Meta-characters to use in regular expression ( LIKE STATEMENT is treated inside MySQL as a Regexp pattern )
      *
      */
-    $_regexpEscapedSrc = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'src' ] );
+    $_regexpEscapedSrc = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'src' ] );
     $_regexpEscapedSrc = $db->escape( $_regexpEscapedSrc );
 
-    $_regexpEscapedTrg = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'trg' ] );
+    $_regexpEscapedTrg = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'trg' ] );
     $_regexpEscapedTrg = $db->escape( $_regexpEscapedTrg );
 
     $query = "";
