@@ -111,8 +111,12 @@ color: #333;
 height: 43px;
 width: 82%;
 }
+
+.outsource.modal p {
+    margin-top: 0;
+}
 .outsource.modal h2 {
-	font-size: 20px;
+	font-size: 23px;
 	font-weight: bold;
 	margin: 10px 0;
 }
@@ -271,7 +275,7 @@ width: 35%;
 padding: 1% 2%;
 border: 1px solid #ccc;
 border-radius: 4px;
-margin: 10px 0;
+margin: 45px 0 0;
 text-align: center;
 background: #FAFAFA;}
 .pricebox .continuebtn {clear: both;
@@ -335,11 +339,11 @@ font-weight:normal;
 	width: auto; 
 	margin-top: 15px! important;
 }
-.pricebox .paybox {
+/*.pricebox .paybox {
 border-radius: 4px;
 background: url(../img/card.png) no-repeat 330px 37px;
 background-size: 170px;
-}
+}*/
 
 
 .paybox, .trustbox{

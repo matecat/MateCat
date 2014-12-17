@@ -55,25 +55,41 @@ class createProjectController extends ajaxController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //if a string is sent by the client, transform it into a valid array
-        if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
-            $__postInput[ 'private_tm_key' ] = array(
-                    array(
-                            'key'  => $__postInput[ 'private_tm_key' ],
-                            'name' => null,
-                            'r'    => true,
-                            'w'    => true
-                    )
-            );
-        } else {
-            $__postInput[ 'private_tm_key' ] = array();
-        }
-
+        //first we check the presence of a list from tm management panel
         $array_keys = json_decode( $_POST['private_keys_list'], true );
         $array_keys = array_merge( $array_keys['ownergroup'], $array_keys['mine'],$array_keys['anonymous'] );
 
-        if ( $array_keys ) {
+        if ( $array_keys ) { // some keys are selected from panel
+
+
+            //if a string is sent by the client, transform it into a valid array
+            if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
+                $__postInput[ 'private_tm_key' ] = array(
+                        array(
+                                'key'  => $__postInput[ 'private_tm_key' ],
+                                'name' => null,
+                                'r'    => true,
+                                'w'    => true
+                        )
+                );
+            } else {
+                $__postInput[ 'private_tm_key' ] = array();
+            }
+
+            //remove duplicates
+            foreach ( $array_keys as $pos => $value ){
+                if( isset( $__postInput[ 'private_tm_key' ][0]['key'] )
+                        && $__postInput[ 'private_tm_key' ][0]['key']  == $value['key']
+                ){
+                    //same key was get from keyring, remove
+                    $__postInput[ 'private_tm_key' ] = array();
+                }
+            }
+
+            //merge the arrays
             $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );
+
+
         } else {
             $private_keyList = $__postInput[ 'private_tm_key' ];
         }
@@ -239,7 +255,8 @@ class createProjectController extends ajaxController {
             //FIXME THIS IS A WORKAROUND, AN WARNING LEVEL MESSAGE SHOULD BE RAISED INSTEAD OF ERROR
             $delete_session = true;
             foreach( $this->result[ 'errors' ] as $err ){
-                if( $err['code'] == -17 ){
+                //these are error for tmx load error because of languages, skip these
+                if( $err['code'] == -17 || $err['code'] == -16 ){
                     $delete_session = false;
                 }
             }
