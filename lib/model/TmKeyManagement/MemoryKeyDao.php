@@ -130,16 +130,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $where_conditions[ ] = "uid = " . $obj->uid;
         $where_conditions[ ] = "key_value = '" . $obj->tm_key->key . "'";
 
-        if ( $obj->r !== null ) {
-            $condition    = "read_grants = %d";
-            $set_array[ ] = sprintf( $condition, $obj->r );
-        }
-
-        if ( $obj->w !== null ) {
-            $condition    = "write_grants = %d";
-            $set_array[ ] = sprintf( $condition, $obj->w );
-        }
-
         //tm_key conditions
         if ( $obj->tm_key !== null ) {
 
