@@ -275,6 +275,7 @@ width: 35%;
 padding: 1% 2%;
 border: 1px solid #ccc;
 border-radius: 4px;
+margin: 45px 0 0;
 text-align: center;
 background: #FAFAFA;}
 .pricebox .continuebtn {clear: both;
@@ -294,22 +295,23 @@ margin-top: -10px;
 }
 
 .references {
-margin-top: 20px;
+margin-top: 35px;
 text-align: center;
-float: left;
 }
 
 .references > img {
-    width: 15%;
-/*padding-left: 1.5%;*/
-padding-right: 9%;
+width: 23%;
+padding-left: 1.5%;
+padding-right: 1.5%;
 -webkit-filter: grayscale(100%);
 -moz-filter: grayscale(100%);
 filter: grayscale(100%);
 }
 
 .references > img:hover {
-
+width: 23%;
+padding-left: 1.5%;
+padding-right: 1.5%;
 -webkit-filter: grayscale(0%);
 -moz-filter: grayscale(0%);
 filter: grayscale(0%);
