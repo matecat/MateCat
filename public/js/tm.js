@@ -164,27 +164,34 @@ $.extend(UI, {
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
-        }).on('click', '#activetm tr.mine td.description .edit-desc', function() {
-            console.log('.edit-desc');
+        }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
+//            console.log('.edit-desc');
 //            $(this).addClass('current');
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
         }).on('blur', '#activetm td.description .edit-desc', function() {
-            console.log('blur');
+//            console.log('blur');
             $(this).removeAttr('contenteditable');
             if(APP.isCattool) UI.saveTMdata(false);
 
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+/*
         }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
                 $(this).removeAttr('contenteditable');
                 if(APP.isCattool) UI.saveTMdata(false);
             }
+*/
+        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+            if(APP.isCattool) UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
          }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
-
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
@@ -1011,6 +1018,39 @@ $.extend(UI, {
             }
         });
     },
+    saveTMdescription: function (field) {
+        console.log(field);
+        var tr = field.parents('tr').first();
+
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'update',
+                key: tr.find('.privatekey').text(),
+                description: field.text()
+            },
+            error: function() {
+                console.log('Error saving TM description!!');
+                APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+            },
+            success: function(d) {
+                $('.popup-tm').removeClass('saving');
+
+//                d.errors = [];
+                if(d.errors.length) {
+                    APP.showMessage({msg: d.errors[0].message});
+//                    $('.mgmt-panel-tm .warning-message').text('').hide();
+//                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
+                } else {
+                    console.log('TM description saved!!');
+
+                }
+            }
+        });
+    },
+
+
     closeTMPanel: function () {
         $('.mgmt-tm tr.uploadpanel').hide();
         $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
