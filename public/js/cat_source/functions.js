@@ -700,6 +700,21 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+function getRangeObject(selectionObject) {
+    console.log('getRangeObject');
+    if (!UI.isSafari) {
+//    if (selectionObject.getRangeAt) {
+        return selectionObject.getRangeAt(0);
+    }
+    else { // Safari!
+        var range = document.createRange();
+        range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
+        range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
+        return range;
+    }
+}
+
+
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function (str){
         return this.indexOf(str) == 0;

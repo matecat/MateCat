@@ -3920,17 +3920,17 @@ $.extend(UI, {
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-//			console.log('c: ', UI.editarea.html());
+			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-//			console.log('ph: ', ph);
+			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-//			console.log('d: ', UI.editarea.html());
+			console.log('d: ', UI.editarea.html());
 //			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-//			console.log('e: ', UI.editarea.html());
+			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-//			console.log('f: ', UI.editarea.html());
+			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -4390,10 +4390,36 @@ $.extend(UI, {
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) {
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
+//                console.log('1: ', window.getSelection());
+//                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
+//                for(var key in window.getSelection()) {
+//                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+//                }
+/*
+                d=window.getSelection()+'';
+//                d=(d.isCollapsed||d.length==0)?document.title:d;
+                console.log('2: ', d);
+                */
+/*
+                dd=window.getSelection()+'';
+                dd=(dd.length==0)? document.title : dd;
+                console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
+                */
+
+                var rangeObject = getRangeObject(window.getSelection());
+//                console.log('rangeObject: ', rangeObject);
+                if($(rangeObject.endContainer.previousElementSibling).hasClass('locked')) {
+//                    console.log('eccolo');
+                    e.preventDefault();
+                    $(rangeObject.endContainer.previousElementSibling).remove();
+                }
+/*
                 if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
+                    console.log('eccolo');
                     e.preventDefault();
                     $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
                 }
+*/
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
@@ -8318,6 +8344,21 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+function getRangeObject(selectionObject) {
+    console.log('getRangeObject');
+    if (!UI.isSafari) {
+//    if (selectionObject.getRangeAt) {
+        return selectionObject.getRangeAt(0);
+    }
+    else { // Safari!
+        var range = document.createRange();
+        range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
+        range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
+        return range;
+    }
+}
+
+
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function (str){
         return this.indexOf(str) == 0;
@@ -8608,6 +8649,14 @@ $.extend(UI, {
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
+ /*
+            var msg = '<tr class="notify">' +
+                   '    <td colspan="7">' +
+                   '        <span>Downloading TMX... You can close the panel and continue translating.</span>' +
+                   '    </td>' +
+                   '</tr>';
+            $(this).parents('tr').first().after(msg);
+*/
         });
 
 

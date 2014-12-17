@@ -514,17 +514,17 @@ $.extend(UI, {
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-//			console.log('c: ', UI.editarea.html());
+			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-//			console.log('ph: ', ph);
+			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-//			console.log('d: ', UI.editarea.html());
+			console.log('d: ', UI.editarea.html());
 //			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-//			console.log('e: ', UI.editarea.html());
+			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-//			console.log('f: ', UI.editarea.html());
+			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -984,10 +984,36 @@ $.extend(UI, {
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) {
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
+//                console.log('1: ', window.getSelection());
+//                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
+//                for(var key in window.getSelection()) {
+//                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+//                }
+/*
+                d=window.getSelection()+'';
+//                d=(d.isCollapsed||d.length==0)?document.title:d;
+                console.log('2: ', d);
+                */
+/*
+                dd=window.getSelection()+'';
+                dd=(dd.length==0)? document.title : dd;
+                console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
+                */
+
+                var rangeObject = getRangeObject(window.getSelection());
+//                console.log('rangeObject: ', rangeObject);
+                if($(rangeObject.endContainer.previousElementSibling).hasClass('locked')) {
+//                    console.log('eccolo');
+                    e.preventDefault();
+                    $(rangeObject.endContainer.previousElementSibling).remove();
+                }
+/*
                 if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
+                    console.log('eccolo');
                     e.preventDefault();
                     $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
                 }
+*/
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
