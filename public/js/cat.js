@@ -4388,6 +4388,14 @@ $.extend(UI, {
 
 //			console.log(e.which); 
 
+            if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) {
+//                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
+                if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
+                    e.preventDefault();
+                    $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
+                }
+            }
+
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
@@ -4396,7 +4404,8 @@ $.extend(UI, {
 					UI.currentSegmentQA();
 				} else {
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-					var numSpacesBefore = $('.space-marker', UI.editarea).length;
+                    console.log('numTagsBefore: ', numTagsBefore);
+                    var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 //					console.log('a: ', UI.editarea.html());
 					saveSelection();
