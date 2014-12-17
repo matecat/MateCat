@@ -1984,6 +1984,7 @@ UI = {
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
+                        $('.editor .editarea .order-error').removeClass('order-error');
 						return;
 					}
 /*

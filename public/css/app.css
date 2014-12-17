@@ -3288,7 +3288,7 @@ article
 .text:hover
 {
 	background: #ecedeb;
-//	background:#ecedeb url(../img/freccia-light.png) 49% 10px  no-repeat;
+/*	background:#ecedeb url(../img/freccia-light.png) 49% 10px  no-repeat;*/
 	color:#000;
 }
 
@@ -3718,7 +3718,7 @@ body.cattool .searchbox .block.right
 
 .checkbox-filter .custom-checkbox{margin:9px 10px 0 0}
 /*concordance*/
-.border-search{border-bottom:1px solid #dedede;margin:-10px 200px 0 5px;float:left;height:20px;;width:70%;}
+.border-search{border-bottom:1px solid #dedede;margin:-10px 200px 0 5px;float:left;height:20px;width:70%}
 .col1-search{float:left;width:100%;}
 .col1-search ul{margin:-5px 0 0px 0;padding:0;float:left;width:100%;}
 .col1-search li{margin:0;padding:0 0px 0 0; float:left;}
@@ -3754,11 +3754,11 @@ body.cattool .searchbox .block.right
 
 
 
-.custom-checkbox > .tr-check{  background-color: #09beec; !important}
-.custom-checkbox > .dr-check{  background-color: #d0d1d1; !important}
-.custom-checkbox > .rj-check{  background-color: #ed1c24; !important}
-.custom-checkbox > .ap-check{  background-color: #7cc576; !important}
-.custom-checkbox > .normal-check{  background-color: #fff; !important}
+.custom-checkbox > .tr-check{  background-color: #09beec !important}
+.custom-checkbox > .dr-check{  background-color: #d0d1d1 !important}
+.custom-checkbox > .rj-check{  background-color: #ed1c24 !important}
+.custom-checkbox > .ap-check{  background-color: #7cc576 !important}
+.custom-checkbox > .normal-check{  background-color: #fff !important}
 
 
 .custom-checkbox:hover{
@@ -4293,7 +4293,7 @@ textarea, input, .editarea, .search-editarea, select  {
 }
 .graysmall div.comment[contenteditable=true]
 {
-	background: #fff;;
+	background: #fff;
 	border: 1px solid #999;
 	padding: 3px 6px;
 	margin-left: 23px;

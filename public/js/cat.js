@@ -1984,6 +1984,7 @@ UI = {
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
+                        $('.editor .editarea .order-error').removeClass('order-error');
 						return;
 					}
 /*
@@ -3559,7 +3560,6 @@ $.extend(UI, {
             console.log('click su tagMode toggle');
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
-            console.log(typeof UI.currentSegment);
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 
 //		}).bind('keydown', 'Backspace', function(e) {
@@ -4663,7 +4663,7 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function() {
+		}).on('input', '.editarea', function() { //inputineditarea
 			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {
@@ -4689,7 +4689,9 @@ $.extend(UI, {
 				}, 10);
 */
 			UI.registerQACheck();
-		}).on('input', '.editor .cc-search .input', function() {
+            UI.lockTags(UI.editarea);
+
+        }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
@@ -4806,7 +4808,7 @@ $.extend(UI, {
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
-			}, 100);
+            }, 100);
 		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
@@ -5071,6 +5073,8 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
+            UI.lockTags(UI.editarea);
+
             /*
 			$(window).trigger({
 				type: "pastedInEditarea",
@@ -7802,7 +7806,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {console.log('el: ', el);
+function setCursorPosition(el, pos) {
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -7904,7 +7908,6 @@ function fileUpload(form, action_url, div_id) {
 console.log('TMKey 1: ', TMKey);
     console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
-//    UI.pollForUploadCallback(TMKey, TMName);
 
     //delay because server can take some time to process large file
     setTimeout(function() {
@@ -9154,7 +9157,6 @@ $.extend(UI, {
         }
 
     },
-
     pollForUploadProgress: function(TMKey, TMName, existing, TRcaller) {
         APP.doRequest({
             data: {
