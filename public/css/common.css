@@ -906,7 +906,7 @@ form.add-TM-Form {
     color: #F00;
 }
 
-.notify td {
+td.notify {
 float: left;
 clear: both;
 width: 96%;
@@ -915,8 +915,11 @@ height: 20px;
 border-top: 1px solid #E1E1E1;
 box-shadow: inset 0px 2px 5px 0px rgba(228, 228, 228, 0.52);
 background: #FFFA8B !important;
-padding: 5px 2%;
+padding: 5px 2% !important;
 text-align: right;
+}
+.mgmt-container table tr {
+    display: block;
 }
 
 #activetm tr.new .error span {

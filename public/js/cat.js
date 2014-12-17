@@ -8649,14 +8649,8 @@ $.extend(UI, {
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
- /*
-            var msg = '<tr class="notify">' +
-                   '    <td colspan="7">' +
-                   '        <span>Downloading TMX... You can close the panel and continue translating.</span>' +
-                   '    </td>' +
-                   '</tr>';
-            $(this).parents('tr').first().after(msg);
-*/
+            var msg = '<td class="notify">Downloading TMX... You can close the panel and continue translating.</td>';
+            $(this).parents('tr').first().append(msg);
         });
 
 
@@ -9477,6 +9471,7 @@ $.extend(UI, {
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        $(tm).find('td.notify').remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $('#' + iFrameID).contents().find('body').text();
