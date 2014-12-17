@@ -15,22 +15,20 @@ class userKeysController extends ajaxController {
 
     private $description;
 
+    private $exec;
+
     public function __construct() {
 
         //Session Enabled
         $this->checkLogin();
         //Session Disabled
 
-        if( !$this->userIsLogged ){
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -1,
-                    'message' => "Login is required to perform this action"
-            );
-            return;
-        }
-
         //define input filters
         $filterArgs = array(
+                'exec'        => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                ),
                 'key'         => array(
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
@@ -45,6 +43,7 @@ class userKeysController extends ajaxController {
         $_postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //assign variables
+        $this->exec        = $_postInput[ 'exec' ];
         $this->key         = $_postInput[ 'key' ];
         $this->description = $_postInput[ 'description' ];
 
@@ -57,28 +56,51 @@ class userKeysController extends ajaxController {
             );
         }
 
-    }
+        if ( array_search( $this->exec, array( 'update', 'newKey' ) ) === false ) {
+            $this->result[ 'errors' ][ ] = array(
+                    'code'    => -5,
+                    'message' => "No method $this->exec allowed."
+            );
+        }
 
+    }
 
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
-     * @return mixed
+     * @return void
      */
     function doAction() {
 
+
+        //raise an error only if user is not logged and if he want update a key
+        if ( !$this->userIsLogged && $this->exec == 'update' ) {
+            $this->result[ 'errors' ][ ] = array(
+                    'code'    => -1,
+                    'message' => "Login is required to perform this action"
+            );
+        } elseif( !$this->userIsLogged && $this->exec == 'new Key' ) {
+            //if the user is not logged
+            //ONLY LOGGED USERS CAN ADD KEYS TO THEIR KEYRING
+            return;
+        }
+
         //if some error occured, stop execution.
         if ( count( @$this->result[ 'errors' ] ) ) {
-            return false;
+            return;
         }
 
         try {
 
-            $tmKeyStruct              = new TmKeyManagement_TmKeyStruct();
-            $tmKeyStruct->key         = $this->key;
-            $tmKeyStruct->name        = $this->description;
-            $tmKeyStruct->tm          = true;
-            $tmKeyStruct->glos        = true;
+            $tmService = new TMSService();
+            $tmService->setTmKey( $this->key );
+            $tmService->checkCorrectKey();
+
+            $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
+            $tmKeyStruct->key  = $this->key;
+            $tmKeyStruct->name = $this->description;
+            $tmKeyStruct->tm   = true;
+            $tmKeyStruct->glos = true;
 
 
             $mkDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
@@ -87,12 +109,23 @@ class userKeysController extends ajaxController {
             $memoryKeyToUpdate->uid    = $this->uid;
             $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 
-            $userMemoryKeys = $mkDao->update( $memoryKeyToUpdate );
-            if ( !$userMemoryKeys ){
+            switch ( $this->exec ) {
+                case 'update':
+                    $userMemoryKeys = $mkDao->update( $memoryKeyToUpdate );
+                    break;
+                case 'newKey':
+                    $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
+                    break;
+                default:
+                    throw new Exception( "Unexpected Exception", -4 );
+            }
+
+            if ( !$userMemoryKeys ) {
                 throw new Exception( "This key wasn't found in your keyring.", -3 );
             }
 
-        } catch ( Exception $e ){
+
+        } catch ( Exception $e ) {
             $this->result[ 'data' ]      = 'KO';
             $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
