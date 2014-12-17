@@ -8825,11 +8825,12 @@ $.extend(UI, {
         //check if the key already exists, it can not be sent nor added twice
         var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey' );
         var keyIsAlreadyPresent = false;
-        $( keys_of_the_job ).each( function(){
-            if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
+        $( keys_of_the_job ).each( function( index, value ){
+            if( $(value).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
                 console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
                 $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
+                $('#activetm tr.new .error').show();
                 UI.checkTMAddAvailability(); //some enable/disable stuffs
                 keyIsAlreadyPresent = true;
                 return false;
