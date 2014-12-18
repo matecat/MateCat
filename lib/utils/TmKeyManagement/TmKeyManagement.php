@@ -296,6 +296,10 @@ class TmKeyManagement_TmKeyManagement {
                 throw new Exception( "Read and Write grants can not be both empty", 4 );
             }
 
+            if ( empty( $_client_tm_key->key ) ){
+                throw new Exception( "Invalid Key Provided", 5 );
+            }
+
         }
 
         $uniq_num = count( array_unique( $reverse_lookup_client_json[ 'unique' ] ) );
