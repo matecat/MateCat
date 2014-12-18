@@ -1501,9 +1501,19 @@ UI = {
                     .replace( config.crPlaceholderRegex, "\r" )
                     .replace( config.crlfPlaceholderRegex, "\r\n" )
                     .replace( config.tabPlaceholderRegex, "\t" )
+					//.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
                     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
-            UI.dmp.diff_cleanupEfficiency( diff_obj );
+
+			_str  = htmlDecode(_str );
+			_edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+
+			//Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
+			//used to detect initial spaces
+			_str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str;
+			_edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit;
+
+            diff_obj = UI.dmp.diff_main( _edit, _str );
+			UI.dmp.diff_cleanupEfficiency( diff_obj );
             return diff_obj;
         }
 
