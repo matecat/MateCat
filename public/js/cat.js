@@ -1508,9 +1508,9 @@ UI = {
 			_edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
 			//Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
-			//used to detect initial spaces
-			_str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str;
-			_edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit;
+			//used to detect initial and final spaces in html diff
+			_str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
+			_edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
 
 			diff_obj = UI.dmp.diff_main( _edit, _str );
 			UI.dmp.diff_cleanupEfficiency( diff_obj );
