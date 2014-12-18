@@ -150,6 +150,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
             UI.checkTMKey('key');
+            UI.saveTMkey($(this));
 //            UI.addTMKeyToList();
 
 //            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
@@ -1037,15 +1038,33 @@ $.extend(UI, {
             },
             success: function(d) {
                 $('.popup-tm').removeClass('saving');
-
-//                d.errors = [];
                 if(d.errors.length) {
                     APP.showMessage({msg: d.errors[0].message});
-//                    $('.mgmt-panel-tm .warning-message').text('').hide();
-//                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
                 } else {
                     console.log('TM description saved!!');
-
+                }
+            }
+        });
+    },
+    saveTMkey: function (button) {
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'newKey',
+                key: $('#new-tm-key').val(),
+                description: $('#new-tm-description').val()
+            },
+            error: function() {
+                console.log('Error saving TM key!');
+//                APP.showMessage({msg: 'There was an error saving your key. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+            },
+            success: function(d) {
+                $('.popup-tm').removeClass('saving');
+                if(d.errors.length) {
+//                    APP.showMessage({msg: d.errors[0].message});
+                } else {
+                    console.log('TM key saved!!');
                 }
             }
         });
