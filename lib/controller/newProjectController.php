@@ -315,6 +315,7 @@ class newProjectController extends viewController {
         $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
         $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
