@@ -1496,13 +1496,13 @@ UI = {
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
 
-        function prepareTranslationDiff( translation ){
-            _str = translation.replace( config.lfPlaceholderRegex, "\n" )
-                    .replace( config.crPlaceholderRegex, "\r" )
-                    .replace( config.crlfPlaceholderRegex, "\r\n" )
-                    .replace( config.tabPlaceholderRegex, "\t" )
-					//.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+		function prepareTranslationDiff( translation ){
+			_str = translation.replace( config.lfPlaceholderRegex, "\n" )
+					.replace( config.crPlaceholderRegex, "\r" )
+					.replace( config.crlfPlaceholderRegex, "\r\n" )
+					.replace( config.tabPlaceholderRegex, "\t" )
+				//.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+					.replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
 
 			_str  = htmlDecode(_str );
 			_edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
@@ -1512,10 +1512,10 @@ UI = {
 			_str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str;
 			_edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit;
 
-            diff_obj = UI.dmp.diff_main( _edit, _str );
+			diff_obj = UI.dmp.diff_main( _edit, _str );
 			UI.dmp.diff_cleanupEfficiency( diff_obj );
-            return diff_obj;
-        }
+			return diff_obj;
+		}
 
         $.each(d.data.editable, function(index) {
             diff_obj = prepareTranslationDiff( this.translation );
