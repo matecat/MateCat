@@ -672,7 +672,7 @@ $.extend(UI, {
         $('.mgmt-container .tm-error-message').hide();
         $('.mgmt-container .tm-warning-message').hide();
         $('#activetm .edit-desc').removeAttr('contenteditable');
-        $('#activetm td.uploadfile').remove();
+//        $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
         $('#activetm tr.new .canceladdtmx').click();
     },
@@ -681,8 +681,11 @@ $.extend(UI, {
         console.log('div_id: ', div_id);
         console.log('form: ', form);
         // Create the iframe...
+        ts = new Date().getTime();
+        ifId = "upload_iframe-" + ts;
         var iframe = document.createElement("iframe");
-        iframe.setAttribute("id", "upload_iframe");
+        iframe.setAttribute("id", ifId);
+        console.log('iframe: ', iframe);
         iframe.setAttribute("name", "upload_iframe");
         iframe.setAttribute("width", "0");
         iframe.setAttribute("height", "0");
@@ -690,9 +693,10 @@ $.extend(UI, {
         iframe.setAttribute("style", "width: 0; height: 0; border: none;");
 
         // Add to document...
-        form.parentNode.appendChild(iframe);
+        document.body.appendChild(iframe);
+//        form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
-        iframeId = document.getElementById("upload_iframe");
+        iframeId = document.getElementById(ifId);
 
         // Add event...
         var eventHandler = function () {
@@ -1078,6 +1082,15 @@ $.extend(UI, {
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
         $.cookie('tmpanel-open', 0, { path: '/' });
+        if((!APP.isCattool)&&(!checkAnalyzability('closing tmx panel'))) {
+            disableAnalyze();
+            if(!checkAnalyzabilityTimer) var checkAnalyzabilityTimer = window.setInterval( function () {
+                if(checkAnalyzability('set interval')) {
+                    enableAnalyze();
+                    window.clearInterval( checkAnalyzabilityTimer );
+                }
+            }, 500 );
+        }
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
