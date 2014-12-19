@@ -2249,6 +2249,21 @@ left: 9999px;
 }
 
 
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before
+{
+    left: auto !important;
+    right: 10000px !important;
+}
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
+{
+    left: auto !important;
+    right: 9998px !important;
+}
+
 
 .icon-tag-expand:before {
 content: "...";
