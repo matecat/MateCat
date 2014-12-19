@@ -110,6 +110,7 @@ class downloadTMXController extends downloadController {
             Log::doLog( $output );
 
             Utils::sendErrMailReport( $output, "Download TMX Error: user Not Logged" );
+            $this->unlockToken();
             exit;
         }
 
