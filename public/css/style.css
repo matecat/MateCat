@@ -2108,6 +2108,7 @@ footer nav
 	/*
 		cursor: move !important;
 	*/
+	display: inline-block;
 }
 .editarea .locked:hover,
 .source .locked:hover
@@ -2136,6 +2137,7 @@ footer nav
 {
 	color: #767676;
 	font-style: italic;
+	display: inline-block;
 }
 
 .editor .editarea .locked,
