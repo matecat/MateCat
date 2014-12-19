@@ -203,6 +203,7 @@
 </div>
 
 
+
         <footer>
 			<a href="#" id="settingsSwitcher" title="Settings"></a>
 
@@ -227,13 +228,13 @@
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
                         </div>
                     </tal:block>
 
                     <tal:block tal:condition="php: !empty(logged_user)">
                         <div id='welcomebox'>
-                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
                         </div>
                     </tal:block>
 					
@@ -241,8 +242,8 @@
 
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <p class="progress">Progress:</p>
-                    <div class="meter">
+                    <!-- <p class="progress">Progress:</p> -->
+                    <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
                         <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
@@ -253,71 +254,20 @@
                     <ul>
 
                         <li id="stat-eqwords">
-                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
-                            <tal:block tal:condition="php: empty(analysis_enabled)">
-                                Payable Words
-                            </tal:block>
-                            : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
-
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
                         <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                         -->
-                        <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
+                      
+		     <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
                         <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
 
-                    </ul>
-
-                    <div class="stats">
-                        <div class="header-stats">Project stats (<a href="${basepath}?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
-                        <ul class="h-stats">
-
-
-                            <li class="first">&nbsp;</li>
-                            <li>Initial</li>
-                            <li>To-do</li>
-                            <li>%</li>
-                            <li>Cost</li>
-                        </ul>
-                        <ul>
-                            <li class="first">New</li>
-                            <li>---.---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Repetitions</li> <li>---</li>
-                            <li>90</li>
-                            <li>100</li>
-                            <li>30</li>
-                        </ul>
-                        <ul>
-                            <li class="first">100% match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">100% context match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Fuzzy match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Machine translation</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <a href="#" class="arrow-notification"></a>
-
-                    </div>
-
-                </div>
+                   </ul> 
+			
+		</div>
 
                 <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
                     <p class="progress">Calculating word count...</p>

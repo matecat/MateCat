@@ -2225,7 +2225,7 @@ footer nav
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {
-         display: none;
+         display: block;
     }
 }
 @media screen and (max-width: 1280px){
@@ -2375,7 +2375,7 @@ p.percent
 #stat-completion,
 #stat-wph
 {
-	display: none;
+	display: wph;
 }
 
 #originalDownload,
