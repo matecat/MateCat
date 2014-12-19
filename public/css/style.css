@@ -2148,6 +2148,7 @@ footer nav
 	height: 32px;
 	vertical-align: middle;
     border: 2px solid transparent;
+	display: inline-block;
 }
 .editor .footer .locked
 {
