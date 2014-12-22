@@ -4229,9 +4229,22 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
-            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                if(!UI.isFirefox) UI.showEditToolbar();
+            if(!UI.editarea.find('.locked.selected').length) {
+                if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                    if(!UI.isFirefox) UI.showEditToolbar();
+                }
             }
+            /*
+                        if(!UI.editarea.find('.locked.selected').length) {
+                            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                                if(!UI.isFirefox) UI.showEditToolbar();
+                            }
+                        } else {
+                            console.log('A tag is selected');
+                            console.log(UI.editarea.find('.locked.selected')[0]);
+                            setCursorPosition(UI.editarea.find('.locked.selected')[0]);
+                        }
+            */
 		}).on('mousedown', '.editarea', function(e) {
             if(e.which == 3) {
                 e.preventDefault();
@@ -4743,9 +4756,15 @@ $.extend(UI, {
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			setCursorPosition(this);
-			selectText(this);
-			$(this).toggleClass('selected');
+            if($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                setCursorPosition(this, 'end');
+            } else {
+                setCursorPosition(this);
+                selectText(this);
+                $(this).toggleClass('selected');
+            }
+
 //		}).on('contextmenu', '.source', function(e) {
 			// temporarily disabled
 //            if(UI.viewConcordanceInContextMenu||UI.viewSpellCheckInContextMenu) e.preventDefault();
