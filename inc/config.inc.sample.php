@@ -249,7 +249,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.4.2.2';
+        self::$BUILD_NUMBER = '0.4.2.3';
         self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$AUTHCOOKIENAME='matecat_login_v2';
