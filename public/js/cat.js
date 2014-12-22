@@ -8186,9 +8186,9 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
+    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length || $('.popup-tm td.uploadfile.uploading').length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending download. Are you sure you want to quit?';
+		var leave_message = 'You have a pending operation. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
 			if(!e) e = window.event;
 			//e.cancelBubble is supported by IE - this will kill the bubbling process.
@@ -8685,7 +8685,7 @@ $.extend(UI, {
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
-            var msg = '<td class="notify">Downloading TMX... You can close the panel and continue translating.</td>';
+            var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
             $(this).parents('tr').first().append(msg);
         });
 
