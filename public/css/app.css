@@ -5508,7 +5508,10 @@ padding-top: 0px;
 }
 
 
-
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag ,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag ,
@@ -5518,6 +5521,13 @@ body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag {
     transform: rotate(-180deg);
 }
 
+body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag {
+ -ms-transform: rotate(0deg); /* IE 9 */
+    -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
+    transform: rotate(0deg);
+}
 
 
 .tagModeToggle {
