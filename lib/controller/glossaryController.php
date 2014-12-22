@@ -1,0 +1,397 @@
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: domenico
+ * Date: 06/12/13
+ * Time: 15.55
+ *
+ */
+include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
+include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
+include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
+include_once INIT::$MODEL_ROOT . "/queries.php";
+
+class glossaryController extends ajaxController {
+
+    private $exec;
+    private $id_job;
+    private $password;
+    private $segment;
+    private $translation;
+    private $comment;
+    private $automatic;
+    private $_TMS;
+    private $job_info;
+
+    public function __construct() {
+
+        parent::__construct();
+
+        $filterArgs = array(
+            'exec'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'segment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'translation' => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'comment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'automatic'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+        );
+
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->exec        = $__postInput[ 'exec' ];
+        $this->id_job      = $__postInput[ 'id_job' ];
+        $this->password    = $__postInput[ 'password' ];
+        $this->segment     = $__postInput[ 'segment' ];
+        $this->translation = $__postInput[ 'translation' ];
+        $this->comment     = $__postInput[ 'comment' ];
+        $this->automatic   = $__postInput[ 'automatic' ];
+    }
+
+    public function doAction() {
+
+        $this->job_info = getJobData( $this->id_job, $this->password );
+
+        /**
+         * For future reminder
+         *
+         * MyMemory should not be the only Glossary provider
+         *
+         */
+        $this->_TMS = new TMS( 1 /* MyMemory */ );
+
+        $this->checkLogin();
+
+        try {
+
+            $config = TMS::getConfigStruct();
+
+            $config[ 'segment' ]     = $this->segment;
+            $config[ 'translation' ] = $this->translation;
+            $config[ 'tnote' ]       = $this->comment;
+            $config[ 'source_lang' ] = $this->job_info[ 'source' ];
+            $config[ 'target_lang' ] = $this->job_info[ 'target' ];
+            $config[ 'email' ]       = "demo@matecat.com";
+            $config[ 'id_user' ]     = $this->job_info[ 'id_translator' ];
+            $config[ 'isGlossary' ]  = true;
+            $config[ 'get_mt' ]      = null;
+            $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
+
+            switch ( $this->exec ) {
+
+                case 'get':
+                    $this->_get( $config );
+                    break;
+                case 'set':
+                    /**
+                     * For future reminder
+                     *
+                     * MyMemory should not be the only Glossary provider
+                     *
+                     */
+                    if ( $this->job_info[ 'id_tms' ] == 0 ) {
+                        throw new Exception( "Glossary is not available when the TM feature is disabled", -11 );
+                    }
+                    $this->_set( $config );
+                    break;
+                case 'update':
+                    $this->_update( $config );
+                    break;
+                case 'delete':
+                    $this->_delete( $config );
+                    break;
+
+            }
+
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+        }
+        
+    }
+
+    protected function _get( $config ){
+
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $this->uid, $this->userRole );
+
+        if ( count( $tm_keys ) ) {
+            $config[ 'id_user' ] = array();
+            /**
+             * @var $tm_key TmKeyManagement_TmKeyStruct
+             */
+            foreach ( $tm_keys as $tm_key ) {
+                $config[ 'id_user' ][ ] = $tm_key->key;
+            }
+        }
+
+        //remove tags from requests sent to MyMemory
+        $config[ 'segment' ] = CatUtils::view2rawxliff( preg_replace( '#<(?:/?[^>]+/?)>#', "", $config[ 'segment' ] ) );
+
+        $TMS_RESULT = $this->_TMS->get( $config )->get_glossary_matches_as_array();
+
+        /**
+         * Return only exact matches in glossary when a search is executed over the entire segment
+         * Reordered by positional status of matches in source
+         *
+         * Example:
+         * Segment: On average, Members of the House of Commons have 4,2 support staff.
+         *
+         * Glossary terms found: House of Commons, House of Lords
+         *
+         * Return: House of Commons
+         *
+         */
+        if ( $this->automatic ) {
+            $tmp_Result = array();
+            foreach ( $TMS_RESULT as $k => $val ) {
+                if ( ( $res = mb_stripos( $this->segment, preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $k ) ) ) === false ) {
+                    unset( $TMS_RESULT[ $k ] );
+                } else {
+                    $tmp_Result[ $res ] = $k;
+                }
+            }
+            ksort( $tmp_Result ); //sort by position in source
+            $ordered_Result = array();
+            foreach ( $tmp_Result as $glossary_matches ) {
+                $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+            }
+            $TMS_RESULT = $ordered_Result;
+        }
+        $this->result[ 'data' ][ 'matches' ] = $TMS_RESULT;
+
+    }
+
+    protected function _set( $config ){
+
+        $this->result[ 'errors' ] = array();
+
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
+
+        if ( empty( $tm_keys ) ) {
+
+            $APIKeySrv = new TMSService();
+            $newUser   = (object)$APIKeySrv->createMyMemoryKey(); //throws exception
+
+            //TODO take only for hystorical reason
+            updateTranslatorJob( $this->id_job, $newUser );
+
+            //fallback
+            $config[ 'id_user' ] = $newUser->id;
+            
+            $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
+            $new_key->tm    = 1;
+            $new_key->glos  = 1;
+            $new_key->key   = $newUser->key;
+            $new_key->owner = ( $this->userMail == $this->job_info['owner'] );
+
+            if( !$new_key->owner ){
+                $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]} = 1;
+                $new_key->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]} = 1;
+            } else {
+                $new_key->r     = 1;
+                $new_key->w     = 1;
+            }
+
+            if( $new_key->owner ){
+                //do nothing, this is a greedy if
+            } elseif ( $this->userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+                $new_key->uid_transl = $this->uid;
+            } elseif ( $this->userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+                $new_key->uid_rev = $this->uid;
+            }
+
+            //create an empty array
+            $tm_keys   = array();
+            //append new key
+            $tm_keys[] = $new_key;
+
+            //put the key in the job
+            TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->id_job, $this->password, $tm_keys );
+
+            //put the key in the user keiring
+            if( $this->userIsLogged  ){
+
+                $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
+                $newMemoryKey->tm_key = $new_key;
+                $newMemoryKey->uid    = $this->uid;
+
+                $mkDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+
+                $mkDao->create( $newMemoryKey );
+
+            }
+
+        }
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
+
+        //prepare the error report
+        $set_code = array();
+        //set the glossary entry for each key with write grants
+        if ( count( $tm_keys ) ) {
+
+            /**
+             * @var $tm_keys TmKeyManagement_TmKeyStruct[]
+             */
+            foreach ( $tm_keys as $tm_key ) {
+                $config[ 'id_user' ] = $tm_key->key;
+                $TMS_RESULT = $this->_TMS->set( $config );
+                $set_code[ ] = $TMS_RESULT;
+            }
+
+        }
+
+        $set_successful = true;
+        if( array_search( false, $set_code, true ) ){
+            //There's an error, for now skip, let's assume that are not errors
+          $set_successful = false;
+        }
+
+        if ( $set_successful ) {
+//          Often the get method after a set is not in real time, so return the same values ( FAKE )
+//          $TMS_GET_RESULT = $this->_TMS->get($config)->get_glossary_matches_as_array();
+//          $this->result['data']['matches'] = $TMS_GET_RESULT;
+            $this->result[ 'data' ][ 'matches' ] = array(
+                    $config[ 'segment' ] => array(
+                            array(
+                                    'segment'          => $config[ 'segment' ],
+                                    'translation'      => $config[ 'translation' ],
+                                    'last_update_date' => date_create()->format( 'Y-m-d H:i:m' ),
+                                    'last_updated_by'  => "Matecat user",
+                                    'created_by'       => "Matecat user",
+                                    'target_note'      => $config[ 'tnote' ],
+                            )
+                    )
+            );
+
+            if( isset($new_key) ){
+                $this->result[ 'data' ][ 'created_tm_key' ] = true;
+            }
+
+        } else {
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "We got an error, please try again." );
+        }
+
+    }
+
+    protected function _update( $config ){
+
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
+
+        //prepare the error report
+        $set_code = array();
+        //set the glossary entry for each key with write grants
+        if ( count( $tm_keys ) ) {
+
+            /**
+             * @var $tm_key TmKeyManagement_TmKeyStruct
+             */
+            foreach ( $tm_keys as $tm_key ) {
+                $config[ 'id_user' ] = $tm_key->key;
+                $TMS_RESULT = $this->_TMS->update( $config );
+                $set_code[ ] = $TMS_RESULT;
+            }
+
+        }
+
+        $set_successful = true;
+        if( array_search( false, $set_code, true ) ){
+            $set_successful = false;
+        }
+
+        //reset key list
+        $config[ 'id_user' ] = array();
+        foreach ( $tm_keys as $tm_key ) {
+            $config[ 'id_user' ][ ] = $tm_key->key;
+        }
+
+        if ( $set_successful ) {
+            $TMS_GET_RESULT = $this->_TMS->get( $config )->get_glossary_matches_as_array();
+            $this->result[ 'data' ][ 'matches' ] = $TMS_GET_RESULT;
+        }
+
+    }
+
+    protected function _delete( $config ){
+
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+
+        //prepare the error report
+        $set_code = array();
+        //set the glossary entry for each key with write grants
+        if ( count( $tm_keys ) ) {
+
+            /**
+             * @var $tm_key TmKeyManagement_TmKeyStruct
+             */
+            foreach ( $tm_keys as $tm_key ) {
+                $config[ 'id_user' ] = $tm_key->key;
+                $TMS_RESULT = $this->_TMS->delete( $config );
+                $set_code[ ] = $TMS_RESULT;
+            }
+
+        }
+
+        $set_successful = true;
+        if( array_search( false, $set_code, true ) ){
+            $set_successful = false;
+        }
+
+        $this->result[ 'code' ] = $set_successful;
+        $this->result[ 'data' ] = ( $set_successful ? 'OK' : null );
+
+    }
+
+}

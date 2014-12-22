@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<link href="css/comments.css" rel="stylesheet" type="text/css" />
+ <script src="js/jquery.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div class="header">
+
+
+
+<div class="wrapper">   <a href="" class="notification m-notification">2</a><span class="text">+ you</span> <a href="#" class="viewer"><span class="v-name"><span class="v-arrow"></span>marco trombetti</span></a> <a href="#" class="viewer"><span class="v-name"><span class="v-arrow"></span>Antonio Farina</span></a> <a href="#" class="viewer"><span class="v-name"><span class="v-arrow"></span>Alessandro Cattelan</span></a>
+  
+  <div id="notification">
+    <a href="#" class="arrow-notification"></a>
+    <div class="h-notification">Notifications  </div>
+      <ul>
+        <li><b>Luca</b> 
+          <br />
+        "parts" va tradotto con "componenti" e non con "pezzi"</li>
+    <li>
+      <b>Lucia</b><br />
+      
+      questa frase è lunga e risulta illeggibile</li>
+    <li>
+      <b>Antonio</b>
+      <br />
+      attenzione ai doppi spazi</li>
+    </ul>
+     </div>
+  <script type="text/javascript">
+        $(document).ready(function() {
+
+            $(".m-notification").click(function(e) {          
+				e.preventDefault();
+                $("div#notification").toggle();
+				$(".m-notification").toggleClass("menu-open");
+            });
+			
+			$("div#notification").mouseup(function() {
+				return false
+			});
+			$(document).mouseup(function(e) {
+				if($(e.target).parent("a.m-notification").length==0) {
+					$(".m-notification").removeClass("menu-open");
+					$("fieldset#signin_menu").hide();
+				}
+			});			
+			
+        });
+   </script>
+     <a href="#"><img src="img/logo.png" class="logo" /></a>
+  <div class="breadcrumbs">
+    
+    
+  <a href="#">Projects</a> > <a href="#">MyMemory</a> > A_collaborative_language_resource.html  </div>
+  
+
+  
+<div class="cl"></div>
+</div>
+
+<div class="cl"></div>
+
+<div class="tools">
+<div class="wrapper">
+<a href="#"></a>
+<a href="#"></a>
+<a href="" class="search-icon"></a>
+
+
+
+
+
+
+
+
+ 
+<script type="text/javascript">
+        $(document).ready(function() {
+
+            $(".search-icon, .search-on").click(function(e) {          
+				e.preventDefault();
+                $("div#search").toggle();
+				
+			
+				
+            });
+			
+			
+			
+        });
+</script>
+</div>
+</div>
+
+<div class="search" id="search" >
+<a href="#" class="search-on"></a>
+<div class="h-editor"> 
+  search
+  <div class="cl"></div>
+</div>
+<p>Find:	</p>
+<input name="" type="text" class="input" />									   
+<p>Replace with:</p>
+<input name="" type="text" class="input"/>
+<input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
+<a href="#" class="btn con-menubtn"></a>
+<div class="cl"></div>
+
+
+     <input name="" type="checkbox" value="" class="checkbox"/> 
+     <p>Match case</p>         
+     <input name="" type="checkbox" value="" class="checkbox"/>    
+     <p>Match whole word</p>        
+     <input name="" type="checkbox" value="" class="checkbox"/>    
+     <p>search regular expressions </p>      
+     <input name="" type="checkbox" value="" class="checkbox"/>    
+     <p>conditional search   </p>
+     <div class="cl"></div>
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+</div>
+</div>
+
+
+<div class="main">
+
+<div class="comment-area" id="cmt">
+ <div class="h-notification">Comments<a href="#" class="x"></a></div>
+  <ul>
+  <span class="corner"></span>
+    <li><p> <strong>luca panzarella</strong>
+
+    <span class="date">  6:11 PM Mar 31</span>
+<br />
+      Fede, questa modifica riguarda lo sviluppo: molto più facile spiegartela bene a voce.. è banale </li>
+    </p><li> <p><strong>Federico</strong>
+
+     <span class="date"> 12:53 PM Apr 2</span>
+<br />
+      Domanda: ma poi l'utente cosa può fare in queste pagine statiche? Ci si arriva solamente da compilazione form? </li>
+    </p><li> <p><strong>dario</strong>
+
+    <span class="date">  2:11 PM Apr 2</span>
+<br />
+      si! </p></li>
+      <li style="background:#c4d3dd">
+      <textarea name="" cols="" rows="" class="sugg-input" style="width:195px"></textarea>
+   
+<input name="" type="button" class="btn con-submit sugg-submit" value="ADD THE COMMENT"/>  
+<div class="cl"></div> 
+      </li>
+  </ul>
+</div>
+
+
+
+<div class="cl"></div>
+
+
+<ul class="gray">
+<li class="number">1</li>
+<li >Contribute your TMs to create more accurate memories containing matches from your assets.</li>
+<li class="b"><a href="#" class="cmt"><span class="spancomm"><span class="lft"></span>Che cosa è MyMemory?</span></a></li>
+<li class="color"><a href="#" class="status"></a></li>
+<li class="commentballoon"><a href="#" title="view 1 comment">1</a></li>
+</ul>
+<ul class="gray2">
+<li class="number">2</li>
+<li >What is MyMemory?</li>
+<li class="b">MyMemory è la memoria più grande del mondo di traduzione.</li>
+<li class="color"><a href="#" class="status"></a></li>
+<li class="commentballoon"><a href="#" title="view 1 comment">1</a></li>
+</ul>
+<ul class="gray">
+<li class="number">3</li>
+<li >MyMemory is the world's largest Translation Memory.<br />
+  asdsa<br />
+  asdasd<br />
+  fdff</li>
+<li class="b">Vai a http://mymemory.translated.net e fare clic su 
+Log in (username: demo - password: demo).</li>
+<li class="color"><a href="#" class="status"></a></li>
+</ul>
+
+
+<script type="text/javascript">
+        $(document).ready(function() {
+            $(".cmt, .x").click(function(e) {          
+				e.preventDefault();
+                $("div#cmt").toggle();
+            });
+        });
+</script>
+
+
+<ul class="gray2">
+<li class="number">4</li>
+<li >Upload a small .doc (not .docx) file you want to translate, choose source and target languages.</li>
+<li class="b">Carica un piccolo. Doc (non. Docx) file che si desidera tradurre, selezionare le lingue di origine e di destinazione.</li>
+<li class="color"><a href="#" class="status"></a></li>
+</ul>
+<div class="cl"></div>
+
+<ul class="gray2">
+<li class="number">5</li>
+<li >What is MyMemory?</li>
+<li class="b">MyMemory è la memoria più grande del mondo di traduzione.</li>
+<li class="color"><a href="#" class="status"></a></li>
+</ul>
+<ul class="gray">
+<li class="number">6</li>
+<li >MyMemory is the world's largest Translation Memory.<br />
+  asdsa<br />
+  asdasd<br />
+  fdff</li>
+<li class="b">Vai a http://mymemory.translated.net e fare clic su 
+Log in (username: demo - password: demo).</li>
+<li class="color"><a href="#" class="status"></a></li>
+</ul>
+
+
+
+
+
+
+
+<div class="cl"></div>
+</div>
+
+
+
+
+
+
+<div class="footer">
+<div class="wrapper">
+Total words: 13765 | Repetitions: 2571 | 100% Matches: 1771 | Fuzzy matches: 14 | New words: 9409</div>
+</div>
+
+
+
+</body>
+</html>

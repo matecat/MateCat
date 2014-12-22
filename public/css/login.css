@@ -1,0 +1,85 @@
+/*
+#loadingspinner{visibility:hidden}
+*/
+
+html,body
+    {
+    min-height:100%;
+    }
+
+body
+    {
+    width: 100%;
+    height: 100%;
+    background: url(../img/login_bg_1.jpg) left bottom no-repeat;
+    background-size: cover !important;
+min-width:1px !important;
+    }
+
+#loadingspinner
+    {
+    visibility:hidden;
+    }
+
+h1
+    {
+    display: none !important;
+    }
+
+h2
+    {
+    font-size: 42px !important;
+    }
+
+h3
+    {
+    font-weight: normal;
+    font-size: 24px !important;
+    }
+
+.outer
+    {
+    background: url(../img/bg_login_button.gif) 0 0 repeat;
+    border-radius: 6px;
+    margin: 0 auto;
+    width: 330px;
+    border: 1px solid #222;
+    }
+    .outer:hover
+        {
+        background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
+        }
+
+.inner
+    {
+    width: 45px;
+    border-right: 1px solid #003366;
+    background: transparent url(../img/g.png) 0 5px no-repeat;
+    border-radius: 0 0 0 6px;
+    }
+
+.login-button
+    {
+    width: 330px;
+    font-weight: normal;
+    padding: 8px 0 8px 45px;
+    text-align: center;
+    color: #fff;
+    font-size: 16px !important;
+    text-shadow: 0 -1px 0 #003366;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    }
+
+.container
+    {
+    width:100%;
+    height: 100%;
+    }
+
+#incomingurl
+    {
+    visibility: hidden;
+    }
+    

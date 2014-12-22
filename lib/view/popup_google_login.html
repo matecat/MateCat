@@ -1,0 +1,24 @@
+
+<div class="modal login-google" data-type="view" metal:define-macro="googleLoginPopup">
+    <div class="popup-outer closeClickingOutside"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>Login with Google</h1>
+
+        <p>Log in to manage your translation projects, translation memories and glossaries.</p><br/>
+        <div class="popup-box">
+            <div class="outer">
+                <div class="inner">
+                    <button id="sign-in"
+                            tal:attributes='data-oauth authURL'
+                            name=""
+                            type="button"
+                            class="login-button"
+                            >Sign in using Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+<!-- msg to show in all the other pages -->
+<div class="iepopup nobrowser nobrowser2" metal:define-macro="unsupported">
+	<a href="${basepath}" class="logoblack"></a>
+	<script>
+		var browser = ($.browser.msie)? 'Internet Explorer' : ($.browser.opera)? 'Opera' : 'Your browser';
+
+
+<!-- // <script>document.write(browser); < /script> -->
+<!-- // questo comando non funziona nelle pagine interne di ff e ie, viene fuori un messaggio undefined. Quando funzionerà va inserito al posto di "this browser" -->
+<!-- //${basepath}public/img/ff -->
+	</script>
+	<div class="titleie">
+        <h1>Sorry, this browser is currently not supported.</h1><br />
+    
+    </div>
+    <div>
+    	<!-- Currently MateCat works great with the following browsers: -->
+        <p>MateCat works great with the following browsers</p>
+    	<ul>
+           
+
+            <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
+    		<li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
+    Chrome</a></li>
+            </tal:block>
+
+            <tal:block tal:condition="php: in_array('safari', enabledBrowsers)">
+    		<li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
+    Safari</a></li>
+            </tal:block>
+        </ul>
+    </div>
+   
+</div>
+<!-- end -->
+<!-- msg to show in homepage -->
+
+<div class="iepopup nobrowser" metal:define-macro="indexie">
+    <style type="text/css">
+       .nobrowser {display:block!important}
+    </style>
+    <a href="${basepath}" class="logoblack"></a>
+
+    <div class="titleie">
+        <h1>Welcome to MateCat!</h1>
+        <h2>There are 2 options for you</h2>
+    </div>
+    <div class="col-2 pull-left col-a">
+        <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
+        <p>MateCat works great with the following browsers</p>
+        <ul>
+         
+            <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
+    Chrome</a></li>
+
+            <li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
+    Safari</a></li>
+        </ul>
+    </div>
+    <div class="col-2 pull-left col-b">
+        <h3>2 - Learn more about MateCat</h3>
+        <br />
+        <p>       
+<a class="button-learn-2" href="https://www.matecat.com/features/"><img src="/public/img/master_matecat.png" />Visit the website</a></p>
+    </div>
+</div>
+
+<!-- end -->
+
+
+
+
+<div class="iepopup" metal:define-macro="job_not_found">
+	<a href="${basepath}" class="logoblack"></a><br />
+
+
+	<strong style="font-size:160%">Sorry, we can't find the project you're looking for.</strong>
+    <br /><br />
+     <img src="/public/img/jobnotfound.png" />
+    <br />
+	<p>Double check the URL or contact your PM.<br />
+ If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
+</div>
+
+<div class="iepopup" metal:define-macro="project_not_found">
+    <a href="${basepath}" class="logoblack"></a><br />
+
+
+    <strong style="font-size:160%">Sorry, we can't find the project you're looking for.</strong><br /><br />
+ <img src="/public/img/jobcancelled.png" />
+    <br />
+    <p>Double check the URL or contact your PM.<br />
+ If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
+</div>
+
+<div class="iepopup job_cancelled" metal:define-macro="job_cancelled">
+    <a href="${basepath}" class="logoblack"></a><br />
+
+
+    <strong style="font-size:160%">This job has been cancelled.</strong><br /><br />
+<img src="/public/img/jobcancelled.png" />
+    <br />
+    <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br />
+        If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
+</div>
+
+<div class="iepopup job_archived" metal:define-macro="job_archived">
+    <script>
+        $("body").on('click', '#reactivate-job', function(e) {
+            e.preventDefault();
+            UI.reactivateJob();
+        });
+    </script>
+    <a href="${basepath}" class="logoblack"></a><br />
+
+
+    <strong style="font-size:160%">This job has been archived.</strong><br /><br />
+<img src="/public/img/jobarchived.png" /><br />
+    <p>MateCAT archives automatically jobs after ${job_archived} days of inactivity.</p>
+    <p tal:condition="true:ownerIsMe">
+        <a id="reactivate-job" href="#" class="translated">Reactivate it</a>
+
+    </p>
+    <p tal:condition="not:ownerIsMe">If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br />
+        If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+

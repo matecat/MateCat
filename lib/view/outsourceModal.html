@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+<div metal:define-macro="outsource_modal">
+    <!--ClickMeter.com code for on click conversion: hanno cliccato su show prizes -->
+    <script type='text/javascript'>
+        var ClickMeter_conversion_id = '5647F8BD60574A36AD75968F397774F5';
+        var ClickMeter_conversion_value = '0.00';
+        var ClickMeter_conversion_commission = '0.00';
+        var ClickMeter_conversion_parameter = 'empty';
+    </script>
+    <script type='text/javascript' id='cmconvscript' src='//www.clickmeter.com/js/conversionOnClick.js'></script>
+
+    <div class="modal outsource" data-type="view">
+        <div class="popup-outer closeClickingOutside"></div>
+        <div class="popup">
+            <a href="#" class="x-popup"></a>
+
+		<h1><span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h1>
+
+        <!--    <h1>Choose the best way to translate</h1> -->
+
+            <div class="popup-box pricebox">
+                <div class="choose">
+                    <div class="onyourown">
+                        <h2>Option #1 - Share the following link with your translator</h2>
+                        <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
+                        <a class="uploadbtn in-popup" target="_blank">Open</a>
+                    </div>
+                    <div class="outsourceto">
+                        <h2>Option #2 - Outsource to a translation company</h2>  <a  href='javascript:void(0)' onclick='trackConversion("#"); return false;' class="uploadbtn showprices">Show
+                        prices</a>
+
+                        <div class="revealprices">
+                            <div class="copytext">
+                                <img src="/public/img/logo_translated.png"/>
+
+                                <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">
+                                    T-Rank</a> to select our best translator in this field (<strong>${subject | string:IT}</strong>)
+                                    and keep using the <strong>same translator</strong> for your next projects.
+                                </p>
+
+                                <p>
+                                    You can pay with a <strong>monthly invoice</strong> within 5 days of receipt by credit card, bank transfer or PayPal
+                                </p>
+
+                                <p class="trustbox">
+                                    <strong>About</strong><br /> Translated, since 1999, provides professional translation services
+                                    with a team of more than 100,000 translators and is trusted by more than 40,000 customers.
+                                <a href="http://www.translated.net/en/contact-us" target="_blank">http://www.translated.net/en/contact-us</a>
+                                </p>
+
+
+
+
+                                
+								<div class="references">
+									<img src="/public/img/europe.jpg" style="width:65px;" />
+									<img src="/public/img/google.png" />
+									<img src="/public/img/benetton.jpg" />
+									<img src="/public/img/expedia.jpg" style="vertical-align:bottom;" />
+								</div>
+                            </div>
+                            <div class="total">
+                                <div class="offer">
+                                    <div class="tprice">
+                                        <span class="tpricetitle">Professional Translation<br/>
+											<span class="tpricedesc" style="font-size:15px!important;">
+                                                Subject: ${subject | string:Information Technology}
+                                            </span>
+										</span>
+					                    <span class="euro">€</span>
+                                        <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
+										<span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>
+                                        
+                                    <select id="changecurrency">
+                                        <option value="EUR" data-symbol="€">Euro (EUR)</option>
+                                        <option value="USD" data-symbol="US$">US dollar (USD)</option>
+                                        <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
+                                        <option value="CAD" data-symbol="$">Canadian dollar (CAD)</option>
+                                        <option value="NZD" data-symbol="$">New Zealand dollar (NZD)</option>
+                                        <option value="GBP" data-symbol="£">Pound sterling (GBP)</option>
+                                        <option value="BRL" data-symbol="R$">Real (BRL)</option>
+                                        <option value="RUB" data-symbol="руб">Russian ruble (RUB)</option>
+                                        <option value="SEK" data-symbol="kr">Swedish krona (SEK)</option>
+                                        <option value="CHF" data-symbol="Fr.">Swiss franc (CHF)</option>
+                                        <option value="TRY" data-symbol="TL">Turkish lira (TL)</option>
+                                        <option value="KRW" data-symbol="￦">Won (KRW)</option>
+                                        <option value="JPY" data-symbol="￥">Yen (JPY)</option>
+                                        <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
+                                    </select>
+                                    </div>
+                                    <div class="delivery">Delivery guaranteed by:
+                                        <span class="time" data-timezone="" data-rawtime=""></span>
+                                        <span class="zone2">(UTC +1:00 ) Central European Time (Rome, Paris)
+                                            <!-- select id="changeTimezone" class="noselect" style="width:100%;">
+                                                <option value="-11">(UTC -11:00 ) Midway Islands, American Samoa</option>
+                                                <option value="-10">(UTC -10:00 ) Hawaii, Tahiti, Cook Islands</option>
+                                                <option value="-9">(UTC -9:00 ) Alaska</option>
+                                                <option value="-8">(UTC -8:00 ) Pacific Standard Time (LA, Vancouver)</option>
+                                                <option value="-7">(UTC -7:00 ) Mountain Standard Time (Denver, SLC)</option>
+                                                <option value="-6">(UTC -6:00 ) Central Standard Time (Mexico, Chicago)</option>
+                                                <option value="-5">(UTC -5:00 ) Eastern Standard Time (NYC, Toronto)</option>
+                                                <option value="-4.5">(UTC -4:30 ) Venezuela (Caracas)</option>
+                                                <option value="-4">(UTC -4:00 ) Atlantic Standard Time (Santiago)</option>
+                                                <option value="-3">(UTC -3:00 ) Brasília, São Paulo, Buenos Aires</option>
+                                                <option value="-2">(UTC -2:00 ) South Sandwich Islands</option>
+                                                <option value="-1">(UTC -1:00 ) Azores, Cape Verde (Praia)</option>
+                                                <option value="0">(UTC) Western European Time (London, Lisbon)</option>
+                                                <option value="1">(UTC +1:00 ) Central European Time (Rome, Paris)</option>
+                                                <option value="2">(UTC +2:00 ) Eastern European Time, CAT </option>
+                                                <option value="3">(UTC +3:00 ) Arabia Standard Time (Baghdad, Riyadh)</option>
+                                                <option value="3.5">(UTC +3:30 ) Iran Standard Time (Tehran)</option>
+                                                <option value="4">(UTC +4:00 ) Moscow, St. Petersburg, Dubai</option>
+                                                <option value="4.5">(UTC +4:30 ) Afghanistan Time (Kabul)</option>
+                                                <option value="5">(UTC +5:00 ) Karachi, Tashkent, Maldive Islands</option>
+                                                <option value="5.5">(UTC +5:30 ) India Standard Time (Mumbai, Colombo)</option>
+                                                <option value="6">(UTC +6:00 ) Yekaterinburg, Almaty, Dhaka</option>
+                                                <option value="7">(UTC +7:00 ) Bangkok, Hanoi, Jakarta</option>
+                                                <option value="8">(UTC +8:00 ) Beijing, Perth, Singapore, Hong Kong</option>
+                                                <option value="9">(UTC +9:00 ) Tokyo, Seoul</option>
+                                                <option value="9.5">(UTC +9:30 ) ACST (Darwin, Adelaide)</option>
+                                                <option value="10">(UTC +10:00 ) AEST (Brisbane, Sydney), Yakutsk</option>
+                                                <option value="11">(UTC +11:00 ) Vladivostok, Nouméa, Solomon Islands</option>
+                                                <option value="12">(UTC +12:00 ) Auckland, Fiji, Marshall Islands</option>
+                                                <option value="13">(UTC +13:00 ) Samoa</option>
+                                            </select -->
+                                        </span>
+                                      
+                                    </div>
+                                    <div class="ilmiodiv"></div>
+                                    <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
+                                        <input type="hidden" name="url_ok" value=""/>
+                                        <input type="hidden" name="url_ko" value=""/>
+                                        <input type='hidden' name='data_key' value="" />
+                                        <input type="hidden" name="quoteData" value=""/>
+                                        <a href="#" class="continuebtn disabled">Order</a>
+                                    </form>
+                                    
+                                </div>
+                            </div>
+                            <!-- end total-->
+                        </div>
+                        <!-- end reveal prices-->
+                    </div>
+                    <!--end outsourceto-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

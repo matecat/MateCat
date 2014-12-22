@@ -1,0 +1,63 @@
+<!doctype html>
+<html dir="ltr" lang="en-US">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Matecat Login</title>
+    <link rel="icon" href="${basepath}public/img/favicon.ico" />
+    <script src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/common.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/common.js?build=${build_number}"></script>
+
+    <script type="text/javascript">
+        var config = {
+            basepath: '${basepath | string:/}'
+        };
+        $(document ).ready(function(){
+            $( "#sign-in" ).on('click', function(e){
+                e.preventDefault();
+                APP.googole_popup($(this).data('oauth'));
+            })
+        });
+    </script>
+
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/login.css?build=${build_number}" rel="stylesheet" type="text/css" />
+</head>
+
+
+<body class="login">
+<header>
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+    </div>
+    <div class="cl"></div>
+
+</header>
+<div class="container"></div>
+<span id="incomingurl" tal:content='incomingUrl'></span>
+
+<div class="wrap">
+    <h1>Translated</h1>
+
+    <h2>Translate your files</h2>
+
+    <h3>Matecat gives you more matches<br/>than any other translation tool.</h3>
+
+    <div class="outer">
+        <div class="inner">
+            <button id="sign-in"
+                    tal:attributes='data-oauth authURL'
+                    name=""
+                    type="button"
+                    class="login-button"
+                    >Sign in using Google
+            </button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
