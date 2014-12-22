@@ -2245,7 +2245,6 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
-
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,

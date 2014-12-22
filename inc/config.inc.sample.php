@@ -49,6 +49,7 @@ class INIT {
 	public static $SPELL_CHECK_TRANSPORT_TYPE;
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
+	public static $MAX_UPLOAD_TMX_FILE_SIZE;
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
 	public static $OAUTH_CLIENT_ID;
@@ -263,6 +264,7 @@ class INIT {
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
         self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
+        self::$MAX_UPLOAD_TMX_FILE_SIZE = 100 * 1024 * 1024; // bytes
         self::$MAX_NUM_FILES = 100;
 
         self::$SUPPORTED_FILE_TYPES = array(

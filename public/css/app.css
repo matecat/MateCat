@@ -2245,6 +2245,7 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
+
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
@@ -2258,8 +2259,45 @@ top: -2px;
 left: 9999px;
 }
 
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before
+{
+    left: auto !important;
+    right: 10000px !important;
+}
+
+<<<<<<< HEAD
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
+=======
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before
+{
+    left: auto !important;
+    right: 10000px !important;
+}
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before
+>>>>>>> 45c4c573f3ca7f46208b3cc9a9b471412ccbc826
+{
+    left: auto !important;
+    right: 9998px !important;
+}
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> 45c4c573f3ca7f46208b3cc9a9b471412ccbc826
 .icon-tag-expand:before {
 content: "...";
 margin-top: -5px;
@@ -4687,6 +4725,7 @@ footer nav
 	/*
 		cursor: move !important;
 	*/
+	display: inline-block;
 }
 .editarea .locked:hover,
 .source .locked:hover
@@ -4715,6 +4754,7 @@ footer nav
 {
 	color: #767676;
 	font-style: italic;
+	display: inline-block;
 }
 
 .editor .editarea .locked,
@@ -4727,6 +4767,7 @@ footer nav
 	height: 32px;
 	vertical-align: middle;
     border: 2px solid transparent;
+	display: inline-block;
 }
 .editor .footer .locked
 {

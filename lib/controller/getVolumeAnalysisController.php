@@ -240,7 +240,7 @@ class getVolumeAnalysisController extends ajaxController {
                     $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] += $v;
 
                     //format numbers after sum
-                    $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ], 0, ".", "," );
+                    $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] + 0.00000001, 0, ".", "," );
                 }
             }
         }
@@ -384,9 +384,9 @@ class getVolumeAnalysisController extends ajaxController {
             $this->return_data[ 'summary' ][ 'SEGMENTS_ANALYZED_PRINT' ] = number_format( $this->segments_analyzed, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'TOTAL_STANDARD_WC_PRINT' ] = number_format( $this->total_wc_standard_analysis, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'TOTAL_FAST_WC_PRINT' ]     = number_format( $this->total_wc_fast_analysis, 0, ".", "," );
-            $this->return_data[ 'summary' ][ 'TOTAL_TM_WC_PRINT' ]       = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_TM_WC_PRINT' ]       = number_format( $this->total_wc_tm_analysis + 0.00000001, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'TOTAL_RAW_WC_PRINT' ]      = number_format( $this->total_raw_wc, 0, ".", "," );
-            $this->return_data[ 'summary' ][ 'TOTAL_PAYABLE_PRINT' ]     = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_PAYABLE_PRINT' ]     = number_format( $this->total_wc_tm_analysis + 0.00000001, 0, ".", "," );
 
         } else {
 

@@ -59,22 +59,21 @@ class createProjectController extends ajaxController {
         $array_keys = json_decode( $_POST['private_keys_list'], true );
         $array_keys = array_merge( $array_keys['ownergroup'], $array_keys['mine'],$array_keys['anonymous'] );
 
+        //if a string is sent by the client, transform it into a valid array
+        if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
+            $__postInput[ 'private_tm_key' ] = array(
+                    array(
+                            'key'  => $__postInput[ 'private_tm_key' ],
+                            'name' => null,
+                            'r'    => true,
+                            'w'    => true
+                    )
+            );
+        } else {
+            $__postInput[ 'private_tm_key' ] = array();
+        }
+
         if ( $array_keys ) { // some keys are selected from panel
-
-
-            //if a string is sent by the client, transform it into a valid array
-            if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
-                $__postInput[ 'private_tm_key' ] = array(
-                        array(
-                                'key'  => $__postInput[ 'private_tm_key' ],
-                                'name' => null,
-                                'r'    => true,
-                                'w'    => true
-                        )
-                );
-            } else {
-                $__postInput[ 'private_tm_key' ] = array();
-            }
 
             //remove duplicates
             foreach ( $array_keys as $pos => $value ){
