@@ -701,7 +701,7 @@ function toTitleCase(str)
 }
 
 function getRangeObject(selectionObject) {
-    console.log('getRangeObject');
+//    console.log('getRangeObject');
     if (!UI.isSafari) {
 //    if (selectionObject.getRangeAt) {
         return selectionObject.getRangeAt(0);

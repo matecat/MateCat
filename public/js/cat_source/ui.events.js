@@ -983,7 +983,7 @@ $.extend(UI, {
 
 //			console.log(e.which); 
 
-            if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) {
+            if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
 //                console.log('1: ', window.getSelection());
 //                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
@@ -1000,14 +1000,24 @@ $.extend(UI, {
                 dd=(dd.length==0)? document.title : dd;
                 console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
                 */
-
+                console.log(UI.editarea.html());
                 var rangeObject = getRangeObject(window.getSelection());
-//                console.log('rangeObject: ', rangeObject);
-                if($(rangeObject.endContainer.previousElementSibling).hasClass('locked')) {
-//                    console.log('eccolo');
+                console.log('startOffset dell elemento: ', rangeObject.startOffset);
+                console.log('classe del precedente elemento: ', $(rangeObject.endContainer.previousElementSibling).attr('class'));
+
+
+                                for(var key in rangeObject.endContainer) {
+                                    console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
+                                }
+
+/*
+                if(($(rangeObject.endContainer.previousElementSibling).hasClass('locked'))&&(rangeObject.startOffset < 1)) {
+                    console.log('eccolo');
                     e.preventDefault();
+                    console.log('quanti sono?: ', $(rangeObject.endContainer.previousElementSibling).length);
                     $(rangeObject.endContainer.previousElementSibling).remove();
                 }
+*/
 /*
                 if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
                     console.log('eccolo');
@@ -1025,7 +1035,7 @@ $.extend(UI, {
 					UI.currentSegmentQA();
 				} else {
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-                    console.log('numTagsBefore: ', numTagsBefore);
+//                    console.log('numTagsBefore: ', numTagsBefore);
                     var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 //					console.log('a: ', UI.editarea.html());

@@ -171,6 +171,7 @@ $.extend(UI, {
             } else {
                 segment.removeClass('hasTags');
             }
+            $('span.locked', this).addClass('monad');
             UI.detectTagType(this);
 
 //            UI.checkTagsInSegment();
@@ -689,10 +690,16 @@ $.extend(UI, {
 		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range) {
-//        console.log('RANGE IN JUMPTAG: ', range);
-//        for(var key in range.endContainer) {
-//            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
-//        }
+/*
+        console.log('RANGE IN JUMPTAG: ', range.endContainer);
+        console.log('range.endContainer.data.length: ', range.endContainer.data.length);
+        console.log('range.endOffset: ', range.endOffset);
+        console.log('range.endContainer.nextElementSibling.className: ', range.endContainer.nextElementSibling.className);
+
+        for(var key in range.endContainer) {
+            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+        }
+ */
 //        console.log('data: ', range.endContainer);
 		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
 //			console.log('da saltare');
