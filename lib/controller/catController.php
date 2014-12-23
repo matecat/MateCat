@@ -488,6 +488,7 @@ class catController extends viewController {
         $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
         $this->template->logged_user            = $this->logged_user['short'];
+        $this->template->extended_user          = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
