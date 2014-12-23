@@ -269,23 +269,34 @@ $.extend(UI, {
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
+        logData = {
+            segment_id: segment_id,
+            status: status,
+            byStatus: byStatus
+        };
+        this.log('setContribution1', reqData);
 		segment = $('#segment-' + segment_id);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
+        this.log('setContribution2', '');
 
         if( config.brPlaceholdEnabled ) {
             source = this.postProcessEditarea(segment, '.source');
             target = this.postProcessEditarea(segment);
+            this.log('setContribution3', '');
         } else {
             source = $('.source', segment).text();
             // Attention: to be modified when we will be able to lock tags.
             target = $('.editarea', segment).text();
         }
+        this.log('setContribution4', '');
 
 		if ((target === '') && (byStatus)) {
+            this.log('setContribution5', '');
 			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
 		if (target === '') {
+            this.log('setContribution6', '');
 			return false;
 		}
 		this.updateContribution(source, target);
@@ -294,6 +305,12 @@ $.extend(UI, {
 		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
+        logData = {
+            source: source,
+            target: target
+        };
+        this.log('updateContribution', logData);
+
 		APP.doRequest({
 			data: {
 				action: 'setContribution',
