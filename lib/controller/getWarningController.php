@@ -23,10 +23,17 @@ class getWarningController extends ajaxController {
             'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'token'       => array( 'filter' => FILTER_SANITIZE_STRING,
                                     'flags'  => FILTER_FLAG_STRIP_LOW ),
+            'logs'        => array( 'filter' => FILTER_UNSAFE_RAW )
 
         );
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
+
+        if( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ){
+            Log::$fileName = 'clientLog.log';
+            Log::doLog( $this->__postInput->logs );
+            Log::$fileName = 'log.txt';
+        }
 
     }
 
