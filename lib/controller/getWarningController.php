@@ -31,7 +31,7 @@ class getWarningController extends ajaxController {
 
         if( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ){
             Log::$fileName = 'clientLog.log';
-            Log::doLog( $this->__postInput->logs );
+            Log::doLog( json_decode( $this->__postInput->logs ) );
             Log::$fileName = 'log.txt';
         }
 
