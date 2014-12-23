@@ -505,8 +505,9 @@ $.extend(UI, {
 
             UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
-//            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -984,10 +985,36 @@ $.extend(UI, {
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) {
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
+//                console.log('1: ', window.getSelection());
+//                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
+//                for(var key in window.getSelection()) {
+//                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+//                }
+/*
+                d=window.getSelection()+'';
+//                d=(d.isCollapsed||d.length==0)?document.title:d;
+                console.log('2: ', d);
+                */
+/*
+                dd=window.getSelection()+'';
+                dd=(dd.length==0)? document.title : dd;
+                console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
+                */
+
+                var rangeObject = getRangeObject(window.getSelection());
+//                console.log('rangeObject: ', rangeObject);
+                if($(rangeObject.endContainer.previousElementSibling).hasClass('locked')) {
+//                    console.log('eccolo');
+                    e.preventDefault();
+                    $(rangeObject.endContainer.previousElementSibling).remove();
+                }
+/*
                 if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
+                    console.log('eccolo');
                     e.preventDefault();
                     $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
                 }
+*/
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)

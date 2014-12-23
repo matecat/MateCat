@@ -495,6 +495,7 @@ class catController extends viewController {
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
         $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize         = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 

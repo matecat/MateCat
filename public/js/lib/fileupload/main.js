@@ -169,6 +169,9 @@ UI = {
             $('.tm-added .num').text('');
         }
     },
+    uploadingTMX: function () {
+        return $('.mgmt-tm td.uploadfile').length;
+    },
 
 
 }
@@ -874,6 +877,10 @@ checkAnalyzability = function(who) {
 			return false;
 		}
 		if($('.upload-table tr.failed').length) res = false;
+        if(UI.uploadingTMX()) {
+            res = false;
+//            console.log('una tmx in caricamento');
+        }
 		return res;
 	} else {
 		return false;

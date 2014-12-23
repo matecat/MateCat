@@ -1496,16 +1496,26 @@ UI = {
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
 
-        function prepareTranslationDiff( translation ){
-            _str = translation.replace( config.lfPlaceholderRegex, "\n" )
-                    .replace( config.crPlaceholderRegex, "\r" )
-                    .replace( config.crlfPlaceholderRegex, "\r\n" )
-                    .replace( config.tabPlaceholderRegex, "\t" )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
-            UI.dmp.diff_cleanupEfficiency( diff_obj );
-            return diff_obj;
-        }
+		function prepareTranslationDiff( translation ){
+			_str = translation.replace( config.lfPlaceholderRegex, "\n" )
+					.replace( config.crPlaceholderRegex, "\r" )
+					.replace( config.crlfPlaceholderRegex, "\r\n" )
+					.replace( config.tabPlaceholderRegex, "\t" )
+				//.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+					.replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+
+			_str  = htmlDecode(_str );
+			_edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+
+			//Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
+			//used to detect initial and final spaces in html diff
+			_str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
+			_edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
+
+			diff_obj = UI.dmp.diff_main( _edit, _str );
+			UI.dmp.diff_cleanupEfficiency( diff_obj );
+			return diff_obj;
+		}
 
         $.each(d.data.editable, function(index) {
             diff_obj = prepareTranslationDiff( this.translation );
@@ -2512,7 +2522,7 @@ UI = {
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         $(area).find('span.space-marker').replaceWith(' ');
-        $(area).find('span.rangySelectionBoundary').remove();
+        $(area).find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
@@ -3911,8 +3921,9 @@ $.extend(UI, {
 
             UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
-//            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4390,10 +4401,36 @@ $.extend(UI, {
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) {
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
+//                console.log('1: ', window.getSelection());
+//                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
+//                for(var key in window.getSelection()) {
+//                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+//                }
+/*
+                d=window.getSelection()+'';
+//                d=(d.isCollapsed||d.length==0)?document.title:d;
+                console.log('2: ', d);
+                */
+/*
+                dd=window.getSelection()+'';
+                dd=(dd.length==0)? document.title : dd;
+                console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
+                */
+
+                var rangeObject = getRangeObject(window.getSelection());
+//                console.log('rangeObject: ', rangeObject);
+                if($(rangeObject.endContainer.previousElementSibling).hasClass('locked')) {
+//                    console.log('eccolo');
+                    e.preventDefault();
+                    $(rangeObject.endContainer.previousElementSibling).remove();
+                }
+/*
                 if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
+                    console.log('eccolo');
                     e.preventDefault();
                     $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
                 }
+*/
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
@@ -8318,6 +8355,21 @@ function toTitleCase(str)
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
+function getRangeObject(selectionObject) {
+    console.log('getRangeObject');
+    if (!UI.isSafari) {
+//    if (selectionObject.getRangeAt) {
+        return selectionObject.getRangeAt(0);
+    }
+    else { // Safari!
+        var range = document.createRange();
+        range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
+        range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
+        return range;
+    }
+}
+
+
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function (str){
         return this.indexOf(str) == 0;
@@ -8524,6 +8576,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
             UI.checkTMKey('key');
+            UI.saveTMkey($(this));
 //            UI.addTMKeyToList();
 
 //            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
@@ -8538,27 +8591,34 @@ $.extend(UI, {
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
-        }).on('click', '#activetm tr.mine td.description .edit-desc', function() {
-            console.log('.edit-desc');
+        }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
+//            console.log('.edit-desc');
 //            $(this).addClass('current');
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
         }).on('blur', '#activetm td.description .edit-desc', function() {
-            console.log('blur');
+//            console.log('blur');
             $(this).removeAttr('contenteditable');
             if(APP.isCattool) UI.saveTMdata(false);
 
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+/*
         }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
                 $(this).removeAttr('contenteditable');
                 if(APP.isCattool) UI.saveTMdata(false);
             }
+*/
+        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+            if(APP.isCattool) UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
          }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
-
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
@@ -8580,8 +8640,8 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
-            if(this.files[0].size > config.maxFileSize) {
-                numMb = config.maxFileSize/(1024*1024);
+            if(this.files[0].size > config.maxTMXFileSize) {
+                numMb = config.maxTMXFileSize/(1024*1024);
                 APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
                 return false;
             };
@@ -8608,6 +8668,8 @@ $.extend(UI, {
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
+            var msg = '<td class="notify">Downloading TMX... You can close the panel and continue translating.</td>';
+            $(this).parents('tr').first().append(msg);
         });
 
 
@@ -9036,7 +9098,7 @@ $.extend(UI, {
         $('.mgmt-container .tm-error-message').hide();
         $('.mgmt-container .tm-warning-message').hide();
         $('#activetm .edit-desc').removeAttr('contenteditable');
-        $('#activetm td.uploadfile').remove();
+//        $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
         $('#activetm tr.new .canceladdtmx').click();
     },
@@ -9045,8 +9107,11 @@ $.extend(UI, {
         console.log('div_id: ', div_id);
         console.log('form: ', form);
         // Create the iframe...
+        ts = new Date().getTime();
+        ifId = "upload_iframe-" + ts;
         var iframe = document.createElement("iframe");
-        iframe.setAttribute("id", "upload_iframe");
+        iframe.setAttribute("id", ifId);
+        console.log('iframe: ', iframe);
         iframe.setAttribute("name", "upload_iframe");
         iframe.setAttribute("width", "0");
         iframe.setAttribute("height", "0");
@@ -9054,9 +9119,10 @@ $.extend(UI, {
         iframe.setAttribute("style", "width: 0; height: 0; border: none;");
 
         // Add to document...
-        form.parentNode.appendChild(iframe);
+        document.body.appendChild(iframe);
+//        form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
-        iframeId = document.getElementById("upload_iframe");
+        iframeId = document.getElementById(ifId);
 
         // Add event...
         var eventHandler = function () {
@@ -9384,6 +9450,57 @@ $.extend(UI, {
             }
         });
     },
+    saveTMdescription: function (field) {
+        console.log(field);
+        var tr = field.parents('tr').first();
+
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'update',
+                key: tr.find('.privatekey').text(),
+                description: field.text()
+            },
+            error: function() {
+                console.log('Error saving TM description!!');
+                APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+            },
+            success: function(d) {
+                $('.popup-tm').removeClass('saving');
+                if(d.errors.length) {
+                    APP.showMessage({msg: d.errors[0].message});
+                } else {
+                    console.log('TM description saved!!');
+                }
+            }
+        });
+    },
+    saveTMkey: function (button) {
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'newKey',
+                key: $('#new-tm-key').val(),
+                description: $('#new-tm-description').val()
+            },
+            error: function() {
+                console.log('Error saving TM key!');
+//                APP.showMessage({msg: 'There was an error saving your key. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+            },
+            success: function(d) {
+                $('.popup-tm').removeClass('saving');
+                if(d.errors.length) {
+//                    APP.showMessage({msg: d.errors[0].message});
+                } else {
+                    console.log('TM key saved!!');
+                }
+            }
+        });
+    },
+
+
     closeTMPanel: function () {
         $('.mgmt-tm tr.uploadpanel').hide();
         $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
@@ -9391,6 +9508,15 @@ $.extend(UI, {
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
         $.cookie('tmpanel-open', 0, { path: '/' });
+        if((!APP.isCattool)&&(!checkAnalyzability('closing tmx panel'))) {
+            disableAnalyze();
+            if(!checkAnalyzabilityTimer) var checkAnalyzabilityTimer = window.setInterval( function () {
+                if(checkAnalyzability('set interval')) {
+                    enableAnalyze();
+                    window.clearInterval( checkAnalyzabilityTimer );
+                }
+            }, 500 );
+        }
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
@@ -9429,6 +9555,7 @@ $.extend(UI, {
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        $(tm).find('td.notify').remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $('#' + iFrameID).contents().find('body').text();

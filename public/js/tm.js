@@ -150,6 +150,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
             UI.checkTMKey('key');
+            UI.saveTMkey($(this));
 //            UI.addTMKeyToList();
 
 //            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
@@ -164,27 +165,34 @@ $.extend(UI, {
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
-        }).on('click', '#activetm tr.mine td.description .edit-desc', function() {
-            console.log('.edit-desc');
+        }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
+//            console.log('.edit-desc');
 //            $(this).addClass('current');
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
         }).on('blur', '#activetm td.description .edit-desc', function() {
-            console.log('blur');
+//            console.log('blur');
             $(this).removeAttr('contenteditable');
             if(APP.isCattool) UI.saveTMdata(false);
 
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+/*
         }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
                 $(this).removeAttr('contenteditable');
                 if(APP.isCattool) UI.saveTMdata(false);
             }
+*/
+        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+            if(APP.isCattool) UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
          }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
-
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
@@ -206,8 +214,8 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
-            if(this.files[0].size > config.maxFileSize) {
-                numMb = config.maxFileSize/(1024*1024);
+            if(this.files[0].size > config.maxTMXFileSize) {
+                numMb = config.maxTMXFileSize/(1024*1024);
                 APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
                 return false;
             };
@@ -234,6 +242,8 @@ $.extend(UI, {
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
+            var msg = '<td class="notify">Downloading TMX... You can close the panel and continue translating.</td>';
+            $(this).parents('tr').first().append(msg);
         });
 
 
@@ -662,7 +672,7 @@ $.extend(UI, {
         $('.mgmt-container .tm-error-message').hide();
         $('.mgmt-container .tm-warning-message').hide();
         $('#activetm .edit-desc').removeAttr('contenteditable');
-        $('#activetm td.uploadfile').remove();
+//        $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
         $('#activetm tr.new .canceladdtmx').click();
     },
@@ -671,8 +681,11 @@ $.extend(UI, {
         console.log('div_id: ', div_id);
         console.log('form: ', form);
         // Create the iframe...
+        ts = new Date().getTime();
+        ifId = "upload_iframe-" + ts;
         var iframe = document.createElement("iframe");
-        iframe.setAttribute("id", "upload_iframe");
+        iframe.setAttribute("id", ifId);
+        console.log('iframe: ', iframe);
         iframe.setAttribute("name", "upload_iframe");
         iframe.setAttribute("width", "0");
         iframe.setAttribute("height", "0");
@@ -680,9 +693,10 @@ $.extend(UI, {
         iframe.setAttribute("style", "width: 0; height: 0; border: none;");
 
         // Add to document...
-        form.parentNode.appendChild(iframe);
+        document.body.appendChild(iframe);
+//        form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
-        iframeId = document.getElementById("upload_iframe");
+        iframeId = document.getElementById(ifId);
 
         // Add event...
         var eventHandler = function () {
@@ -1010,6 +1024,57 @@ $.extend(UI, {
             }
         });
     },
+    saveTMdescription: function (field) {
+        console.log(field);
+        var tr = field.parents('tr').first();
+
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'update',
+                key: tr.find('.privatekey').text(),
+                description: field.text()
+            },
+            error: function() {
+                console.log('Error saving TM description!!');
+                APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+            },
+            success: function(d) {
+                $('.popup-tm').removeClass('saving');
+                if(d.errors.length) {
+                    APP.showMessage({msg: d.errors[0].message});
+                } else {
+                    console.log('TM description saved!!');
+                }
+            }
+        });
+    },
+    saveTMkey: function (button) {
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'newKey',
+                key: $('#new-tm-key').val(),
+                description: $('#new-tm-description').val()
+            },
+            error: function() {
+                console.log('Error saving TM key!');
+//                APP.showMessage({msg: 'There was an error saving your key. Please retry!'});
+                $('.popup-tm').removeClass('saving');
+            },
+            success: function(d) {
+                $('.popup-tm').removeClass('saving');
+                if(d.errors.length) {
+//                    APP.showMessage({msg: d.errors[0].message});
+                } else {
+                    console.log('TM key saved!!');
+                }
+            }
+        });
+    },
+
+
     closeTMPanel: function () {
         $('.mgmt-tm tr.uploadpanel').hide();
         $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
@@ -1017,6 +1082,15 @@ $.extend(UI, {
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
         $.cookie('tmpanel-open', 0, { path: '/' });
+        if((!APP.isCattool)&&(!checkAnalyzability('closing tmx panel'))) {
+            disableAnalyze();
+            if(!checkAnalyzabilityTimer) var checkAnalyzabilityTimer = window.setInterval( function () {
+                if(checkAnalyzability('set interval')) {
+                    enableAnalyze();
+                    window.clearInterval( checkAnalyzabilityTimer );
+                }
+            }, 500 );
+        }
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
@@ -1055,6 +1129,7 @@ $.extend(UI, {
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        $(tm).find('td.notify').remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $('#' + iFrameID).contents().find('body').text();
