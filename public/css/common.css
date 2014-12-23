@@ -99,7 +99,7 @@ ul
 	    margin: -5px 0 0 0;
 	    padding: 0;
 	    float: left;
-	    border-right: 1px solid #333;
+	/*    border-right: 1px solid #333; */
     }
     footer nav ul
     {
@@ -121,6 +121,34 @@ footer li
 	    margin-top: 5px;
 }
 
+ul.statistics-details {
+margin: 0 auto;
+overflow: hidden;
+width: 33%;
+float: none;
+border: none;
+padding: 0 5px;
+	    padding-top: 0px;
+	    margin-top: -5px;
+
+}
+
+ul.statistics-details li {
+		    border-right: 1px solid #fff;
+border-left: 1px solid #fff;
+padding-top: 0px;
+margin-top: 5px;
+height: 12px;
+}
+
+ul.statistics-details li:first-child {
+	border-right: none;
+}
+
+.editing footer .wrapper {
+width: 91.6%;
+margin-left: 5%;
+}
 
 footer nav li:first-child
 {
