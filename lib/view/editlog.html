@@ -164,7 +164,6 @@
                             <li><a href="${authURL}" class="authLink">Manage</a></li>
                         </tal:block>
 
-                        <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 
@@ -207,17 +206,13 @@
             
 
                    </ul> 
-                   <ul class="statistics-details">
+                   <!-- ul class="statistics-details">
 
                      <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
                         <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
-                    </ul>
+                    </ul -->
             
         </div>
-
-                <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
-                    <p class="progress">Calculating word count...</p>
-                </div>
 
             </div> <!-- .wrapper -->
         </footer>
