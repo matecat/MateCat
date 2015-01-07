@@ -52,7 +52,7 @@ ul
     .wrapper
     {
 	    width: 98%;
-	    min-width: 960px;
+	    min-width: 820px;
 	    margin: 0px auto 0 auto;
 	    padding: 5px 0 0 0;
 	    width: 92%;
@@ -99,7 +99,7 @@ ul
 	    margin: -5px 0 0 0;
 	    padding: 0;
 	    float: left;
-	    border-right: 1px solid #333;
+	/*    border-right: 1px solid #333; */
     }
     footer nav ul
     {
@@ -109,7 +109,7 @@ ul
 footer li
 {
 	margin: 0 0px 0 0;
-	padding: 5px 10px;
+	padding: 5px 5px;
 	float: left;
 	/*border-left: 1px solid #333;*/
     }
@@ -121,6 +121,34 @@ footer li
 	    margin-top: 5px;
 }
 
+ul.statistics-details {
+margin: 0 auto;
+overflow: hidden;
+width: 33%;
+float: none;
+border: none;
+padding: 0 5px;
+	    padding-top: 0px;
+	    margin-top: -5px;
+
+}
+
+ul.statistics-details li {
+		    border-right: 1px solid #fff;
+border-left: 1px solid #fff;
+padding-top: 0px;
+margin-top: 5px;
+height: 12px;
+}
+
+ul.statistics-details li:first-child {
+	border-right: none;
+}
+
+.editing footer .wrapper {
+width: 91.6%;
+margin-left: 5%;
+}
 
 footer nav li:first-child
 {
@@ -906,20 +934,10 @@ form.add-TM-Form {
     color: #F00;
 }
 
-td.notify {
-float: left;
-clear: both;
-width: 96%;
-display: block;
-height: 20px;
-border-top: 1px solid #E1E1E1;
-box-shadow: inset 0px 2px 5px 0px rgba(228, 228, 228, 0.52);
+.notify td {
 background: #FFFA8B !important;
-padding: 5px 2% !important;
+padding: 5px 25px;
 text-align: right;
-}
-.mgmt-container table tr {
-    display: block;
 }
 
 #activetm tr.new .error span {

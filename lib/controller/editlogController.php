@@ -68,7 +68,8 @@ class editlogController extends viewController {
         $this->template->target_code  = $this->data[ 0 ][ 'target_lang' ];
         $this->template->job_stats    = $this->job_stats;
         $this->template->build_number = INIT::$BUILD_NUMBER;
-        $this->template->logged_user  = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->extended_user  = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
+        $this->template->logged_user  = $this->logged_user['short'];
         $this->template->incomingUrl  = '/login?incomingUrl=' . $this->thisUrl;
 
 	}
