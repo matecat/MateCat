@@ -1018,7 +1018,7 @@ UI = {
                 new_status:     "active",
                 res:            "job",
                 id:             config.job_id,
-                jpassword:      config.password,
+                password:      config.password,
             },
             success: function(d){
                 if(d.data == 'OK') {

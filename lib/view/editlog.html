@@ -161,7 +161,7 @@
                         </tal:block>
 
                         <tal:block tal:condition="php: empty(logged_user)">
-                            <li><a href="${authURL}" class="authLink">Manage</a></li>
+                            <li><a href="${incomingUrl}" class="authLink">Manage</a></li>
                         </tal:block>
 
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
@@ -169,7 +169,7 @@
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${incomingUrl}">Login</a>)
                         </div>
                     </tal:block>
 

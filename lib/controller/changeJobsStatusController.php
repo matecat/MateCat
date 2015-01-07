@@ -21,7 +21,7 @@ class changeJobsStatusController extends ajaxController {
             'res'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'id'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'jpassword'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'password'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'new_status'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'status'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -63,8 +63,8 @@ class changeJobsStatusController extends ajaxController {
             $this->project_id = false;
         };
 
-        if ( isset( $_POST[ 'jpassword' ] ) ) {
-            $this->job_password = $__postInput[ 'jpassword' ];
+        if ( isset( $_POST[ 'password' ] ) ) {
+            $this->job_password = $__postInput[ 'password' ];
         } else {
             $this->job_password = null;
         };
@@ -151,7 +151,6 @@ class changeJobsStatusController extends ajaxController {
             $this->result[ 'code' ]   = 1;
             $this->result[ 'data' ]   = "OK";
             $this->result[ 'status' ] = $this->new_status;
-
         }
     }
 
