@@ -5691,25 +5691,25 @@ $.extend(UI, {
 		segment = $('#segment-' + segment_id);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
-        this.log('setContribution2', '');
+        this.log('setContribution2', {});
 
         if( config.brPlaceholdEnabled ) {
             source = this.postProcessEditarea(segment, '.source');
             target = this.postProcessEditarea(segment);
-            this.log('setContribution3', '');
+            this.log('setContribution3', {});
         } else {
             source = $('.source', segment).text();
             // Attention: to be modified when we will be able to lock tags.
             target = $('.editarea', segment).text();
         }
-        this.log('setContribution4', '');
+        this.log('setContribution4', {});
 
 		if ((target === '') && (byStatus)) {
-            this.log('setContribution5', '');
+            this.log('setContribution5', {});
 			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
 		if (target === '') {
-            this.log('setContribution6', '');
+            this.log('setContribution6', {});
 			return false;
 		}
 		this.updateContribution(source, target);
