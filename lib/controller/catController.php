@@ -313,7 +313,7 @@ class catController extends viewController {
 
         //TODO: IMPROVE
         $_from_url = parse_url( $_SERVER['REQUEST_URI'] );
-        $url_request = strpos( $_from_url['path'] , "/review" ) === 0;
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         } elseif( $user_email == $data[ 0 ]['job_owner'] ) {
@@ -497,7 +497,7 @@ class catController extends viewController {
 
         $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize         = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $is_review                          = explode('/', $_SERVER["REQUEST_URI"])[1] == 'review';
+        $is_review                          = explode('/', $_SERVER["REQUEST_URI"])[1] == 'revise';
         $this->template->isReview              = $is_review;
         $this->template->reviewClass            = ($is_review)? ' review' : '';
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
