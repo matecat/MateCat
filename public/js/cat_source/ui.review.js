@@ -1,7 +1,7 @@
 /*
  Component: ui.review
  */
-if(config.enableReview) {
+if(config.enableReview && parseInt(config.isReview)) {
 
     $('html').on('open', 'section', function() {
         editarea = $(this).find('.editarea');
