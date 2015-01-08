@@ -46,7 +46,9 @@
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
                 survey: false,
-                optimized: false
+                optimized: false,
+                isReview: '${isReview}',
+                enableReview: true
             };
             var renderStart = new Date();
             /*]]>*/
@@ -108,7 +110,7 @@
     </body>
 
 
-    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
+    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -154,7 +156,9 @@
 
 
         </header>
+        <h1>
 
+        </h1>
         <div id="outer">
 
        	</div>
@@ -421,5 +425,60 @@ tbody td:last-child, thead th:last-child {
 
     </body>
 
+    <template id="tpl-review-tab">
+
+        <div class="error-type" style="width: 49%; float: left; border: 3px solid #fff">
+            <h3>Select the type of error</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>None</th>
+                        <th>Minor</th>
+                        <th>Major</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="radio" name="t1" value="0" checked="checked" /></td>
+                        <td><input type="radio" name="t1" value="1" /></td>
+                        <td><input type="radio" name="t1" value="2" /></td>
+                        <td>Typing errors, double spaces and tags</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t2" value="0" checked="checked" /></td>
+                        <td><input type="radio" name="t2" value="1" /></td>
+                        <td><input type="radio" name="t2" value="2" /></td>
+                        <td>Translation errors (mistranslation, additions/omissions, misunderstanding)</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t3" value="0" checked="checked" /></td>
+                        <td><input type="radio" name="t3" value="1" /></td>
+                        <td><input type="radio" name="t3" value="2" /></td>
+                        <td>Terminology and translation consistency</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t4" value="0" checked="checked" /></td>
+                        <td><input type="radio" name="t4" value="1" /></td>
+                        <td><input type="radio" name="t4" value="2" /></td>
+                        <td>Language quality (grammar, punctuation, spelling)</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t5" value="0" checked="checked" /></td>
+                        <td><input type="radio" name="t5" value="1" /></td>
+                        <td><input type="radio" name="t5" value="2" /></td>
+                        <td>Style (readability, consistent style and tone)</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="track-changes">
+            <h3>Revision (track changes)</h3>
+            <p></p>
+        </div>
+    </template>
 
 </html>

@@ -16,6 +16,10 @@ RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
 RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]
+
+RewriteRule ^(review)[/]?$ index.php?action=cat [L]
+RewriteRule ^(review)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]
+
 RewriteRule ^(translatenew)[/]?$ index.php?action=catnew [L]
 RewriteRule ^(translatenew)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ index.php?action=catnew&jid=$4&password=$5&step=$6 [L]
 

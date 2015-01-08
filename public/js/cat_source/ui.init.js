@@ -27,6 +27,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();

@@ -216,10 +216,12 @@ UI = {
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		var buttons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
-        buttonsOb.empty().append(buttons);
+		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+		buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+        UI.currentSegment.trigger('buttonsCreation');
+        buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
+        UI.segmentButtons = null;
 	},
 	createFooter: function(segment, emptyContributions) {
 //		isNotSimilar = emptyContributions;
@@ -234,7 +236,7 @@ UI = {
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
-		var footer =	'<ul class="submenu">' +
+		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
@@ -278,7 +280,9 @@ UI = {
 					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
 					'	<div class="overflow"></div>' +
 					'</div>';
-		$('.footer', segment).html(footer);
+		UI.currentSegment.trigger('footerCreation');
+        $('.footer', segment).html(UI.footerHTML);
+        UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
@@ -922,6 +926,7 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
+        segment.trigger('open');
 		this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
@@ -3158,6 +3163,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
@@ -4960,12 +4966,14 @@ $.extend(UI, {
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
 		}).on('click', 'a.approved', function() {
+/*
 			UI.setStatusButtons(this);
 			$(".editarea", UI.nextUntranslatedSegment).click();
 
 			UI.changeStatus(this, 'approved', 0);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
+*/
 		}).on('click', 'a.d, a.a, a.r, a.f', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
@@ -6225,11 +6233,51 @@ $.extend(UI, {
             {tagModesEnabled: false}
         )
     },
-    checkTagProximity: function (w, range) {return false;
+    checkTagProximity: function (w, range) {
+        return false;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
+        tempRange = range;
 
-        //check if there is a tag ahed
+/*
+        console.log('nextEl: ', nextEl);
+        console.log('prevEl: ', prevEl);
+        console.log("$(nextEl).hasClass('locked'): ", $(nextEl).hasClass('locked'));
+*/
+        //check if there is a tag ahead
+        if($(nextEl).hasClass('locked')) {
+            console.log('nextEl è un tag');
+            console.log('range.endOffset: ', range.endOffset);
+            console.log('range.endContainer.length - 1: ', range.endContainer.length - 1);
+        } else {
+            console.log('nextEl non è un tag');
+            if($(nextEl).hasClass('undoCursorPlaceholder')) {
+                console.log('è un undoCursor Placeholder');
+ /*
+                for(var key in range.endContainer) {
+                    console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+                }
+
+                console.log('range.endOffset: ', range.endOffset);
+                console.log('range.endContainer.length - 1: ', range.endContainer.length - 1);
+                console.log('$(nextEl).next(): ', $(nextEl).next());
+                console.log('$(nextEl).html(): ', $(nextEl).html());
+                console.log('$(nextEl).next().html(): ', $(nextEl).next().html());
+                console.log('prova: ', $(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML);
+                console.log(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML));
+  */
+ //               if(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML)) console.log('qui dovrebbe funzionare, e non lo fa');
+ //               if(range.endOffset == 1) console.log('qui dovrebbe funzionare, e non lo fa');
+            } else {
+                console.log('e neanche un undoCursor Placeholder');
+            }
+            if($(nextEl).next().hasClass('locked')) {
+                console.log('il successivo invece è un tag');
+            } else {
+                console.log('e neanche il successivo è un tag');
+            }
+        }
+
         if($(nextEl).hasClass('locked')) {
             if(range.endOffset == range.endContainer.length - 1) {
                 console.log('1');
@@ -6237,22 +6285,44 @@ $.extend(UI, {
             } else {
                 UI.removeHighlightCorrespondingTags();
             }
-        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+        } else if(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML)) {
+            console.log('qui dovrebbe funzionare, e non lo fa');
+            console.log('w: ', w);
+//            tempRange = range;
             saveSelection();
+            if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) console.log('qui');
+            console.log('editarea: ', UI.editarea.html());
+//            console.log('wholeText: ', range.endContainer.wholeText);
+//            console.log('typeof tempRange.endContainer: ', typeof tempRange.endContainer);
+//            console.log('typeof tempRange.endContainer.wholeText: ', typeof tempRange.endContainer.wholeText);
+//            if(typeof range.endContainer == 'undefined') console.log('eccolo');
+/*
+            for(var key in tempRange.endContainer) {
+                console.log('key: ' + key + '\n' + 'value: "' + tempRange.endContainer[key] + '"');
+            }
+ */
+            restoreSelection();
+            if(w == 'right') this.highlightCorrespondingTags($(nextEl).next());
+        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+//            saveSelection();
 //            console.log('UI.editarea.html(): ', UI.editarea.html());
 /*
             for(var key in range.startContainer) {
                 console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
             }
             */
-            restoreSelection();
+//            restoreSelection();
             content = UI.editarea.html();
             str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+/*
             console.log('content: ', content);
             console.log('str: ', str);
             console.log('content.indexOf(str): ', content.indexOf(str));
             console.log('range.startOffset: ', range.startOffset);
             console.log('range.startContainer.length: ', range.startContainer.length);
+*/
+            // tolto temporaneamente, da rimettere:
+/*
             if(content.indexOf(str) > -1) { // escape false positives
                 if(range.endOffset == range.endContainer.length) {
                     console.log('2');
@@ -6261,6 +6331,8 @@ $.extend(UI, {
                     UI.removeHighlightCorrespondingTags();
                 }
             }
+            */
+
         } else {
             UI.removeHighlightCorrespondingTags();
         }
@@ -8477,6 +8549,69 @@ $.extend(UI, {
 
 
 
+/*
+ Component: ui.review
+ */
+if(config.enableReview) {
+
+    $('html').on('open', 'section', function() {
+        editarea = $(this).find('.editarea');
+        editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
+    }).on('buttonsCreation', 'section', function() {
+        var div = $('<ul>' + UI.segmentButtons + '</ul>');
+
+        div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
+        div.find('.next-untranslated').parent().remove();
+
+        UI.segmentButtons = div.html();
+    }).on('footerCreation', 'section', function() {
+        var div = $('<div>' + UI.footerHTML + '</div>');
+
+        div.find('.submenu').append('<li class="tab-switcher-review" id="segment-20896069-review"><a tabindex="-1" href="#">Review</a></li>');
+        div.append('<div class="tab sub-editor review" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
+        setTimeout(function() {// fixes a bug in setting defaults in radio buttons
+            UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
+            UI.trackChanges(UI.editarea);
+        }, 100);
+        UI.footerHTML = div.html();
+    }).on('click', '.tab-switcher-review', function(e) {
+        e.preventDefault();
+        $('.editor .submenu .active').removeClass('active');
+        $(this).addClass('active');
+        $('.editor .sub-editor').hide();
+        $('.editor .sub-editor.review').show();
+    }).on('input', '.editor .editarea', function() {
+        UI.trackChanges(this);
+    }).on('click', '.approved', function(e) {
+        e.preventDefault();
+        noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
+        if(noneSelected) {
+            $('.sub-editor.review .error-type').addClass('error');
+        } else {
+            $('.sub-editor.review .error-type').removeClass('error');
+            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
+        }
+//        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
+    }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
+        $('.sub-editor.review .error-type').removeClass('error');
+    });
+    $.extend(UI, {
+        trackChanges: function (editarea) {
+            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text());
+            diffTxt = '';
+            $.each(diff, function (index) {
+                if(this[0] == -1) {
+                    diffTxt += '<span class="deleted">' + this[1] + '</span>';
+                } else if(this[0] == 1) {
+                    diffTxt += '<span class="added">' + this[1] + '</span>';
+                } else {
+                    diffTxt += this[1];
+                }
+                $('.editor .sub-editor.review .track-changes p').html(diffTxt);
+            });
+        }
+    })
+}
 /*
  Component: tm
  Created by andreamartines on 02/10/14.

@@ -216,10 +216,12 @@ UI = {
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
         var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		var buttons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
-        buttonsOb.empty().append(buttons);
+		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+		buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+        UI.currentSegment.trigger('buttonsCreation');
+        buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
+        UI.segmentButtons = null;
 	},
 	createFooter: function(segment, emptyContributions) {
 //		isNotSimilar = emptyContributions;
@@ -234,7 +236,7 @@ UI = {
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
-		var footer =	'<ul class="submenu">' +
+		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
@@ -278,7 +280,9 @@ UI = {
 					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
 					'	<div class="overflow"></div>' +
 					'</div>';
-		$('.footer', segment).html(footer);
+		UI.currentSegment.trigger('footerCreation');
+        $('.footer', segment).html(UI.footerHTML);
+        UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
@@ -922,6 +926,7 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
+        segment.trigger('open');
 		this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;

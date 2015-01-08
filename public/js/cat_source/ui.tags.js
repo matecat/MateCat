@@ -332,11 +332,51 @@ $.extend(UI, {
             {tagModesEnabled: false}
         )
     },
-    checkTagProximity: function (w, range) {return false;
+    checkTagProximity: function (w, range) {
+        return false;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
+        tempRange = range;
 
-        //check if there is a tag ahed
+/*
+        console.log('nextEl: ', nextEl);
+        console.log('prevEl: ', prevEl);
+        console.log("$(nextEl).hasClass('locked'): ", $(nextEl).hasClass('locked'));
+*/
+        //check if there is a tag ahead
+        if($(nextEl).hasClass('locked')) {
+            console.log('nextEl è un tag');
+            console.log('range.endOffset: ', range.endOffset);
+            console.log('range.endContainer.length - 1: ', range.endContainer.length - 1);
+        } else {
+            console.log('nextEl non è un tag');
+            if($(nextEl).hasClass('undoCursorPlaceholder')) {
+                console.log('è un undoCursor Placeholder');
+ /*
+                for(var key in range.endContainer) {
+                    console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+                }
+
+                console.log('range.endOffset: ', range.endOffset);
+                console.log('range.endContainer.length - 1: ', range.endContainer.length - 1);
+                console.log('$(nextEl).next(): ', $(nextEl).next());
+                console.log('$(nextEl).html(): ', $(nextEl).html());
+                console.log('$(nextEl).next().html(): ', $(nextEl).next().html());
+                console.log('prova: ', $(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML);
+                console.log(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML));
+  */
+ //               if(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML)) console.log('qui dovrebbe funzionare, e non lo fa');
+ //               if(range.endOffset == 1) console.log('qui dovrebbe funzionare, e non lo fa');
+            } else {
+                console.log('e neanche un undoCursor Placeholder');
+            }
+            if($(nextEl).next().hasClass('locked')) {
+                console.log('il successivo invece è un tag');
+            } else {
+                console.log('e neanche il successivo è un tag');
+            }
+        }
+
         if($(nextEl).hasClass('locked')) {
             if(range.endOffset == range.endContainer.length - 1) {
                 console.log('1');
@@ -344,22 +384,44 @@ $.extend(UI, {
             } else {
                 UI.removeHighlightCorrespondingTags();
             }
-        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+        } else if(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML)) {
+            console.log('qui dovrebbe funzionare, e non lo fa');
+            console.log('w: ', w);
+//            tempRange = range;
             saveSelection();
+            if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) console.log('qui');
+            console.log('editarea: ', UI.editarea.html());
+//            console.log('wholeText: ', range.endContainer.wholeText);
+//            console.log('typeof tempRange.endContainer: ', typeof tempRange.endContainer);
+//            console.log('typeof tempRange.endContainer.wholeText: ', typeof tempRange.endContainer.wholeText);
+//            if(typeof range.endContainer == 'undefined') console.log('eccolo');
+/*
+            for(var key in tempRange.endContainer) {
+                console.log('key: ' + key + '\n' + 'value: "' + tempRange.endContainer[key] + '"');
+            }
+ */
+            restoreSelection();
+            if(w == 'right') this.highlightCorrespondingTags($(nextEl).next());
+        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+//            saveSelection();
 //            console.log('UI.editarea.html(): ', UI.editarea.html());
 /*
             for(var key in range.startContainer) {
                 console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
             }
             */
-            restoreSelection();
+//            restoreSelection();
             content = UI.editarea.html();
             str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+/*
             console.log('content: ', content);
             console.log('str: ', str);
             console.log('content.indexOf(str): ', content.indexOf(str));
             console.log('range.startOffset: ', range.startOffset);
             console.log('range.startContainer.length: ', range.startContainer.length);
+*/
+            // tolto temporaneamente, da rimettere:
+/*
             if(content.indexOf(str) > -1) { // escape false positives
                 if(range.endOffset == range.endContainer.length) {
                     console.log('2');
@@ -368,6 +430,8 @@ $.extend(UI, {
                     UI.removeHighlightCorrespondingTags();
                 }
             }
+            */
+
         } else {
             UI.removeHighlightCorrespondingTags();
         }

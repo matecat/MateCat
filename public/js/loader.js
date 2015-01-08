@@ -20,7 +20,8 @@ Loader = {
 		'ui.glossary',
 		'ui.search',
 		'functions',
-		'ui.customization'
+		'ui.customization',
+        'ui.review'
 	),
     other_components: new Array (
         'tm'
