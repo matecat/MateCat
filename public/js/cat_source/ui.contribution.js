@@ -1,6 +1,10 @@
 /*
 	Component: ui.contribution
  */
+$('html').on('copySourceToTarget', 'section', function() {
+    UI.setChosenSuggestion(0);
+});
+
 $.extend(UI, {
 	chooseSuggestion: function(w) {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);

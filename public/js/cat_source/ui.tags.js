@@ -1,6 +1,11 @@
 /*
 	Component: ui.tags
  */
+
+$('html').on('copySourceToTarget', 'section', function() {
+    UI.lockTags(UI.editarea);
+});
+
 $.extend(UI, {
 	noTagsInSegment: function(options) {
         editarea = options.area;

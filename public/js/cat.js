@@ -172,15 +172,10 @@ UI = {
 //		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
-		$(window).trigger({
-			type: "sourceCopied",
-			segment: segment
-		});
 		this.highlightEditarea();
 
 		this.currentSegmentQA();
-		this.setChosenSuggestion(0);
-		this.lockTags(this.editarea);
+        $(this.currentSegment).trigger('copySourceToTarget');
 	},
 	highlightEditarea: function(seg) {
 		segment = seg || this.currentSegment;
@@ -889,6 +884,9 @@ UI = {
 			return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
 		}
 	},
+/*
+// not used anymore?
+
 	closeInplaceEditor: function(ed) {
 		$(ed).removeClass('editing');
 		$(ed).attr('contenteditable', false);
@@ -901,6 +899,7 @@ UI = {
 		$(ed).addClass('editing').attr('contenteditable', true).after('<span class="edit-buttons"><button class="cancel">Cancel</button><button class="save">Save</button></span>');
 		$(ed).focus();
 	},
+*/
 	millisecondsToTime: function(milli) {
 //		var milliseconds = milli % 1000;
 		var seconds = Math.round((milli / 1000) % 60);
@@ -4151,6 +4150,8 @@ $.extend(UI, {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
             UI.copyGlossaryItemInEditarea($(this));
+/*
+// not used anymore?
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -4163,6 +4164,7 @@ $.extend(UI, {
 			ed = $(this).parents('.graysmall').find('.translation');
 			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
 			UI.closeInplaceEditor(ed);
+*/
 		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
@@ -5422,6 +5424,10 @@ $.extend(UI, {
 /*
 	Component: ui.contribution
  */
+$('html').on('copySourceToTarget', 'section', function() {
+    UI.setChosenSuggestion(0);
+});
+
 $.extend(UI, {
 	chooseSuggestion: function(w) {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
@@ -5902,6 +5908,11 @@ $.extend(UI, {
 /*
 	Component: ui.tags
  */
+
+$('html').on('copySourceToTarget', 'section', function() {
+    UI.lockTags(UI.editarea);
+});
+
 $.extend(UI, {
 	noTagsInSegment: function(options) {
         editarea = options.area;
