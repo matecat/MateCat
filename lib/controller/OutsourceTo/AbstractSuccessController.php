@@ -42,6 +42,20 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
     protected $tokenAuth;
 
     /**
+     * Key that holds extra info
+     *
+     * @var mixed|string
+     */
+    protected $dataKeyName;
+
+    /**
+     * Extra info as the project id
+     *
+     * @var mixed|string
+     */
+    protected $data_key_content;
+
+    /**
      * Class Constructor
      *
      * @throws LogicException
@@ -58,17 +72,13 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
         }
 
         //SESSION ENABLED
+        $this->sessionStart();
+        parent::__construct(false);
 
-		parent::__construct(false);
-
-        /**
-         * redirectSuccessPage is a white page with a form submitted by javascript
-         *
-         */
-        parent::makeTemplate("redirectSuccessPage.html");
 
         $filterArgs = array(
-                $this->tokenName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                $this->tokenName  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                $this->dataKeyName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         $__getInput = filter_input_array( INPUT_GET, $filterArgs );
@@ -80,7 +90,9 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
          *  $__getInput['tk']
          *
          */
-        $this->tokenAuth = $__getInput['tk'];
+        $this->tokenAuth = $__getInput[ $this->tokenName ];
+
+        $this->data_key_content = $__getInput[ $this->dataKeyName ];
 
         Log::doLog( $_GET );
         Log::doLog( $_SERVER['QUERY_STRING'] );
@@ -103,15 +115,36 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         $shop_cart = Shop_Cart::getInstance('outsource_to_external');
 
+        if ( !$shop_cart->countItems() ){
+            /**
+             * redirectFailurePage is a white page with an error for session expired
+             *
+             */
+            parent::makeTemplate("redirectFailurePage.html");
+
+            return null;
+
+        } else {
+            /**
+             * redirectSuccessPage is a white page with a form submitted by javascript
+             *
+             */
+            parent::makeTemplate("redirectSuccessPage.html");
+        }
+
         //we need a list not an hashmap
         $item_list = array();
-        foreach( $shop_cart->getCart() as $item ){
+        foreach( array( $shop_cart->getItem( $this->data_key_content ) ) as $item ){
             $item_list[ ] = $item;
         }
 
         $this->template->tokenAuth = $this->tokenAuth;
         $this->template->data = json_encode( $item_list );
         $this->template->redirect_url = $this->review_order_page;
+        $this->template->data_key = $this->data_key_content;
+
+        //clear the cart after redirection
+        //$shop_cart->emptyCart();
 
     }
 

@@ -3,6 +3,7 @@ $root = realpath(dirname(__FILE__) . '/../../../../');
 include_once "$root/inc/config.inc.php";
 INIT::obtain();
 
+require_once INIT::$UTILS_ROOT.'/engines/engine.class.php';
 
 require_once INIT::$UTILS_ROOT.'/Log.php';
 require_once INIT::$UTILS_ROOT.'/Utils.php';
@@ -30,4 +31,3 @@ $equivalentWordMapping['MT'] = 85;
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-?>

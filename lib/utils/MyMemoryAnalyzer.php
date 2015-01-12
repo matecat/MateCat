@@ -1,7 +1,7 @@
 <?php
-$root = realpath(dirname(__FILE__) . '/../../');
-include_once ($root."/inc/config.inc.php"); // only fortesting purpose
-include_once (INIT::$UTILS_ROOT."/Utils.php"); //only for testing purpose
+$root = realpath( dirname( __FILE__ ) . '/../../' );
+include_once( $root . "/inc/config.inc.php" ); // only fortesting purpose
+include_once( INIT::$UTILS_ROOT . "/Utils.php" ); //only for testing purpose
 /*
    This code is copyrighted and property of Translated s.r.l.
    Should not be distrubuted.
@@ -9,121 +9,137 @@ include_once (INIT::$UTILS_ROOT."/Utils.php"); //only for testing purpose
    Thank you for keeping is confidential.
  */
 
-class MyMemoryAnalyzer {
+class MyMemoryAnalyzer extends Engine {
 
-	private $url = "http://api.mymemory.translated.net";
+    public function fastAnalysis( $segs_array ) {
+        if ( !is_array( $segs_array ) ) {
 
-	public function __construct() {
+            return null;
+        }
+        $json_segs = json_encode( $segs_array );
 
-	}
+        $d[ 'fast' ] = "1";
+        $d[ 'df' ]   = "matecat_array";
+        $d[ 'segs' ] = $json_segs;
 
-	public function fastAnalysis($segs_array) {
-		if (!is_array($segs_array)){
+        $this->doQuery( "analyze", $d, true );
 
-			return null;
-		}
-		$json_segs=json_encode($segs_array);
+        return $this->raw_result;
 
-		$d[ 'fast' ]     = "1";
-		$d[ 'df' ]       = "matecat_array";
-		$d[ 'segs' ]     = $json_segs;
+    }
 
-		$countwordReport = Utils::curl_post( "$this->url/analyze", $d );
-
-		$reportDecoded=json_decode($countwordReport,true);
-
-		return $reportDecoded;
-	}
-
-	/**
-	 * Detect language for an array of file's segments.
-	 * @param $segs_array An array whose keys are file IDs and values are array of segments.
-	 * @return mixed
-	 */
-	public function detectLanguage($segs_array, $lang_detect_files){
-		//In this array we will put a significative string for each job.
-		$segmentsToBeDetected = array();
+    /**
+     * Detect language for an array of file's segments.
+     *
+     * @param $segs_array An array whose keys are file IDs and values are array of segments.
+     *
+     * @return mixed
+     */
+    public function detectLanguage( $segs_array, $lang_detect_files ) {
+        //In this array we will put a significative string for each job.
+        $segmentsToBeDetected = array();
 
 
-		/**
-		 * @var $arrayIterator ArrayIterator
-		 */
-		$arrayIterator = $segs_array->getIterator();
+        /**
+         * @var $segs_array ArrayObject
+         */
+        $arrayIterator = $segs_array->getIterator();
 
-		$counter = 0;
-		//iterate through files and extract a significative
-		//string long at least 150 characters for language detection
-		while($arrayIterator->valid()){
-			$currFileName = key($lang_detect_files);
+        $counter = 0;
+        //iterate through files and extract a significative
+        //string long at least 150 characters for language detection
+        while ( $arrayIterator->valid() ) {
+            $currFileName = key( $lang_detect_files );
 
-			if($lang_detect_files[$currFileName] == "skip"){
-				//this will force google to answer with "und" language code
-				$segmentsToBeDetected[] = "q[$counter]=1";
+            if ( $lang_detect_files[ $currFileName ] == "skip" ) {
+                //this will force google to answer with "und" language code
+                $segmentsToBeDetected[ ] = "q[$counter]=1";
 
-				next($lang_detect_files);
-				$arrayIterator->next();
-				$counter++;
-				continue;
-			}
+                next( $lang_detect_files );
+                $arrayIterator->next();
+                $counter++;
+                continue;
+            }
 
-			$currFileId = $arrayIterator->key();
+            $currFileId = $arrayIterator->key();
 
-			$currFile = $arrayIterator->current();
+            $currFile = $arrayIterator->current();
 
-			/**
-			 * @var $currFileIterator ArrayIterator
-			 */
-			$segmentArray = $currFile->getIterator()->current();
+            /**
+             * @var $currFileIterator ArrayIterator
+             */
+            $segmentArray = $currFile->getIterator()->current();
 
-			//take first 50 segments
-			$segmentArray = array_slice($segmentArray, 0, 50);
+            //take first 50 segments
+            $segmentArray = array_slice( $segmentArray, 0, 50 );
 
-			//remove tags
-			$segmentArray = preg_replace(array("#<[^<>]*>#", "#  *#"), array("", " "), $segmentArray);
+            foreach ( $segmentArray as $i => $singleSegment ) {
+                $singleSegment = explode( ",", $singleSegment );
+                $singleSegment = array_slice( $singleSegment, 3, 1 );
 
-			foreach ($segmentArray as $i => $singleSegment){
-				$singleSegment = explode(",", $singleSegment);
-				$singleSegment = array_slice( $singleSegment, 3, 1 );
-				$segmentArray[$i] = $singleSegment[0];
-			}
+                //remove tags, duplicated spaces and all not Unicode Letter
+                $singleSegment[ 0 ] = preg_replace( array( "#<[^<>]*>#", "#\x20{2,}#", '#\PL+#u' ), array(
+                                "", " ", " "
+                        ), $singleSegment[ 0 ] );
 
-			usort($segmentArray, array($this, 'sortByStrLenAsc'));
+                //remove not useful spaces
+                $singleSegment[ 0 ] = preg_replace( "#\x20{2,}#", " ", $singleSegment[ 0 ] );
 
-			$textToBeDetected = "";
-			/**
-			 * take first 150 characters starting from the longest segment in the slice
-			 */
-			for($i = count($segmentArray) -1; $i >= 0; $i-- ){
-				$textToBeDetected .= " " . trim ($segmentArray[$i], "'");
-				if(mb_strlen($textToBeDetected) > 150) break;
-			}
-			$segmentsToBeDetected[] = "q[$counter]=" . urlencode($textToBeDetected);
+                $segmentArray[ $i ] = $singleSegment[ 0 ];
+            }
 
-			next($lang_detect_files);
-			$arrayIterator->next();
-			$counter++;
-		}
+            usort( $segmentArray, array( $this, 'sortByStrLenAsc' ) );
 
-		$curl_parameters = implode("&", $segmentsToBeDetected)."&of=json";
+            $textToBeDetected = "";
+            /**
+             * take first 150 characters starting from the longest segment in the slice
+             */
+            for ( $i = count( $segmentArray ) - 1; $i >= 0; $i-- ) {
+                $textToBeDetected .= " " . trim( $segmentArray[ $i ], "'" );
+                if ( mb_strlen( $textToBeDetected ) > 150 ) {
+                    break;
+                }
+            }
+            $segmentsToBeDetected[ ] = "q[$counter]=" . urlencode( $textToBeDetected );
 
-		$options = array(
-			CURLOPT_HEADER => false,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_HEADER => 0,
-			CURLOPT_USERAGENT => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
-			CURLOPT_CONNECTTIMEOUT => 2,
-			CURLOPT_POST => true,
-			CURLOPT_POSTFIELDS => $curl_parameters
-		);
+            next( $lang_detect_files );
+            $arrayIterator->next();
+            $counter++;
+        }
 
-		$mh = new MultiCurlHandler();
-		$tokenHash = $mh->createResource( "http://api-test.mymemory.translated.net/langdetect.php", $options );
+        $curl_parameters = implode( "&", $segmentsToBeDetected ) . "&of=json";
 
-		$mh->multiExec();
+        log::dolog( "DETECT LANG :", $segmentsToBeDetected );
 
-		$res = $mh->getAllContents();
+        $options = array(
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER         => 0,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $curl_parameters,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
+        );
 
-		return json_decode( $res[ $tokenHash ], true );
-	}
+        $this->buildPostQuery( 'detect_language' );
+
+        $mh        = new MultiCurlHandler();
+        $tokenHash = $mh->createResource( $this->url, $options );
+        Log::dolog( "DETECT LANG TOKENHASH: $tokenHash" );
+
+        $mh->multiExec();
+
+        $res = $mh->getAllContents();
+        Log::dolog( "DETECT LANG RES:", $res );
+
+        return json_decode( $res[ $tokenHash ], true );
+    }
+
+    private function sortByStrLenAsc( $a, $b ) {
+        return strlen( $a ) >= strlen( $b );
+    }
+
 }
-?>
+

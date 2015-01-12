@@ -1,14 +1,14 @@
 ﻿body{padding-top:30px;font-family:Calibri, Arial, Helvetica, sans-serif;text-align:center}
 header
 {
-	background:#6d6e71;
+	background-color: #4D4D4D;
 	top:0;
 	left:0;
 	text-align:left;
 	width:100%;
 	position:fixed;
 	z-index:999999999;
-	border-bottom:1px solid #333;
+	border-bottom:1px solid #5F5F5F;
 	padding:4px 0 5px 0;
 	height:38px;
 	margin-top: 0;
@@ -36,7 +36,7 @@ h3{margin:0px 0 0 0;padding:0;font-size:18px;color:#999999 !important;font-weigh
 .tablestats{border-right:1px solid #ccc;}
 .tablestats th{background-color:#efefef;}
 
-.tablestats td, .tablestats th{border-bottom:1px solid #ccc;border-left:1px solid #ccc;padding:8px;margin:1px 0;text-align:center}
+.tablestats td, .tablestats th{border-bottom:1px solid #ccc;border-left:1px solid #ccc;padding:6px 8px;margin:1px 0;text-align:center}
 .tablestats  tr:hover{background:#f7f8f9}
 .tablestats{border-top:1px solid #ccc;margin-bottom:40px;-moz-box-shadow: 0 1px 2px #ccc;background:#fff}
 .tablestats.continue{margin-bottom:4px !important;}
@@ -126,40 +126,41 @@ body.manage a.copy
 
 body.manage .actions a
 	{
-	display: block;
+	display: inline-block;
 	width: 18px;
 	height: 18px;
-	margin: -7px 0 0 16px !important;
 	text-indent: -10000px;
-	position: absolute;
-	}
+margin-left: 4px	}
 
 	body.manage .actions a.change
 		{
-		margin-left: 5px !important;
+		
 		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
-		margin-left: 33px !important;
 		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
-		margin-left: 61px !important;
 		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
-		margin-left: 33px !important;
 		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
 		{
-		margin-left: 61px !important;
+		margin-left: 63px !important;
 		background: url(../img/sprite.png) -13px -39px no-repeat;
 		}
+
+    body.manage .actions a.sdlxliff {
+        text-indent: 0;
+text-decoration: none;
+color: #999;
+    }
 
 	body.manage tr[data-status=active] .actions a.resume,
 	body.manage tr[data-status=active] .actions a.unarchive,
@@ -287,31 +288,31 @@ body.manage .meter
 
 body.manage th.create-date
 	{
-	min-width: 150px;
+	width: 140px;
 	}
 	
 body.manage th.job-detail
 	{
-	width: 37%;
+	width: 33%;
 	}
 body.manage th.private-tm-key
 	{
-	min-width: 140px;
+	min-width: 180px;
 	}
 
 body.manage th.words
 	{
-	min-width: 130px;
+	width: 80px;
 	}
 	
 body.manage th.progress
 	{
-	width: 12%;
+	width: 10%;
 	}
 
 body.manage th.actions
 	{
-	width: 8%;
+	width: 110px;
 	}
 
 body.manage tr.row
@@ -322,6 +323,28 @@ body.manage tr.row
 		{
 		display: table-row;
 		}
+
+.tm-key .key,
+.tm-key .rgrant,
+.tm-key .wgrant
+{
+    min-width: 140px;
+    float:left;
+    padding: 6px 4px;
+    display: block;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 12px;
+}
+
+.tm-key .rgrant,
+.tm-key .wgrant{
+    min-width: 40px;
+    width: 40px;
+}
+
+.tm-key .clear{
+    clear: both;
+}
 
 /*	
 body.manage tr.disabled
@@ -790,6 +813,68 @@ border-radius: 4px;}
 .opt {background-color: #dff0d8; border-left: 2px solid #3c763d; color: #3c763d;}
 
 .api p {margin:0;}
+
+
+.missing-outsource-data {
+	background: url(../img/loading-black.gif) 40px 10px no-repeat;
+	background-size: 20px;
+background-position: center;
+}
+
+.outsource-btn {
+	border:1px solid #666; 
+	border-radius:4px; 
+	color:white; 
+	outline: 0;
+	opacity:0.9; 
+	padding:0px!important;
+	border:1px solid #ccc;
+	cursor: pointer;
+}
+
+.outsource-btn:hover {
+	-moz-box-shadow: 0 0px 2px #666;
+-webkit-box-shadow: 0 0px 2px #666;
+box-shadow: 0 0px 2px #666;
+}
+
+.outsource-btn:active .outsource-price {
+-moz-box-shadow: inset 0 0 5px 2px #888;
+-webkit-box-shadow: inset 0 0 5px 2px #888;
+box-shadow: inset 0 0 5px 2px #888;
+}
+
+.outsource-btn:active .outsource-delivery {
+-moz-box-shadow: inset 0 -1px 2px 1px #888;
+-webkit-box-shadow: inset 0 -1px 2px 1px #888;
+box-shadow: inset 0 -1px 2px 1px #888;
+}
+
+.outsource-price {
+text-align: center;
+display: block;
+font-size: 18px;
+background: #7eaf3e;
+font-weight: bold;
+padding: 10px;
+}
+
+.outsource-delivery {
+	background: #f4f4f4;
+display: block;
+padding: 5px;
+margin-top: -5px;
+line-height: 18px;
+font-size:12px;
+	border-radius:4px; 
+	color:#333;
+
+		border-top:1px solid #ccc;
+
+}
+.outsource-delivery strong {
+font-size: 14px;
+}
 
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),

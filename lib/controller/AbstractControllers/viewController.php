@@ -63,24 +63,24 @@ abstract class viewController extends controller {
         }
 
         // Next get the name of the useragent yes seperately and for good reason
-        if ( preg_match( '/MSIE/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Internet Explorer';
+        if ( ( (preg_match( '/MSIE/i', $u_agent)) or  (preg_match( '/Trident/i', $u_agent))  ) && !preg_match( '/Opera/i', $u_agent ) ) {
+	    $bname = 'Internet Explorer';
             $ub    = "MSIE";
         } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
             $bname = 'Mozilla Firefox';
             $ub    = "Firefox";
-        } elseif ( preg_match( '/Chrome/i', $u_agent ) ) {
+        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/OPR/i', $u_agent ) ) {
             $bname = 'Google Chrome';
             $ub    = "Chrome";
+        } elseif ( preg_match( '/Opera/i', $u_agent ) or preg_match( '/OPR/i', $u_agent ) ) {
+            $bname = 'Opera';
+            $ub    = "Opera";
         } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
             $bname = 'Apple Safari';
 	        $ub    = "Safari";
-	    } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
+	} elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
 	        $bname = 'Apple Safari';
 	        $ub    = "Safari";
-        } elseif ( preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Opera';
-            $ub    = "Opera";
         } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
             $bname = 'Netscape';
             $ub    = "Netscape";
@@ -91,11 +91,9 @@ abstract class viewController extends controller {
             $bname = 'Unknown';
             $ub    = "Unknown";
         }
-
         // finally get the correct version number
         $known   = array( 'Version', $ub, 'other' );
-        $pattern = '#(?<browser>' . join( '|', $known ) .
-                ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
         if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
             // we have no matching number just continue
         }
@@ -141,6 +139,8 @@ abstract class viewController extends controller {
 		    exit;
 	    }
 
+        //SESSION ENABLED
+        parent::sessionStart();
         parent::__construct();
 
         //load Template Engine
@@ -154,7 +154,8 @@ abstract class viewController extends controller {
             //log::doLog(get_class($this)." requires check for login");
             $username_from_cookie = AuthCookie::getCredentials();
             if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie;
+                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
+                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
             }
 
         }
@@ -162,6 +163,7 @@ abstract class viewController extends controller {
         //even if no login in required, if user data is present, pull it out
         if ( !empty( $_SESSION[ 'cid' ] ) ){
             $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
+            $this->logged_user['short']=trim( substr($this->logged_user[ 'first_name' ],0,1) . "" . substr($this->logged_user[ 'last_name' ],0,1) );
         }
 
         if( $isAuthRequired  ) {
@@ -177,7 +179,6 @@ abstract class viewController extends controller {
      * @return bool
      */
     private function doAuth() {
-
         //prepare redirect flag
         $mustRedirectToLogin = false;
 
@@ -209,7 +210,22 @@ abstract class viewController extends controller {
      * @return bool
      */
     public function isLoggedIn() {
-        return ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        return (
+                ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
+                ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
+        );
+    }
+
+    /**
+     * GatUser Login Info
+     *
+     * @return bool
+     */
+    public function getLoginUserParams() {
+        if ( $this->isLoggedIn() ){
+            return array( $_SESSION['uid'], $_SESSION['cid'] );
+        }
+        return array( null, null );
     }
 
     /**
@@ -221,8 +237,14 @@ abstract class viewController extends controller {
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
+//	    log::doLog ("bname $browser_name");
+
+/*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
+                return -2;
+         }
+*/
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false || 1) {
+            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
                 return 1;
             }
         }
@@ -233,6 +255,8 @@ abstract class viewController extends controller {
             }
         }
 
+	//unsupported browsers: hack for home page
+        if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
 
         return 0;
     }

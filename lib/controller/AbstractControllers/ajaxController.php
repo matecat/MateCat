@@ -20,15 +20,9 @@ abstract class ajaxController extends controller {
      */
     protected $result = array("error" => array(), "data" => array());
 
-    /**
-     * Explicitly disable sessions for ajax call
-     *
-     * Sessions enabled on INIT Class
-     *
-     */
-    public function disableSessions(){
-        INIT::sessionClose();
-    }
+    protected $uid;
+    protected $userIsLogged = false;
+    protected $userMail;
 
     /**
      * Class constructor, initialize the header content type.
@@ -56,35 +50,48 @@ abstract class ajaxController extends controller {
      *
      */
     public function finalize() {
-        $toJson = json_encode($this->result);
+        $toJson = json_encode( $this->result );
 
-	if(function_exists("json_last_error")){
-		switch (json_last_error()) {
-            	case JSON_ERROR_NONE:
+        if ( function_exists( "json_last_error" ) ) {
+            switch ( json_last_error() ) {
+                case JSON_ERROR_NONE:
 //              	  Log::doLog(' - No errors');
-                	break;
-            	case JSON_ERROR_DEPTH:
-                	Log::doLog(' - Maximum stack depth exceeded');
-                break;
-            	case JSON_ERROR_STATE_MISMATCH:
-                	Log::doLog(' - Underflow or the modes mismatch');
-                break;
-            	case JSON_ERROR_CTRL_CHAR:
-                	Log::doLog(' - Unexpected control character found');
-                break;
-            	case JSON_ERROR_SYNTAX:
-                	Log::doLog(' - Syntax error, malformed JSON');
-                break;
-            	case JSON_ERROR_UTF8:
-                	Log::doLog(' - Malformed UTF-8 characters, possibly incorrectly encoded');
-                break;
-            	default:
-                	Log::doLog(' - Unknown error');
-                break;
-        	}
-	}
-        
+                    break;
+                case JSON_ERROR_DEPTH:
+                    Log::doLog( ' - Maximum stack depth exceeded' );
+                    break;
+                case JSON_ERROR_STATE_MISMATCH:
+                    Log::doLog( ' - Underflow or the modes mismatch' );
+                    break;
+                case JSON_ERROR_CTRL_CHAR:
+                    Log::doLog( ' - Unexpected control character found' );
+                    break;
+                case JSON_ERROR_SYNTAX:
+                    Log::doLog( ' - Syntax error, malformed JSON' );
+                    break;
+                case JSON_ERROR_UTF8:
+                    Log::doLog( ' - Malformed UTF-8 characters, possibly incorrectly encoded' );
+                    break;
+                default:
+                    Log::doLog( ' - Unknown error' );
+                    break;
+            }
+        }
+
         echo $toJson;
+    }
+
+    public function checkLogin( $close = true ) {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        parent::sessionStart();
+        $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->userMail     = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->uid          = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+
+        if ( $close ) {
+            parent::disableSessions();
+        }
+        
     }
 
 }

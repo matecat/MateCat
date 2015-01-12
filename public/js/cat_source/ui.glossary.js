@@ -114,7 +114,7 @@ $.extend(UI, {
 			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);	
 		}		
 	},
-	markGlossaryItemsInSource: function(d, context) {
+	markGlossaryItemsInSource: function(d) {
 		if (Object.size(d.data.matches)) {
 			i = 0;	
 			cleanString = $('.source', UI.currentSegment).html();
@@ -131,7 +131,7 @@ $.extend(UI, {
 				int = {
 					x: coso.indexOf('<mark>'), 
 					y: coso.indexOf('</mark>') - 6
-				} 
+				};
 				intervals.push(int);
 			});
 			UI.intervalsUnion = [];
@@ -151,7 +151,7 @@ $.extend(UI, {
 	removeGlossaryMarksFormSource: function() {
 		$('.editor mark.inGlossary').each(function() {
 			$(this).replaceWith($(this).html());
-		})
+		});
 	},
 
 	checkIntervalsUnions: function(intervals) {
@@ -185,6 +185,9 @@ $.extend(UI, {
 		}
 		if(smallest.x < 1000000) UI.intervalsUnion.push(smallest);
 //			console.log('intervals 1: ', JSON.stringify(intervals));
+
+        //throws exception when it is undefined
+        ( typeof smallestIndex == 'undefined' ? smallestIndex = 0 : null );
 		intervals.splice(smallestIndex, 1);
 //			console.log('intervals 2: ', JSON.stringify(intervals));
 			if(!intervals.length) return false;
@@ -197,8 +200,8 @@ $.extend(UI, {
 		smallest = {
 					x: 1000000, 
 					y: 2000000
-				} 
-		$.each(ar, function(index) {
+				};
+		$.each(ar, function() {
 			if(this.x < smallest.x) smallest = this;
 		});
 		return smallest;
@@ -259,7 +262,8 @@ $.extend(UI, {
 					UI.footerMessage('A Private TM Key has been created for this job', this[0]);
 					UI.noGlossary = false;
 				} else {
-					UI.footerMessage('A glossary item has been added', this[0]);					
+                    msg = (d.errors.length)? d.errors[0].message : 'A glossary item has been added';
+					UI.footerMessage(msg, this[0]);
 				}
 				UI.processLoadedGlossary(d, this);
 			},
@@ -268,6 +272,19 @@ $.extend(UI, {
 			}
 		});
 	},
+    copyGlossaryItemInEditarea: function(item) {
+        translation = item.find('.translation').text();
+        $('.editor .editarea .focusOut').before(translation + '<span class="tempCopyGlossaryPlaceholder"></span>').remove();
+        this.lockTags(this.editarea);
+        range = window.getSelection().getRangeAt(0);
+        node = $('.editor .editarea .tempCopyGlossaryPlaceholder')[0];
+        setCursorAfterNode(range, node);
+        $('.editor .editarea .tempCopyGlossaryPlaceholder').remove();
+
+//        this.editarea.focus();
+        this.highlightEditarea();
+    },
+
 });
 
 

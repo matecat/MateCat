@@ -27,6 +27,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -39,6 +40,7 @@ $.extend(UI, {
 		this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
+            this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();
@@ -56,6 +58,10 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
+        this.logEnabled = true;
+        this.unsavedSegmentsToRecover = [];
+        this.recoverUnsavedSegmentsTimer = false;
+        this.savingMemoryErrorNotificationEnabled = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -138,19 +144,21 @@ $.extend(UI, {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "alt+ctrl+c",
+					"standard": "alt+c",
 					"mac": "alt+meta+c",
 				}
 			},
-		}
+		};
 		this.setShortcuts();
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 		APP.initMessageBar();
 		this.checkVersion();
+        this.initTM();
+        this.storeClientInfo();
 
-		// SET EVENTS
+        // SET EVENTS
 		this.setEvents();
 		if(this.surveyAlreadyDisplayed()) {
 			this.surveyDisplayed = true;

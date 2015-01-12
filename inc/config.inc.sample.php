@@ -49,6 +49,7 @@ class INIT {
 	public static $SPELL_CHECK_TRANSPORT_TYPE;
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
+	public static $MAX_UPLOAD_TMX_FILE_SIZE;
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
 	public static $OAUTH_CLIENT_ID;
@@ -61,9 +62,15 @@ class INIT {
 	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
-	 * @var $JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
+     * Default Matecat user agent string
+     *
+     */
+    const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
+
+    /**
+	 * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
 	 */
-	public static $JOB_ARCHIVABILITY_THRESHOLD;
+	const JOB_ARCHIVABILITY_THRESHOLD = 30;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -75,41 +82,16 @@ class INIT {
      */
     public static $ENABLE_OUTSOURCE = true;
 
+    public static $DEFAULT_PAYABLE_RATES = array(
+            'NO_MATCH'    => 100,
+            '50%-74%'     => 100,
+            '75%-99%'     => 60,
+            '100%'        => 30,
+            'REPETITIONS' => 30,
+            'INTERNAL'    => 60,
+            'MT'          => 85
+    );
 
-
-
-
-	private function initOK() {
-
-		$flagfile = ".initok.lock";
-		if (file_exists($flagfile)) {
-			return true;
-		}
-		$errors = "";
-		if (self::$DB_SERVER == "@ip address@") {
-			$errors.="\$DB_SERVER not initialized\n";
-		}
-
-		if (self::$DB_USER == "@username@") {
-			$errors.="\$DB_USER not initialized\n";
-		}
-
-		if (self::$DB_PASS == "@password@") {
-			$errors.="\$DB_PASS not initialized\n";
-		}
-
-
-		if (empty($errors)) {
-			touch($flagfile);
-			return true;
-		} else {
-
-			echo "<pre>
-				APPLICATION INIT ERROR : \n
-				$errors\n";
-			return false;
-		}
-	}
 
 	public static function obtain() {
 		if (!self::$instance) {
@@ -119,9 +101,13 @@ class INIT {
 		return self::$instance;
 	}
 
-	public static function sessionClose(){
-		@session_write_close();
-	}
+    public static function sessionClose(){
+        @session_write_close();
+    }
+
+    public static function sessionStart(){
+        @session_start();
+    }
 
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = array(
@@ -166,11 +152,10 @@ class INIT {
         register_shutdown_function( 'INIT::fatalErrorHandler' );
 
         if( stripos( PHP_SAPI, 'cli' ) === false ){
-            //access session data
-            @session_start();
+
             register_shutdown_function( 'INIT::sessionClose' );
 
-            self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+            self::$PROTOCOL = isset($_SERVER['HTTPS']) ? "https" : "http";
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
 
         } else {
@@ -241,9 +226,7 @@ class INIT {
 			}
 		}
 
-		self::$AUTHCOOKIENAME='matecat_login';
-		self::$AUTHCOOKIEDURATION=86400*60;
-		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
+		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari'); //, 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
         // This occurs especially in mobile environment. As an example, when you try to open a link from within
@@ -266,8 +249,11 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.4.0';
-		self::$VOLUME_ANALYSIS_ENABLED = true;
+        self::$BUILD_NUMBER = '0.4.2.3';
+        self::$VOLUME_ANALYSIS_ENABLED = true;
+
+        self::$AUTHCOOKIENAME='matecat_login_v2';
+        self::$AUTHCOOKIEDURATION=86400*60;
 
         self::$FORCE_XLIFF_CONVERSION = false;
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds
@@ -278,77 +264,80 @@ class INIT {
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
         self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
+        self::$MAX_UPLOAD_TMX_FILE_SIZE = 100 * 1024 * 1024; // bytes
         self::$MAX_NUM_FILES = 100;
 
         self::$SUPPORTED_FILE_TYPES = array(
-            'Office'              => array(
-                'doc'  => array( '','','extdoc'),
-                'dot'  => array( '','','extdoc'),
-                'docx' => array( '','','extdoc'),
-                'dotx' => array( '','','extdoc'),
-                'docm' => array( '','','extdoc'),
-                'dotm' => array( '','','extdoc'),
-                'pdf'  => array( '','','extpdf'),
-                'xls'  => array( '','','extxls'),
-                'xlt'  => array( '','','extxls'),
-                'xlsm' => array( '','','extxls'),
-                'xlsx' => array( '','','extxls'),
-                'xltx' => array( '','','extxls'),
-                'pot'  => array( '','','extppt'),
-                'pps'  => array( '','','extppt'),
-                'ppt'  => array( '','','extppt'),
-                'potm' => array( '','','extppt'),
-                'potx' => array( '','','extppt'),
-                'ppsm' => array( '','','extppt'),
-                'ppsx' => array( '','','extppt'),
-                'pptm' => array( '','','extppt'),
-                'pptx' => array( '','','extppt'),
-                'odp'  => array( '','','extppt'),
-                'ods'  => array( '','','extxls'),
-                'odt'  => array( '','','extdoc'),
-                'sxw'  => array( '','','extdoc'),
-                'sxc'  => array( '','','extxls'),
-                'sxi'  => array( '','','extppt'),
-                'txt'  => array( '','','exttxt'),
-                'csv'  => array( '','','extxls'),
-                'xml'  => array( '','','extxml'),
-                //                'vxd' => array("Try converting to XML")
-            ),
-            'Web'                 => array(
-                'htm'   => array( '','','exthtm'),
-                'html'  => array( '','','exthtm'),
-                'xhtml' => array( '','','exthtm'),
-                'xml'   => array( '','','extxml')
-            ),
-            "Interchange Formats" => array(
-                'xliff'    => array( 'default','','extxif' ),
-                'sdlxliff' => array( 'default','','extixif' ),
-                'tmx'      => array( '','','exttmx'),
-                'ttx'      => array( '','','extttx'),
-                'itd'      => array( '','','extitd'),
-                'xlf'      => array( 'default', '', 'extxlf' )
-            ),
-            "Desktop Publishing"  => array(
-                //                'fm' => array('', "Try converting to MIF"),
-                'mif'  => array( '','','extmif'),
-                'inx'  => array( '','','extidd'),
-                'idml' => array( '','','extidd'),
-                'icml' => array( '','','extidd'),
-                //                'indd' => array('', "Try converting to INX"),
-                'xtg'  => array( '','','extqxp'),
-                'tag'  => array( '','','exttag'),
-                'xml'  => array( '','','extxml'),
-                'dita' => array( '','','extdit')
-            ),
-            "Localization"   => array(
-                'properties' => array( '','','extpro'),
-                'rc'         => array( '','','extrcc'),
-                'resx'       => array( '','','extres'),
-                'xml'        => array( '','','extxml'),
-                'dita'       => array( '','','extdit'),
-                'sgml'       => array( '','','extsgm'),
-                'sgm'        => array( '','','extsgm')
-            )
+                'Office'              => array(
+                        'doc'  => array( '', '', 'extdoc' ),
+                        'dot'  => array( '', '', 'extdoc' ),
+                        'docx' => array( '', '', 'extdoc' ),
+                        'dotx' => array( '', '', 'extdoc' ),
+                        'docm' => array( '', '', 'extdoc' ),
+                        'dotm' => array( '', '', 'extdoc' ),
+                        'pdf'  => array( '', '', 'extpdf' ),
+                        'xls'  => array( '', '', 'extxls' ),
+                        'xlt'  => array( '', '', 'extxls' ),
+                        'xlsm' => array( '', '', 'extxls' ),
+                        'xlsx' => array( '', '', 'extxls' ),
+                        'xltx' => array( '', '', 'extxls' ),
+                        'pot'  => array( '', '', 'extppt' ),
+                        'pps'  => array( '', '', 'extppt' ),
+                        'ppt'  => array( '', '', 'extppt' ),
+                        'potm' => array( '', '', 'extppt' ),
+                        'potx' => array( '', '', 'extppt' ),
+                        'ppsm' => array( '', '', 'extppt' ),
+                        'ppsx' => array( '', '', 'extppt' ),
+                        'pptm' => array( '', '', 'extppt' ),
+                        'pptx' => array( '', '', 'extppt' ),
+                        'odp'  => array( '', '', 'extppt' ),
+                        'ods'  => array( '', '', 'extxls' ),
+                        'odt'  => array( '', '', 'extdoc' ),
+                        'sxw'  => array( '', '', 'extdoc' ),
+                        'sxc'  => array( '', '', 'extxls' ),
+                        'sxi'  => array( '', '', 'extppt' ),
+                        'txt'  => array( '', '', 'exttxt' ),
+                        'csv'  => array( '', '', 'extxls' ),
+                        'xml'  => array( '', '', 'extxml' ),
+                        'rtf'  => array( '', '', 'extrtf' ),
+                    //                'vxd' => array("Try converting to XML")
+                ),
+                'Web'                 => array(
+                        'htm'   => array( '', '', 'exthtm' ),
+                        'html'  => array( '', '', 'exthtm' ),
+                        'xhtml' => array( '', '', 'exthtm' ),
+                        'xml'   => array( '', '', 'extxml' )
+                ),
+                "Interchange Formats" => array(
+                        'xliff'    => array( 'default', '', 'extxif' ),
+                        'sdlxliff' => array( 'default', '', 'extixif' ),
+                        'tmx'      => array( '', '', 'exttmx' ),
+                        'ttx'      => array( '', '', 'extttx' ),
+                        'itd'      => array( '', '', 'extitd' ),
+                        'xlf'      => array( 'default', '', 'extxlf' )
+                ),
+                "Desktop Publishing"  => array(
+                    //                'fm' => array('', "Try converting to MIF"),
+                        'mif'  => array( '', '', 'extmif' ),
+                        'inx'  => array( '', '', 'extidd' ),
+                        'idml' => array( '', '', 'extidd' ),
+                        'icml' => array( '', '', 'extidd' ),
+                    //                'indd' => array('', "Try converting to INX"),
+                        'xtg'  => array( '', '', 'extqxp' ),
+                        'tag'  => array( '', '', 'exttag' ),
+                        'xml'  => array( '', '', 'extxml' ),
+                        'dita' => array( '', '', 'extdit' )
+                ),
+                "Localization"        => array(
+                        'properties'  => array( '', '', 'extpro' ),
+                        'rc'          => array( '', '', 'extrcc' ),
+                        'resx'        => array( '', '', 'extres' ),
+                        'xml'         => array( '', '', 'extxml' ),
+                        'dita'        => array( '', '', 'extdit' ),
+                        'sgml'        => array( '', '', 'extsgm' ),
+                        'Android xml' => array( '', '', 'extxml' ),
+                        'sgm'         => array( '', '', 'extsgm' )
+                )
         );
 
         self::$UNSUPPORTED_FILE_TYPES = array(
@@ -393,7 +382,6 @@ class INIT {
 
 	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
 
-	    self::$JOB_ARCHIVABILITY_THRESHOLD = 30;
 	}
 
     public static function fatalErrorHandler() {

@@ -22,15 +22,20 @@ Loader = {
 		'functions',
 		'ui.customization'
 	),
+    other_components: new Array (
+        'tm'
+    ),
 	forkComponents: new Array (
 	),
 	libraries: new Array (
 		'jquery-1.11.0.min',
 //		'jquery',
-//        'jquery-ui-1.8.20.custom.min',
+        'jquery-ui',
 		'jquery.hotkeys.min',
 //		'jquery-migrate-1.2.1',
 		'jquery.cookie',
+        'jquery.tablesorter-fork-mottie',
+//        'jquery.dataTables.min',
 		'diff_match_patch',
 		'waypoints',
 		'rangy-core',
@@ -58,12 +63,14 @@ Loader = {
 	start: function() {
 		var l = this.libraries;
 		var s = this.source_components;
+        var o = this.other_components;
 //		var c = this.detect('fork')? this.forkComponents : this.components;
 		this.basePath = config.basepath+'public/js/';
 		for (var i = 0; i < l.length; i++) this.include(l[i] + '.js', 'lib/', this.basePath);
 		this.include('common.js', '', this.basePath);
 		if(this.concatSources) {
 			for (var i = 0; i < s.length; i++) this.include(s[i] + '.js', 'cat_source/', this.basePath);
+            for (var i = 0; i < o.length; i++) this.include(o[i] + '.js', '', this.basePath);
 		} else {
 			this.include('cat.js', '', this.basePath);
 		}

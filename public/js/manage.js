@@ -9,7 +9,7 @@ UI = {
         this.isSafari = $.browser.webkit && !window.chrome;
         this.body = $('body');
         this.firstLoad = firstLoad;
-        this.pageStep = 100;
+        this.pageStep = 25;
         this.isMac = (navigator.platform == 'MacIntel')? true : false;
         
         var page = location.pathname.split('/')[2];
@@ -229,7 +229,7 @@ UI = {
 						new_status: new_status,
 						res: 		res,
 						id:			id,
-						jpassword: password,
+						password:   password,
 		                page:		UI.page,
 		                step:		UI.pageStep,
 		                undo:		1
@@ -290,21 +290,21 @@ UI = {
 		console.log('ob: ', ob);
         if(typeof only_if == 'undefined') only_if = 0;
 
-        if(res=='job') {
-        	UI.lastJobStatus = ob.data('status');
-        	id        = ob.data('jid');
-        	jpassword = ob.data('password');
-		console.log('jpassword: ', jpassword);
+        if ( res == 'job' ) {
+            UI.lastJobStatus = ob.data( 'status' );
+            id = ob.data( 'jid' );
+            password = ob.data( 'password' );
+            console.log( 'password: ', password );
 
-		} else {
-		    var arJobs = '';
-		    $("tr.row",ob).each(function(){
-		        arJobs += $(this).data('jid')+':'+$(this).data('status')+',';
-		    })
-		    arJobs = arJobs.substring(0, arJobs.length - 1);
-		    UI.lastJobStatus = arJobs;
-		    id = ob.data('pid');
-            jpassword = null;
+        } else {
+            var arJobs = '';
+            $( "tr.row", ob ).each( function () {
+                arJobs += $( this ).data( 'jid' ) + "-" + $( this ).data( 'password' ) + ':' + $( this ).data( 'status' ) + ',';
+            } );
+            arJobs = arJobs.substring( 0, arJobs.length - 1 );
+            UI.lastJobStatus = arJobs;
+            id = ob.data( 'pid' );
+            password = ob.data('password');
         }
 
         var d = {
@@ -312,7 +312,7 @@ UI = {
 				new_status: status,
 				res: 		res,
 				id:			id,
-                jpassword:  jpassword,
+                password:   password,
                 page:		UI.page,
                 step:		UI.pageStep,
                 only_if:	only_if,
@@ -332,7 +332,10 @@ UI = {
 					UI.changeJobsStatus_success(res,$(this),d,0);
 					UI.setPagination(d);
 				}
-			}
+			},
+            error: function(d){
+                document.location = '/';
+            }
 		});
     },
 
@@ -358,7 +361,8 @@ UI = {
 			if(undo) {
 				$.each(d.status.split(','), function() {
 					var s = this.split(':');
-					$('tr.row[data-jid='+s[0]+']').attr('data-status',s[1]);
+                    var job_info = s[0].split('-'); //123-abc534f001
+                    $( 'tr.row[data-jid=' + job_info[0] + ']' ).attr( 'data-status', s[1] );
 				})
 			} else {
 				id = ob.data('pid');
@@ -376,8 +380,12 @@ UI = {
 		}
 		if(!undo) {
 			var token =  new Date();
-			var resData = (res == 'prj')? 'pid':'jid';
-			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-password="' + ob.data('password') + '" data-operation="changeStatus" data-status="' + ((res == 'prj')? d.old_status : this.lastJobStatus) + '">Undo</a>').show();
+            var resData = (res == 'prj') ? 'pid' : 'jid';
+            $( '.message' ).attr( 'data-token', token.getTime() ).html( msg +
+            ' <a href="#" class="undo" data-res="' + res +
+            '" data-id="' + ob.data( resData ) +
+            '" data-password="' + ob.data( 'password' ) +
+            '" data-operation="changeStatus" data-status="' + ((res == 'prj') ? d.old_status : this.lastJobStatus) + '">Undo</a>' ).show();
 			setTimeout(function(){
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
@@ -507,9 +515,17 @@ UI = {
 			data: ar,
 			success: function(d){
 				data = $.parseJSON(d.data);
+
+                if( typeof d.errors != 'undefined' && d.errors.length ){
+                    window.location = '/';
+                }
+
 				UI.renderProjects(data,'single');
 				UI.setTablesorter();
-			}
+			},
+            error: function(d){
+                window.location = '/';
+            }
 		});
 	},
 
@@ -526,6 +542,13 @@ UI = {
 			success: function(d){
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
+
+                if( typeof d.errors != 'undefined' && d.errors.length ){
+                    window.location = '/';
+                }
+
+                UI.pageStep = d.pageStep;
+
 				UI.setPagination(d);
 				UI.renderProjects(data,'all');
 				if((d.pnumber - UI.pageStep) > 0) UI.renderPagination(d.page,0,d.pnumber);
@@ -540,10 +563,17 @@ UI = {
 					history.replaceState(stateObj, "page "+d.page, d.page+UI.filters2hash());
 				}
 				UI.compileDisplay();
+
+					//UI.outsourceElements = $( ".missing-outsource-data" );
+					//UI.getOutsourceQuotes();
+
 		        $("html,body").animate({
 		            scrollTop: 0
 		        }, 500 );
-			}
+			},
+            error: function(d){
+                window.location = '/';
+            }
 		});
 	},
 
@@ -581,7 +611,7 @@ UI = {
             var project = this;
             var newProject = '';
 
-			newProject += '<div data-pid="'+this.id+'" class="article">'+
+			newProject += '<div data-pid="'+this.id+'" data-password="' + this.password + '" class="article">'+
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
 		        '	    <div class="project-details">';
@@ -617,10 +647,11 @@ UI = {
 			    '                <th class="private-tm-key">Private TM Key</th>';
 
             if(config.v_analysis){
-                newProject += '                <th class="words header">Payable Words</th>';
+                newProject += '                <th class="words header">Words</th>';
             }
 
             newProject += '                <th class="progress header">Progress</th>'+
+				'	<!-- th class="progress header">Outsource</th -->' +
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
@@ -631,6 +662,15 @@ UI = {
             var ind = 0;
             $.each(this, function() {
                 ind++;
+                var private_tm_keys = '';
+                this.private_tm_key = $.parseJSON(this.private_tm_key);
+                $.each(this.private_tm_key, function(i, tm_key){
+
+                    private_tm_keys +=  "<span class='key'>"    + tm_key.key  + "</span>"+
+                                        "<span class='rgrant'>" + tm_key.r    + "</span>"+
+                                        "<span class='wgrant'>" + tm_key.w    + "</span><br class='clear'/>";
+                });
+
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
@@ -641,7 +681,7 @@ UI = {
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="tm-key">'+
-		            '        	<span>'+ ((typeof this.private_tm_key == 'undefined')? '': this.private_tm_key) + '</span>'+
+		                    	private_tm_keys +
 		            '        </td>';
                 if(config.v_analysis){
                     newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';
@@ -655,12 +695,15 @@ UI = {
 				    '                <a href="#" class="draft-bar" title="Draft '+this.stats.DRAFT_PERC_FORMATTED+'%" style="width:'+this.stats.DRAFT_PERC+'%"></a>'+
 				    '            </div>'+
 		            '        </td>'+
+					'		<!--td class="missing-outsource-data"></td-->'+
 		            '        <td class="actions">'+
 		            '            <a class="change" href="#" title="Change job password">Change</a>'+
 		            '            <a class="cancel" href="#" title="Cancel Job">Cancel</a>'+
 		            '            <a class="archive" href="#" title="Archive Job">Archive</a>'+
 		            '            <a class="resume" href="#" title="Resume Job">Resume</a>'+
 		            '            <a class="unarchive" href="#" title="Unarchive Job">Unarchive</a>'+
+		            '            <a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '/' + project.name + '.zip" title="Export as SDLXLIFF"></a>'+
+		            '            <a target="_blank" href="/TMX/' + this.id + '/' + this.password + '"" class="download-manage"><span>Export as TMX</span></a>'+
 		            '        </td>'+
 		            '    </tr>';
 
@@ -677,7 +720,7 @@ UI = {
         if(action == 'append') {
 	        $('#projects').append(projects);  	
         } else if(action == 'single') {
-        	$('.article[data-pid='+d[0].id+']').replaceWith(projects);
+            $( '.article[data-pid=' + d[0].id + ']' ).replaceWith( projects );
         } else {
 	        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
 	        $('#projects').html(projects);        	        	
@@ -686,7 +729,7 @@ UI = {
     }, // renderProjects
 
     setPagination: function(d) {
-		if((d.pnumber - UI.pageStep) > 0) {
+		if((d.pnumber - d.pageStep) > 0) {
 			this.renderPagination(d.page,1,d.pnumber);
 		} else {
 			$('.pagination').empty();
@@ -712,7 +755,80 @@ UI = {
 	            } 
 	        }			    	
 	    });
-    }
+    },
+
+    getOutsourceQuotes: function() {
+        if ( UI.outsourceElements.length == 0 ) {
+            return;
+        }
+
+		var tableElement = $( UI.outsourceElements[0] );
+		UI.outsourceElements.splice(0, 1);
+
+		var pid_data = tableElement.parents( "table" ).attr( "id" ).split( "-" );
+		var pid = pid_data[ 1 ];
+
+		var url_data = $( "div[data-pid='" + pid + "'] div.project-details > a" ).attr( "href" ).split( "/" );
+		var psw_data = url_data[ url_data.length - 1 ].split( "-" );
+		var psw = psw_data[ 1 ];
+
+		var jid = tableElement.parent( "tr" ).attr( "data-jid" );
+		var jsw = tableElement.parent( "tr" ).attr( "data-password" );
+
+		if ( $( "div[data-pid='" + pid + "'] div.project-details > a" ).text().charAt( 0 ) == '0' )
+		{
+			tableElement.html( "0 words found.<br/>Unable to quote." );
+			tableElement.removeClass( "missing-outsource-data" );
+
+			//UI.getOutsourceQuotes();
+			return;
+		}
+	
+		$.ajax({
+			async: true,
+	  		type: "POST",
+			url : "/?action=outsourceTo",
+			data:
+			{
+				action: 'outsourceTo',
+				pid: pid,
+				ppassword: psw,
+				jobs:
+				[{
+					jid: jid,
+					jpassword: jsw
+				}]
+			},
+			success : function ( data )
+			{
+				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
+				{
+					var price = parseFloat( data.data[0]["price_currency"] ).toFixed( 2 );
+					var date = new Date( data.data[0]["delivery_date"] );
+					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
+
+                    if ( data.data[0].currency == "EUR" ) {
+                        var currency = "€"
+                    } else {
+                        var currency = data.data[0].currency;
+                    }
+
+					var form = 	"<form class='submit-outsource-data' action='http://signin.translated.net/' method='POST' target='_blank'>" +
+                               		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
+                            		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
+                                    "<input type='hidden' name='data_key' value='" + jid + "-" + jsw + "'>" +
+									"<input type='hidden' name='quote_data' value='" + JSON.stringify( data.data ) + "'>" +
+ 	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'> " + currency + " " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
+                                "</form>";
+
+					tableElement.html( form );
+					tableElement.removeClass( "missing-outsource-data" );
+
+					//UI.getOutsourceQuotes();
+				}
+			}
+		});
+	}
 
 } // UI
 
@@ -732,9 +848,9 @@ function setBrowserHistoryBehavior() {
 	};
 }
 
+
 $(document).ready(function(){
     setBrowserHistoryBehavior();
     UI.render(true);
     UI.init();
 });
-

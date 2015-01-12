@@ -42,7 +42,23 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
+    private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
+
+    /**
+     * @var string
+     */
 	private $thisUrl;
+
+    /**
+     * @var Google_Client
+     */
+    private $client;
+
+    /**
+     * @var string
+     */
+    private $authURL;
+
 
 	public function __construct() {
 		$this->start_time = microtime(1) * 1000;
@@ -84,29 +100,29 @@ class catController extends viewController {
         
 		$this->downloadFileName = "";
 
-		$this->thisUrl=$_SERVER['REQUEST_URI'];
+		$this->doAuth();
+
+        $this->generateAuthURL();
 
 	}
 
-	private function parse_time_to_edit($ms) {
-		if ($ms <= 0) {
-			return array("00", "00", "00", "00");
-		}
+    private function doAuth() {
 
-		$usec = $ms % 1000;
-		$ms = floor($ms / 1000);
+        //if no login set and login is required
+        if ( !$this->isLoggedIn() ) {
+            //take note of url we wanted to go after
+            $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
+        }
 
-		$seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
+    }
 
-		$minutes = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
+    private function generateAuthURL() {
 
-		$hours = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
-		$ms = floor($ms / 60);
+        $this->client = OauthClient::getInstance()->getClient();
 
-		return array($hours, $minutes, $seconds, $usec);
-	}
+        $this->authURL = $this->client->createAuthUrl();
+
+    }
 
 	public function doAction() {
 		$files_found = array();
@@ -122,29 +138,43 @@ class catController extends viewController {
 		//retrieve job owner. It will be useful also if the job is archived or cancelled
 		$this->job_owner = ($data[0]['job_owner'] != "") ? $data[0]['job_owner'] : "support@matecat.com" ;
 
-		if ($data[0]['status'] == 'cancelled') {
+		if ( $data[0]['status'] == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
             //stop execution
             return;
         }
 
-		if ($data[0]['status'] == 'archived') {
+		if ( $data[0]['status'] == Constants_JobStatus::STATUS_ARCHIVED ) {
 			$this->job_archived = true;
 //			$this->setTemplateVars();
 			//stop execution
 			return;
 		}
 
-		$jobIsArchivable = count( Utils::getArchivableJobs($this->jid) ) > 0;
+        /*
+         * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
+         * because the query to check "Utils::getArchivableJobs($this->jid)" should be
+         * executed every time a job is loaded ( F5 or CTRL+R on browser ) and it cost some milliseconds ( ~0.1s )
+         * and it is little heavy for the database.
+         * We use the data we already have from last query and perform
+         * the check on the last translation only if the job is older than 30 days
+         *
+         */
+        $lastUpdate = new DateTime( $data[0]['last_update'] );
+        $oneMonthAgo = new DateTime();
+        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
 
-		if( $jobIsArchivable && !$this->job_cancelled ) {
-			//TODO: change this workaround
+        if( $lastUpdate < $oneMonthAgo  && !$this->job_cancelled ) {
 
-			$res = "job";
-			$new_status = 'archived';
+            $lastTranslationInJob = new Datetime( getLastTranslationDate( $this->jid ) );
 
-			updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
-			$this->job_archived = true;
+            if( $lastTranslationInJob < $oneMonthAgo ){
+                $res = "job";
+                $new_status = Constants_JobStatus::STATUS_ARCHIVED;
+                updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+                $this->job_archived = true;
+            }
+
 		}
 
 		foreach ($data as $i => $job) {
@@ -156,9 +186,9 @@ class catController extends viewController {
 				$this->downloadFileName = $job['pname'] . ".zip"; // will be overwritten below in case of one file job
 			}
 
-			if (empty($this->last_opened_segment)) {
-				$this->last_opened_segment = $job['last_opened_segment'];
-			}
+            if ( empty( $this->last_opened_segment ) ) {
+                $this->last_opened_segment = $job[ 'last_opened_segment' ];
+            }
 
 			if (empty($this->cid)) {
 				$this->cid = $job['cid'];
@@ -200,59 +230,43 @@ class catController extends viewController {
 			//check if language belongs to supported right-to-left languages
 
 
-			if ($job['status'] == 'archived') {
+			if ( $job['status'] == Constants_JobStatus::STATUS_ARCHIVED ) {
 				$this->job_archived = true;
 				$this->job_owner = $data[0]['job_owner'];
 			}
 
 			$id_file = $job['id_file'];
 
-
-			if (!isset($this->data["$id_file"])) {
-				$files_found[] = $job['filename'];
-//				$file_stats = CatUtils::getStatsForFile($id_file);
-//
-//				$this->data["$id_file"]['jid'] = $seg['jid'];
-//				$this->data["$id_file"]["filename"] = $seg['filename'];
-//				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-////				$this->data["$id_file"]['id_segment_start'] = @$seg['id_segment_start'];
-////				$this->data["$id_file"]['id_segment_end'] = @$seg['id_segment_end'];
-//				$this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source'],'en');
-//				$this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target'],'en');
-//				$this->data["$id_file"]['source_code'] = $seg['source'];
-//				$this->data["$id_file"]['target_code'] = $seg['target'];
-//				$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
-//				$this->data["$id_file"]['file_stats'] = $file_stats;
-			}
-			//$this->filetype_handler = new filetype($seg['mime_type']);
+            if ( !isset( $this->data[ "$id_file" ] ) ) {
+                $files_found[ ] = $job[ 'filename' ];
+            }
 
             $wStruct = new WordCount_Struct();
 
             $wStruct->setIdJob( $this->jid );
             $wStruct->setJobPassword( $this->password );
-            $wStruct->setNewWords( $job['new_words'] );
-            $wStruct->setDraftWords( $job['draft_words'] );
-            $wStruct->setTranslatedWords( $job['translated_words'] );
-            $wStruct->setApprovedWords( $job['approved_words'] );
-            $wStruct->setRejectedWords( $job['rejected_words'] );
+            $wStruct->setNewWords( $job[ 'new_words' ] );
+            $wStruct->setDraftWords( $job[ 'draft_words' ] );
+            $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
+            $wStruct->setApprovedWords( $job[ 'approved_words' ] );
+            $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
 
-			unset($job['id_file']);
-			unset($job['source']);
-			unset($job['target']);
-			unset($job['source_code']);
-			unset($job['target_code']);
-			unset($job['mime_type']);
-			unset($job['filename']);
-			unset($job['jid']);
-			unset($job['pid']);
-			unset($job['cid']);
-			unset($job['tid']);
-			unset($job['pname']);
-			unset($job['create_date']);
-			unset($job['owner']);
-//			unset($seg['id_segment_end']);
-//			unset($seg['id_segment_start']);
-			unset($job['last_opened_segment']);
+            unset( $job[ 'id_file' ] );
+            unset( $job[ 'source' ] );
+            unset( $job[ 'target' ] );
+            unset( $job[ 'source_code' ] );
+            unset( $job[ 'target_code' ] );
+            unset( $job[ 'mime_type' ] );
+            unset( $job[ 'filename' ] );
+            unset( $job[ 'jid' ] );
+            unset( $job[ 'pid' ] );
+            unset( $job[ 'cid' ] );
+            unset( $job[ 'tid' ] );
+            unset( $job[ 'pname' ] );
+            unset( $job[ 'create_date' ] );
+            unset( $job[ 'owner' ] );
+
+            unset( $job[ 'last_opened_segment' ] );
 
             unset( $job[ 'new_words' ] );
             unset( $job[ 'draft_words' ] );
@@ -261,21 +275,17 @@ class catController extends viewController {
             unset( $job[ 'rejected_words' ] );
 
             //For projects created with No tm analysis enabled
-            if( $wStruct->getTotal() == 0 && ( $job['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ||  $job['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ){
+            if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
                 $wCounter = new WordCount_Counter();
-                $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
+                $wStruct  = $wCounter->initializeJobWordCount( $this->jid, $this->password );
                 Log::doLog( "BackWard compatibility set Counter." );
             }
 
             $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
 
-//            Log::doLog( $this->job_stats );
-
-            //$this->job_stats = CatUtils::getStatsForJob( $this->jid, null, $this->password );
-
         }
 
-        //TODO check and improve, this is not needed
+        //Needed because a just created job has last_opened segment NULL
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
@@ -298,6 +308,130 @@ class catController extends viewController {
         $this->firstSegmentOfFiles = json_encode( $fileInfo );
         $this->fileCounter         = json_encode( $TotalPayable );
 
+
+        list( $uid, $user_email ) = $this->getLoginUserParams();
+
+        //TODO: IMPROVE
+        $_from_url = parse_url( $_SERVER['REQUEST_URI'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $user_email == $data[ 0 ]['job_owner'] ) {
+            $this->userRole = TmKeyManagement_Filter::OWNER;
+        } else {
+            $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
+
+        try {
+
+            /*
+             * Take the keys of the user
+             */
+            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+            $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+
+            $keyList = $_keyList->read( $dh );
+
+        } catch ( Exception $e ) {
+
+            $keyList = array();
+            Log::doLog( $e->getMessage() );
+
+        }
+
+
+        $reverse_lookup_user_personal_keys = array( 'pos' => array(), 'elements' => array() );
+        /**
+         * Set these keys as editable for the client
+         *
+         * @var $keyList TmKeyManagement_MemoryKeyStruct[]
+         */
+        foreach ( $keyList as $_j => $key ) {
+
+            /**
+             * @var $_client_tm_key TmKeyManagement_TmKeyStruct
+             */
+
+            //create a reverse lookup
+            $reverse_lookup_user_personal_keys[ 'pos' ][ $_j ]      = $key->tm_key->key;
+            $reverse_lookup_user_personal_keys[ 'elements' ][ $_j ] = $key;
+
+            $this->_keyList[ 'totals' ][ $_j ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
+
+        }
+
+        /*
+         * Now take the JOB keys
+         */
+        $job_keyList = json_decode( $data[ 0 ][ 'tm_keys' ], true );
+
+        /**
+         * Start this N^2 cycle from keys of the job,
+         * these should be statistically lesser than the keys of the user
+         *
+         * @var $keyList array
+         */
+        foreach ( $job_keyList as $jobKey ) {
+
+            $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+
+            if( $this->isLoggedIn() && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ){
+
+                /*
+                 * If user has some personal keys, check for the job keys if they are present, and obfuscate
+                 * when they are not
+                 */
+                $_index_position = array_search( $jobKey->key, $reverse_lookup_user_personal_keys[ 'pos' ] );
+                if( $_index_position !== false ){
+
+                    //i found a key in the job that is present in my database
+                    //i'm owner?? and the key is an owner type key?
+                    if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
+                        $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
+                        $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
+                        $jobKey = $jobKey->hideKey( $uid );
+                    }
+
+                    else if( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ){
+                        $jobKey = $jobKey->hideKey( -1 );
+                    }
+
+                    else if( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ){
+                        //do Nothing
+                    }
+
+                    unset( $this->_keyList[ 'totals' ][ $_index_position ] );
+
+                } else {
+
+                    /*
+                     * This is not a key of that user, set right and obfuscate
+                     */
+                    $jobKey->r = true;
+                    $jobKey->w = true;
+                    $jobKey = $jobKey->hideKey( -1 );
+
+                }
+
+                $this->_keyList[ 'job_keys' ][ ] = $jobKey;
+
+            } else {
+                /*
+                 * This user is anonymous or it has no keys in its keyring, obfuscate all
+                 */
+                $jobKey->r = true;
+                $jobKey->w = true;
+                $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( -1 );
+
+            }
+
+        }
+
+        //clean unordered keys
+        $this->_keyList[ 'totals' ] = array_values( $this->_keyList[ 'totals' ] );
+
+//        Log::doLog( $this->_keyList );
+
     }
 
 	public function setTemplateVars() {
@@ -309,7 +443,6 @@ class catController extends viewController {
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = 0;
             $this->template->fileCounter         = 0;
-	        $this->template->owner_email         = $this->job_owner;
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->target              = $this->target;
@@ -318,7 +451,7 @@ class catController extends viewController {
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
         }
-
+        $this->template->page = 'cattool';
         $this->template->jid         = $this->jid;
         $this->template->password    = $this->password;
         $this->template->cid         = $this->cid;
@@ -329,17 +462,18 @@ class catController extends viewController {
         $this->template->source_rtl  = $this->source_rtl;
         $this->template->target_rtl  = $this->target_rtl;
 
+        $this->template->authURL = $this->authURL;
+
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
 		$this->template->owner_email         = $this->job_owner;
-        //$this->template->data                = $this->data;
+        $this->template->ownerIsMe           = ($this->logged_user['email'] == $this->job_owner);
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-//        Log::doLog( $this->job_stats );
-
+        $this->template->user_keys              = $this->_keyList;
         $this->template->job_stats              = $this->job_stats;
 
         $end_time                               = microtime( true ) * 1000;
@@ -351,14 +485,18 @@ class catController extends viewController {
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
         $this->template->job_not_found          = $this->job_not_found;
-        $this->template->job_archived           = ( $this->job_archived ) ? INIT::$JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
-        $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->logged_user            = $this->logged_user['short'];
+        $this->template->extended_user          = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
+
+        $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize         = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
@@ -375,7 +513,7 @@ class catController extends viewController {
 
         //check if cjk
         if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
-            $this->template->taglockEnabled = 0;
+//            $this->template->taglockEnabled = 0;
         }
 
         /*

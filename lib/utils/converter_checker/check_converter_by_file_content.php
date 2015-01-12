@@ -502,8 +502,8 @@ class ConvertersMonitor {
             $rebootTime             = new DateTime( $this->resultSet[ $ip_converter ][ 'last_update' ] );
             $thisTimeFailure = new DateTime();
 
-            //if this failure happened 5 minutes after reboot time
-            if( $thisTimeFailure->modify('-5 minutes') >= $rebootTime ){
+            //if this failure happened 10 minutes after reboot time
+            if( $thisTimeFailure->modify('-10 minutes') >= $rebootTime ){
 
                 self::_prettyEcho( "> *** FAILED REBOOT FOUND....", 4 );
 
@@ -596,7 +596,7 @@ class ConvertersMonitor {
             $this->converterFactory->sendErrorReport = false;
 
             //10 seconds of timeout, average time is less than 5 seconds
-            $this->converterFactory->setCurlOpt( array( 'CURLOPT_TIMEOUT' => 10 ) );
+            $this->converterFactory->setCurlOpt( array( 'CURLOPT_TIMEOUT' => 15 ) );
 
             self::_prettyEcho( "> Trying conversion on " . $ip_converter, 4 );
 
@@ -639,7 +639,7 @@ class ConvertersMonitor {
             //compare distance
             $diff = $min / $max;
 
-            if ( $diff < 0.99 ) {
+            if ( $diff < 0.97 ) {
                 self::_prettyEcho( "> Size Mismatch, conversion is failed...", 4 );
 
                 //file differ too much, conversion failed

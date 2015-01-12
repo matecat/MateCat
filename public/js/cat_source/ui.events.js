@@ -63,7 +63,7 @@ $.extend(UI, {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		});		
+		});
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -101,16 +101,9 @@ $.extend(UI, {
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-            if(!UI.hiddenTextEnabled) return;
-
-            e.preventDefault();
-			var node = document.createElement("span");
-			var br = document.createElement("br");
-			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-			node.setAttribute('contenteditable', 'false');
-			node.appendChild(br);
-			insertNodeAtCursor(node);
-			UI.unnestMarkers();
+            UI.handleReturn(e);
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.handleReturn(e);
 		}).on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
@@ -146,11 +139,23 @@ $.extend(UI, {
 			$('.editor .editarea .lastInserted').removeClass('lastInserted');
 			console.log('c: ', UI.editarea.html());
 */
-		});		
+        });
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
-		}).bind('keydown', 'Meta+c', function() {
+		}).bind('keydown', 'Meta+shift+l', function() {
+            UI.openLanguageResourcesPanel();
+        }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
+        }).bind('keydown', 'Meta+shift+s', function(e) {
+//            e.preventDefault();
+            UI.body.toggleClass('tagmode-default-extended');
+        }).on('click', '.tagModeToggle', function(e) {
+            e.preventDefault();
+            console.log('click su tagMode toggle');
+            $(this).toggleClass('active');
+            UI.body.toggleClass('tagmode-default-extended');
+            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
+
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {
@@ -174,17 +179,295 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.unbindShortcuts();
 			$('.popup-settings').show();
+
+        // start addtmx
+        }).on('click', '.open-popup-addtm-tr', function(e) {
+            e.preventDefault();
+            UI.openLanguageResourcesPanel();
+//            $('.popup-addtm-tr').show();
+        }).on('click', '#addtm-create-key', function(e) {
+            e.preventDefault();
+            //prevent double click
+            if($(this).hasClass('disabled')) return false;
+            $(this).addClass('disabled');
+            $(this).attr('disabled','');
+//            $.get("https://mymemory.translated.net/api/createranduser",function(data){
+//                //parse to appropriate type
+//                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+//                if(typeof data == 'string'){
+//                    data=jQuery.parseJSON(data);
+//                }
+//                //put value into input field
+//                $('#addtm-tr-key').val(data.key);
+//                $('#addtm-create-key').removeClass('disabled');
+//                setTimeout(function() {
+//                    UI.checkAddTMEnable();
+//                    UI.checkManageTMEnable();
+//                }, 100);
+////                $('#private-tm-user').val(data.id);
+////                $('#private-tm-pass').val(data.pass);
+////                $('#create_private_tm_btn').attr('data-key', data.key);
+//                return false;
+//            });
+
+            //call API
+            APP.doRequest({
+                data: {
+                    action: 'createRandUser'
+                },
+                success: function(d) {
+                    //put value into input field
+                    $('#addtm-tr-key').val( d.data.key);
+                    $('#addtm-create-key').removeClass('disabled');
+                    setTimeout(function() {
+                        UI.checkAddTMEnable();
+                        UI.checkManageTMEnable();
+                    }, 100);
+                    //$('#private-tm-user').val(data.id);
+                    //$('#private-tm-pass').val(data.pass);
+                    //$('#create_private_tm_btn').attr('data-key', data.key);
+                    return false;
+                }
+            });
+
+        }).on('change', '#addtm-tr-read, #addtm-tr-write', function() {
+            if(UI.checkTMgrants($('.addtm-tr'))) {
+                $('.addtm-tr .error-message').hide();
+            }
+        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function() {
+            if(UI.checkTMgrants($('.addtm-tr-key'))) {
+                $('.addtm-tr-key .error-message').hide();
+            }
+        }).on('change', '.addtm-select-file', function() {
+/*
+            $('.addtm-tr .warning-message').hide();
+            if($('#addtm-tr-key').val() == '') {
+                $('#addtm-create-key').click();
+                $('.addtm-tr .warning-message').show();
+                setTimeout(function() {
+                    UI.checkAddTMEnable();
+                }, 500);
+            }
+*/
+/*
+        }).on('click', '.addtm-tr-key .btn-ok', function() {
+            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
+                return false;
+            } else {
+                $('.addtm-tr-key .error-message').text('').hide();
+            }
+            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
+*/
+        }).on('click', '#addtm-select-file', function() {
+            $('.addtm-select-file').click();
+        }).on('change', '.addtm-select-file', function() {
+            console.log($(this).val());
+            if($(this).val() !== '') {
+                $('#uploadTMX').html($(this).val().split('\\')[$(this).val().split('\\').length - 1] + '<a class="delete"></a>').show();
+            } else {
+                $('#uploadTMX').hide();
+            }
+        }).on('change', '#addtm-tr-key', function() {
+            $('.addtm-tr .warning-message').hide();
+        }).on('input', '#addtm-tr-key', function() {
+            UI.checkAddTMEnable();
+            UI.checkManageTMEnable();
+        }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function() {
+            UI.checkAddTMEnable();
+/*
+        }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
+            UI.checkAddTMEnable($('#addtm-add'));
+        }).on('change', '#addtm-tr-key-key', function(e) {
+            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
+        }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
+*/
+        }).on('click', '#uploadTMX .delete', function(e) {
+            e.preventDefault();
+            $('#uploadTMX').html('');
+            $('.addtm-select-file').val('');
+        }).on('click', '#addtm-add', function(e) {
+            e.preventDefault();
+            if(!UI.checkTMgrants($('.addtm-tr'))) {
+                return false;
+            } else {
+                console.log('vediamo qui');
+                $('.addtm-tr .error-message').text('').hide();
+                console.log('CONTROLLO: ', $('#uploadTMX').text());
+                operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
+                UI.checkTMKey($('#addtm-tr-key').val(), operation);
+//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+
+            }
+
+
+/*
+// web worker implementation
+
+            if(typeof(Worker) !== "undefined") {
+                // Yes! Web worker support!
+
+                var worker = new Worker('http://matecat.local/public/js/addtm.js');
+                worker.onmessage = function(e) {
+                    alert(e.data);
+                }
+                worker.onerror =werror;
+
+                // Setup the dnd listeners.
+                var dropZone = document.getElementById('drop_zone');
+                dropZone.addEventListener('dragover', handleDragOver, false);
+                dropZone.addEventListener('drop', handleFileSelect, false);
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            } else {
+                // Sorry! No Web Worker support..
+            }
+*/
+
+/*
+            $('#addtm-add').addClass('disabled');
+
+            //create an iFrame element
+            var iFrameAddTM = $( document.createElement( 'iframe' ) ).hide().prop({
+                id: 'iFrameAddTM',
+                src: ''
+            });
+
+            //append iFrame to the DOM
+            $("body").append( iFrameAddTM );
+*/
+
+/*
+            //generate a token addTM
+            var addTMToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameAddTM.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                addTMTimer = window.setInterval(function () {
+
+                    //check for cookie
+                    var token = $.cookie('addTMToken');
+                    console.log('TOKEN: ', token);
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == addTMToken ) {
+                        $('#addtm-add').removeClass('disabled').val( $('#addtm-add' ).data('oldValue') ).removeData('oldValue');
+                        window.clearInterval( addTMTimer );
+                        $.cookie('addTMToken', null, { path: '/', expires: -1 });
+                        iFrameAddTM.remove();
+                    }
+
+                }, 2000);
+
+            });
+
+            //clone the html form and append a token for download
+            var iFrameAddTMForm = $("#addTMForm").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type: 'hidden',
+                    name: 'addTMToken',
+                    value: addTMToken
+                })
+            );
+*/
+/*
+            var iFrameAddTMForm = $("#addTMForm").clone();
+            //append from to newly created iFrame and submit form post
+            iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
+            console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
+            iFrameAddTM.contents().find("#addTMForm").submit();
+*/
+            /*
+                        //check if we are in download status
+                        if ( !$('#downloadProject').hasClass('disabled') ) {
+
+                            //disable download button
+                            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+
+                            //create an iFrame element
+                            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                                id:'iframeDownload',
+                                src: ''
+                            });
+
+                            //append iFrame to the DOM
+                            $("body").append( iFrameDownload );
+
+                            //generate a token download
+                            var downloadToken = new Date().getTime();
+
+                            //set event listner, on ready, attach an interval that check for finished download
+                            iFrameDownload.ready(function () {
+
+                                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                                downloadTimer = window.setInterval(function () {
+
+                                    //check for cookie
+                                    var token = $.cookie('downloadToken');
+
+                                    //if the cookie is found, download is completed
+                                    //remove iframe an re-enable download button
+                                    if ( token == downloadToken ) {
+                                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                                        window.clearInterval( downloadTimer );
+                                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                                        iFrameDownload.remove();
+                                    }
+
+                                }, 2000);
+
+                            });
+
+                            //clone the html form and append a token for download
+                            var iFrameForm = $("#fileDownload").clone().append(
+                                $( document.createElement( 'input' ) ).prop({
+                                    type:'hidden',
+                                    name:'downloadToken',
+                                    value: downloadToken
+                                })
+                            );
+
+                            //append from to newly created iFrame and submit form post
+                            iFrameDownload.contents().find('body').append( iFrameForm );
+                            iFrameDownload.contents().find("#fileDownload").submit();
+
+                        } else {
+                            //we are in download status
+                        }
+             */
+ /*
+            APP.doRequest({
+                data: {
+                    action: 'addTM',
+                    job_id: config.job_id,
+                    job_pass: config.password,
+                    tm_key: $('#addtm-tr-key').val(),
+                    name: $('#addtm-tr-name').val(),
+                    tmx_file: ''
+                },
+                error: function() {
+                    console.log('addTM error!!');
+                },
+                success: function(d) {
+                    console.log('addTM success!!');
+                }
+            });
+*/
+        // end addtmx
+
 		}).on('click', '.popup-settings #settings-restore', function(e) {
 			e.preventDefault();
 			APP.closePopup();
 		}).on('click', '.popup-settings #settings-save', function(e) {
 			e.preventDefault();
 			APP.closePopup();
-		}).on('click', '.modal .x-popup', function(e) {
+        }).on('click', '.modal .x-popup', function() {
 			if($('body').hasClass('shortcutsDisabled')) {
 				UI.bindShortcuts();
 			}
-		}).on('click', '.popup-settings .x-popup', function(e) {
+		}).on('click', '.popup-settings .x-popup', function() {
 			console.log('close');
 		}).on('click', '.popup-settings .submenu li', function(e) {
 			e.preventDefault();
@@ -195,7 +478,7 @@ $.extend(UI, {
 //			console.log($(this).attr('data-tab'));
 		}).on('click', '.popup-settings .submenu li a', function(e) {
 			e.preventDefault();
-		}).on('click', '#settings-shortcuts .list .combination .keystroke', function(e) {
+		}).on('click', '#settings-shortcuts .list .combination .keystroke', function() {
 			$('#settings-shortcuts .list .combination .msg').remove();
 			$('#settings-shortcuts .list .combination .keystroke.changing').removeClass('changing');
 			$(this).toggleClass('changing').after('<span class="msg">New: </span>');
@@ -213,18 +496,18 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.closeContextMenu();
 			UI.addWord(UI.selectedMisspelledElement.text());
-		}).on('click', '.reloadPage', function(e) {
+		}).on('click', '.reloadPage', function() {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-//			console.log('a: ', UI.editarea.html());
+
+            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
-//            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//            console.log('a1: ', UI.editarea.html());
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			console.log('b: ', UI.editarea.html());
+            UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -266,7 +549,7 @@ $.extend(UI, {
 			var n = e.which;
 			var c = $(this).parents('.combination');
 			if(!(c.find('.new').length)) {
-				$(c).append('<span class="new"></span>')
+				$(c).append('<span class="new"></span>');
 			}
 			var s = $('.new', c);
 			console.log(n);
@@ -303,7 +586,7 @@ $.extend(UI, {
 //				$('#settings-shortcuts.modifying').removeClass('modifying');
 //				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
 			}				
-		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function(e) {
+		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
 			var c = $(this).parents('.combination');
 			var s = $('.new', c);
@@ -311,13 +594,48 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		});
+		} ).on('click', '.authLink', function(e){
+            e.preventDefault();
+
+            $(".login-google").show();
+
+            return false;
+        } ).on('click', '#sign-in', function(e){
+            e.preventDefault();
+
+            var url = $(this).data('oauth');
+
+            var newWindow = window.open(url, 'name', 'height=600,width=900');
+            if (window.focus) {
+                newWindow.focus();
+            }
+        });
 		
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
-		});
+		}).on('mousedown', function() {
+
+            //when the catoool is not loaded because of the job is archived,
+            // saveSelection leads to a javascript error
+            //so, add a check to see if the cattool page is really created/loaded
+            if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
+                return false;
+            }
+
+            if(!$('.editor .rangySelectionBoundary.focusOut').length) {
+                if(!UI.isSafari) saveSelection();
+            }
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && hasFocusAfter){
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+                }
+            }, 600);
+        });
 //		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
@@ -409,6 +727,8 @@ $.extend(UI, {
 			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
+        }).on('dblclick', '.glossary .sugg-target', function() {
+            UI.copyGlossaryItemInEditarea($(this));
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -492,27 +812,47 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
-		}).on('mouseup', '.editarea', function(e) {
-			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				if(!UI.isFirefox) UI.showEditToolbar();
-			};
+		}).on('mouseup', '.editarea', function() { //mouseupeditarea
+            if(!UI.editarea.find('.locked.selected').length) {
+                if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                    if(!UI.isFirefox) UI.showEditToolbar();
+                }
+            }
+            /*
+                        if(!UI.editarea.find('.locked.selected').length) {
+                            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                                if(!UI.isFirefox) UI.showEditToolbar();
+                            }
+                        } else {
+                            console.log('A tag is selected');
+                            console.log(UI.editarea.find('.locked.selected')[0]);
+                            setCursorPosition(UI.editarea.find('.locked.selected')[0]);
+                        }
+            */
 		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
-		}).on('mousedown', '.editToolbar .uppercase', function(e) {
+		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
-		}).on('mousedown', '.editToolbar .lowercase', function(e) {
+		}).on('mousedown', '.editToolbar .lowercase', function() {
 			UI.formatSelection('lowercase');
-		}).on('mousedown', '.editToolbar .capitalize', function(e) {
+		}).on('mousedown', '.editToolbar .capitalize', function() {
 			UI.formatSelection('capitalize');
-		}).on('mouseup', '.editToolbar li', function(e) {
+		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-		}).on('click', '.editarea', function(e, operation, action) {
-			if (typeof operation == 'undefined')
+		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
+            if (typeof operation == 'undefined')
 				operation = 'clicking';
-			this.onclickEditarea = new Date();
+            UI.saveInUndoStack('click');
+            this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
-			if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+            UI.removeHighlightCorrespondingTags();
+
+            if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
 				if (operation == 'moving') {
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
 						UI.segmentToOpen = segment;
@@ -541,7 +881,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
-			if (UI.debug)
+            UI.lockTags(UI.editarea);
+
+            if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
@@ -549,98 +891,14 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-        }).on('keydown', '.editor .editarea', function(e) {
-//            saveSelection();
-//            console.log('KEYDOWN: ', UI.editarea.html());
-//            restoreSelection();
-        }).on('keypress', '.editor .editarea', function(e) {
-//            saveSelection();
-//            console.log('KEYPRESS: ', UI.editarea.html());
-//            restoreSelection();
-        }).on('keyup', '.editor .editarea', function(e) {
-/*
-            saveSelection();
-            insideBr = $('.editor .editarea .br .rangySelectionBoundary').length;
-//            if(insideBr) console.log('is inside BR');
-
-            currentBr = $('.br:has(.rangySelectionBoundary)', UI.editarea);
-//            startRow = $('.br:has(.rangySelectionBoundary) .startRow', UI.editarea);
-            pastedContent = currentBr.text().trim();
-
-//            pastedContent = startRow.text().trim();
-            restoreSelection();
-//            console.log('startRow: ', startRow);
-//            console.log('startRow text: ', startRow.text().trim());
-            currentBr.html('<br /><span class="startRow">&nbsp;</span>');
-//            console.log('currentBr: ', currentBr);
-//            console.log('pastedContent: ', pastedContent);
-            $(currentBr).after(pastedContent + '<span class="pointCursorHere"></span>');
-//            setCursorPosition($('.pointCursorHere', UI.editarea)[0]);
-            $('.pointCursorHere', UI.editarea).remove();
-*/
-//            setCursorAfterNode(window.getSelection().getRangeAt(0), $('.pointCursorHere', UI.editarea)[0]);
-
-//            console.log('ecco: ', UI.editarea.html());
-//      $('.editor .editarea .startRow').replaceWith('<span class="startRow">&nbsp;</span>' + pastedContent);
-
-            /*
-                        saveSelection();
-                        insideStartRow = $('.editor .editarea .startRow .rangySelectionBoundary').length;
-                        startRow = $('.startRow:has(.rangySelectionBoundary)', UI.editarea);
-                        pastedContent = startRow.text().trim();
-
-            //            console.log('cursore dentro a uno span? ', insideStartRow);
-                        restoreSelection();
-            //            console.log('insideStartRow: ', insideStartRow);
-            //            console.log('startRow: ', '"' + startRow.text() + '"');
-            //            console.log('startRow: ', '"' + startRow.text().trim() + '"');
-            //            $(startRow).html()
-            //            $('.editor .editarea .startRow')[0].innerHTML = '&nbsp;';
-            //            console.log('pastedContent: ', pastedContent);
-                        $('.editor .editarea .startRow').replaceWith(pastedContent);
-
-            //            $('.editor .editarea .startRow').html('&nbsp;').after(startRow.text().trim());
-            //            $('.editor .editarea .startRow').text('COSO').after(startRow.text().trim());
-            */
-
-//            saveSelection();
-//            console.log('KEYUP: ', UI.editarea.html());
-//            restoreSelection();
-/*
-            // are the cursor inside of a span tag?
-            saveSelection();
-            insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
-            console.log('cursore dentro a uno span? ', insideSpan);
-            restoreSelection();
-            console.log('insideSpan: ', insideSpan);
-            if(insideSpan) {
-                console.log('vediamo insideSpan');
-                e.preventDefault();
-            }
-*/
-            /*
-                        console.log('KEYDOWN ON EDITAREA');
-                        saveSelection();
-                        console.log('html: ', UI.editarea.html());
-                        insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
-                        console.log('cursore dentro a uno span? ', insideSpan);
-                        range = window.getSelection().getRangeAt(0);
-                        node = $('.editor .editarea span:has(.rangySelectionBoundary)')[0];
-                        if(insideSpan) {
-                            console.log(node);
-                            setCursorPosition(node, 'end');
-            //                setCursorAfterNode(range, node);
-                        }
-                        restoreSelection();
-             */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
-            if(!UI.defaultBRmanagement) {
+ //           if(!UI.defaultBRmanagement) {
                 console.log( 'Enter key is disabled!' );
                 e.preventDefault();
                 return false;
-            };
+ //           };
 
 //            if(!UI.defaultBRmanagement) {
 //                range = window.getSelection().getRangeAt(0);
@@ -660,6 +918,8 @@ $.extend(UI, {
 //            }
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
+            e.preventDefault();
+/*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
                 UI.defaultBRmanagement = true;
@@ -669,8 +929,8 @@ $.extend(UI, {
                 restoreSelection();
                 e.preventDefault();
             }
+*/
         }).on('keypress', '.editor .editarea', function(e) {
-            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -693,8 +953,12 @@ $.extend(UI, {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
                     // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\></span>'));
+
+                    tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+                    UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+
+//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 //                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
 //                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
 
@@ -705,7 +969,16 @@ $.extend(UI, {
 					}
 					UI.checkAutocompleteTags();
 				}
-			}, 50);			
+			}, 50);
+            if (!UI.body.hasClass('searchActive')) {
+//                console.log('vediamo: ', e.which);
+                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                } else {
+                    setTimeout(function() {
+                        UI.lockTags(UI.editarea);
+                    }, 10);
+                }
+            }
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -723,6 +996,50 @@ $.extend(UI, {
 
 //			console.log(e.which); 
 
+            if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
+//                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
+//                console.log('1: ', window.getSelection());
+//                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
+//                for(var key in window.getSelection()) {
+//                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+//                }
+/*
+                d=window.getSelection()+'';
+//                d=(d.isCollapsed||d.length==0)?document.title:d;
+                console.log('2: ', d);
+                */
+/*
+                dd=window.getSelection()+'';
+                dd=(dd.length==0)? document.title : dd;
+                console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
+                */
+                console.log(UI.editarea.html());
+                var rangeObject = getRangeObject(window.getSelection());
+                console.log('startOffset dell elemento: ', rangeObject.startOffset);
+                console.log('classe del precedente elemento: ', $(rangeObject.endContainer.previousElementSibling).attr('class'));
+
+
+                                for(var key in rangeObject.endContainer) {
+                                    console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
+                                }
+
+/*
+                if(($(rangeObject.endContainer.previousElementSibling).hasClass('locked'))&&(rangeObject.startOffset < 1)) {
+                    console.log('eccolo');
+                    e.preventDefault();
+                    console.log('quanti sono?: ', $(rangeObject.endContainer.previousElementSibling).length);
+                    $(rangeObject.endContainer.previousElementSibling).remove();
+                }
+*/
+/*
+                if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
+                    console.log('eccolo');
+                    e.preventDefault();
+                    $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
+                }
+*/
+            }
+
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
@@ -731,7 +1048,8 @@ $.extend(UI, {
 					UI.currentSegmentQA();
 				} else {
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-					var numSpacesBefore = $('.space-marker', UI.editarea).length;
+//                    console.log('numTagsBefore: ', numTagsBefore);
+                    var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 //					console.log('a: ', UI.editarea.html());
 					saveSelection();
@@ -828,6 +1146,8 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+                UI.checkTagProximity('left', range);
+
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
 					r = range.startContainer.innerText;
@@ -911,6 +1231,9 @@ $.extend(UI, {
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range when pressing right arrow key: ', range);
+                UI.checkTagProximity('right', range);
+
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
@@ -948,6 +1271,10 @@ $.extend(UI, {
                 //              return false;
 			}
 
+            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
+                UI.saveInUndoStack('arrow');
+            }
+
 			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
 				if (UI.body.hasClass('searchActive')) {
 					UI.resetSearch();
@@ -961,7 +1288,7 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-                    console.log('QQQQQQ: ', UI.editarea.html());
+//                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
@@ -980,7 +1307,7 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function() {
+		}).on('input', '.editarea', function() { //inputineditarea
 			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {
@@ -996,19 +1323,32 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+            if(!UI.editarea.find('.locked').length) {
+                UI.currentSegment.removeClass('hasTags');
+            }
+/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);
 				}, 10);
+*/
 			UI.registerQACheck();
-		}).on('input', '.editor .cc-search .input', function() {
+            UI.lockTags(UI.editarea);
+
+        }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			setCursorPosition(this);
-			selectText(this);
-			$(this).toggleClass('selected');
+            if($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                setCursorPosition(this, 'end');
+            } else {
+                setCursorPosition(this);
+                selectText(this);
+                $(this).toggleClass('selected');
+            }
+
 //		}).on('contextmenu', '.source', function(e) {
 			// temporarily disabled
 //            if(UI.viewConcordanceInContextMenu||UI.viewSpellCheckInContextMenu) e.preventDefault();
@@ -1070,7 +1410,7 @@ $.extend(UI, {
 			UI.tagToDelete = $(this);
 //		}).on('drop', '.editor .editarea .locked', function() {
 //			console.log('dropped tag: ', $(this));
-		}).on('drag', '.editarea .locked, .source .locked', function(e) {
+		}).on('drag', '.editarea .locked, .source .locked', function() {
 //			console.log('a tag is dragged');
 //			console.log('e: ', $(this).text());
 			UI.draggingTagIsOpening = ($(this).text().match(/^<\//gi))? false : true;
@@ -1086,7 +1426,7 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-			UI.saveInUndoStack('drop');
+//			UI.saveInUndoStack('drop');
 //			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
@@ -1104,13 +1444,13 @@ $.extend(UI, {
 				UI.draggingTagIsOpening = null;
 				UI.editarea.html(UI.editarea.html().replace(/&nbsp;(<span contenteditable\="false" class\="locked)/gi, toAddBefore + '$1').replace(/(&gt;<\/span>)&nbsp;/gi, '$1' + toAddAfter));
 				var nn = 0;
-				$('.locked', UI.editarea).each(function(index) {
+				$('.locked', UI.editarea).each(function() {
 					if($(this).text() == UI.draggingTagText) {
 						uniqueEl = $(this);
 						nn++;
 						return false;
 					}
-				})
+				});
 				if(nn > 0) {
 					setCursorPosition(uniqueEl[0].nextSibling, 0);
 				}
@@ -1118,7 +1458,7 @@ $.extend(UI, {
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
-			}, 100);
+            }, 100);
 		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
@@ -1147,10 +1487,10 @@ $.extend(UI, {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					if (!UI.nextUntranslatedSegmentId) {
-						console.log('a');
+//						console.log('a');
 						$('#' + $(this).attr('data-segmentid') + '-close').click();
 					} else {
-						console.log('b');
+//						console.log('b');
 						UI.reloadWarning();
 					}
 
@@ -1164,18 +1504,19 @@ $.extend(UI, {
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
 				}
 			}
-
 			UI.checkHeaviness();
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+ //               console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-					console.log('segment is already loaded');
+//					console.log('segment is already loaded');
 				} else {
-					console.log('segment is not loaded');
+//					console.log('segment is not loaded');
 
 					if (!UI.noMoreSegmentsAfter) {
 						UI.reloadWarning();
 					}
 				}
+ //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			UI.blockButtons = true;
@@ -1192,7 +1533,13 @@ $.extend(UI, {
 				$(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
-			UI.markTags();
+//			UI.markTags();
+            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
+            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
+            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+
+            UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
+            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
@@ -1343,6 +1690,27 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
+ /*
+        }).on('mousedown', function(e) {
+
+            console.log('mousedown');
+            console.log('prima: ', UI.editarea.is(":focus"));
+            saveSelection();
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && !hasFocusAfter) {
+                    console.log('blurred from editarea');
+                } else if(!hasFocusBefore && hasFocusAfter) {
+                    console.log('focused in editarea');
+                    restoreSelection();
+                } else {
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+
+                }
+            }, 50);
+            */
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 
@@ -1355,6 +1723,8 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
+            UI.lockTags(UI.editarea);
+
             /*
 			$(window).trigger({
 				type: "pastedInEditarea",
@@ -1364,7 +1734,7 @@ $.extend(UI, {
 			setTimeout(function() {
 				UI.saveInUndoStack('paste');
 			}, 100);
- 			UI.lockTags(UI.editarea);
+            UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
  */
 		}).on('click', 'a.close', function(e, param) {
@@ -1396,7 +1766,7 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
-		}).on('keyup', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 
@@ -1411,7 +1781,15 @@ $.extend(UI, {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
 			}
-		});
+		}).on('click', '.tagMode .crunched', function(e) {
+            e.preventDefault();
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
+        }).on('click', '.tagMode .extended', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
+        });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
@@ -1433,7 +1811,7 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
-		$("#point2seg").bind('mousedown', function(e) {
+		$("#point2seg").bind('mousedown', function() {
 			UI.setNextWarnedSegment();
 		});
 		
@@ -1545,15 +1923,18 @@ $.extend(UI, {
 			});
 		});
 		$("#exec-replace").click(function(e) {
+            console.log('ddd');
 			e.preventDefault();
+            console.log('a');
 			if ($('#search-target').val() == $('#replace-target').val()) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
+            console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
 				
-			} else if (UI.searchMode == 'source&target') {
+//			} else if (UI.searchMode == 'source&target') {
 
 			} else {
 				txt = $('#replace-target').val();
@@ -1561,13 +1942,21 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
-				UI.updateSearchDisplayCount(segment);
+                segment_id = $(segment).attr('id').split('-')[1];
+                status = UI.getStatus(segment);
+                byStatus = 0;
+
+                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setContribution(segment_id, status, byStatus);
+
+                UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);
 			}
-		});
+            console.log('c');
+
+        });
 		$("#enable-replace").on('change', function() {
 			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');

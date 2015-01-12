@@ -11,6 +11,8 @@
  */
 abstract class controller {
 
+    protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     /**
      * Controllers Factory
      *
@@ -125,6 +127,20 @@ abstract class controller {
         $ret = null;
         $ret = isset($_GET[$varname]) ? $_GET[$varname] : (isset($_POST[$varname]) ? $_POST[$varname] : null);
         return $ret;
+    }
+
+    public function sessionStart(){
+        INIT::sessionStart();
+    }
+
+    /**
+     * Explicitly disable sessions for ajax call
+     *
+     * Sessions enabled on INIT Class
+     *
+     */
+    public function disableSessions(){
+        INIT::sessionClose();
     }
 
 }

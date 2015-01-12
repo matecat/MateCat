@@ -12,7 +12,6 @@ class getWarningController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(
@@ -24,10 +23,17 @@ class getWarningController extends ajaxController {
             'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'token'       => array( 'filter' => FILTER_SANITIZE_STRING,
                                     'flags'  => FILTER_FLAG_STRIP_LOW ),
+            'logs'        => array( 'filter' => FILTER_UNSAFE_RAW )
 
         );
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
+
+        if( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ){
+            Log::$fileName = 'clientLog.log';
+            Log::doLog( json_decode( $this->__postInput->logs ) );
+            Log::$fileName = 'log.txt';
+        }
 
     }
 
@@ -91,10 +97,10 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
-	//        $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-04-03 00:00"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
-//
-//        $msg = 'MateCat will be undergoing scheduled maintenance starting on Wednesday, July 2 at 08:00 PM CEST. MateCat will be unavailable for approximately 3 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
-//        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-07-02 23:30:00"}]';
+
+//        $msg = 'MateCat will be undergoing scheduled maintenance starting on Saturday, December 13 at 11:50 PM CEST. MateCat will be unavailable for approximately 4 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
+//        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-12-14 04:00:00"}]';
+
 
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 

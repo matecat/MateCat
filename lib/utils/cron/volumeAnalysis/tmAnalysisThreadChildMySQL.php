@@ -86,6 +86,7 @@ while (1) {
     $id_translator   = $segment[ 'id_translator' ];
     $raw_wc          = $segment[ 'raw_word_count' ];
     $fast_match_type = $segment[ 'match_type' ];
+    $payable_rates   = $segment[ 'payable_rates' ];
 
     $text            = $segment[ 'segment' ];
 
@@ -104,7 +105,15 @@ while (1) {
     $config[ 'source_lang' ]   = $source;
     $config[ 'target_lang' ]   = $target;
     $config[ 'email' ]         = "tmanalysis@matecat.com";
-    $config[ 'id_user' ]       = $id_translator;
+
+//    $config[ 'id_user' ]       = $id_translator;
+    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($segment[ 'tm_keys' ], 'r', 'tm' );
+    if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
+        foreach ( $tm_keys as $tm_key ) {
+            $config[ 'id_user' ][ ] = $tm_key->key;
+        }
+    }
+    
     $config[ 'num_result' ]    = 3;
 
     $id_mt_engine    = $segment[ 'id_mt_engine' ];
@@ -133,7 +142,7 @@ while (1) {
 
         $tms_enabled = true;
 
-    } else if ( $id_tms == 0 && $id_mt_engine == 1 ) {
+    } elseif ( $id_tms == 0 && $id_mt_engine == 1 ) {
         /**
          * MyMemory disabled but MT Enabled and it is NOT a Custom one
          * So tell to MyMemory to get MT only
@@ -256,6 +265,8 @@ while (1) {
     $suggestion_json = json_encode($matches);
     $suggestion_source = $matches[0]['created_by'];
 
+    $equivalentWordMapping = json_decode($payable_rates, true);
+
     $new_match_type = getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMapping);
     //echo "sid is $sid ";
     $eq_words = $equivalentWordMapping[$new_match_type] * $raw_wc / 100;
@@ -338,23 +349,23 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
             $tm_rate_paid = $equivalentWordMapping[$tm_match_cat];
         }
 
-        if ($ind < 50) {
+        elseif ($ind < 50) {
             $tm_match_cat = "NO_MATCH";
             $tm_rate_paid = $equivalentWordMapping["NO_MATCH"];
         }
 
-        if ($ind >= 50 and $ind <= 74) {
+        elseif ($ind >= 50 and $ind < 75) {
             $tm_match_cat = "50%-74%";
             $tm_rate_paid = $equivalentWordMapping["50%-74%"];
         }
 
-        if ($ind >= 75 and $ind <= 99) {
+        elseif ($ind >= 75 and $ind <= 99) {
             $tm_match_cat = "75%-99%";
             $tm_rate_paid = $equivalentWordMapping["75%-99%"];
         }
     }
-
-    if ($tm_rate_paid < $fast_rate_paid) {
+    //this is because 50%-74% is never returned because it's rate equals NO_MATCH
+    if ($tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
         return $tm_match_cat;
     }
     return $fast_match_type;

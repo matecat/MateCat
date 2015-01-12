@@ -3,6 +3,7 @@
  */
 $.extend(UI, {
 	render: function(options) {
+        options = options || {};
 		firstLoad = (options.firstLoad || false);
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
@@ -14,6 +15,7 @@ $.extend(UI, {
 //		this.isChrome = $.browser.webkit && !!window.chrome;
 //		this.isFirefox = $.browser.mozilla;
 //		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isSafari = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
 		this.isChrome = (typeof window.chrome != 'undefined');
 		this.isFirefox = (typeof navigator.mozApps != 'undefined');
 //		console.log('body.scrollTop: ', $('body').scrollTop());
@@ -53,8 +55,8 @@ $.extend(UI, {
 		this.tagSelection = false;
 		this.nextUntranslatedSegmentIdByServer = 0;
 		this.cursorPlaceholder = '[[placeholder]]';
-		this.openTagPlaceholder = 'åå';
-		this.closeTagPlaceholder = 'ΩΩ';
+		this.openTagPlaceholder = 'MATECAT-openTagPlaceholder-MATECAT';
+		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';
 		this.tempViewPoint = '';
 		this.checkUpdatesEvery = 180000;
 		this.autoUpdateEnabled = true;
@@ -62,6 +64,17 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
+//        console.log('options: ', options);
+//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+//        console.log('1: ', this.tagModesEnabled);
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+//        console.log('2: ', this.tagModesEnabled);
+
+        if(this.tagModesEnabled) {
+            UI.body.addClass('tagModes');
+        } else {
+            UI.body.removeClass('tagModes');
+        }
 
 
 
@@ -80,7 +93,8 @@ $.extend(UI, {
 		this.debug = false;
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
-
+        this.findCommonPartInSegmentIds();
+//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);

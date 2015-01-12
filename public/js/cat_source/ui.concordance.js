@@ -76,7 +76,6 @@ $.extend(UI, {
 	renderConcordances: function(d, in_target) {
 		segment = this.currentSegment;
 		segment_id = this.currentSegmentId;
-
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
@@ -100,10 +99,10 @@ $.extend(UI, {
 				UI.setExtendedConcordances(true);			
 			} else {
 				UI.setExtendedConcordances(false);
-			};
+			}
 		} else {
 			console.log('no matches');
-			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Can\'t find any matches. Check the language combination.</li></ul>');
 		}
 
 		$('.cc-search', this.currentSegment).removeClass('loading');

@@ -14,10 +14,13 @@ class Utils {
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, "Matecat-Cattool/v" . INIT::$BUILD_NUMBER);
+		curl_setopt($ch, CURLOPT_USERAGENT, INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $d);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
 		if (self::is_assoc($opt) and !empty($opt)) {
 			foreach ($opt as $k => $v) {
 
@@ -56,9 +59,9 @@ class Utils {
 			       ) as $key ) {
 			if ( array_key_exists( $key, $_SERVER ) === true) {
 				foreach ( explode(',', $_SERVER[$key]) as $ip ) {
-					if ( filter_var( trim($ip), FILTER_VALIDATE_IP ) !== false) {
-						return $ip;
-					}
+					if( filter_var( trim($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6 ) !== false ) {
+                        return $ip;
+                    }
 				}
 			}
 		}
@@ -266,33 +269,77 @@ class Utils {
                 '}';
 
         return $guid;
+    }
+
+    public static function filterLangDetectArray( $arr ) {
+        return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
+    }
+
+    public static function deleteDir( $dirPath ) {
+
+        $iterator = new DirectoryIterator( $dirPath );
+
+        foreach ( $iterator as $fileInfo ) {
+            if ( $fileInfo->isDot() ) {
+                continue;
+            }
+            if ( $fileInfo->isDir() ) {
+                self::deleteDir( $fileInfo->getPathname() );
+            } else {
+                $fileName = $fileInfo->getFilename();
+                if( $fileName{0} == '.' ) continue;
+                unlink( $fileInfo->getPathname() );
+            }
+        }
+        rmdir( $iterator->getPath() );
 
     }
 
-	/**
-	 * @author Roberto
-	 * @param array $jobs an array of job IDs (integers)
-	 * @return array|bool An array of archivable job IDs or false in case of error
-	 */
-	public static function getArchivableJobs($jobs = array()){
-		if(!is_array($jobs) && !is_numeric($jobs)) return false;
+    /**
+     * Call the output in JSON format
+     *
+     */
+    public static function raiseJsonExceptionError() {
 
-		if(is_numeric($jobs)) $jobs = array($jobs);
+        if ( function_exists( "json_last_error" ) ) {
+            switch ( json_last_error() ) {
+                case JSON_ERROR_NONE:
+//              	  Log::doLog(' - No errors');
+                    break;
+                case JSON_ERROR_DEPTH:
+                    $msg = ' - Maximum stack depth exceeded';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_DEPTH);
+                    break;
+                case JSON_ERROR_STATE_MISMATCH:
+                    $msg = ' - Underflow or the modes mismatch';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_STATE_MISMATCH);
+                    break;
+                case JSON_ERROR_CTRL_CHAR:
+                    $msg =  ' - Unexpected control character found' ;
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_CTRL_CHAR);
+                    break;
+                case JSON_ERROR_SYNTAX:
+                    $msg = ' - Syntax error, malformed JSON' ;
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_SYNTAX);
+                    break;
+                case JSON_ERROR_UTF8:
+                    $msg =  ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_UTF8);
+                    break;
+                default:
+                    $msg =  ' - Unknown error';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, 6);
+                    break;
+            }
+        }
 
-		$jobs = getArchivableJobs($jobs);
-
-		if($jobs !== false){
-			foreach($jobs as $i=>$job){
-				$jobs[$i] = (int)$job['id'];
-			}
-		}
-		return $jobs;
-	}
-
-	public static function filterLangDetectArray($arr){
-		usleep(1);
-		return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
-	}
+    }
 
 }
 

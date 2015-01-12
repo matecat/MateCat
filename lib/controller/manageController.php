@@ -18,16 +18,22 @@ class manageController extends viewController {
 	public function __construct() {
 		parent::__construct(true);
 		parent::makeTemplate("manage.html");
-		$this->jid = $this->get_from_get_post("jid");
-		$this->password = $this->get_from_get_post("password");
-		$this->lang_handler = Languages::getInstance();
-		if (isset($_GET['page'])) {
-			$this->page = ($_GET['page'] == '') ? 1 : $_GET['page'];
-		} else {
-			$this->page = 1;
-		};
 
-		if (isset($_GET['filter'])) {
+        $filterArgs = array(
+            'page'      =>  array('filter'  =>  array(FILTER_SANITIZE_NUMBER_INT)),
+            'filter'    =>  array('filter'  =>  array(FILTER_VALIDATE_BOOLEAN), 'options' => array(FILTER_NULL_ON_FAILURE))
+        );
+
+        $postInput = filter_input_array(INPUT_GET, $filterArgs);
+
+        $this->page = $postInput[ 'page' ];
+
+        if($this->page == null || empty($this->page)){
+            $this->page = 1;
+        }
+		$this->lang_handler = Languages::getInstance();
+
+		if ($postInput[ 'filter' ] !== null && $postInput[ 'filter' ]) {
 			$this->filter_enabled = true;
 		} else {
 			$this->filter_enabled = false;
@@ -35,7 +41,6 @@ class manageController extends viewController {
 	}
 
 	public function doAction() {
-
 	}
 
 	public function setTemplateVars() {
@@ -45,7 +50,7 @@ class manageController extends viewController {
 		$this->template->languages = $this->lang_handler->getEnabledLanguages('en');
 		$this->template->filtered = $this->filter_enabled;
 		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
-		$this->template->logged_user = trim($this->logged_user['first_name'] . " " . $this->logged_user['last_name']);
+		$this->template->logged_user = $this->logged_user['short'];
 		$this->template->build_number = INIT::$BUILD_NUMBER;
         $this->template->basepath = INIT::$BASEURL;
         $this->template->hostpath = INIT::$HTTPHOST;

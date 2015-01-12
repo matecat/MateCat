@@ -52,7 +52,7 @@ $.extend(UI, {
 		this.searchParams['exact-match'] = $('#exact-match').is(':checked');
 		this.searchParams.search = 1;
 		if ((typeof this.searchParams.source == 'undefined') && (typeof this.searchParams.target == 'undefined') && (this.searchParams.status == 'all')) {
-			APP.alert({msg: 'You must specify at least one between source and target<br>or choose a status'});
+			APP.alert({msg: 'Enter text in source or target input boxes<br /> or select a status.'});
 			return false;
 		}
 		this.disableTagMark();
@@ -287,8 +287,11 @@ $.extend(UI, {
 			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p.source).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p.target).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            psource = p.source.replace(/(\W)/gi, "\\$1");
+            ptarget = p.target.replace(/(\W)/gi, "\\$1");
+
+			var regSource = new RegExp('(' + htmlEncode(psource).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(ptarget).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			txtSrc = p.source;
 			txtTrg = p.target;
 			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
@@ -338,7 +341,10 @@ $.extend(UI, {
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
-			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            regTxt = regTxt.replace(/(\W)/gi, "\\$1");
+//            console.log('regTxt: ', regTxt);
+//			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder).replace(/\W/gi, "$1" );
 			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 //			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
@@ -380,8 +386,14 @@ $.extend(UI, {
         searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
-				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-				$(this).html(tt);
+				var tt = $(this).html()
+                    .replace(/&lt;/g, UI.openTagPlaceholder)
+                    .replace(/&gt;/g, UI.closeTagPlaceholder)
+                    .replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
+                    .replace(openTagReg, '&lt;')
+                    .replace(closeTagReg, '&gt;')
+                    .replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
+                $(this).html(tt);
 			}
 		});
 	},
@@ -672,5 +684,6 @@ $.extend(UI, {
 			$('body').addClass('filterOpen');
 			$('#search-source').focus();
 		}
+        this.fixHeaderHeightChange();
 	},
 });

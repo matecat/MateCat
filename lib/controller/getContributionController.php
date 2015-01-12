@@ -10,33 +10,33 @@ include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getContributionController extends ajaxController {
 
-	private $id_segment;
-	private $id_job;
-	private $num_results;
-	private $text;
-	private $source;
-	private $target;
-	private $id_mt_engine;
-	private $id_tms;
-	private $id_translator;
+    private $id_segment;
+    private $id_job;
+    private $num_results;
+    private $text;
+    private $source;
+    private $target;
+    private $id_mt_engine;
+    private $id_tms;
+    private $id_translator;
     private $password;
+    private $tm_keys;
 
     private $__postInput = array();
 
-	public function __construct() {
+    public function __construct() {
 
-        $this->disableSessions();
-		parent::__construct();
+        parent::__construct();
 
         $filterArgs = array(
-            'id_segment'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'id_job'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'num_results'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'text'            => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'id_translator'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'password'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'is_concordance'  => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'from_target'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'id_segment'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'id_job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'num_results'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'text'           => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'id_translator'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'password'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'is_concordance' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'from_target'    => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -45,55 +45,55 @@ class getContributionController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->id_segment          = $this->__postInput[ 'id_segment' ];
-        $this->id_job              = $this->__postInput[ 'id_job' ];
-        $this->num_results         = $this->__postInput[ 'num_results' ];
-        $this->text                = trim( $this->__postInput[ 'text' ] );
-        $this->id_translator       = $this->__postInput[ 'id_translator' ];
-        $this->concordance_search  = $this->__postInput[ 'is_concordance' ];
-        $this->switch_languages    = $this->__postInput[ 'from_target' ];
-        $this->password            = $this->__postInput[ 'password' ];
+        $this->id_segment         = $this->__postInput[ 'id_segment' ];
+        $this->id_job             = $this->__postInput[ 'id_job' ];
+        $this->num_results        = $this->__postInput[ 'num_results' ];
+        $this->text               = trim( $this->__postInput[ 'text' ] );
+        $this->id_translator      = $this->__postInput[ 'id_translator' ];
+        $this->concordance_search = $this->__postInput[ 'is_concordance' ];
+        $this->switch_languages   = $this->__postInput[ 'from_target' ];
+        $this->password           = $this->__postInput[ 'password' ];
 
-		if ($this->id_translator == 'unknown_translator') {
-			$this->id_translator = "";
-		}
-	}
+        if ( $this->id_translator == 'unknown_translator' ) {
+            $this->id_translator = "";
+        }
+    }
 
-	public function doAction() {
+    public function doAction() {
 
-        if( !$this->concordance_search ){
+        if ( !$this->concordance_search ) {
             //execute these lines only in segment contribution search,
             //in case of user concordance search skip these lines
             //because segment can be optional
-            if (empty($this->id_segment)) {
-                $this->result['errors'][] = array("code" => -1, "message" => "missing id_segment");
+            if ( empty( $this->id_segment ) ) {
+                $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
             }
         }
 
-		if (is_null($this->text) || $this->text === '' ) {
-			$this->result['errors'][] = array("code" => -2, "message" => "missing text");
-		}
-
-        if (empty($this->id_job)) {
-            $this->result['errors'][] = array("code" => -3, "message" => "missing id_job");
+        if ( is_null( $this->text ) || $this->text === '' ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing text" );
         }
 
+        if ( empty( $this->id_job ) ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "missing id_job" );
+        }
 
-		if (empty($this->num_results)) {
-			$this->num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
-		}
+        if ( empty( $this->num_results ) ) {
+            $this->num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
+        }
 
-		if (!empty($this->result['errors'])) {
-			return -1;
-		}
+        if ( !empty( $this->result[ 'errors' ] ) ) {
+            return -1;
+        }
 
         //get Job Infos, we need only a row of jobs ( split )
-		$st = getJobData( $this->id_job, $this->password );
+        $jobData = getJobData( $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( empty( $st ) || !$pCheck->grantJobAccessByJobData( $st, $this->password ) ){
-            $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
+        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
+            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+
             return -1;
         }
 
@@ -103,10 +103,9 @@ class getContributionController extends ajaxController {
          */
         if ( !$this->concordance_search ) {
             //
-            $this->text = CatUtils::view2rawxliff( $this->text );
-            $this->source = $st[ 'source' ];
-            $this->target = $st[ 'target' ];
-
+            $this->text   = CatUtils::view2rawxliff( $this->text );
+            $this->source = $jobData[ 'source' ];
+            $this->target = $jobData[ 'target' ];
         } else {
 
             $regularExpressions = $this->tokenizeSourceSearch();
@@ -124,21 +123,22 @@ class getContributionController extends ajaxController {
                  * we want result in italian from german source
                  *
                  */
-                $this->source = $st[ 'target' ];
-                $this->target = $st[ 'source' ];
+                $this->source = $jobData[ 'target' ];
+                $this->target = $jobData[ 'source' ];
             } else {
-                $this->source = $st[ 'source' ];
-                $this->target = $st[ 'target' ];
+                $this->source = $jobData[ 'source' ];
+                $this->target = $jobData[ 'target' ];
             }
-
         }
 
-		$this->id_mt_engine = $st['id_mt_engine'];
-		$this->id_tms = $st['id_tms'];
+        $this->id_mt_engine = $jobData[ 'id_mt_engine' ];
+        $this->id_tms       = $jobData[ 'id_tms' ];
+
+        $this->tm_keys      = $jobData[ 'tm_keys' ];
 
         $config = TMS::getConfigStruct();
 
-		if ( $this->id_tms == 1 ) {
+        if ( $this->id_tms == 1 ) {
             /**
              * MyMemory Enabled
              */
@@ -153,199 +153,216 @@ class getContributionController extends ajaxController {
             }
 
             $_TMS = $this->id_tms;
-
-        } else if( $this->id_tms == 0 && $this->id_mt_engine == 1 ){
+        } else if ( $this->id_tms == 0 && $this->id_mt_engine == 1 ) {
 
             /**
              * MyMemory disabled but MT Enabled and it is NOT a Custom one
              * So tell to MyMemory to get MT only
-            */
+             */
             $config[ 'get_mt' ]  = true;
             $config[ 'mt_only' ] = true;
 
             $_TMS = 1; /* MyMemory */
-
-		}
+        }
 
         /**
          * if No TM server and No MT selected $_TMS is not defined
          * so we want not to perform TMS Call
          *
          */
-        if( isset( $_TMS ) ){
+        if ( isset( $_TMS ) ) {
 
             $config[ 'segment' ]       = $this->text;
             $config[ 'source_lang' ]   = $this->source;
             $config[ 'target_lang' ]   = $this->target;
             $config[ 'email' ]         = "demo@matecat.com";
-            $config[ 'id_user' ]       = $this->id_translator;
+            $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
 
             $tms = new TMS( $_TMS );
+
+            //get job's TM keys
+            $this->checkLogin();
+
+            try{
+
+                $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+                $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+                if ( $url_request ) {
+                    $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+                }
+
+                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->uid, $this->userRole );
+
+                if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
+                    foreach ( $tm_keys as $tm_key ) {
+                        $config[ 'id_user' ][ ] = $tm_key->key;
+                    }
+                }
+
+            }
+            catch(Exception $e){
+                $this->result[ 'error' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+                return;
+            }
+
             $tms_match = $tms->get( $config );
             $tms_match = $tms_match->get_matches_as_array();
-
         }
 
-		$mt_res = array();
-		$mt_match = "";
-		if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
+        $mt_res   = array();
+        $mt_match = "";
+        if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
-			$mt = new MT($this->id_mt_engine);
-			$mt_result = $mt->get($this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
+            $mt        = new MT( $this->id_mt_engine );
+            $mt_result = $mt->get( $this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
 
-			if ($mt_result->error->code < 0) {
-				$mt_match = '';
-			} else {
-				$mt_match = $mt_result->translatedText;
-				$penalty = $mt->getPenalty();
-				$mt_score = 100 - $penalty;
-				$mt_score.="%";
+            if ( $mt_result->error->code < 0 ) {
+                $mt_match = '';
+            } else {
+                $mt_match = $mt_result->translatedText;
+                $penalty  = $mt->getPenalty();
+                $mt_score = 100 - $penalty;
+                $mt_score .= "%";
 
-				$mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
+                $mt_match_res = new TMS_GET_MATCHES( $this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date( "Y-m-d" ) );
 
-				$mt_res = $mt_match_res->get_as_array();
-                $mt_res['sentence_confidence'] = $mt_result->sentence_confidence; //can be null
+                $mt_res                          = $mt_match_res->get_as_array();
+                $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
 
-			}
+            }
+        }
+        $matches = array();
 
-		}
-		$matches = array();
+        if ( !empty( $tms_match ) ) {
+            $matches = $tms_match;
+        }
 
-		if (!empty($tms_match)) {
-			$matches = $tms_match;
-		}
+        if ( !empty( $mt_match ) ) {
+            $matches[ ] = $mt_res;
+            usort( $matches, array( "getContributionController", "__compareScore" ) );
+            //this is necessary since usort sorts is ascending order, thus inverting the ranking
+            $matches = array_reverse( $matches );
+        }
 
-		if (!empty($mt_match)) {
-			$matches[] = $mt_res;
-			usort( $matches, array( "getContributionController", "__compareScore" ) );
-			//this is necessary since usort sorts is ascending order, thus inverting the ranking
-			$matches=array_reverse($matches);
-		}
-
-		$matches = array_slice( $matches, 0, $this->num_results );
-
+        $matches = array_slice( $matches, 0, $this->num_results );
 
         /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) */
-        ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
-        if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
+        ( isset( $matches[ 0 ][ 'match' ] ) ? $firstMatchVal = floatval( $matches[ 0 ][ 'match' ] ) : null );
+        if ( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ) {
 
             $srcSearch    = strip_tags( $this->text );
             $segmentFound = strip_tags( $matches[ 0 ][ 'raw_segment' ] );
             $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
             $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
 
-            $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
+            $fuzzy = levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
 
             //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
             if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
-                $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
+                $qaRealign = new QA( $this->text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
                 $qaRealign->tryRealignTagID();
 
                 $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
-                if( !$qaRealign->thereAreErrors() ){
-					/*
+                if ( !$qaRealign->thereAreErrors() ) {
+                    /*
                     Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $this->__postInput, true) );
                     Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
                     Log::doLog( $log_prepend . "TMS RAW RESULT:" );
                     Log::doLog( $log_prepend . var_export($matches[0], true) );
                     Log::doLog( $log_prepend . "Realignment Success:");
                     */
-                    $matches[0]['segment'] = CatUtils::rawxliff2view( $this->text );
-                    $matches[0]['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
-                    $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
+                    $matches[ 0 ][ 'segment' ]     = CatUtils::rawxliff2view( $this->text );
+                    $matches[ 0 ][ 'translation' ] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
+                    $matches[ 0 ][ 'match' ]       = ( $fuzzy == 0 ? '100%' : '99%' );
                     /*
                     Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
                     Log::doLog( $log_prepend . "View Translation: " . var_export($matches[0]['translation'], true) );
 					*/
                 } else {
-                    Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $this->__postInput['id_segment'] );
+                    Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $this->__postInput[ 'id_segment' ] );
                 }
-
             }
-
         }
         /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) */
 
-
-        if( !$this->concordance_search ){
+        if ( !$this->concordance_search ) {
             //execute these lines only in segment contribution search,
             //in case of user concordance search skip these lines
-            $res = $this->setSuggestionReport($matches);
-            if (is_array($res) and array_key_exists("error", $res)) {
+            $res = $this->setSuggestionReport( $matches );
+            if ( is_array( $res ) and array_key_exists( "error", $res ) ) {
                 ; // error occurred
             }
             //
         }
 
-		foreach ($matches as &$match) {
+        foreach ( $matches as &$match ) {
 
-			if (strpos($match['created_by'], 'MT') !== false) {
-				$match['match'] = 'MT';
+            if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
+                $match[ 'match' ] = 'MT';
 
-                $QA = new PostProcess( $match['raw_segment'], $match['raw_translation'] );
+                $QA = new PostProcess( $match[ 'raw_segment' ], $match[ 'raw_translation' ] );
                 $QA->realignMTSpaces();
 
                 //this should every time be ok because MT preserve tags, but we use the check on the errors
                 //for logic correctness
-                if( !$QA->thereAreErrors() ){
-                    $match['raw_translation'] = $QA->getTrgNormalized();
-                    $match['translation'] = CatUtils::rawxliff2view( $match['raw_translation'] );
+                if ( !$QA->thereAreErrors() ) {
+                    $match[ 'raw_translation' ] = $QA->getTrgNormalized();
+                    $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'raw_translation' ] );
                 } else {
                     Log::doLog( $QA->getErrors() );
                 }
-			}
-			if ($match['created_by'] == 'MT!') {
-				$match['created_by'] = 'MT'; //MyMemory returns MT!
-			}
-
-            if( !empty($match['sentence_confidence']) ){
-                $match['sentence_confidence'] = round( $match['sentence_confidence'], 0 ) . "%";
+            }
+            if ( $match[ 'created_by' ] == 'MT!' ) {
+                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
             }
 
-            if( $this->concordance_search ){
+            if ( !empty( $match[ 'sentence_confidence' ] ) ) {
+                $match[ 'sentence_confidence' ] = round( $match[ 'sentence_confidence' ], 0 ) . "%";
+            }
 
-                $match['segment'] = strip_tags( html_entity_decode( $match['segment'] ) );
-                $match['segment'] = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $match['segment'] );
+            if ( $this->concordance_search ) {
+
+                $match[ 'segment' ] = strip_tags( html_entity_decode( $match[ 'segment' ] ) );
+                $match[ 'segment' ] = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $match[ 'segment' ] );
 
                 //Do something with &$match, tokenize strings and send to client
-                $match['segment'] = preg_replace( array_keys( $regularExpressions ), array_values( $regularExpressions ), $match['segment'] );
-                $match['translation'] = strip_tags( html_entity_decode( $match['translation'] ) );
-
+                $match[ 'segment' ]     = preg_replace( array_keys( $regularExpressions ), array_values( $regularExpressions ), $match[ 'segment' ] );
+                $match[ 'translation' ] = strip_tags( html_entity_decode( $match[ 'translation' ] ) );
             }
+        }
 
-		}
-//throw new Exception( '' );
-        $this->result['data']['matches'] = $matches;
+        $this->result[ 'data' ][ 'matches' ] = $matches;
 
-	}
+    }
 
-    private function setSuggestionReport($matches) {
-        if (count($matches) > 0) {
+    private function setSuggestionReport( $matches ) {
+        if ( count( $matches ) > 0 ) {
 
             foreach ( $matches as $k => $m ) {
                 $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
             }
 
             $suggestions_json_array = json_encode( $matches );
-            $match = $matches[ 0 ];
+            $match                  = $matches[ 0 ];
 
-            ( !empty( $match['sentence_confidence'] ) ? $mt_qe = floatval( $match['sentence_confidence'] ) : $mt_qe = null );
+            ( !empty( $match[ 'sentence_confidence' ] ) ? $mt_qe = floatval( $match[ 'sentence_confidence' ] ) : $mt_qe = null );
 
-            if ($match['created_by'] == 'MT!') {
-                $match['created_by'] = 'MT'; //MyMemory returns MT!
+            if ( $match[ 'created_by' ] == 'MT!' ) {
+                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
             }
 
-            $data                          = array();
-            $data[ 'suggestions_array' ]   = $suggestions_json_array;
-            $data[ 'suggestion' ]          = $match[ 'raw_translation' ];
-            $data[ 'suggestion_source' ]   = $match[ 'created_by' ];
-            $data[ 'mt_qe' ]               = $mt_qe;
-            $data[ 'suggestion_match' ]    = str_replace( '%', '', $match['match'] );
+            $data                        = array();
+            $data[ 'suggestions_array' ] = $suggestions_json_array;
+            $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
+            $data[ 'suggestion_source' ] = $match[ 'created_by' ];
+            $data[ 'mt_qe' ]             = $mt_qe;
+            $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $where = " id_segment= " . (int)$this->id_segment . " and id_job = " . (int)$this->id_job . " and status = 'NEW' ";
+            $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " and status = 'NEW' ";
 
             $db = Database::obtain();
             $db->update( 'segment_translations', $data, $where );
@@ -362,18 +379,21 @@ class getContributionController extends ajaxController {
             }
 
             $rows = $db->affected_rows;
+
             //Log::doLog("Affected: " . $rows );
 
             return $rows;
-
         }
 
         return 0;
     }
 
-    private static function __compareScore($a, $b) {
-        if( floatval($a['match']) == floatval($b['match']) ){ return 0; }
-        return ( floatval($a['match']) < floatval($b['match']) ? -1 : 1);
+    private static function __compareScore( $a, $b ) {
+        if ( floatval( $a[ 'match' ] ) == floatval( $b[ 'match' ] ) ) {
+            return 0;
+        }
+
+        return ( floatval( $a[ 'match' ] ) < floatval( $b[ 'match' ] ) ? -1 : 1 );
     }
 
     /**
@@ -436,16 +456,17 @@ class getContributionController extends ajaxController {
          */
         if ( !defined( '_sortByLenDesc' ) ) {
             function _sortByLenDesc( $a, $b ) {
-                if ( strlen( $a ) == strlen( $b ) ) { return 0; }
+                if ( strlen( $a ) == strlen( $b ) ) {
+                    return 0;
+                }
+
                 return ( strlen( $b ) < strlen( $a ) ) ? -1 : 1;
             }
         }
         uksort( $regularExpressions, '_sortByLenDesc' );
 
         return $regularExpressions;
-
     }
-
 }
 
 

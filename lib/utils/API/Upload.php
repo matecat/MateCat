@@ -60,6 +60,8 @@ class Upload  {
 
         $result = new stdClass();
 
+        if ( empty($filesToUpload) ) throw new Exception ( "No files received." );
+
         foreach( $filesToUpload as $inputName => $file ) {
             $result->$inputName = $this->_uploadFile($file);
         }
@@ -196,7 +198,7 @@ class Upload  {
         $fileNameChunks = explode( ".", $fileUp->name );
 
         //first Check the extension
-        if( !array_key_exists( $fileNameChunks[count($fileNameChunks) - 1], $this->acceptedExtensions ) ){
+        if( !array_key_exists( strtolower( $fileNameChunks[count($fileNameChunks) - 1] ), $this->acceptedExtensions ) ){
             return false;
         }
 

@@ -14,13 +14,17 @@
 
 UI = null;
 
-var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
-delete window.base;
-config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
 UI = {
     init: function() {
         UI.conversionBlocked = false;
+        UI.skipLangDetectArr = {}
+
+        var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
+        config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
+        this.initTM();
+        console.log($.cookie('tmpanel-open'));
+        if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
     },
     enableAnalyze: function() {
         enableAnalyze();
@@ -49,7 +53,7 @@ UI = {
         UI.restartConversions();
     },
     errorsBeforeUpload: function(file) {console.log('errorsBeforeUpload');
-//        console.log(file);
+        console.log(file);
         ext = file.name.split('.')[file.name.split('.').length - 1];
 //        console.log(ext);
         msg = 'Format not supported. Convert to DOCX and upload the file again.';
@@ -65,7 +69,10 @@ UI = {
                         ( ext == 'tgz' )
         ) {
                 msg = 'ZIP archives not yet supported. Coming soon.';
-        }
+        }else if (ext=='tmx'){
+                msg = 'TMX importing disabled';
+
+	}
 
         console.log(file.size);
         if((file.size) > config.maxFileSize) {
@@ -116,6 +123,7 @@ UI = {
 	},
 
 	createKeyByTMX: function() {
+		if (!isTMXAllowed()) return false;
 		if($('#create_private_tm_btn[data-key]').length || $('#private-tm-key').val().length ) { // a key has already been created
 			console.log('già cliccato');
 			if($('#private-tm-key').val() == '') {
@@ -133,7 +141,39 @@ UI = {
 
     checkFailedConversionsNumber: function() {
     	return checkFailedConversionsNumber();
-    }
+    },
+
+    addInlineMessage: function (fileName, message){
+        var currDeleteDiv = $('.upload-table td.name:contains("'+fileName+'")').next().next().addClass("error");
+
+        if($(currDeleteDiv).find(".skiplangdetect").length == 0){
+            $(currDeleteDiv).html("")
+                    .append(
+                            '<span class="label label-important">'+
+                                    message+
+                                    '</span>');
+        }
+    },
+    updateTMAddedMsg: function () {
+        var numTM = $('#activetm tr.mine').length;
+        if(numTM) {
+            $('.tm-added .num').text(numTM);
+            if(numTM > 1) {
+                $('.tm-added .msg').text(' TMs added');
+            } else {
+                $('.tm-added .msg').text(' TM added');
+            }
+            $('.tm-added').show();
+        } else {
+            $('.tm-added').hide();
+            $('.tm-added .num').text('');
+        }
+    },
+    uploadingTMX: function () {
+        return $('.mgmt-tm td.uploadfile').length;
+    },
+
+
 }
 
 $(function () {
@@ -291,17 +331,17 @@ $(function () {
 		var deletedFileName = data.url.match(/file=[^&]*/g);
 		deletedFileName = decodeURIComponent(deletedFileName[0].replace("file=",""));
 
-		console.log(skipLangDetectArr, deletedFileName, typeof( skipLangDetectArr[deletedFileName] ));
+		console.log(UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ));
 
-		if(typeof( skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
-			console.log(skipLangDetectArr);
-			delete skipLangDetectArr[deletedFileName];
+		if(typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
+			console.log(UI.skipLangDetectArr);
+			delete(UI.skipLangDetectArr[deletedFileName]);
 		}
 
-        if($('.error-message.no-more').length) {
+        if($('.wrapper-upload .error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
-				$('.error-message').empty().hide();
+				$('.wrapper-upload .error-message').empty().hide();
 		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
 		    	$('#add-files').removeClass('disabled');
 		    	$('#add-files input').removeAttr('disabled');
@@ -332,10 +372,10 @@ $(function () {
 	}).on('click', '.template-upload .cancel button', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file canceled');
-        if($('.error-message.no-more').length) {
+        if($('.wrapper-upload .error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
-				$('.error-message').empty().hide();
+				$('.wrapper-upload .error-message').empty().hide();
 		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
 		    	$('#add-files').removeClass('disabled');
 		    	$('#add-files input').removeAttr('disabled');
@@ -365,7 +405,7 @@ $(function () {
 		var maxnum = config.maxNumberFiles;
 		if($('.upload-table tr').length > (maxnum-1)) {
 			console.log('10 files loaded');
-			$('.error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			$('.wrapper-upload .error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
 		    $('#fileupload').fileupload('option', 'dropZone', null);
 		    $('#add-files').addClass('disabled');
 		    $('#add-files input').attr('disabled', 'disabled');
@@ -434,11 +474,13 @@ $(function () {
 
         if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
 
+            //Global
+            UI.skipLangDetectArr[fileSpecs.fname] = 'detect';
+
             if ( config.conversionEnabled ) {
 
 //				console.log('fileuploadcompleted');
 //				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
-
                 if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
                     //console.log( filerow );
                     console.log( 'ACTION: bind fileuploadcompleted' );
@@ -451,7 +493,7 @@ $(function () {
 
         } else if ( fileSpecs.error ) {
             disableAnalyze();
-            $( '.error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -509,7 +551,7 @@ $(function () {
 
     $('#clear-all-files').bind('click', function (e) {
         e.preventDefault();
-        $('.error-message').hide();
+        $('.wrapper-upload .error-message').hide();
         $('.template-download .delete button, .template-upload .cancel button').click();
 	});
 
@@ -645,7 +687,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
             action: 'convertFile',
             file_name: fname,
             source_lang: $('#source-lang').val(),
-            target_lang: $('#target-lang').val()
+            target_lang: $('#target-lang').val(),
+            segmentation_rule: $('#segm_rule' ).val()
         },
         type: 'POST',
         dataType: 'json',
@@ -671,7 +714,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         success: function(d){
 
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
-			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
+			falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
             filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if( d.code == 1 ) {
@@ -687,7 +730,6 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					// Animation complete.
 				});
 
-				skipLangDetectArr[fname] = 'detect';
            	} else if( d.code < 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
@@ -835,6 +877,10 @@ checkAnalyzability = function(who) {
 			return false;
 		}
 		if($('.upload-table tr.failed').length) res = false;
+        if(UI.uploadingTMX()) {
+            res = false;
+//            console.log('una tmx in caricamento');
+        }
 		return res;
 	} else {
 		return false;
@@ -862,6 +908,14 @@ isValidFileExtension = function(filename) {
 //        if(this == ext) res = true;
 //    });
     console.log(res);
+    return res;
+}
+
+isTMXAllowed = function() {
+    filename="test.tmx";
+    res = (!filename.match(config.allowedFileTypes))? false : true;
+
+    console.log("function isTMXAllowed return value: " +res);
     return res;
 }
 
@@ -928,6 +982,34 @@ unsupported = function() {
 	return pf;
 }
 
+function goodbye(e) {
+    if ($('.popup-tm .notify').length) {
+        var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+        var leave_message = 'You have a pending operation. Are you sure you want to quit?';
+        if(dont_confirm_leave!==1) {
+            if(!e) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = leave_message;
+            //e.stopPropagation works in Firefox.
+            if (e.stopPropagation)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            //return works for Chrome and Safari
+            return leave_message;
+        }
+    }
+}
+
+window.onbeforeunload = function(e) {
+    goodbye(e);
+//    UI.clearStorage('contribution');
+
+//			localStorage.clear();
+};
 
 $(document).ready(function() {
 	config.unsupported = unsupported();

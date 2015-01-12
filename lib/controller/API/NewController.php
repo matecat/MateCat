@@ -42,7 +42,6 @@ class NewController extends ajaxController {
 		//limit execution time to 300 seconds
 		set_time_limit( 300 );
 
-		$this->disableSessions();
 		parent::__construct();
 
 		//force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
@@ -178,7 +177,7 @@ class NewController extends ajaxController {
 
             try {
 
-                $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+                $APIKeySrv = new TMSService();
 
                 $newUser = $APIKeySrv->createMyMemoryKey();
 
@@ -225,6 +224,7 @@ class NewController extends ajaxController {
 					'job_to_split'       => null,
 					'job_to_split_pass'  => null,
 					'split_result'       => null,
+					'skip_lang_validation' => true
 					) );
 
 		$projectManager = new ProjectManager( $projectStructure );

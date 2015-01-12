@@ -20,7 +20,7 @@ class analyzeController extends viewController {
      *
      * @var string
      */
-    protected $_outsource_login_API =  'http://signin.translated.net/';
+    protected $_outsource_login_API = '//signin.translated.net/';
 
     private $pid;
     private $ppassword;
@@ -47,15 +47,30 @@ class analyzeController extends viewController {
     private $project_status = "";
     private $num_segments = 0;
     private $num_segments_analyzed = 0;
+    private $proj_payable_rates;
+    private $subject;
 
     public function __construct() {
+
+        parent::sessionStart();
         parent::__construct( false );
 
-        $this->pid      = $this->get_from_get_post( "pid" );
-        $this->jid      = $this->get_from_get_post( "jid" );
-        $pass = $this->get_from_get_post( "password" );
+        $filterArgs = array(
+                'pid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'password' => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                )
+        );
 
-        if( !empty( $this->jid ) ){
+        $postInput = filter_input_array( INPUT_GET, $filterArgs );
+
+        $this->pid = $postInput[ 'pid' ];
+        $this->jid = $postInput[ 'jid' ];
+        $pass      = $postInput[ 'password' ];
+
+        if ( !empty( $this->jid ) ) {
             parent::makeTemplate( "jobAnalysis.html" );
             $this->jpassword = $pass;
             $this->ppassword = null;
@@ -78,7 +93,15 @@ class analyzeController extends viewController {
             $this->project_not_found = true;
         }
 
+        //pick the project subject from the first job
+        if ( count( $project_by_jobs_data ) > 0 ) {
+            $this->subject = $project_by_jobs_data[ 0 ][ 'subject' ];
+        }
+
         foreach ( $project_by_jobs_data as &$p_jdata ) {
+
+            //json_decode payable rates
+            $p_jdata[ 'payable_rates' ] = json_decode( $p_jdata[ 'payable_rates' ], true );
 
             $this->num_segments += $p_jdata[ 'total_segments' ];
             if ( empty( $this->pname ) ) {
@@ -140,6 +163,7 @@ class analyzeController extends viewController {
             $target_short = $p_jdata[ 'target' ];
             $password     = $p_jdata[ 'jpassword' ];
 
+
             unset( $p_jdata[ 'name' ] );
             unset( $p_jdata[ 'source' ] );
             unset( $p_jdata[ 'target' ] );
@@ -159,6 +183,7 @@ class analyzeController extends viewController {
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jpassword' ]    = $password;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source_short' ] = $source_short;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target_short' ] = $target_short;
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'rates' ]                                 = $p_jdata[ 'payable_rates' ];
 
                 if ( !array_key_exists( "total_raw_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
                     $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] = 0;
@@ -178,7 +203,7 @@ class analyzeController extends viewController {
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] += $p_jdata[ 'file_eq_word_count' ];
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ], 0, ".", "," );
 
-            $p_jdata[ 'file_eq_word_count' ] = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
+            $p_jdata[ 'file_eq_word_count' ]  = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
             $p_jdata[ 'file_raw_word_count' ] = number_format( $p_jdata[ 'file_raw_word_count' ], 0, ".", "," );
 
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'files' ][ $p_jdata[ 'id_file' ] ] = $p_jdata;
@@ -186,7 +211,6 @@ class analyzeController extends viewController {
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] = ( count( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ] ) > 1 ? 'splitted' : '' );
 
         }
-
 
         $raw_wc_time  = $this->total_raw_word_count / INIT::$ANALYSIS_WORDS_PER_DAYS;
         $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
@@ -277,6 +301,7 @@ class analyzeController extends viewController {
 
     public function setTemplateVars() {
 
+
         $this->template->jobs                       = $this->jobs;
         $this->template->fast_analysis_wc           = $this->fast_analysis_wc;
         $this->template->fast_analysis_wc_print     = $this->fast_analysis_wc_print;
@@ -301,10 +326,15 @@ class analyzeController extends viewController {
         $this->template->project_status             = $this->project_status;
         $this->template->num_segments               = $this->num_segments;
         $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
-        $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->logged_user                = $this->logged_user['short'];
+        $this->template->extended_user              = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
-	    $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
-	    $this->template->outsource_service_login    = $this->_outsource_login_API;
+        $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
+        $this->template->outsource_service_login    = $this->_outsource_login_API;
+
+        $langDomains = langs_LanguageDomains::getInstance();
+        $this->subject = $langDomains::getDisplayDomain($this->subject);
+        $this->template->subject                    = $this->subject;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
@@ -316,15 +346,15 @@ class analyzeController extends viewController {
             $this->template->showModalBoxLogin = false;
         }
 
-	    //url to which to send data in case of login
-	    $client = OauthClient::getInstance()->getClient();
-	    $this->template->oauthFormUrl = $client->createAuthUrl();
+        //url to which to send data in case of login
+        $client                       = OauthClient::getInstance()->getClient();
+        $this->template->oauthFormUrl = $client->createAuthUrl();
 
         $this->template->incomingUrl = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
         //perform check on running daemons and send a mail randomly
         $misconfiguration = Daemons_Manager::thereIsAMisconfiguration();
-        if( $misconfiguration && mt_rand( 1, 3 ) == 1 ){
+        if ( $misconfiguration && mt_rand( 1, 3 ) == 1 ) {
             $msg = "<strong>The analysis daemons seem not to be running despite server configuration.</strong><br />Change the application configuration or start analysis daemons.";
             Utils::sendErrMailReport( $msg, "Matecat Misconfiguration" );
         }

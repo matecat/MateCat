@@ -15,6 +15,9 @@ class oauthResponseHandlerController extends viewController{
 	private $user_logged;
 
 	public function __construct(){
+
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("oauth_response_handler.html");
 
@@ -73,7 +76,7 @@ class oauthResponseHandlerController extends viewController{
 			}
 
 			//set stuff
-			AuthCookie::setCredentials($this->userData['email'],INIT::$AUTHCOOKIEDURATION);
+			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
 			//$_SESSION['cid'] = $this->userdata['email'];
 
 			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );

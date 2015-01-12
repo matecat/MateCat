@@ -4,6 +4,7 @@ APP = {
     init: function() {
 //        this.waitingConfirm = false;
 //        this.confirmValue = null;
+        this.isCattool = $('body').hasClass('cattool');
         $("body").on('click', '.modal .x-popup', function(e) {
             e.preventDefault();
             APP.closePopup();
@@ -16,12 +17,13 @@ APP = {
                     APP.confirmValue = true;
                 }
             }
-	  }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
+	    }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
             e.preventDefault();
             APP.closePopup();
             if($(this).attr('data-callback')) {
                 if( typeof UI[$(this).attr('data-callback')] === 'function' ){
-                    UI[$(this).attr('data-callback')]();
+                    var context = $(this).attr('data-context') || '';
+                    UI[$(this).attr('data-callback')](decodeURI(context));
                     APP.confirmValue = true;
                 } else {
                     APP.confirmValue = APP.confirmCallbackFunction();
@@ -35,7 +37,8 @@ APP = {
             el = $(this).parents('.modal').find('.btn-cancel');
             if($(el).attr('data-callback')) {
                 if( typeof UI[$(el).attr('data-callback')] === 'function' ){
-                    UI[$(this).attr('data-callback')]();
+                    var context = $(this).attr('data-context') || '';
+                    UI[$(this).attr('data-callback')](decodeURI(context));
                 } else {
                     APP.cancelValue = APP.cancelCallbackFunction();
                 }
@@ -46,7 +49,17 @@ APP = {
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
 			e.preventDefault();
 			$(this).parents('.modal').find('.x-popup').click();
-        })
+        });
+
+        $('#sign-in').click(function(e){
+            e.preventDefault();
+            APP.googole_popup($(this).data('oauth'));
+        });
+
+        $('#sign-in-o').click(function(e){
+            $('#sign-in' ).trigger('click');
+        });
+
     },
     alert: function(options) {
         //FIXME
@@ -67,6 +80,14 @@ APP = {
 			content: content
 		});
     },
+    googole_popup: function ( url ) {
+        //var rid=$('#rid').text();
+        //url=url+'&rid='+rid;
+        var newWindow = window.open( url, 'name', 'height=600,width=900' );
+        if ( window.focus ) {
+            newWindow.focus();
+        }
+    },
     confirm: function(options) {
         this.waitingConfirm = true;
         this.popup({
@@ -78,7 +99,8 @@ APP = {
             title: 'Confirmation required',
             cancelTxt: options.cancelTxt,
             okTxt: options.okTxt,
-            content: options.msg
+            content: options.msg,
+            context: options.context
         });
         this.checkConfirmation();
         return APP.confirmValue;
@@ -132,9 +154,10 @@ APP = {
 //        }
     },
 	doRequest: function(req,log) {
+//        console.log('req: ', req);
 		logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
 		version = (typeof config.build_number == 'undefined')? '' : '-v' + config.build_number;
-		builtURL = (req.url)? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version;
+		builtURL = (req.url)? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.job_id + ((typeof req.data.id_segment != 'undefined')? ',sid=' + req.data.id_segment : '');
 		var setup = {
 			url: builtURL,
 //			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
@@ -172,6 +195,7 @@ APP = {
             title: '', // (optional)
             onConfirm: 'functionName' // (optional) UI function to call after confirmation. Confirm value is anyway stored in APP.confirmValue, but a UI function can be automatically called when the user confirm true or false (checks are done every 0.2 seconds)
             content: '', // html
+            context: '', // ACTUALLY ENABLED ONLY FOR CONFIRM: a string that will be passed to the callbacks, may be a JSON. Escaping and unescaping are done automatically.
             buttons:    [ // (optional) list from left
                                 {
                                     type: '', // "ok" (default) or "cancel"
@@ -185,6 +209,7 @@ APP = {
         }
  */
         this.closePopup();
+//        console.log('conf: ', conf);
 
         newPopup = '<div class="modal" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
                     '   <div class="popup-outer"></div>' +
@@ -195,8 +220,8 @@ APP = {
         if(conf.type == 'alert') {
             newPopup += '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>Ok<\a>';
         } else if(conf.type == 'confirm') {
-            newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
-                             '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
+            newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +
+                             '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';
             APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
             APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
             APP.callerObject = (conf.caller)? conf.caller : null;
@@ -267,5 +292,15 @@ APP = {
 			o = s + o;
 		}
 		return o;
-	}
+	},
+    isAnonymousUser: function () {
+        anonymous = $('#welcomebox span').text() == "Anonymous";
+        return anonymous;
+    },
 };
+
+$.extend($.expr[":"], {
+    "containsNC": function(elem, i, match) {
+        return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+    }
+});

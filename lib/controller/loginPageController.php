@@ -10,6 +10,9 @@ class loginPageController extends viewController {
 	private $authURL;
 
 	public function __construct() {
+
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("login.html");
 
@@ -39,11 +42,9 @@ class loginPageController extends viewController {
 	}
 
 	public function setTemplateVars() {
-		$this->template->oauthFormUrl   = $this->authURL;
+		$this->template->authURL   = $this->authURL;
 		$this->template->incomingUrl    = $this->incomingUrl;
 		$this->template->build_number   = INIT::$BUILD_NUMBER;
 	}
 
 }
-
-?>

@@ -2,7 +2,7 @@
 body {margin:0; padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0;}
 th, td { padding: 0px; }
 table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;} 
-header{background:#6d6e71;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #333;padding:2px 0 0px 0;height:45px;}
+header{background:#4D4D4D;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #5F5F5F;padding:2px 0 0px 0;height:45px;}
 .logo{float:left;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;margin-top:4px}
 /*.wrapper{width:960px;margin:0 auto;text-align:left}*/
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
@@ -822,13 +822,16 @@ footer a:hover{text-decoration:none}
 }
 
 .outsource.modal .popup {
-	top: 30%;
+top: 25%;
 }
 .chunks-container
 {
 	max-height: 250px;
 	overflow: auto;
 }
+
+
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),

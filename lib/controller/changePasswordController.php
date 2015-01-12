@@ -10,7 +10,7 @@ class changePasswordController extends ajaxController {
 
 	public function __construct() {
 
-        $this->disableSessions();
+        parent::checkLogin();
 		parent::__construct();
 
         $filterArgs = array(
@@ -32,6 +32,10 @@ class changePasswordController extends ajaxController {
     }
 
 	public function doAction() {
+
+        if( !$this->userIsLogged ){
+            throw new Exception('User not Logged');
+        }
 
         if ( $this->undo ){
             $new_pwd    = $this->old_password;

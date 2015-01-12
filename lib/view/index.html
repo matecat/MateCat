@@ -5,46 +5,51 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
+        <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+
 <!--
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
 -->
         <script type="text/javascript">
-			/*<![CDATA[*/
-			var config = {
-				basepath: '${basepath | string:/}',
-				id_translator: '${tid | nothing}',
-				private_translator: '${private_translator | string:0}',
-				id_customer: '${id_customer | string:unknown_customer}',
-				private_customer: '${private_customer | string:0}',
-				last_opened_segment: '${last_opened_segment}',
-				first_job_segment: '${first_job_segment}',
-				last_job_segment: '${last_job_segment}',
-				server_load_time: '${load_time}',
-				tms_enabled: ${tms_enabled | string:true},
-				mt_enabled: ${mt_enabled | string:true},
-				job_id: '${jid}',
-				password: '${password}',
-				source_rfc: '${source_code}',
-				target_rfc: '${target_code}',
-				source_lang: '${source}',
-				target_lang: '${target}',
-				time_to_edit_enabled: ${time_to_edit_enabled},
-				build_number: '${build_number}',
-				warningPollingInterval: '${warningPollingInterval}',
-				segmentQACheckInterval: '${segmentQACheckInterval}',
-				firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
-				fileCounter: ${structure php: fileCounter },
-				taglockEnabled: ${taglockEnabled | string:1},
-				alternativesEnabled: true,
-				brPlaceholdEnabled: '${brPlaceholdEnabled}',
-				//survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
-				survey: false,
-				optimized: false
-			};
-			var renderStart = new Date();
-			/*]]>*/
+            /*<![CDATA[*/
+            var config = {
+                basepath: '${basepath | string:/}',
+                maxFileSize: ${maxFileSize},
+                maxTMXFileSize: ${maxTMXFileSize},
+                id_translator: '${tid | nothing}',
+                private_translator: '${private_translator | string:0}',
+                id_customer: '${id_customer | string:unknown_customer}',
+                private_customer: '${private_customer | string:0}',
+                last_opened_segment: '${last_opened_segment}',
+                first_job_segment: '${first_job_segment}',
+                last_job_segment: '${last_job_segment}',
+                server_load_time: '${load_time}',
+                tms_enabled: ${tms_enabled | string:true},
+                mt_enabled: ${mt_enabled | string:true},
+                job_id: '${jid}',
+                password: '${password}',
+                source_rfc: '${source_code}',
+                target_rfc: '${target_code}',
+                source_lang: '${source}',
+                target_lang: '${target}',
+                ownerIsMe: ${ownerIsMe},
+                time_to_edit_enabled: ${time_to_edit_enabled},
+                build_number: '${build_number}',
+                warningPollingInterval: '${warningPollingInterval}',
+                segmentQACheckInterval: '${segmentQACheckInterval}',
+                firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
+                fileCounter: ${structure php: fileCounter },
+                taglockEnabled: ${taglockEnabled | string:1},
+                alternativesEnabled: true,
+                brPlaceholdEnabled: '${brPlaceholdEnabled}',
+                //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
+                survey: false,
+                optimized: false
+            };
+            var renderStart = new Date();
+            /*]]>*/
         </script>
         <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
             /*<![CDATA[*/
@@ -65,7 +70,6 @@
             config.nbspPlaceholder       = '${nbspPlaceholder | null}';
             config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
             config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
-
             /*]]>*/
         </script>
 		<script>
@@ -81,8 +85,10 @@
 				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
 			}
             /*]]>*/
-		</script>	
-		
+		</script>
+
+
+<!--        <script src="${basepath}public/js/addtm.js?build=${build_number}"></script> -->
 <!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
@@ -116,69 +122,6 @@
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
-
-                <!-- viewer icons
-				
-                    <a href="#" class="notification m-notification" title="click to view notifications">2</a>
-                    <span class="text">+ you
-                    <span id="id_translator" class="hide">antonio</span>
-                    </span> 
-                    <a href="#" class="viewer not-online">
-                     <span class="v-name">
-                            <span class="v-arrow"></span>
-                            Marco Trombetti <br />
-                            (offline)<br />
-                            last edit: 12/06/12 at 06.30 AM
-                        </span>
-                    </a> 
-                    <a href="#" class="viewer not-online">
-                        <span class="v-name">
-                            <span class="v-arrow"></span>
-                            Antonio Farina <br />
-                            (offline)<br />
-                            last edit: 12/06/12 at 06.30 AM
-                        </span>
-                    </a> 
-                    <a href="#" class="viewer">
-                        <span class="v-name">
-                            <span class="v-arrow"></span>
-                            Alessandro Cattelan<br />
-                            last edit: 12/06/12 at 06.30 AM
-                        </span>
-                    </a>
-					
-                -->
-
-
-                <!-- edit/view notifiche globali -->
-                <div class="notification-box">
-                    <a href="#" class="arrow-notification"></a>
-                    <div class="h-notification">Notifications  </div>
-                    <ul>
-                        <li>
-                            <a href="#">
-                                <b>Luca</b> 
-                                <br/>
-                                "parts" va tradotto con "componenti" e non con "pezzi"
-                            </a>
-                        </li>
-                        <li>
-                            <b>Lucia</b>
-                            <br/>      
-                            questa frase è lunga e risulta illeggibile
-                        </li>
-                        <li>
-                            <b>Antonio</b>
-                            <br/>
-                            attenzione ai doppi spazi
-                        </li>
-                    </ul>
-                </div>
-                <!-- END edit/view notifiche globali -->
-                <!--div class="release">Release <span id="rel_version">0.1b</span> <span id="rel_date">2012-07-15</span></div-->
-
-
-
                 <a href="${basepath}" class="logo">                 
                 </a>
                 <div class="breadcrumbs">    
@@ -211,77 +154,6 @@
 
 
         </header>
-
-        <div tal:attributes="class string:searchbox${filtered_class}">
-            <form>
-
-                <div class="search-inputs">
-
-                    <div class="block">
-                        <label for="search-source">Find in source</label>
-                        <input id="search-source" class="search-input" type="text" value=""/>				
-                    </div>
-                    <div class="block">
-                        <div class="field">
-                            <label for="search-target">Find in target</label>
-                            <input id="search-target" class="search-input" type="text" value=""/>
-                        </div>
-
-                        <div class="field">
-						<input id="enable-replace" type="checkbox" />
-						<label for="enable-replace">Replace with</label>
-						<input id="replace-target" disabled="disabled" class="search-input" type="text" value=""/>
-                        </div>
-
-                        <!--div class="field">
-                            <label for="replace-target">Replace with</label>
-                            <input id="replace-target" class="search-input" type="text" value=""/>
-                        </div-->
-
-
-                    </div>                    
-                    <div class="block">
-                        <label for="select-status">Status</label>
-                        <select id="select-status" class="search-select" >
-                            <option value="all" selected="selected">All</option>
-                            <option value="new">New</option>
-                            <option value="draft">Draft</option>
-                            <option value="translated">Translated</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>  	
-                    </div>
-                    <div class="block right buttons">
-                        <div class="field">
-                            <input id="exec-cancel" type="button" class="btn" value="Cancel" />			
-                            <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />			
-                        </div>
-
-                        <div class="field">
-                            <input id="exec-replaceall" type="button" class="btn" disabled="disabled" value="Replace all" />
-                            <input id="exec-replace" type="button" class="btn" disabled="disabled" value="Replace" />	
-                        </div>
-
-                    </div>          
-                </div>
-
-                <div class="search-options">
-                    <div class="block">
-                        <input id="match-case" type="checkbox" />
-                        <label for="match-case">Match case</label>
-                    </div>
-                    <div class="block">
-                        <input id="exact-match" type="checkbox" />
-                        <label for="exact-match">Exact match</label>
-                    </div>                    
-                </div>
-
-            </form>
-            <div class="search-display">
-                <p class="searching">Searching ...</p>
-                <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
-            </div>
-        </div>
 
         <div id="outer">
 
@@ -331,6 +203,8 @@
     </div>
 </div>
 
+
+
         <footer>
 			<a href="#" id="settingsSwitcher" title="Settings"></a>
 
@@ -341,20 +215,27 @@
 
                 <nav>
                     <ul>
-                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                        <tal:block tal:condition="php: !empty(logged_user)">
+                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                        </tal:block>
+
+                        <tal:block tal:condition="php: empty(logged_user)">
+                            <li><a href="${authURL}" class="authLink">Manage</a></li>
+                        </tal:block>
+
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
-                        <li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
+                        <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
                         </div>
                     </tal:block>
 
                     <tal:block tal:condition="php: !empty(logged_user)">
-                        <div id='welcomebox'>
-                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        <div id='welcomebox' tal:attributes="title extended_user">
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
                         </div>
                     </tal:block>
 					
@@ -362,8 +243,8 @@
 
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <p class="progress">Progress:</p>
-                    <div class="meter">
+                    <!-- <p class="progress">Progress:</p> -->
+                    <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
                         <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
@@ -374,71 +255,24 @@
                     <ul>
 
                         <li id="stat-eqwords">
-                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
-                            <tal:block tal:condition="php: empty(analysis_enabled)">
-                                Payable Words
-                            </tal:block>
-                            : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
-
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
                         <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                         -->
-                        <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
-                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
+                      
+		    
 
+                   </ul> 
+                   <ul class="statistics-details">
+
+                     <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
+                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
                     </ul>
-
-                    <div class="stats">
-                        <div class="header-stats">Project stats (<a href="${basepath}?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
-                        <ul class="h-stats">
-
-
-                            <li class="first">&nbsp;</li>
-                            <li>Initial</li>
-                            <li>To-do</li>
-                            <li>%</li>
-                            <li>Cost</li>
-                        </ul>
-                        <ul>
-                            <li class="first">New</li>
-                            <li>---.---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Repetitions</li> <li>---</li>
-                            <li>90</li>
-                            <li>100</li>
-                            <li>30</li>
-                        </ul>
-                        <ul>
-                            <li class="first">100% match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">100% context match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Fuzzy match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Machine translation</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <a href="#" class="arrow-notification"></a>
-
-                    </div>
-
-                </div>
+			
+		</div>
 
                 <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
                     <p class="progress">Calculating word count...</p>
@@ -447,57 +281,9 @@
             </div> <!-- .wrapper -->
         </footer>
 
+        <div metal:use-macro="tm.html/tm_panel"></div>
 
 
-		<!-- POPUP LOGIN -->
-		<!--
-		<div class="popup-outer"></div>
-		<div class="popup">
-		
-		<a href="#" class="x-popup"></a>
-		<h1>Login</h1>
-		
-		<h2>Login to add the project <br/>to  your Management Panel</h2>
-		
-		 <div class="outer">
-					<div class="inner">
-					   <button id="sign-in" name="" type="button" class="login-button" data-oauth="http://matecat.translated.home/oauth/request">Sign in using Google</button>
-					</div>
-				</div>
-		
-		
-		 
-		
-		<br/>
-		
-		Or <br/>
-		
-		
-		<a href="#">
-		Stay anonymous</a>
-		
-		</div>
-		-->
-		<!-- FINE POPUP LOGIN -->
-
-
-
-
-		<!-- POPUP PREVIEW WARNING -->
-		<!--
-		<div class="popup-outer"></div>
-		<div class="popup">
-			<a href="#" class="x-popup"></a>
-			<h1>Warning</h1>
-		
-			<p>There are some potential errors (missing tags, numbers, etc). <br/>
-			Do you want to continue anyway?</p>
-		
-			<a href="#" class="btn-ok">Ok</a>
-			<a href="#" class="btn-cancel">Ops!</a>
-		</div>
-		-->
-		<!-- FINE PREVIEW WARNING -->
 
 
 
@@ -565,6 +351,75 @@
                                 </div>
         -->
         <script src="${basepath}public/js/lib/snapengage.js"></script>
+		<script type="text/javascript">
+		$( ".open-popup-tmx" ).click(function() {
+  $( this ).hide();
+});
+
+</script>
+
+<script>
+$( document ).ready(function() {
+
+
+        // Change the selector if needed
+var $table = $('table.scroll'),
+    $bodyCells = $table.find('tbody tr:first').children(),
+    colWidth;
+
+// Adjust the width of thead cells when window resizes
+$(window).resize(function() {
+    // Get the tbody columns width array
+    colWidth = $bodyCells.map(function() {
+        return $(this).width();
+    }).get();
+    
+    // Set the width of thead columns
+    $table.find('thead tr').children().each(function(i, v) {
+        $(v).width(colWidth[i]);
+    });    
+}).resize(); // Trigger resize handler
+
+});
+		</script>
+
+
+<style type="text/css">
+table.scroll {
+    /* width: 100%; */ /* Optional */
+    /* border-collapse: collapse; */
+    border-spacing: 0;
+}
+
+table.scroll tbody,
+table.scroll thead { display: block; }
+
+thead tr th { 
+    height: 30px;
+    line-height: 30px;
+    /* text-align: left; */
+}
+
+table.scroll tbody {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+tbody td, thead th {
+    /* width: 20%; */ /* Optional */
+    /* white-space: nowrap; */
+}
+
+tbody td:last-child, thead th:last-child {
+    border-right: none;
+}
+</style>
+
+    <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
     </body>
+
+
 </html>

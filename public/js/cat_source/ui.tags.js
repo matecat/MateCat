@@ -2,19 +2,16 @@
 	Component: ui.tags
  */
 $.extend(UI, {
-	noTagsInSegment: function(starting) {
-		if ((!this.editarea) && (typeof starting == 'undefined'))
-			return true;
-		if (typeof starting != 'undefined')
-			return false;
+	noTagsInSegment: function(options) {
+        editarea = options.area;
+        starting = options.starting;
+        if(starting) return false;
 
-		var a = $('.source', this.currentSegment).html().match(/\&lt;.*?\&gt;/gi);
-		var b = this.editarea.html().match(/\&lt;.*?\&gt;/gi);
-		if (a || b) {
-			return false;
-		} else {
-			return true;
-		}
+        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+            return false;
+        } else {
+            return true;
+        }
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
@@ -38,26 +35,7 @@ $.extend(UI, {
 		}
 		return(mismatch);
 	},
-	
-	// TAG MARK
-	detectTags: function(area) {
-		//ALL in one
-//		$(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//		if(typeof $(area).attr('data-sid') == 'undefined') console.log(area);
-//		if(typeof $(area).attr('data-sid') == 'undefined') console.log('HTML 1: ', $(area).html());
-		$(area).html($(area).html().replace(/(:?<span[^>]*locked[^>]*>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//		if(typeof $(area).attr('data-sid') == 'undefined') console.log('HTML 2: ', $(area).html());
-		
-
-//        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
-
-//		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-//      if (!this.firstMarking) {
-//			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//          console.log( $(area).html() );
-//		}
-	},
-	disableTagMark: function() {
+    disableTagMark: function() {
 		this.taglockEnabled = false;
 		this.body.addClass('tagmarkDisabled');
 		$('.source span.locked').each(function() {
@@ -85,6 +63,7 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
+            UI.detectTagType(this);
         });
 		$('.footer .translation').each(function() {
             $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -94,54 +73,61 @@ $.extend(UI, {
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
-	},
+            UI.detectTagType(this);
+        });
+
+    },
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
 //		UI.checkHeaviness(); 
-		
-		if (this.noTagsInSegment(1))
-			return false;
-		$('.source').each(function() {
-			UI.detectTags(this);
-		});
 
-		$('.editarea').each(function() {
-//			if($(this).attr('data-sid') == 13655401) console.log('AAAAAAAAAAA: ', $(this).attr('data-sid'));
-			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
-				return false;
-//			if($(this).attr('data-sid') == 13655401) console.log('prova 1: ', $('#segment-13655401 .editarea').html());
-			UI.detectTags(this);
-//			if($(this).attr('data-sid') == 13655401) console.log('prova 2: ', $('#segment-13655401 .editarea').html());
+		if(this.noTagsInSegment({
+            area: false,
+            starting: true
+        })) {
+            return false;
+        }
+
+		$('.source, .editarea').each(function() {
+			UI.lockTags(this);
 		});
 	},
+
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
 			return false;
 		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
 		elements.each(function() {
-//			UI.detectTags(this);
+//			UI.lockTags(this);
 		});
 	},
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags: ', el);
+//		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
+        el = (typeof el == 'undefined') ? UI.editarea : el;
 		if (!this.taglockEnabled)
 			return false;
-		if (this.noTagsInSegment())
+//        console.log('this.noTagsInSegment(): ', this.noTagsInSegment());
+//		console.log('IL SEGMENTO: ', $('#segment-' + el.attr('data-sid')));
+//        console.log('devo interrompere il lockTags?: ', this.noTagsInSegment($(el).parents('section').first()));
+//        console.log('elemento: ', el);
+        if (this.noTagsInSegment({
+            area: el,
+            starting: false
+        }))
 			return false;
-		$(editarea).first().each(function() {
+//        console.log('$(editarea).first(): ', $(editarea).first());
+        $(editarea).first().each(function() {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
-
             tx = tx.replace(/<span/gi, "<pl")
                     .replace(/<\/span/gi, "</pl")
                     .replace(/&lt;/gi, "<")
@@ -179,10 +165,36 @@ $.extend(UI, {
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+            segment = $(this).parents('section');
+            if($('span.locked', this).length) {
+                segment.addClass('hasTags');
+            } else {
+                segment.removeClass('hasTags');
+            }
+            $('span.locked', this).addClass('monad');
+            UI.detectTagType(this);
+
+//            UI.checkTagsInSegment();
 		});
 
 	},
-	unlockTags: function() {
+    detectTagType: function (area) {
+        $('span.locked', area).each(function () {
+//                console.log(segment.attr('id') + ' - ' + $(this).text());
+//                console.log($(this).text().startsWith('</'));
+            if($(this).text().startsWith('</')) {
+                $(this).addClass('endTag')
+            } else {
+                if($(this).text().endsWith('/>')) {
+                    $(this).addClass('selfClosingTag')
+                } else {
+                    $(this).addClass('startTag')
+                }
+            }
+        })
+    },
+
+    unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
 		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
@@ -266,12 +278,311 @@ $.extend(UI, {
 		}
 */
 	},
-	
-	// TAG MISMATCH
+/*
+    setExtendedTagMode: function (el) {
+        console.log('setExtendedTagMode');
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'extended');
+    },
+    setCrunchedTagMode: function (el) {
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'crunched');
+    },
+*/
+    setTagMode: function () {
+        if(this.custom.extended_tagmode) {
+            this.setExtendedTagMode();
+        } else {
+            this.setCrunchedTagMode();
+        }
+    },
+    setExtendedTagMode: function () {
+        this.body.addClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = true;
+        this.saveCustomization();
+    },
+    setCrunchedTagMode: function () {
+        this.body.removeClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = false;
+        this.saveCustomization();
+    },
+
+    /*
+        checkTagsInSegment: function (el) {
+            segment = el || UI.currentSegment;
+            hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+            if(hasTags) {
+                this.setExtendedTagMode(el);
+            } else {
+                this.setCrunchedTagMode(el);
+            }
+        },
+    */
+    enableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: true}
+        )
+    },
+    disableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: false}
+        )
+    },
+    checkTagProximity: function (w, range) {return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+
+        //check if there is a tag ahed
+        if($(nextEl).hasClass('locked')) {
+            if(range.endOffset == range.endContainer.length - 1) {
+                console.log('1');
+                this.highlightCorrespondingTags(nextEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+            saveSelection();
+//            console.log('UI.editarea.html(): ', UI.editarea.html());
+/*
+            for(var key in range.startContainer) {
+                console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+            }
+            */
+            restoreSelection();
+            content = UI.editarea.html();
+            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content: ', content);
+            console.log('str: ', str);
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            console.log('range.startOffset: ', range.startOffset);
+            console.log('range.startContainer.length: ', range.startContainer.length);
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.endOffset == range.endContainer.length) {
+                    console.log('2');
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        } else {
+            UI.removeHighlightCorrespondingTags();
+        }
+/*
+        //check if there is a tag behind
+        if($(prevEl).hasClass('locked')) {
+            console.log("l'elemento precedente è un tag");
+//            console.log('range.startOffset: ', range.startOffset);
+//            console.log('range.startContainer.length: ', (range.startContainer.length));
+            if(range.startOffset == 1) {
+                this.highlightCorrespondingTags(prevEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+            console.log("l'elemento precedente è un cursor placeholder, e quello ancora precedente un tag");
+
+            content = UI.editarea.html();
+            console.log('content: ', content);
+            str = '&gt;</span><span class="undoCursorPlaceholder monad" contenteditable="false"></span>' + range.endContainer.wholeText;
+//            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+            console.log('content.indexOf(str): ', content.indexOf(str));
+            if(content.indexOf(str) > -1) { // escape false positives
+                if(range.startOffset == 1) {
+                    this.highlightCorrespondingTags($(nextEl).next());
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            }
+        }
+*/
+
+            return false;
+
+        if(w == 'right') {
+            nextEl = $(range.endContainer.nextElementSibling);
+//            console.log('a: ', nextEl);
+//            console.log('b: ', nextEl.next());
+//            console.log('è quello dopo: ', (($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))));
+            if($(nextEl).hasClass('locked')) {
+                console.log('il prossimo è locked');
+//            if(($(nextEl).hasClass('locked'))||(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked')))) {
+//                console.log('entra');
+//                console.log('range.endOffset: ', range.endOffset);
+//                console.log('range.endContainer.length: ', range.endContainer.length);
+//                if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
+                if(range.endOffset == range.endContainer.length - 1) {
+                    this.highlightCorrespondingTags(nextEl);
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
+                content = UI.editarea.html();
+                str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+                if(content.indexOf(str) > -1) { // escape false positives
+                    if(range.endOffset == range.endContainer.length) {
+                        this.highlightCorrespondingTags($(nextEl).next());
+                    } else {
+                        UI.removeHighlightCorrespondingTags();
+                    }
+                }
+
+//                console.log('il prossimo è placeholder e quello dopo è locked');
+//                console.log('content: ', content);
+//                console.log('str: ', str);
+//                console.log('str è contenuta nel content? ', content.indexOf(str));
+//                console.log('range: ', range);
+//                console.log('range.startOffset: ', range.startOffset);
+//                console.log('range.startContainer.data: ', range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked');
+//                console.log(UI.editarea.html());
+//                console.log(UI.editarea.html().indexOf(range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'));
+//                console.log('range.startContainer: ', range.startOffset);
+/*
+                for(var key in range.startContainer) {
+                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
+                }
+*/
+//                console.log('range.commonAncestorContainer.innerHTML: ', range.commonAncestorContainer.innerHTML);
+
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+            /*
+                        console.log('range: ', range);
+                        if(range.endOffset == range.endContainer.length - 1) {
+            //            if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
+                            console.log('nextElementSibling: ', $(range.endContainer.nextElementSibling));
+                            if($(range.endContainer.nextElementSibling).hasClass('locked')) {
+                                this.highlightCorrespondingTags($(range.endContainer.nextElementSibling));
+                                console.log('tag nei pressi: ', $(range.endContainer.nextElementSibling));
+                            } else {
+                                UI.removeHighlightCorrespondingTags();
+                            }
+                        } else {
+                            UI.removeHighlightCorrespondingTags();
+                        }
+            */
+        } else {
+            prevEl = $(range.startContainer.previousElementSibling);
+            if($(prevEl).hasClass('locked')) {
+                if(range.startOffset == range.startContainer.length - 1) {
+                    this.highlightCorrespondingTags(prevEl);
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+            } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
+//                content = UI.editarea.html();
+//                str = range.endContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
+//                str = '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+
+
+
+            /*
+                        if(range.startOffset == 1) {
+            //            if((range.startOffset == 0)||(range.startOffset == 1)) {
+                            if($(range.startContainer.previousElementSibling).hasClass('locked')) {
+                                this.highlightCorrespondingTags($(range.startContainer.previousElementSibling));
+                                console.log('tag nei pressi: ', $(range.startContainer.previousElementSibling));
+                            } else {
+                                UI.removeHighlightCorrespondingTags();
+                            }
+                        } else {
+                            UI.removeHighlightCorrespondingTags();
+                        }
+            */
+        }
+    },
+    highlightCorrespondingTags: function (el) {
+        if(el.hasClass('startTag')) {
+//            console.log('has start tag');
+            if(el.next('.endTag').length) {
+                el.next('.endTag').addClass('highlight');
+            } else {
+//                console.log('il successivo non è un end tag');
+                num = 1;
+                ind = 0;
+                $(el).nextAll('.locked').each(function () {
+                    ind++;
+//                    console.log('ora stiamo valutando: ', $(this));
+                    if($(this).hasClass('startTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+//                    $(this).addClass('test-' + num);
+
+                })
+                $(pairEl).addClass('highlight');
+
+
+            }
+//            console.log('next endTag: ', el.next('.endTag'));
+        } else if(el.hasClass('endTag')) {
+            console.log('is an end tag');
+            if(el.prev('.startTag').length) {
+                console.log('and the previous element is a start tag');
+                el.prev('.startTag').first().addClass('highlight');
+            } else {
+                console.log('and the previous element is not a start tag');
+                num = 1;
+                ind = 0;
+                $(el).prevAll('.locked').each(function () {
+                    ind++;
+                    console.log('start tag: ', $(this));
+
+                    if($(this).hasClass('endTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            console.log('found el: ', $(this));
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+
+                });
+                $(pairEl).addClass('highlight');
+            }
+        }
+//        console.log('$(el): ', $(el));
+        $(el).addClass('highlight');
+
+
+//        console.log('$(pairEl).length: ', $(pairEl).length);
+
+//        UI.editarea.find('.locked')
+
+    },
+    removeHighlightCorrespondingTags: function () {
+        $(UI.editarea).find('.locked.highlight').removeClass('highlight');
+    },
+
+    // TAG MISMATCH
 	markTagMismatch: function(d) {
+        if(($.parseJSON(d.warnings).length)) {
+//            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        }
+//        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
 //        d.tag_mismatch.order = 2;
-        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order == '')) {
+        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
             if(typeof d.tag_mismatch.source != 'undefined') {
                 $.each(d.tag_mismatch.source, function(index) {
                     $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
@@ -347,7 +658,7 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -378,11 +689,19 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();
 	},
-	jumpTag: function(range, where) {
-//		console.log('range: ', range);
-//		console.log(range.endContainer.data.length);
-//		console.log(range.endOffset);
-		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+	jumpTag: function(range) {
+/*
+        console.log('RANGE IN JUMPTAG: ', range.endContainer);
+        console.log('range.endContainer.data.length: ', range.endContainer.data.length);
+        console.log('range.endOffset: ', range.endOffset);
+        console.log('range.endContainer.nextElementSibling.className: ', range.endContainer.nextElementSibling.className);
+
+        for(var key in range.endContainer) {
+            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
+        }
+ */
+//        console.log('data: ', range.endContainer);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
 //			console.log('da saltare');
 			setCursorAfterNode(range, range.endContainer.nextElementSibling);
 		}

@@ -14,9 +14,19 @@ class editlogDownloadController extends downloadController {
 
     public function __construct() {
         parent::__construct();
-        $this->jid = $this->get_from_get_post("jid");
-        $this->password = $this->get_from_get_post("password");
+
+
+        $filterArgs = array(
+                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'password' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+        );
+
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->jid      = $__postInput[ "jid" ];
+        $this->password = $__postInput[ "password" ];
         $this->filename = "Edit-log-export-" . $this->jid . ".csv";
+
     }
 
     public function doAction() {
@@ -47,7 +57,7 @@ class editlogDownloadController extends downloadController {
             $pe_effort_perc = $d[ 'pe_effort_perc' ];
             $hter           = $d[ 'ter' ];
             $segment        = $d[ 'source_csv' ];
-            $suggestion     = $d[ 'sug' ];
+            $suggestion     = $d[ 'sug_csv' ];
             $translation    = $d[ 'translation_csv' ];
             $id_translator  = $d[ 'tid' ];
 
@@ -112,4 +122,3 @@ class editlogDownloadController extends downloadController {
 
 }
 
-?>

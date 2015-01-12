@@ -80,6 +80,20 @@ $(document).ready(function(){
 //        $('.popup-languages .popup-box').empty().append('<ul class="test"><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li></ul>');
     };
 
+    $( 'a.authLink' ).click(function(e){
+        e.preventDefault();
+
+        $(".login-google").show();
+
+        return false;
+    });
+
+    $('#sign-in').click(function(e){
+        e.preventDefault();
+        APP.googole_popup($(this).data('oauth'));
+    })
+
 });
+
 
 

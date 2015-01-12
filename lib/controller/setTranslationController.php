@@ -26,7 +26,6 @@ class setTranslationController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(
@@ -52,6 +51,9 @@ class setTranslationController extends ajaxController {
         $this->translation             = CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] );
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
+
+	//PATCH TO FIX BOM INSERTIONS
+	$this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
 
     }
 
@@ -104,7 +106,7 @@ class setTranslationController extends ajaxController {
             }
 
             //add check for job status archived.
-            if ( strtolower( $job_data[ 'status' ] ) == 'archived' ) {
+            if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
                 $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 
@@ -348,16 +350,6 @@ class setTranslationController extends ajaxController {
 
         $file_stats = array();
 
-        $is_completed = ( $job_stats[ 'TRANSLATED_PERC' ] == '100' ) ? 1 : 0;
-
-        $update_completed = setJobCompleteness( $this->id_job, $is_completed );
-
-        if ( $update_completed < 0 ) {
-            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
-        }
-
         $this->result[ 'stats' ]      = $job_stats;
         $this->result[ 'file_stats' ] = $file_stats;
         $this->result[ 'code' ]       = 1;
@@ -376,6 +368,16 @@ class setTranslationController extends ajaxController {
         }
 
         $db->commit();
+
+        if( $job_stats[ 'TRANSLATED_PERC' ] == '100' ){
+            $update_completed = setJobCompleteness( $this->id_job, 1 );
+        }
+
+        if ( @$update_completed < 0 ) {
+            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+        }
 
     }
 

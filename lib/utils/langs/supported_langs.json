@@ -134,7 +134,7 @@
 	,
 		{
 			"localized":[{
-				"en":"Bielarus"
+				"en":"Belarus"
 			}],
 			"isocode":"be",
 			"enabled":true,
@@ -934,6 +934,17 @@
 			"rfc3066code":"mn-MN"
 		}
 	,
+        {
+            "localized":[{
+                "en":"Montenegrin"
+            }],
+            "isocode":"me",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"sr-ME",
+            "languageRegionCode":"sr-Latn-RS"
+        }
+    ,
 		{
 			"localized":[{
 				"en":"Morisyen" 
@@ -1223,7 +1234,6 @@
             "languageRegionCode":"sr-Cyrl-RS"
 		}
 	,
-        
 		{
 			"localized":[{
 				"en":"Seselwa Creole French" 
@@ -1515,9 +1525,9 @@
 				"en":"Turkmen" 
 			}],
 			"isocode":"tk",
-			"enabled":false,
-			"rtl":true,
-			"rfc3066code":"tk-TK"
+			"enabled":true,
+			"rtl":false,
+			"rfc3066code":"tk-TM"
 		}
 	,
 		{
