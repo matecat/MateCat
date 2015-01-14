@@ -360,12 +360,8 @@ $.extend(UI, {
             this.findCharsUntilTag(index+1, ar);
         }
     },
-
-    checkTagProximity1: function (w, range) {
-        return false;
-        nextEl = $(range.endContainer.nextElementSibling);
-        prevEl = $(range.endContainer.previousElementSibling);
-        tempRange = range;
+    checkForward: function (w, range, nextEl, prevEl) {
+/*
         if($(nextEl).hasClass('locked')) {
             if(range.endOffset == range.endContainer.length - 1) {
                 this.highlightCorrespondingTags(nextEl);
@@ -373,6 +369,7 @@ $.extend(UI, {
                 UI.removeHighlightCorrespondingTags();
             }
         } else {
+        */
             UI.editarea.find('.test-invisible').remove();
 
             pasteHtmlAtCaret('<span class="test-invisible"></span>');
@@ -394,18 +391,18 @@ $.extend(UI, {
                 $.each(coso, function (index) {
                     if($(this).hasClass('test-invisible')) num = index;
                 });
-/*
-                console.log('a: ', $(coso[num]).hasClass('test-invisible'));
-                console.log('b: ', coso[num+1].data.length);
-                console.log('c: ', $(coso[num+2]).hasClass('undoCursorPlaceholder'));
-                console.log('d: ', $(coso[num+3]).hasClass('locked'));
-*/
+                /*
+                 console.log('a: ', $(coso[num]).hasClass('test-invisible'));
+                 console.log('b: ', coso[num+1].data.length);
+                 console.log('c: ', $(coso[num+2]).hasClass('undoCursorPlaceholder'));
+                 console.log('d: ', $(coso[num+3]).hasClass('locked'));
+                 */
                 if(
                     ($(coso[num]).hasClass('test-invisible')) &&
-                    (coso[num+1].data.length == 1) &&
-                    ($(coso[num+2]).hasClass('undoCursorPlaceholder')) &&
-                    ($(coso[num+3]).hasClass('locked'))
-                ) {
+                        (coso[num+1].data.length == 1) &&
+                        ($(coso[num+2]).hasClass('undoCursorPlaceholder')) &&
+                        ($(coso[num+3]).hasClass('locked'))
+                    ) {
                     console.log('TROVATO');
 //                    console.log(UI.editarea.find('.test-invisible').next().next());
                     UI.editarea.find('.test-invisible').remove();
@@ -417,7 +414,34 @@ $.extend(UI, {
             }
             UI.editarea.find('.test-invisible').remove();
 
+ //       }
+
+    },
+
+    checkTagProximity1: function (w, range) {
+        return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+        tempRange = range;
+        if(w == 'right') {
+//            UI.editarea.find('.test-invisible').remove();
+//            pasteHtmlAtCaret('<span class="test-invisible"></span>');
+
+
         }
+        this.checkForward(w, range, nextEl, prevEl);
+
+/*
+        // check backward
+        if($(prevEl).hasClass('locked')) {
+            console.log('prev is a tag');
+            if(range.endOffset == range.endContainer.length - 1) {
+                this.highlightCorrespondingTags(prevEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        }
+*/
     },
 
     checkTagProximity: function (w, range) {

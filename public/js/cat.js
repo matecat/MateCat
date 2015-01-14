@@ -6267,12 +6267,8 @@ $.extend(UI, {
             this.findCharsUntilTag(index+1, ar);
         }
     },
-
-    checkTagProximity1: function (w, range) {
-        return false;
-        nextEl = $(range.endContainer.nextElementSibling);
-        prevEl = $(range.endContainer.previousElementSibling);
-        tempRange = range;
+    checkForward: function (w, range, nextEl, prevEl) {
+/*
         if($(nextEl).hasClass('locked')) {
             if(range.endOffset == range.endContainer.length - 1) {
                 this.highlightCorrespondingTags(nextEl);
@@ -6280,6 +6276,7 @@ $.extend(UI, {
                 UI.removeHighlightCorrespondingTags();
             }
         } else {
+        */
             UI.editarea.find('.test-invisible').remove();
 
             pasteHtmlAtCaret('<span class="test-invisible"></span>');
@@ -6301,18 +6298,18 @@ $.extend(UI, {
                 $.each(coso, function (index) {
                     if($(this).hasClass('test-invisible')) num = index;
                 });
-/*
-                console.log('a: ', $(coso[num]).hasClass('test-invisible'));
-                console.log('b: ', coso[num+1].data.length);
-                console.log('c: ', $(coso[num+2]).hasClass('undoCursorPlaceholder'));
-                console.log('d: ', $(coso[num+3]).hasClass('locked'));
-*/
+                /*
+                 console.log('a: ', $(coso[num]).hasClass('test-invisible'));
+                 console.log('b: ', coso[num+1].data.length);
+                 console.log('c: ', $(coso[num+2]).hasClass('undoCursorPlaceholder'));
+                 console.log('d: ', $(coso[num+3]).hasClass('locked'));
+                 */
                 if(
                     ($(coso[num]).hasClass('test-invisible')) &&
-                    (coso[num+1].data.length == 1) &&
-                    ($(coso[num+2]).hasClass('undoCursorPlaceholder')) &&
-                    ($(coso[num+3]).hasClass('locked'))
-                ) {
+                        (coso[num+1].data.length == 1) &&
+                        ($(coso[num+2]).hasClass('undoCursorPlaceholder')) &&
+                        ($(coso[num+3]).hasClass('locked'))
+                    ) {
                     console.log('TROVATO');
 //                    console.log(UI.editarea.find('.test-invisible').next().next());
                     UI.editarea.find('.test-invisible').remove();
@@ -6324,7 +6321,34 @@ $.extend(UI, {
             }
             UI.editarea.find('.test-invisible').remove();
 
+ //       }
+
+    },
+
+    checkTagProximity1: function (w, range) {
+        return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+        tempRange = range;
+        if(w == 'right') {
+//            UI.editarea.find('.test-invisible').remove();
+//            pasteHtmlAtCaret('<span class="test-invisible"></span>');
+
+
         }
+        this.checkForward(w, range, nextEl, prevEl);
+
+/*
+        // check backward
+        if($(prevEl).hasClass('locked')) {
+            console.log('prev is a tag');
+            if(range.endOffset == range.endContainer.length - 1) {
+                this.highlightCorrespondingTags(prevEl);
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        }
+*/
     },
 
     checkTagProximity: function (w, range) {
@@ -7009,6 +7033,9 @@ $.extend(UI, {
 				UI.failedConnection(0, 'glossary');
 			},
 			success: function(d) {
+                //temp
+//                d = {"error":[],"data":{"matches":{"is":[{"id":"459372897","raw_segment":"is","segment":"is","translation":"\u00e8","target_note":"","raw_translation":"\u00e8","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:33:42","last_update_date":"2014-12-23","match":"62%","prop":[]}],"this":[{"id":"459372893","raw_segment":"this","segment":"this","translation":"questo","target_note":"","raw_translation":"questo","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:32:49","last_update_date":"2014-12-23","match":"62%","prop":[]}]}}};
+
 				if(typeof d.errors != 'undefined') {
 					if(d.errors[0].code == -1) {
 						UI.noGlossary = true;
@@ -7054,9 +7081,29 @@ $.extend(UI, {
 			i = 0;	
 			cleanString = $('.source', UI.currentSegment).html();
 			var intervals = [];
+            matches = [];
+            $.each(d.data.matches, function (index) {
+                matches.push(this[0].raw_segment);
+            });
+            matchesToRemove = [];
+            $.each(matches, function (index) {
+                $.each(matches, function (ind) {
+                    if(index != ind) {
+                        if(matches[index].indexOf(this) > -1) {
+                            matchesToRemove.push(matches[ind]);
+                        }
+                    }
+                });
+            });
+
 			$.each(d.data.matches, function(k) {
 				i++;
 				k1 = UI.decodePlaceholdersToText(k, true);
+                toRemove = false;
+                $.each(matchesToRemove, function (index) {
+                    if(this == k1) toRemove = true;
+                });
+                if(toRemove) return true;
                 k2 = k1.replace(/<\//gi, '<\\/').replace(/\(/gi, '\\(').replace(/\)/gi, '\\)');
                 var re = new RegExp(k2.trim(), "gi");
                 var cs = cleanString;
@@ -7075,13 +7122,22 @@ $.extend(UI, {
 			UI.endGlossaryMark = '</mark>';
 			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
 			sourceString = $('.editor .source').html();
-			$.each(UI.intervalsUnion, function(index) {
+            console.log('UI.intervalsUnion: ', UI.intervalsUnion);
+
+            $.each(UI.intervalsUnion, function(index) {
 				added = markLength * index;
 				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
+                console.log('source 1: ', $('.editor .source').html());
 				$('.editor .source').html(sourceString);
-			});		
-		}		
+                console.log('source 2: ', $('.editor .source').html());
+			});
+/*
+            $('.editor .source mark mark').each(function () {
+                $(this).replaceWith($(this).html());
+            })
+*/
+		}
 	},
 	removeGlossaryMarksFormSource: function() {
 		$('.editor mark.inGlossary').each(function() {
