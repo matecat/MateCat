@@ -52,6 +52,8 @@ $.extend(UI, {
 			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();			
 		}
 		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).text());
+//        console.log('txt: ', txt);
+        if(typeof txt == 'undefined') return false;
 //		console.log('typeof n: ', typeof $(n).attr('id'));
 //		console.log('n: ', $(n).attr('id').split('-')[1]);
 //		if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 1: ', $('.source', n).html()); 
