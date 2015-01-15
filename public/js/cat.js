@@ -4570,7 +4570,10 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
-                UI.checkTagProximity1('left', range);
+                setTimeout(function() {
+                    UI.checkTagProximity2('left', range);
+                }, 10);
+//                UI.checkTagProximity1('left', range);
 
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -4656,7 +4659,10 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 //                console.log('range when pressing right arrow key: ', range);
-                UI.checkTagProximity1('right', range);
+                setTimeout(function() {
+                    UI.checkTagProximity2('right', range);
+                }, 10);
+//                UI.checkTagProximity1('right', range);
 
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
@@ -6244,29 +6250,7 @@ $.extend(UI, {
             {tagModesEnabled: false}
         )
     },
-    findCharsUntilTag: function (index, ar) {
-        if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTag == 1) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-            }
-        } else {
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
-            }
-            this.findCharsUntilTag(index+1, ar);
-        }
-    },
+
     checkForward: function (w, range, nextEl, prevEl) {
 /*
         if($(nextEl).hasClass('locked')) {
@@ -6324,19 +6308,214 @@ $.extend(UI, {
  //       }
 
     },
+    findCharsUntilTag: function (index, ar) {
+        if($(ar[index]).hasClass('locked')) {
+            if(UI.numCharsUntilTag == 1) {
+                // count index of this tag in the tags list
+                indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            indexTags++;
+                        }
+                    }
+                });
+                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+            }
+        } else {
+            if(ar[index].nodeName == '#text') {
+                UI.numCharsUntilTag += ar[index].data.length;
+            }
+            this.findCharsUntilTag(index+1, ar);
+        }
+    },
+    findCharsUntilTag1: function (index, ar) {
+        if($(ar[index]).hasClass('locked')) {
+            if((UI.numCharsUntilTag == 0)||(UI.numCharsUntilTag == 1)) {
+                // count index of this tag in the tags list
+                indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            indexTags++;
+                        }
+                    }
+                });
+                UI.removeHighlightCorrespondingTags();
+//                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+            }
+        } else {
+            if(ar[index].nodeName == '#text') {
+                UI.numCharsUntilTag += ar[index].data.length;
+            }
+            this.findCharsUntilTag(index+1, ar);
+        }
 
-    checkTagProximity1: function (w, range) {
+    },
+
+
+    findCharsUntilTag2: function (index, ar) {
+        if($(ar[index]).hasClass('locked')) {
+            if(UI.numCharsUntilTag == 1) {
+                // count index of this tag in the tags list
+                indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            indexTags++;
+                        }
+                    }
+                });
+                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+            }
+        } else {
+            if(ar[index].nodeName == '#text') {
+                UI.numCharsUntilTag += ar[index].data.length;
+            }
+            this.findCharsUntilTag2(index+1, ar);
+        }
+    },
+    findCharsUntilTag3: function (index, ar) {
+        if($(ar[index]).hasClass('locked')) {
+            if(UI.numCharsUntilTag == 0) {
+                // count index of this tag in the tags list
+                indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            indexTags++;
+                        }
+                    }
+                });
+//                UI.removeHighlightCorrespondingTags();
+                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+            } else {
+                UI.removeHighlightCorrespondingTags();
+            }
+        } else {
+            if(ar[index].nodeName == '#text') {
+                UI.numCharsUntilTag += ar[index].data.length;
+            }
+            this.findCharsUntilTag3(index+1, ar);
+        }
+    },
+    nearTagOnRight: function (index, ar) {
+        console.log('nearTagOnRight');
+        if($(ar[index]).hasClass('locked')) {
+            if(UI.numCharsUntilTag == 0) {
+                // count index of this tag in the tags list
+                indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            indexTags++;
+                        }
+                    }
+                });
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if(ar[index].nodeName == '#text') {
+                UI.numCharsUntilTag += ar[index].data.length;
+            }
+            this.nearTagOnRight(index+1, ar);
+        }
+    },
+    nearTagOnLeft: function (index, ar) {
+        console.log('nearTagOnLeft');
+        if($(ar[index]).hasClass('locked')) {
+            if(UI.numCharsUntilTag == 0) {
+                // count index of this tag in the tags list
+                indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            indexTags++;
+                        }
+                    }
+                });
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if(ar[index].nodeName == '#text') {
+                UI.numCharsUntilTag += ar[index].data.length;
+            }
+            this.nearTagOnLeft(index+1, ar);
+        }
+    },
+    checkTagProximity2: function (w, range) {
         return false;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
         tempRange = range;
+
+        UI.editarea.find('.test-invisible').remove();
+        pasteHtmlAtCaret('<span class="test-invisible"></span>');
+        coso = $.parseHTML(UI.editarea.html());
+        $.each(coso, function (index) {
+            if($(this).hasClass('test-invisible')) {
+                UI.numCharsUntilTag = 0;
+//                console.log('index: ', index);
+                if(UI.nearTagOnRight(index+1, coso)) {
+                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                } else if(UI.nearTagOnLeft(index-1, coso)) {
+                    UI.removeHighlightCorrespondingTags();
+                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                } else {
+                    UI.removeHighlightCorrespondingTags();
+                }
+//                UI.findCharsUntilTag3(index+1, coso, true);
+                UI.numCharsUntilTag = null;
+                return false;
+            };
+        });
+    },
+
+    checkTagProximity1: function (w, range) {
+//        return false;
+        nextEl = $(range.endContainer.nextElementSibling);
+        prevEl = $(range.endContainer.previousElementSibling);
+        tempRange = range;
         if(w == 'right') {
-//            UI.editarea.find('.test-invisible').remove();
-//            pasteHtmlAtCaret('<span class="test-invisible"></span>');
+            UI.editarea.find('.test-invisible').remove();
+            pasteHtmlAtCaret('<span class="test-invisible"></span>');
+            coso = $.parseHTML(UI.editarea.html());
+            console.log('coso: ', coso);
+            $.each(coso, function (index) {
+                if($(this).hasClass('test-invisible')) {
+                    UI.numCharsUntilTag = 0;
+                    UI.findCharsUntilTag1(index+1, coso);
+                    UI.numCharsUntilTag = null;
+                    return false;
+                };
+            });
 
+            var num = 0;
+            // check if there is only one character between the cursor and the tag
+            $.each(coso, function (index) {
+                if($(this).hasClass('test-invisible')) num = index;
+            });
 
+        } else {
+            UI.removeHighlightCorrespondingTags();
         }
-        this.checkForward(w, range, nextEl, prevEl);
+//        this.checkForward(w, range, nextEl, prevEl);
 
 /*
         // check backward
@@ -6351,7 +6530,7 @@ $.extend(UI, {
 */
     },
 
-    checkTagProximity: function (w, range) {
+    checkTagProximity: function (w, range) {console.log('checkTagProximity');
 //        return false;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);

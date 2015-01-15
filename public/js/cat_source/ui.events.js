@@ -1149,7 +1149,10 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
-                UI.checkTagProximity1('left', range);
+                setTimeout(function() {
+                    UI.checkTagProximity2('left', range);
+                }, 10);
+//                UI.checkTagProximity1('left', range);
 
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -1235,7 +1238,10 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 //                console.log('range when pressing right arrow key: ', range);
-                UI.checkTagProximity1('right', range);
+                setTimeout(function() {
+                    UI.checkTagProximity2('right', range);
+                }, 10);
+//                UI.checkTagProximity1('right', range);
 
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
