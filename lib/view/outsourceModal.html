@@ -6,12 +6,44 @@
 <body>
 
 <div metal:define-macro="outsource_modal">
-    <!--ClickMeter.com code for on click conversion: hanno cliccato su show prizes -->
-    <script type='text/javascript'>
-        var ClickMeter_conversion_id = '5647F8BD60574A36AD75968F397774F5';
-        var ClickMeter_conversion_value = '0.00';
-        var ClickMeter_conversion_commission = '0.00';
-        var ClickMeter_conversion_parameter = 'empty';
+
+    <script>
+
+        //TODO REMOVE Temporary PATCH to allow multiple track events
+        var ClickMeter_conversion_id = '';
+        var ClickMeter_conversion_value = '';
+        var ClickMeter_conversion_commission = '';
+        var ClickMeter_conversion_parameter = '';
+
+        function trackClick( context ){
+
+            var clickMeterVars = {
+                showprices: {
+                    ClickMeter_conversion_id: '5647F8BD60574A36AD75968F397774F5',
+                    ClickMeter_conversion_value: '0.00',
+                    ClickMeter_conversion_commission: '0.00',
+                    ClickMeter_conversion_parameter: 'empty'
+                },
+                translate: {
+                    ClickMeter_conversion_id: 'ED4EAD94E3B84821AD92AB2DA1674698',
+                    ClickMeter_conversion_value: '0.00',
+                    ClickMeter_conversion_commission: '0.00',
+                    ClickMeter_conversion_parameter: 'empty'
+                }
+            };
+
+            var env = clickMeterVars[ context ];
+            ClickMeter_conversion_id = env[ 'ClickMeter_conversion_id' ];
+            ClickMeter_conversion_value = env[ 'ClickMeter_conversion_value' ];
+            ClickMeter_conversion_commission = env[ 'ClickMeter_conversion_commission' ];
+            ClickMeter_conversion_parameter = env[ 'ClickMeter_conversion_parameter' ];
+
+            //call clickMeter method
+            trackConversion("#");
+
+        }
+        //TODO REMOVE Temporary PATCH to allow multiple track events
+
     </script>
     <script type='text/javascript' id='cmconvscript' src='//www.clickmeter.com/js/conversionOnClick.js'></script>
 
@@ -29,10 +61,10 @@
                     <div class="onyourown">
                         <h2>Option #1 - Share the following link with your translator</h2>
                         <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
-                        <a class="uploadbtn in-popup" target="_blank">Open</a>
+                        <a  href='javascript:void(0)' onclick='trackClick( "translate" );' class="uploadbtn in-popup" target="_blank">Open</a>
                     </div>
                     <div class="outsourceto">
-                        <h2>Option #2 - Outsource to a translation company</h2>  <a  href='javascript:void(0)' onclick='trackConversion("#"); return false;' class="uploadbtn showprices">Show
+                        <h2>Option #2 - Outsource to a translation company</h2>  <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show
                         prices</a>
 
                         <div class="revealprices">
