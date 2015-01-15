@@ -293,7 +293,7 @@ class TmKeyManagement_TmKeyManagement {
             $reverse_lookup_client_json[ 'unique' ][ $_j ]   = $_client_tm_key->getCrypt();
 
             if( empty( $_client_tm_key->r ) && empty( $_client_tm_key->w ) ){
-                throw new Exception( "Read and Write grants can not be both empty", 4 );
+                throw new Exception( "Please, select Lookup and/or Update to activate your TM in this project", 4 );
             }
 
             if ( empty( $_client_tm_key->key ) ){
