@@ -596,7 +596,7 @@ class ConvertersMonitor {
             $this->converterFactory->sendErrorReport = false;
 
             //10 seconds of timeout, average time is less than 5 seconds
-            $this->converterFactory->setCurlOpt( array( 'CURLOPT_TIMEOUT' => 15 ) );
+            $this->converterFactory->setCurlOpt( array( 'CURLOPT_TIMEOUT' => 20 ) );
 
             self::_prettyEcho( "> Trying conversion on " . $ip_converter, 4 );
 
