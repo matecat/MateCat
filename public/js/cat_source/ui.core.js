@@ -172,15 +172,10 @@ UI = {
 //		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
-		$(window).trigger({
-			type: "sourceCopied",
-			segment: segment
-		});
 		this.highlightEditarea();
 
 		this.currentSegmentQA();
-		this.setChosenSuggestion(0);
-		this.lockTags(this.editarea);
+        $(this.currentSegment).trigger('copySourceToTarget');
 	},
 	highlightEditarea: function(seg) {
 		segment = seg || this.currentSegment;
@@ -889,6 +884,9 @@ UI = {
 			return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
 		}
 	},
+/*
+// not used anymore?
+
 	closeInplaceEditor: function(ed) {
 		$(ed).removeClass('editing');
 		$(ed).attr('contenteditable', false);
@@ -901,6 +899,7 @@ UI = {
 		$(ed).addClass('editing').attr('contenteditable', true).after('<span class="edit-buttons"><button class="cancel">Cancel</button><button class="save">Save</button></span>');
 		$(ed).focus();
 	},
+*/
 	millisecondsToTime: function(milli) {
 //		var milliseconds = milli % 1000;
 		var seconds = Math.round((milli / 1000) % 60);
