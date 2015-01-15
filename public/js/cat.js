@@ -7071,7 +7071,7 @@ $.extend(UI, {
 			if($('.sub-editor.concordances .more').length) {
 				$('.sub-editor.concordances .more').text('More');
 			} else {
-				$('.sub-editor.concordances', segment).append('<a href="#" class="more">More</a>');				
+				$('.sub-editor.concordances', segment).append('<br class="clear"><a href="#" class="more">More</a>');				
 			}
 			this.custom.extended_concordance = false;
 			this.saveCustomization();
