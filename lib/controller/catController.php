@@ -497,9 +497,12 @@ class catController extends viewController {
 
         $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize         = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $is_review                          = explode('/', $_SERVER["REQUEST_URI"])[1] == 'revise';
-        $this->template->isReview              = $is_review;
+
+        $is_review                              = explode('/', $_SERVER["REQUEST_URI"]);
+        $is_review                              = $is_review[1] == 'revise';
+        $this->template->isReview               = $is_review;
         $this->template->reviewClass            = ($is_review)? ' review' : '';
+
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
 		//check if it is a composite language, for cjk check that accepts only ISO 639 code
