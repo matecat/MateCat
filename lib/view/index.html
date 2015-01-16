@@ -266,14 +266,14 @@
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
                         <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                         -->
-                      
-		    
-
-                   </ul> 
-                   <ul class="statistics-details">
-
-                     <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
-                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
+                   </ul>
+                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details">
+                        <li id="stat-wph" title="Based on last 10 segments performance">Speed:
+                            <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
+                        </li>
+                        <li id="stat-completion">Completed in:
+                            <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
+                        </li>
                     </ul>
 			
 		</div>
