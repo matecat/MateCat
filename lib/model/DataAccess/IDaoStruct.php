@@ -8,7 +8,7 @@
 
 /**
  * Interface IDaoStruct A generic interface that will be used by any DataAccess_AbstractDao extended object
- * @see AbstractDao
+ * @see DataAccess_AbstractDao
  */
 
 interface DataAccess_IDaoStruct {
