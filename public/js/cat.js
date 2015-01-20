@@ -6317,6 +6317,7 @@ $.extend(UI, {
     checkTagProximity: function () {
 //        return false;
         selection = window.getSelection();
+        if(selection.rangeCount < 1) return false;
         range = selection.getRangeAt(0);
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
