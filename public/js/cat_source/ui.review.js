@@ -18,12 +18,14 @@ if(config.enableReview && parseInt(config.isReview)) {
 
         div.find('.submenu').append('<li class="tab-switcher-review" id="segment-20896069-review"><a tabindex="-1" href="#">Review</a></li>');
         div.append('<div class="tab sub-editor review" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
+        $('.tab-switcher-review').click();
         setTimeout(function() {// fixes a bug in setting defaults in radio buttons
             UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
             UI.trackChanges(UI.editarea);
         }, 100);
         UI.footerHTML = div.html();
-    }).on('click', '.tab-switcher-review', function(e) {
+
+    }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
@@ -35,6 +37,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         e.preventDefault();
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if(noneSelected) {
+            $('.editor .tab-switcher-review').click();
             $('.sub-editor.review .error-type').addClass('error');
         } else {
             $('.sub-editor.review .error-type').removeClass('error');
