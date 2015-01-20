@@ -38,6 +38,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             $('.sub-editor.review .error-type').addClass('error');
         } else {
             $('.sub-editor.review .error-type').removeClass('error');
+            UI.changeStatus(this, 'approved', 0);
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
             err = $('.sub-editor.review .error-type');
             APP.doRequest({
@@ -45,8 +46,8 @@ if(config.enableReview && parseInt(config.isReview)) {
 
                 data: {
                     action: 'setRevision',
-                    id_job: config.job_id,
-                    id_segment: UI.currentSegmentId,
+                    job: config.job_id,
+                    segment: UI.currentSegmentId,
                     err_typing: $(err).find('input[name=t1]:checked').val(),
                     err_translation: $(err).find('input[name=t2]:checked').val(),
                     err_terminology: $(err).find('input[name=t3]:checked').val(),
