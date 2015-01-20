@@ -8,8 +8,18 @@
 
 class Constants_Revise {
 
-    const NONE = 0;
-    const MINOR = 1;
-    const MAJOR = 2;
+    public static $ERR_TYPES_MAP = array(
+        self::CLIENT_VALUE_NONE  => self::NONE,
+        self::CLIENT_VALUE_MINOR => self::MINOR,
+        self::CLIENT_VALUE_MAJOR => self::MAJOR,
+    );
+
+    const NONE  = 'none';
+    const MINOR = 'minor';
+    const MAJOR = 'major';
+
+    const CLIENT_VALUE_NONE  = 0;
+    const CLIENT_VALUE_MINOR = 1;
+    const CLIENT_VALUE_MAJOR = 2;
 
 } 
