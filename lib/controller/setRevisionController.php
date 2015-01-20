@@ -17,9 +17,9 @@ class setRevisionController extends ajaxController {
     private $err_style;
 
     private static $accepted_values = array(
-            Constants_Revise::NONE,
-            Constants_Revise::MINOR,
-            Constants_Revise::MAJOR
+            Constants_Revise::CLIENT_VALUE_NONE,
+            Constants_Revise::CLIENT_VALUE_MINOR,
+            Constants_Revise::CLIENT_VALUE_MAJOR
     );
 
     public function __construct() {
@@ -113,7 +113,7 @@ class setRevisionController extends ajaxController {
             return Constants_Revise::NONE;
         }
 
-        return $fieldVal;
+        return Constants_Revise::$ERR_TYPES_MAP[ $fieldVal ];
     }
 
 } 
