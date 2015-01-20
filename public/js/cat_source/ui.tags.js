@@ -547,7 +547,7 @@ $.extend(UI, {
         }
     },
     checkTagProximity2: function (w, range) {
-        return false;
+//        return false;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
         tempRange = range;
