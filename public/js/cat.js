@@ -4242,7 +4242,7 @@ $.extend(UI, {
                     if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
-            /*
+             /*
                         if(!UI.editarea.find('.locked.selected').length) {
                             if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                                 if(!UI.isFirefox) UI.showEditToolbar();
@@ -4254,6 +4254,8 @@ $.extend(UI, {
                         }
             */
 		}).on('mousedown', '.editarea', function(e) {
+
+
             if(e.which == 3) {
                 e.preventDefault();
                 return false;
@@ -4270,6 +4272,7 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
+
             UI.saveInUndoStack('click');
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
@@ -4305,7 +4308,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
+
             UI.lockTags(UI.editarea);
+            UI.checkTagProximity();
 
             if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
@@ -4571,9 +4576,8 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
                 setTimeout(function() {
-                    UI.checkTagProximity2('left', range);
+                    UI.checkTagProximity();
                 }, 10);
-//                UI.checkTagProximity1('left', range);
 
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -4603,7 +4607,7 @@ $.extend(UI, {
 
 					}
 				} else { // there's nothing selected
-                    console.log('nothing selected when left is pressed');
+//                    console.log('nothing selected when left is pressed');
 /*
                     saveSelection();
                     sbIndex = 0;
@@ -4660,9 +4664,8 @@ $.extend(UI, {
 				range = selection.getRangeAt(0);
 //                console.log('range when pressing right arrow key: ', range);
                 setTimeout(function() {
-                    UI.checkTagProximity2('right', range);
+                    UI.checkTagProximity();
                 }, 10);
-//                UI.checkTagProximity1('right', range);
 
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
@@ -6250,167 +6253,11 @@ $.extend(UI, {
             {tagModesEnabled: false}
         )
     },
-
-    checkForward: function (w, range, nextEl, prevEl) {
-/*
-        if($(nextEl).hasClass('locked')) {
-            if(range.endOffset == range.endContainer.length - 1) {
-                this.highlightCorrespondingTags(nextEl);
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-        } else {
-        */
-            UI.editarea.find('.test-invisible').remove();
-
-            pasteHtmlAtCaret('<span class="test-invisible"></span>');
-            console.log('editarea: ', UI.editarea.html());
-            if(w == 'right') {
-                coso = $.parseHTML(UI.editarea.html());
-                console.log('coso: ', coso);
-                var num = 0;
-                $.each(coso, function (index) {
-                    if($(this).hasClass('test-invisible')) {
-                        UI.numCharsUntilTag = 0;
-                        UI.findCharsUntilTag(index+1, coso);
-                        UI.numCharsUntilTag = null;
-                        return false;
-                    };
-                });
-
-                // check if there is only one character between the cursor and the tag
-                $.each(coso, function (index) {
-                    if($(this).hasClass('test-invisible')) num = index;
-                });
-                /*
-                 console.log('a: ', $(coso[num]).hasClass('test-invisible'));
-                 console.log('b: ', coso[num+1].data.length);
-                 console.log('c: ', $(coso[num+2]).hasClass('undoCursorPlaceholder'));
-                 console.log('d: ', $(coso[num+3]).hasClass('locked'));
-                 */
-                if(
-                    ($(coso[num]).hasClass('test-invisible')) &&
-                        (coso[num+1].data.length == 1) &&
-                        ($(coso[num+2]).hasClass('undoCursorPlaceholder')) &&
-                        ($(coso[num+3]).hasClass('locked'))
-                    ) {
-                    console.log('TROVATO');
-//                    console.log(UI.editarea.find('.test-invisible').next().next());
-                    UI.editarea.find('.test-invisible').remove();
-
-//                    this.highlightCorrespondingTags($(nextEl).next());
-                }
-
-
-            }
-            UI.editarea.find('.test-invisible').remove();
-
- //       }
-
-    },
-    findCharsUntilTag: function (index, ar) {
-        if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTag == 1) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-            }
-        } else {
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
-            }
-            this.findCharsUntilTag(index+1, ar);
-        }
-    },
-    findCharsUntilTag1: function (index, ar) {
-        if($(ar[index]).hasClass('locked')) {
-            if((UI.numCharsUntilTag == 0)||(UI.numCharsUntilTag == 1)) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-                UI.removeHighlightCorrespondingTags();
-//                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-            }
-        } else {
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
-            }
-            this.findCharsUntilTag(index+1, ar);
-        }
-
-    },
-
-
-    findCharsUntilTag2: function (index, ar) {
-        if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTag == 1) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-            }
-        } else {
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
-            }
-            this.findCharsUntilTag2(index+1, ar);
-        }
-    },
-    findCharsUntilTag3: function (index, ar) {
-        if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTag == 0) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-//                UI.removeHighlightCorrespondingTags();
-                UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-        } else {
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
-            }
-            this.findCharsUntilTag3(index+1, ar);
-        }
-    },
     nearTagOnRight: function (index, ar) {
-        console.log('nearTagOnRight');
+//        console.log('nearTagOnRight');
+//        console.log('html: ', UI.editarea.html());
         if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTag == 0) {
+            if(UI.numCharsUntilTagRight == 0) {
                 // count index of this tag in the tags list
                 indexTags = 0;
                 $.each(ar, function (ind) {
@@ -6428,15 +6275,23 @@ $.extend(UI, {
             }
         } else {
             if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
+                UI.numCharsUntilTagRight += ar[index].data.length;
             }
             this.nearTagOnRight(index+1, ar);
         }
     },
     nearTagOnLeft: function (index, ar) {
+        if (index < 0) return false;
+/*
         console.log('nearTagOnLeft');
+        console.log('html: ', UI.editarea.html());
+        console.log('index: ', index);
+        console.log('ar: ', ar);
+        console.log('$(ar[index]): ', $(ar[index]));
+*/
+//        console.log('UI.numCharsUntilTag: ', UI.numCharsUntilTag);
         if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTag == 0) {
+            if(UI.numCharsUntilTagLeft == 0) {
                 // count index of this tag in the tags list
                 indexTags = 0;
                 $.each(ar, function (ind) {
@@ -6454,351 +6309,55 @@ $.extend(UI, {
             }
         } else {
             if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTag += ar[index].data.length;
+                UI.numCharsUntilTagLeft += ar[index].data.length;
             }
-            this.nearTagOnLeft(index+1, ar);
+            this.nearTagOnLeft(index-1, ar);
         }
     },
-    checkTagProximity2: function (w, range) {
+    checkTagProximity: function () {
 //        return false;
+        selection = window.getSelection();
+        range = selection.getRangeAt(0);
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
+//        console.log('nextEl: ', nextEl.length);
+//        console.log('prevEl: ', prevEl.length);
         tempRange = range;
 
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         coso = $.parseHTML(UI.editarea.html());
+//        console.log('coso: ', coso);
         $.each(coso, function (index) {
             if($(this).hasClass('test-invisible')) {
-                UI.numCharsUntilTag = 0;
+                UI.numCharsUntilTagRight = 0;
+                UI.numCharsUntilTagLeft = 0;
 //                console.log('index: ', index);
-                if(UI.nearTagOnRight(index+1, coso)) {
-                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-                } else if(UI.nearTagOnLeft(index-1, coso)) {
+//                console.log('sssss: ', UI.nearTagOnRight(index+1, coso));
+                nearTagOnRight = UI.nearTagOnRight(index+1, coso);
+//                console.log('nearTagOnRight: ', nearTagOnRight);
+                nearTagOnLeft = UI.nearTagOnLeft(index-1, coso);
+//                console.log('nearTagOnLeft: ', nearTagOnLeft);
+                if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
                     UI.removeHighlightCorrespondingTags();
                     UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-                } else {
+                } else if((typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {//console.log('2');
+                    UI.removeHighlightCorrespondingTags();
+                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                } else {//console.log('3');
                     UI.removeHighlightCorrespondingTags();
                 }
-//                UI.findCharsUntilTag3(index+1, coso, true);
-                UI.numCharsUntilTag = null;
+
+                UI.numCharsUntilTagRight = null;
+                UI.numCharsUntilTagLeft = null;
                 return false;
             };
         });
     },
-
-    checkTagProximity1: function (w, range) {
-//        return false;
-        nextEl = $(range.endContainer.nextElementSibling);
-        prevEl = $(range.endContainer.previousElementSibling);
-        tempRange = range;
-        if(w == 'right') {
-            UI.editarea.find('.test-invisible').remove();
-            pasteHtmlAtCaret('<span class="test-invisible"></span>');
-            coso = $.parseHTML(UI.editarea.html());
-            console.log('coso: ', coso);
-            $.each(coso, function (index) {
-                if($(this).hasClass('test-invisible')) {
-                    UI.numCharsUntilTag = 0;
-                    UI.findCharsUntilTag1(index+1, coso);
-                    UI.numCharsUntilTag = null;
-                    return false;
-                };
-            });
-
-            var num = 0;
-            // check if there is only one character between the cursor and the tag
-            $.each(coso, function (index) {
-                if($(this).hasClass('test-invisible')) num = index;
-            });
-
-        } else {
-            UI.removeHighlightCorrespondingTags();
-        }
-//        this.checkForward(w, range, nextEl, prevEl);
-
-/*
-        // check backward
-        if($(prevEl).hasClass('locked')) {
-            console.log('prev is a tag');
-            if(range.endOffset == range.endContainer.length - 1) {
-                this.highlightCorrespondingTags(prevEl);
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-        }
-*/
-    },
-
-    checkTagProximity: function (w, range) {console.log('checkTagProximity');
-//        return false;
-        nextEl = $(range.endContainer.nextElementSibling);
-        prevEl = $(range.endContainer.previousElementSibling);
-        tempRange = range;
-
-/*
-        console.log('nextEl: ', nextEl);
-        console.log('prevEl: ', prevEl);
-        console.log("$(nextEl).hasClass('locked'): ", $(nextEl).hasClass('locked'));
-*/
-        //check if there is a tag ahead
-        if($(nextEl).hasClass('locked')) {
-            console.log('nextEl è un tag');
-            console.log('range.endOffset: ', range.endOffset);
-            console.log('range.endContainer.length - 1: ', range.endContainer.length - 1);
-        } else {
-            console.log('nextEl non è un tag');
-            if($(nextEl).hasClass('undoCursorPlaceholder')) {
-                console.log('è un undoCursor Placeholder');
- /*
-                for(var key in range.endContainer) {
-                    console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
-                }
-
-                console.log('range.endOffset: ', range.endOffset);
-                console.log('range.endContainer.length - 1: ', range.endContainer.length - 1);
-                console.log('$(nextEl).next(): ', $(nextEl).next());
-                console.log('$(nextEl).html(): ', $(nextEl).html());
-                console.log('$(nextEl).next().html(): ', $(nextEl).next().html());
-                console.log('prova: ', $(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML);
-                console.log(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML));
-  */
- //               if(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML)) console.log('qui dovrebbe funzionare, e non lo fa');
- //               if(range.endOffset == 1) console.log('qui dovrebbe funzionare, e non lo fa');
-            } else {
-                console.log('e neanche un undoCursor Placeholder');
-            }
-            if($(nextEl).next().hasClass('locked')) {
-                console.log('il successivo invece è un tag');
-            } else {
-                console.log('e neanche il successivo è un tag');
-            }
-        }
-
-        if($(nextEl).hasClass('locked')) {
-            console.log('AAA');
-            if(range.endOffset == range.endContainer.length - 1) {
-                console.log('1');
-                this.highlightCorrespondingTags(nextEl);
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-        } else if(UI.editarea.html().match($(nextEl)[0].outerHTML + $(nextEl).next()[0].outerHTML)) { // il prossimo elemento e il successivo sono attaccati
-            console.log('BBB');
-//            this.highlightCorrespondingTags(nextEl);
-//            console.log('qui dovrebbe funzionare, e non lo fa');
-            console.log('w: ', w);
-            if(w == 'right') {
-                UI.highlightCorrespondingTags($(nextEl).next());
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-//            tempRange = range;
-/*
-            saveSelection();
-//            if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) console.log('QUI');
-//            setTimeout(function() {
-                console.log('editarea: ', UI.editarea.html());
-            console.log($.parseHTML(UI.editarea.html()));
-            coso = $.parseHTML(UI.editarea.html());
-            i = 0;
-            $.each(coso, function (index) {
-                if(this.className == "rangySelectionBoundary") {
-                    i = index;
-                    c = 0;
-                }
-                console.log('i: ', i);
-                console.log('c: ', c);
-                if(index == i + c) {
-                    console.log(this);
-                    if(nodeName == '#text' ) {
-                        if(this.data.length == 1) {
-                            console.log('solo qui dovrebbe illuminarsi');
-                        } else {
-                            c++;
-                        }
-                    }
-                }
-
-            });
-*/
-//            }, 10);
-//            console.log('wholeText: ', range.endContainer.wholeText);
-//            console.log('typeof tempRange.endContainer: ', typeof tempRange.endContainer);
-//            console.log('typeof tempRange.endContainer.wholeText: ', typeof tempRange.endContainer.wholeText);
-//            if(typeof range.endContainer == 'undefined') console.log('eccolo');
-/*
-            for(var key in tempRange.endContainer) {
-                console.log('key: ' + key + '\n' + 'value: "' + tempRange.endContainer[key] + '"');
-            }
- */
-//            restoreSelection();
-            if(w == 'right') this.highlightCorrespondingTags($(nextEl).next());
-        } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
-            console.log('CCC');
-//            saveSelection();
-//            console.log('UI.editarea.html(): ', UI.editarea.html());
-/*
-            for(var key in range.startContainer) {
-                console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
-            }
-            */
-//            restoreSelection();
-//            content = UI.editarea.html();
-//            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
-/*
-            console.log('content: ', content);
-            console.log('str: ', str);
-            console.log('content.indexOf(str): ', content.indexOf(str));
-            console.log('range.startOffset: ', range.startOffset);
-            console.log('range.startContainer.length: ', range.startContainer.length);
-*/
-            // tolto temporaneamente, da rimettere:
-/*
-            if(content.indexOf(str) > -1) { // escape false positives
-                if(range.endOffset == range.endContainer.length) {
-                    console.log('2');
-                    this.highlightCorrespondingTags($(nextEl).next());
-                } else {
-                    UI.removeHighlightCorrespondingTags();
-                }
-            }
-            */
-
-        } else {
-            UI.removeHighlightCorrespondingTags();
-        }
-/*
-        //check if there is a tag behind
-        if($(prevEl).hasClass('locked')) {
-            console.log("l'elemento precedente è un tag");
-//            console.log('range.startOffset: ', range.startOffset);
-//            console.log('range.startContainer.length: ', (range.startContainer.length));
-            if(range.startOffset == 1) {
-                this.highlightCorrespondingTags(prevEl);
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-        } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
-            console.log("l'elemento precedente è un cursor placeholder, e quello ancora precedente un tag");
-
-            content = UI.editarea.html();
-            console.log('content: ', content);
-            str = '&gt;</span><span class="undoCursorPlaceholder monad" contenteditable="false"></span>' + range.endContainer.wholeText;
-//            str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
-            console.log('content.indexOf(str): ', content.indexOf(str));
-            if(content.indexOf(str) > -1) { // escape false positives
-                if(range.startOffset == 1) {
-                    this.highlightCorrespondingTags($(nextEl).next());
-                } else {
-                    UI.removeHighlightCorrespondingTags();
-                }
-            }
-        }
-*/
-
-            return false;
-
-        if(w == 'right') {
-            nextEl = $(range.endContainer.nextElementSibling);
-//            console.log('a: ', nextEl);
-//            console.log('b: ', nextEl.next());
-//            console.log('è quello dopo: ', (($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))));
-            if($(nextEl).hasClass('locked')) {
-                console.log('il prossimo è locked');
-//            if(($(nextEl).hasClass('locked'))||(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked')))) {
-//                console.log('entra');
-//                console.log('range.endOffset: ', range.endOffset);
-//                console.log('range.endContainer.length: ', range.endContainer.length);
-//                if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
-                if(range.endOffset == range.endContainer.length - 1) {
-                    this.highlightCorrespondingTags(nextEl);
-                } else {
-                    UI.removeHighlightCorrespondingTags();
-                }
-            } else if(($(nextEl).hasClass('undoCursorPlaceholder'))&&($(nextEl).next().hasClass('locked'))) {
-                content = UI.editarea.html();
-                str = range.startContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
-                if(content.indexOf(str) > -1) { // escape false positives
-                    if(range.endOffset == range.endContainer.length) {
-                        this.highlightCorrespondingTags($(nextEl).next());
-                    } else {
-                        UI.removeHighlightCorrespondingTags();
-                    }
-                }
-
-//                console.log('il prossimo è placeholder e quello dopo è locked');
-//                console.log('content: ', content);
-//                console.log('str: ', str);
-//                console.log('str è contenuta nel content? ', content.indexOf(str));
-//                console.log('range: ', range);
-//                console.log('range.startOffset: ', range.startOffset);
-//                console.log('range.startContainer.data: ', range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked');
-//                console.log(UI.editarea.html());
-//                console.log(UI.editarea.html().indexOf(range.startContainer.data + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'));
-//                console.log('range.startContainer: ', range.startOffset);
-/*
-                for(var key in range.startContainer) {
-                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
-                }
-*/
-//                console.log('range.commonAncestorContainer.innerHTML: ', range.commonAncestorContainer.innerHTML);
-
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-            /*
-                        console.log('range: ', range);
-                        if(range.endOffset == range.endContainer.length - 1) {
-            //            if((range.endOffset == range.endContainer.length - 1)||(range.endOffset == range.endContainer.length)) {
-                            console.log('nextElementSibling: ', $(range.endContainer.nextElementSibling));
-                            if($(range.endContainer.nextElementSibling).hasClass('locked')) {
-                                this.highlightCorrespondingTags($(range.endContainer.nextElementSibling));
-                                console.log('tag nei pressi: ', $(range.endContainer.nextElementSibling));
-                            } else {
-                                UI.removeHighlightCorrespondingTags();
-                            }
-                        } else {
-                            UI.removeHighlightCorrespondingTags();
-                        }
-            */
-        } else {
-            prevEl = $(range.startContainer.previousElementSibling);
-            if($(prevEl).hasClass('locked')) {
-                if(range.startOffset == range.startContainer.length - 1) {
-                    this.highlightCorrespondingTags(prevEl);
-                } else {
-                    UI.removeHighlightCorrespondingTags();
-                }
-            } else if(($(prevEl).hasClass('undoCursorPlaceholder'))&&($(prevEl).prev().hasClass('locked'))) {
-//                content = UI.editarea.html();
-//                str = range.endContainer.wholeText + '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked';
-//                str = '<span class="undoCursorPlaceholder monad" contenteditable="false"></span><span contenteditable="false" class="locked'
-            } else {
-                UI.removeHighlightCorrespondingTags();
-            }
-
-
-
-            /*
-                        if(range.startOffset == 1) {
-            //            if((range.startOffset == 0)||(range.startOffset == 1)) {
-                            if($(range.startContainer.previousElementSibling).hasClass('locked')) {
-                                this.highlightCorrespondingTags($(range.startContainer.previousElementSibling));
-                                console.log('tag nei pressi: ', $(range.startContainer.previousElementSibling));
-                            } else {
-                                UI.removeHighlightCorrespondingTags();
-                            }
-                        } else {
-                            UI.removeHighlightCorrespondingTags();
-                        }
-            */
-        }
-    },
     highlightCorrespondingTags: function (el) {
-        console.log('highlighting: ', $(el));
+//        console.log('highlighting: ', $(el));
         if(el.hasClass('startTag')) {
-            console.log('has start tag');
+//            console.log('has start tag');
             if(el.next('.endTag').length) {
                 el.next('.endTag').addClass('highlight');
             } else {
@@ -6815,7 +6374,7 @@ $.extend(UI, {
                     } else { // end tag
                         num--;
                         if(num == 0) {
-                            console.log('found el: ', $(this));
+//                            console.log('found el: ', $(this));
                             pairEl = $(this);
                             return false;
                         }
@@ -6823,24 +6382,24 @@ $.extend(UI, {
 //                    $(this).addClass('test-' + num);
 
                 })
-                console.log('pairEl: ', $(pairEl).text());
+//                console.log('pairEl: ', $(pairEl).text());
                 $(pairEl).addClass('highlight');
 
 
             }
 //            console.log('next endTag: ', el.next('.endTag'));
         } else if(el.hasClass('endTag')) {
-            console.log('is an end tag');
+//            console.log('is an end tag');
             if(el.prev('.startTag').length) {
-                console.log('and the previous element is a start tag');
+//                console.log('and the previous element is a start tag');
                 el.prev('.startTag').first().addClass('highlight');
             } else {
-                console.log('and the previous element is not a start tag');
+//                console.log('and the previous element is not a start tag');
                 num = 1;
                 ind = 0;
                 $(el).prevAll('.locked').each(function () {
                     ind++;
-                    console.log('start tag: ', $(this));
+//                    console.log('start tag: ', $(this));
 
                     if($(this).hasClass('endTag')) {
                         num++;
@@ -6849,7 +6408,7 @@ $.extend(UI, {
                     } else { // end tag
                         num--;
                         if(num == 0) {
-                            console.log('found el: ', $(this));
+//                            console.log('found el: ', $(this));
                             pairEl = $(this);
                             return false;
                         }
@@ -6859,9 +6418,9 @@ $.extend(UI, {
                 $(pairEl).addClass('highlight');
             }
         }
-        console.log('$(el): ', $(el).text());
+//        console.log('$(el): ', $(el).text());
         $(el).addClass('highlight');
-        console.log('vediamo: ', UI.editarea.html());
+//        console.log('vediamo: ', UI.editarea.html());
 
 
 //        console.log('$(pairEl).length: ', $(pairEl).length);
@@ -7002,10 +6561,13 @@ $.extend(UI, {
         }
  */
 //        console.log('data: ', range.endContainer);
-		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
+		if(typeof range.endContainer.data != 'undefined') {
+            if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
 //			console.log('da saltare');
-			setCursorAfterNode(range, range.endContainer.nextElementSibling);
-		}
+                setCursorAfterNode(range, range.endContainer.nextElementSibling);
+            }
+        }
+
 	},
 
 });

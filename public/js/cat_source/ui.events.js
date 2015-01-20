@@ -821,7 +821,7 @@ $.extend(UI, {
                     if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
-            /*
+             /*
                         if(!UI.editarea.find('.locked.selected').length) {
                             if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                                 if(!UI.isFirefox) UI.showEditToolbar();
@@ -833,6 +833,8 @@ $.extend(UI, {
                         }
             */
 		}).on('mousedown', '.editarea', function(e) {
+
+
             if(e.which == 3) {
                 e.preventDefault();
                 return false;
@@ -849,6 +851,7 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
+
             UI.saveInUndoStack('click');
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
@@ -884,7 +887,9 @@ $.extend(UI, {
 				if (operation != 'moving')
 					UI.scrollSegment($('#segment-' + $(this).data('sid')));
 			}
+
             UI.lockTags(UI.editarea);
+            UI.checkTagProximity();
 
             if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
@@ -1150,9 +1155,8 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
                 setTimeout(function() {
-                    UI.checkTagProximity2('left', range);
+                    UI.checkTagProximity();
                 }, 10);
-//                UI.checkTagProximity1('left', range);
 
 //                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -1182,7 +1186,7 @@ $.extend(UI, {
 
 					}
 				} else { // there's nothing selected
-                    console.log('nothing selected when left is pressed');
+//                    console.log('nothing selected when left is pressed');
 /*
                     saveSelection();
                     sbIndex = 0;
@@ -1239,9 +1243,8 @@ $.extend(UI, {
 				range = selection.getRangeAt(0);
 //                console.log('range when pressing right arrow key: ', range);
                 setTimeout(function() {
-                    UI.checkTagProximity2('right', range);
+                    UI.checkTagProximity();
                 }, 10);
-//                UI.checkTagProximity1('right', range);
 
 				if (range.startOffset != range.endOffset) {
 					r = range.startContainer.innerText;
