@@ -8,8 +8,8 @@
 
 class Constants_Revise {
 
-    const NONE = 'none';
-    const MINOR = 'minor';
-    const MAJOR = 'major';
+    const NONE = 0;
+    const MINOR = 1;
+    const MAJOR = 2;
 
 } 
