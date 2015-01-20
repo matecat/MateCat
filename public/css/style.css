@@ -2152,7 +2152,7 @@ footer nav
 	font-style: italic;
 	margin-top: -2px;
 	height: 32px;
-	vertical-align: middle;
+	vertical-align: baseline;
     border: 2px solid transparent;
 	display: inline-block;
 }
