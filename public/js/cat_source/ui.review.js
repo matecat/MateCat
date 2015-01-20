@@ -38,7 +38,32 @@ if(config.enableReview && parseInt(config.isReview)) {
             $('.sub-editor.review .error-type').addClass('error');
         } else {
             $('.sub-editor.review .error-type').removeClass('error');
-            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
+//            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
+            err = $('.sub-editor.review .error-type');
+            APP.doRequest({
+//                data: reqData,
+
+                data: {
+                    action: 'setRevision',
+                    id_job: config.job_id,
+                    id_segment: UI.currentSegmentId,
+                    err_typing: $(err).find('input[name=t1]:checked').val(),
+                    err_translation: $(err).find('input[name=t2]:checked').val(),
+                    err_terminology: $(err).find('input[name=t3]:checked').val(),
+                    err_quality: $(err).find('input[name=t4]:checked').val(),
+                    err_style: $(err).find('input[name=t5]:checked').val()
+                },
+
+//                context: [reqArguments, segment, status],
+                error: function() {
+//                    UI.failedConnection(this[0], 'setTranslation');
+                },
+                success: function(d) {
+                    console.log('d: ', d);
+                }
+            });
+
+
         }
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
