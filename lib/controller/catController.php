@@ -42,6 +42,8 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
+    private $isRevision = false;
+
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
     /**
@@ -316,6 +318,7 @@ class catController extends viewController {
         $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            $this->isRevision = true;
         } elseif( $user_email == $data[ 0 ]['job_owner'] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
@@ -497,9 +500,10 @@ class catController extends viewController {
 
         $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize         = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $is_review                          = explode('/', $_SERVER["REQUEST_URI"])[1] == 'revise';
-        $this->template->isReview              = $is_review;
-        $this->template->reviewClass            = ($is_review)? ' review' : '';
+
+        $this->template->isReview               = $this->isRevision;
+        $this->template->reviewClass            = ( $this->isRevision ? ' review' : '' );
+
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
 		//check if it is a composite language, for cjk check that accepts only ISO 639 code

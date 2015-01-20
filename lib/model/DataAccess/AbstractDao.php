@@ -114,7 +114,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected static function _sanitizeInput( $input, $type ) {
 
-        //if something diffferent from $type is passed, throw exception
+        //if something different from $type is passed, throw exception
         if ( !( $input instanceof $type ) ) {
             throw new Exception( "Invalid input. Expected " . $type, -1 );
         }

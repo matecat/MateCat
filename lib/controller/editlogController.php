@@ -73,5 +73,6 @@ class editlogController extends viewController {
         $this->template->incomingUrl  = '/login?incomingUrl=' . $this->thisUrl;
 
 	}
-
 }
+
+
