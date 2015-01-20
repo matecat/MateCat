@@ -18,7 +18,13 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
 
         $query = "INSERT INTO " . self::TABLE .
                 " (id_job, id_segment, err_typing, err_translation, err_terminology, err_quality, err_style)
-                VALUES ( %d, %d, '%s', '%s', '%s', '%s', '%s' )";
+                    VALUES ( %d, %d, '%s', '%s', '%s', '%s', '%s' ) ON DUPLICATE KEY UPDATE
+                    SET err_typing = VALUES(err_typing),
+                        err_translation = VALUES(err_translation),
+                        err_terminology = VALUES(err_terminology),
+                        err_quality = VALUES(err_quality),
+                        err_style = VALUES(err_style)
+            ";
 
         $query = sprintf(
                 $query,
