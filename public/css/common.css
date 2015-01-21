@@ -2380,8 +2380,41 @@ cursor: pointer;
 		content: "\e602";
 	padding-right: 5px;
 	vertical-align: text-top;
+}
+
+.error-type table {
+	border-collapse: collapse;
+	width: 98%;
+}
+
+
+.error-type td {
+padding: 4px 2px;
+	border: 1px solid #efefef;
 
 }
+
+.error-type tbody td:last-child {
+border-right: 1px solid #efefef;
+padding: 8px;
+}
+
+
+.error-type tbody tr:hover {
+background: rgba(187, 187, 187, 0.14);
+}
+
+
+.error-type th {
+text-align: center;
+padding: 0px 4px;
+font-size: 80%;
+}
+
+td.align-left {
+text-align: left;
+}
+
 
 .icon-play:before {
 	content: "\f04b";
