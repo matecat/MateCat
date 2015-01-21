@@ -33,6 +33,8 @@ if(config.enableReview && parseInt(config.isReview)) {
         $('.editor .sub-editor.review').show();
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
+    }).on('click', '.editor .outersource .copy', function(e) {
+        UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
         e.preventDefault();
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
