@@ -358,6 +358,8 @@ $.extend(UI, {
                 return false;
             }
         } else {
+            if (typeof ar[index] == 'undefined') return false;
+
             if(ar[index].nodeName == '#text') {
                 UI.numCharsUntilTagRight += ar[index].data.length;
             }
