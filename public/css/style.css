@@ -3328,7 +3328,7 @@ margin: 0 0 2% 0;
     border: 3px solid #fff;
 }
 .sub-editor.review .error-type.error tbody {
-border: 1px double red !important;
+border: 2px solid red !important;
 }
 .sub-editor.review .error-type.error h3 {
 color:red !important;
@@ -3355,7 +3355,7 @@ margin-right: 3%;
 	height: 96% !important;
 	padding: 5px;
 	font-size: 18px;
-	margin-top: 30px;
+	margin-top: 32px;
 	border-bottom: 1px solid #ccc;
 	padding: 5px;
 	background: #FBFBFB;
