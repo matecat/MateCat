@@ -3116,7 +3116,7 @@ UI = {
         });
         //launch segments check on opening
         UI.checkWarnings(true);
-//        $('body').trigger('start');
+        $('html').trigger('start');
     },
     restart: function () {
         $('#outer').empty();
@@ -8498,9 +8498,8 @@ if(config.enableReview && parseInt(config.isReview)) {
     $('html').on('open', 'section', function() {
         editarea = $(this).find('.editarea');
         editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
-    }).on('ready', function() {
-        console.log('ddd');
-        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#">(Details)</a></li>');
+    }).on('start', function() {
+        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -8571,6 +8570,9 @@ if(config.enableReview && parseInt(config.isReview)) {
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
+    }).on('click', '#stat-quality .details', function(e) {
+        e.preventDefault();
+        console.log('apri dati');
     });
 
     $.extend(UI, {

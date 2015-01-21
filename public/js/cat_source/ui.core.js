@@ -3116,7 +3116,7 @@ UI = {
         });
         //launch segments check on opening
         UI.checkWarnings(true);
-//        $('body').trigger('start');
+        $('html').trigger('start');
     },
     restart: function () {
         $('#outer').empty();
