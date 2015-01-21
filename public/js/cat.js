@@ -4658,6 +4658,9 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
+                setTimeout(function() {
+                    UI.checkTagProximity();
+                }, 10);
 			}
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
@@ -4700,6 +4703,9 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
+                setTimeout(function() {
+                    UI.checkTagProximity();
+                }, 10);
 //                console.log($(':focus'));
                 //              return false;
 			}
