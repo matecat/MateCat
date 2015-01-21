@@ -405,12 +405,12 @@ $.extend(UI, {
         selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
         range = selection.getRangeAt(0);
+        if(!range.collapsed) return true;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
 //        console.log('nextEl: ', nextEl.length);
 //        console.log('prevEl: ', prevEl.length);
         tempRange = range;
-
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         coso = $.parseHTML(UI.editarea.html());
@@ -425,6 +425,7 @@ $.extend(UI, {
 //                console.log('nearTagOnRight: ', nearTagOnRight);
                 nearTagOnLeft = UI.nearTagOnLeft(index-1, coso);
 //                console.log('nearTagOnLeft: ', nearTagOnLeft);
+
                 if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
                     UI.removeHighlightCorrespondingTags();
                     UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));

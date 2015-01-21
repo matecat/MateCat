@@ -833,8 +833,6 @@ $.extend(UI, {
                         }
             */
 		}).on('mousedown', '.editarea', function(e) {
-
-
             if(e.which == 3) {
                 e.preventDefault();
                 return false;

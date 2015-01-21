@@ -6,6 +6,9 @@ if(config.enableReview && parseInt(config.isReview)) {
     $('html').on('open', 'section', function() {
         editarea = $(this).find('.editarea');
         editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
+    }).on('ready', function() {
+        console.log('ddd');
+        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#">(Details)</a></li>');
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -77,6 +80,7 @@ if(config.enableReview && parseInt(config.isReview)) {
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     });
+
     $.extend(UI, {
         trackChanges: function (editarea) {
             var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text());

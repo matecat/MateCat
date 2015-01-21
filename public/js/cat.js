@@ -3116,6 +3116,7 @@ UI = {
         });
         //launch segments check on opening
         UI.checkWarnings(true);
+//        $('body').trigger('start');
     },
     restart: function () {
         $('#outer').empty();
@@ -4254,8 +4255,6 @@ $.extend(UI, {
                         }
             */
 		}).on('mousedown', '.editarea', function(e) {
-
-
             if(e.which == 3) {
                 e.preventDefault();
                 return false;
@@ -6327,12 +6326,12 @@ $.extend(UI, {
         selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
         range = selection.getRangeAt(0);
+        if(!range.collapsed) return true;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
 //        console.log('nextEl: ', nextEl.length);
 //        console.log('prevEl: ', prevEl.length);
         tempRange = range;
-
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         coso = $.parseHTML(UI.editarea.html());
@@ -6347,6 +6346,7 @@ $.extend(UI, {
 //                console.log('nearTagOnRight: ', nearTagOnRight);
                 nearTagOnLeft = UI.nearTagOnLeft(index-1, coso);
 //                console.log('nearTagOnLeft: ', nearTagOnLeft);
+
                 if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
                     UI.removeHighlightCorrespondingTags();
                     UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
@@ -8498,6 +8498,9 @@ if(config.enableReview && parseInt(config.isReview)) {
     $('html').on('open', 'section', function() {
         editarea = $(this).find('.editarea');
         editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
+    }).on('ready', function() {
+        console.log('ddd');
+        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#">(Details)</a></li>');
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -8569,6 +8572,7 @@ if(config.enableReview && parseInt(config.isReview)) {
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
     });
+
     $.extend(UI, {
         trackChanges: function (editarea) {
             var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text());

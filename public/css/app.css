@@ -2380,8 +2380,41 @@ cursor: pointer;
 		content: "\e602";
 	padding-right: 5px;
 	vertical-align: text-top;
+}
+
+.error-type table {
+	border-collapse: collapse;
+	width: 98%;
+}
+
+
+.error-type td {
+padding: 4px 2px;
+	border: 1px solid #efefef;
 
 }
+
+.error-type tbody td:last-child {
+border-right: 1px solid #efefef;
+padding: 8px;
+}
+
+
+.error-type tbody tr:hover {
+background: rgba(187, 187, 187, 0.14);
+}
+
+
+.error-type th {
+text-align: center;
+padding: 0px 4px;
+font-size: 80%;
+}
+
+td.align-left {
+text-align: left;
+}
+
 
 .icon-play:before {
 	content: "\f04b";
@@ -4857,7 +4890,7 @@ footer nav
 }
 @media screen and (max-width: 1260px){
 
-	.text .item,.white li{width: 44.5% !important}
+	.text .item,.white li, .track-changes {width: 44.5% !important}
 
 
 }
@@ -4889,7 +4922,7 @@ footer nav
 	.loader{left:-40px;}
 
 	.search-editarea {width:200px !Important}
-	.text .item,.white li{width: 44% !important}
+	.text .item,.white li, .track-changes {width: 44% !important}
     article {margin-left: 6%;}
     .sid {left: -6%;}
 
@@ -5937,16 +5970,53 @@ box-shadow: inset 0 0 1px 1px #888;
 
 .sub-editor.review .error-type
 {
-    width: 46%;
-    padding: 1%;
-    margin: 1%;
+    width: 49%;
+    padding: 0 1%;
+margin: 0 0 2% 0;
     float: left;
     border: 3px solid #fff;
 }
-.sub-editor.review .error-type.error
-{
-    border-color: red !important;
+.sub-editor.review .error-type.error tbody {
+border: 2px solid red !important;
 }
+.sub-editor.review .error-type.error h3 {
+color:red !important;
+}
+
+.track-changes {
+	float: right;
+	width: 45%;
+margin-right: 3%;
+
+}
+
+.error-type h3, .track-changes h3 {
+	margin: 20px 0 0;
+}
+
+
+.track-changes p {
+	width: 100%;
+	line-height: 30px;
+	margin: 0 auto;
+	min-height: 70px;
+	text-align: left;
+	height: 96% !important;
+	padding: 5px;
+	font-size: 18px;
+	margin-top: 32px;
+	border-bottom: 1px solid #ccc;
+	padding: 5px;
+	background: #FBFBFB;
+	box-shadow: 0px 1px 0px #000;
+	border-radius: 2px;
+
+	border: 1px solid #727272;
+	box-shadow: 0 1px 2px #ccc;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+
+}
+
 .sub-editor.review .track-changes .deleted
 {
     background: #ffc7ca;
