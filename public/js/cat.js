@@ -6280,6 +6280,8 @@ $.extend(UI, {
                 return false;
             }
         } else {
+            if (typeof ar[index] == 'undefined') return false;
+
             if(ar[index].nodeName == '#text') {
                 UI.numCharsUntilTagRight += ar[index].data.length;
             }
@@ -8532,6 +8534,8 @@ if(config.enableReview && parseInt(config.isReview)) {
         } else {
             $('.sub-editor.review .error-type').removeClass('error');
             UI.changeStatus(this, 'approved', 0);
+            UI.gotoNextSegment();
+
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
             err = $('.sub-editor.review .error-type');
             APP.doRequest({
