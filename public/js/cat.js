@@ -8499,7 +8499,41 @@ if(config.enableReview && parseInt(config.isReview)) {
         editarea = $(this).find('.editarea');
         editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
     }).on('start', function() {
+        // temp
+        config.stat_quality = [
+            {
+                "type":"Typing",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Translation",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Terminology",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Language Quality",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Style",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            }
+        ];
         $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
+        UI.createStatQualityPanel();
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -8572,7 +8606,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         $('.sub-editor.review .error-type').removeClass('error');
     }).on('click', '#stat-quality .details', function(e) {
         e.preventDefault();
-        console.log('apri dati');
+        UI.openStatQualityPanel();
     });
 
     $.extend(UI, {
@@ -8589,6 +8623,17 @@ if(config.enableReview && parseInt(config.isReview)) {
                 }
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
+        },
+        createStatQualityPanel: function () {
+            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
+        },
+
+        openStatQualityPanel: function() {
+            $('body').addClass('side-popup');
+            $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
+//            $("#SnapABug_Button").hide();
+            $(".outer-stat-quality").show();
+//            $.cookie('tmpanel-open', 1, { path: '/' });
         }
     })
 }
