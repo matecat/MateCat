@@ -218,6 +218,15 @@
         </footer>
 
 
+        <script type="text/javascript">
+            $( document ).ready(function() {
+                $('a.authLink').click(function(e){
+                    e.preventDefault();
+                    APP.googole_popup($(this).attr('href'));
+                });
+            });
+        </script>
         <script src="${basepath}public/js/lib/snapengage.js"></script>
-    </body> 
+
+    </body>
 </html>

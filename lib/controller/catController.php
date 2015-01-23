@@ -49,17 +49,6 @@ class catController extends viewController {
      */
 	private $thisUrl;
 
-    /**
-     * @var Google_Client
-     */
-    private $client;
-
-    /**
-     * @var string
-     */
-    private $authURL;
-
-
 	public function __construct() {
 		$this->start_time = microtime(1) * 1000;
 
@@ -113,14 +102,6 @@ class catController extends viewController {
             //take note of url we wanted to go after
             $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
         }
-
-    }
-
-    private function generateAuthURL() {
-
-        $this->client = OauthClient::getInstance()->getClient();
-
-        $this->authURL = $this->client->createAuthUrl();
 
     }
 

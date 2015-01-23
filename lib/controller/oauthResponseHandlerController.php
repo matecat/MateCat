@@ -8,7 +8,6 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class oauthResponseHandlerController extends viewController{
 
-	private $client;
 	private $redirectUrl;
 	private $userData=array();
 

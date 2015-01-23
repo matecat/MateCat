@@ -2,7 +2,11 @@
 <head>
 <script type="text/JavaScript" language="javascript">
 function doload(url){
-        window.opener.location.href = url;
+        if( url != '/' ) {
+            window.opener.location.href = url;
+        } else {
+            window.opener.location.reload();
+        }
         self.close();
 }
 </script>
