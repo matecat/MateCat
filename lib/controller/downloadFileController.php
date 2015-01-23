@@ -183,6 +183,7 @@ class downloadFileController extends downloadController {
                 $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $fp );
 
                 //run parsing
+                Log::doLog( "work on " . $fileID . " " . $current_filename );
                 $xsp->replaceTranslation();
                 fclose( $fp );
                 unset( $xsp );
