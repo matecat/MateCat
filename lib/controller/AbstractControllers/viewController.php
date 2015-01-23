@@ -28,6 +28,16 @@ abstract class viewController extends controller {
     protected $supportedBrowser = false;
 
     /**
+     * @var Google_Client
+     */
+    protected $client;
+
+    /**
+     * @var string
+     */
+    protected $authURL;
+
+    /**
      * Flag to get info about user authentication
      *
      * @var bool
@@ -202,6 +212,17 @@ abstract class viewController extends controller {
         }
 
         return true;
+    }
+
+    /**
+     * Get Client Instance and retrieve authentication url
+     *
+     */
+    protected function generateAuthURL() {
+
+        $this->client  = OauthClient::getInstance()->getClient();
+        $this->authURL = $this->client->createAuthUrl();
+
     }
 
     /**

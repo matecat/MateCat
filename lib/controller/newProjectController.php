@@ -22,16 +22,6 @@ class newProjectController extends viewController {
      */
     private $incomingUrl;
 
-    /**
-     * @var string The Google's auth URL
-     */
-    private $authURL;
-
-    /**
-     * @var Google_Client
-     */
-    private $client;
-
     private $keyList = array();
 
     public function __construct() {
@@ -258,14 +248,6 @@ class newProjectController extends viewController {
             //take note of url we wanted to go after
             $this->incomingUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
         }
-
-    }
-
-    private function generateAuthURL() {
-
-        $this->client = OauthClient::getInstance()->getClient();
-
-        $this->authURL = $this->client->createAuthUrl();
 
     }
 

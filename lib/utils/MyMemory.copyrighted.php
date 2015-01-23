@@ -263,6 +263,9 @@ class MyMemory {
             return $new;
         }
 
+        //Remove html apostrophe from old, should not be here...
+        $old = html_entity_decode( $old, ENT_QUOTES | 16 /* ENT_XML1 */, 'UTF-8');
+
         if ( strlen( $old ) <= 254 AND strlen( $old ) <= 254 ) {
             if ( levenshtein( $new, $old ) <= 2 ) {
                 $by_word = false;
