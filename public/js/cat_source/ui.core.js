@@ -1436,7 +1436,8 @@ UI = {
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
-	},
+        $('html').trigger('setCurrentSegment_success', d);
+    },
     detectTranslationAlternatives: function(d) {
 
         /**
@@ -3116,7 +3117,7 @@ UI = {
         });
         //launch segments check on opening
         UI.checkWarnings(true);
-//        $('body').trigger('start');
+        $('html').trigger('start');
     },
     restart: function () {
         $('#outer').empty();

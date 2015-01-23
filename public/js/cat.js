@@ -1436,7 +1436,8 @@ UI = {
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
-	},
+        $('html').trigger('setCurrentSegment_success', d);
+    },
     detectTranslationAlternatives: function(d) {
 
         /**
@@ -3116,7 +3117,7 @@ UI = {
         });
         //launch segments check on opening
         UI.checkWarnings(true);
-//        $('body').trigger('start');
+        $('html').trigger('start');
     },
     restart: function () {
         $('#outer').empty();
@@ -8498,9 +8499,44 @@ if(config.enableReview && parseInt(config.isReview)) {
     $('html').on('open', 'section', function() {
         editarea = $(this).find('.editarea');
         editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
-    }).on('ready', function() {
-        console.log('ddd');
-        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#">(Details)</a></li>');
+    }).on('start', function() {
+        // temp
+        config.stat_quality = [
+            {
+                "type":"Typing",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Translation",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Terminology",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Language Quality",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            },
+            {
+                "type":"Style",
+                "allowed":5,
+                "found":1,
+                "vote":"Excellent"
+            }
+        ];
+        // end temp
+        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
+        UI.createStatQualityPanel();
+        UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -8514,10 +8550,12 @@ if(config.enableReview && parseInt(config.isReview)) {
         div.find('.submenu').append('<li class="tab-switcher-review" id="segment-20896069-review"><a tabindex="-1" href="#">Review</a></li>');
         div.append('<div class="tab sub-editor review" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
         $('.tab-switcher-review').click();
+ /*
         setTimeout(function() {// fixes a bug in setting defaults in radio buttons
             UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
             UI.trackChanges(UI.editarea);
         }, 100);
+ */
         UI.footerHTML = div.html();
 
     }).on('click', '.editor .tab-switcher-review', function(e) {
@@ -8532,6 +8570,9 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
         e.preventDefault();
+        console.log('a: "', UI.currentSegment.find('.original-translation').text() + '"');
+        console.log('b: "', $(editarea).text() + '"');
+        if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if(noneSelected) {
             $('.editor .tab-switcher-review').click();
@@ -8563,6 +8604,11 @@ if(config.enableReview && parseInt(config.isReview)) {
                 },
                 success: function(d) {
                     console.log('d: ', d);
+                    // temp
+                    d.stat_quality = config.stat_quality;
+                    d.stat_quality[0].found = 2;
+                    //end temp
+                    UI.populateStatQualityPanel(d.stat_quality);
                 }
             });
 
@@ -8571,6 +8617,40 @@ if(config.enableReview && parseInt(config.isReview)) {
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
+    }).on('click', '#stat-quality .details', function(e) {
+        e.preventDefault();
+        UI.openStatQualityPanel();
+    }).on('click', '.popup-stat-quality h1 .btn-ok, .outer-stat-quality', function(e) {
+        e.preventDefault();
+        $( ".popup-stat-quality").removeClass('open').hide("slide", { direction: "right" }, 400);
+        $(".outer-stat-quality").hide();
+        $('body').removeClass('side-popup');
+    }).on('setCurrentSegment_success', function(e, d) {
+        // temp
+        d.error_data = [
+            {
+                "type":"Typing",
+                "value": 1
+            },
+            {
+                "type":"Translation",
+                "value": 2
+            },
+            {
+                "type":"Terminology",
+                "value": 0
+            },
+            {
+                "type":"Language Quality",
+                "value": 0
+            },
+            {
+                "type":"Style",
+                "value": 0
+            }
+        ];
+        // end temp
+        UI.setReviewErrorData(d.error_data);
     });
 
     $.extend(UI, {
@@ -8587,7 +8667,39 @@ if(config.enableReview && parseInt(config.isReview)) {
                 }
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
+        },
+        createStatQualityPanel: function () {
+            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
+        },
+        populateStatQualityPanel: function (d) {
+            tbody = $('#popup-stat-quality .slide-panel-body tbody');
+            tbody.empty();
+            $.each(d, function (index) {
+                $(tbody).append('<tr><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
+            });
+//            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
+        },
+        openStatQualityPanel: function() {
+            $('body').addClass('side-popup');
+            $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
+//            $("#SnapABug_Button").hide();
+            $(".outer-stat-quality").show();
+//            $.cookie('tmpanel-open', 1, { path: '/' });
+        },
+        setReviewErrorData: function (d) {
+            $.each(d, function (index) {
+//                console.log(this.type + ' - ' + this.value);
+//                console.log('.editor .error-type input[name=t1][value=' + this.value + ']');
+                if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
+
+            });
+
         }
+
     })
 }
 /*
