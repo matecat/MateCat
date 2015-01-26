@@ -172,14 +172,21 @@ class downloadFileController extends downloadController {
                 //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
                 //clean also not valid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
                 $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
+
+                //remove binary chars in some xliff files
+                $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
+
                 foreach ( $data as $i => $k ) {
                     $data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
                     //FIXME: temporary patch
                     $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
                     $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
 
-                    $sanitized_src = preg_replace( $regexpEntity, '', $data[ $i ][ 'segment' ] );
-                    $sanitized_trg = preg_replace( $regexpEntity, '', $data[ $i ][ 'translation' ] );
+                    $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
+                    $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
+
+                    $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
+                    $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
                     if( $sanitized_src != null ){
                         $data[ $i ][ 'segment' ] = $sanitized_src;
                     }
