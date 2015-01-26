@@ -202,8 +202,18 @@ class XliffSAXTranslationReplacer {
 
             //seta a Buffer for the segSource Source tag
             if ( 'source' == $name || 'seg-source' == $name || $this->bufferIsActive || 'value' == $name ) {
-                $this->bufferIsActive = true;
-                $this->CDATABuffer .= $tag;
+
+                //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
+                //so check for isEmpty also in conjunction with name
+                if( $this->isEmpty && ( 'source' == $name || 'seg-source' == $name ) ) {
+                    $this->postProcAndflush( $this->outputFP, $tag );
+
+                } else {
+                    //these are NOT source/seg-source/value empty tags, THERE IS A CONTENT, write it in buffer
+                    $this->bufferIsActive = true;
+                    $this->CDATABuffer .= $tag;
+                }
+
             } else {
                 $this->postProcAndflush( $this->outputFP, $tag );
             }
