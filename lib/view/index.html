@@ -256,7 +256,7 @@
                         <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
                     </div>
                     <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
-                    <ul>
+                    <ul class="statistics-core">
 
                         <li id="stat-eqwords">
                             <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
@@ -267,7 +267,8 @@
                         <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                         -->
                    </ul>
-                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details">
+                    <ul class="statistics-details">
+<!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->
                         <li id="stat-wph" title="Based on last 10 segments performance">Speed:
                             <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
                         </li>

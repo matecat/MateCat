@@ -61,7 +61,7 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
-        console.log('byStatus: ', byStatus);
+//        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
@@ -1597,6 +1597,7 @@ UI = {
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
+//        console.log('WPH: ', wph);
 		if (typeof wph == 'undefined') {
 			$('#stat-wph').hide();
 		} else {
@@ -2029,9 +2030,9 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller) {
-        console.log('id_segment: ', id_segment);
-        console.log('status: ', status);
-        console.log('setTranslation sul segmento ', UI.currentSegmentId);
+//        console.log('id_segment: ', id_segment);
+//        console.log('status: ', status);
+//        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
@@ -2044,7 +2045,7 @@ UI = {
 		} else {
 			translation = $('.editarea', segment ).text();
 		}
-        console.log('translation: ', translation);
+//        console.log('translation: ', translation);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -2118,7 +2119,7 @@ UI = {
 				operation: operation,
 				args: reqArguments
 			};
-			console.log('pendingConnection: ', pendingConnection);
+//			console.log('pendingConnection: ', pendingConnection);
 			var dd = new Date();
 			if(pendingConnection.args) {
 				localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
@@ -2467,7 +2468,7 @@ UI = {
             "stack": stackTrace()
         };
 //        console.log('prova: ', prova);
-        console.log('logValue: ', JSON.stringify(logValue));
+//        console.log('logValue: ', JSON.stringify(logValue));
         localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
 /*
@@ -2484,7 +2485,7 @@ UI = {
         inp = 'log';
         $.each(localStorage, function(k,v) {
             if(k.substring(0, inp.length) === inp) {
-                console.log('v: ', v);
+//                console.log('v: ', v);
 //                console.log('$.parseJSON(v): ', $.parseJSON(v));
                 pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
             }
@@ -2492,7 +2493,7 @@ UI = {
         logs = JSON.stringify(pendingLogs);
         this.clearStorage('log');
 
-        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs: ', pendingLogs);
 //        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
         return logs;
     },
