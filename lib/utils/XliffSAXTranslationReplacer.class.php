@@ -201,7 +201,7 @@ class XliffSAXTranslationReplacer {
             $tag .= ">";
 
             //seta a Buffer for the segSource Source tag
-            if ( 'source' == $name || 'seg-source' == $name || $this->bufferIsActive ) {
+            if ( 'source' == $name || 'seg-source' == $name || $this->bufferIsActive || 'value' == $name ) {
                 $this->bufferIsActive = true;
                 $this->CDATABuffer .= $tag;
             } else {
@@ -254,7 +254,7 @@ class XliffSAXTranslationReplacer {
                 $this->inTarget = false;
                 $this->postProcAndflush( $this->outputFP, $tag, $treatAsCDATA = true );
 
-            } elseif ( 'source' == $name || 'seg-source' == $name ) { // we are closing a critical CDATA section
+            } elseif ( 'source' == $name || 'seg-source' == $name || 'value' == $name ) { // we are closing a critical CDATA section
 
                 $this->bufferIsActive = false;
                 $tag                  = $this->CDATABuffer . "</$name>";
