@@ -2606,7 +2606,7 @@ body.side-popup {
 
 #menu-site li {
     display: inline-block;
-    padding-top: 10px;
+    padding-top: 8px;
 }
 
 #menu-site li a {
@@ -2617,6 +2617,24 @@ body.side-popup {
     padding: 10px 15px;
     font-weight: 200;
     font-size: 18px;
+}
+
+#menu-site li a.bigred {
+	font-size: 18px!important;
+background: #3aa9dd;
+border: none!important;
+color: #fff!important;
+border-radius: 4px;
+background-color: #cf3d2b;
+border-bottom: 2px solid #343434!important;
+padding: 10px;
+font-weight: bold;
+margin-left: 5px;
+margin-top: 6px;
+}
+
+#menu-site li a.bigred:hover {
+background: #3aa9dd!important;
 }
 
 #menu-site li a:hover {

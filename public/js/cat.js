@@ -8497,8 +8497,8 @@ $.extend(UI, {
 if(config.enableReview && parseInt(config.isReview)) {
 
     $('html').on('open', 'section', function() {
-        editarea = $(this).find('.editarea');
-        editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
+//        editarea = $(this).find('.editarea');
+//        editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
     }).on('start', function() {
         // temp
         config.stat_quality = [
@@ -8578,6 +8578,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             $('.editor .tab-switcher-review').click();
             $('.sub-editor.review .error-type').addClass('error');
         } else {
+            original = UI.currentSegment.find('.original-translation').text();
             $('.sub-editor.review .error-type').removeClass('error');
             UI.changeStatus(this, 'approved', 0);
             UI.gotoNextSegment();
@@ -8591,6 +8592,7 @@ if(config.enableReview && parseInt(config.isReview)) {
                     action: 'setRevision',
                     job: config.job_id,
                     segment: UI.currentSegmentId,
+                    original: original,
                     err_typing: $(err).find('input[name=t1]:checked').val(),
                     err_translation: $(err).find('input[name=t2]:checked').val(),
                     err_terminology: $(err).find('input[name=t3]:checked').val(),
@@ -8649,7 +8651,9 @@ if(config.enableReview && parseInt(config.isReview)) {
                 "value": 0
             }
         ];
+        d.original = UI.editarea.text();
         // end temp
+        UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
     });
 
