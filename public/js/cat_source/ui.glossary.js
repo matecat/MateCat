@@ -175,11 +175,11 @@ $.extend(UI, {
 				$('.editor .source').html(sourceString);
 //                console.log('source 2: ', $('.editor .source').html());
 			});
-/*
+
             $('.editor .source mark mark').each(function () {
                 $(this).replaceWith($(this).html());
             })
-*/
+
 		}
 	},
 	removeGlossaryMarksFormSource: function() {
