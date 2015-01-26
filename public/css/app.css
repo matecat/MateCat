@@ -122,7 +122,6 @@ footer li
 }
 
 ul.statistics-details {
-    display: none;
     margin: 0 auto;
     overflow: hidden;
     width: 33%;
@@ -5061,7 +5060,7 @@ p.percent
 #stat-completion,
 #stat-wph
 {
-	display: wph;
+	display: none;
 }
 
 #originalDownload,

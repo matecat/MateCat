@@ -61,7 +61,7 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
-        console.log('byStatus: ', byStatus);
+//        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
@@ -1597,7 +1597,7 @@ UI = {
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
-        console.log('WPH: ', wph);
+//        console.log('WPH: ', wph);
 		if (typeof wph == 'undefined') {
 			$('#stat-wph').hide();
 		} else {
@@ -2030,9 +2030,9 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller) {
-        console.log('id_segment: ', id_segment);
-        console.log('status: ', status);
-        console.log('setTranslation sul segmento ', UI.currentSegmentId);
+//        console.log('id_segment: ', id_segment);
+//        console.log('status: ', status);
+//        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
@@ -2045,7 +2045,7 @@ UI = {
 		} else {
 			translation = $('.editarea', segment ).text();
 		}
-        console.log('translation: ', translation);
+//        console.log('translation: ', translation);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -2119,7 +2119,7 @@ UI = {
 				operation: operation,
 				args: reqArguments
 			};
-			console.log('pendingConnection: ', pendingConnection);
+//			console.log('pendingConnection: ', pendingConnection);
 			var dd = new Date();
 			if(pendingConnection.args) {
 				localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
@@ -2468,7 +2468,7 @@ UI = {
             "stack": stackTrace()
         };
 //        console.log('prova: ', prova);
-        console.log('logValue: ', JSON.stringify(logValue));
+//        console.log('logValue: ', JSON.stringify(logValue));
         localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
 /*
@@ -2485,7 +2485,7 @@ UI = {
         inp = 'log';
         $.each(localStorage, function(k,v) {
             if(k.substring(0, inp.length) === inp) {
-                console.log('v: ', v);
+//                console.log('v: ', v);
 //                console.log('$.parseJSON(v): ', $.parseJSON(v));
                 pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
             }
@@ -2493,7 +2493,7 @@ UI = {
         logs = JSON.stringify(pendingLogs);
         this.clearStorage('log');
 
-        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs: ', pendingLogs);
 //        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
         return logs;
     },
@@ -8535,7 +8535,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             }
         ];
         // end temp
-        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
+        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
         UI.createStatQualityPanel();
         UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
@@ -8571,11 +8571,18 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
         e.preventDefault();
-        console.log('a: "', UI.currentSegment.find('.original-translation').text() + '"');
-        console.log('b: "', $(editarea).text() + '"');
+/*
+        var a = UI.currentSegment.find('.original-translation').text() + '"';
+        var b = $(editarea).text() + '"';
+        console.log('a: "', htmlEncode(a));
+        console.log('b: "', htmlEncode(b));
+        console.log('a = b: ', a == b);
+        console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+
         if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
+ */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
-        if(noneSelected) {
+        if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
             $('.sub-editor.review .error-type').addClass('error');
         } else {
@@ -8606,7 +8613,7 @@ if(config.enableReview && parseInt(config.isReview)) {
 //                    UI.failedConnection(this[0], 'setTranslation');
                 },
                 success: function(d) {
-                    console.log('d: ', d);
+//                    console.log('d: ', d);
                     // temp
                     d.stat_quality = config.stat_quality;
                     d.stat_quality[0].found = 2;
@@ -8656,11 +8663,22 @@ if(config.enableReview && parseInt(config.isReview)) {
         // end temp
         UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
+        UI.trackChanges(UI.editarea);
     });
 
     $.extend(UI, {
         trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text());
+/*
+            console.log('11111: ', $(editarea).text());
+            console.log('22222: ', htmlEncode($(editarea).text()));
+            console.log('a: ', UI.currentSegment.find('.original-translation').text());
+            console.log('b: ', $(editarea).html());
+            console.log('c: ', $(editarea).text());
+            var c = $(editarea).text();
+            console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
+*/
+            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text().replace(/(<([^>]+)>)/ig,""));
+//            console.log('diff: ', diff);
             diffTxt = '';
             $.each(diff, function (index) {
                 if(this[0] == -1) {

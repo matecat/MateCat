@@ -41,7 +41,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             }
         ];
         // end temp
-        $('#statistics ul').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
+        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
         UI.createStatQualityPanel();
         UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
@@ -77,11 +77,18 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
         e.preventDefault();
-        console.log('a: "', UI.currentSegment.find('.original-translation').text() + '"');
-        console.log('b: "', $(editarea).text() + '"');
+/*
+        var a = UI.currentSegment.find('.original-translation').text() + '"';
+        var b = $(editarea).text() + '"';
+        console.log('a: "', htmlEncode(a));
+        console.log('b: "', htmlEncode(b));
+        console.log('a = b: ', a == b);
+        console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+
         if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
+ */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
-        if(noneSelected) {
+        if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
             $('.sub-editor.review .error-type').addClass('error');
         } else {
@@ -112,7 +119,7 @@ if(config.enableReview && parseInt(config.isReview)) {
 //                    UI.failedConnection(this[0], 'setTranslation');
                 },
                 success: function(d) {
-                    console.log('d: ', d);
+//                    console.log('d: ', d);
                     // temp
                     d.stat_quality = config.stat_quality;
                     d.stat_quality[0].found = 2;
@@ -162,11 +169,22 @@ if(config.enableReview && parseInt(config.isReview)) {
         // end temp
         UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
+        UI.trackChanges(UI.editarea);
     });
 
     $.extend(UI, {
         trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text());
+/*
+            console.log('11111: ', $(editarea).text());
+            console.log('22222: ', htmlEncode($(editarea).text()));
+            console.log('a: ', UI.currentSegment.find('.original-translation').text());
+            console.log('b: ', $(editarea).html());
+            console.log('c: ', $(editarea).text());
+            var c = $(editarea).text();
+            console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
+*/
+            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text().replace(/(<([^>]+)>)/ig,""));
+//            console.log('diff: ', diff);
             diffTxt = '';
             $.each(diff, function (index) {
                 if(this[0] == -1) {
