@@ -1597,6 +1597,7 @@ UI = {
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
+        console.log('WPH: ', wph);
 		if (typeof wph == 'undefined') {
 			$('#stat-wph').hide();
 		} else {

@@ -267,7 +267,8 @@
                         <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                         -->
                    </ul>
-                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details">
+                    <ul class="statistics-details">
+<!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->
                         <li id="stat-wph" title="Based on last 10 segments performance">Speed:
                             <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
                         </li>

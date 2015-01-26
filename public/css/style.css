@@ -2379,7 +2379,7 @@ p.percent
 #stat-completion,
 #stat-wph
 {
-	display: wph;
+	display: none;
 }
 
 #originalDownload,
