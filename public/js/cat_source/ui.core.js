@@ -3106,6 +3106,15 @@ UI = {
             return false;
         }
     },
+    isKorean: function () {
+        var l = config.target_rfc;
+        if(l=='ko-KR') {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     start: function () {
         APP.init();
         APP.fitText($('.breadcrumbs'), $('#pname'), 30);

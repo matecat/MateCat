@@ -3106,6 +3106,15 @@ UI = {
             return false;
         }
     },
+    isKorean: function () {
+        var l = config.target_rfc;
+        if(l=='ko-KR') {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     start: function () {
         APP.init();
         APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -4361,7 +4370,7 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-//			console.log('keypress: ', UI.editarea.html());
+			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -4401,7 +4410,7 @@ $.extend(UI, {
 				}
 			}, 50);
             if (!UI.body.hasClass('searchActive')) {
-//                console.log('vediamo: ', e.which);
+                console.log('vediamo: ', e.which);
                 if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
                 } else {
                     setTimeout(function() {
@@ -4410,7 +4419,7 @@ $.extend(UI, {
                 }
             }
 		}).on('keydown', '.editor .editarea', function(e) {
-//			console.log('keydown: ', UI.editarea.html());
+			console.log('keydown: ', UI.editarea.html());
 /*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -4773,7 +4782,13 @@ $.extend(UI, {
 				}, 10);
 */
 			UI.registerQACheck();
-            UI.lockTags(UI.editarea);
+                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which = '32')) ) {
+                } else {
+                    UI.lockTags(UI.editarea);
+                }
+
+
+//            UI.lockTags(UI.editarea);
 
         }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
@@ -6032,7 +6047,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags: ', UI.editarea.html());
+		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
