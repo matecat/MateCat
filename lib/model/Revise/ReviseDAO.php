@@ -17,13 +17,14 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
         $this->_validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (id_job, id_segment, err_typing, err_translation, err_terminology, err_quality, err_style)
-                    VALUES ( %d, %d, '%s', '%s', '%s', '%s', '%s' ) ON DUPLICATE KEY UPDATE
+                " (id_job, id_segment, err_typing, err_translation, err_terminology, err_quality, err_style, original_translation)
+                    VALUES ( %d, %d, '%s', '%s', '%s', '%s', '%s', '%s' ) ON DUPLICATE KEY UPDATE
                         err_typing = VALUES(err_typing),
                         err_translation = VALUES(err_translation),
                         err_terminology = VALUES(err_terminology),
                         err_quality = VALUES(err_quality),
-                        err_style = VALUES(err_style)
+                        err_style = VALUES(err_style),
+                        original_translation = VALUES(original_translation)
             ";
 
         $query = sprintf(
@@ -34,7 +35,8 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
                 $obj->err_translation,
                 $obj->err_terminology,
                 $obj->err_quality,
-                $obj->err_style
+                $obj->err_style,
+                $obj->original_translation
         );
 
         $this->con->query( $query );
@@ -60,7 +62,8 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
                                     err_translation,
                                     err_terminology,
                                     err_quality,
-                                    err_style
+                                    err_style,
+                                    original_translation
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->id_job !== null ) {
@@ -124,6 +127,11 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
             $set_array[ ] = sprintf($condition, $obj->err_style);
         }
 
+        if($obj->original_translation !== null){
+            $condition = "origin_translation = '%s'";
+            $set_array[ ] = sprintf($condition, $obj->original_translation);
+        }
+
         $set_string   = null;
         $where_string = implode( " AND ", $where_conditions );
 
@@ -183,7 +191,8 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
                     'err_translation' => $item['err_translation'],
                     'err_terminology' => $item['err_terminology'],
                     'err_quality'     => $item['err_quality'],
-                    'err_style'       => $item['err_style']
+                    'err_style'       => $item['err_style'],
+                    'original_translation' => $item['original_translation']
             );
 
             $obj = new Revise_ReviseStruct( $build_arr );
