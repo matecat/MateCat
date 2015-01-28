@@ -1748,6 +1748,32 @@ header .searchbox {
     line-height: 15px;
 }
 
+.popup-stat-quality td, .popup-stat-quality th {
+padding: 15px;
+}
+
+.popup-stat-quality p {
+	margin: 20px 25px;
+	line-height: 30px;
+	text-align: left;
+}
+
+tr[data-vote='excellent'] td,
+tr[data-vote='verygood'] td,
+tr[data-vote='good'] td
+ {
+	background: #d8ead3;
+}
+
+tr[data-vote='acceptable'] td, {
+	background: #fff3cd;
+}
+
+tr[data-vote='fail'] td, {
+	background: #f4cdcc;
+}
+
+
 body.filterOpen .searchbox
 {
 	display: block;
