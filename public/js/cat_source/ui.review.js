@@ -144,6 +144,7 @@ if(config.enableReview && parseInt(config.isReview)) {
     }).on('setCurrentSegment_success', function(e, d) {
         console.log('d: ', d)
         // temp
+/*
         d.error_data = [
             {
                 "type":"Typing",
@@ -167,6 +168,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             }
         ];
         d.original = UI.editarea.text();
+        */
         // end temp
         UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
