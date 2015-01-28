@@ -214,7 +214,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             tbody = $('#popup-stat-quality .slide-panel-body tbody');
             tbody.empty();
             $.each(d, function (index) {
-                $(tbody).append('<tr><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
+                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
             });
 //            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },

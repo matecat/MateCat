@@ -3416,8 +3416,7 @@ $.extend(UI, {
 //        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
-		console.log('render');
-        UI.getSegments(options);
+		UI.getSegments(options);
 //		if(highlight) {
 //			console.log('HIGHLIGHT');
 //			UI.highlightEditarea();
@@ -7154,7 +7153,7 @@ $.extend(UI, {
 
 	},
 	execFind_success: function(d) {
-        console.log('execFind_success');
+        console.log('execFind_success'); return false;
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
@@ -8726,7 +8725,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             tbody = $('#popup-stat-quality .slide-panel-body tbody');
             tbody.empty();
             $.each(d, function (index) {
-                $(tbody).append('<tr><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
+                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
             });
 //            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },
