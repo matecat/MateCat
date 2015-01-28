@@ -1758,18 +1758,18 @@ padding: 15px;
 	text-align: left;
 }
 
-tr[data-vote='excellent'] td,
-tr[data-vote='verygood'] td,
-tr[data-vote='good'] td
+tr[data-vote='Excellent'] td,
+tr[data-vote='Verygood'] td,
+tr[data-vote='Good'] td
  {
 	background: #d8ead3;
 }
 
-tr[data-vote='acceptable'] td, {
+tr[data-vote='Acceptable'] td, {
 	background: #fff3cd;
 }
 
-tr[data-vote='fail'] td, {
+tr[data-vote='Fail'] td, {
 	background: #f4cdcc;
 }
 
