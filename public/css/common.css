@@ -2428,18 +2428,21 @@ cursor: pointer;
 }
 
 
-.error-type td {
-padding: 4px 2px;
-	border: 1px solid #efefef;
 
+
+.error-type tbody {
+border: 1px solid #efefef;
 }
 
 .error-type tbody td:last-child {
 border-right: 1px solid #efefef;
+border-left: 1px solid #efefef;
 padding: 8px;
 }
 
-
+.error-type tbody tr {
+border-bottom: 1px solid #efefef;
+}
 .error-type tbody tr:hover {
 background: rgba(187, 187, 187, 0.14);
 }
