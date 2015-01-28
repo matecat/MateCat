@@ -95,10 +95,16 @@ if(config.enableReview && parseInt(config.isReview)) {
             original = UI.currentSegment.find('.original-translation').text();
             $('.sub-editor.review .error-type').removeClass('error');
             UI.changeStatus(this, 'approved', 0);
+            err = $('.sub-editor.review .error-type');
+            err_typing = $(err).find('input[name=t1]:checked').val();
+            err_translation = $(err).find('input[name=t2]:checked').val();
+            err_terminology = $(err).find('input[name=t3]:checked').val();
+            err_quality = $(err).find('input[name=t4]:checked').val();
+            err_style = $(err).find('input[name=t5]:checked').val();
             UI.gotoNextSegment();
 
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
-            err = $('.sub-editor.review .error-type');
+
             APP.doRequest({
 //                data: reqData,
 
@@ -107,11 +113,11 @@ if(config.enableReview && parseInt(config.isReview)) {
                     job: config.job_id,
                     segment: UI.currentSegmentId,
                     original: original,
-                    err_typing: $(err).find('input[name=t1]:checked').val(),
-                    err_translation: $(err).find('input[name=t2]:checked').val(),
-                    err_terminology: $(err).find('input[name=t3]:checked').val(),
-                    err_quality: $(err).find('input[name=t4]:checked').val(),
-                    err_style: $(err).find('input[name=t5]:checked').val()
+                    err_typing: err_typing,
+                    err_translation: err_translation,
+                    err_terminology: err_terminology,
+                    err_quality: err_quality,
+                    err_style: err_style
                 },
 
 //                context: [reqArguments, segment, status],
@@ -142,7 +148,9 @@ if(config.enableReview && parseInt(config.isReview)) {
         $(".outer-stat-quality").hide();
         $('body').removeClass('side-popup');
     }).on('setCurrentSegment_success', function(e, d) {
+        console.log('d: ', d)
         // temp
+/*
         d.error_data = [
             {
                 "type":"Typing",
@@ -166,7 +174,9 @@ if(config.enableReview && parseInt(config.isReview)) {
             }
         ];
         d.original = UI.editarea.text();
+        */
         // end temp
+        if(d.original == '') d.original = UI.editarea.text();
         UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
         UI.trackChanges(UI.editarea);
@@ -204,7 +214,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             tbody = $('#popup-stat-quality .slide-panel-body tbody');
             tbody.empty();
             $.each(d, function (index) {
-                $(tbody).append('<tr><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
+                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
             });
 //            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },

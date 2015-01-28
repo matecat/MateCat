@@ -55,6 +55,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			WHERE fj.id_job = {$queryParams['job']}
 		AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
 			$where_status
+			AND show_in_cattool = 1
 			GROUP BY s.id WITH ROLLUP";
 
     } elseif ( $key == "target" ) {
@@ -1333,7 +1334,7 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
     return $results;
 }
 
-function getCurrentTranslation( $id_job, $id_segment ) {
+function getCurrentTranslationAndLock( $id_job, $id_segment ) {
 
     $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
     $query = sprintf( $query, $id_segment, $id_job );

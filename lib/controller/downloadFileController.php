@@ -300,7 +300,7 @@ class downloadFileController extends downloadController {
 
         $debug[ 'total' ][ ] = time();
 
-// /        Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+        Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
     }
 
