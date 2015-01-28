@@ -112,20 +112,21 @@ class setCurrentSegmentController extends ajaxController {
         $searchReviseStruct             = Revise_ReviseStruct::getStruct();
         $searchReviseStruct->id_job     = $this->id_job;
         $searchReviseStruct->id_segment = $this->id_segment;
-        $dbReviseStruct = $reviseDao -> read( $searchReviseStruct );
+        $_dbReviseStruct = $reviseDao -> read( $searchReviseStruct );
 
-        if(count($dbReviseStruct) > 0){
-            $dbReviseStruct = $dbReviseStruct[0];
+        if(count($_dbReviseStruct) > 0){
+            $_dbReviseStruct = $_dbReviseStruct[0];
         }
         else {
-            $dbReviseStruct = Revise_ReviseStruct::getStruct();
+            $_dbReviseStruct = Revise_ReviseStruct::getStruct();
         }
 
-        $dbReviseStruct = Revise_ReviseStruct::setDefaultValues($dbReviseStruct);
-        $dbReviseStruct = self::prepareReviseStructReturnValues($dbReviseStruct);
+        $_dbReviseStruct = Revise_ReviseStruct::setDefaultValues($_dbReviseStruct);
+        $dbReviseStruct = self::prepareReviseStructReturnValues($_dbReviseStruct);
 
         $this->result[ 'nextSegmentId' ] = $nSegment[ 'id' ];
-        $this->result[ 'error_data' ] = $dbReviseStruct;
+        $this->result[ 'error_data' ]    = $dbReviseStruct;
+        $this->result[ 'original' ]      = CatUtils::rawxliff2view( $_dbReviseStruct->original_translation );
     }
 
     private static function prepareReviseStructReturnValues($struct){

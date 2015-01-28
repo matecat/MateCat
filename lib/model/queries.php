@@ -1333,9 +1333,9 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
     return $results;
 }
 
-function getCurrentTranslationAndLock( $id_job, $id_segment ) {
+function getCurrentTranslation( $id_job, $id_segment ) {
 
-    $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u FOR UPDATE";
+    $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
     $query = sprintf( $query, $id_segment, $id_job );
 
     $db      = Database::obtain();
