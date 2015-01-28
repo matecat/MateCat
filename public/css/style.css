@@ -3356,6 +3356,7 @@ margin-right: 3%;
 	padding: 5px;
 	font-size: 18px;
 	margin-top: 32px;
+	cursor: default!important;
 	border-bottom: 1px solid #ccc;
 	padding: 5px;
 	background: #fbfcfc;
@@ -3364,6 +3365,12 @@ margin-right: 3%;
 	border: 1px solid #E6E6E6;
 	box-shadow: 0 1px 2px #ccc;
 	-webkit-box-shadow: 0 1px 2px #DFDFDF;
+	    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .sub-editor.review .track-changes .deleted
