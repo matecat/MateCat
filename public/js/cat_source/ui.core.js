@@ -667,6 +667,7 @@ UI = {
 		return percentageClass;
 	},
 	getSegments: function(options) {
+        console.log('options: ', options);
 		where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');

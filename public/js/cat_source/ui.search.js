@@ -103,6 +103,7 @@ $.extend(UI, {
 
 	},
 	execFind_success: function(d) {
+        console.log('execFind_success'); return false;
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
