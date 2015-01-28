@@ -438,6 +438,7 @@ $.extend(UI, {
 
                 UI.numCharsUntilTagRight = null;
                 UI.numCharsUntilTagLeft = null;
+                UI.editarea.find('.test-invisible').remove();
                 return false;
             };
         });
