@@ -15,6 +15,7 @@ class setRevisionController extends ajaxController {
     private $err_terminology;
     private $err_quality;
     private $err_style;
+    private $original_translation;
 
     private static $accepted_values = array(
             Constants_Revise::CLIENT_VALUE_NONE,
@@ -24,38 +25,43 @@ class setRevisionController extends ajaxController {
 
     public function __construct() {
         $filterArgs = array(
-                'job'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'segment'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'err_typing'      => array(
+                'job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'err_typing'           => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_translation' => array(
+                'err_translation'      => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_terminology' => array(
+                'err_terminology'      => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_quality'     => array(
+                'err_quality'          => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_style'       => array(
+                'err_style'            => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
+                ),
+                'original' => array(
+                        'filter'  => FILTER_SANITIZE_STRING,
+                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
                 )
         );
 
-        $postInput             = filter_input_array( INPUT_POST, $filterArgs );
-        $this->id_job          = $postInput[ 'job' ];
-        $this->id_segment      = $postInput[ 'segment' ];
-        $this->err_typing      = $postInput[ 'err_typing' ];
-        $this->err_translation = $postInput[ 'err_translation' ];
-        $this->err_terminology = $postInput[ 'err_terminology' ];
-        $this->err_quality     = $postInput[ 'err_quality' ];
-        $this->err_style       = $postInput[ 'err_style' ];
+        $postInput                  = filter_input_array( INPUT_POST, $filterArgs );
+        $this->id_job               = $postInput[ 'job' ];
+        $this->id_segment           = $postInput[ 'segment' ];
+        $this->err_typing           = $postInput[ 'err_typing' ];
+        $this->err_translation      = $postInput[ 'err_translation' ];
+        $this->err_terminology      = $postInput[ 'err_terminology' ];
+        $this->err_quality          = $postInput[ 'err_quality' ];
+        $this->err_style            = $postInput[ 'err_style' ];
+        $this->original_translation = $postInput[ 'original' ];
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][ ] = array( 'code' => -1, 'message' => 'Job ID missing' );
@@ -78,17 +84,15 @@ class setRevisionController extends ajaxController {
         }
 
         //store segment revision in DB
-        $revisionStruct = new Revise_ReviseStruct(
-                array(
-                        'id_job'          => $this->id_job,
-                        'id_segment'      => $this->id_segment,
-                        'err_typing'      => $this->err_typing,
-                        'err_translation' => $this->err_translation,
-                        'err_terminology' => $this->err_terminology,
-                        'err_quality'     => $this->err_quality,
-                        'err_style'       => $this->err_style
-                )
-        );
+        $revisionStruct                           = Revise_ReviseStruct::getStruct();
+        $revisionStruct->id_job                   = $this->id_job;
+        $revisionStruct->id_segment               = $this->id_segment;
+        $revisionStruct->err_typing               = $this->err_typing;
+        $revisionStruct->err_translation          = $this->err_translation;
+        $revisionStruct->err_terminology          = $this->err_terminology;
+        $revisionStruct->err_quality              = $this->err_quality;
+        $revisionStruct->err_style                = $this->err_style;
+        $revisionStruct->original_translation     = $this->original_translation;
 
         $reviseDAO = new Revise_ReviseDAO( Database::obtain() );
 
@@ -98,6 +102,7 @@ class setRevisionController extends ajaxController {
         } catch ( Exception $e ) {
             Log::doLog( __CLASS__ . "::" . __METHOD__ . " -> " . $e->getMessage() );
             $this->result[ 'errors' ] [ ] = array( 'code' => -3, 'message' => "Insert failed" );
+
             return;
         }
     }
@@ -116,4 +121,4 @@ class setRevisionController extends ajaxController {
         return Constants_Revise::$ERR_TYPES_MAP[ $fieldVal ];
     }
 
-} 
+}
