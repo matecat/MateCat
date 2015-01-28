@@ -142,6 +142,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         $(".outer-stat-quality").hide();
         $('body').removeClass('side-popup');
     }).on('setCurrentSegment_success', function(e, d) {
+        console.log('d: ', d)
         // temp
         d.error_data = [
             {

@@ -5571,7 +5571,7 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-//				console.log(d);
+				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.error.length)
 					UI.processErrors(d.error, 'getContribution');
 				UI.getContribution_success(d, this);
@@ -6047,7 +6047,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-		console.log('lock tags: ', UI.editarea.html());
+//		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -8651,6 +8651,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         $(".outer-stat-quality").hide();
         $('body').removeClass('side-popup');
     }).on('setCurrentSegment_success', function(e, d) {
+        console.log('d: ', d)
         // temp
         d.error_data = [
             {
