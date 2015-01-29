@@ -8607,6 +8607,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             original = UI.currentSegment.find('.original-translation').text();
             $('.sub-editor.review .error-type').removeClass('error');
             UI.changeStatus(this, 'approved', 0);
+            sid = UI.currentSegmentId;
             err = $('.sub-editor.review .error-type');
             err_typing = $(err).find('input[name=t1]:checked').val();
             err_translation = $(err).find('input[name=t2]:checked').val();
@@ -8623,7 +8624,7 @@ if(config.enableReview && parseInt(config.isReview)) {
                 data: {
                     action: 'setRevision',
                     job: config.job_id,
-                    segment: UI.currentSegmentId,
+                    segment: sid,
                     original: original,
                     err_typing: err_typing,
                     err_translation: err_translation,
