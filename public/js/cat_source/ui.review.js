@@ -7,8 +7,8 @@ if(config.enableReview && parseInt(config.isReview)) {
         console.log('new? ', $(this).hasClass('status-new'));
         console.log('draft? ', $(this).hasClass('status-draft'));
         if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
-            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
-            UI.openableSegment = false;
+//            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
+//            UI.openableSegment = false;
         }
     }).on('start', function() {
         // temp
@@ -116,6 +116,7 @@ if(config.enableReview && parseInt(config.isReview)) {
                 data: {
                     action: 'setRevision',
                     job: config.job_id,
+                    jpassword: config.password,
                     segment: sid,
                     original: original,
                     err_typing: err_typing,

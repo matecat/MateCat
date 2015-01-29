@@ -3373,12 +3373,14 @@ margin-right: 3%;
     user-select: none;
 }
 
-.sub-editor.review .track-changes .deleted
+.sub-editor.review .track-changes .deleted,
+.suggestion_source .deleted
 {
     background: #ffc7ca;
     text-decoration: line-through;
 }
-.sub-editor.review .track-changes .added
+.sub-editor.review .track-changes .added,
+.suggestion_source .added
 {
     background: #b0ffb3
 }
