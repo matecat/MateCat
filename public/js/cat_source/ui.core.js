@@ -926,8 +926,12 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
+        UI.openableSegment = true;
         segment.trigger('open');
-		this.numOpenedSegments++;
+        if(!UI.openableSegment) return false;
+        UI.openableSegment = false;
+
+        this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);

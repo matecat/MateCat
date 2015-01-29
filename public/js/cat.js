@@ -926,8 +926,12 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
+        UI.openableSegment = true;
         segment.trigger('open');
-		this.numOpenedSegments++;
+        if(!UI.openableSegment) return false;
+        UI.openableSegment = false;
+
+        this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
@@ -8516,8 +8520,12 @@ $.extend(UI, {
 if(config.enableReview && parseInt(config.isReview)) {
 
     $('html').on('open', 'section', function() {
-//        editarea = $(this).find('.editarea');
-//        editarea.after('<div class="original-translation" style="display: none">' + $(this).find('.editarea').text() + '</div>');
+        console.log('new? ', $(this).hasClass('status-new'));
+        console.log('draft? ', $(this).hasClass('status-draft'));
+        if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
+            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
+            UI.openableSegment = false;
+        }
     }).on('start', function() {
         // temp
         config.stat_quality = [
