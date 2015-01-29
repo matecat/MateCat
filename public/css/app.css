@@ -1748,6 +1748,32 @@ header .searchbox {
     line-height: 15px;
 }
 
+.popup-stat-quality td, .popup-stat-quality th {
+padding: 15px;
+}
+
+.popup-stat-quality p {
+	margin: 20px 25px;
+	line-height: 30px;
+	text-align: left;
+}
+
+tr[data-vote='Excellent'] td,
+tr[data-vote='Verygood'] td,
+tr[data-vote='Good'] td
+ {
+	background: #d8ead3;
+}
+
+tr[data-vote='Acceptable'] td, {
+	background: #fff3cd;
+}
+
+tr[data-vote='Fail'] td, {
+	background: #f4cdcc;
+}
+
+
 body.filterOpen .searchbox
 {
 	display: block;
@@ -2402,18 +2428,21 @@ cursor: pointer;
 }
 
 
-.error-type td {
-padding: 4px 2px;
-	border: 1px solid #efefef;
 
+
+.error-type tbody {
+border: 1px solid #efefef;
 }
 
 .error-type tbody td:last-child {
 border-right: 1px solid #efefef;
+border-left: 1px solid #efefef;
 padding: 8px;
 }
 
-
+.error-type tbody tr {
+border-bottom: 1px solid #efefef;
+}
 .error-type tbody tr:hover {
 background: rgba(187, 187, 187, 0.14);
 }
@@ -6037,16 +6066,21 @@ margin-right: 3%;
 	padding: 5px;
 	font-size: 18px;
 	margin-top: 32px;
+	cursor: default!important;
 	border-bottom: 1px solid #ccc;
 	padding: 5px;
-	background: #FBFBFB;
+	background: #fbfcfc;
 	box-shadow: 0px 1px 0px #000;
 	border-radius: 2px;
-
-	border: 1px solid #727272;
+	border: 1px solid #E6E6E6;
 	box-shadow: 0 1px 2px #ccc;
-	-webkit-box-shadow: 0 1px 2px #ccc;
-
+	-webkit-box-shadow: 0 1px 2px #DFDFDF;
+	    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .sub-editor.review .track-changes .deleted
