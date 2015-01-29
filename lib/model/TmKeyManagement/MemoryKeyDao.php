@@ -34,10 +34,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $query = sprintf(
                 $query,
                 (int)$obj->uid,
-                $obj->tm_key->key,
-                ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
-                ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
+                $this->con->escape( $obj->tm_key->key ),
+                ( $obj->tm_key->name == null ) ? '' : $this->con->escape( $obj->tm_key->name ),
+                ( $obj->tm_key->tm == null ) ? 1 : $this->con->escape( $obj->tm_key->tm ),
+                ( $obj->tm_key->glos == null ) ? 1 : $this->con->escape( $obj->tm_key->glos )
         );
 
         $this->con->query( $query );
@@ -78,22 +78,22 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
             if ( $obj->tm_key->key !== null ) {
                 $condition           = "key_value = '%s'";
-                $where_conditions[ ] = sprintf( $condition, $obj->tm_key->key );
+                $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->key ) );
             }
 
             if ( $obj->tm_key->name !== null ) {
                 $condition           = "key_name = '%s'";
-                $where_conditions[ ] = sprintf( $condition, $obj->tm_key->name );
+                $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->name ) );
             }
 
             if ( $obj->tm_key->tm !== null ) {
                 $condition           = "key_tm = %d";
-                $where_conditions[ ] = sprintf( $condition, $obj->tm_key->tm );
+                $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->tm ) );
             }
 
             if ( $obj->tm_key->glos !== null ) {
                 $condition           = "key_glos = %d";
-                $where_conditions[ ] = sprintf( $condition, $obj->tm_key->glos );
+                $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->glos ) );
             }
         }
 
@@ -128,14 +128,14 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         $where_conditions[ ] = "uid = " . $obj->uid;
-        $where_conditions[ ] = "key_value = '" . $obj->tm_key->key . "'";
+        $where_conditions[ ] = "key_value = '" . $this->con->escape( $obj->tm_key->key ) . "'";
 
         //tm_key conditions
         if ( $obj->tm_key !== null ) {
 
             if ( $obj->tm_key->name !== null ) {
                 $condition    = "key_name = '%s'";
-                $set_array[ ] = sprintf( $condition, $obj->tm_key->name );
+                $set_array[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->name ) );
             }
 
 //            if ( $obj->tm_key->tm !== null ) {
@@ -202,10 +202,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $values[ ] = sprintf(
                         $tuple_template,
                         (int)$obj->uid,
-                        $obj->tm_key->key,
-                        ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
-                        ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                        ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
+                        $this->con->escape( $obj->tm_key->key ),
+                        ( $obj->tm_key->name == null ) ? '' : $this->con->escape( $obj->tm_key->name ),
+                        ( $obj->tm_key->tm == null ) ? 1 : $this->con->escape( $obj->tm_key->tm ),
+                        ( $obj->tm_key->glos == null ) ? 1 : $this->con->escape( $obj->tm_key->glos )
                 );
             }
 
@@ -260,11 +260,11 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         //compose where condition
         if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . $obj->uid;
+            $where_conditions[ ] = "uid = " . (int)$obj->uid;
         }
 
         if ( $obj->tm_key->key !== null ) {
-            $where_conditions[ ] = "key_value = '" . $obj->tm_key->key . "'";
+            $where_conditions[ ] = "key_value = '" . $this->con->escape( $obj->tm_key->key ) . "'";
         }
 
         //throw exception if where condition is empty
@@ -287,7 +287,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
             if ( $obj->tm_key->name !== null ) {
                 $condition    = "key_name = '%s'";
-                $set_array[ ] = sprintf( $condition, $obj->tm_key->name );
+                $set_array[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->name ) );
             }
 
 //            if ( $obj->tm_key->tm !== null ) {
@@ -364,10 +364,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $values[ ] = sprintf(
                         $tuple_template,
                         (int)$obj->uid,
-                        $obj->tm_key->key,
-                        ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
-                        ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                        ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos,
+                        $this->con->escape( $obj->tm_key->key ),
+                        ( $obj->tm_key->name == null ) ? '' : $this->con->escape( $obj->tm_key->name ),
+                        ( $obj->tm_key->tm == null ) ? 1 : $this->con->escape( $obj->tm_key->tm ),
+                        ( $obj->tm_key->glos == null ) ? 1 : $this->con->escape( $obj->tm_key->glos ),
                         ( $obj->r == null ) ? true : $obj->r,
                         ( $obj->w == null ) ? true : $obj->w
                 );

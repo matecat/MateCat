@@ -10,6 +10,7 @@ abstract class DataAccess_AbstractDao {
 
     /**
      * The connection object
+     * @var Database
      */
     protected $con;
 

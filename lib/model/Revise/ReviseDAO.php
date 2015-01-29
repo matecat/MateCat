@@ -36,7 +36,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
                 $obj->err_terminology,
                 $obj->err_quality,
                 $obj->err_style,
-                $obj->original_translation
+                $this->con->escape( $obj->original_translation )
         );
 
         $this->con->query( $query );
@@ -67,11 +67,11 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->id_job !== null ) {
-            $where_conditions[ ] = "id_job = " . $obj->id_job;
+            $where_conditions[ ] = "id_job = " . (int)$obj->id_job;
         }
 
         if ( $obj->id_segment !== null ) {
-            $where_conditions[ ] = "id_segment = " . $obj->id_segment;
+            $where_conditions[ ] = "id_segment = " . (int)$obj->id_segment;
         }
 
 
@@ -99,8 +99,8 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
         $where_conditions = array();
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
-        $where_conditions[ ] = "id_job = " . $obj->id_job;
-        $where_conditions[ ] = "id_segment = " . $obj->id_segment;
+        $where_conditions[ ] = "id_job = " . (int)$obj->id_job;
+        $where_conditions[ ] = "id_segment = " . (int)$obj->id_segment;
 
         if($obj->err_typing !== null){
             $condition = "err_typing = '%s'";
@@ -129,7 +129,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
 
         if($obj->original_translation !== null){
             $condition = "origin_translation = '%s'";
-            $set_array[ ] = sprintf($condition, $obj->original_translation);
+            $set_array[ ] = sprintf($condition, $this->con->escape( $obj->original_translation ) );
         }
 
         $set_string   = null;
