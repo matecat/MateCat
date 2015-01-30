@@ -24,7 +24,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
                         err_terminology = VALUES(err_terminology),
                         err_quality = VALUES(err_quality),
                         err_style = VALUES(err_style),
-                        original_translation = VALUES(original_translation)
+                        original_translation = original_translation
             ";
 
         $query = sprintf(
@@ -127,10 +127,10 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
             $set_array[ ] = sprintf($condition, $obj->err_style);
         }
 
-        if($obj->original_translation !== null){
-            $condition = "origin_translation = '%s'";
-            $set_array[ ] = sprintf($condition, $this->con->escape( $obj->original_translation ) );
-        }
+//        if($obj->original_translation !== null){
+//            $condition = "origin_translation = '%s'";
+//            $set_array[ ] = sprintf($condition, $this->con->escape( $obj->original_translation ) );
+//        }
 
         $set_string   = null;
         $where_string = implode( " AND ", $where_conditions );

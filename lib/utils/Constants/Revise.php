@@ -20,12 +20,18 @@ class Constants_Revise {
             self::MAJOR => self::CLIENT_VALUE_MAJOR
     );
 
-    const NONE = 'none';
+    const NONE  = 'none';
     const MINOR = 'minor';
     const MAJOR = 'major';
 
-    const CLIENT_VALUE_NONE = 0;
+    const CLIENT_VALUE_NONE  = 0;
     const CLIENT_VALUE_MINOR = 1;
     const CLIENT_VALUE_MAJOR = 2;
+
+    const ERR_TYPING       = 'Typing';
+    const ERR_TRANSLATION  = 'Translation';
+    const ERR_TERMINOLOGY  = 'Terminology';
+    const ERR_QUALITY      = 'Language Quality';
+    const ERR_STYLE        = 'Style';
 
 } 

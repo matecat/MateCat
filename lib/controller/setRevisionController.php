@@ -6,9 +6,12 @@
  * Date: 19/01/15
  * Time: 16.50
  */
+include_once INIT::$MODEL_ROOT . "/queries.php";
+
 class setRevisionController extends ajaxController {
 
     private $id_job;
+    private $password_job;
     private $id_segment;
     private $err_typing;
     private $err_translation;
@@ -25,29 +28,33 @@ class setRevisionController extends ajaxController {
 
     public function __construct() {
         $filterArgs = array(
-                'job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'err_typing'           => array(
+                'job'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'segment'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'jpassword'       => array(
+                        'filter'  => FILTER_SANITIZE_STRING,
+                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                ),
+                'err_typing'      => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_translation'      => array(
+                'err_translation' => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_terminology'      => array(
+                'err_terminology' => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_quality'          => array(
+                'err_quality'     => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_style'            => array(
+                'err_style'       => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'original' => array(
+                'original'        => array(
                         'filter'  => FILTER_SANITIZE_STRING,
                         'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
                 )
@@ -55,6 +62,7 @@ class setRevisionController extends ajaxController {
 
         $postInput                  = filter_input_array( INPUT_POST, $filterArgs );
         $this->id_job               = $postInput[ 'job' ];
+        $this->password_job         = $postInput[ 'jpassword' ];
         $this->id_segment           = $postInput[ 'segment' ];
         $this->err_typing           = $postInput[ 'err_typing' ];
         $this->err_translation      = $postInput[ 'err_translation' ];
@@ -71,6 +79,10 @@ class setRevisionController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( 'code' => -2, 'message' => 'Segment ID missing' );
         }
 
+        if ( empty( $this->password_job ) ) {
+            $this->result[ 'errors' ][ ] = array( 'code' => -3, 'message' => 'Job password missing' );
+        }
+
     }
 
     /**
@@ -83,28 +95,108 @@ class setRevisionController extends ajaxController {
             return;
         }
 
-        //store segment revision in DB
-        $revisionStruct                           = Revise_ReviseStruct::getStruct();
-        $revisionStruct->id_job                   = $this->id_job;
-        $revisionStruct->id_segment               = $this->id_segment;
-        $revisionStruct->err_typing               = $this->err_typing;
-        $revisionStruct->err_translation          = $this->err_translation;
-        $revisionStruct->err_terminology          = $this->err_terminology;
-        $revisionStruct->err_quality              = $this->err_quality;
-        $revisionStruct->err_style                = $this->err_style;
-        $revisionStruct->original_translation     = $this->original_translation;
+        $job_data = getJobData( (int)$this->id_job, $this->password_job );
+        if ( empty( $job_data ) ) {
+            $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+        }
+
+        $db    = Database::obtain();
+        $err   = $db->get_error();
+        $errno = $err[ 'error_code' ];
+
+        if ( $errno != 0 ) {
+            $msg                        = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
+            $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+
+            throw new Exception( $msg, -1 );
+        }
+
+        //add check for job status archived.
+        if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            $this->result[ 'error' ][ ] = array( "code" => -6, "message" => "job archived" );
+        }
+
+        $pCheck = new AjaxPasswordCheck();
+        //check for Password correctness
+        if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password_job, $this->id_segment ) ) {
+            $this->result[ 'error' ][ ] = array( "code" => -7, "message" => "wrong password" );
+        }
+
+        $wStruct = new WordCount_Struct();
+
+        $wStruct->setIdJob( $this->id_job );
+        $wStruct->setJobPassword( $this->password_job );
+        $wStruct->setNewWords( $job_data[ 'new_words' ] );
+        $wStruct->setDraftWords( $job_data[ 'draft_words' ] );
+        $wStruct->setTranslatedWords( $job_data[ 'translated_words' ] );
+        $wStruct->setApprovedWords( $job_data[ 'approved_words' ] );
+        $wStruct->setRejectedWords( $job_data[ 'rejected_words' ] );
+
 
         $reviseDAO = new Revise_ReviseDAO( Database::obtain() );
 
+        //store segment revision in DB
+        $revisionStruct             = Revise_ReviseStruct::getStruct();
+        $revisionStruct->id_job     = $this->id_job;
+        $revisionStruct->id_segment = $this->id_segment;
+
+        //check if an old revision exists. If it does, retrieve it and save it.
+        $oldRevision = $reviseDAO->read( $revisionStruct );
+        $oldRevision = ( isset( $oldRevision[ 0 ] ) ) ? $oldRevision[ 0 ] : null;
+
+        $revisionStruct->err_typing           = $this->err_typing;
+        $revisionStruct->err_translation      = $this->err_translation;
+        $revisionStruct->err_terminology      = $this->err_terminology;
+        $revisionStruct->err_quality          = $this->err_quality;
+        $revisionStruct->err_style            = $this->err_style;
+        $revisionStruct->original_translation = $this->original_translation;
+
+        //save the new revision in the database.
         try {
             $reviseDAO->create( $revisionStruct );
-            $this->result[ 'data' ][ 'message' ] = 'OK';
         } catch ( Exception $e ) {
-            Log::doLog( __CLASS__ . "::" . __METHOD__ . " -> " . $e->getMessage() );
-            $this->result[ 'errors' ] [ ] = array( 'code' => -3, 'message' => "Insert failed" );
+            Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
+            $this->result[ 'errors' ] [ ] = array( 'code' => -4, 'message' => "Insert failed" );
 
             return;
         }
+
+        /**
+         * Refresh error counters in the job table
+         */
+
+        $errorCountStruct = new ErrorCount_DiffStruct( $oldRevision, $revisionStruct );
+        $errorCountStruct->setIdJob( $this->id_job );
+        $errorCountStruct->setJobPassword( $this->password_job );
+
+        $errorCountDao = new ErrorCount_ErrorCountDAO( Database::obtain() );
+        try {
+            $errorCountDao->update( $errorCountStruct );
+        } catch ( Exception $e ) {
+            Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
+            $this->result[ 'errors' ] [ ] = array( 'code' => -5, 'message' => "Did not update job error counters." );
+
+            return;
+        }
+
+        /**
+         * Retrieve information about job errors
+         * ( Note: these information are fed by the revision process )
+         * @see setRevisionController
+         */
+        $jobQA = new Revise_JobQA(
+                $this->id_job,
+                $this->password_job,
+                $wStruct->getTotal()
+        );
+
+        $jobQA->retrieveJobErrorTotals();
+        $jobVote = $jobQA->evalJobVote();
+
+        $this->result[ 'data' ][ 'message' ]      = 'OK';
+        $this->result[ 'data' ][ 'stat_quality' ] = $jobQA->getQaData();;
     }
 
     /**

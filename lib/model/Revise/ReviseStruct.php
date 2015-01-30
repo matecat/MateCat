@@ -91,5 +91,4 @@ class Revise_ReviseStruct extends DataAccess_AbstractDaoObjectStruct implements 
 
         return $struct;
     }
-
-} 
+}
