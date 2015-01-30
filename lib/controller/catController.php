@@ -300,10 +300,7 @@ class catController extends viewController {
 
         list( $uid, $user_email ) = $this->getLoginUserParams();
 
-        //TODO: IMPROVE
-        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-        $url_request = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
-        if ( $url_request ) {
+        if ( $this->isRevision() ) {
             $this->userRole   = TmKeyManagement_Filter::ROLE_REVISOR;
             $this->isRevision = true;
         } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {

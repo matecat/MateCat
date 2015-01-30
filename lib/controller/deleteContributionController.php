@@ -92,12 +92,9 @@ class deleteContributionController extends ajaxController {
         //get job's TM keys
         try{
 
-            $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-            $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
             $tm_keys = $this->tm_keys;
 
-            if ( $url_request ) {
+            if ( $this->isRevision() ) {
                 $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
             } elseif( $this->userMail == $job_data['owner'] ){
                 $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'r', 'tm' );
