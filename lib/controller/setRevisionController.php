@@ -88,7 +88,7 @@ class setRevisionController extends ajaxController {
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
-     * @return mixed
+     * @throws Exception
      */
     public function doAction() {
         if ( !empty( $this->result[ 'errors' ] ) ) {
