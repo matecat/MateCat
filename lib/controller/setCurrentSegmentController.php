@@ -63,7 +63,7 @@ class setCurrentSegmentController extends ajaxController {
         } else {
             $getTranslatedInstead = true;
         }
-        $nextSegmentId = getNextNextSegment( $this->id_segment, $this->id_job, $this->password, $getTranslatedInstead );
+        $nextSegmentId = getNextSegment( $this->id_segment, $this->id_job, $this->password, $getTranslatedInstead );
 
         $_thereArePossiblePropagations = countThisTranslatedHashInJob( $this->id_job, $this->password, $this->id_segment );
         $thereArePossiblePropagations  = intval( $_thereArePossiblePropagations[ 'available' ] );

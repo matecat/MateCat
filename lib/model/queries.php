@@ -1558,7 +1558,7 @@ function getEditLog( $jid, $pass ) {
     return $results;
 }
 
-function getNextNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) {
+function getNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) {
 
     $db      = Database::obtain();
 
