@@ -45,6 +45,7 @@ class catController extends viewController {
     private $isRevision = false;
 
     private $qa_data;
+    private $qa_overall;
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
@@ -428,7 +429,8 @@ class catController extends viewController {
 
         $jobQA->retrieveJobErrorTotals();
         $jobVote = $jobQA->evalJobVote();
-        $this->qa_data = $jobQA->getQaData();
+        $this->qa_data    = json_encode( $jobQA->getQaData() );
+        $this->qa_overall = $jobVote;
     }
 
     public function setTemplateVars() {
@@ -470,9 +472,10 @@ class catController extends viewController {
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->user_keys = $this->_keyList;
-        $this->template->job_stats = $this->job_stats;
-        $this->template->stat_quality = $this->qa_data;
+        $this->template->user_keys       = $this->_keyList;
+        $this->template->job_stats       = $this->job_stats;
+        $this->template->stat_quality    = $this->qa_data;
+        $this->template->overall_quality = $this->qa_overall;
 
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;

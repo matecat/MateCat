@@ -195,8 +195,9 @@ class setRevisionController extends ajaxController {
         $jobQA->retrieveJobErrorTotals();
         $jobVote = $jobQA->evalJobVote();
 
-        $this->result[ 'data' ][ 'message' ]      = 'OK';
-        $this->result[ 'data' ][ 'stat_quality' ] = $jobQA->getQaData();;
+        $this->result[ 'data' ][ 'message' ]         = 'OK';
+        $this->result[ 'data' ][ 'stat_quality' ]    = $jobQA->getQaData();
+        $this->result[ 'data' ][ 'overall_quality' ] = $jobVote;
     }
 
     /**
