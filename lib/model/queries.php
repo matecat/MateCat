@@ -1893,12 +1893,10 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 				   INNER JOIN segments s ON s.id_file=f.id
 				   LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
 				   WHERE p.id= '$pid'
-
 				   %s
 				   AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 				   %s
 				   %s
-
 				   GROUP BY f.id, j.id, j.password
 				   ORDER BY j.create_date, j.job_first_segment
 				   ";

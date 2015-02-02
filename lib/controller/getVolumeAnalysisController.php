@@ -416,8 +416,23 @@ class getVolumeAnalysisController extends ajaxController {
             $this->result[ 'jobs' ]    = array();
 
             foreach ( $this->_project_data as $job ) {
+
                 $this->result[ 'jobs' ][ 'langpairs' ][ $job[ 'jid_jpassword' ] ] = $job[ 'lang_pair' ];
                 $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ]   = "/translate/" . $job[ 'job_url' ];
+
+                //set the total for the job
+                $jobQA = new Revise_JobQA(
+                        $job[ 'jid' ],
+                        $job[ 'jpassword' ],
+                        $this->return_data[ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ]
+                );
+
+                $jobQA->retrieveJobErrorTotals();
+                $jobVote = $jobQA->evalJobVote();
+
+                $this->result[ 'jobs' ][ 'job-quality-details' ][ $job[ 'jid_jpassword' ] ] = $jobQA->getQaData();
+                $this->result[ 'jobs' ][ 'quality-overall' ][ $job[ 'jid_jpassword' ] ]     = $jobVote[ 'minText' ];
+
             }
 
         }

@@ -4765,7 +4765,7 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function() { //inputineditarea
+		}).on('input', '.editarea', function( e ) { //inputineditarea
 			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {

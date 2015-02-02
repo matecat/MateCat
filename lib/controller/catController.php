@@ -430,7 +430,7 @@ class catController extends viewController {
         $jobQA->retrieveJobErrorTotals();
         $jobVote = $jobQA->evalJobVote();
         $this->qa_data    = json_encode( $jobQA->getQaData() );
-        $this->qa_overall = $jobVote;
+        $this->qa_overall = $jobVote[ 'minText' ];
     }
 
     public function setTemplateVars() {

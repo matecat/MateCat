@@ -232,12 +232,12 @@
 
                         <tal:block tal:condition="php: !isReview">
                             <li><a
-                                    href="${basepath}revise/${pname}/'${source}-'${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
+                                    href="${basepath}revise/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
                         </tal:block>
 
                         <tal:block tal:condition="php: isReview">
                             <li><a
-                                    href="${basepath}translate/${pname}/'${source}-'${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
+                                    href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>
 
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>

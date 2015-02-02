@@ -38,7 +38,7 @@ class Revise_JobQA {
      * The lesser vote of the job after it is evaluated ( evalJobVote )
      * @var string
      */
-    private $lesserVote = self::VOTE_EXCELLENT;
+    private $leastVote = self::VOTE_EXCELLENT;
 
     private $job_id;
     private $job_password;
@@ -134,7 +134,7 @@ class Revise_JobQA {
             $fieldName = $constants = $reflect->getConstant( "ERR_" . strtoupper( $field ) );
             $qaData[]    = array(
                     'type'    => $fieldName,
-                    'allowed' => $info[ 'maxErr' ],
+                    'allowed' => (int)$info[ 'acceptance' ],
                     'found'   => $info[ 'foundErr' ],
                     'vote'    => $info[ 'textVote' ]
             );
@@ -157,7 +157,7 @@ class Revise_JobQA {
      */
     private function evalFieldVote( $field ) {
         if ( array_key_exists( $field, self::$error_info ) ) {
-            //evaluate ther method name to invoke into job_error_totals
+            //evaluate the method name to invoke into job_error_totals
             $methodName = 'get' . ucfirst( $field );
             /**
              * @var $errNumber int
@@ -182,15 +182,15 @@ class Revise_JobQA {
         //evaluate
         $avgMark = 0.0;
         foreach ( self::$error_info as $field => $info ) {
-//            $avgMark += $info[ 'foundErr' ];
-            if( $this->scaleVote[ $info[ 'textVote' ] ] < $this->scaleVote[ $this->lesserVote ] ){
-                $this->lesserVote = $info[ 'textVote' ];
+            $avgMark += $info[ 'vote' ];
+            if( $this->scaleVote[ $info[ 'textVote' ] ] < $this->scaleVote[ $this->leastVote ] ){
+                $this->leastVote = $info[ 'textVote' ];
             }
         }
 
-//        $avgMark = $avgMark / count( self::$error_info );
+        $avgMark = $avgMark / count( self::$error_info );
 
-        return $this->lesserVote;
+        return array( 'avg' => $avgMark, 'minText' => $this->leastVote );
     }
 
     private static function vote2text( $vote ) {
