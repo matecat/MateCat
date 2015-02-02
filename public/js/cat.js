@@ -275,8 +275,9 @@ UI = {
 					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
 					'	<div class="overflow"></div>' +
 					'</div>';
-		UI.currentSegment.trigger('footerCreation');
+        UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
@@ -929,7 +930,6 @@ UI = {
 				return;
 		}
         UI.openableSegment = true;
-        segment.trigger('open');
         if(!UI.openableSegment) return false;
         UI.openableSegment = false;
 
@@ -955,7 +955,9 @@ UI = {
 		getNormally = isNotSimilar || isEqual;
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
-		this.getNextSegment(this.currentSegment, 'untranslated');
+        segment.trigger('open');
+
+        this.getNextSegment(this.currentSegment, 'untranslated');
 
 		if ((!this.readonly)&&(!getNormally)) {
 			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
@@ -8579,6 +8581,12 @@ if(config.enableReview && parseInt(config.isReview)) {
     $('html').on('open', 'section', function() {
 //        console.log('new? ', $(this).hasClass('status-new'));
 //        console.log('draft? ', $(this).hasClass('status-draft'));
+        if($(this).hasClass('opened')) {
+            console.log('OPEN SEGMENT');
+            console.log($(this).find('.tab-switcher-review').length);
+            $(this).find('.tab-switcher-review').click();
+        }
+
         if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
             APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
             UI.openableSegment = false;
@@ -8630,10 +8638,8 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-
-        div.find('.submenu').append('<li class="tab-switcher-review" id="segment-20896069-review"><a tabindex="-1" href="#">Review</a></li>');
+        div.find('.submenu').append('<li class="tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Review</a></li>');
         div.append('<div class="tab sub-editor review" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
-        $('.tab-switcher-review').click();
  /*
         setTimeout(function() {// fixes a bug in setting defaults in radio buttons
             UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
@@ -8642,6 +8648,10 @@ if(config.enableReview && parseInt(config.isReview)) {
  */
         UI.footerHTML = div.html();
 
+    }).on('afterFooterCreation', 'section', function() {
+        setTimeout(function() {
+            UI.currentSegment.find('.tab-switcher-review').click();
+        }, 100);
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
         $('.editor .submenu .active').removeClass('active');
@@ -8779,7 +8789,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         */
         // end temp
         if(d.original == '') d.original = UI.editarea.text();
-        UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
+        if(!UI.currentSegment.find('.original-translation').length) UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
         UI.trackChanges(UI.editarea);
     });
