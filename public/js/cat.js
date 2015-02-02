@@ -5695,7 +5695,7 @@ $.extend(UI, {
 				// before doing a enanched view you will need to add a data-original tag
                 escapedSegment = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
 
-                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                $('.sub-editor.matches .overflow', segment).append('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
@@ -5943,23 +5943,50 @@ $.extend(UI, {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
     setContributionSourceDiff: function (segment) {
-        UI.currentSegment.find('.sub-editor.matches').each(function () {
+        sourceText = '';
+        $.each($.parseHTML($('.editor .source').html()), function (index) {
+            if(this.nodeName == '#text') {
+                sourceText += this.data;
+            } else {
+                sourceText += this.innerText;
+            }
+        });
+        console.log('sourceText: ', sourceText);
+        UI.currentSegment.find('.sub-editor.matches ul.suggestion-item').each(function () {
             ss = $(this).find('.suggestion_source');
-            console.log($(ss).html());
-            console.log($(this).find('.graysmall-details .percent').text());
-            diff = UI.dmp.diff_main(UI.currentSegment.find('.source').html(), $(ss).html());
+
+            suggestionSourceText = '';
+            $.each($.parseHTML($(ss).html()), function (index) {
+                if(this.nodeName == '#text') {
+                    suggestionSourceText += this.data;
+                } else {
+                    suggestionSourceText += this.innerText;
+                }
+            });
+            console.log('suggestionSourceText: ', suggestionSourceText);
+
+
+//            console.log('a: ', $('.editor .source').html());
+//            console.log($.parseHTML($('.editor .source').html()));
+//            console.log('b: ', $(ss).html());
+//            console.log($(this).find('.graysmall-details .percent').text());
+
+            diff = UI.dmp.diff_main(sourceText, suggestionSourceText);
             diffTxt = '';
             $.each(diff, function (index) {
                 if(this[0] == -1) {
-                    diffTxt += '<span class="deleted">' + this[1] + '</span>';
+                    diffTxt += '<del>' + this[1] + '</del>';
                 } else if(this[0] == 1) {
-                    diffTxt += '<span class="added">' + this[1] + '</span>';
+                    diffTxt += '<ins>' + this[1] + '</ins>';
                 } else {
                     diffTxt += this[1];
                 }
             });
             console.log('diffTxt: ', diffTxt);
             $(ss).html(diffTxt);
+            UI.lockTags();
+
+
         })
 
 
@@ -8546,11 +8573,11 @@ $.extend(UI, {
 if(config.enableReview && parseInt(config.isReview)) {
 
     $('html').on('open', 'section', function() {
-        console.log('new? ', $(this).hasClass('status-new'));
-        console.log('draft? ', $(this).hasClass('status-draft'));
+//        console.log('new? ', $(this).hasClass('status-new'));
+//        console.log('draft? ', $(this).hasClass('status-draft'));
         if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
-//            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
-//            UI.openableSegment = false;
+            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
+            UI.openableSegment = false;
         }
     }).on('start', function() {
         // temp
@@ -8587,9 +8614,9 @@ if(config.enableReview && parseInt(config.isReview)) {
             }
         ];
         // end temp
-        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
-        UI.createStatQualityPanel();
-        UI.populateStatQualityPanel(config.stat_quality);
+//        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
+//        UI.createStatQualityPanel();
+//        UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -8648,7 +8675,15 @@ if(config.enableReview && parseInt(config.isReview)) {
             err_terminology = $(err).find('input[name=t3]:checked').val();
             err_quality = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
-            UI.gotoNextSegment();
+            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
+                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+            } else {
+                UI.reloadWarning();
+            }
+
+//            console.log(UI.nextUntranslatedSegmentIdByServer);
+//            UI.gotoNextSegment();
 
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
 
@@ -8678,7 +8713,7 @@ if(config.enableReview && parseInt(config.isReview)) {
                     d.stat_quality = config.stat_quality;
                     d.stat_quality[0].found = 2;
                     //end temp
-                    UI.populateStatQualityPanel(d.stat_quality);
+//                    UI.populateStatQualityPanel(d.stat_quality);
                 }
             });
 
@@ -8687,16 +8722,18 @@ if(config.enableReview && parseInt(config.isReview)) {
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
+/*
     }).on('click', '#stat-quality .details', function(e) {
         e.preventDefault();
-        UI.openStatQualityPanel();
+//        UI.openStatQualityPanel();
     }).on('click', '.popup-stat-quality h1 .btn-ok, .outer-stat-quality', function(e) {
         e.preventDefault();
         $( ".popup-stat-quality").removeClass('open').hide("slide", { direction: "right" }, 400);
         $(".outer-stat-quality").hide();
         $('body').removeClass('side-popup');
+*/
     }).on('setCurrentSegment_success', function(e, d) {
-        console.log('d: ', d)
+//        console.log('d: ', d)
         // temp
 /*
         d.error_data = [
@@ -8755,10 +8792,11 @@ if(config.enableReview && parseInt(config.isReview)) {
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
         },
+/*
         createStatQualityPanel: function () {
             UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },
-        populateStatQualityPanel: function (d) {
+        populateStatQualityPanel: function (d) { // no more used
             tbody = $('#popup-stat-quality .slide-panel-body tbody');
             tbody.empty();
             $.each(d, function (index) {
@@ -8766,13 +8804,14 @@ if(config.enableReview && parseInt(config.isReview)) {
             });
 //            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },
-        openStatQualityPanel: function() {
+        openStatQualityPanel: function() { // no more used
             $('body').addClass('side-popup');
             $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
 //            $("#SnapABug_Button").hide();
             $(".outer-stat-quality").show();
 //            $.cookie('tmpanel-open', 1, { path: '/' });
         },
+*/
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
 //                console.log(this.type + ' - ' + this.value);
