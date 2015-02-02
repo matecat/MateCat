@@ -345,4 +345,11 @@ abstract class viewController extends controller {
 
     }
 
+    public function isRevision(){
+        //TODO: IMPROVE
+        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
+        return $is_revision_url;
+    }
+
 }

@@ -57,7 +57,13 @@ class setCurrentSegmentController extends ajaxController {
         }
 
         $insertRes     = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
-        $nextSegmentId = getNextUntranslatedSegment( $this->id_segment, $this->id_job, $this->password );
+
+        if( !$this->isRevision() ){
+            $getTranslatedInstead = false;
+        } else {
+            $getTranslatedInstead = true;
+        }
+        $nextSegmentId = getNextSegment( $this->id_segment, $this->id_job, $this->password, $getTranslatedInstead );
 
         $_thereArePossiblePropagations = countThisTranslatedHashInJob( $this->id_job, $this->password, $this->id_segment );
         $thereArePossiblePropagations  = intval( $_thereArePossiblePropagations[ 'available' ] );
@@ -132,21 +138,21 @@ class setCurrentSegmentController extends ajaxController {
     private static function prepareReviseStructReturnValues($struct){
         $return = array();
 
-        foreach ( $struct as $key => $val ) {
-            if(strpos($key, "err_") > -1){
+        $reflect = new ReflectionClass( 'Constants_Revise' );
+        $constCache =  $reflect->getConstants();
+        foreach ($constCache as $key => $val){
+            if(strpos($key, "ERR_") === false ) {
+                unset($constCache[$key]);
+            }
+        }
 
-                $key = ucfirst(
-                        str_replace(
-                                array("err_","_"),
-                                array("",""),
-                                $key
-                        )
-                );
-                //TODO: remove this hard-coded replacement
-                if($key == "Quality") $key = "Language Quality";
+        $constCache_keys = array_map("strtolower", array_keys($constCache));
+
+        foreach ( $struct as $key => $val ) {
+            if(in_array($key, $constCache_keys) ){
 
                 $return[] = array(
-                    'type' => $key,
+                    'type' => $constCache[strtoupper($key)],
                     'value' => Constants_Revise::$const2clientValues[$val]
                 );
             }

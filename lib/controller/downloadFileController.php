@@ -182,8 +182,6 @@ class downloadFileController extends downloadController {
                     $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
                     $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
 
-//                    $sanitized_src = $data[ $i ][ 'segment' ];
-//                    $sanitized_trg = $data[ $i ][ 'translation' ];
                     $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
                     $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
 

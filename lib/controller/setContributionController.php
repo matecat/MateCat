@@ -140,10 +140,7 @@ class setContributionController extends ajaxController {
 
             try {
 
-                $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-                $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
-                if ( $url_request ) {
+                if ( $this->isRevision() ) {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
                 }
 

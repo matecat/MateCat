@@ -115,12 +115,9 @@ class glossaryController extends ajaxController {
 
     protected function _get( $config ){
 
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $url_request ) {
+        if ( $this->isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
@@ -178,12 +175,9 @@ class glossaryController extends ajaxController {
 
         $this->result[ 'errors' ] = array();
 
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $url_request ) {
+        if ( $this->isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
@@ -301,12 +295,9 @@ class glossaryController extends ajaxController {
 
     protected function _update( $config ){
 
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $url_request ) {
+        if ( $this->isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
@@ -353,12 +344,9 @@ class glossaryController extends ajaxController {
 
     protected function _delete( $config ){
 
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $url_request ) {
+        if ( $this->isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
