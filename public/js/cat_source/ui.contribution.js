@@ -117,7 +117,7 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-				console.log('getContribution from ' + this + ': ', d.data.matches);
+//				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.error.length)
 					UI.processErrors(d.error, 'getContribution');
 				UI.getContribution_success(d, this);

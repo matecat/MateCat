@@ -7,7 +7,7 @@ if(config.enableReview && parseInt(config.isReview)) {
 //        console.log('new? ', $(this).hasClass('status-new'));
 //        console.log('draft? ', $(this).hasClass('status-draft'));
         if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
-            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
+            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
             UI.openableSegment = false;
         }
     }).on('start', function() {
@@ -81,6 +81,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
         e.preventDefault();
+        UI.tempDisablingReadonlyAlert = true;
 /*
         var a = UI.currentSegment.find('.original-translation').text() + '"';
         var b = $(editarea).text() + '"';
@@ -98,6 +99,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         } else {
             original = UI.currentSegment.find('.original-translation').text();
             $('.sub-editor.review .error-type').removeClass('error');
+//            console.log('a: ', UI.currentSegmentId);
             UI.changeStatus(this, 'approved', 0);
             sid = UI.currentSegmentId;
             err = $('.sub-editor.review .error-type');
@@ -106,13 +108,24 @@ if(config.enableReview && parseInt(config.isReview)) {
             err_terminology = $(err).find('input[name=t3]:checked').val();
             err_quality = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
+//            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
             UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
+
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
+//                console.log('b: ', UI.currentSegmentId);
                 UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+//                console.log('c: ', UI.currentSegmentId);
+
             } else {
                 UI.reloadWarning();
             }
-
+            // temp fix
+/*
+            setTimeout(function() {
+                UI.tempDisablingReadonlyAlert = false;
+            }, 3000);
+*/
 //            console.log(UI.nextUntranslatedSegmentIdByServer);
 //            UI.gotoNextSegment();
 

@@ -866,8 +866,10 @@ UI = {
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
+//        console.log('gotoSegment: ', id);
 		var el = $("#segment-" + id + "-target").find(".editarea");
-		$(el).click();
+//        console.log('el: ', el);
+        $(el).click();
 	},
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
