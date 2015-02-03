@@ -6084,14 +6084,17 @@ margin-right: 3%;
 }
 
 .sub-editor.review .track-changes .deleted,
-.suggestion_source .deleted
+.suggestion_source .deleted,
+.suggestion_source del
 {
     background: #ffc7ca;
     text-decoration: line-through;
 }
 .sub-editor.review .track-changes .added,
-.suggestion_source .added
+.suggestion_source .added,
+.suggestion_source ins
 {
-    background: #b0ffb3
+    background: #b0ffb3;
+    text-decoration: none;
 }
 

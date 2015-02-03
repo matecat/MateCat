@@ -48,8 +48,10 @@
                 //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
                 survey: false,
                 optimized: false,
-                isReview: '${isReview}',
-                enableReview: true
+                isReview: ${isReview},
+                enableReview: true,
+                stat_quality: ${structure php: stat_quality },
+                overall_quality: '${overall_quality}'
             };
             var renderStart = new Date();
             /*]]>*/
@@ -228,14 +230,14 @@
                             <li><a href="${authURL}" class="authLink">Manage</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: !isReview">
+                        <tal:block tal:condition="php: !catController::isRevision()">
                             <li><a
-                                    href="${basepath}revise/${pname}/'${source}-'${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
+                                    href="${basepath}revise/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: isReview">
+                        <tal:block tal:condition="php: catController::isRevision()">
                             <li><a
-                                    href="${basepath}translate/${pname}/'${source}-'${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
+                                    href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>
 
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
@@ -492,11 +494,10 @@ tbody td:last-child, thead th:last-child {
             <p></p>
         </div>
     </template>
-
+<!--
     <template id="tpl-review-stat-quality">
 
         <div class="popup-outer outer-stat-quality hide"></div>
-        <!-- inizio popup tm mgmt -->
         <div class="popup-stat-quality slide-panel hide" data-type="view">
 
             <h1>
@@ -523,5 +524,5 @@ tbody td:last-child, thead th:last-child {
         </div>
 
     </template>
-
+-->
 </html>

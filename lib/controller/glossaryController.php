@@ -117,7 +117,7 @@ class glossaryController extends ajaxController {
 
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
@@ -177,7 +177,7 @@ class glossaryController extends ajaxController {
 
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
@@ -297,7 +297,7 @@ class glossaryController extends ajaxController {
 
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 
@@ -346,7 +346,7 @@ class glossaryController extends ajaxController {
 
         $tm_keys = $this->job_info['tm_keys'];
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         }
 

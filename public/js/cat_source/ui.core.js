@@ -141,7 +141,10 @@ UI = {
                 if ((operation == 'translated') || (operation == 'Save'))
                     saveBrevior = false;
             }
-            if ((segment.hasClass('modified')) && (saveBrevior)) {
+//            console.log('segment.hasClass(modified): ', segment.hasClass('modified'));
+//            console.log('saveBrevior: ', saveBrevior);
+//            console.log('!config.isReview: ', !config.isReview);
+            if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton);
@@ -275,8 +278,9 @@ UI = {
 					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
 					'	<div class="overflow"></div>' +
 					'</div>';
-		UI.currentSegment.trigger('footerCreation');
+        UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
@@ -866,8 +870,9 @@ UI = {
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
+//        console.log('gotoSegment: ', id);
 		var el = $("#segment-" + id + "-target").find(".editarea");
-		$(el).click();
+        $(el).click();
 	},
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
@@ -927,7 +932,6 @@ UI = {
 				return;
 		}
         UI.openableSegment = true;
-        segment.trigger('open');
         if(!UI.openableSegment) return false;
         UI.openableSegment = false;
 
@@ -953,7 +957,9 @@ UI = {
 		getNormally = isNotSimilar || isEqual;
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
-		this.getNextSegment(this.currentSegment, 'untranslated');
+        segment.trigger('open');
+
+        this.getNextSegment(this.currentSegment, 'untranslated');
 
 		if ((!this.readonly)&&(!getNormally)) {
 			$('#segment-' + segment_id + ' .alternatives .overflow').hide();

@@ -4,11 +4,17 @@
 if(config.enableReview && parseInt(config.isReview)) {
 
     $('html').on('open', 'section', function() {
-        console.log('new? ', $(this).hasClass('status-new'));
-        console.log('draft? ', $(this).hasClass('status-draft'));
+//        console.log('new? ', $(this).hasClass('status-new'));
+//        console.log('draft? ', $(this).hasClass('status-draft'));
+        if($(this).hasClass('opened')) {
+            console.log('OPEN SEGMENT');
+            console.log($(this).find('.tab-switcher-review').length);
+            $(this).find('.tab-switcher-review').click();
+        }
+
         if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
-//            APP.alert("This segment is not translated yet. Only translated segments can be revised.");
-//            UI.openableSegment = false;
+            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
+            UI.openableSegment = false;
         }
     }).on('start', function() {
         // temp
@@ -45,9 +51,9 @@ if(config.enableReview && parseInt(config.isReview)) {
             }
         ];
         // end temp
-        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
-        UI.createStatQualityPanel();
-        UI.populateStatQualityPanel(config.stat_quality);
+//        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
+//        UI.createStatQualityPanel();
+//        UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -57,10 +63,8 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-
-        div.find('.submenu').append('<li class="tab-switcher-review" id="segment-20896069-review"><a tabindex="-1" href="#">Review</a></li>');
+        div.find('.submenu').append('<li class="tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Review</a></li>');
         div.append('<div class="tab sub-editor review" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
-        $('.tab-switcher-review').click();
  /*
         setTimeout(function() {// fixes a bug in setting defaults in radio buttons
             UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
@@ -69,6 +73,10 @@ if(config.enableReview && parseInt(config.isReview)) {
  */
         UI.footerHTML = div.html();
 
+    }).on('afterFooterCreation', 'section', function() {
+        setTimeout(function() {
+            UI.currentSegment.find('.tab-switcher-review').click();
+        }, 100);
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
         $('.editor .submenu .active').removeClass('active');
@@ -81,6 +89,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
         e.preventDefault();
+        UI.tempDisablingReadonlyAlert = true;
 /*
         var a = UI.currentSegment.find('.original-translation').text() + '"';
         var b = $(editarea).text() + '"';
@@ -98,6 +107,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         } else {
             original = UI.currentSegment.find('.original-translation').text();
             $('.sub-editor.review .error-type').removeClass('error');
+//            console.log('a: ', UI.currentSegmentId);
             UI.changeStatus(this, 'approved', 0);
             sid = UI.currentSegmentId;
             err = $('.sub-editor.review .error-type');
@@ -106,7 +116,26 @@ if(config.enableReview && parseInt(config.isReview)) {
             err_terminology = $(err).find('input[name=t3]:checked').val();
             err_quality = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
-            UI.gotoNextSegment();
+//            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
+            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
+
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
+//                console.log('b: ', UI.currentSegmentId);
+                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+//                console.log('c: ', UI.currentSegmentId);
+
+            } else {
+                UI.reloadWarning();
+            }
+            // temp fix
+/*
+            setTimeout(function() {
+                UI.tempDisablingReadonlyAlert = false;
+            }, 3000);
+*/
+//            console.log(UI.nextUntranslatedSegmentIdByServer);
+//            UI.gotoNextSegment();
 
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
 
@@ -136,7 +165,7 @@ if(config.enableReview && parseInt(config.isReview)) {
                     d.stat_quality = config.stat_quality;
                     d.stat_quality[0].found = 2;
                     //end temp
-                    UI.populateStatQualityPanel(d.stat_quality);
+//                    UI.populateStatQualityPanel(d.stat_quality);
                 }
             });
 
@@ -145,16 +174,18 @@ if(config.enableReview && parseInt(config.isReview)) {
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
+/*
     }).on('click', '#stat-quality .details', function(e) {
         e.preventDefault();
-        UI.openStatQualityPanel();
+//        UI.openStatQualityPanel();
     }).on('click', '.popup-stat-quality h1 .btn-ok, .outer-stat-quality', function(e) {
         e.preventDefault();
         $( ".popup-stat-quality").removeClass('open').hide("slide", { direction: "right" }, 400);
         $(".outer-stat-quality").hide();
         $('body').removeClass('side-popup');
+*/
     }).on('setCurrentSegment_success', function(e, d) {
-        console.log('d: ', d)
+//        console.log('d: ', d)
         // temp
 /*
         d.error_data = [
@@ -183,7 +214,7 @@ if(config.enableReview && parseInt(config.isReview)) {
         */
         // end temp
         if(d.original == '') d.original = UI.editarea.text();
-        UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
+        if(!UI.currentSegment.find('.original-translation').length) UI.editarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
         UI.trackChanges(UI.editarea);
     });
@@ -199,7 +230,14 @@ if(config.enableReview && parseInt(config.isReview)) {
             var c = $(editarea).text();
             console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
 */
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text(), $(editarea).text().replace(/(<([^>]+)>)/ig,""));
+            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
+                    .replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
+                $(editarea).text().replace(/(<([^>]+)>)/ig,""));
 //            console.log('diff: ', diff);
             diffTxt = '';
             $.each(diff, function (index) {
@@ -213,10 +251,11 @@ if(config.enableReview && parseInt(config.isReview)) {
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
         },
+/*
         createStatQualityPanel: function () {
             UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },
-        populateStatQualityPanel: function (d) {
+        populateStatQualityPanel: function (d) { // no more used
             tbody = $('#popup-stat-quality .slide-panel-body tbody');
             tbody.empty();
             $.each(d, function (index) {
@@ -224,13 +263,14 @@ if(config.enableReview && parseInt(config.isReview)) {
             });
 //            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
         },
-        openStatQualityPanel: function() {
+        openStatQualityPanel: function() { // no more used
             $('body').addClass('side-popup');
             $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
 //            $("#SnapABug_Button").hide();
             $(".outer-stat-quality").show();
 //            $.cookie('tmpanel-open', 1, { path: '/' });
         },
+*/
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
 //                console.log(this.type + ' - ' + this.value);

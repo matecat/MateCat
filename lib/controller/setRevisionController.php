@@ -88,7 +88,7 @@ class setRevisionController extends ajaxController {
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
-     * @return mixed
+     * @throws Exception
      */
     public function doAction() {
         if ( !empty( $this->result[ 'errors' ] ) ) {
@@ -144,7 +144,7 @@ class setRevisionController extends ajaxController {
 
         //check if an old revision exists. If it does, retrieve it and save it.
         $oldRevision = $reviseDAO->read( $revisionStruct );
-        $oldRevision = ( isset( $oldRevision[ 0 ] ) ) ? $oldRevision[ 0 ] : null;
+        $oldRevision = ( isset( $oldRevision[ 0 ] ) ) ? $oldRevision[ 0 ] : Revise_ReviseStruct::setDefaultValues( Revise_ReviseStruct::getStruct() );
 
         $revisionStruct->err_typing           = $this->err_typing;
         $revisionStruct->err_translation      = $this->err_translation;
@@ -195,8 +195,9 @@ class setRevisionController extends ajaxController {
         $jobQA->retrieveJobErrorTotals();
         $jobVote = $jobQA->evalJobVote();
 
-        $this->result[ 'data' ][ 'message' ]      = 'OK';
-        $this->result[ 'data' ][ 'stat_quality' ] = $jobQA->getQaData();;
+        $this->result[ 'data' ][ 'message' ]         = 'OK';
+        $this->result[ 'data' ][ 'stat_quality' ]    = $jobQA->getQaData();
+        $this->result[ 'data' ][ 'overall_quality' ] = $jobVote[ 'minText' ];
     }
 
     /**

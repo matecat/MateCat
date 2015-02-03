@@ -709,6 +709,7 @@ $.extend(UI, {
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
 			e.preventDefault();
+            if(config.isReview) return false;
 			if (UI.justSelecting('readonly'))
 				return;
 			if (UI.someUserSelection)
@@ -849,7 +850,8 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
-
+//            console.log('operation: ', operation);
+//            console.log('action: ', action);
             UI.saveInUndoStack('click');
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
@@ -1323,7 +1325,7 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function() { //inputineditarea
+		}).on('input', '.editarea', function( e ) { //inputineditarea
 			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {

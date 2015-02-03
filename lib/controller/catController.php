@@ -42,9 +42,8 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
-    private $isRevision = false;
-
     private $qa_data;
+    private $qa_overall;
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
@@ -300,9 +299,8 @@ class catController extends viewController {
 
         list( $uid, $user_email ) = $this->getLoginUserParams();
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole   = TmKeyManagement_Filter::ROLE_REVISOR;
-            $this->isRevision = true;
         } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
@@ -428,7 +426,8 @@ class catController extends viewController {
 
         $jobQA->retrieveJobErrorTotals();
         $jobVote = $jobQA->evalJobVote();
-        $this->qa_data = $jobQA->getQaData();
+        $this->qa_data    = json_encode( $jobQA->getQaData() );
+        $this->qa_overall = $jobVote[ 'minText' ];
     }
 
     public function setTemplateVars() {
@@ -470,9 +469,11 @@ class catController extends viewController {
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->user_keys = $this->_keyList;
-        $this->template->job_stats = $this->job_stats;
-        $this->template->stat_quality = $this->qa_data;
+        $this->template->user_keys       = $this->_keyList;
+        $this->template->job_stats       = $this->job_stats;
+        $this->template->stat_quality    = $this->qa_data;
+        $this->template->overall_quality = $this->qa_overall;
+        $this->template->overall_quality_class = strtolower(str_replace(' ', '', $this->qa_overall));
 
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;
@@ -496,8 +497,8 @@ class catController extends viewController {
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
-        $this->template->isReview    = $this->isRevision;
-        $this->template->reviewClass = ( $this->isRevision ? ' review' : '' );
+        $this->template->isReview    = var_export( self::isRevision(), true );
+        $this->template->reviewClass = ( self::isRevision() ? ' review' : '' );
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
 

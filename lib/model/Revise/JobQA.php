@@ -15,6 +15,31 @@ class Revise_JobQA {
     const MAX_QUALITY = 5;
     const MAX_STYLE = 2;
 
+    const VOTE_EXCELLENT  = "Excellent";
+    const VOTE_VERY_GOOD  = "Very Good";
+    const VOTE_GOOD       = "Good";
+    const VOTE_ACCEPTABLE = "Acceptable";
+    const VOTE_FAIL       = "Fail";
+
+    /**
+     * A scale for the votes, needs to get the lesser vote of a job ( evalJobVote )
+     *
+     * @var int[]
+     */
+    private $scaleVote    = array(
+            self::VOTE_EXCELLENT  => 100,
+            self::VOTE_VERY_GOOD  => 80,
+            self::VOTE_GOOD       => 60,
+            self::VOTE_ACCEPTABLE => 40,
+            self::VOTE_FAIL       => 20
+    );
+
+    /**
+     * The lesser vote of the job after it is evaluated ( evalJobVote )
+     * @var string
+     */
+    private $leastVote = self::VOTE_EXCELLENT;
+
     private $job_id;
     private $job_password;
     private $job_words;
@@ -91,6 +116,11 @@ class Revise_JobQA {
         $this->job_error_totals = $jobErrorTotals;
     }
 
+    /**
+     * Get the QA value for the job in a client readable structure
+     *
+     * @return array
+     */
     public function getQaData() {
         if ( empty( $this->job_error_totals ) ) {
             throw new BadFunctionCallException( "You must call retrieveJobErrorTotals first" );
@@ -104,7 +134,7 @@ class Revise_JobQA {
             $fieldName = $constants = $reflect->getConstant( "ERR_" . strtoupper( $field ) );
             $qaData[]    = array(
                     'type'    => $fieldName,
-                    'allowed' => $info[ 'maxErr' ],
+                    'allowed' => (int)$info[ 'acceptance' ],
                     'found'   => $info[ 'foundErr' ],
                     'vote'    => $info[ 'textVote' ]
             );
@@ -127,7 +157,7 @@ class Revise_JobQA {
      */
     private function evalFieldVote( $field ) {
         if ( array_key_exists( $field, self::$error_info ) ) {
-            //evaluate ther method name to invoke into job_error_totals
+            //evaluate the method name to invoke into job_error_totals
             $methodName = 'get' . ucfirst( $field );
             /**
              * @var $errNumber int
@@ -153,50 +183,32 @@ class Revise_JobQA {
         $avgMark = 0.0;
         foreach ( self::$error_info as $field => $info ) {
             $avgMark += $info[ 'vote' ];
+            if( $this->scaleVote[ $info[ 'textVote' ] ] < $this->scaleVote[ $this->leastVote ] ){
+                $this->leastVote = $info[ 'textVote' ];
+            }
         }
 
         $avgMark = $avgMark / count( self::$error_info );
 
-        return $avgMark;
+        return array( 'avg' => $avgMark, 'minText' => $this->leastVote );
     }
 
     private static function vote2text( $vote ) {
-        if ( $vote < 0 ) {
+
+        if ( $vote >= 4.2 ) {
+            return self::VOTE_FAIL;
+        } elseif ( $vote >= 3 ) {
+            return self::VOTE_ACCEPTABLE;
+        } elseif ( $vote >= 1.8 ) {
+            return self::VOTE_GOOD;
+        } elseif ( $vote >= 1.2 ) {
+            return self::VOTE_VERY_GOOD;
+        } elseif ( $vote >= 0 ) {
+            return self::VOTE_EXCELLENT;
+        } else {
             return "";
         }
-        else if($vote < 0.6 ){
-            return "Excellent";
-        }
-        else if($vote < 1.2 ){
-            return "Very Good";
-        }
-        else if($vote < 1.8 ){
-            return "Good";
-        }
-        else if($vote < 2.4 ){
-            return "Good";
-        }
-        else if($vote < 3 ){
-            return "Acceptable";
-        }
-        else if($vote < 3.6 ){
-            return "Acceptable";
-        }
-        else if($vote < 4.2 ){
-            return "Fail";
-        }
-        else if($vote < 4.8 ){
-            return "Fail";
-        }
-        else if($vote < 5.4 ){
-            return "Fail";
-        }
-        else if($vote < 6 ){
-            return "Fail";
-        }
-        else{
-            return "Fail";
-        }
+
     }
 
 } 

@@ -1558,22 +1558,37 @@ function getEditLog( $jid, $pass ) {
     return $results;
 }
 
-function getNextUntranslatedSegment( $sid, $jid, $password ) {
+function getNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) {
 
-    $query = "SELECT s.id, st.`status`
+    $db      = Database::obtain();
+
+    $jid      = (int)$jid;
+    $sid      = (int)$sid;
+    $password = $db->escape( $password );
+
+    if( !$getTranslatedInstead ){
+        $translationStatus = " ( st.status IN (
+                '" . Constants_TranslationStatus::STATUS_NEW . "',
+                '" . Constants_TranslationStatus::STATUS_DRAFT . "',
+                '" . Constants_TranslationStatus::STATUS_REJECTED . "'
+            ) OR st.status IS NULL )";
+    } else {
+        $translationStatus = " st.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' ";
+    }
+
+    $query = "SELECT s.id, st.status
 		FROM segments AS s
 		JOIN files_job fj USING (id_file)
 		JOIN jobs ON jobs.id = fj.id_job
 		JOIN files f ON f.id = fj.id_file
 		LEFT JOIN segment_translations st ON st.id_segment = s.id AND fj.id_job = st.id_job
 		WHERE jobs.id = $jid AND jobs.password = '$password'
-		AND ( st.status IN ( 'NEW', 'DRAFT', 'REJECTED' ) OR st.status IS NULL )
+		AND $translationStatus
 		AND s.show_in_cattool = 1
 		AND s.id <> $sid
 		AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		";
 
-    $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
@@ -1878,12 +1893,10 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 				   INNER JOIN segments s ON s.id_file=f.id
 				   LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
 				   WHERE p.id= '$pid'
-
 				   %s
 				   AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 				   %s
 				   %s
-
 				   GROUP BY f.id, j.id, j.password
 				   ORDER BY j.create_date, j.job_first_segment
 				   ";
