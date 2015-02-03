@@ -473,6 +473,7 @@ class catController extends viewController {
         $this->template->job_stats       = $this->job_stats;
         $this->template->stat_quality    = $this->qa_data;
         $this->template->overall_quality = $this->qa_overall;
+        $this->template->overall_quality_class = strtolower(str_replace(' ', '', $this->qa_overall));
 
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;

@@ -8578,7 +8578,7 @@ $.extend(UI, {
 /*
  Component: ui.review
  */
-if(config.enableReview && parseInt(config.isReview)) {
+if(config.enableReview && config.isReview) {
 
     $('html').on('open', 'section', function() {
 //        console.log('new? ', $(this).hasClass('status-new'));

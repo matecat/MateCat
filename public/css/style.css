@@ -170,7 +170,30 @@ body.searchActive #filterSwitch
 
 .cattool .breadcrumbs{padding:22px 0 4px 15px;}
 
-.cattool .downloadtr-button{margin:2px -10px 0px 10px !important;}
+.cattool .downloadtr-button
+{margin:2px -10px 0px 10px !important;}
+.cattool #quality-report
+{
+    margin: 2px -10px 0px 10px !important;
+    padding: 5px 20px;
+    margin-right: 10px !important;
+    cursor: pointer;
+}
+.cattool #quality-report[data-vote=excellent],
+.cattool #quality-report[data-vote=verygood],
+.cattool #quality-report[data-vote=good]
+{
+    border-right: 10px solid green;
+}
+
+.cattool #quality-report[data-vote=acceptable]
+  {
+      border-right: 10px solid yellow;
+  }
+.cattool #quality-report[data-vote=fail]
+   {
+       border-right: 10px solid red;
+   }
 
 .breadcrumbs a{color:#fff}
 .breadcrumbs a:hover{text-decoration:none}
