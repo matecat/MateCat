@@ -8812,13 +8812,13 @@ if(config.enableReview && config.isReview) {
             console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
 */
             var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
-				.replace( config.lfPlaceholderRegex, "\n" )
-				.replace( config.crPlaceholderRegex, "\r" )
-				.replace( config.crlfPlaceholderRegex, "\r\n" )
-				.replace( config.tabPlaceholderRegex, "\t" )
-				//.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-				.replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-				$(editarea).text().replace(/(<([^>]+)>)/ig,""));
+                    .replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
+                $(editarea).text().replace(/(<([^>]+)>)/ig,""));
 //            console.log('diff: ', diff);
             diffTxt = '';
             $.each(diff, function (index) {
