@@ -677,7 +677,7 @@ UI = {
 		            '        	<span class="urls">'+
 		            '        		<div class="jobdata">'+this.id+((prefix)? '-'+ind : '')+'</div>'+
 		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
-		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'</a>'+
+		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">(link)</a>'+
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="tm-key">'+
@@ -697,13 +697,18 @@ UI = {
 		            '        </td>'+
 					'		<!--td class="missing-outsource-data"></td-->'+
 		            '        <td class="actions">'+
-		            '            <a class="change" href="#" title="Change job password">Change</a>'+
-		            '            <a class="cancel" href="#" title="Cancel Job">Cancel</a>'+
-		            '            <a class="archive" href="#" title="Archive Job">Archive</a>'+
-		            '            <a class="resume" href="#" title="Resume Job">Resume</a>'+
-		            '            <a class="unarchive" href="#" title="Unarchive Job">Unarchive</a>'+
-		            '            <a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '/' + project.name + '.zip" title="Export as SDLXLIFF"></a>'+
-		            '            <a target="_blank" href="/TMX/' + this.id + '/' + this.password + '"" class="download-manage"><span>Export as TMX</span></a>'+
+		            '			<div id="dd" class="wrapper-dropdown-5" tabindex="1">Select'+
+    				'				<ul class="dropdown">'+
+    				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change</a></li>'+
+        			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
+        			'					<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
+        			'					<li><a class="archive" href="#" title="Archive Job"><span class="icon-drawer"></span>Archive</a></li>'+
+        			'					<li><a class="resume" href="#" title="Resume Job"><span class="icon-trash-o noticon"></span>Resume</a></li>'+
+        			'					<li><a class="unarchive" href="#" title="Unarchive Job"><span class="noticon icon-drawer"></span>Unarchive</a></li>'+
+		            '            		<li><a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '/' + project.name + '.zip" title="Export SDLXLIFF"><span class="icon-download"></span>Export SDLXLIFF</a></li>'+
+		            '					<li><a target="_blank" href="/TMX/' + this.id + '/' + this.password + '"" class="download-manage"><span class="icon-download"></span>Export TMX</a></li>'+
+        			'				</ul>'+
+        			'			</div>'+
 		            '        </td>'+
 		            '    </tr>';
 
