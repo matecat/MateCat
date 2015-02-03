@@ -117,7 +117,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
     //    Log::doLog($results);
 
-    $vector = array( 'sidlist' => array(), 'count' => 0 );
+    $vector = array( 'sidlist' => array(), 'count' => '0' );
     foreach ( $results as $occurrence ) {
         $vector[ 'sidlist' ][ ] = $occurrence[ 'id' ];
     }
