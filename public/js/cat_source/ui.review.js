@@ -128,7 +128,7 @@ if(config.enableReview && config.isReview) {
             err_quality = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
 //            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
-            UI.gotoNextUntranslated();
+            UI.openNextTranslated();
             // temp fix
 /*
             setTimeout(function() {
@@ -161,10 +161,11 @@ if(config.enableReview && config.isReview) {
 //                    UI.failedConnection(this[0], 'setTranslation');
                 },
                 success: function(d) {
-//                    console.log('d: ', d);
+                    console.log('d: ', d);
+                    $('#quality-report').attr('data-vote', d.overall_quality_class);
                     // temp
-                    d.stat_quality = config.stat_quality;
-                    d.stat_quality[0].found = 2;
+//                    d.stat_quality = config.stat_quality;
+//                    d.stat_quality[0].found = 2;
                     //end temp
 //                    UI.populateStatQualityPanel(d.stat_quality);
                 }
@@ -285,6 +286,7 @@ if(config.enableReview && config.isReview) {
             });
 
         },
+/*
         gotoNextUntranslated: function () {
             UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
             UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
@@ -299,6 +301,7 @@ if(config.enableReview && config.isReview) {
             }
 
         },
+*/
         openNextTranslated: function (sid) {
             sid = sid | UI.currentSegmentId;
 //            console.log('sid: ', sid);
