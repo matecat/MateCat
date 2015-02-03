@@ -71,7 +71,7 @@ class updateJobKeysController extends ajaxController {
 
         $this->checkLogin();
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         } elseif( $this->userMail == $this->jobData['owner'] ){
             $this->userRole = TmKeyManagement_Filter::OWNER;

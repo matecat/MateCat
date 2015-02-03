@@ -230,12 +230,12 @@
                             <li><a href="${authURL}" class="authLink">Manage</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: !isReview">
+                        <tal:block tal:condition="php: !catController::isRevision()">
                             <li><a
                                     href="${basepath}revise/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: isReview">
+                        <tal:block tal:condition="php: catController::isRevision()">
                             <li><a
                                     href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>

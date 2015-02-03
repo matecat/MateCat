@@ -140,7 +140,7 @@ class setContributionController extends ajaxController {
 
             try {
 
-                if ( $this->isRevision() ) {
+                if ( self::isRevision() ) {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
                 }
 
