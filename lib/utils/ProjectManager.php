@@ -126,7 +126,12 @@ class ProjectManager {
 
                 try {
 
-                    $this->tmxServiceWrapper->checkCorrectKey();
+                    $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
+
+                    if ( !isset($keyExists) || $keyExists === false ) {
+                        Log::doLog( __METHOD__ . " -> TM key is not valid." );
+                        throw new Exception( "TM key is not valid.", -4 );
+                    }
 
                 } catch ( Exception $e ) {
 
