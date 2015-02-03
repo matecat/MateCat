@@ -141,7 +141,10 @@ UI = {
                 if ((operation == 'translated') || (operation == 'Save'))
                     saveBrevior = false;
             }
-            if ((segment.hasClass('modified')) && (saveBrevior)) {
+//            console.log('segment.hasClass(modified): ', segment.hasClass('modified'));
+//            console.log('saveBrevior: ', saveBrevior);
+//            console.log('!config.isReview: ', !config.isReview);
+            if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton);
@@ -869,7 +872,6 @@ UI = {
 	gotoSegment: function(id) {
 //        console.log('gotoSegment: ', id);
 		var el = $("#segment-" + id + "-target").find(".editarea");
-//        console.log('el: ', el);
         $(el).click();
 	},
 	initSegmentNavBar: function() {
