@@ -7216,13 +7216,13 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {
-				UI.execFind_success(d);
+                UI.execFind_success(d);
 			}
 		});
 
 	},
 	execFind_success: function(d) {
-        console.log('execFind_success'); return false;
+        console.log('execFind_success');
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
@@ -8897,7 +8897,23 @@ if(config.enableReview && config.isReview) {
                 if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
                     $('section.status-translated, section.status-approved').first().find('.editarea').click();
                 } else { // find in not loaded segments
-                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+//                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            UI.render({
+                                firstLoad: false,
+                                segmentToOpen: d.nextId
+                            });
+                        }
+                    });
                 }
             }
         }
