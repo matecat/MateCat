@@ -94,7 +94,7 @@ class deleteContributionController extends ajaxController {
 
             $tm_keys = $this->tm_keys;
 
-            if ( $this->isRevision() ) {
+            if ( self::isRevision() ) {
                 $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
             } elseif( $this->userMail == $job_data['owner'] ){
                 $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'r', 'tm' );

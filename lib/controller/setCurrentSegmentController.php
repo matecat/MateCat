@@ -58,7 +58,7 @@ class setCurrentSegmentController extends ajaxController {
 
         $insertRes     = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
 
-        if( !$this->isRevision() ){
+        if( !self::isRevision() ){
             $getTranslatedInstead = false;
         } else {
             $getTranslatedInstead = true;

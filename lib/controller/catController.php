@@ -299,7 +299,7 @@ class catController extends viewController {
 
         list( $uid, $user_email ) = $this->getLoginUserParams();
 
-        if ( $this->isRevision() ) {
+        if ( self::isRevision() ) {
             $this->userRole   = TmKeyManagement_Filter::ROLE_REVISOR;
         } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
@@ -496,8 +496,8 @@ class catController extends viewController {
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
-        $this->template->isReview    = var_export( $this->isRevision(), true );
-        $this->template->reviewClass = ( $this->isRevision() ? ' review' : '' );
+        $this->template->isReview    = var_export( self::isRevision(), true );
+        $this->template->reviewClass = ( self::isRevision() ? ' review' : '' );
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
 
