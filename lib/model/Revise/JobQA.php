@@ -195,13 +195,13 @@ class Revise_JobQA {
 
     private static function vote2text( $vote ) {
 
-        if ( $vote >= 4.2 ) {
+        if ( $vote >= 3.6 ) {
             return self::VOTE_FAIL;
-        } elseif ( $vote >= 3 ) {
+        } elseif ( $vote >= 2.4 ) {
             return self::VOTE_ACCEPTABLE;
-        } elseif ( $vote >= 1.8 ) {
-            return self::VOTE_GOOD;
         } elseif ( $vote >= 1.2 ) {
+            return self::VOTE_GOOD;
+        } elseif ( $vote >= 0.6 ) {
             return self::VOTE_VERY_GOOD;
         } elseif ( $vote >= 0 ) {
             return self::VOTE_EXCELLENT;
