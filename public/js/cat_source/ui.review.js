@@ -288,7 +288,7 @@ if(config.enableReview && config.isReview) {
         gotoNextUntranslated: function () {
             UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
             UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
+            //console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
 //                console.log('b: ', UI.currentSegmentId);
                 UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
