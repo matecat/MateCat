@@ -148,5 +148,34 @@
 
 		<img id="spinner" src="${basepath}public/img/loader.gif" />
     <script src="${basepath}public/js/lib/snapengage.js"></script>
+    <script>
+$(window).load(function() {
+function DropDown(el) {
+				this.dd = el;
+				this.initEvents();
+			}
+			DropDown.prototype = {
+				initEvents : function() {
+					var obj = this;
+
+					obj.dd.on('click', function(event){
+						$(this).toggleClass('active');
+						event.stopPropagation();
+					});	
+				}
+			}
+
+			$(function() {
+
+				var dd = new DropDown( $('#dd') );
+
+				$(document).click(function() {
+					// all dropdowns
+					$('.wrapper-dropdown-5').removeClass('active');
+				});
+
+			});
+});
+    </script>
     </body> 
 </html>
