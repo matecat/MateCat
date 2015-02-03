@@ -7216,13 +7216,13 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {
-				UI.execFind_success(d);
+                UI.execFind_success(d);
 			}
 		});
 
 	},
 	execFind_success: function(d) {
-        console.log('execFind_success'); return false;
+        console.log('execFind_success');
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
