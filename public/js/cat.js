@@ -8898,6 +8898,23 @@ if(config.enableReview && config.isReview) {
                     $('section.status-translated, section.status-approved').first().find('.editarea').click();
                 } else { // find in not loaded segments
                     console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    APP.doRequest({
+
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+
+//                context: [reqArguments, segment, status],
+                        error: function() {
+//                    UI.failedConnection(this[0], 'setTranslation');
+                        },
+                        success: function(d) {
+                            console.log('d: ', d);
+                        }
+                    });
                 }
             }
         }
