@@ -144,7 +144,7 @@ class setRevisionController extends ajaxController {
 
         //check if an old revision exists. If it does, retrieve it and save it.
         $oldRevision = $reviseDAO->read( $revisionStruct );
-        $oldRevision = ( isset( $oldRevision[ 0 ] ) ) ? $oldRevision[ 0 ] : null;
+        $oldRevision = ( isset( $oldRevision[ 0 ] ) ) ? $oldRevision[ 0 ] : Revise_ReviseStruct::setDefaultValues( Revise_ReviseStruct::getStruct() );
 
         $revisionStruct->err_typing           = $this->err_typing;
         $revisionStruct->err_translation      = $this->err_translation;
