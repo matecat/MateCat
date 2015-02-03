@@ -100,19 +100,6 @@ class setCurrentSegmentController extends ajaxController {
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = $result;
 
-        $nSegment = array( 'id' => null );
-        if ( isset( $nextSegmentId[ 0 ][ 'id' ] ) ) {
-            //if there are results check for next id,
-            //otherwise get the first one in the list
-            $nSegment = $nextSegmentId[ 0 ];
-            foreach ( $nextSegmentId as $seg ) {
-                if ( $seg[ 'id' ] > $this->id_segment ) {
-                    $nSegment = $seg;
-                    break;
-                }
-            }
-        }
-
         //get segment revision informations
         $reviseDao                      = new Revise_ReviseDAO( Database::obtain() );
         $searchReviseStruct             = Revise_ReviseStruct::getStruct();
@@ -130,7 +117,7 @@ class setCurrentSegmentController extends ajaxController {
         $_dbReviseStruct = Revise_ReviseStruct::setDefaultValues($_dbReviseStruct);
         $dbReviseStruct = self::prepareReviseStructReturnValues($_dbReviseStruct);
 
-        $this->result[ 'nextSegmentId' ] = $nSegment[ 'id' ];
+        $this->result[ 'nextSegmentId' ] = $nextSegmentId;
         $this->result[ 'error_data' ]    = $dbReviseStruct;
         $this->result[ 'original' ]      = CatUtils::rawxliff2view( $_dbReviseStruct->original_translation );
     }

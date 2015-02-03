@@ -117,7 +117,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
     //    Log::doLog($results);
 
-    $vector = array();
+    $vector = array( 'sidlist' => array(), 'count' => '0' );
     foreach ( $results as $occurrence ) {
         $vector[ 'sidlist' ][ ] = $occurrence[ 'id' ];
     }
@@ -132,8 +132,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
         //empty search values removed
         //ROLLUP counter rules!
         if ( $vector[ 'count' ] == 0 ) {
-            $vector[ 'sidlist' ] = null;
-            $vector[ 'count' ]   = null;
+            $vector[ 'sidlist' ] = array();
+            $vector[ 'count' ]   = 0;
         }
     }
 
@@ -1558,13 +1558,28 @@ function getEditLog( $jid, $pass ) {
     return $results;
 }
 
-function getNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) {
+/**
+ * Used to get the closest segment of untranslated/translated type
+ *
+ * @param      $sid
+ * @param      $jid
+ * @param      $password
+ * @param bool $getTranslatedInstead
+ *
+ * @return array
+ */
+function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = false ) {
 
     $db      = Database::obtain();
 
     $jid      = (int)$jid;
     $sid      = (int)$sid;
-    $password = $db->escape( $password );
+
+    $and_password = '';
+    if( !empty( $password ) ){
+        $password = $db->escape( $password );
+        $and_password = "AND jobs.password = '$password'";
+    }
 
     if( !$getTranslatedInstead ){
         $translationStatus = " ( st.status IN (
@@ -1573,7 +1588,10 @@ function getNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) 
                 '" . Constants_TranslationStatus::STATUS_REJECTED . "'
             ) OR st.status IS NULL )";
     } else {
-        $translationStatus = " st.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' ";
+        $translationStatus = " st.status IN(
+            '" . Constants_TranslationStatus::STATUS_TRANSLATED . "',
+            '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+        )";
     }
 
     $query = "SELECT s.id, st.status
@@ -1584,6 +1602,7 @@ function getNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) 
 		LEFT JOIN segment_translations st ON st.id_segment = s.id AND fj.id_job = st.id_job
 		WHERE jobs.id = $jid AND jobs.password = '$password'
 		AND $translationStatus
+		$and_password
 		AND s.show_in_cattool = 1
 		AND s.id <> $sid
 		AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
@@ -1591,29 +1610,20 @@ function getNextSegment( $sid, $jid, $password, $getTranslatedInstead = false ) 
 
     $results = $db->fetch_array( $query );
 
-    return $results;
-}
+    $nSegment = null;
+    if ( isset( $results[ 0 ][ 'id' ] ) ) {
+        //if there are results check for next id,
+        //otherwise get the first one in the list
+        $nSegment = $results[ 0 ];
+        foreach ( $results as $seg ) {
+            if ( $seg[ 'id' ] > $sid ) {
+                $nSegment = $seg[ 'id' ];
+                break;
+            }
+        }
+    }
 
-function getNextSegmentId( $sid, $jid, $status ) {
-    $rules        = ( $status == 'untranslated' ) ? "'NEW','DRAFT','REJECTED'" : "'$status'";
-    $statusIsNull = ( $status == 'untranslated' ) ? " OR st.status IS NULL" : "";
-    // Warning this is a LEFT join a little slower...
-    $query = "select s.id as sid
-		from segments s
-		LEFT JOIN segment_translations st on st.id_segment = s.id
-		INNER JOIN files_job fj on fj.id_file=s.id_file 
-		INNER JOIN jobs j on j.id=fj.id_job 
-		where fj.id_job=$jid AND 
-		(st.status in ($rules)$statusIsNull) and s.id>$sid
-		and s.show_in_cattool=1
-		order by s.id
-		limit 1
-		";
-
-    $db      = Database::obtain();
-    $results = $db->query_first( $query );
-
-    return $results[ 'sid' ];
+    return $nSegment;
 }
 
 //function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
