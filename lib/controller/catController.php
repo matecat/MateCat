@@ -42,8 +42,6 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
-    private $isRevision = false;
-
     private $qa_data;
     private $qa_overall;
 
@@ -303,7 +301,6 @@ class catController extends viewController {
 
         if ( $this->isRevision() ) {
             $this->userRole   = TmKeyManagement_Filter::ROLE_REVISOR;
-            $this->isRevision = true;
         } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
@@ -499,8 +496,8 @@ class catController extends viewController {
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
-        $this->template->isReview    = $this->isRevision;
-        $this->template->reviewClass = ( $this->isRevision ? ' review' : '' );
+        $this->template->isReview    = var_export( $this->isRevision(), true );
+        $this->template->reviewClass = ( $this->isRevision() ? ' review' : '' );
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
 
