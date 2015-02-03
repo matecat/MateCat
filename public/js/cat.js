@@ -8741,7 +8741,7 @@ if(config.enableReview && config.isReview) {
 //                    UI.failedConnection(this[0], 'setTranslation');
                 },
                 success: function(d) {
-                    console.log('d: ', d);
+//                    console.log('d: ', d);
                     $('#quality-report').attr('data-vote', d.overall_quality_class);
                     // temp
 //                    d.stat_quality = config.stat_quality;
