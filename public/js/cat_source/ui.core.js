@@ -235,7 +235,7 @@ UI = {
 			return false; 
 
 		UI.footerHTML =	'<ul class="submenu">' +
-					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
+					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +

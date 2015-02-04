@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
-        <title>Job Quality - MateCat</title>
+        <title>Editing log - MateCat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
         <link href="../../public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
@@ -84,118 +84,117 @@
                 </tr>
             </tal:block>
             </table>
-            <hr />
-            <h2 class="qa-h2-title">About this report</h2>
+            <div class="vote-howto">
+                <h2>How Matecat ensures the best revision quality</h2>
+                <p>Il voto complessivo del job è calcolato come la media del voto calcolato per ogni tipologia di errore. Il risultato sarà un numero decimale che va mappato a un voto e allo score di Translated:</p>
+                <h3>Tipologia di errori e soglia di tolleranza</h3>
+                <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <th>Errore</th>
+                        <th>Numero di errori tollerati per 2.500 parole</th>
+                    </tr>
+                    <tr> 
+                        <td>Typing errors, double spaces and tags</td>
+                        <td>5</td>
+                    </tr>
+                    <tr> 
+                        <td>Translation errors (mistranslation, additions/omissions, misunderstanding)</td>
+                        <td>3</td>
+                    </tr>                
+                    <tr> 
+                        <td>Terminology and translation consistency</td>
+                        <td>4</td>
+                    </tr>  
+                    <tr> 
+                        <td>Language quality (grammar, punctuation, spelling)</td>
+                        <td>5</td>
+                    </tr>                                 
+                    <tr> 
+                        <td>Style (readability, consistent style and tone)</td>
+                        <td>2</td>
+                    </tr>                 
+                </table>
+                <h3>Valutazione qualità del job</h3>
+                <p>Per ogni job e tipologia di errore, viene calcolata una soglia di accettazione con la seguente formula:
+    <blockquote>(numero di parole del job / 2500) * numero di errori tollerati (vedi tabella precedente)</blockquote>
+    <p>Per ogni tipologia di errore, viene calcolato un voto con la seguente formula:</p>
+    <blockquote>numero di errori nel job / soglia di accettazione</blockquote>
 
-            <h3>Valutazione qualità del job</h3>
-            <p>Per ogni job e tipologia di errore, viene calcolata una soglia di accettazione con la seguente formula:
-<pre>(numero di parole del job / 2500) * numero di errori tollerati (vedi tabella precedente)</pre>
-
-Per ogni tipologia di errore, viene calcolato un voto con la seguente formula:
-<pre>numero di errori nel job / soglia di accettazione</pre>
-
-Il voto complessivo del job è calcolato come la media del voto calcolato per ogni tipologia di errore. Il risultato sarà un numero decimale che va mappato a un voto e allo score di Translated:</p>
-            <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr>
-                    <th>Min</th>
-                    <th>Max</th>
-                    <th>Voto visualizzato in Matecat</th>
-                    <th>Score Translated</th>
-                </tr>
-                <tr data-vote='Excellent'> 
-                    <td>0</td>
-                    <td>0,5</td>
-                    <td>Excellent</td>
-                    <td>80</td>
-                </tr>
-                <tr data-vote='Verygood'> 
-                    <td>0,6</td>
-                    <td>1,1</td>
-                    <td>Very good</td>
-                    <td>75</td>
-                </tr>                
-                <tr data-vote='Good'> 
-                    <td>1,2</td>
-                    <td>1,7</td>
-                    <td>Good</td>
-                    <td>70</td>
-                </tr>  
-                <tr data-vote='Good'> 
-                    <td>1,8</td>
-                    <td>2,3</td>
-                    <td>Good</td>
-                    <td>65</td>
-                </tr>                                 
-                <tr data-vote='Acceptable'> 
-                    <td>2,4</td>
-                    <td>2,9</td>
-                    <td>Acceptable</td>
-                    <td>60</td>
-                </tr>  
-                <tr data-vote='Acceptable'> 
-                    <td>3</td>
-                    <td>3,5</td>
-                    <td>Acceptable</td>
-                    <td>55</td>
-                </tr>                
-                <tr data-vote='Fail'> 
-                    <td>3,6</td>
-                    <td>4,1</td>
-                    <td>Fail</td>
-                    <td>50</td>
-                </tr>            
-                <tr data-vote='Fail'> 
-                    <td>4,2</td>
-                    <td>4,7</td>
-                    <td>Fail</td>
-                    <td>45</td>
-                </tr>                
-                <tr data-vote='Fail'> 
-                    <td>4,8</td>
-                    <td>5,3</td>
-                    <td>Fail</td>
-                    <td>40</td>
-                </tr>
-                <tr data-vote='Fail'> 
-                    <td>5,4</td>
-                    <td>5,9</td>
-                    <td>Fail</td>
-                    <td>35</td>
-                </tr>                
-                <tr data-vote='Fail'> 
-                    <td>>6</td>
-                    <td></td>
-                    <td>Fail</td>
-                    <td>30</td>
-                </tr>                
-            </table>
-            <h3>Tipologia di errori e soglia di tolleranza</h3>
-            <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr>
-                    <th>Errore</th>
-                    <th>Numero di errori tollerati per 2.500 parole</th>
-                </tr>
-                <tr> 
-                    <td>Typing errors, double spaces and tags</td>
-                    <td>5</td>
-                </tr>
-                <tr> 
-                    <td>Translation errors (mistranslation, additions/omissions, misunderstanding)</td>
-                    <td>3</td>
-                </tr>                
-                <tr> 
-                    <td>Terminology and translation consistency</td>
-                    <td>4</td>
-                </tr>  
-                <tr> 
-                    <td>Language quality (grammar, punctuation, spelling)</td>
-                    <td>5</td>
-                </tr>                                 
-                <tr> 
-                    <td>Style (readability, consistent style and tone)</td>
-                    <td>2</td>
-                </tr>                 
-            </table>
+    <p>Il voto complessivo del job è calcolato come la media del voto calcolato per ogni tipologia di errore. Il risultato sarà un numero decimale che va mappato a un voto e allo score di Translated:</p>
+                <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Voto visualizzato in Matecat</th>
+                        <th>Score Translated</th>
+                    </tr>
+                    <tr data-vote='Excellent'> 
+                        <td>0</td>
+                        <td>0,5</td>
+                        <td>Excellent</td>
+                        <td>80</td>
+                    </tr>
+                    <tr data-vote='Verygood'> 
+                        <td>0,6</td>
+                        <td>1,1</td>
+                        <td>Very good</td>
+                        <td>75</td>
+                    </tr>                
+                    <tr data-vote='Good'> 
+                        <td>1,2</td>
+                        <td>1,7</td>
+                        <td>Good</td>
+                        <td>70</td>
+                    </tr>  
+                    <tr data-vote='Good'> 
+                        <td>1,8</td>
+                        <td>2,3</td>
+                        <td>Good</td>
+                        <td>65</td>
+                    </tr>                                 
+                    <tr data-vote='Acceptable'> 
+                        <td>2,4</td>
+                        <td>2,9</td>
+                        <td>Acceptable</td>
+                        <td>60</td>
+                    </tr>  
+                    <tr data-vote='Acceptable'> 
+                        <td>3</td>
+                        <td>3,5</td>
+                        <td>Acceptable</td>
+                        <td>55</td>
+                    </tr>                
+                    <tr data-vote='Fail'> 
+                        <td>3,6</td>
+                        <td>4,1</td>
+                        <td>Fail</td>
+                        <td>50</td>
+                    </tr>            
+                    <tr data-vote='Fail'> 
+                        <td>4,2</td>
+                        <td>4,7</td>
+                        <td>Fail</td>
+                        <td>45</td>
+                    </tr>                
+                    <tr data-vote='Fail'> 
+                        <td>4,8</td>
+                        <td>5,3</td>
+                        <td>Fail</td>
+                        <td>40</td>
+                    <tr data-vote='Fail'> 
+                        <td>5,4</td>
+                        <td>5,9</td>
+                        <td>Fail</td>
+                        <td>35</td>
+                    </tr>                
+                    <tr data-vote='Fail'> 
+                        <td>>6</td>
+                        <td></td>
+                        <td>Fail</td>
+                        <td>30</td>
+                    </tr>                
+                </table>
+            </div>  
         </div>
 
 

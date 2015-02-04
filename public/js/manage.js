@@ -79,26 +79,38 @@ UI = {
 	        $('body').addClass('filterOpen');
 	        $('#search-projectname').focus();
         });
+/*
+		$("#contentBox" ).prepend('<a href="#" style="position:relative;top:300px;" class="test">cliccami</a>');
+		$("#contentBox" ).on('click','a.test',function(e) {
+			e.preventDefault();
+			alert('ciccio');
+		});
 
-		//$("#contentBox" ).prepend('<a href="#" style="position:relative;top:300px;" class="test">cliccami</a>');
-		//$("#contentBox" ).on('click','a.test',function(e) {
-		//	e.preventDefault();
-		//	alert('ciccio');
-		//});
+        $("#contentBox").on('mousedown','a.cancel', function(e) {
+            e.preventDefault();
+            alert('sss');
+        });
+*/
 
-		$("#contentBox").on('click','td.actions a.cancel',function(e) {
+		$("#contentBox").on('mousedown','td.actions .change',function(e) {
+            e.preventDefault();
+            UI.changePassword('job',$(this).parents('tr'),0,0);
+        }).on('mousedown','td.actions .cancel',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'cancelled');
-	    }).on('click','td.actions a.archive',function(e) {
+        }).on('mousedown','td.actions .revise',function(e) {
+            e.preventDefault();
+            location.href = $(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/");
+	    }).on('mousedown','td.actions .archive',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'archived');
-	    }).on('click','td.actions a.resume',function(e) {
+	    }).on('mousedown','td.actions .resume',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
-	    }).on('click','td.actions a.unarchive',function(e) {
+	    }).on('mousedown','td.actions .unarchive',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
-	    }).on('click','a.cancel-project',function(e) { 
+        }).on('click','a.cancel-project',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'cancelled');		
 	    }).on('click','a.archive-project',function(e) {
@@ -110,9 +122,6 @@ UI = {
 	    }).on('click','a.unarchive-project',function(e) { 
 	        e.preventDefault();
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'active','archived');
-	    }).on('click','a.change',function(e) {
-	        e.preventDefault();
-	        UI.changePassword('job',$(this).parents('tr'),0,0);
 	    }).on('click','.meter a',function(e) {
 	        e.preventDefault();
 	    }).on('click','.pagination a',function(e) {
@@ -120,7 +129,7 @@ UI = {
 			UI.page = $(this).data('page');
 			UI.getProjects('page');
 		});
-	    
+
 	    $('header .filter').click(function(e) {    
 	        e.preventDefault();
 	        $('body').toggleClass('filterOpen');
@@ -198,8 +207,9 @@ UI = {
 	DropDown: function(el){
 		this.initEvents = function () {
 			var obj = this;
-			obj.dd.on( 'click', function ( event ) {
+			obj.dd.on( 'click', function ( event ) {console.log('this: ', this);
 				$( this ).toggleClass( 'active' );
+                event.preventDefault();
 				event.stopPropagation();
 			} );
 		};
@@ -743,7 +753,7 @@ UI = {
 		            '        <td class="actions">'+
 		            '			<div id="dd' + ind + '" class="wrapper-dropdown-5" tabindex="1">Select'+
     				'				<ul class="dropdown">'+
-    				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change</a></li>'+
+    				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change Password</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
         			'					<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
         			'					<li><a class="archive" href="#" title="Archive Job"><span class="icon-drawer"></span>Archive</a></li>'+

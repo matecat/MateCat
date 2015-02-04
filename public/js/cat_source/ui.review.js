@@ -74,8 +74,8 @@ if(config.enableReview && config.isReview) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Review</a></li>');
-        div.append('<div class="tab sub-editor review" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
+        div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Review</a></li>');
+        div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + this.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
  /*
         setTimeout(function() {// fixes a bug in setting defaults in radio buttons
             UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
