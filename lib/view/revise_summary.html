@@ -80,7 +80,7 @@
                 <tr>
                     <td>${qa_value/type}</td>
                     <td>${qa_value/found} / ${qa_value/allowed}</td>
-                    <td tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( class_vote ) )}">${qa_value/vote}</td>
+                    <td tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( str_replace( ' ', '', class_vote ) ) )}">${qa_value/vote}</td>
                 </tr>
             </tal:block>
             </table>
