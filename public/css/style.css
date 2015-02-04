@@ -879,6 +879,7 @@ body.noGlossary .tab-switcher-gl
     display: none;
 	float: left;
 	width: 100%;
+    background: #fff !important;
 }   
 .sub-editor.matches
 {
