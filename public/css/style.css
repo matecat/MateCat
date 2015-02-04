@@ -3383,7 +3383,8 @@ margin-right: 3%;
 }
 
 .error-type h3, .track-changes h3 {
-	margin: 20px 0 0;
+	margin: 20px 0 0 1px;
+	text-align: left;
 }
 
 
@@ -3400,10 +3401,10 @@ margin-right: 3%;
 	cursor: default!important;
 	border-bottom: 1px solid #ccc;
 	padding: 5px;
-	background: #fbfcfc;
+	background: #efefef;
 	box-shadow: 0px 1px 0px #000;
 	border-radius: 2px;
-	border: 1px solid #E6E6E6;
+	border: 1px solid #727272;
 	box-shadow: 0 1px 2px #ccc;
 	-webkit-box-shadow: 0 1px 2px #DFDFDF;
 	    -webkit-touch-callout: none;

@@ -743,7 +743,7 @@ UI = {
 		            '        <td class="actions">'+
 		            '			<div id="dd' + ind + '" class="wrapper-dropdown-5" tabindex="1">Select'+
     				'				<ul class="dropdown">'+
-    				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change</a></li>'+
+    				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change Password</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
         			'					<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
         			'					<li><a class="archive" href="#" title="Archive Job"><span class="icon-drawer"></span>Archive</a></li>'+
