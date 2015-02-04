@@ -1,7 +1,7 @@
 UI = null;
 
 UI = {
-	
+
     render: function(firstLoad) {
         this.isWebkit = $.browser.webkit;
         this.isChrome = $.browser.webkit && !!window.chrome;
@@ -78,7 +78,7 @@ UI = {
             e.preventDefault();
 	        $('body').addClass('filterOpen');
 	        $('#search-projectname').focus();
-        })
+        });
 		
 		$("#contentBox").on('click','td.actions a.cancel',function(e) {  
 	        e.preventDefault();
@@ -167,6 +167,38 @@ UI = {
 		        $('.searchbox #show-archived, .searchbox #show-cancelled').removeAttr('checked');        	
 	        }
 	    });
+
+
+
+	},
+
+	setDropDown: function(){
+
+		//init dropdown events on every class
+		new UI.DropDown( $( '.wrapper-dropdown-5' ) );
+
+		//set control events
+		$( '.dropdown' ).mouseleave( function(){
+			$( '.wrapper-dropdown-5' ).removeClass( 'active' );
+		} );
+
+		$(document).click(function() {
+			// all dropdowns
+			$('.wrapper-dropdown-5').removeClass('active');
+		});
+
+	},
+
+	DropDown: function(el){
+		this.initEvents = function () {
+			var obj = this;
+			obj.dd.on( 'click', function ( event ) {
+				$( this ).toggleClass( 'active' );
+				event.stopPropagation();
+			} );
+		};
+		this.dd = el;
+		this.initEvents();
 	},
 
     appendTime: function() {
@@ -522,6 +554,10 @@ UI = {
 
 				UI.renderProjects(data,'single');
 				UI.setTablesorter();
+
+				//init dropdown events on every class
+				UI.setDropDown();
+
 			},
             error: function(d){
                 window.location = '/';
@@ -566,6 +602,8 @@ UI = {
 
 					//UI.outsourceElements = $( ".missing-outsource-data" );
 					//UI.getOutsourceQuotes();
+
+				UI.setDropDown();
 
 		        $("html,body").animate({
 		            scrollTop: 0
