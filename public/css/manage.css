@@ -124,21 +124,30 @@ body.manage a.copy
 
 
 
-   
+body.manage .article:last-child .wrapper-dropdown-5 .dropdown {
+	bottom: 100%;
+top: inherit;
+}
+
+body.manage .article:last-child .wrapper-dropdown-5 .dropdown li:first-child{
+border-top:1px solid #ccc;
+}
+
+
 
 .wrapper-dropdown-5 {
 position: relative;
-border: 1px solid #ccc !important;
 cursor: pointer;
 outline: none;
 background: #09beec;
 font-weight: bold;
-width: 130px;
+width: 128px;
 -webkit-transition: all 100ms ease-in;
 -moz-transition: all 100ms ease-in;
 font-size: 17px !important;
 cursor: pointer;
 color: #fff;
+border: 1px solid #666;
 -moz-box-shadow: 0 1px 2px #ccc;
 -webkit-box-shadow: 0 1px 2px #ccc;
 box-shadow: 0 1px 2px #ccc;
@@ -146,7 +155,7 @@ border-radius: 2px;
 text-decoration: none;
 text-align: center;
 padding: 5px 10px !Important;
-margin: 0 0 -3px 10px !important;
+margin: 0!important;
 float: right;
 }
  
@@ -168,13 +177,13 @@ float: right;
     top: 100%;
     left: 0;
     right: 0;
+    margin-top: 1px;
  
     /* Styles */
-    background: #fff;
-    border-radius: 0 0 5px 5px;
+ /*   border-radius: 0 0 5px 5px;*/
     border: 1px solid rgba(0,0,0,0.2);
-    border-top: none;
-    border-bottom: none;
+    border-bottom: 0;
+    border-top: 0;
     list-style: none;
     transition: all 0.3s ease-out;
  
@@ -183,6 +192,20 @@ float: right;
     overflow: hidden;
     z-index: 1;
 }
+
+.wrapper-dropdown-5:hover {
+	-moz-box-shadow: 0 1px 2px #666;
+	-webkit-box-shadow: 0 1px 2px #666;
+	box-shadow: 0 1px 2px #666;
+}
+
+
+.wrapper-dropdown-5:active {
+-moz-box-shadow: inset 0 0 1px 1px #888;
+-webkit-box-shadow: inset 0 0 1px 1px #888;
+box-shadow: inset 0 0 1px 1px #888;
+}
+
 .wrapper-dropdown-5 .dropdown li {
 width: 100%;
 }
@@ -190,6 +213,8 @@ width: 100%;
 .wrapper-dropdown-5 .dropdown li a {
     display: block;
     text-decoration: none;
+        background: #fff;
+
     color: #333;
     text-align: left;
 	padding: 5px 5px 5px 7px;
@@ -220,7 +245,6 @@ background: #f7f8f9;
  
 .wrapper-dropdown-5.active {
     box-shadow: none;
-    border-bottom: none;
     color: white;
 }
  
@@ -425,6 +449,11 @@ body.manage tr.row
     clear: both;
 }
 
+#projects {
+float: left;
+margin-bottom: 30px;
+}
+
 /*	
 body.manage tr.disabled
 	{
@@ -549,6 +578,11 @@ body.manage .pagination a:hover
 body.manage header .filter
 	{
 	display: block !important;
+	text-decoration: none;
+	color: #eee;
+	padding: 12px;
+	font-size: 20px;
+	text-align: center;
 	}
 
 body.manage .search
@@ -963,14 +997,11 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 
-.filter {
-	background: url(../img/sprite2x.png) 2px -214px no-repeat;
-}
 
 .logosmall {
 	background: url(../img/sprite2x.png) 1px -1403px no-repeat;
 }
-.filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
+body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
 	background-size:42px;	
 }
 }
@@ -1012,8 +1043,9 @@ td[data-vote='Fail'] {
 	padding: 20px;
 }
 
-.reviselog p {
+.vote-howto p {
 	font-size: 18px;
+	line-height: 30px;
 }
 
 #ribbon {
@@ -1075,16 +1107,17 @@ td[data-vote='Fail'] {
 	  border-width: .5em .5em 0 0;
 	}
 #vote-box {
-width: 187px;
+width: 217px;
 background: #f7f7f7;
 height: 60px;
 position: absolute;
 right: 0px;
-top:30px;
-font-size: 50px;
+top: 30px;
+text-align: center;
+font-size: 45px;
 font-weight: bold;
 text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
-padding: 70px 20px 10px;
+padding: 70px 5px 10px;
 border-radius: 4px;
 border: 1px solid #ECECEC;
 box-shadow: 1px 1px 0px #E6E6E6;
@@ -1095,6 +1128,10 @@ margin: 0 auto;
 width: 100%;
 float: left;
 padding: 20px 0 30px 0;
+}
+
+.vote-area h3 {
+clear: both;
 }
 
 .blueline {
@@ -1119,4 +1156,33 @@ box-shadow: 0px 1px 0px #ccc;
 #vote-box[data-vote='Fail']
  {
 	color: #E7504D;
+}
+
+table.tablestats.revision-info td,
+table.tablestats.revision-info th {
+padding: 15px;
+font-size: 16px;
+}
+
+
+
+.vote-howto h3 {
+	font-size: 22px;
+	margin-bottom: 20px;
+	font-weight: bold!important;
+	color: #333!important;
+}
+
+.vote-howto h2 {
+	 margin-top:20px;
+	 margin-bottom:20px
+}
+
+blockquote {
+padding: 10px 20px;
+margin: 20px 30px 30px 30px;
+background: #eee;
+font-size: 16px;
+border-left: 5px solid #aaa;
+width: 700px;
 }
