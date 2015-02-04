@@ -183,16 +183,16 @@ body.searchActive #filterSwitch
 .cattool #quality-report[data-vote=verygood],
 .cattool #quality-report[data-vote=good]
 {
-    border-right: 10px solid green;
+    border-right: 10px solid #3C9423;
 }
 
 .cattool #quality-report[data-vote=acceptable]
   {
-      border-right: 10px solid yellow;
+      border-right: 10px solid #EABA22;
   }
 .cattool #quality-report[data-vote=fail]
    {
-       border-right: 10px solid red;
+       border-right: 10px solid #E7504D;
    }
 
 .breadcrumbs a{color:#fff}
@@ -1038,7 +1038,7 @@ background-size: 42px;
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 
 .preview{font-family:Cambria, Arial, Helvetica, sans-serif !important; height:300px}
-.filter{	background: url(../img/sprite.png) 2px -214px no-repeat;width:45px;height:49px;box-shadow: 0px 0px 1px #AEAEAE;display:block;float:right;margin:-5px 10px -2px 0;border-left:1px solid #333;border-right:1px solid #333;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;position:relative;display:none !important;}
+.filter{width:24px;height:24px;box-shadow: 0px 0px 1px #AEAEAE;display:block;float:right;margin:-5px 10px -2px 0;border-left:1px solid #333;border-right:1px solid #333;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;position:relative;display:none !important;}
 .arrow-top{display:block;position:absolute;bottom:-12px;right:10px;height:20px;width:20px;background:url(../img/search-arrow.png) 0 0 no-repeat;display:none;background-size:16px 8px}
 
 /*search*/
