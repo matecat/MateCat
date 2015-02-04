@@ -1015,6 +1015,10 @@ td[data-vote='Fail'] {
 	font-size: 18px;
 }
 
+.reviselog .percent {
+	font-size:14px;
+}
+
 #ribbon {
 		padding: .34em 2em;
 		margin: 8% -7px 0;

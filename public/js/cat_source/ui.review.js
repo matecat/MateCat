@@ -162,7 +162,7 @@ if(config.enableReview && config.isReview) {
                 },
                 success: function(d) {
 //                    console.log('d: ', d);
-                    $('#quality-report').attr('data-vote', d.overall_quality_class);
+                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
                     // temp
 //                    d.stat_quality = config.stat_quality;
 //                    d.stat_quality[0].found = 2;

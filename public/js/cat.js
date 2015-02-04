@@ -4220,6 +4220,9 @@ $.extend(UI, {
 
 		$('html').click(function() {
 			$(".menucolor").hide();
+		}).on('click', '#quality-report', function(e){
+			var win = window.open( $('#quality-report' ).data('url') , '_self');
+			win.focus();
 		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             if( $('#downloadProject').hasClass('disabled') ) return false;
@@ -8741,8 +8744,8 @@ if(config.enableReview && config.isReview) {
 //                    UI.failedConnection(this[0], 'setTranslation');
                 },
                 success: function(d) {
-//                    console.log('d: ', d);
-                    $('#quality-report').attr('data-vote', d.overall_quality_class);
+                    //console.log('d: ', d);
+                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
                     // temp
 //                    d.stat_quality = config.stat_quality;
 //                    d.stat_quality[0].found = 2;

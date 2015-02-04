@@ -773,7 +773,10 @@ $.extend(UI, {
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-		}).on('click', '#downloadProject', function(e) {
+		} ).on('click', '#quality-report', function(e){
+            var win = window.open( $('#quality-report' ).data('url') , '_self');
+            win.focus();
+        }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             if( $('#downloadProject').hasClass('disabled') ) return false;
             //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
