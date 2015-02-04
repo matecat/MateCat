@@ -671,7 +671,7 @@ UI = {
 		return percentageClass;
 	},
 	getSegments: function(options) {
-        console.log('options: ', options);
+//        console.log('options: ', options);
 		where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');
@@ -920,9 +920,14 @@ UI = {
 //        console.log('open segment - editarea: ', UI.currentSegmentId);
 //        console.log('operation: ', operation);
 //		if(UI.body.hasClass('archived')) return;
+
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
-		this.openSegmentStart = new Date();
+        UI.openableSegment = true;
+        segment.trigger('just-open');
+        if(!UI.openableSegment) return false;
+        UI.openableSegment = false;
+        this.openSegmentStart = new Date();
 		if(UI.warningStopped) {
 			UI.warningStopped = false;
 			UI.checkWarnings(false);
@@ -931,9 +936,7 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
-        UI.openableSegment = true;
-        if(!UI.openableSegment) return false;
-        UI.openableSegment = false;
+
 
         this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;

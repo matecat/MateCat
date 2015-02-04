@@ -1,20 +1,31 @@
 /*
  Component: ui.review
  */
-if(config.enableReview && parseInt(config.isReview)) {
+if(config.enableReview && config.isReview) {
 
-    $('html').on('open', 'section', function() {
+    $('html').on('just-open', 'section', function() {
+        if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
+//            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
+            sid = $(this).attr('id').split('-')[1];
+            APP.confirm({
+                name: 'confirmNotYetTranslated',
+                cancelTxt: 'OK',
+//                onCancel: 'cancelTMDisable',
+                callback: 'openNextTranslated',
+                okTxt: 'Open next translated segment',
+                context: sid,
+                msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
+            });
+            UI.openableSegment = false;
+//            UI.openNextTranslated(sid);
+        }
+    }).on('open', 'section', function() {
 //        console.log('new? ', $(this).hasClass('status-new'));
 //        console.log('draft? ', $(this).hasClass('status-draft'));
         if($(this).hasClass('opened')) {
-            console.log('OPEN SEGMENT');
-            console.log($(this).find('.tab-switcher-review').length);
+//            console.log('OPEN SEGMENT');
+//            console.log($(this).find('.tab-switcher-review').length);
             $(this).find('.tab-switcher-review').click();
-        }
-
-        if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
-            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
-            UI.openableSegment = false;
         }
     }).on('start', function() {
         // temp
@@ -117,17 +128,7 @@ if(config.enableReview && parseInt(config.isReview)) {
             err_quality = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
 //            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
-            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
-
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
-//                console.log('b: ', UI.currentSegmentId);
-                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
-//                console.log('c: ', UI.currentSegmentId);
-
-            } else {
-                UI.reloadWarning();
-            }
+            UI.openNextTranslated();
             // temp fix
 /*
             setTimeout(function() {
@@ -161,9 +162,10 @@ if(config.enableReview && parseInt(config.isReview)) {
                 },
                 success: function(d) {
 //                    console.log('d: ', d);
+                    $('#quality-report').attr('data-vote', d.overall_quality_class);
                     // temp
-                    d.stat_quality = config.stat_quality;
-                    d.stat_quality[0].found = 2;
+//                    d.stat_quality = config.stat_quality;
+//                    d.stat_quality[0].found = 2;
                     //end temp
 //                    UI.populateStatQualityPanel(d.stat_quality);
                 }
@@ -283,6 +285,60 @@ if(config.enableReview && parseInt(config.isReview)) {
 
             });
 
+        },
+/*
+        gotoNextUntranslated: function () {
+            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            //console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
+//                console.log('b: ', UI.currentSegmentId);
+                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+//                console.log('c: ', UI.currentSegmentId);
+
+            } else {
+                UI.reloadWarning();
+            }
+
+        },
+*/
+        openNextTranslated: function (sid) {
+            sid = sid | UI.currentSegmentId;
+//            console.log('sid: ', sid);
+            el = $('#segment-' + sid);
+//            console.log(el.nextAll('.status-translated, .status-approved'));
+            // find in current UI
+            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
+                el.nextAll('.status-translated, .status-approved').first().find('.editarea').click();
+            } else {
+                file = el.parents('article');
+                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+                    $(this).find('.status-translated, .status-approved').first().find('.editarea').click();
+                    return false;
+                })
+                // else
+                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+                    $('section.status-translated, section.status-approved').first().find('.editarea').click();
+                } else { // find in not loaded segments
+//                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            UI.render({
+                                firstLoad: false,
+                                segmentToOpen: d.nextId
+                            });
+                        }
+                    });
+                }
+            }
         }
 
     })
