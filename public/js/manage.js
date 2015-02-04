@@ -100,7 +100,10 @@ UI = {
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'cancelled');
         }).on('mousedown','td.actions .revise',function(e) {
             e.preventDefault();
-            location.href = $(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/");
+			var win = window.open(
+				$(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/"), '_blank'
+			);
+			win.focus();
 	    }).on('mousedown','td.actions .archive',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'archived');

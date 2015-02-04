@@ -448,7 +448,7 @@ UI = {
                         } else if (s.IN_QUEUE_BEFORE > 0) {
 							//increasing number of segments ( fast analysis on another project )
 							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
-                                $('#shortloading' ).show().html('<p class="label">There are other project in queue. Please wait...</p>');
+                                $('#shortloading' ).show().html('<p class="label">There are other projects in queue. Please wait...</p>');
                                 $('#longloading' ).hide();
 							} else { //decreasing ( TM analysis on another project )
 								if ( !$('#shortloading .queue').length ) {
