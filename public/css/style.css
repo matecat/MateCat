@@ -799,6 +799,10 @@ article
 {
 	display: none;
 }
+body.review .submenu
+{
+    display: block;
+}
 .popup .submenu
 {
 	display: block;
@@ -875,6 +879,7 @@ body.noGlossary .tab-switcher-gl
     display: none;
 	float: left;
 	width: 100%;
+    background: #fff !important;
 }   
 .sub-editor.matches
 {
@@ -1284,8 +1289,21 @@ body.cattool .searchbox .block.right
 .editor{border:1px solid #58595b;width:100%;box-shadow: 0 1px 10px #666;-webkit-box-shadow: 0 1px 10px #666;position:relative;z-index:999;-moz-border-radius: 2px;border-radius: 2px;}
 .editor, .editor .text{background:#fff;}
 
-.loader{width:20px;height:20px;background:  url(../img/loading.gif) 0 0 no-repeat !important;position:absolute;left:-47px;bottom:-40px;display:none;background-size: 20px 20px !important}
-
+.loader
+{
+    width:20px;
+    height:20px;
+    background:  url(../img/loading.gif) 0 0 no-repeat !important;
+    position:absolute;
+    left:-47px;
+    bottom:-40px;
+    display:none;
+    background-size: 20px 20px !important;
+}
+body.review .loader
+{
+    background: none !important;
+}
 
 @-moz-document url-prefix() {
 
