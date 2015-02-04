@@ -275,8 +275,8 @@ body.manage a.unarchive-project
 	margin-left: 10px;
 	top: 5px;
 	background: url(../img/sprite.png) -13px -78px no-repeat;
-*/
 	}
+*/
 	body.manage .article.allCancelled a.cancel-project
 		{
 		display: none;
@@ -775,8 +775,7 @@ color: #666;
 			width: 100px;
 padding-right: 20px;
         }
-		.
-		
+
         .api dd {
             margin-left:120px;
         }
@@ -1088,6 +1087,7 @@ padding: 70px 20px 10px;
 border-radius: 4px;
 border: 1px solid #ECECEC;
 box-shadow: 1px 1px 0px #E6E6E6;
+text-align: center;
 }
 
 .vote-area {
@@ -1119,4 +1119,13 @@ box-shadow: 0px 1px 0px #ccc;
 #vote-box[data-vote='Fail']
  {
 	color: #E7504D;
+}
+
+.qa-h2-title{
+	margin-top:20px;
+	margin-bottom:10px;
+}
+
+.qa-job-title{
+	margin-bottom:0;
 }

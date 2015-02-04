@@ -39,6 +39,7 @@ RewriteRule ^(manage)[/]?$ /manage/1 [R]
 RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
 
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [L]
+RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
 RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
 
 RewriteRule ^api/docs$ lib/view/APIDoc.php [L]

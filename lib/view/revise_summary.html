@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
-        <title>Editing log - MateCat</title>
+        <title>Job Quality - MateCat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
         <link href="../../public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
@@ -39,19 +39,7 @@
                     <span style="float: left">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
                 </div>
 
-
-
-
-                <!--tal:block metal:fill-slot="actions"-->
-                <form action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="editlogDownload"/>
-                    <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
-                    <input type="hidden" name="password" tal:attributes="value password" value=""/>
-
-                    
-                    <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}"  class="downloadtr-button backbtn" >< Go to Revision</a>
-                </form>
-                <!--/tal:block -->
+                <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Go to Revision</a>
 
             </div>
         </header>
@@ -60,13 +48,13 @@
             <div class="vote-area">
                 <!--	<h1>Field test - 1</h1> -->
                 <div class="pull-left">
-                    <h1 class="pull-left"style="margin-bottom:0px">Job 12345<span tal:replace="jid | default"></span> - Revision</h1> <span class="pull-left lang-info">(French > Italian)</span>
+                    <h1 class="pull-left qa-job-title">Job <span tal:replace="jid | default"></span> - Revision</h1> <span class="pull-left lang-info">(${source_code} > ${target_code})</span>
                     <br class="clear" />
-                    <h3>January 24, 2014</h3>
+                    <h3 tal:content="creation_date">---</h3>
                 </div>
                 <div class="pull-right">
-                    <div id="vote-box" data-vote="Excellent">
-                        Excellent
+                    <div id="vote-box" data-vote="${overall_quality_class}">
+                        ${qa_overall}
                     </div>    
                     <div id="ribbon">
                         <span id="content">Overall quality</span>
@@ -79,8 +67,7 @@
         <div class="wrapper">
              <br class="clear" />
 
-            <h2 style="margin-top:20px;margin-bottom:10px">Details</h2>
-
+            <h2 class="qa-h2-title">Details</h2>
 
             <table class="tablestats revision" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
@@ -88,34 +75,17 @@
                     <th>Errors / Max number of errors</th>
                     <th>Vote</th>
                 </tr>
-                <tr> 
-                    <td>Typing</td>
-                    <td>0 / 5</td>
-                    <td data-vote='Fail'>Fail</td>
-                </tr>
+
+            <tal:block tal:repeat="qa_value qa_data">
                 <tr>
-                    <td>Translation</td>
-                    <td>0 / 5</td>
-                    <td data-vote='Acceptable'>Acceptable</td>
+                    <td>${qa_value/type}</td>
+                    <td>${qa_value/found} / ${qa_value/allowed}</td>
+                    <td tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( class_vote ) )}">${qa_value/vote}</td>
                 </tr>
-                <tr>
-                    <td>Terminology</td>
-                    <td>0 / 5</td>
-                    <td data-vote='Good'>Good</td>
-                </tr>
-                <tr>
-                    <td>Language Quality</td>
-                    <td>0 / 5</td>
-                    <td data-vote='Verygood'>Very Good</td>
-                </tr>
-                <tr>
-                    <td>Style</td>
-                    <td>0 / 5</td>
-                    <td data-vote='Excellent'>Excellent</td>
-                </tr>
+            </tal:block>
             </table>
             <hr />
-            <h2 style="margin-top:20px;margin-bottom:10px">About this report</h2>
+            <h2 class="qa-h2-title">About this report</h2>
 
             <h3>Valutazione qualità del job</h3>
             <p>Per ogni job e tipologia di errore, viene calcolata una soglia di accettazione con la seguente formula:
@@ -185,6 +155,7 @@ Il voto complessivo del job è calcolato come la media del voto calcolato per og
                     <td>5,3</td>
                     <td>Fail</td>
                     <td>40</td>
+                </tr>
                 <tr data-vote='Fail'> 
                     <td>5,4</td>
                     <td>5,9</td>

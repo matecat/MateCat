@@ -16,6 +16,8 @@ class editlogController extends viewController {
 
     private $job_archived = false;
     private $job_owner_email;
+    private $job_stats;
+    private $data;
 
 	public function __construct() {
 		parent::__construct();
@@ -41,6 +43,15 @@ class editlogController extends viewController {
         //pay a little query to avoid to fetch 5000 rows
         $jobData = getJobData( $this->jid, $this->password );
 
+        $wStruct = new WordCount_Struct();
+        $wStruct->setIdJob( $this->jid );
+        $wStruct->setJobPassword( $this->password );
+        $wStruct->setNewWords( $jobData[ 'new_words' ] );
+        $wStruct->setDraftWords( $jobData[ 'draft_words' ] );
+        $wStruct->setTranslatedWords( $jobData[ 'translated_words' ] );
+        $wStruct->setApprovedWords( $jobData[ 'approved_words' ] );
+        $wStruct->setRejectedWords( $jobData[ 'rejected_words' ] );
+
         if( $jobData['status'] == Constants_JobStatus::STATUS_ARCHIVED || $jobData['status'] == Constants_JobStatus::STATUS_CANCELLED ){
             //this job has been archived
             $this->job_archived = true;
@@ -52,7 +63,7 @@ class editlogController extends viewController {
         $this->data  = $tmp[ 0 ];
         $this->stats = $tmp[ 1 ];
 
-		$this->job_stats = CatUtils::getStatsForJob($this->jid);
+        $this->job_stats = CatUtils::getFastStatsForJob($wStruct);
 
         $proj = getProject( $jobData['id_project'] );
         $this->project_status = $proj[0];
