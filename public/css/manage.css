@@ -127,22 +127,27 @@ body.manage a.copy
    
 
 .wrapper-dropdown-5 {
-    /* Size & position */
-    position: relative;
-    margin: 0 auto;
-    padding: 5px 17px !important;
- border-radius: 2px;
-    /* Styles */
-    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-background: -moz-linear-gradient(top, #09beec, #119ec4);
-background: linear-gradient(top, #09beec, #119ec4);
-    border: 1px solid #ccc !important;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.3s ease-out;
-    font-size: 16px;
+position: relative;
+border: 1px solid #ccc !important;
+cursor: pointer;
+outline: none;
+background: #09beec;
+font-weight: bold;
+width: 130px;
+-webkit-transition: all 100ms ease-in;
+-moz-transition: all 100ms ease-in;
+font-size: 17px !important;
 cursor: pointer;
 color: #fff;
+-moz-box-shadow: 0 1px 2px #ccc;
+-webkit-box-shadow: 0 1px 2px #ccc;
+box-shadow: 0 1px 2px #ccc;
+border-radius: 2px;
+text-decoration: none;
+text-align: center;
+padding: 5px 10px !Important;
+margin: 0 0 -3px 10px !important;
+float: right;
 }
  
 .wrapper-dropdown-5:after { /* Little arrow */
@@ -190,6 +195,8 @@ width: 100%;
 	padding: 5px 5px 5px 7px;
     transition: all 0.3s ease-out;
     border-bottom: 1px solid #e6e8ea;
+    font-weight: normal;
+font-size: 16px;
 }
 .wrapper-dropdown-5 .dropdown li a:hover {
 background: #f7f8f9;
@@ -966,4 +973,150 @@ only screen and (in-resolution: 2dppx) {
 .filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
 	background-size:42px;	
 }
+}
+/* revise page */
+
+.lang-info {
+margin-top: 40px;
+margin-left: 10px;
+color: #666;
+font-size: 20px;
+}
+
+.revision-info tr[data-vote='Excellent'],
+.revision-info tr[data-vote='Verygood'],
+.revision-info tr[data-vote='Good'],
+td[data-vote='Excellent'],
+td[data-vote='Verygood'],
+td[data-vote='Good']
+ {
+	background: #d8ead3;
+}
+
+.revision-info tr[data-vote='Acceptable'],
+td[data-vote='Acceptable'] {
+	background: #fff3cd;
+}
+
+.revision-info tr[data-vote='Fail'],
+td[data-vote='Fail'] {
+	background: #f4cdcc;
+}
+
+.tablestats.revision {
+	font-size: 18px;
+}
+
+.tablestats.revision td,
+.tablestats.revision th {
+	padding: 20px;
+}
+
+.reviselog p {
+	font-size: 18px;
+}
+
+#ribbon {
+		padding: .34em 2em;
+		margin: 8% -7px 0;
+		position:relative;
+		color: #ffffff;
+		font-size: 24px;
+		font-weight: bold;
+		text-align: center;
+		text-shadow: 0px -1px 0px rgba(0,0,0,0.3);
+		box-shadow: inset 0px 1px 0px rgba(255,255,255,.3),
+					inset 0px 0px 20px rgba(0,0,0,0.0),
+					0px 1px 1px rgba(0, 0, 0, 0.65);
+		 background: #09beec;
+      display: inline-block;
+	}
+	
+#ribbon:before, #ribbon:after {
+		content: "";
+		width:.2em;
+		bottom:-.5em;
+		position:absolute;
+		display:block;
+		border: .9em solid #09beec;
+		box-shadow:0px 1px 0px rgba(0,0,0,0.4);
+		z-index:-2;
+	}
+	
+#ribbon:before {
+		left:-1.35em;
+		border-right-width: .75em;
+		border-left-color:transparent;
+	}
+	
+#ribbon:after {
+		right:-1.35em;
+		border-left-width: .75em;
+		border-right-color:transparent;
+	}
+	
+#content:before, #content:after {
+		content:"";
+		bottom:-.5em;
+		position:absolute;
+		display:block;
+		border-style:solid;
+		border-color: #0675b3 transparent transparent transparent;
+		z-index:-1;
+	}
+	
+#content:before {
+	  left: 0;
+	  border-width: .5em 0 0 .5em;
+	}
+	
+#content:after {
+	  right: 0;
+	  border-width: .5em .5em 0 0;
+	}
+#vote-box {
+width: 187px;
+background: #f7f7f7;
+height: 60px;
+position: absolute;
+right: 0px;
+top:30px;
+font-size: 50px;
+font-weight: bold;
+text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
+padding: 70px 20px 10px;
+border-radius: 4px;
+border: 1px solid #ECECEC;
+box-shadow: 1px 1px 0px #E6E6E6;
+}
+
+.vote-area {
+margin: 0 auto;
+width: 100%;
+float: left;
+padding: 20px 0 30px 0;
+}
+
+.blueline {
+width: 100%;
+height: 1px;
+background: #09beec;
+float: left;
+box-shadow: 0px 1px 0px #ccc;
+}
+
+#vote-box[data-vote='Excellent'],
+#vote-box[data-vote='Verygood'],
+#vote-box[data-vote='Good']
+ {
+	color: #3C9423;
+}
+
+#vote-box[data-vote='Acceptable'] {
+	color: #EABA22;
+}
+
+#vote-box[data-vote='Fail']
+ {
+	color: #E7504D;
 }

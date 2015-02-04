@@ -1,7 +1,7 @@
 UI = null;
 
 UI = {
-	
+
     render: function(firstLoad) {
         this.isWebkit = $.browser.webkit;
         this.isChrome = $.browser.webkit && !!window.chrome;
@@ -78,18 +78,24 @@ UI = {
             e.preventDefault();
 	        $('body').addClass('filterOpen');
 	        $('#search-projectname').focus();
-        })
-		
-		$("#contentBox").on('click','td.actions a.cancel',function(e) {  
+        });
+
+		//$("#contentBox" ).prepend('<a href="#" style="position:relative;top:300px;" class="test">cliccami</a>');
+		//$("#contentBox" ).on('click','a.test',function(e) {
+		//	e.preventDefault();
+		//	alert('ciccio');
+		//});
+
+		$("#contentBox").on('click','td.actions a.cancel',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'cancelled');
-	    }).on('click','td.actions a.archive',function(e) {  
+	    }).on('click','td.actions a.archive',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'archived');
-	    }).on('click','td.actions a.resume',function(e) {  
+	    }).on('click','td.actions a.resume',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
-	    }).on('click','td.actions a.unarchive',function(e) {  
+	    }).on('click','td.actions a.unarchive',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
 	    }).on('click','a.cancel-project',function(e) { 
@@ -104,7 +110,7 @@ UI = {
 	    }).on('click','a.unarchive-project',function(e) { 
 	        e.preventDefault();
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'active','archived');
-	    }).on('click','td.actions a.change',function(e) {;
+	    }).on('click','a.change',function(e) {
 	        e.preventDefault();
 	        UI.changePassword('job',$(this).parents('tr'),0,0);
 	    }).on('click','.meter a',function(e) {
@@ -167,6 +173,38 @@ UI = {
 		        $('.searchbox #show-archived, .searchbox #show-cancelled').removeAttr('checked');        	
 	        }
 	    });
+
+
+
+	},
+
+	setDropDown: function(){
+
+		//init dropdown events on every class
+		new UI.DropDown( $( '.wrapper-dropdown-5' ) );
+
+		//set control events
+		$( '.dropdown' ).mouseleave( function(){
+			$( '.wrapper-dropdown-5' ).removeClass( 'active' );
+		} );
+
+		$(document).click(function() {
+			// all dropdowns
+			$('.wrapper-dropdown-5').removeClass('active');
+		});
+
+	},
+
+	DropDown: function(el){
+		this.initEvents = function () {
+			var obj = this;
+			obj.dd.on( 'click', function ( event ) {
+				$( this ).toggleClass( 'active' );
+				event.stopPropagation();
+			} );
+		};
+		this.dd = el;
+		this.initEvents();
 	},
 
     appendTime: function() {
@@ -178,13 +216,13 @@ UI = {
         if($('#search-projectname').val() != '') {
         	this.filters['pn'] = $('#search-projectname').val();
         } else {
-        	delete this.filters['pn'];	        	
+        	delete this.filters['pn'];
         }
 
         if($('#select-source').val() != '') {
         	this.filters['source'] = $('#select-source').val();
         } else {
-        	delete this.filters['source'];	        	
+        	delete this.filters['source'];
         }
 
         if($('#select-target').val() != '') {
@@ -235,7 +273,7 @@ UI = {
 		                undo:		1
 					}
 				ar = $.extend(d,UI.filters);
-				
+
 				APP.doRequest({
 					data: ar,
 					context: ob,
@@ -263,7 +301,7 @@ UI = {
 		}
 
     },
-    
+
     balanceAction: function(res,ob,d,undo,project) {
         console.log('d prima: ', d);
 		// check if the project have to be hidden
@@ -343,7 +381,7 @@ UI = {
         if(res == 'job') {
 			project = ob.parents('.article');
 			if(undo) {
-				ob.attr('data-status',d.status);				
+				ob.attr('data-status',d.status);
 			} else {
 				id = ob.data('jid');
 				if(d.status == 'cancelled') {
@@ -372,7 +410,7 @@ UI = {
 					msg = 'All the jobs in a project has been archived.';
 				} else if(d.status == 'active') {
 					msg = 'All the jobs in a project has been resumed as active.';
-				}	
+				}
 				$('tr.row',project).each(function(){
 					$(this).attr('data-status',d.status);
 			    })
@@ -437,11 +475,11 @@ UI = {
 		$(jd).effect("highlight", {}, 1000);
 
 		if(res == 'job') {
-			ob.attr('data-password',d.password);				
+			ob.attr('data-password',d.password);
 			if(undo) {
 				msg = 'A job password has been restored.';
 			} else {
-				msg = 'A job password has been changed.';	
+				msg = 'A job password has been changed.';
 			}
 
 		} else {
@@ -510,7 +548,7 @@ UI = {
                 page:	UI.page
 			}
 		ar = $.extend(d,UI.filters);
-		
+
 		APP.doRequest({
 			data: ar,
 			success: function(d){
@@ -522,6 +560,10 @@ UI = {
 
 				UI.renderProjects(data,'single');
 				UI.setTablesorter();
+
+				//init dropdown events on every class
+				UI.setDropDown();
+
 			},
             error: function(d){
                 window.location = '/';
@@ -536,7 +578,7 @@ UI = {
                 page:	UI.page
 			}
 		ar = $.extend(d,UI.filters);
-		
+
 		APP.doRequest({
 			data: ar,
 			success: function(d){
@@ -567,6 +609,8 @@ UI = {
 					//UI.outsourceElements = $( ".missing-outsource-data" );
 					//UI.getOutsourceQuotes();
 
+				UI.setDropDown();
+
 		        $("html,body").animate({
 		            scrollTop: 0
 		        }, 500 );
@@ -579,7 +623,7 @@ UI = {
 
     renderPagination: function(page,top,pnumber) {
     	page = parseInt(page);
-    	
+
     	var prevLink = (page>1)? '<a href="#" data-page="' + (page-1) + '">&lt;</a>' : '';
     	var aroundBefore = (page==1)? '<strong>1</strong>' : (page==2)? '<a href="#" data-page="1">1</a><strong>2</strong>' : (page==3)? '<a href="#" data-page="1">1</a><a href="#" data-page="2">2</a><strong>3</strong>' : (page==4)? '<a href="#" data-page="1">1</a><a href="#" data-page="2">2</a><a href="#" data-page="3">3</a><strong>4</strong>' : '<a href="#" data-page="1">1</a>...<a href="#" data-page="'+(page-2)+'">'+(page-2)+'</a><a href="#" data-page="'+(page-1)+'">'+(page-1)+'</a><strong>'+page+'</strong>';
     	var pages = Math.floor(pnumber/UI.pageStep)+1;
@@ -632,13 +676,13 @@ UI = {
 	            '	</div>';
 
 //            if (this.private_tm_key!==''){
-//                    
+//
 //                     newProject += '	<div class="field">'+
 //	            '		<h3>Private TM Key:</h3>'+
 //	            '		<span class="value">'+this.private_tm_key+'</span>'+
 //	            '	</div>';
 //            }
-                    
+
 		      newProject += '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
 		        '        <thead>'+
 			    '            <tr>'+
@@ -697,7 +741,7 @@ UI = {
 		            '        </td>'+
 					'		<!--td class="missing-outsource-data"></td-->'+
 		            '        <td class="actions">'+
-		            '			<div id="dd" class="wrapper-dropdown-5" tabindex="1">Select'+
+		            '			<div id="dd' + ind + '" class="wrapper-dropdown-5" tabindex="1">Select'+
     				'				<ul class="dropdown">'+
     				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
