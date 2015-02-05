@@ -58,15 +58,19 @@ class convertFileController extends ajaxController {
 
 	public function doAction() {
 
+		$this->result[ 'code' ]      = 0; // No Good, Default
+
 		if ( empty( $this->file_name ) ) {
+			$this->result[ 'code' ]      = -1; // No Good, Default
 			$this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Error: missing file name." );
 
 			return false;
 		}
 
-		$file_path = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+		$file_path = $this->intDir . DIRECTORY_SEPARATOR . html_entity_decode( $this->file_name, ENT_QUOTES );
 
 		if ( !file_exists( $file_path ) ) {
+			$this->result[ 'code' ]      = -6; // No Good, Default
 			$this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Error during upload. Please retry." );
 
 			return -1;
@@ -122,6 +126,7 @@ class convertFileController extends ajaxController {
 				} elseif ( $fileType[ 'proprietary' ] ) {
 
 					unlink( $file_path );
+					$this->result[ 'code' ]      = -7; // No Good, Default
 					$this->result[ 'errors' ][ ] = array(
 							"code"    => -7,
 							"message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
@@ -142,6 +147,7 @@ class convertFileController extends ajaxController {
 			}
 
 		} catch ( Exception $e ) { //try catch not used because of exception no more raised
+			$this->result[ 'code' ]      = -8; // No Good, Default
 			$this->result[ 'errors' ][ ] = array( "code" => -8, "message" => $e->getMessage() );
 			Log::doLog( $e->getMessage() );
 
