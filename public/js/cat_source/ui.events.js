@@ -7,11 +7,12 @@ $.extend(UI, {
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .translated').click();
+            $('body.review .editor .approved').click();
 //		}).bind('keydown', 'Meta+return', function(e) {
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
-			console.log('funziona');
 			$('.editor .translated').click();
+            $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
