@@ -730,7 +730,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					// Animation complete.
 				});
 
-           	} else if( d.code < 0 ){
+           	} else if( d.code <= 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
                 $(filerow).addClass('failed');
