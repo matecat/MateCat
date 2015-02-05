@@ -10,29 +10,16 @@ class Revise_JobQA {
 
     const WORD_INTERVAL = 2500;
     const MAX_TYPING = 5;
-    const MAX_TRANSLATION = 3;
-    const MAX_TERMINOLOGY = 4;
-    const MAX_QUALITY = 5;
-    const MAX_STYLE = 2;
+    const MAX_TRANSLATION = 2;
+    const MAX_TERMINOLOGY = 3;
+    const MAX_QUALITY = 4;
+    const MAX_STYLE = 5;
 
     const VOTE_EXCELLENT  = "Excellent";
     const VOTE_VERY_GOOD  = "Very Good";
     const VOTE_GOOD       = "Good";
     const VOTE_ACCEPTABLE = "Acceptable";
     const VOTE_FAIL       = "Fail";
-
-    /**
-     * A scale for the votes, needs to get the lesser vote of a job ( evalJobVote )
-     *
-     * @var int[]
-     */
-    private $scaleVote    = array(
-            self::VOTE_EXCELLENT  => 100,
-            self::VOTE_VERY_GOOD  => 80,
-            self::VOTE_GOOD       => 60,
-            self::VOTE_ACCEPTABLE => 40,
-            self::VOTE_FAIL       => 20
-    );
 
     /**
      * The lesser vote of the job after it is evaluated ( evalJobVote )
@@ -183,14 +170,9 @@ class Revise_JobQA {
         $avgMark = 0.0;
         foreach ( self::$error_info as $field => $info ) {
             $avgMark += $info[ 'vote' ];
-            if( $this->scaleVote[ $info[ 'textVote' ] ] < $this->scaleVote[ $this->leastVote ] ){
-                $this->leastVote = $info[ 'textVote' ];
-            }
         }
 
-        $avgMark = $avgMark / count( self::$error_info );
-
-        return array( 'avg' => $avgMark, 'minText' => $this->leastVote );
+        return array( 'sum' => $avgMark, 'minText' => self::vote2text( $avgMark ) );
     }
 
     private static function vote2text( $vote ) {

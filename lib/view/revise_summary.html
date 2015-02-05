@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
-        <title>Job Quality - MateCat</title>
+        <title>Quality Report - MateCat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
         <link href="../../public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
@@ -48,9 +48,9 @@
             <div class="vote-area">
                 <!--	<h1>Field test - 1</h1> -->
                 <div class="pull-left">
-                    <h1 class="pull-left qa-job-title">Job <span tal:replace="jid | default"></span> - Revision</h1> <span class="pull-left lang-info">(${source_code} > ${target_code})</span>
+                    <h1 class="pull-left qa-job-title">Job <span tal:replace="jid | default"></span> - Quality Report</h1> <span class="pull-left lang-info">(${source_code} > ${target_code})</span>
                     <br class="clear" />
-                    <h3 tal:content="creation_date">---</h3>
+             
                 </div>
                 <div class="pull-right">
                     <div id="vote-box" data-vote="${overall_quality_class}">
@@ -66,67 +66,75 @@
         </div>
         <div class="wrapper">
              <br class="clear" />
-
-            <h2 class="qa-h2-title">Details</h2>
+			 <br class="clear" />
+			 <br class="clear" />
+			 <br class="clear" />
+			 <br class="clear" />
+			
 
             <table class="tablestats revision" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                    <th>Error type</th>
-                    <th>Errors / Max number of errors</th>
+                    <th>Issue</th>
+                    <th>Issues Found / Max # of Minor Issues<br /><small style="font-weight: normal">1 Major = 2 Minor</small></th>
                     <th>Vote</th>
                 </tr>
 
             <tal:block tal:repeat="qa_value qa_data">
                 <tr>
-                    <td>${qa_value/type}</td>
+                    <td style="text-align: left">${qa_value/type}</td>
                     <td>${qa_value/found} / ${qa_value/allowed}</td>
-                    <td tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( str_replace( ' ', '', class_vote ) ) )}">${qa_value/vote}</td>
+                    <td style="text-align: left" tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( str_replace( ' ', '', class_vote ) ) )}">${qa_value/vote}</td>
                 </tr>
             </tal:block>
             </table>
             <div class="vote-howto">
-                <h2>How Matecat ensures the best revision quality</h2>
-                <p>Il voto complessivo del job è calcolato come la media del voto calcolato per ogni tipologia di errore. Il risultato sarà un numero decimale che va mappato a un voto e allo score di Translated:</p>
-                <h3>Tipologia di errori e soglia di tolleranza</h3>
+                <h2>How Matecat Helps Objective Quality Mesuraments</h2>
+                <p>MateCat uses an analitical approach to quality. It defines the maximum number of minor issues (major counts as 2 minor) and use the data provided by the reviser to calculate an objective score.</p>
+                <p>Based on your needs, you can agree with your provider the quality you expect. For some people/projects "Good" or "Acceptable" may be ok, others will require an "Excellent" score from your providers.</p>                
+                
+                <h3>Type of Issues and Tollerated Threshold</h3>
                 <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
-                        <th>Errore</th>
-                        <th>Numero di errori tollerati per 2.500 parole</th>
+                        <th>Issue Type</th>
+                        <th>Tollerated Num of Minor Errors for each 2,500 words<br /><small style="font-weight: normal">1 Major = 2 Minor</small></th>
                     </tr>
                     <tr> 
-                        <td>Typing errors, double spaces and tags</td>
-                        <td>5</td>
+                        <td style="text-align: left">Typing errors, double spaces and tags</td>
+                        <td><b>5</b><br />(99.8% Accuracy)</td>
                     </tr>
                     <tr> 
-                        <td>Translation errors (mistranslation, additions/omissions, misunderstanding)</td>
-                        <td>3</td>
+                        <td style="text-align: left">Translation errors (mistranslation, additions/omissions, misunderstanding)</td>
+                        <td><b>2</b><br />(99.9% Accuracy)</td>
                     </tr>                
                     <tr> 
-                        <td>Terminology and translation consistency</td>
-                        <td>4</td>
+                        <td style="text-align: left">Terminology and translation consistency</td>
+                        <td><b>3</b><br />(99.9% Accuracy)</td>
                     </tr>  
                     <tr> 
-                        <td>Language quality (grammar, punctuation, spelling)</td>
-                        <td>5</td>
+                        <td style="text-align: left">Language quality (grammar, punctuation, spelling)</td>
+                        <td><b>4</b><br />(99.8% Accuracy)</td>
                     </tr>                                 
                     <tr> 
-                        <td>Style (readability, consistent style and tone)</td>
-                        <td>2</td>
+                        <td style="text-align: left">Style (readability, consistent style and tone)</td>
+                        <td><b>5</b><br />(99.8% Accuracy)</td>
                     </tr>                 
                 </table>
-                <h3>Valutazione qualità del job</h3>
-                <p>Per ogni job e tipologia di errore, viene calcolata una soglia di accettazione con la seguente formula:</p>
-    <blockquote>(numero di parole del job / 2500) * numero di errori tollerati (vedi tabella precedente)</blockquote>
-    <p>Per ogni tipologia di errore, viene calcolato un voto con la seguente formula:</p>
-    <blockquote>numero di errori nel job / soglia di accettazione</blockquote>
+                
+                <h3>Score Calculation</h3>
+                
+                <p>Matecat uses the following formula to calculate the num of tollerated issues for the project:</p>
+    <blockquote>(Num of Payable Words / 2500) * Num of Minor Error Tollerated</blockquote>
+    
+    <p>For each type of issue, Matecat calculates the score using in this way:</p>
+    <blockquote>Num of Issues Found / Num of Tollerated Issues</blockquote>
 
-    <p>Il voto complessivo del job è calcolato come la media del voto calcolato per ogni tipologia di errore. Il risultato sarà un numero decimale che va mappato a un voto e allo score di Translated:</p>
+    <p>The final vote is calculated as the sum of the single category votes.</p>
                 <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
-                        <th>Min</th>
-                        <th>Max</th>
-                        <th>Voto visualizzato in Matecat</th>
-                        <th>Score Translated</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Description</th>
+                        <th>Translated.net's Equivalent Score</th>
                     </tr>
                     <tr data-vote='Excellent'> 
                         <td>0</td>

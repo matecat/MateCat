@@ -65,8 +65,8 @@ class ErrorCount_DiffStruct extends ErrorCount_Struct {
         foreach ( $obj as $key => $value ) {
             if ( strpos( $key, "err_" ) > -1 ) {
                 //convert the string value into a numeric one (mapped).
-                //if the value is not zero, force it to 1.
-                $result[ $key ] = (Constants_Revise::$const2clientValues[ $value ] == 0) ? 0 : 1;
+                //if the value is not zero, get it.
+                $result[ $key ] = Constants_Revise::$const2clientValues[ $value ];
             }
         }
 
