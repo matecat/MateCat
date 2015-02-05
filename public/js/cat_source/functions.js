@@ -424,7 +424,7 @@ function saveSelection() {
 	}
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+    if(editarea != '') editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 	UI.savedSelActiveElement = document.activeElement;
 }
 
