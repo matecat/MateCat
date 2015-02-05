@@ -174,17 +174,26 @@ body.searchActive #filterSwitch
 {margin:2px -10px 0px 10px !important;}
 .cattool #quality-report
 {
+    display: none;
     margin: 2px -10px 0px 10px !important;
     padding: 5px 20px;
     margin-right: 10px !important;
     cursor: pointer;
 }
+.cattool #quality-report[data-vote=acceptable],
+.cattool #quality-report[data-vote=fail],
+.cattool.review #quality-report
+{
+    display: block;
+}
+
 .cattool #quality-report[data-vote=excellent],
 .cattool #quality-report[data-vote=verygood],
 .cattool #quality-report[data-vote=good]
 {
     border-right: 10px solid #3C9423;
 }
+
 
 .cattool #quality-report[data-vote=acceptable]
   {
