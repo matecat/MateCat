@@ -9,7 +9,7 @@ if(config.enableReview && config.isReview) {
             sid = $(this).attr('id').split('-')[1];
             APP.confirm({
                 name: 'confirmNotYetTranslated',
-                cancelTxt: 'OK',
+                cancelTxt: 'Close',
 //                onCancel: 'cancelTMDisable',
                 callback: 'openNextTranslated',
                 okTxt: 'Open next translated segment',
@@ -95,6 +95,8 @@ if(config.enableReview && config.isReview) {
         $('.editor .sub-editor').hide();
         $('.editor .sub-editor.review').show();
     }).on('input', '.editor .editarea', function() {
+        UI.trackChanges(this);
+    }).on('afterFormatSelection', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
         UI.trackChanges(UI.editarea);

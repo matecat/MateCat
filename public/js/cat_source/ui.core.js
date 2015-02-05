@@ -1712,6 +1712,7 @@ UI = {
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
 		$('.editor .editarea .formatSelection-placeholder').remove();
+        $('.editor .editarea').trigger('afterFormatSelection');
 	},
 
 	setStatus: function(segment, status) {
