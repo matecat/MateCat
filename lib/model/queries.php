@@ -1559,7 +1559,7 @@ function getEditLog( $jid, $pass ) {
 }
 
 /**
- * Used to get the closest segment of untranslated/translated type
+ * Used to get a resultset of segments id and statuses
  *
  * @param      $sid
  * @param      $jid
@@ -1586,7 +1586,7 @@ function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = fal
                 '" . Constants_TranslationStatus::STATUS_NEW . "',
                 '" . Constants_TranslationStatus::STATUS_DRAFT . "',
                 '" . Constants_TranslationStatus::STATUS_REJECTED . "'
-            ) OR st.status IS NULL )";
+            ) OR st.status IS NULL )"; //status NULL is not possible
     } else {
         $translationStatus = " st.status IN(
             '" . Constants_TranslationStatus::STATUS_TRANSLATED . "',
@@ -1610,13 +1610,34 @@ function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = fal
 
     $results = $db->fetch_array( $query );
 
+    return $results;
+}
+
+/**
+ * @param        $sid
+ * @param        $results array The resultset from previous getNextSegment()
+ * @param string $status
+ *
+ * @return null
+ */
+
+function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STATUS_NEW ){
+
+    $statusWeight = array(
+        Constants_TranslationStatus::STATUS_NEW        => 10,
+        Constants_TranslationStatus::STATUS_DRAFT      => 10,
+        Constants_TranslationStatus::STATUS_REJECTED   => 10,
+        Constants_TranslationStatus::STATUS_TRANSLATED => 40,
+        Constants_TranslationStatus::STATUS_APPROVED   => 50
+    );
+
     $nSegment = null;
     if ( isset( $results[ 0 ][ 'id' ] ) ) {
         //if there are results check for next id,
         //otherwise get the first one in the list
-        $nSegment = $results[ 0 ];
+        $nSegment = $results[ 0 ]['id'];
         foreach ( $results as $seg ) {
-            if ( $seg[ 'id' ] > $sid ) {
+            if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg['status'] ] == $statusWeight[ $status ] ) {
                 $nSegment = $seg[ 'id' ];
                 break;
             }
@@ -1624,6 +1645,7 @@ function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = fal
     }
 
     return $nSegment;
+
 }
 
 //function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {

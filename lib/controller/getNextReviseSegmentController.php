@@ -51,7 +51,14 @@ class getNextReviseSegmentController extends ajaxController {
 			$this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing job password" );
 		}
 
-		$nextSegmentId            = getNextSegment( $this->id_segment, $this->id_job, $this->password, true );
+		//get all segments with translated and approved status different from this segment
+		$segmentList = getNextSegment( $this->id_segment, $this->id_job, $this->password, true );
+
+		$nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
+		if ( !$nextSegmentId ) {
+			$nextSegmentId = fetchStatus( $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+		}
+
 		$this->result[ 'nextId' ] = $nextSegmentId;
 		$this->result[ 'code' ]   = 1;
 		$this->result[ 'data' ]   = "OK";

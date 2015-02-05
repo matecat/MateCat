@@ -12,11 +12,16 @@ $.extend(UI, {
         starting = options.starting;
         if(starting) return false;
 
-        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
-            return false;
-        } else {
+        try{
+            if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch(e){
             return true;
         }
+
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 

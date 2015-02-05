@@ -309,18 +309,50 @@ if(config.enableReview && config.isReview) {
 //            console.log('sid: ', sid);
             el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
+
+            var translatedList = [];
+            var approvedList = [];
+
             // find in current UI
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-                el.nextAll('.status-translated, .status-approved').first().find('.editarea').click();
+
+                translatedList = el.nextAll('.status-translated');
+                approvedList   = el.nextAll('.status-approved');
+
+                if( translatedList.length ) {
+                    translatedList.first().find('.editarea').click();
+                } else {
+                    approvedList.first().find('.editarea').click();
+                }
+
             } else {
                 file = el.parents('article');
                 file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
-                    $(this).find('.status-translated, .status-approved').first().find('.editarea').click();
+
+                    var translatedList = $(this).find('.status-translated');
+                    var approvedList   = $(this).find('.status-approved');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        approvedList.first().find('.editarea').click();
+                    }
+
                     return false;
-                })
+
+                });
                 // else
                 if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
-                    $('section.status-translated, section.status-approved').first().find('.editarea').click();
+
+                    translatedList = $('section.status-translated');
+                    approvedList   = $('section.status-approved');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        approvedList.first().find('.editarea').click();
+                    }
+
                 } else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
                     APP.doRequest({
@@ -333,6 +365,7 @@ if(config.enableReview && config.isReview) {
                         error: function() {
                         },
                         success: function(d) {
+                            if( d.nextId == null ) return false;
                             UI.render({
                                 firstLoad: false,
                                 segmentToOpen: d.nextId

@@ -6024,11 +6024,19 @@ $.extend(UI, {
         starting = options.starting;
         if(starting) return false;
 
-        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
-            return false;
-        } else {
-            return true;
-        }
+		try{
+			//we need this try because when we are in revision
+			// and we open a draft segment from a link we have not a editarea.html()
+			//so javascript crash
+			if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch(e){
+			return true;
+		}
+
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
@@ -8238,7 +8246,13 @@ function saveSelection() {
 	}
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	try {
+		//we need this try because when we are in revision
+		// and we open a draft segment from a link we have not a editarea.html()
+		//so javascript crash
+		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
+
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -8889,44 +8903,73 @@ if(config.enableReview && config.isReview) {
 
         },
 */
-        openNextTranslated: function (sid) {
-            sid = sid | UI.currentSegmentId;
+		openNextTranslated: function (sid) {
+			sid = sid | UI.currentSegmentId;
 //            console.log('sid: ', sid);
-            el = $('#segment-' + sid);
+			el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
-            // find in current UI
-            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-                el.nextAll('.status-translated, .status-approved').first().find('.editarea').click();
-            } else {
-                file = el.parents('article');
-                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
-                    $(this).find('.status-translated, .status-approved').first().find('.editarea').click();
-                    return false;
-                })
-                // else
-                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
-                    $('section.status-translated, section.status-approved').first().find('.editarea').click();
-                } else { // find in not loaded segments
+			// find in current UI
+			if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
+
+				var translatedList = el.nextAll('.status-translated');
+				var approvedList   = el.nextAll('.status-approved');
+
+				if( translatedList.length ) {
+					translatedList.first().find('.editarea').click();
+				} else {
+					approvedList.first().find('.editarea').click();
+				}
+
+			} else {
+				file = el.parents('article');
+				file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+
+					var translatedList = $(this).find('.status-translated');
+					var approvedList   = $(this).find('.status-approved');
+
+					if( translatedList.length ) {
+						translatedList.first().find('.editarea').click();
+					} else {
+						approvedList.first().find('.editarea').click();
+					}
+
+					return false;
+
+				});
+				// else
+				if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+
+					var translatedList = $('section.status-translated');
+					var approvedList   = $('section.status-approved');
+
+					if( translatedList.length ) {
+						translatedList.first().find('.editarea').click();
+					} else {
+						approvedList.first().find('.editarea').click();
+					}
+
+				} else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
-                    APP.doRequest({
-                        data: {
-                            action: 'getNextReviseSegment',
-                            id_job: config.job_id,
-                            password: config.password,
-                            id_segment: sid
-                        },
-                        error: function() {
-                        },
-                        success: function(d) {
-                            UI.render({
-                                firstLoad: false,
-                                segmentToOpen: d.nextId
-                            });
-                        }
-                    });
-                }
-            }
-        }
+					APP.doRequest({
+						data: {
+							action: 'getNextReviseSegment',
+							id_job: config.job_id,
+							password: config.password,
+							id_segment: sid
+						},
+						error: function() {
+						},
+						success: function(d) {
+							if( d.nextId == null ) return false;
+							UI.render({
+								firstLoad: false,
+								segmentToOpen: d.nextId
+							});
+						}
+					});
+				}
+			}
+		}
 
     })
 }

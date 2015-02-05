@@ -57,7 +57,17 @@ class setCurrentSegmentController extends ajaxController {
         }
 
         $insertRes     = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
-        $nextSegmentId = getNextSegment( $this->id_segment, $this->id_job, $this->password, ( !self::isRevision() ? false : true ) );
+        $segmentList   = getNextSegment( $this->id_segment, $this->id_job, $this->password, ( !self::isRevision() ? false : true ) );
+
+        if( !self::isRevision() ){
+            $nextSegmentId = fetchStatus( $this->id_segment, $segmentList );
+        } else {
+            $nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
+            if ( !$nextSegmentId ) {
+                $nextSegmentId = fetchStatus( $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+            }
+        }
+
 
         $_thereArePossiblePropagations = countThisTranslatedHashInJob( $this->id_job, $this->password, $this->id_segment );
         $thereArePossiblePropagations  = intval( $_thereArePossiblePropagations[ 'available' ] );
