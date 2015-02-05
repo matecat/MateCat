@@ -9,7 +9,7 @@ if(config.enableReview && config.isReview) {
             sid = $(this).attr('id').split('-')[1];
             APP.confirm({
                 name: 'confirmNotYetTranslated',
-                cancelTxt: 'OK',
+                cancelTxt: 'Close',
 //                onCancel: 'cancelTMDisable',
                 callback: 'openNextTranslated',
                 okTxt: 'Open next translated segment',
