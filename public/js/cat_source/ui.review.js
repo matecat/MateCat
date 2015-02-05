@@ -96,6 +96,8 @@ if(config.enableReview && config.isReview) {
         $('.editor .sub-editor.review').show();
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
+    }).on('afterFormatSelection', '.editor .editarea', function() {
+        UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {

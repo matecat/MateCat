@@ -1712,6 +1712,7 @@ UI = {
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
 		$('.editor .editarea .formatSelection-placeholder').remove();
+        $('.editor .editarea').trigger('afterFormatSelection');
 	},
 
 	setStatus: function(segment, status) {
@@ -4220,10 +4221,10 @@ $.extend(UI, {
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-		}).on('click', '#quality-report', function(e){
-			var win = window.open( $('#quality-report' ).data('url') , '_self');
-			win.focus();
-		}).on('click', '#downloadProject', function(e) {
+		} ).on('click', '#quality-report', function(e){
+            var win = window.open( $('#quality-report' ).data('url') , '_self');
+            win.focus();
+        }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             if( $('#downloadProject').hasClass('disabled') ) return false;
             //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
@@ -8679,6 +8680,8 @@ if(config.enableReview && config.isReview) {
         $('.editor .sub-editor.review').show();
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
+    }).on('afterFormatSelection', '.editor .editarea', function() {
+        UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
         UI.trackChanges(UI.editarea);
     }).on('click', '.approved', function(e) {
@@ -8744,7 +8747,7 @@ if(config.enableReview && config.isReview) {
 //                    UI.failedConnection(this[0], 'setTranslation');
                 },
                 success: function(d) {
-                    //console.log('d: ', d);
+//                    console.log('d: ', d);
                     $('#quality-report').attr('data-vote', d.data.overall_quality_class);
                     // temp
 //                    d.stat_quality = config.stat_quality;
