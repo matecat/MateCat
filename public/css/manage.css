@@ -1057,21 +1057,22 @@ td[data-vote='Fail'] {
 }
 
 #ribbon {
-		padding: .34em 2em;
-		margin: 8% -7px 0;
-		position:relative;
-		color: #ffffff;
-		font-size: 24px;
-		font-weight: bold;
-		text-align: center;
-		text-shadow: 0px -1px 0px rgba(0,0,0,0.3);
-		box-shadow: inset 0px 1px 0px rgba(255,255,255,.3),
-					inset 0px 0px 20px rgba(0,0,0,0.0),
-					0px 1px 1px rgba(0, 0, 0, 0.65);
-		 background: #09beec;
-      display: inline-block;
-	}
-	
+	padding: .34em 2em;
+	margin: 8% -7px 0;
+	position:relative;
+	color: black;
+	font-size: 24px;
+	font-weight: bold;
+	text-align: center;
+	text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+	/*box-shadow: inset 0px 1px 0px rgba(255,255,255,.3),
+	   inset 0px 0px 20px rgba(0,0,0,0.0),
+	   0px 1px 1px rgba(0, 0, 0, 0.65); */
+	/* background: #09beec; */
+	display: inline-block;
+}
+
+/*
 #ribbon:before, #ribbon:after {
 		content: "";
 		width:.2em;
@@ -1082,13 +1083,13 @@ td[data-vote='Fail'] {
 		box-shadow:0px 1px 0px rgba(0,0,0,0.4);
 		z-index:-2;
 	}
-	
+
 #ribbon:before {
 		left:-1.35em;
 		border-right-width: .75em;
 		border-left-color:transparent;
 	}
-	
+
 #ribbon:after {
 		right:-1.35em;
 		border-left-width: .75em;
@@ -1114,6 +1115,7 @@ td[data-vote='Fail'] {
 	  right: 0;
 	  border-width: .5em .5em 0 0;
 	}
+*/
 #vote-box {
 width: 217px;
 background: #f7f7f7;
@@ -1199,11 +1201,14 @@ font-size: 16px;
 border-left: 5px solid #aaa;
 width: 700px;
 }
-.qa-h2-title{
-	margin-top:20px;
-	margin-bottom:10px;
-}
 
+/**
+	QUALITY REPORT
+**/
 .qa-job-title{
 	margin-bottom:0;
 }
+.weight-normal {font-weight:normal;}
+.tablestats.revision th.issue {width:440px;}
+.tablestats.revision th.score {width:200px;}
+.tablestats.revision td, .tablestats.revision-info td {text-align: left;}

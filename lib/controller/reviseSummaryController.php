@@ -22,8 +22,7 @@ class reviseSummaryController extends viewController {
     private $qa_overall;
     private $totalJobWords;
 
-
-	public function __construct() {
+    public function __construct() {
 		parent::__construct();
 		parent::makeTemplate("revise_summary.html");
 
@@ -112,8 +111,22 @@ class reviseSummaryController extends viewController {
         $this->template->incomingUrl  = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->authURL      = $this->authURL;
 
+
+        //set the labels
+        $error_info = array(
+                Constants_Revise::ERR_TYPING      => 'Typing errors, double spaces and tags issues',
+                Constants_Revise::ERR_TRANSLATION => 'Translation errors (mistranslation, additions/omissions)',
+                Constants_Revise::ERR_TERMINOLOGY => 'Terminology and translation consistency',
+                Constants_Revise::ERR_QUALITY     => 'Language quality (grammar, punctuation, spelling)',
+                Constants_Revise::ERR_STYLE       => 'Style (readability, consistent style and tone)',
+        );
+
+        foreach( $this->qa_data as $k => $value ){
+            $this->qa_data[ $k ][ 'text_content' ] = $error_info[ $value[ 'type' ] ];
+        }
+
         //now set the field values of the qa
-        $this->template->totalJobWords = $this->totalJobWords;
+        $this->template->totalJobWords         = $this->totalJobWords;
         $this->template->qa_data               = $this->qa_data;
         $this->template->qa_overall            = $this->qa_overall;
         $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall ) ) );

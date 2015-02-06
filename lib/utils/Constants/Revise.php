@@ -28,10 +28,27 @@ class Constants_Revise {
     const CLIENT_VALUE_MINOR = 1;
     const CLIENT_VALUE_MAJOR = 2;
 
+    /**
+     * Max allowed errors for category
+     */
+    const WORD_INTERVAL    = 2500;
+    const MAX_TYPING       = 5;
+    const MAX_TRANSLATION  = 2;
+    const MAX_TERMINOLOGY  = 3;
+    const MAX_QUALITY      = 4;
+    const MAX_STYLE        = 5;
+
     const ERR_TYPING       = 'Typing';
     const ERR_TRANSLATION  = 'Translation';
     const ERR_TERMINOLOGY  = 'Terminology';
     const ERR_QUALITY      = 'Language Quality';
     const ERR_STYLE        = 'Style';
+
+    const VOTE_EXCELLENT  = "Excellent";
+    const VOTE_VERY_GOOD  = "Very Good";
+    const VOTE_GOOD       = "Good";
+    const VOTE_ACCEPTABLE = "Acceptable";
+    const VOTE_POOR       = "Poor";
+    const VOTE_FAIL       = "Fail";
 
 } 

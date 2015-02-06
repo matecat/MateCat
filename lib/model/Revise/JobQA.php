@@ -8,26 +8,6 @@
  */
 class Revise_JobQA {
 
-    const WORD_INTERVAL = 2500;
-    const MAX_TYPING = 5;
-    const MAX_TRANSLATION = 2;
-    const MAX_TERMINOLOGY = 3;
-    const MAX_QUALITY = 4;
-    const MAX_STYLE = 5;
-
-    const VOTE_EXCELLENT  = "Excellent";
-    const VOTE_VERY_GOOD  = "Very Good";
-    const VOTE_GOOD       = "Good";
-    const VOTE_ACCEPTABLE = "Acceptable";
-    const VOTE_POOR       = "Poor";
-    const VOTE_FAIL       = "Fail";
-
-    /**
-     * The lesser vote of the job after it is evaluated ( evalJobVote )
-     * @var string
-     */
-    private $leastVote = self::VOTE_EXCELLENT;
-
     private $job_id;
     private $job_password;
     private $job_words;
@@ -45,39 +25,39 @@ class Revise_JobQA {
 
         self::$error_info = array(
                 'typing'      => array(
-                        'maxErr'     => self::MAX_TYPING,
-                        'acceptance' => null,
-                        'foundErr'   => null,
-                        'vote'       => null,
-                        'textVote'   => null
+                        'maxErr'       => Constants_Revise::MAX_TYPING,
+                        'acceptance'   => null,
+                        'foundErr'     => null,
+                        'vote'         => null,
+                        'textVote'     => null,
                 ),
                 'translation' => array(
-                        'maxErr'     => self::MAX_TRANSLATION,
-                        'acceptance' => null,
-                        'foundErr'   => null,
-                        'vote'       => null,
-                        'textVote'   => null
+                        'maxErr'       => Constants_Revise::MAX_TRANSLATION,
+                        'acceptance'   => null,
+                        'foundErr'     => null,
+                        'vote'         => null,
+                        'textVote'     => null,
                 ),
                 'terminology' => array(
-                        'maxErr'     => self::MAX_TERMINOLOGY,
-                        'acceptance' => null,
-                        'foundErr'   => null,
-                        'vote'       => null,
-                        'textVote'   => null
+                        'maxErr'       => Constants_Revise::MAX_TERMINOLOGY,
+                        'acceptance'   => null,
+                        'foundErr'     => null,
+                        'vote'         => null,
+                        'textVote'     => null,
                 ),
                 'quality'     => array(
-                        'maxErr'     => self::MAX_QUALITY,
-                        'acceptance' => null,
-                        'foundErr'   => null,
-                        'vote'       => null,
-                        'textVote'   => null
+                        'maxErr'       => Constants_Revise::MAX_QUALITY,
+                        'acceptance'   => null,
+                        'foundErr'     => null,
+                        'vote'         => null,
+                        'textVote'     => null,
                 ),
                 'style'       => array(
-                        'maxErr'     => self::MAX_STYLE,
-                        'acceptance' => null,
-                        'foundErr'   => null,
-                        'vote'       => null,
-                        'textVote'   => null
+                        'maxErr'       => Constants_Revise::MAX_STYLE,
+                        'acceptance'   => null,
+                        'foundErr'     => null,
+                        'vote'         => null,
+                        'textVote'     => null,
                 )
 
         );
@@ -181,17 +161,17 @@ class Revise_JobQA {
     private static function vote2text( $vote ) {
 
         if ( $vote >= 0.94 ) {
-            return self::VOTE_FAIL;
+            return Constants_Revise::VOTE_FAIL;
         } elseif ( $vote >= 0.7 ) {
-            return self::VOTE_POOR;
+            return Constants_Revise::VOTE_POOR;
         } elseif ( $vote >= 0.46 ) {
-            return self::VOTE_ACCEPTABLE;
+            return Constants_Revise::VOTE_ACCEPTABLE;
         } elseif ( $vote >= 0.22 ) {
-            return self::VOTE_GOOD;
+            return Constants_Revise::VOTE_GOOD;
         } elseif ( $vote >= 0.10 ) {
-            return self::VOTE_VERY_GOOD;
+            return Constants_Revise::VOTE_VERY_GOOD;
         } elseif ( $vote >= 0 ) {
-            return self::VOTE_EXCELLENT;
+            return Constants_Revise::VOTE_EXCELLENT;
         } else {
             return "";
         }

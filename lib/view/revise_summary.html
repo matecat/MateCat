@@ -70,22 +70,21 @@
 			 <br class="clear" />
 			 <br class="clear" />
 			 <br class="clear" />
-			
-
             <table class="tablestats revision" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                    <th>Issue</th>
-                    <th>Issues Found / Max tolerated Issues for ${totalJobWords} words<br /><small style="font-weight: normal">1 Major = 2 Minor</small></th>
-                    <th>Score</th>
+                    <th class="issue">Type of Issue</th>
+                    <th>Issues Found / Max tolerated Issues for ${job_stats/TOTAL_FORMATTED} words<br /><small class="weight-normal">1 Major = 2 Minor</small></th>
+                    <th class="score">Score</th>
                 </tr>
 
             <tal:block tal:repeat="qa_value qa_data">
                 <tr>
-                    <td style="text-align: left">${qa_value/type}</td>
-                    <td>${qa_value/found} / ${qa_value/allowed}</td>
-                    <td style="text-align: left" tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( str_replace( ' ', '', class_vote ) ) )}">${qa_value/vote}</td>
+                    <td>${qa_value/text_content}</td>
+                    <td class="text-center">${qa_value/found} / ${qa_value/allowed}</td>
+                    <td tal:define="class_vote qa_value/vote"  data-vote="${php: ucfirst( strtolower( str_replace( ' ', '', class_vote ) ) )}">${qa_value/vote}</td>
                 </tr>
             </tal:block>
+
             </table>
             <div class="vote-howto">
                 <h2>How MateCat Helps Objective Quality Measurements</h2>
@@ -96,27 +95,27 @@
                 <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
                         <th>Type of Issues</th>
-                        <th>Max Tolerated Number of Issues for 2,500 words<br /><small style="font-weight: normal">1 Major = 2 Minor</small></th>
+                        <th>Max Tolerated Number of Issues for 2,500 words<br /><small class="weight-normal">1 Major = 2 Minor</small></th>
                     </tr>
                     <tr> 
-                        <td style="text-align: left">Typing errors, double spaces and tags issues</td>
-                        <td><b>5</b><br />(99.8% Accuracy)</td>
+                        <td>Typing errors, double spaces and tags issues</td>
+                        <td class="text-center"><b>5</b><br />(99.8% Accuracy)</td>
                     </tr>
                     <tr> 
-                        <td style="text-align: left">Translation errors (mistranslation, additions/omissions)</td>
-                        <td><b>2</b><br />(99.9% Accuracy)</td>
+                        <td>Translation errors (mistranslation, additions/omissions)</td>
+                        <td class="text-center"><b>2</b><br />(99.9% Accuracy)</td>
                     </tr>                
                     <tr> 
-                        <td style="text-align: left">Terminology and translation consistency</td>
-                        <td><b>3</b><br />(99.9% Accuracy)</td>
+                        <td>Terminology and translation consistency</td>
+                        <td class="text-center"><b>3</b><br />(99.9% Accuracy)</td>
                     </tr>  
                     <tr> 
-                        <td style="text-align: left">Language quality (grammar, punctuation, spelling)</td>
-                        <td><b>4</b><br />(99.8% Accuracy)</td>
+                        <td>Language quality (grammar, punctuation, spelling)</td>
+                        <td class="text-center"><b>4</b><br />(99.8% Accuracy)</td>
                     </tr>                                 
                     <tr> 
-                        <td style="text-align: left">Style (readability, consistent style and tone)</td>
-                        <td><b>5</b><br />(99.8% Accuracy)</td>
+                        <td>Style (readability, consistent style and tone)</td>
+                        <td class="text-center"><b>5</b><br />(99.8% Accuracy)</td>
                     </tr>                 
                 </table>
 
@@ -175,7 +174,8 @@
                     <tr data-vote='Poor'>
                         <td>0,70</td>
                         <td>0,82</td>
-                        <td>Poor</td>
+                        <td>Poor
+                        </td>
                         <td>50</td>
                     </tr>            
                     <tr data-vote='Poor'>
