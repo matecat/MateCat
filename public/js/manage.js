@@ -732,9 +732,8 @@ UI = {
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
-		            '        		<div class="jobdata">'+this.id+((prefix)? '-'+ind : '')+'</div>'+
-		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
-		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">(link)</a>'+
+		            '        		<div class="jobdata">'+this.id+((prefix)? '-'+ind : '') + '<span class="langs">' + this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt +'</span></div>'+
+		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'</a>'+
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="tm-key">'+
@@ -754,7 +753,7 @@ UI = {
 		            '        </td>'+
 					'		<!--td class="missing-outsource-data"></td-->'+
 		            '        <td class="actions">'+
-		            '			<div id="dd' + ind + '" class="wrapper-dropdown-5" tabindex="1">Select'+
+		            '			<div id="dd' + ind + '" class="wrapper-dropdown-5" tabindex="1">&nbsp;'+
     				'				<ul class="dropdown">'+
     				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change Password</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
@@ -765,7 +764,7 @@ UI = {
 		            '            		<li><a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '/' + project.name + '.zip" title="Export SDLXLIFF"><span class="icon-download"></span>Export SDLXLIFF</a></li>'+
 		            '					<li><a target="_blank" href="/TMX/' + this.id + '/' + this.password + '"" class="download-manage"><span class="icon-download"></span>Export TMX</a></li>'+
         			'				</ul>'+
-        			'			</div>'+
+        			'			</div><input type="button" class="btn pull-right revise" value="Revise">'+
 		            '        </td>'+
 		            '    </tr>';
 
@@ -814,7 +813,10 @@ UI = {
 	            }, 
 	            4: { 
 	                sorter: false 
-	            } 
+	            },
+				5: {
+					sorter: false
+				}
 	        }			    	
 	    });
     },
