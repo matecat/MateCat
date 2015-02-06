@@ -2708,7 +2708,7 @@ UI = {
 				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
 			}
 
-			if (this.code == '-10') {
+			if (this.code == '-10' && operation != 'getSegments' ) {
 //				APP.alert("Job canceled or assigned to another translator");
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator', 
