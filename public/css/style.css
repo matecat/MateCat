@@ -194,6 +194,10 @@ body.searchActive #filterSwitch
     border-right: 10px solid #3C9423;
 }
 
+.cattool #quality-report[data-vote=poor]
+{
+	border-right: 10px solid #FFA935;
+}
 
 .cattool #quality-report[data-vote=acceptable]
   {

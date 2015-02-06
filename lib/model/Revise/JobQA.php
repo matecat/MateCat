@@ -19,6 +19,7 @@ class Revise_JobQA {
     const VOTE_VERY_GOOD  = "Very Good";
     const VOTE_GOOD       = "Good";
     const VOTE_ACCEPTABLE = "Acceptable";
+    const VOTE_POOR       = "Poor";
     const VOTE_FAIL       = "Fail";
 
     /**
@@ -172,18 +173,22 @@ class Revise_JobQA {
             $avgMark += $info[ 'vote' ];
         }
 
-        return array( 'sum' => $avgMark, 'minText' => self::vote2text( $avgMark ) );
+        $avgMark = $avgMark / count( self::$error_info );
+
+        return array( 'avg' => $avgMark, 'minText' => self::vote2text( $avgMark ) );
     }
 
     private static function vote2text( $vote ) {
 
-        if ( $vote >= 3.6 ) {
+        if ( $vote >= 0.94 ) {
             return self::VOTE_FAIL;
-        } elseif ( $vote >= 2.4 ) {
+        } elseif ( $vote >= 0.7 ) {
+            return self::VOTE_POOR;
+        } elseif ( $vote >= 0.46 ) {
             return self::VOTE_ACCEPTABLE;
-        } elseif ( $vote >= 1.2 ) {
+        } elseif ( $vote >= 0.22 ) {
             return self::VOTE_GOOD;
-        } elseif ( $vote >= 0.6 ) {
+        } elseif ( $vote >= 0.10 ) {
             return self::VOTE_VERY_GOOD;
         } elseif ( $vote >= 0 ) {
             return self::VOTE_EXCELLENT;

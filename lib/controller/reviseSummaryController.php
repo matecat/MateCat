@@ -20,6 +20,8 @@ class reviseSummaryController extends viewController {
     private $job_owner_email;
     private $qa_data;
     private $qa_overall;
+    private $totalJobWords;
+
 
 	public function __construct() {
 		parent::__construct();
@@ -78,9 +80,10 @@ class reviseSummaryController extends viewController {
         );
 
         $jobQA->retrieveJobErrorTotals();
-        $jobVote = $jobQA->evalJobVote();
-        $this->qa_data    = $jobQA->getQaData();
-        $this->qa_overall = $jobVote[ 'minText' ];
+        $jobVote             = $jobQA->evalJobVote();
+        $this->totalJobWords = $wStruct->getTotal();
+        $this->qa_data       = $jobQA->getQaData();
+        $this->qa_overall    = $jobVote[ 'minText' ];
 
 	}
 
@@ -110,6 +113,7 @@ class reviseSummaryController extends viewController {
         $this->template->authURL      = $this->authURL;
 
         //now set the field values of the qa
+        $this->template->totalJobWords = $this->totalJobWords;
         $this->template->qa_data               = $this->qa_data;
         $this->template->qa_overall            = $this->qa_overall;
         $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall ) ) );

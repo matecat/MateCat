@@ -1023,6 +1023,11 @@ td[data-vote='Good']
 	background: #d8ead3;
 }
 
+.revision-info tr[data-vote='Poor'],
+td[data-vote='Poor'] {
+	background: #FDD7A4;
+}
+
 .revision-info tr[data-vote='Acceptable'],
 td[data-vote='Acceptable'] {
 	background: #fff3cd;
@@ -1155,6 +1160,11 @@ box-shadow: 0px 1px 0px #ccc;
 #vote-box[data-vote='Acceptable'] {
 	color: #EABA22;
 }
+
+#vote-box[data-vote='Poor'] {
+	color: #FFA935;;
+}
+
 
 #vote-box[data-vote='Fail']
  {
