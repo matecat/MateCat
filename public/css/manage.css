@@ -405,12 +405,12 @@ body.manage .meter
 
 body.manage th.create-date
 	{
-	width: 140px;
+	width: 100px;
 	}
 	
 body.manage th.job-detail
 	{
-	width: 30%;
+	width: 33%;
 	}
 body.manage th.private-tm-key
 	{
