@@ -42,8 +42,8 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
-    private $qa_data;
-    private $qa_overall;
+    private $qa_data = '[]';
+    private $qa_overall = '';
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
