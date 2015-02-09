@@ -6024,11 +6024,16 @@ $.extend(UI, {
         starting = options.starting;
         if(starting) return false;
 
-        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
-            return false;
-        } else {
+        try{
+            if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch(e){
             return true;
         }
+
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
@@ -8244,8 +8249,12 @@ function saveSelection() {
 	}
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-    if(editarea != '') editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	else UI.editarea = $('<div>');
+	try {
+		//we need this try because when we are in revision
+		// and we open a draft segment from a link we have not a editarea.html()
+		//so javascript crash
+		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -8697,16 +8706,19 @@ if(config.enableReview && config.isReview) {
     }).on('click', '.approved', function(e) {
         e.preventDefault();
         UI.tempDisablingReadonlyAlert = true;
-/*
-        var a = UI.currentSegment.find('.original-translation').text() + '"';
-        var b = $(editarea).text() + '"';
-        console.log('a: "', htmlEncode(a));
-        console.log('b: "', htmlEncode(b));
-        console.log('a = b: ', a == b);
-        console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+        UI.hideEditToolbar();
+        UI.currentSegment.removeClass('modified');
 
-        if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
- */
+        /*
+                var a = UI.currentSegment.find('.original-translation').text() + '"';
+                var b = $(editarea).text() + '"';
+                console.log('a: "', htmlEncode(a));
+                console.log('b: "', htmlEncode(b));
+                console.log('a = b: ', a == b);
+                console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+
+                if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
+         */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
@@ -8898,73 +8910,77 @@ if(config.enableReview && config.isReview) {
 
         },
 */
-		openNextTranslated: function (sid) {
-			sid = sid | UI.currentSegmentId;
+        openNextTranslated: function (sid) {
+            sid = sid | UI.currentSegmentId;
 //            console.log('sid: ', sid);
-			el = $('#segment-' + sid);
+            el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
-			// find in current UI
-			if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
 
-				var translatedList = el.nextAll('.status-translated');
-				var approvedList   = el.nextAll('.status-approved');
+            var translatedList = [];
+            var approvedList = [];
 
-				if( translatedList.length ) {
-					translatedList.first().find('.editarea').click();
-				} else {
-					approvedList.first().find('.editarea').click();
-				}
+            // find in current UI
+            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
 
-			} else {
-				file = el.parents('article');
-				file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+                translatedList = el.nextAll('.status-translated');
+                approvedList   = el.nextAll('.status-approved');
 
-					var translatedList = $(this).find('.status-translated');
-					var approvedList   = $(this).find('.status-approved');
+                if( translatedList.length ) {
+                    translatedList.first().find('.editarea').click();
+                } else {
+                    approvedList.first().find('.editarea').click();
+                }
 
-					if( translatedList.length ) {
-						translatedList.first().find('.editarea').click();
-					} else {
-						approvedList.first().find('.editarea').click();
-					}
+            } else {
+                file = el.parents('article');
+                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
 
-					return false;
+                    var translatedList = $(this).find('.status-translated');
+                    var approvedList   = $(this).find('.status-approved');
 
-				});
-				// else
-				if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        approvedList.first().find('.editarea').click();
+                    }
 
-					var translatedList = $('section.status-translated');
-					var approvedList   = $('section.status-approved');
+                    return false;
 
-					if( translatedList.length ) {
-						translatedList.first().find('.editarea').click();
-					} else {
-						approvedList.first().find('.editarea').click();
-					}
+                });
+                // else
+                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
 
-				} else { // find in not loaded segments
+                    translatedList = $('section.status-translated');
+                    approvedList   = $('section.status-approved');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        approvedList.first().find('.editarea').click();
+                    }
+
+                } else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
-					APP.doRequest({
-						data: {
-							action: 'getNextReviseSegment',
-							id_job: config.job_id,
-							password: config.password,
-							id_segment: sid
-						},
-						error: function() {
-						},
-						success: function(d) {
-							if( d.nextId == null ) return false;
-							UI.render({
-								firstLoad: false,
-								segmentToOpen: d.nextId
-							});
-						}
-					});
-				}
-			}
-		}
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            if( d.nextId == null ) return false;
+                            UI.render({
+                                firstLoad: false,
+                                segmentToOpen: d.nextId
+                            });
+                        }
+                    });
+                }
+            }
+        }
 
     })
 }

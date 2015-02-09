@@ -105,16 +105,19 @@ if(config.enableReview && config.isReview) {
     }).on('click', '.approved', function(e) {
         e.preventDefault();
         UI.tempDisablingReadonlyAlert = true;
-/*
-        var a = UI.currentSegment.find('.original-translation').text() + '"';
-        var b = $(editarea).text() + '"';
-        console.log('a: "', htmlEncode(a));
-        console.log('b: "', htmlEncode(b));
-        console.log('a = b: ', a == b);
-        console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+        UI.hideEditToolbar();
+        UI.currentSegment.removeClass('modified');
 
-        if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
- */
+        /*
+                var a = UI.currentSegment.find('.original-translation').text() + '"';
+                var b = $(editarea).text() + '"';
+                console.log('a: "', htmlEncode(a));
+                console.log('b: "', htmlEncode(b));
+                console.log('a = b: ', a == b);
+                console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+
+                if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
+         */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
