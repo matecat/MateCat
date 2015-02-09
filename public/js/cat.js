@@ -2149,23 +2149,33 @@ UI = {
 	},
 
 	failedConnection: function(reqArguments, operation) {
-		if(this.autoFailoverEnabled) {
-			this.failover(reqArguments, operation);
-			return false;
-		}
-		if(operation != 'getWarning') {
-			var pendingConnection = {
-				operation: operation,
-				args: reqArguments
-			};
-			UI.abortedOperations.push(pendingConnection);
-		}
-		if(!$('.noConnection').length) {
-			UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-			$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
-		}
+        console.log('failed connection');
+        $(window).trigger({
+            type: "offlineON",
+            reqArguments: reqArguments,
+            operation: operation
+        });
+
 	},
-	checkConnection: function() {
+    blockUIForNoConnection: function (reqArguments, operation) {
+        if(this.autoFailoverEnabled) {
+            this.failover(reqArguments, operation);
+            return false;
+        }
+        if(operation != 'getWarning') {
+            var pendingConnection = {
+                operation: operation,
+                args: reqArguments
+            };
+            UI.abortedOperations.push(pendingConnection);
+        }
+        if(!$('.noConnection').length) {
+            UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+            $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+        }
+    },
+
+    checkConnection: function() {
 		APP.doRequest({
 			data: {
 				action: 'ajaxUtils',
@@ -2173,19 +2183,22 @@ UI = {
 			},
 			error: function() {
 				console.log('error on checking connection');
-				if(UI.autoFailoverEnabled) {
-					setTimeout(function() {
-						UI.checkConnection();
-					}, 5000);	
-				} else {
-					$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-					$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");					
-				}
-
+                if(UI.autoFailoverEnabled) {
+                    setTimeout(function() {
+                        UI.checkConnection();
+                    }, 5000);
+                } else {
+                    $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+                    $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                }
 			},
 			success: function() {
 				console.log('connection is back');
-				if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                if(UI.offlineModeEnabled) {
+                    $(window).trigger('offlineOFF');
+                } else {
+                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                }
 			}
 		});
 	},
@@ -3200,7 +3213,9 @@ $.extend(UI, {
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
 		this.autoFailoverEnabled = false;
-		this.searchEnabled = true;
+        this.offlineModeEnabled = false;
+//        if(this.offlineModeEnabled) this.autoFailoverEnabled
+        this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
             this.fixHeaderHeightChange();
@@ -3402,7 +3417,6 @@ $.extend(UI, {
 //        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 //        console.log('2: ', this.tagModesEnabled);
-
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
         } else {
@@ -4084,6 +4098,8 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
+        }).on('offlineON', function(d) {
+            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
@@ -8611,7 +8627,7 @@ if(config.enableReview && config.isReview) {
             APP.confirm({
                 name: 'confirmNotYetTranslated',
                 cancelTxt: 'Close',
-//                onCancel: 'cancelTMDisable',
+//                onCancel: 'closeNotYetTranslated',
                 callback: 'openNextTranslated',
                 okTxt: 'Open next translated segment',
                 context: sid,
@@ -8910,9 +8926,14 @@ if(config.enableReview && config.isReview) {
 
         },
 */
+/*
+        closeNotYetTranslated: function () {
+            return false;
+        },
+*/
         openNextTranslated: function (sid) {
             sid = sid | UI.currentSegmentId;
-//            console.log('sid: ', sid);
+            console.log('sid: ', sid);
             el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
 
@@ -10167,3 +10188,16 @@ $.extend(UI, {
     }
 
 });
+
+/*
+ Component: ui.offline
+ */
+if(config.offlineModeEnabled) {
+
+    $(window).on('offlineON', function(d) {
+        numUntranslated = $('section.status-new, section.status-draft')
+        UI.showMessage({
+            msg: 'No connection available. You can still translate in offline mode. You have <span class="left">30</span> segments left to translate while you wait for connection to return.'})
+    })
+
+}

@@ -636,6 +636,8 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
+        }).on('offlineON', function(d) {
+            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 

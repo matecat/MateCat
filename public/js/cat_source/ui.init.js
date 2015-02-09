@@ -38,7 +38,9 @@ $.extend(UI, {
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
 		this.autoFailoverEnabled = false;
-		this.searchEnabled = true;
+        this.offlineModeEnabled = false;
+//        if(this.offlineModeEnabled) this.autoFailoverEnabled
+        this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
             this.fixHeaderHeightChange();
