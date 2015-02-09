@@ -710,7 +710,7 @@ $.extend(UI, {
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
 			e.preventDefault();
-            if(config.isReview) return false;
+//            if(config.isReview) return false;
 			if (UI.justSelecting('readonly'))
 				return;
 			if (UI.someUserSelection)
