@@ -167,6 +167,9 @@ body.searchActive #filterSwitch
 
 
 
+.cattool.review #jobMenu {display: none;}
+.cattool.review .breadcrumbs #pname {background: none;}
+.cattool.review .breadcrumbs {padding: 22px 0 4px 0px;}
 
 .cattool .breadcrumbs{padding:22px 0 4px 15px;}
 
