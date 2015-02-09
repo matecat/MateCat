@@ -21,17 +21,42 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
+// codice inserito da Daniele per aprire la tm e settare l'active nel tab
+
         $(".mgmt-tm").click(function() {
-            $(".mgmt-panel-gl").hide();
-            $(".mgmt-panel-tm").show();
-            $("table.mgmt-tm").show();
+            $(this).addClass("active");
+            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-table-mt").hide();
+            $(".mgmt-table-tm").show();
+        });
+        $(".tm-mgmt").click(function() {
+            $(".mgmt-mt").addClass("active");
+            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-table-tm").hide();
+            $(".mgmt-table-mt").show();
         });
 
-        $(".mgmt-gl").click(function() {
-            $(".mgmt-panel-tm").hide();
-            $("table.mgmt-tm").hide();
-            $(".mgmt-panel-gl").show();
+        
+
+        $(".mgmt-mt").click(function() {
+            $(this).addClass("active");
+            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-table-tm").hide();
+            $(".mgmt-table-mt").show();
         });
+
+        $("#mt_engine_int").change(function() {
+            if($(this).val() == "microsofthub") {
+                $(".step2").show();
+                $(".step3").show();
+
+            }
+            if($(this).val() !== "microsofthub") {
+                 $(".step2").hide();
+                $(".step3").hide();
+            }
+        });
+// fine codice di Daniele 
 
         $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
             e.preventDefault();

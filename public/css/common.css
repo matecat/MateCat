@@ -885,6 +885,10 @@ text-align: right;
 	    margin: 0 !important;
 	    text-align: left;
     }
+
+    .popup-tm h1 {
+        border-bottom: 0;
+    }
     .slide-panel h1 {
     	height: 30px;
     	padding: 10px 23px 7px 58px;
@@ -1033,10 +1037,7 @@ text-align: center;
 float: none!important;
 }
 
-.mgmt-panel-tm .btn-ok, .mgmt-panel-gl .btn-ok {
-		    padding: 4px 18px;
-		    margin-top:10px;
-}
+
 .popup h1 .btn-ok,
 .popup h1 .btn-cancel
 {
@@ -1094,12 +1095,12 @@ float: none!important;
 	
 	
 	#myTab  {
-background: #fff;
+background: #4D4D4D;
 display: block;
 text-align: left;
 width: 100%;
 border-bottom: 1px solid #666;
-margin-top: 1px;
+padding-top: 5px;
 }
 
     .manage .searchbox {	
@@ -1134,8 +1135,10 @@ div.mgmt-container {
 margin: 0 auto;
 overflow: hidden;
 width: 96%;
+padding-top: 20px;
 text-align: left;
 }
+
 
 
 
@@ -1143,7 +1146,7 @@ text-align: left;
 
 margin:0 auto; overflow:hidden; width:100%;
 		background: #fff;
-		padding: 15px 0 30px;
+		padding: 0 0 30px;
 			font-size:16px;
 		
 
@@ -1541,7 +1544,7 @@ color: #999;}
 #activetm tr.ownergroup td.dragrow .status {border: none; cursor:auto;}
 #activetm tr.uploadfile td {background: #fff;}
 #inactivetm td {background: #f3f3f3;}
-.mgmt-tm th, .mgmt-gl th {
+.mgmt-tm th, .mgmt-mt th {
     padding: 8px 5px;
     background: #fff;
 }
@@ -1585,9 +1588,10 @@ margin: 10px 0;
 .addrow label {float:left;}
 
 .mgmt-panel p {
-margin: 10px 0 10px;
+margin: 0;
 clear: both;
 text-align: left;
+line-height: 30px;
 }
 
 .mgmt-add-tm input, .mgmt-add-gl input {
@@ -1602,6 +1606,11 @@ border: 1px solid #abadb3;
 }
 #inactivetm.filtering tbody tr:not(.found) {
     display: none !important;
+}
+
+.insert-tm .canceladdtmx {
+    margin-bottom: 15px;
+    margin-right: 20px;
 }
 
 .nonumber {display:none;}
@@ -1670,17 +1679,83 @@ body.filterOpen .searchbox
 }
 
 .mgmt-panel label {
-text-transform: none;
-padding-bottom: 5px;
-font-weight: bold;
+    text-transform: none;
+    padding-bottom: 5px;
+    font-weight: bold;
 }
 
+.step2 label {
+    width: 130px!important;
+    text-align: right;
+    font-size: 16px;
+    display: inline-block;
+    margin-bottom: 20px;
+    margin-right: 10px;
+}
+
+.step2 input {
+    border: 1px solid #999;
+    background: #fff;
+    height: auto;
+    outline: 0;
+    box-shadow: inset 0 1px 2px #ddd;
+    -webkit-box-shadow: inset 0 1px 2px #ddd;
+    white-space: initial;
+    overflow: initial;
+    text-overflow: initial;
+    width: 444px;
+    height: 25px;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.insert-tm {
+    border: 1px solid #ccc;
+    margin: 0 auto;
+    overflow: hidden;
+    padding: 10px 20px;
+}
+
+.insert-tm h4 {
+    font-size: 18px;
+    margin: 15px 0 25px;
+}
+
+
+.text-left {
+width: 60%;
+}
+
+.contact-box {
+    width: 25%;
+border: 1px dashed #ccc;
+height: 90px;
+padding: 2%;
+}
+
+.step1 {
+margin-right: 14%;
+}
+
+.step2 {
+width: 60%;
+}
+
+.step3 {
+border-top: 1px solid #ccc;
+margin: 0 auto;
+overflow: hidden;
+clear: left;
+padding: 20px 0 10px;
+}
+
+
 a.memory-mgmt.pull-right {
-margin-top: 35px;
-background: url(../img/sprite.png) 0 -259px no-repeat;
-background-size: 12px;
-padding: 0 0 5px 18px;
-margin-bottom: 5px;
+    margin-top: 35px;
+    background: url(../img/sprite.png) 0 -259px no-repeat;
+    background-size: 12px;
+    padding: 0 0 5px 18px;
+    margin-bottom: 5px;
 }
 
 
