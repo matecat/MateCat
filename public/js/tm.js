@@ -23,13 +23,15 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-        $(".mgmt-tm").click(function() {
+        $(".mgmt-tm").click(function(e) {
+            e.preventDefault();
             $(this).addClass("active");
             $(".mgmt-mt").removeClass("active");
             $(".mgmt-table-mt").hide();
             $(".mgmt-table-tm").show();
         });
-        $(".tm-mgmt").click(function() {
+        $(".tm-mgmt").click(function(e) {
+            e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
             $(".mgmt-table-tm").hide();
@@ -38,7 +40,8 @@ $.extend(UI, {
 
         
 
-        $(".mgmt-mt").click(function() {
+        $(".mgmt-mt").click(function(e) {
+            e.preventDefault();
             $(this).addClass("active");
             $(".mgmt-tm").removeClass("active");
             $(".mgmt-table-tm").hide();
@@ -46,17 +49,44 @@ $.extend(UI, {
         });
 
         $("#mt_engine_int").change(function() {
-            if($(this).val() == "microsofthub") {
-                $(".step2").show();
-                $(".step3").show();
-
-            }
-            if($(this).val() !== "microsofthub") {
-                 $(".step2").hide();
+            $(".step2").show();
+            provider = $(this).val();
+            if(provider == 'none') {
+                $('.step2 .fields').html('');
+                $(".step2").hide();
                 $(".step3").hide();
+            } else {
+                $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step3").show();
             }
         });
-// fine codice di Daniele 
+// fine codice di Daniele
+
+        $('#add-mt-provider-confirm').click(function(e) {
+            e.preventDefault();
+            if($(this).hasClass('disabled')) return false;
+            provider = $("#mt_engine_int").val();
+            providerName = $("#mt_engine_int option:selected").text();
+            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
+            $('#mt_engine option:selected').removeAttr('selected');
+            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
+            $('.popup-tm h1 .btn-ok').click();
+        });
+        $('#add-mt-provider-cancel').click(function(e) {
+            $('.popup-tm h1 .btn-ok').click();
+        });
+
+        $('html').on('input', '#mt-provider-details input', function() {
+            num = 0;
+            $('#mt-provider-details input').each(function () {
+                if($(this).val() == '') num++;
+            })
+            if(num) {
+                $('#add-mt-provider-confirm').addClass('disabled');
+            } else {
+                $('#add-mt-provider-confirm').removeClass('disabled');
+            }
+        });
 
         $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
             e.preventDefault();

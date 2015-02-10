@@ -224,24 +224,14 @@
                                     </div>
                                     <div class="step2 hide pull-left">
                                         <h4>Provide details to connect</h4>
-                                        <form>
-                                            <label>Engine name</label>
-                                            <input placeholder="here" />
+                                        <form id="mt-provider-details">
+                                            <span class="fields"></span>
                                             <br class="clear" />
-                                            <label>ClientID</label>
-                                            <input placeholder="here" />
-                                            <br class="clear" />
-                                            <label>Client Secret</label>
-                                            <input placeholder="here" />
-                                            <br class="clear" />
-                                            <label>Category</label>
-                                            <input placeholder="here" />
-                                        <br class="clear" />
-                                            <a class="pull-right btn-ok uploadtm disabled">
+                                            <a id="add-mt-provider-confirm" class="pull-right btn-ok uploadtm disabled">
                                                 <span class="text uploadkey">Confirm</span>
                                             </a>
 
-                                            <a class="pull-right btn-grey canceladdtmx">
+                                            <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
                                                 <span class="text">Cancel</span>
                                             </a>
                                             <div class="error">
@@ -293,7 +283,35 @@
     </div>
     <!-- fine popup glossary mgmt -->
 
+    <template id="mt-provider-microsofthub">
+        <label>Engine name</label>
+        <input placeholder="here" />
+        <br class="clear" />
+        <label>ClientID</label>
+        <input placeholder="here" />
+        <br class="clear" />
+        <label>Client Secret</label>
+        <input placeholder="here" />
+        <br class="clear" />
+        <label>Category</label>
+        <input placeholder="here" />
+    </template>
+
+    <template id="mt-provider-iptranslator">
+        Placeholder, qui vanno dati di questo provider.
+    </template>
+
+    <template id="mt-provider-deeplingo">
+        Placeholder, qui vanno dati di questo provider.
+    </template>
+
+    <template id="mt-provider-moses">
+        Placeholder, qui vanno dati di questo provider.
+    </template>
+
+
 </div>
+
 
 </body>
 </html>

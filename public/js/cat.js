@@ -6024,11 +6024,16 @@ $.extend(UI, {
         starting = options.starting;
         if(starting) return false;
 
-        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
-            return false;
-        } else {
+        try{
+            if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch(e){
             return true;
         }
+
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
@@ -8244,8 +8249,12 @@ function saveSelection() {
 	}
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-    if(editarea != '') editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	else UI.editarea = $('<div>');
+	try {
+		//we need this try because when we are in revision
+		// and we open a draft segment from a link we have not a editarea.html()
+		//so javascript crash
+		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -8898,73 +8907,77 @@ if(config.enableReview && config.isReview) {
 
         },
 */
-		openNextTranslated: function (sid) {
-			sid = sid | UI.currentSegmentId;
+        openNextTranslated: function (sid) {
+            sid = sid | UI.currentSegmentId;
 //            console.log('sid: ', sid);
-			el = $('#segment-' + sid);
+            el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
-			// find in current UI
-			if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
 
-				var translatedList = el.nextAll('.status-translated');
-				var approvedList   = el.nextAll('.status-approved');
+            var translatedList = [];
+            var approvedList = [];
 
-				if( translatedList.length ) {
-					translatedList.first().find('.editarea').click();
-				} else {
-					approvedList.first().find('.editarea').click();
-				}
+            // find in current UI
+            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
 
-			} else {
-				file = el.parents('article');
-				file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+                translatedList = el.nextAll('.status-translated');
+                approvedList   = el.nextAll('.status-approved');
 
-					var translatedList = $(this).find('.status-translated');
-					var approvedList   = $(this).find('.status-approved');
+                if( translatedList.length ) {
+                    translatedList.first().find('.editarea').click();
+                } else {
+                    approvedList.first().find('.editarea').click();
+                }
 
-					if( translatedList.length ) {
-						translatedList.first().find('.editarea').click();
-					} else {
-						approvedList.first().find('.editarea').click();
-					}
+            } else {
+                file = el.parents('article');
+                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
 
-					return false;
+                    var translatedList = $(this).find('.status-translated');
+                    var approvedList   = $(this).find('.status-approved');
 
-				});
-				// else
-				if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        approvedList.first().find('.editarea').click();
+                    }
 
-					var translatedList = $('section.status-translated');
-					var approvedList   = $('section.status-approved');
+                    return false;
 
-					if( translatedList.length ) {
-						translatedList.first().find('.editarea').click();
-					} else {
-						approvedList.first().find('.editarea').click();
-					}
+                });
+                // else
+                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
 
-				} else { // find in not loaded segments
+                    translatedList = $('section.status-translated');
+                    approvedList   = $('section.status-approved');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        approvedList.first().find('.editarea').click();
+                    }
+
+                } else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
-					APP.doRequest({
-						data: {
-							action: 'getNextReviseSegment',
-							id_job: config.job_id,
-							password: config.password,
-							id_segment: sid
-						},
-						error: function() {
-						},
-						success: function(d) {
-							if( d.nextId == null ) return false;
-							UI.render({
-								firstLoad: false,
-								segmentToOpen: d.nextId
-							});
-						}
-					});
-				}
-			}
-		}
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            if( d.nextId == null ) return false;
+                            UI.render({
+                                firstLoad: false,
+                                segmentToOpen: d.nextId
+                            });
+                        }
+                    });
+                }
+            }
+        }
 
     })
 }
@@ -8991,16 +9004,71 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-        $(".mgmt-tm").click(function() {
-            $(".mgmt-panel-gl").hide();
-            $(".mgmt-panel-tm").show();
-            $("table.mgmt-tm").show();
+// codice inserito da Daniele per aprire la tm e settare l'active nel tab
+
+        $(".mgmt-tm").click(function(e) {
+            e.preventDefault();
+            $(this).addClass("active");
+            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-table-mt").hide();
+            $(".mgmt-table-tm").show();
+        });
+        $(".tm-mgmt").click(function(e) {
+            e.preventDefault();
+            $(".mgmt-mt").addClass("active");
+            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-table-tm").hide();
+            $(".mgmt-table-mt").show();
         });
 
-        $(".mgmt-gl").click(function() {
-            $(".mgmt-panel-tm").hide();
-            $("table.mgmt-tm").hide();
-            $(".mgmt-panel-gl").show();
+        
+
+        $(".mgmt-mt").click(function(e) {
+            e.preventDefault();
+            $(this).addClass("active");
+            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-table-tm").hide();
+            $(".mgmt-table-mt").show();
+        });
+
+        $("#mt_engine_int").change(function() {
+            $(".step2").show();
+            provider = $(this).val();
+            if(provider == 'none') {
+                $('.step2 .fields').html('');
+                $(".step2").hide();
+                $(".step3").hide();
+            } else {
+                $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step3").show();
+            }
+        });
+// fine codice di Daniele
+
+        $('#add-mt-provider-confirm').click(function(e) {
+            e.preventDefault();
+            if($(this).hasClass('disabled')) return false;
+            provider = $("#mt_engine_int").val();
+            providerName = $("#mt_engine_int option:selected").text();
+            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
+            $('#mt_engine option:selected').removeAttr('selected');
+            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
+            $('.popup-tm h1 .btn-ok').click();
+        });
+        $('#add-mt-provider-cancel').click(function(e) {
+            $('.popup-tm h1 .btn-ok').click();
+        });
+
+        $('html').on('input', '#mt-provider-details input', function() {
+            num = 0;
+            $('#mt-provider-details input').each(function () {
+                if($(this).val() == '') num++;
+            })
+            if(num) {
+                $('#add-mt-provider-confirm').addClass('disabled');
+            } else {
+                $('#add-mt-provider-confirm').removeClass('disabled');
+            }
         });
 
         $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
