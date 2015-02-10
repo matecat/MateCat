@@ -2287,14 +2287,17 @@ footer nav
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {
          display: block;
+
     }
+    	.breadcrumbs a {width: 260px;}
+
 }
 @media screen and (max-width: 1280px){
 	/*.buttons{margin:-15px 42px 0 0 !important;}*/
 	.header-menu{margin-right:16px}
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
-	.breadcrumbs a {width: 300px;}
+	.breadcrumbs a {width: 200px;}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
 }
 @media screen and (max-width: 1260px){
@@ -2338,7 +2341,9 @@ footer nav
 }
 
 @media screen and (max-width: 1100px){
-	.breadcrumbs a {width: 240px;}
+	.breadcrumbs a {width: 110px; padding-left:10px!important;}
+	.wrapper {width: 98%;}
+	.cattool #quality-report {padding:5px 10px!important;}
 }
 
 li.tag-mismatch
