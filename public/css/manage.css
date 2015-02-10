@@ -28,7 +28,7 @@ body.manage h2
 	float: left;
 	width: 100%;
 	margin-top: 20px;
-	margin-bottom: 0;
+	margin-bottom: 5px;
 	}
 		
 h2{font-size:30px;margin:0;}
@@ -127,6 +127,7 @@ body.manage a.copy
 body.manage .article:last-child .wrapper-dropdown-5 .dropdown {
 	bottom: 100%;
 top: inherit;
+border-top: 0;
 }
 
 body.manage .article:last-child .wrapper-dropdown-5 .dropdown li:first-child{
@@ -135,7 +136,7 @@ border-top:1px solid #ccc;
 
 body.manage input[type=button].revise {
 	cursor: pointer;
-	height: 31px;
+	height: 29px;
 	width: 77% !important;
 	border-right: 0 solid;
 	border-radius: 2px 0 0 2px;
@@ -163,7 +164,7 @@ body.manage input[type=button].revise {
 	border-radius: 0 2px 2px 0;
 	text-decoration: none;
 	text-align: center;
-	padding: 5px 10px !Important;
+	padding: 4px 10px !Important;
 	margin: 0 !important;
 	float: right;
 }
@@ -186,8 +187,8 @@ body.manage input[type=button].revise {
 	/* Size & position */
 	position: absolute;
 	top: 98%;
-	left: -117px;
-	width: 149px;
+	left: -116px;
+	width: 147px;
 	right: 0;
 	margin-top: 1px;
 
@@ -225,10 +226,9 @@ body.manage input[type=button].revise {
 	display: block;
 	text-decoration: none;
 	background: #fff;
-
 	color: #666;
 	text-align: left;
-	padding: 5px 5px 5px 7px;
+	padding: 5px 0px 5px 5px;
 	transition: all 0.3s ease-out;
 	border-bottom: 1px solid #e6e8ea;
 	font-weight: normal;
