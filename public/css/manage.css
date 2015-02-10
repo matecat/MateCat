@@ -674,6 +674,7 @@ body.manage input[type=button],
 body.manage input[type=submit]
 	{
 	width: 80px !important;
+	background: #dcdedf!important;
 	}
 
 body.manage .message
