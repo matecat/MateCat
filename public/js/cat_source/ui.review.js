@@ -10,7 +10,7 @@ if(config.enableReview && config.isReview) {
             APP.confirm({
                 name: 'confirmNotYetTranslated',
                 cancelTxt: 'Close',
-//                onCancel: 'cancelTMDisable',
+//                onCancel: 'closeNotYetTranslated',
                 callback: 'openNextTranslated',
                 okTxt: 'Open next translated segment',
                 context: sid,
@@ -309,9 +309,14 @@ if(config.enableReview && config.isReview) {
 
         },
 */
+/*
+        closeNotYetTranslated: function () {
+            return false;
+        },
+*/
         openNextTranslated: function (sid) {
             sid = sid | UI.currentSegmentId;
-//            console.log('sid: ', sid);
+            console.log('sid: ', sid);
             el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
 
