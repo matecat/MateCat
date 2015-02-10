@@ -2294,7 +2294,7 @@ footer nav
 	.header-menu{margin-right:16px}
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
-	.breadcrumbs {width: 300px;}
+	.breadcrumbs a {width: 300px;}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
 }
 @media screen and (max-width: 1260px){
@@ -2338,7 +2338,7 @@ footer nav
 }
 
 @media screen and (max-width: 1100px){
-	.breadcrumbs {width: 240px;}
+	.breadcrumbs a {width: 240px;}
 }
 
 li.tag-mismatch
