@@ -350,12 +350,13 @@ class TMSService {
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
-<tmx version="1.4" xmlns="https://www.matecat.com">
+<tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
             creationtoolversion="'. INIT::$BUILD_NUMBER .'"
+	    o-tmf="Matecat"
             creationid="Matecat"
-            datatype="xml"
+            datatype="plaintext"
             segtype="sentence"
             adminlang="en-US"
             srclang="' . $sourceLang . '"/>
