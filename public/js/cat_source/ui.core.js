@@ -925,6 +925,7 @@ UI = {
 		var segment = $('#segment-' + segment_id);
         UI.openableSegment = true;
         segment.trigger('just-open');
+//        console.log('UI.openableSegment: ', UI.openableSegment);
         if(!UI.openableSegment) return false;
         UI.openableSegment = false;
         this.openSegmentStart = new Date();

@@ -890,8 +890,12 @@ $.extend(UI, {
 				if (action == 'openConcordance')
 					UI.openConcordance();
 
-				if (operation != 'moving')
-					UI.scrollSegment($('#segment-' + $(this).data('sid')));
+				if (operation != 'moving') {
+                    segment = $('#segment-' + $(this).data('sid'));
+                    if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+                        UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                    }
+                }
 			}
 
             UI.lockTags(UI.editarea);
