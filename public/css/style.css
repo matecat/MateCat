@@ -3442,6 +3442,8 @@ margin-right: 3%;
 	top: -140px;
 	opacity: 0;
 	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+	-webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+	-moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 	-webkit-transition: all 0.3s ease-in-out;
 	-moz-transition: all 0.3s ease-in-out;
 	-o-transition: all 0.3s ease-in-out;
@@ -3453,7 +3455,7 @@ margin-right: 3%;
 .tooltip span:before, .tooltip span:after {
 	content: '';
 	position: absolute;
-	bottom: -12px;
+	bottom: -11px;
 	left: 43%;
 	width: 0;
 	height: 0;
