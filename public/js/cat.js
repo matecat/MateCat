@@ -3170,6 +3170,7 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
+    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 });
 
 
