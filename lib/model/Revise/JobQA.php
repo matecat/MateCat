@@ -155,7 +155,12 @@ class Revise_JobQA {
 
         $avgMark = $avgMark / count( self::$error_info );
 
-        return array( 'avg' => $avgMark, 'minText' => self::vote2text( $avgMark ) );
+        return array(
+                'avg'              => $avgMark,
+                'minText'          => self::vote2text( $avgMark ),
+                'equivalent_class' => self::vote2EquivalentScore( $avgMark )
+        );
+
     }
 
     private static function vote2text( $vote ) {
@@ -176,6 +181,20 @@ class Revise_JobQA {
             return "";
         }
 
+    }
+
+    /**
+     * Convert job average score to Equivalent Translated Score
+     *
+     * @param $vote
+     *
+     * @return null|string
+     */
+    private static function vote2EquivalentScore( $vote ){
+        foreach( Constants_Revise::$equivalentScoreMap as $class => $value ){
+            if ( $value >= $vote ) return $class;
+        }
+        return null;
     }
 
 } 

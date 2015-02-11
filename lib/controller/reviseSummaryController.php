@@ -19,7 +19,9 @@ class reviseSummaryController extends viewController {
     private $job_archived = false;
     private $job_owner_email;
     private $qa_data;
-    private $qa_overall;
+    private $qa_overall_text;
+    private $qa_overall_avg;
+    private $qa_equivalent_class;
     private $totalJobWords;
 
     public function __construct() {
@@ -79,10 +81,12 @@ class reviseSummaryController extends viewController {
         );
 
         $jobQA->retrieveJobErrorTotals();
-        $jobVote             = $jobQA->evalJobVote();
-        $this->totalJobWords = $wStruct->getTotal();
-        $this->qa_data       = $jobQA->getQaData();
-        $this->qa_overall    = $jobVote[ 'minText' ];
+        $jobVote                   = $jobQA->evalJobVote();
+        $this->totalJobWords       = $wStruct->getTotal();
+        $this->qa_data             = $jobQA->getQaData();
+        $this->qa_overall_text     = $jobVote[ 'minText' ];
+        $this->qa_overall_avg      = $jobVote[ 'avg' ];
+        $this->qa_equivalent_class = $jobVote[ 'equivalent_class' ];
 
 	}
 
@@ -102,14 +106,14 @@ class reviseSummaryController extends viewController {
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
-        $this->template->job_stats    = $this->job_stats;
+        $this->template->job_stats                = $this->job_stats;
 
 
-        $this->template->build_number = INIT::$BUILD_NUMBER;
-        $this->template->extended_user  = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
-        $this->template->logged_user  = $this->logged_user['short'];
-        $this->template->incomingUrl  = '/login?incomingUrl=' . $this->thisUrl;
-        $this->template->authURL      = $this->authURL;
+        $this->template->build_number  = INIT::$BUILD_NUMBER;
+        $this->template->extended_user = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->logged_user   = $this->logged_user[ 'short' ];
+        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
+        $this->template->authURL       = $this->authURL;
 
 
         //set the labels
@@ -128,8 +132,10 @@ class reviseSummaryController extends viewController {
         //now set the field values of the qa
         $this->template->totalJobWords         = $this->totalJobWords;
         $this->template->qa_data               = $this->qa_data;
-        $this->template->qa_overall            = $this->qa_overall;
-        $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall ) ) );
+        $this->template->qa_overall            = $this->qa_overall_text;
+        $this->template->qa_overall_avg        = $this->qa_overall_avg;
+        $this->template->qa_equivalent_class   = $this->qa_equivalent_class;
+        $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall_text ) ) );
 
 	}
 }

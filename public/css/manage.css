@@ -407,7 +407,7 @@ body.manage th.create-date
 	{
 	width: 100px;
 	}
-	
+
 body.manage th.job-detail
 	{
 	width: 33%;
@@ -1201,7 +1201,37 @@ padding: 15px;
 font-size: 16px;
 }
 
-
+/* Table Equivalent Translated Score Highlight */
+.qa_eq_tr[data-vote='Excellent'] td,
+.qa_eq_tr[data-vote='Verygood'] td,
+.qa_eq_tr[data-vote='Good'] td {
+	border-color: #3C9423 !important;
+}
+.qa_eq_tr[data-vote='Acceptable'] td {
+	border-color: #E5B007 !important;
+}
+.qa_eq_tr[data-vote='Poor'] td {
+	border-color: #FFA935 !important;
+}
+.qa_eq_tr[data-vote='Fail'] td {
+	border-color: #E7504D !important;
+}
+.qa_eq_tr {
+	font-weight: bold;
+}
+.qa_eq_td {
+	font-size: 18px !important;
+	border-top:1px solid;
+	border-bottom:1px solid !important;
+	border-left: 0 !important;
+}
+.qa_eq_td_first {
+	border-left: 4px solid !important;
+}
+.qa_eq_td_last {
+	border-right: 4px solid !important;
+}
+/* Table Equivalent Translated Score Highlight */
 
 .vote-howto h3 {
 	font-size: 22px;

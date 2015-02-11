@@ -51,4 +51,20 @@ class Constants_Revise {
     const VOTE_POOR       = "Poor";
     const VOTE_FAIL       = "Fail";
 
+    public static $equivalentScoreMap = array(
+
+            '80' => 0.10,
+            '75' => 0.22,
+            '70' => 0.34,
+            '65' => 0.46,
+            '60' => 0.58,
+            '55' => 0.70,
+            '50' => 0.82,
+            '45' => 0.94,
+            '40' => 1.06,
+            '35' => 1.18,
+            '30' => 9999,
+
+    );
+
 } 
