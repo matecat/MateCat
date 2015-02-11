@@ -569,7 +569,7 @@ class QA {
         preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
 
 //        Log::doLog($source_seg);
-//        Log::hexDump($target_seg);
+//        Log::doLog($target_seg);
 
         if ( !empty( $matches_src[ 1 ] ) ) {
             $test_src = $source_seg;

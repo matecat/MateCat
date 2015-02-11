@@ -35,6 +35,13 @@ class MultiCurlHandler {
     protected $multi_curl_results = array();
 
     /**
+     * Container for the curl results
+     *
+     * @var array
+     */
+    protected $multi_curl_info = array();
+
+    /**
      * Class Constructor, init the multi curl handler
      *
      */
@@ -97,10 +104,17 @@ class MultiCurlHandler {
             curl_multi_exec( $this->multi_handler, $still_running );
         } while ( $still_running > 0 );
 
-        foreach( $this->curl_handlers as $tokenHash => $curl_resource ){
-            $temp = curl_multi_getcontent ( $curl_resource );
-            $this->multi_curl_results[ $tokenHash ] = $temp;
-//            Log::doLog( "... $tokenHash " . curl_getinfo( $curl_resource, CURLINFO_EFFECTIVE_URL ) . " : ... " . var_export( $temp, true ) );
+        foreach ( $this->curl_handlers as $tokenHash => $curl_resource ) {
+            $temp                                                                          = curl_multi_getcontent( $curl_resource );
+            $this->multi_curl_results[ $tokenHash ]                                        = $temp;
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]                  = curl_getinfo( $curl_resource, CURLINFO_TOTAL_TIME );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ]                = curl_getinfo( $curl_resource, CURLINFO_CONNECT_TIME );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_pretransfer_time' ]            = curl_getinfo( $curl_resource, CURLINFO_PRETRANSFER_TIME );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_starttransfer_transfer_time' ] = curl_getinfo( $curl_resource, CURLINFO_STARTTRANSFER_TIME );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ]               = curl_getinfo( $curl_resource, CURLINFO_EFFECTIVE_URL );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_upload' ]                 = curl_getinfo( $curl_resource, CURLINFO_SIZE_UPLOAD );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]               = curl_getinfo( $curl_resource, CURLINFO_SIZE_DOWNLOAD );
+            Log::doLog( "Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
         }
 
     }
@@ -170,6 +184,15 @@ class MultiCurlHandler {
     }
 
     /**
+     * Return all curl info
+     *
+     * @return array[]
+     */
+    public function getAllInfo(){
+        return $this->multi_curl_info;
+    }
+
+    /**
      * Get single result content from responses array by it's unique Index
      *
      * @param $tokenHash
@@ -182,6 +205,21 @@ class MultiCurlHandler {
         }
         return null;
     }
+
+    /**
+     * Get single info from curl handlers array by it's unique Index
+     *
+     * @param $tokenHash
+     *
+     * @return array|null
+     */
+    public function getSingleInfo( $tokenHash ){
+        if( array_key_exists( $tokenHash, $this->multi_curl_info ) ){
+            return $this->multi_curl_info[ $tokenHash ];
+        }
+        return null;
+    }
+
 
     public function getError( $tokenHash ){
         $res = array();
