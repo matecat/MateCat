@@ -2170,13 +2170,17 @@ UI = {
             };
             UI.abortedOperations.push(pendingConnection);
         }
-        if(!$('.noConnection').length) {
-            UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-            $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+        if(!config.offlineModeEnabled) {
+            if(!$('.noConnection').length) {
+                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+            }
         }
+
     },
 
     checkConnection: function() {
+        console.log('check connection');
 		APP.doRequest({
 			data: {
 				action: 'ajaxUtils',
@@ -2189,13 +2193,19 @@ UI = {
                         UI.checkConnection();
                     }, 5000);
                 } else {
-                    $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-                    $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                    if(config.offlineModeEnabled) {
+                        $(window).trigger('stillNoConnection');
+                    } else {
+                        $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+                        $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                    }
+
+
                 }
 			},
 			success: function() {
 				console.log('connection is back');
-                if(UI.offlineModeEnabled) {
+                if(config.offlineModeEnabled) {
                     $(window).trigger('offlineOFF');
                 } else {
                     if(!UI.restoringAbortedOperations) UI.connectionIsBack();
@@ -3146,7 +3156,10 @@ UI = {
 
     start: function () {
         APP.init();
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        setTimeout(function() {
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        }, 100);
+//        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
         setBrowserHistoryBehavior();
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
@@ -3170,8 +3183,9 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
-    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-});
+    setTimeout(function() {
+        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+    }, 100);});
 
 
 
@@ -3215,12 +3229,13 @@ $.extend(UI, {
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
 		this.autoFailoverEnabled = false;
-        this.offlineModeEnabled = false;
+//        this.offlineModeEnabled = false;
+        this.offline = false;
 //        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
-            this.fixHeaderHeightChange();
+        this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();
@@ -10209,9 +10224,20 @@ $.extend(UI, {
 if(config.offlineModeEnabled) {
 
     $(window).on('offlineON', function(d) {
-        numUntranslated = $('section.status-new, section.status-draft')
+        UI.offline = true;
+//        numUntranslated = $('section.status-new, section.status-draft');
         UI.showMessage({
-            msg: 'No connection available. You can still translate in offline mode. You have <span class="left">30</span> segments left to translate while you wait for connection to return.'})
+            msg: 'No connection available. You can still translate in offline mode until you reach the maximum storage size.'})
+    }).on('offlineOFF', function(d) {
+        console.log('offlineOFF');
+        UI.offline = false;
+        UI.showMessage({
+            msg: "Connection is back. We are saving translated segments in the database."})
+        UI.checkConnection();
+    }).on('stillNoConnection', function(d) {
+        setTimeout(function() {
+            UI.checkConnection();
+        }, 30000);
     })
 
 }

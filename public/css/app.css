@@ -2873,9 +2873,6 @@ body.searchActive #filterSwitch
 
 
 
-.cattool.review #jobMenu {display: none;}
-.cattool.review .breadcrumbs #pname {background: none;}
-.cattool.review .breadcrumbs {padding: 22px 0 4px 0px;}
 
 .cattool .breadcrumbs{padding:22px 0 4px 15px;}
 
@@ -5047,7 +5044,8 @@ footer nav
 }
 
 @media screen and (max-width: 1100px){
-	.breadcrumbs a {width: 110px; padding-left:10px!important;}
+	.breadcrumbs a {width: 110px; padding-left:15px!important;}
+	.cattool .breadcrumbs {padding: 19px 0 4px 0px;}
 	.wrapper {width: 98%;}
 	.cattool #quality-report {padding:5px 10px!important;}
 }
