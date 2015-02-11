@@ -315,8 +315,7 @@ if(config.enableReview && config.isReview) {
         },
 */
         openNextTranslated: function (sid) {
-            sid = sid | UI.currentSegmentId;
-            console.log('sid: ', sid);
+            sid = sid || UI.currentSegmentId;
             el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
 
@@ -325,7 +324,7 @@ if(config.enableReview && config.isReview) {
 
             // find in current UI
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-
+console.log('A');
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
 
@@ -358,13 +357,22 @@ if(config.enableReview && config.isReview) {
                     approvedList   = $('section.status-approved');
 
                     if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
+                        if((translatedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(translatedList.first());
+                        } else {
+                            translatedList.first().find('.editarea').click();
+                        }
                     } else {
-                        approvedList.first().find('.editarea').click();
+                        if((approvedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(approvedList.first());
+                        } else {
+                            approvedList.first().find('.editarea').click();
+                        }
                     }
 
                 } else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    console.log('D');
                     APP.doRequest({
                         data: {
                             action: 'getNextReviseSegment',
