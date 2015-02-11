@@ -247,9 +247,13 @@ APP = {
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
     fitText: function(container,child,limitHeight) {
-		if(container.height() < (limitHeight+1)) return;
-		txt = child.text();
-		var name = txt;
+        if(typeof $(child).attr('data-originalText') == 'undefined') {
+            $(child).attr('data-originalText', $(child).text());
+        }
+//        if((container.height() < (limitHeight+1)) && ()) return;
+//		txt = child.text();
+		txt = $(child).attr('data-originalText');
+        var name = txt;
 		var ext = '';
 		if(txt.split('.').length > 1) {
 			var extension = txt.split('.')[txt.split('.').length-1];
@@ -258,7 +262,8 @@ APP = {
 		}
 		firstHalf = name.substr(0 , Math.ceil(name.length/2));
 		secondHalf = name.replace(firstHalf,'');
-		child.text(firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext);
+        newTxt = firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext;
+		child.text(newTxt);
 		while (container.height() > limitHeight) {
 			num = child.text().length;
 			child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
