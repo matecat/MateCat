@@ -7,6 +7,18 @@ ADD COLUMN `revision_stats_terminology`  int(11) NOT NULL DEFAULT 0 AFTER `revis
 ADD COLUMN `revision_stats_language_quality`  int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_terminology`,
 ADD COLUMN `revision_stats_style`  int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_language_quality`;
 
+ALTER TABLE `jobs`
+CHANGE COLUMN `revision_stats_typing` `revision_stats_typing_min`  int(11) NOT NULL DEFAULT 0 AFTER `payable_rates`,
+CHANGE COLUMN `revision_stats_translations` `revision_stats_translations_min`  int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_typing_min`,
+CHANGE COLUMN `revision_stats_terminology` `revision_stats_terminology_min`  int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_translations_min`,
+CHANGE COLUMN `revision_stats_language_quality` `revision_stats_language_quality_min`  int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_terminology_min`,
+CHANGE COLUMN `revision_stats_style` `revision_stats_style_min`  int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_language_quality_min`,
+ADD COLUMN `revision_stats_typing_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_style_min`,
+ADD COLUMN `revision_stats_translations_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_typing_maj`,
+ADD COLUMN `revision_stats_terminology_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_translations_maj`,
+ADD COLUMN `revision_stats_language_quality_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_terminology_maj`,
+ADD COLUMN `revision_stats_style_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_language_quality_maj`;
+
 CREATE TABLE `segment_revisions` (
 `id_job`  bigint(20) NOT NULL ,
 `id_segment`  bigint(20) NOT NULL ,
@@ -22,6 +34,8 @@ INDEX `segm_key` (`id_segment`, `id_job`) USING BTREE
 ENGINE=InnoDB
 DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci;
 
+ALTER TABLE segment_revisions
+CHANGE COLUMN `err_quality` `err_language`  varchar(512) NOT NULL;
 
 USE matecat_conversions_log;
 ALTER TABLE `failed_conversions_log`

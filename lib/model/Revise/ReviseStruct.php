@@ -40,7 +40,7 @@ class Revise_ReviseStruct extends DataAccess_AbstractDaoObjectStruct implements 
      * @var string A string from the ones in Constants_Revise
      * @see Constants_Revise
      */
-    public $err_quality;
+    public $err_language;
 
     /**
      * @var string A string from the ones in Constants_Revise
