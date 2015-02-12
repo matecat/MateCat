@@ -87,7 +87,7 @@ class ErrorCount_DiffStruct extends ErrorCount_Struct {
             }
             elseif( $rev2[ $key ] > $rev1[ $key ] && $rev1[ $key ] != 0 ){
 
-                // new key is set and the old key was minor
+                // new key is MAJOR and the old key was MINOR
                 $this->{ $real_error_key . "_min" } = -1;
                 $this->{ $real_error_key . "_maj" } = 1;
 
@@ -110,9 +110,9 @@ class ErrorCount_DiffStruct extends ErrorCount_Struct {
             }
             elseif( $rev2[ $key ] < $rev1[ $key ] && $rev2[ $key ] != 0 ){
 
-                //new key is NONE and it is NOT NONE ( MINOR )
-                $this->{ $real_error_key . "_min" } = 0;
-                $this->{ $real_error_key . "_maj" } = 0;
+                //new key is LESSER than the previous and it is NOT NONE ( so it is MINOR )
+                $this->{ $real_error_key . "_min" } = 1;
+                $this->{ $real_error_key . "_maj" } = -1;
 
             }
             else {
