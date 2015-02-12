@@ -247,28 +247,73 @@ APP = {
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
     fitText: function(container,child,limitHeight) {
+
         if(typeof $(child).attr('data-originalText') == 'undefined') {
             $(child).attr('data-originalText', $(child).text());
         }
 //        if((container.height() < (limitHeight+1)) && ()) return;
 //		txt = child.text();
-		txt = $(child).attr('data-originalText');
+        txt = $(child).attr('data-originalText');
         var name = txt;
-		var ext = '';
-		if(txt.split('.').length > 1) {
-			var extension = txt.split('.')[txt.split('.').length-1];
-			name = txt.replace('.'+extension,'');
-			ext = '.' + extension;
-		}
-		firstHalf = name.substr(0 , Math.ceil(name.length/2));
-		secondHalf = name.replace(firstHalf,'');
-        newTxt = firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext;
-		child.text(newTxt);
-		while (container.height() > limitHeight) {
-			num = child.text().length;
-			child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
-			if(num == child.text().length) break;
-		}
+        var ext = '';
+        if(txt.split('.').length > 1) {
+            var extension = txt.split('.')[txt.split('.').length-1];
+            name = txt.replace('.'+extension,'');
+            ext = '.' + extension;
+        }
+        firstHalf = name.substr(0 , Math.ceil(name.length/2));
+        secondHalf = name.replace(firstHalf,'');
+        console.log('firstHalf: ', firstHalf);
+        console.log('secondHalf: ', secondHalf);
+
+        if(container.height() > limitHeight) {
+            newTxt = firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext;
+        } else {
+            newTxt = name;
+        }
+
+
+        child.text(newTxt);
+        console.log('newTxt: ', newTxt);
+
+        if(container.height() > limitHeight) {
+            console.log('AAAA');
+            while (container.height() > limitHeight) {
+                num = child.text().length;
+                child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
+                if(num == child.text().length) break;
+            }
+            console.log('child.text: ', child.text());
+        }
+
+        /*
+                if(typeof $(child).attr('data-originalText') == 'undefined') {
+                    $(child).attr('data-originalText', $(child).text());
+                }
+        //        if((container.height() < (limitHeight+1)) && ()) return;
+        //		txt = child.text();
+                txt = $(child).attr('data-originalText');
+                var name = txt;
+                var ext = '';
+                if(txt.split('.').length > 1) {
+                    var extension = txt.split('.')[txt.split('.').length-1];
+                    name = txt.replace('.'+extension,'');
+                    ext = '.' + extension;
+                }
+                firstHalf = name.substr(0 , Math.ceil(name.length/2));
+                secondHalf = name.replace(firstHalf,'');
+                console.log('firstHalf: ', firstHalf);
+                console.log('secondHalf: ', secondHalf);
+                newTxt = firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext;
+                child.text(newTxt);
+                console.log('container.height(): ', $(container).height());
+                while (container.height() > limitHeight) {
+                    num = child.text().length;
+                    child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
+                    if(num == child.text().length) break;
+                }
+                console.log('child.text: ', child.text());
+        */
     },
     objectSize: function(obj) {
         var size = 0, key;

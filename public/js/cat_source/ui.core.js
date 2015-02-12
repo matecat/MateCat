@@ -3156,10 +3156,7 @@ UI = {
 
     start: function () {
         APP.init();
-        setTimeout(function() {
-            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-        }, 100);
-//        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
         setBrowserHistoryBehavior();
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
@@ -3183,8 +3180,7 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
-    setTimeout(function() {
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-    }, 100);});
+    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+});
 
 
