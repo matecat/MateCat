@@ -3427,7 +3427,9 @@ margin-right: 3%;
 	box-shadow: 1px 1px 1px #999;
 }
 
-
+th a.tooltip {
+	display: inline !important;
+}
 
 .tooltip:hover span {
 	opacity: 1;
