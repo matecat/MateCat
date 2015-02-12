@@ -1071,6 +1071,21 @@ class QA {
             }
         }
 
+        /*
+         * Check for corresponding self closing tags like <g id="pt673"/>
+         */
+        preg_match_all( '#<[^>]+/>#', $this->source_seg, $selfClosingTags_src );
+        preg_match_all( '#<[^>]+/>#', $this->target_seg, $selfClosingTags_trg );
+        $selfClosingTags_src = $selfClosingTags_src[0];
+        $selfClosingTags_trg = $selfClosingTags_trg[0];
+        foreach( $selfClosingTags_trg as $pos => $tag ){
+            if( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ){
+                $this->_addError( self::ERR_TAG_MISMATCH );
+                $this->tagPositionError[] = $selfClosingTags_trg[ $pos ];
+                return;
+            }
+        }
+
     }
 
     /**
