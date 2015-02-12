@@ -2262,8 +2262,12 @@ footer nav
 		color: orange !important;
 	*/
 }
-
-
+.review.justdone .breadcrumbs {
+	max-width: 450px;
+}
+.review.justdone .breadcrumbs #pname {
+	width: 200px;
+}
 
 /*media query */
 
@@ -2284,11 +2288,10 @@ footer nav
 	/*.buttons{margin:-15px 43px 0 0 !important;}*/
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
-    #stat-completion, #stat-wph {
-         display: block;
-
-    }
-    	.breadcrumbs a {width: 260px;}
+    #stat-completion, #stat-wph {display: block;}
+    	.review.justdone .breadcrumbs {width: 250px;}
+    	.review.justdone .breadcrumbs #pname {width:140px;}
+    	.justdone .breadcrumbs a {width:200px;}
 
 }
 @media screen and (max-width: 1280px){
@@ -2296,7 +2299,9 @@ footer nav
 	.header-menu{margin-right:16px}
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
-	.breadcrumbs a {width: 200px;}
+	.review .breadcrumbs a {width: 50px;}
+    .review.justdone .breadcrumbs {width: 180px;}
+    .review.justdone .breadcrumbs #pname {width:45px;}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
 }
 @media screen and (max-width: 1260px){
@@ -2327,10 +2332,12 @@ footer nav
 	.con-input{width:63%;}
 	.con-input{width:62% !important;}
 	.languages{text-indent:-62px }
-
+	.review.justdone .breadcrumbs {width: 220px;}
+	.review .wrapper {width: 98%;}
 	.text .target{padding-left:45px;}
 	.graysmall li{width:43%;}
 	.loader{left:-40px;}
+	    #notifbox,#filterSwitch {width: 45px;}
 
 	.search-editarea {width:200px !Important}
 	.text .item,.white li, .track-changes {width: 44% !important}
@@ -2340,10 +2347,14 @@ footer nav
 }
 
 @media screen and (max-width: 1100px){
-	.breadcrumbs a {width: 110px; padding-left:15px!important;}
+	.review .breadcrumbs a {width: 110px; padding-left:15px!important;}
+	.review.justdone .breadcrumbs {width: 200px;}
+	.review .breadcrumbs a {width: 150px;}
+    #notifbox,#filterSwitch {width: 45px;}
+    .review.justdone .breadcrumbs a {width:200px;}
 	.cattool .breadcrumbs {padding: 19px 0 4px 0px;}
-	.wrapper {width: 98%;}
 	.cattool #quality-report {padding:5px 10px!important;}
+	.header-menu li a, .header-menu li input {font-size:14px;}
 }
 
 li.tag-mismatch
@@ -3162,9 +3173,7 @@ body.tagmode-default-extended .textarea-container .tagMode li.extended,
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),only screen and (min--moz-device-pixel-ratio: 2),only screen and (-o-min-device-pixel-ratio: 2/1),only screen and (min-device-pixel-ratio: 2),only screen and (min-resolution: 192dpi),only screen and (in-resolution: 2dppx) {
 
-.breadcrumbs #pname {
-	background: url(../img/sprite2x.png) -15px -434px no-repeat;
-}
+
 body.editlog .breadcrumbs #pname {
     background: none;
 }
@@ -3213,7 +3222,7 @@ body.tagmode-default-extended a.showExtendedTags {
 .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
 	background: url(../img/sprite2x.png) -11px -187px no-repeat;
 }
-.breadcrumbs #pname, .outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover, .outersource .copy:hover {
+.outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover, .outersource .copy:hover {
 	background-size: 42px;
 }
 
@@ -3445,7 +3454,7 @@ margin-right: 3%;
 	opacity: 0;
 	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 	-webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-	-moz-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+	-moz-box-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 	-webkit-transition: all 0.3s ease-in-out;
 	-moz-transition: all 0.3s ease-in-out;
 	-o-transition: all 0.3s ease-in-out;

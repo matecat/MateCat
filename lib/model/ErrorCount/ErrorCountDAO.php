@@ -17,11 +17,16 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
         $where_conditions = array();
         $query            = "SELECT id, password,
-                                    revision_stats_typing,
-                                    revision_stats_translations,
-                                    revision_stats_terminology,
-                                    revision_stats_language_quality,
-                                    revision_stats_style
+                                revision_stats_typing_min,
+                                revision_stats_translations_min,
+                                revision_stats_terminology_min,
+                                revision_stats_language_quality_min,
+                                revision_stats_style_min,
+                                revision_stats_typing_maj,
+                                revision_stats_translations_maj,
+                                revision_stats_terminology_maj,
+                                revision_stats_language_quality_maj,
+                                revision_stats_style_maj
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->getIdJob() !== null ) {
@@ -47,7 +52,17 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         return $this->_buildResult( $arr_result );
     }
 
+    /**
+     * @param ErrorCount_Struct $obj
+     *
+     * @return ErrorCount_Struct|null
+     * @throws Exception
+     */
     public function update( ErrorCount_Struct $obj ) {
+
+        /**
+         * @var $obj ErrorCount_Struct
+         */
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -56,7 +71,7 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         $where_conditions = array();
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
-        $where_conditions[ ] = "id = " . $obj->getIdJob();
+        $where_conditions[ ] = "id = " . (int)$obj->getIdJob();
         $where_conditions[ ] = "password = '" . $this->con->escape( $obj->getJobPassword() ) . "'";
 
         //WARNING: cannot check if object's values are correctly set, because they have a default value
@@ -64,30 +79,60 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         $condition    = "%s = %s + %d";
         $set_array[ ] = sprintf(
                 $condition,
-                'revision_stats_typing',
-                'revision_stats_typing',
-                $obj->getTyping()
+                'revision_stats_typing_min',
+                'revision_stats_typing_min',
+                $obj->getTypingMin()
         );
         $set_array[ ] = sprintf(
                 $condition,
-                'revision_stats_translations',
-                'revision_stats_translations',
-                $obj->getTranslation() );
+                'revision_stats_typing_maj',
+                'revision_stats_typing_maj',
+                $obj->getTypingMaj()
+        );
+
         $set_array[ ] = sprintf(
                 $condition,
-                'revision_stats_terminology',
-                'revision_stats_terminology',
-                $obj->getTerminology() );
+                'revision_stats_translations_min',
+                'revision_stats_translations_min',
+                $obj->getTranslationMin() );
         $set_array[ ] = sprintf(
                 $condition,
-                'revision_stats_language_quality',
-                'revision_stats_language_quality',
-                $obj->getQuality() );
+                'revision_stats_translations_maj',
+                'revision_stats_translations_maj',
+                $obj->getTranslationMaj() );
+
         $set_array[ ] = sprintf(
                 $condition,
-                'revision_stats_style',
-                'revision_stats_style',
-                $obj->getStyle() );
+                'revision_stats_terminology_min',
+                'revision_stats_terminology_min',
+                $obj->getTerminologyMin() );
+        $set_array[ ] = sprintf(
+                $condition,
+                'revision_stats_terminology_maj',
+                'revision_stats_terminology_maj',
+                $obj->getTerminologyMaj() );
+
+        $set_array[ ] = sprintf(
+                $condition,
+                'revision_stats_language_quality_min',
+                'revision_stats_language_quality_min',
+                $obj->getLanguageMin() );
+        $set_array[ ] = sprintf(
+                $condition,
+                'revision_stats_language_quality_maj',
+                'revision_stats_language_quality_maj',
+                $obj->getLanguageMaj() );
+
+        $set_array[ ] = sprintf(
+                $condition,
+                'revision_stats_style_min',
+                'revision_stats_style_min',
+                $obj->getStyleMin() );
+        $set_array[ ] = sprintf(
+                $condition,
+                'revision_stats_style_maj',
+                'revision_stats_style_maj',
+                $obj->getStyleMaj() );
 
         $set_string   = null;
         $where_string = implode( " AND ", $where_conditions );
@@ -137,11 +182,17 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
             $obj = new ErrorCount_Struct();
             $obj->setIdJob( $item[ 'id' ] )
                     ->setJobPassword( $item[ 'password' ] )
-                    ->setTyping(      $item[ 'revision_stats_typing' ] )
-                    ->setTerminology( $item[ 'revision_stats_terminology' ] )
-                    ->setTranslation( $item[ 'revision_stats_translations' ] )
-                    ->setQuality(     $item[ 'revision_stats_language_quality' ] )
-                    ->setStyle(       $item[ 'revision_stats_style' ] );
+                    ->setTypingMin(      $item[ 'revision_stats_typing_min' ] )
+                    ->setTerminologyMin( $item[ 'revision_stats_terminology_min' ] )
+                    ->setTranslationMin( $item[ 'revision_stats_translations_min' ] )
+                    ->setLanguageMin(    $item[ 'revision_stats_language_quality_min' ] )
+                    ->setStyleMin(       $item[ 'revision_stats_style_min' ] )
+
+                    ->setTypingMaj(      $item[ 'revision_stats_typing_maj' ] )
+                    ->setTerminologyMaj( $item[ 'revision_stats_terminology_maj' ] )
+                    ->setTranslationMaj( $item[ 'revision_stats_translations_maj' ] )
+                    ->setLanguageMaj(    $item[ 'revision_stats_language_quality_maj' ] )
+                    ->setStyleMaj(       $item[ 'revision_stats_style_maj' ] );
 
             $result[ ] = $obj;
         }

@@ -1078,12 +1078,27 @@ td[data-vote='Fail'] {
 	font-size:14px;
 }
 
+.details-anchor {
+	display: block; position: relative; top: -60px; visibility: hidden;
+}
+
+#details-link {
+font-size: 16px;
+color: #999;
+text-shadow: none;
+margin-top: 15px;
+display: block;
+clear: both;
+cursor: pointer;
+}
+
 #ribbon {
 	padding: .34em 2em;
-	margin: 8% -7px 0;
+	margin: 5% -7px 0;
 	position:relative;
 	color: black;
 	font-size: 24px;
+	z-index: 100000000;
 	font-weight: bold;
 	text-align: center;
 	text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
@@ -1141,7 +1156,7 @@ td[data-vote='Fail'] {
 #vote-box {
 width: 217px;
 background: #f7f7f7;
-height: 60px;
+height: 85px;
 position: absolute;
 right: 0px;
 top: 30px;
@@ -1149,7 +1164,8 @@ text-align: center;
 font-size: 45px;
 font-weight: bold;
 text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
-padding: 70px 5px 10px;
+padding: 50px 5px 10px;
+z-index: 100000000;
 border-radius: 4px;
 border: 1px solid #ECECEC;
 box-shadow: 1px 1px 0px #E6E6E6;

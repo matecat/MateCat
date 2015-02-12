@@ -121,7 +121,7 @@ class reviseSummaryController extends viewController {
                 Constants_Revise::ERR_TYPING      => 'Typing errors, double spaces and tags issues',
                 Constants_Revise::ERR_TRANSLATION => 'Translation errors (mistranslation, additions/omissions)',
                 Constants_Revise::ERR_TERMINOLOGY => 'Terminology and translation consistency',
-                Constants_Revise::ERR_QUALITY     => 'Language quality (grammar, punctuation, spelling)',
+                Constants_Revise::ERR_LANGUAGE     => 'Language quality (grammar, punctuation, spelling)',
                 Constants_Revise::ERR_STYLE       => 'Style (readability, consistent style and tone)',
         );
 

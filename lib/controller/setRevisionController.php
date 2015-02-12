@@ -16,7 +16,7 @@ class setRevisionController extends ajaxController {
     private $err_typing;
     private $err_translation;
     private $err_terminology;
-    private $err_quality;
+    private $err_language;
     private $err_style;
     private $original_translation;
 
@@ -46,7 +46,7 @@ class setRevisionController extends ajaxController {
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
-                'err_quality'     => array(
+                'err_language'     => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
@@ -67,7 +67,7 @@ class setRevisionController extends ajaxController {
         $this->err_typing           = $postInput[ 'err_typing' ];
         $this->err_translation      = $postInput[ 'err_translation' ];
         $this->err_terminology      = $postInput[ 'err_terminology' ];
-        $this->err_quality          = $postInput[ 'err_quality' ];
+        $this->err_language         = $postInput[ 'err_language' ];
         $this->err_style            = $postInput[ 'err_style' ];
         $this->original_translation = $postInput[ 'original' ];
 
@@ -149,7 +149,7 @@ class setRevisionController extends ajaxController {
         $revisionStruct->err_typing           = $this->err_typing;
         $revisionStruct->err_translation      = $this->err_translation;
         $revisionStruct->err_terminology      = $this->err_terminology;
-        $revisionStruct->err_quality          = $this->err_quality;
+        $revisionStruct->err_language         = $this->err_language;
         $revisionStruct->err_style            = $this->err_style;
         $revisionStruct->original_translation = $this->original_translation;
 

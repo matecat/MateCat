@@ -21,61 +21,87 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
     /**
      * @var int
      */
-    protected $typing;
+    protected $typing_min;
 
     /**
      * @var int
      */
-    protected $translation;
+    protected $translation_min;
 
     /**
      * @var int
      */
-    protected $terminology;
+    protected $terminology_min;
 
     /**
      * @var int
      */
-    protected $quality;
+    protected $language_min;
 
     /**
      * @var int
      */
-    protected $style;
+    protected $style_min;
 
+    /**
+     * @var int
+     */
+    protected $typing_maj;
+
+    /**
+     * @var int
+     */
+    protected $translation_maj;
+
+    /**
+     * @var int
+     */
+    protected $terminology_maj;
+
+    /**
+     * @var int
+     */
+    protected $language_maj;
+
+    /**
+     * @var int
+     */
+    protected $style_maj;
+    
+    
     /**
      * @return int
      */
-    public function getQuality() {
-        return $this->quality;
+    public function getLanguageMin() {
+        return $this->language_min;
     }
 
     /**
      * @return int
      */
-    public function getStyle() {
-        return $this->style;
+    public function getStyleMin() {
+        return $this->style_min;
     }
 
     /**
      * @return int
      */
-    public function getTerminology() {
-        return $this->terminology;
+    public function getTerminologyMin() {
+        return $this->terminology_min;
     }
 
     /**
      * @return int
      */
-    public function getTranslation() {
-        return $this->translation;
+    public function getTranslationMin() {
+        return $this->translation_min;
     }
 
     /**
      * @return int
      */
-    public function getTyping() {
-        return $this->typing;
+    public function getTypingMin() {
+        return $this->typing_min;
     }
 
     /**
@@ -93,7 +119,9 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
     }
 
     /**
-     * @param int $id_job
+     * @param $id_job int
+     *
+     * @return $this
      */
     public function setIdJob( $id_job ) {
         $this->id_job = $id_job;
@@ -102,6 +130,7 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
 
     /**
      * @param string $job_password
+     * @return $this
      */
     public function setJobPassword( $job_password ) {
         $this->job_password = $job_password;
@@ -109,42 +138,137 @@ class ErrorCount_Struct extends DataAccess_AbstractDaoObjectStruct implements Da
     }
 
     /**
-     * @param int $quality
+     * @param int $language_min
+     * @return $this
      */
-    public function setQuality( $quality ) {
-        $this->quality = $quality;
+    public function setLanguageMin( $language_min ) {
+        $this->language_min = $language_min;
         return $this;
     }
 
     /**
-     * @param int $style
+     * @param int $style_min
+     * @return $this
      */
-    public function setStyle( $style ) {
-        $this->style = $style;
+    public function setStyleMin( $style_min ) {
+        $this->style_min = $style_min;
         return $this;
     }
 
     /**
-     * @param int $terminology
+     * @param int $terminology_min
+     * @return $this
      */
-    public function setTerminology( $terminology ) {
-        $this->terminology = $terminology;
+    public function setTerminologyMin( $terminology_min ) {
+        $this->terminology_min = $terminology_min;
         return $this;
     }
 
     /**
-     * @param int $translation
+     * @param int $translation_min
+     * @return $this
      */
-    public function setTranslation( $translation ) {
-        $this->translation = $translation;
+    public function setTranslationMin( $translation_min ) {
+        $this->translation_min = $translation_min;
         return $this;
     }
 
     /**
-     * @param int $typing
+     * @param int $typing_min
+     * @return $this
      */
-    public function setTyping( $typing ) {
-        $this->typing = $typing;
+    public function setTypingMin( $typing_min ) {
+        $this->typing_min = $typing_min;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTypingMaj() {
+        return $this->typing_maj;
+    }
+
+    /**
+     * @param int $typing_maj
+     *
+     * @return $this
+     */
+    public function setTypingMaj( $typing_maj ) {
+        $this->typing_maj = $typing_maj;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTranslationMaj() {
+        return $this->translation_maj;
+    }
+
+    /**
+     * @param int $translation_maj
+     *
+     * @return $this
+     */
+    public function setTranslationMaj( $translation_maj ) {
+        $this->translation_maj = $translation_maj;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTerminologyMaj() {
+        return $this->terminology_maj;
+    }
+
+    /**
+     * @param int $terminology_maj
+     *
+     * @return $this
+     */
+    public function setTerminologyMaj( $terminology_maj ) {
+        $this->terminology_maj = $terminology_maj;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLanguageMaj() {
+        return $this->language_maj;
+    }
+
+    /**
+     * @param int $language_maj
+     *
+     * @return $this
+     */
+    public function setLanguageMaj( $language_maj ) {
+        $this->language_maj = $language_maj;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStyleMaj() {
+        return $this->style_maj;
+    }
+
+    /**
+     * @param int $style_maj
+     *
+     * @return $this
+     */
+    public function setStyleMaj( $style_maj ) {
+        $this->style_maj = $style_maj;
+
         return $this;
     }
 

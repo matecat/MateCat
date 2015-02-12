@@ -25,39 +25,39 @@ class Revise_JobQA {
 
         self::$error_info = array(
                 'typing'      => array(
-                        'maxErr'       => Constants_Revise::MAX_TYPING,
-                        'acceptance'   => null,
-                        'foundErr'     => null,
-                        'vote'         => null,
-                        'textVote'     => null,
+                        'maxErr'     => Constants_Revise::MAX_TYPING,
+                        'acceptance' => null,
+                        'foundErr'   => null,
+                        'vote'       => null,
+                        'textVote'   => null,
                 ),
                 'translation' => array(
-                        'maxErr'       => Constants_Revise::MAX_TRANSLATION,
-                        'acceptance'   => null,
-                        'foundErr'     => null,
-                        'vote'         => null,
-                        'textVote'     => null,
+                        'maxErr'     => Constants_Revise::MAX_TRANSLATION,
+                        'acceptance' => null,
+                        'foundErr'   => null,
+                        'vote'       => null,
+                        'textVote'   => null,
                 ),
                 'terminology' => array(
-                        'maxErr'       => Constants_Revise::MAX_TERMINOLOGY,
-                        'acceptance'   => null,
-                        'foundErr'     => null,
-                        'vote'         => null,
-                        'textVote'     => null,
+                        'maxErr'     => Constants_Revise::MAX_TERMINOLOGY,
+                        'acceptance' => null,
+                        'foundErr'   => null,
+                        'vote'       => null,
+                        'textVote'   => null,
                 ),
-                'quality'     => array(
-                        'maxErr'       => Constants_Revise::MAX_QUALITY,
-                        'acceptance'   => null,
-                        'foundErr'     => null,
-                        'vote'         => null,
-                        'textVote'     => null,
+                'language'    => array(
+                        'maxErr'     => Constants_Revise::MAX_QUALITY,
+                        'acceptance' => null,
+                        'foundErr'   => null,
+                        'vote'       => null,
+                        'textVote'   => null,
                 ),
                 'style'       => array(
-                        'maxErr'       => Constants_Revise::MAX_STYLE,
-                        'acceptance'   => null,
-                        'foundErr'     => null,
-                        'vote'         => null,
-                        'textVote'     => null,
+                        'maxErr'     => Constants_Revise::MAX_STYLE,
+                        'acceptance' => null,
+                        'foundErr'   => null,
+                        'vote'       => null,
+                        'textVote'   => null,
                 )
 
         );
@@ -102,7 +102,7 @@ class Revise_JobQA {
             $fieldName = $constants = $reflect->getConstant( "ERR_" . strtoupper( $field ) );
             $qaData[]    = array(
                     'type'    => $fieldName,
-                    'allowed' => (int)$info[ 'acceptance' ],
+                    'allowed' => round( $info[ 'acceptance' ], 1 , PHP_ROUND_HALF_UP ),
                     'found'   => $info[ 'foundErr' ],
                     'vote'    => $info[ 'textVote' ]
             );
@@ -116,6 +116,10 @@ class Revise_JobQA {
      */
     private function evalAcceptanceThreshold( $field ) {
         if ( array_key_exists( $field, self::$error_info ) ) {
+
+            /*
+             * maxErr is the number of Major Tolerated Errors, Major counts as 1
+             */
             self::$error_info[ $field ][ 'acceptance' ] = ( $this->job_words / 2500 ) * self::$error_info[ $field ][ 'maxErr' ];
         }
     }
@@ -127,10 +131,13 @@ class Revise_JobQA {
         if ( array_key_exists( $field, self::$error_info ) ) {
             //evaluate the method name to invoke into job_error_totals
             $methodName = 'get' . ucfirst( $field );
+
             /**
              * @var $errNumber int
              */
-            $errNumber = $this->job_error_totals->$methodName();
+            $errNumberMin = $this->job_error_totals->{$methodName . "Min"}() * Constants_Revise::SERV_VALUE_MINOR;
+            $errNumberMaj = $this->job_error_totals->{$methodName . "Maj"}() * Constants_Revise::SERV_VALUE_MAJOR;
+            $errNumber    = $errNumberMin + $errNumberMaj;
 
             self::$error_info[ $field ][ 'foundErr' ] = $errNumber;
             self::$error_info[ $field ][ 'vote' ]     = $errNumber / self::$error_info[ $field ][ 'acceptance' ];
