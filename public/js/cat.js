@@ -8766,7 +8766,7 @@ if(config.enableReview && config.isReview) {
             err_typing = $(err).find('input[name=t1]:checked').val();
             err_translation = $(err).find('input[name=t2]:checked').val();
             err_terminology = $(err).find('input[name=t3]:checked').val();
-			err_language = $(err).find('input[name=t4]:checked').val();
+            err_language = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
 //            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
             UI.openNextTranslated();
@@ -8793,7 +8793,7 @@ if(config.enableReview && config.isReview) {
                     err_typing: err_typing,
                     err_translation: err_translation,
                     err_terminology: err_terminology,
-					err_language: err_language,
+                    err_language: err_language,
                     err_style: err_style
                 },
 

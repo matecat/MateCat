@@ -246,14 +246,17 @@ APP = {
 //            $('.popup.hide, .popup-outer.hide').hide();
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
-    fitText: function(container,child,limitHeight) {
+    fitText: function(container,child,limitHeight, desp, counter) {
+
+        desp = desp || false;
+        counter = counter || 1;
 
         if(typeof $(child).attr('data-originalText') == 'undefined') {
             $(child).attr('data-originalText', $(child).text());
         }
 //        if((container.height() < (limitHeight+1)) && ()) return;
 //		txt = child.text();
-        txt = $(child).attr('data-originalText');
+        txt = (desp)? $(child).text() : $(child).attr('data-originalText');
         var name = txt;
         var ext = '';
         if(txt.split('.').length > 1) {
@@ -266,7 +269,7 @@ APP = {
         console.log('firstHalf: ', firstHalf);
         console.log('secondHalf: ', secondHalf);
 
-        if(container.height() > limitHeight) {
+        if((container.height() > limitHeight) || (desp)) {
             newTxt = firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext;
         } else {
             newTxt = name;
@@ -276,8 +279,58 @@ APP = {
         child.text(newTxt);
         console.log('newTxt: ', newTxt);
 
+        if((container.height() > limitHeight) || (desp)) {
+//            console.log('AAAA');
+            while (container.height() > limitHeight) {
+                num = child.text().length;
+                child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
+                console.log(child.text());
+                if(child.text() == '[...]]') child.text('[...]');
+                if(num == child.text().length) break;
+            }
+            console.log('child.text: ', child.text());
+        }
         if(container.height() > limitHeight) {
-            console.log('AAAA');
+            console.log('fallita: ', child.text());
+            if(counter == 10) return false;
+            console.log('LUNGHEZZA: ', child.text().length);
+
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30, true, counter+1);
+
+        }
+
+/*
+        desp = desp || false;
+        if(typeof $(child).attr('data-originalText') == 'undefined') {
+            $(child).attr('data-originalText', $(child).text());
+        }
+//        if((container.height() < (limitHeight+1)) && ()) return;
+//		txt = child.text();
+        txt = (desp)? $(child).text() : $(child).attr('data-originalText');
+        var name = txt;
+        var ext = '';
+        if(txt.split('.').length > 1) {
+            var extension = txt.split('.')[txt.split('.').length-1];
+            name = txt.replace('.'+extension,'');
+            ext = '.' + extension;
+        }
+        firstHalf = name.substr(0 , Math.ceil(name.length/2));
+        secondHalf = name.replace(firstHalf,'');
+        console.log('firstHalf: ', firstHalf);
+        console.log('secondHalf: ', secondHalf);
+
+        if((container.height() > limitHeight) || (desp)) {
+            newTxt = firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext;
+        } else {
+            newTxt = name;
+        }
+
+
+        child.text(newTxt);
+        console.log('newTxt: ', newTxt);
+
+        if((container.height() > limitHeight) || (desp)) {
+//            console.log('AAAA');
             while (container.height() > limitHeight) {
                 num = child.text().length;
                 child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
@@ -285,7 +338,12 @@ APP = {
             }
             console.log('child.text: ', child.text());
         }
+        if(container.height() > limitHeight) {
+            console.log('fallita: ', child.text());
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30, true);
 
+        }
+*/
         /*
                 if(typeof $(child).attr('data-originalText') == 'undefined') {
                     $(child).attr('data-originalText', $(child).text());
