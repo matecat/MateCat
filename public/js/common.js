@@ -250,6 +250,7 @@ APP = {
 
         desp = desp || false;
         counter = counter || 1;
+        stopLoop = false;
 
         if(typeof $(child).attr('data-originalText') == 'undefined') {
             $(child).attr('data-originalText', $(child).text());
@@ -283,6 +284,10 @@ APP = {
 //            console.log('AAAA');
             while (container.height() > limitHeight) {
                 num = child.text().length;
+                if(num < 9) {
+                    stopLoop = true;
+                    break;
+                }
                 child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
                 console.log(child.text());
                 if(child.text() == '[...]]') child.text('[...]');
@@ -295,7 +300,7 @@ APP = {
             if(counter == 10) return false;
             console.log('LUNGHEZZA: ', child.text().length);
 
-            APP.fitText($('.breadcrumbs'), $('#pname'), 30, true, counter+1);
+            if(!stopLoop) APP.fitText($('.breadcrumbs'), $('#pname'), 30, true, counter+1);
 
         }
 
