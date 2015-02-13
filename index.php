@@ -18,3 +18,4 @@ $controller = controller::getInstance ();
 $controller->doAction ();
 $controller->finalize ();
 $db->close ();
+?>
