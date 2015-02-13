@@ -56,7 +56,7 @@
                 <div class="pull-right">
                     <div id="vote-box" data-vote="${overall_quality_class}">
                         ${qa_overall}
-                        <a href="#details" id="details-link">Details</a>
+                        <a href="#highlight" id="details-link">Details</a>
                     </div>
                     <div id="ribbon">
                         <span id="content">Overall quality</span>
@@ -277,35 +277,33 @@
 
 
         <script type="text/javascript">
-            $( document ).ready(function() {
+            $( document ).ready( function () {
 
                 /* Table Equivalent Translated Score Highlight */
                 var trScore = $( '.revision-info tr' ).filter(
                         function () {
                             return $( this ).data( "score" ) == config.qa_equivalent_class
                         }
-                ).addClass( 'qa_eq_tr' ).attr({id:'highlight'});
-                var tdChildren = trScore.find('td' );
-                tdChildren.each(function(){
-                    $( this ).addClass('qa_eq_td');
-                } ).first().addClass('qa_eq_td_first');
-                tdChildren.last().addClass('qa_eq_td_last');
+                ).addClass( 'qa_eq_tr' ).attr( {id: 'highlight'} );
+                var tdChildren = trScore.find( 'td' );
+                tdChildren.each( function () {
+                    $( this ).addClass( 'qa_eq_td' );
+                } ).first().addClass( 'qa_eq_td_first' );
+                tdChildren.last().addClass( 'qa_eq_td_last' );
                 /* Table Equivalent Translated Score Highlight */
 
-                $('a.authLink').click(function(e){
+                $( 'a.authLink' ).click( function ( e ) {
                     e.preventDefault();
-                    APP.googole_popup($(this).attr('href'));
-                });
-                $(document).ready(function (){
-            $("#details-link").click(function (){
-                //$(this).animate(function(){
-                    $('html, body').animate({
-                        scrollTop: $(".details-anchor").offset().top
-                    }, 1000);
-                //});
-            });
-        });
-            });
+                    APP.googole_popup( $( this ).attr( 'href' ) );
+                } );
+
+                $( "#details-link" ).click( function () {
+                    $( 'html, body' ).animate( {
+                        scrollTop: $( "#highlight" ).offset().top
+                    }, 1000 );
+                } );
+
+            } );
         </script>
         <script src="${basepath}public/js/lib/snapengage.js"></script>
 
