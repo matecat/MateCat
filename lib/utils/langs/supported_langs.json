@@ -1565,9 +1565,10 @@
 				"en":"Uzbek" 
 			}],
 			"isocode":"uz",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"uz-UZ"
+			"rfc3066code":"uz-UZ",
+			"languageRegionCode":"uz-Latn-UZ"
 		}
 	,
 		{
