@@ -51,7 +51,8 @@
                 isReview: ${isReview},
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
-                overall_quality: '${overall_quality}'
+                overall_quality: '${overall_quality}',
+                offlineModeEnabled: false
             };
             var renderStart = new Date();
             /*]]>*/
@@ -448,7 +449,7 @@ tbody td:last-child, thead th:last-child {
                     <tr>
                         <th>None</th>
                         <th>Minor</th>
-                        <th>Major</th>
+                        <th>Major <a class="tooltip">?<span>Error that changes the meaning of the segment</span></a></th>
                         <th></th>
                     </tr>
                 </thead>

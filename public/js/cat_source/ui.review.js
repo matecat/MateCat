@@ -10,7 +10,7 @@ if(config.enableReview && config.isReview) {
             APP.confirm({
                 name: 'confirmNotYetTranslated',
                 cancelTxt: 'Close',
-//                onCancel: 'cancelTMDisable',
+//                onCancel: 'closeNotYetTranslated',
                 callback: 'openNextTranslated',
                 okTxt: 'Open next translated segment',
                 context: sid,
@@ -105,16 +105,19 @@ if(config.enableReview && config.isReview) {
     }).on('click', '.approved', function(e) {
         e.preventDefault();
         UI.tempDisablingReadonlyAlert = true;
-/*
-        var a = UI.currentSegment.find('.original-translation').text() + '"';
-        var b = $(editarea).text() + '"';
-        console.log('a: "', htmlEncode(a));
-        console.log('b: "', htmlEncode(b));
-        console.log('a = b: ', a == b);
-        console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+        UI.hideEditToolbar();
+        UI.currentSegment.removeClass('modified');
 
-        if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
- */
+        /*
+                var a = UI.currentSegment.find('.original-translation').text() + '"';
+                var b = $(editarea).text() + '"';
+                console.log('a: "', htmlEncode(a));
+                console.log('b: "', htmlEncode(b));
+                console.log('a = b: ', a == b);
+                console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+
+                if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
+         */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
@@ -129,7 +132,7 @@ if(config.enableReview && config.isReview) {
             err_typing = $(err).find('input[name=t1]:checked').val();
             err_translation = $(err).find('input[name=t2]:checked').val();
             err_terminology = $(err).find('input[name=t3]:checked').val();
-            err_quality = $(err).find('input[name=t4]:checked').val();
+            err_language = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
 //            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
             UI.openNextTranslated();
@@ -156,7 +159,7 @@ if(config.enableReview && config.isReview) {
                     err_typing: err_typing,
                     err_translation: err_translation,
                     err_terminology: err_terminology,
-                    err_quality: err_quality,
+                    err_language: err_language,
                     err_style: err_style
                 },
 
@@ -306,9 +309,13 @@ if(config.enableReview && config.isReview) {
 
         },
 */
+/*
+        closeNotYetTranslated: function () {
+            return false;
+        },
+*/
         openNextTranslated: function (sid) {
-            sid = sid | UI.currentSegmentId;
-//            console.log('sid: ', sid);
+            sid = sid || UI.currentSegmentId;
             el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
 
@@ -317,7 +324,7 @@ if(config.enableReview && config.isReview) {
 
             // find in current UI
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-
+console.log('A');
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
 
@@ -350,13 +357,22 @@ if(config.enableReview && config.isReview) {
                     approvedList   = $('section.status-approved');
 
                     if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
+                        if((translatedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(translatedList.first());
+                        } else {
+                            translatedList.first().find('.editarea').click();
+                        }
                     } else {
-                        approvedList.first().find('.editarea').click();
+                        if((approvedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(approvedList.first());
+                        } else {
+                            approvedList.first().find('.editarea').click();
+                        }
                     }
 
                 } else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    console.log('D');
                     APP.doRequest({
                         data: {
                             action: 'getNextReviseSegment',

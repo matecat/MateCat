@@ -21,7 +21,8 @@ Loader = {
 		'ui.search',
 		'functions',
 		'ui.customization',
-        'ui.review'
+        'ui.review',
+        'ui.offline'
 	),
     other_components: new Array (
         'tm'

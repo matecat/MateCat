@@ -925,6 +925,7 @@ UI = {
 		var segment = $('#segment-' + segment_id);
         UI.openableSegment = true;
         segment.trigger('just-open');
+//        console.log('UI.openableSegment: ', UI.openableSegment);
         if(!UI.openableSegment) return false;
         UI.openableSegment = false;
         this.openSegmentStart = new Date();
@@ -2149,23 +2150,37 @@ UI = {
 	},
 
 	failedConnection: function(reqArguments, operation) {
-		if(this.autoFailoverEnabled) {
-			this.failover(reqArguments, operation);
-			return false;
-		}
-		if(operation != 'getWarning') {
-			var pendingConnection = {
-				operation: operation,
-				args: reqArguments
-			};
-			UI.abortedOperations.push(pendingConnection);
-		}
-		if(!$('.noConnection').length) {
-			UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-			$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
-		}
+        console.log('failed connection');
+        $(window).trigger({
+            type: "offlineON",
+            reqArguments: reqArguments,
+            operation: operation
+        });
+
 	},
-	checkConnection: function() {
+    blockUIForNoConnection: function (reqArguments, operation) {
+        if(this.autoFailoverEnabled) {
+            this.failover(reqArguments, operation);
+            return false;
+        }
+        if(operation != 'getWarning') {
+            var pendingConnection = {
+                operation: operation,
+                args: reqArguments
+            };
+            UI.abortedOperations.push(pendingConnection);
+        }
+        if(!config.offlineModeEnabled) {
+            if(!$('.noConnection').length) {
+                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+            }
+        }
+
+    },
+
+    checkConnection: function() {
+        console.log('check connection');
 		APP.doRequest({
 			data: {
 				action: 'ajaxUtils',
@@ -2173,19 +2188,28 @@ UI = {
 			},
 			error: function() {
 				console.log('error on checking connection');
-				if(UI.autoFailoverEnabled) {
-					setTimeout(function() {
-						UI.checkConnection();
-					}, 5000);	
-				} else {
-					$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-					$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");					
-				}
+                if(UI.autoFailoverEnabled) {
+                    setTimeout(function() {
+                        UI.checkConnection();
+                    }, 5000);
+                } else {
+                    if(config.offlineModeEnabled) {
+                        $(window).trigger('stillNoConnection');
+                    } else {
+                        $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+                        $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                    }
 
+
+                }
 			},
 			success: function() {
 				console.log('connection is back');
-				if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                if(config.offlineModeEnabled) {
+                    $(window).trigger('offlineOFF');
+                } else {
+                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                }
 			}
 		});
 	},
@@ -3156,6 +3180,7 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
+    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 });
 
 

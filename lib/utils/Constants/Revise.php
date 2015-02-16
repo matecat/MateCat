@@ -8,6 +8,10 @@
  */
 class Constants_Revise {
 
+    const NONE  = 'none';
+    const MINOR = 'minor';
+    const MAJOR = 'major';
+
     public static $ERR_TYPES_MAP = array(
             self::CLIENT_VALUE_NONE  => self::NONE,
             self::CLIENT_VALUE_MINOR => self::MINOR,
@@ -20,9 +24,15 @@ class Constants_Revise {
             self::MAJOR => self::CLIENT_VALUE_MAJOR
     );
 
-    const NONE  = 'none';
-    const MINOR = 'minor';
-    const MAJOR = 'major';
+    public static $const2ServerValues = array(
+            self::NONE  => self::SERV_VALUE_NONE,
+            self::MINOR => self::SERV_VALUE_MINOR,
+            self::MAJOR => self::SERV_VALUE_MAJOR
+    );
+
+    const SERV_VALUE_NONE  = 0;
+    const SERV_VALUE_MINOR = 0.2;
+    const SERV_VALUE_MAJOR = 1;
 
     const CLIENT_VALUE_NONE  = 0;
     const CLIENT_VALUE_MINOR = 1;
@@ -41,7 +51,7 @@ class Constants_Revise {
     const ERR_TYPING       = 'Typing';
     const ERR_TRANSLATION  = 'Translation';
     const ERR_TERMINOLOGY  = 'Terminology';
-    const ERR_QUALITY      = 'Language Quality';
+    const ERR_LANGUAGE     = 'Language Quality';
     const ERR_STYLE        = 'Style';
 
     const VOTE_EXCELLENT  = "Excellent";
@@ -50,5 +60,21 @@ class Constants_Revise {
     const VOTE_ACCEPTABLE = "Acceptable";
     const VOTE_POOR       = "Poor";
     const VOTE_FAIL       = "Fail";
+
+    public static $equivalentScoreMap = array(
+
+            '80' => 0.10,
+            '75' => 0.22,
+            '70' => 0.34,
+            '65' => 0.46,
+            '60' => 0.58,
+            '55' => 0.70,
+            '50' => 0.82,
+            '45' => 0.94,
+            '40' => 1.06,
+            '35' => 1.18,
+            '30' => 9999,
+
+    );
 
 } 

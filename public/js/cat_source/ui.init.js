@@ -38,10 +38,13 @@ $.extend(UI, {
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
 		this.autoFailoverEnabled = false;
-		this.searchEnabled = true;
+//        this.offlineModeEnabled = false;
+        this.offline = false;
+//        if(this.offlineModeEnabled) this.autoFailoverEnabled
+        this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
-            this.fixHeaderHeightChange();
+        this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();

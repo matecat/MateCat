@@ -569,7 +569,7 @@ class QA {
         preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
 
 //        Log::doLog($source_seg);
-//        Log::hexDump($target_seg);
+//        Log::doLog($target_seg);
 
         if ( !empty( $matches_src[ 1 ] ) ) {
             $test_src = $source_seg;
@@ -1067,6 +1067,21 @@ class QA {
             if( trim( $closing_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ){
                 $this->_addError( self::ERR_TAG_ORDER );
                 $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                return;
+            }
+        }
+
+        /*
+         * Check for corresponding self closing tags like <g id="pt673"/>
+         */
+        preg_match_all( '#<[^>]+/>#', $this->source_seg, $selfClosingTags_src );
+        preg_match_all( '#<[^>]+/>#', $this->target_seg, $selfClosingTags_trg );
+        $selfClosingTags_src = $selfClosingTags_src[0];
+        $selfClosingTags_trg = $selfClosingTags_trg[0];
+        foreach( $selfClosingTags_trg as $pos => $tag ){
+            if( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ){
+                $this->_addError( self::ERR_TAG_MISMATCH );
+                $this->tagPositionError[] = $selfClosingTags_trg[ $pos ];
                 return;
             }
         }

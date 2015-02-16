@@ -23,6 +23,7 @@ module.exports = function(grunt) {
 					basePath + 'cat_source/ui.customization.js',
                     basePath + 'cat_source/ui.review.js',
                     basePath + 'tm.js',
+                    basePath + 'cat_source/ui.offline.js'
 				],
 				dest: basePath + 'cat.js'
 			},

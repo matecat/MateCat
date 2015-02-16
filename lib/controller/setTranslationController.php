@@ -278,7 +278,7 @@ class setTranslationController extends ajaxController {
                  *
                  */
                 $propagateToTranslated = false;
-                if ( (bool)$_COOKIE[ $cookie_key ] ) {
+                if ( isset($_COOKIE[ $cookie_key ]) ) {
                     $propagateToTranslated = true;
                 }
 

@@ -16,7 +16,7 @@
 
           <ul class="header-menu" tal:condition="php: !job_archived ">
               <li>
-                  <input id="quality-report" type="button" class="draft" tal:attributes="data-vote overall_quality_class; data-url string:${basepath}revise-summary/${jid}-${password}" value="QUALITY REPORT" />
+                  <a id="quality-report" class="draft" tal:attributes="data-vote overall_quality_class;" href="${basepath}revise-summary/${jid}-${password}" target="_self">QUALITY REPORT</a>
               </li>
               <li>
 

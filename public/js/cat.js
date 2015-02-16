@@ -925,6 +925,7 @@ UI = {
 		var segment = $('#segment-' + segment_id);
         UI.openableSegment = true;
         segment.trigger('just-open');
+//        console.log('UI.openableSegment: ', UI.openableSegment);
         if(!UI.openableSegment) return false;
         UI.openableSegment = false;
         this.openSegmentStart = new Date();
@@ -2149,23 +2150,37 @@ UI = {
 	},
 
 	failedConnection: function(reqArguments, operation) {
-		if(this.autoFailoverEnabled) {
-			this.failover(reqArguments, operation);
-			return false;
-		}
-		if(operation != 'getWarning') {
-			var pendingConnection = {
-				operation: operation,
-				args: reqArguments
-			};
-			UI.abortedOperations.push(pendingConnection);
-		}
-		if(!$('.noConnection').length) {
-			UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-			$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
-		}
+        console.log('failed connection');
+        $(window).trigger({
+            type: "offlineON",
+            reqArguments: reqArguments,
+            operation: operation
+        });
+
 	},
-	checkConnection: function() {
+    blockUIForNoConnection: function (reqArguments, operation) {
+        if(this.autoFailoverEnabled) {
+            this.failover(reqArguments, operation);
+            return false;
+        }
+        if(operation != 'getWarning') {
+            var pendingConnection = {
+                operation: operation,
+                args: reqArguments
+            };
+            UI.abortedOperations.push(pendingConnection);
+        }
+        if(!config.offlineModeEnabled) {
+            if(!$('.noConnection').length) {
+                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+            }
+        }
+
+    },
+
+    checkConnection: function() {
+        console.log('check connection');
 		APP.doRequest({
 			data: {
 				action: 'ajaxUtils',
@@ -2173,19 +2188,28 @@ UI = {
 			},
 			error: function() {
 				console.log('error on checking connection');
-				if(UI.autoFailoverEnabled) {
-					setTimeout(function() {
-						UI.checkConnection();
-					}, 5000);	
-				} else {
-					$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-					$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");					
-				}
+                if(UI.autoFailoverEnabled) {
+                    setTimeout(function() {
+                        UI.checkConnection();
+                    }, 5000);
+                } else {
+                    if(config.offlineModeEnabled) {
+                        $(window).trigger('stillNoConnection');
+                    } else {
+                        $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+                        $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                    }
 
+
+                }
 			},
 			success: function() {
 				console.log('connection is back');
-				if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                if(config.offlineModeEnabled) {
+                    $(window).trigger('offlineOFF');
+                } else {
+                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                }
 			}
 		});
 	},
@@ -3156,6 +3180,7 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
+    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 });
 
 
@@ -3166,7 +3191,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.2.3";
+		this.version = "0.5";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3200,10 +3225,13 @@ $.extend(UI, {
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
 		this.autoFailoverEnabled = false;
-		this.searchEnabled = true;
+//        this.offlineModeEnabled = false;
+        this.offline = false;
+//        if(this.offlineModeEnabled) this.autoFailoverEnabled
+        this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
-            this.fixHeaderHeightChange();
+        this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();
@@ -3402,7 +3430,6 @@ $.extend(UI, {
 //        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 //        console.log('2: ', this.tagModesEnabled);
-
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
         } else {
@@ -4084,6 +4111,8 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
+        }).on('offlineON', function(d) {
+            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
@@ -4158,7 +4187,7 @@ $.extend(UI, {
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
 			e.preventDefault();
-            if(config.isReview) return false;
+//            if(config.isReview) return false;
 			if (UI.justSelecting('readonly'))
 				return;
 			if (UI.someUserSelection)
@@ -4336,8 +4365,12 @@ $.extend(UI, {
 				if (action == 'openConcordance')
 					UI.openConcordance();
 
-				if (operation != 'moving')
-					UI.scrollSegment($('#segment-' + $(this).data('sid')));
+				if (operation != 'moving') {
+                    segment = $('#segment-' + $(this).data('sid'));
+                    if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+                        UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                    }
+                }
 			}
 
             UI.lockTags(UI.editarea);
@@ -8611,7 +8644,7 @@ if(config.enableReview && config.isReview) {
             APP.confirm({
                 name: 'confirmNotYetTranslated',
                 cancelTxt: 'Close',
-//                onCancel: 'cancelTMDisable',
+//                onCancel: 'closeNotYetTranslated',
                 callback: 'openNextTranslated',
                 okTxt: 'Open next translated segment',
                 context: sid,
@@ -8706,16 +8739,19 @@ if(config.enableReview && config.isReview) {
     }).on('click', '.approved', function(e) {
         e.preventDefault();
         UI.tempDisablingReadonlyAlert = true;
-/*
-        var a = UI.currentSegment.find('.original-translation').text() + '"';
-        var b = $(editarea).text() + '"';
-        console.log('a: "', htmlEncode(a));
-        console.log('b: "', htmlEncode(b));
-        console.log('a = b: ', a == b);
-        console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+        UI.hideEditToolbar();
+        UI.currentSegment.removeClass('modified');
 
-        if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
- */
+        /*
+                var a = UI.currentSegment.find('.original-translation').text() + '"';
+                var b = $(editarea).text() + '"';
+                console.log('a: "', htmlEncode(a));
+                console.log('b: "', htmlEncode(b));
+                console.log('a = b: ', a == b);
+                console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+
+                if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
+         */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
@@ -8730,7 +8766,7 @@ if(config.enableReview && config.isReview) {
             err_typing = $(err).find('input[name=t1]:checked').val();
             err_translation = $(err).find('input[name=t2]:checked').val();
             err_terminology = $(err).find('input[name=t3]:checked').val();
-            err_quality = $(err).find('input[name=t4]:checked').val();
+            err_language = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
 //            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
             UI.openNextTranslated();
@@ -8757,7 +8793,7 @@ if(config.enableReview && config.isReview) {
                     err_typing: err_typing,
                     err_translation: err_translation,
                     err_terminology: err_terminology,
-                    err_quality: err_quality,
+                    err_language: err_language,
                     err_style: err_style
                 },
 
@@ -8907,9 +8943,13 @@ if(config.enableReview && config.isReview) {
 
         },
 */
+/*
+        closeNotYetTranslated: function () {
+            return false;
+        },
+*/
         openNextTranslated: function (sid) {
-            sid = sid | UI.currentSegmentId;
-//            console.log('sid: ', sid);
+            sid = sid || UI.currentSegmentId;
             el = $('#segment-' + sid);
 //            console.log(el.nextAll('.status-translated, .status-approved'));
 
@@ -8918,7 +8958,7 @@ if(config.enableReview && config.isReview) {
 
             // find in current UI
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-
+console.log('A');
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
 
@@ -8951,13 +8991,22 @@ if(config.enableReview && config.isReview) {
                     approvedList   = $('section.status-approved');
 
                     if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
+                        if((translatedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(translatedList.first());
+                        } else {
+                            translatedList.first().find('.editarea').click();
+                        }
                     } else {
-                        approvedList.first().find('.editarea').click();
+                        if((approvedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(approvedList.first());
+                        } else {
+                            approvedList.first().find('.editarea').click();
+                        }
                     }
 
                 } else { // find in not loaded segments
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    console.log('D');
                     APP.doRequest({
                         data: {
                             action: 'getNextReviseSegment',
@@ -9004,71 +9053,16 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-// codice inserito da Daniele per aprire la tm e settare l'active nel tab
-
-        $(".mgmt-tm").click(function(e) {
-            e.preventDefault();
-            $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
-            $(".mgmt-table-mt").hide();
-            $(".mgmt-table-tm").show();
-        });
-        $(".tm-mgmt").click(function(e) {
-            e.preventDefault();
-            $(".mgmt-mt").addClass("active");
-            $(".mgmt-tm").removeClass("active");
-            $(".mgmt-table-tm").hide();
-            $(".mgmt-table-mt").show();
+        $(".mgmt-tm").click(function() {
+            $(".mgmt-panel-gl").hide();
+            $(".mgmt-panel-tm").show();
+            $("table.mgmt-tm").show();
         });
 
-        
-
-        $(".mgmt-mt").click(function(e) {
-            e.preventDefault();
-            $(this).addClass("active");
-            $(".mgmt-tm").removeClass("active");
-            $(".mgmt-table-tm").hide();
-            $(".mgmt-table-mt").show();
-        });
-
-        $("#mt_engine_int").change(function() {
-            $(".step2").show();
-            provider = $(this).val();
-            if(provider == 'none') {
-                $('.step2 .fields').html('');
-                $(".step2").hide();
-                $(".step3").hide();
-            } else {
-                $('.step2 .fields').html($('#mt-provider-' + provider).html());
-                $(".step3").show();
-            }
-        });
-// fine codice di Daniele
-
-        $('#add-mt-provider-confirm').click(function(e) {
-            e.preventDefault();
-            if($(this).hasClass('disabled')) return false;
-            provider = $("#mt_engine_int").val();
-            providerName = $("#mt_engine_int option:selected").text();
-            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
-            $('#mt_engine option:selected').removeAttr('selected');
-            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
-            $('.popup-tm h1 .btn-ok').click();
-        });
-        $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
-        });
-
-        $('html').on('input', '#mt-provider-details input', function() {
-            num = 0;
-            $('#mt-provider-details input').each(function () {
-                if($(this).val() == '') num++;
-            })
-            if(num) {
-                $('#add-mt-provider-confirm').addClass('disabled');
-            } else {
-                $('#add-mt-provider-confirm').removeClass('disabled');
-            }
+        $(".mgmt-gl").click(function() {
+            $(".mgmt-panel-tm").hide();
+            $("table.mgmt-tm").hide();
+            $(".mgmt-panel-gl").show();
         });
 
         $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
@@ -10219,3 +10213,27 @@ $.extend(UI, {
     }
 
 });
+
+/*
+ Component: ui.offline
+ */
+if(config.offlineModeEnabled) {
+
+    $(window).on('offlineON', function(d) {
+        UI.offline = true;
+//        numUntranslated = $('section.status-new, section.status-draft');
+        UI.showMessage({
+            msg: 'No connection available. You can still translate in offline mode until you reach the maximum storage size.'})
+    }).on('offlineOFF', function(d) {
+        console.log('offlineOFF');
+        UI.offline = false;
+        UI.showMessage({
+            msg: "Connection is back. We are saving translated segments in the database."})
+        UI.checkConnection();
+    }).on('stillNoConnection', function(d) {
+        setTimeout(function() {
+            UI.checkConnection();
+        }, 30000);
+    })
+
+}

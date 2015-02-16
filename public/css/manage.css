@@ -28,7 +28,7 @@ body.manage h2
 	float: left;
 	width: 100%;
 	margin-top: 20px;
-	margin-bottom: 0;
+	margin-bottom: 5px;
 	}
 		
 h2{font-size:30px;margin:0;}
@@ -127,6 +127,7 @@ body.manage a.copy
 body.manage .article:last-child .wrapper-dropdown-5 .dropdown {
 	bottom: 100%;
 top: inherit;
+border-top: 0;
 }
 
 body.manage .article:last-child .wrapper-dropdown-5 .dropdown li:first-child{
@@ -135,7 +136,7 @@ border-top:1px solid #ccc;
 
 body.manage input[type=button].revise {
 	cursor: pointer;
-	height: 31px;
+	height: 29px;
 	width: 77% !important;
 	border-right: 0 solid;
 	border-radius: 2px 0 0 2px;
@@ -163,7 +164,7 @@ body.manage input[type=button].revise {
 	border-radius: 0 2px 2px 0;
 	text-decoration: none;
 	text-align: center;
-	padding: 5px 10px !Important;
+	padding: 4px 10px !Important;
 	margin: 0 !important;
 	float: right;
 }
@@ -186,8 +187,8 @@ body.manage input[type=button].revise {
 	/* Size & position */
 	position: absolute;
 	top: 98%;
-	left: -117px;
-	width: 149px;
+	left: -116px;
+	width: 147px;
 	right: 0;
 	margin-top: 1px;
 
@@ -225,10 +226,9 @@ body.manage input[type=button].revise {
 	display: block;
 	text-decoration: none;
 	background: #fff;
-
 	color: #666;
 	text-align: left;
-	padding: 5px 5px 5px 7px;
+	padding: 5px 0px 5px 5px;
 	transition: all 0.3s ease-out;
 	border-bottom: 1px solid #e6e8ea;
 	font-weight: normal;
@@ -407,7 +407,7 @@ body.manage th.create-date
 	{
 	width: 100px;
 	}
-	
+
 body.manage th.job-detail
 	{
 	width: 33%;
@@ -674,6 +674,7 @@ body.manage input[type=button],
 body.manage input[type=submit]
 	{
 	width: 80px !important;
+	background: #dcdedf!important;
 	}
 
 body.manage .message
@@ -1077,12 +1078,27 @@ td[data-vote='Fail'] {
 	font-size:14px;
 }
 
+.details-anchor {
+	display: block; position: relative; top: -60px; visibility: hidden;
+}
+
+#details-link {
+font-size: 16px;
+color: #999;
+text-shadow: none;
+margin-top: 15px;
+display: block;
+clear: both;
+cursor: pointer;
+}
+
 #ribbon {
 	padding: .34em 2em;
-	margin: 8% -7px 0;
+	margin: 5% -7px 0;
 	position:relative;
 	color: black;
 	font-size: 24px;
+	z-index: 100000000;
 	font-weight: bold;
 	text-align: center;
 	text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
@@ -1140,7 +1156,7 @@ td[data-vote='Fail'] {
 #vote-box {
 width: 217px;
 background: #f7f7f7;
-height: 60px;
+height: 85px;
 position: absolute;
 right: 0px;
 top: 30px;
@@ -1148,7 +1164,8 @@ text-align: center;
 font-size: 45px;
 font-weight: bold;
 text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
-padding: 70px 5px 10px;
+padding: 50px 5px 10px;
+z-index: 100000000;
 border-radius: 4px;
 border: 1px solid #ECECEC;
 box-shadow: 1px 1px 0px #E6E6E6;
@@ -1200,7 +1217,37 @@ padding: 15px;
 font-size: 16px;
 }
 
-
+/* Table Equivalent Translated Score Highlight */
+.qa_eq_tr[data-vote='Excellent'] td,
+.qa_eq_tr[data-vote='Verygood'] td,
+.qa_eq_tr[data-vote='Good'] td {
+	border-color: #3C9423 !important;
+}
+.qa_eq_tr[data-vote='Acceptable'] td {
+	border-color: #E5B007 !important;
+}
+.qa_eq_tr[data-vote='Poor'] td {
+	border-color: #FFA935 !important;
+}
+.qa_eq_tr[data-vote='Fail'] td {
+	border-color: #E7504D !important;
+}
+.qa_eq_tr {
+	font-weight: bold;
+}
+.qa_eq_td {
+	font-size: 18px !important;
+	border-top:1px solid;
+	border-bottom:1px solid !important;
+	border-left: 0 !important;
+}
+.qa_eq_td_first {
+	border-left: 4px solid !important;
+}
+.qa_eq_td_last {
+	border-right: 4px solid !important;
+}
+/* Table Equivalent Translated Score Highlight */
 
 .vote-howto h3 {
 	font-size: 22px;

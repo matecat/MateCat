@@ -636,6 +636,8 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
+        }).on('offlineON', function(d) {
+            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
@@ -710,7 +712,7 @@ $.extend(UI, {
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
 			e.preventDefault();
-            if(config.isReview) return false;
+//            if(config.isReview) return false;
 			if (UI.justSelecting('readonly'))
 				return;
 			if (UI.someUserSelection)
@@ -888,8 +890,12 @@ $.extend(UI, {
 				if (action == 'openConcordance')
 					UI.openConcordance();
 
-				if (operation != 'moving')
-					UI.scrollSegment($('#segment-' + $(this).data('sid')));
+				if (operation != 'moving') {
+                    segment = $('#segment-' + $(this).data('sid'));
+                    if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+                        UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                    }
+                }
 			}
 
             UI.lockTags(UI.editarea);
