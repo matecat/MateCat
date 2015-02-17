@@ -162,11 +162,7 @@ body.searchActive #filterSwitch
 
 /*ul{margin:0;padding:0;list-style:none}
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}*/
-.breadcrumbs{float:left;color:#fff;padding:19px 0 4px 0px;}
-
-
-
-
+.breadcrumbs{color:#fff;padding:19px 0 4px 0px;}
 
 .cattool .breadcrumbs{padding:22px 0 4px 15px;}
 
@@ -213,13 +209,8 @@ body.searchActive #filterSwitch
 
 .breadcrumbs #pname
 {
-	float: left;
-
 	padding-left: 22px;
-
 	background: url(../img/sprite.png) -15px -434px no-repeat;
-	max-width: 300px;
-	/*overflow: hidden;*/
 	margin-left:2px;
 	word-break: break-all;
 }
@@ -229,6 +220,9 @@ body.searchActive #filterSwitch
 	float: left;
 }
 
+.breadcrumbs span {
+    display: inline-block;
+}
 /*.logo{float:left;border:0;margin-top:10px;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}*/
 
 
@@ -2299,7 +2293,7 @@ footer nav
 	.header-menu{margin-right:16px}
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
-	.review .breadcrumbs a {width: 50px;}
+	.review .breadcrumbs a {width: 100%;}
     .review.justdone .breadcrumbs {width: 180px;}
     .review.justdone .breadcrumbs #pname {width:45px;}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
