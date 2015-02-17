@@ -102,7 +102,9 @@ if(config.enableReview && config.isReview) {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
         UI.trackChanges(UI.editarea);
-    }).on('click', '.approved', function(e) {
+    }).on('click', 'a.approved', function(e) {
+        // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+        // because of the event is triggered even on download button
         e.preventDefault();
         UI.tempDisablingReadonlyAlert = true;
         UI.hideEditToolbar();
