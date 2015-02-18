@@ -66,10 +66,10 @@
 				"en":"Azerbaijani"
 			}],
 			"isocode":"az",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"az-AZ",
-            "languageRegionCode":"az-Latn-AZ"
+            		"languageRegionCode":"az-Latn-AZ"
 		}
 	,
 		{
