@@ -246,16 +246,19 @@ APP = {
 //            $('.popup.hide, .popup-outer.hide').hide();
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
-    fitText: function( container, child, limitHeight, actualTextLow, actualTextHi ){
+    fitText: function( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ){
 
+        if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;
         if ( typeof $( child ).attr( 'data-originalText' ) == 'undefined' ) {
             $( child ).attr( 'data-originalText', $( child ).text() );
         }
 
+
         var originalText = $( child ).text();
 
-        if ( originalText.length < 12 ) {
-            return originalText;
+        //tail recursion exit control
+        if ( originalText.length < escapeTextLen || ( actualTextLow + actualTextHi ).length < escapeTextLen ) {
+            return;
         }
 
         if( typeof actualTextHi == 'undefined' && typeof actualTextLow == 'undefined' ){
@@ -276,7 +279,7 @@ APP = {
 
         // break recursion for browser width resize below 480 px to avoid infinite loop and stack overflow
         while( container.height() >= limitHeight && $( window ).width() > 480 ){
-            this.fitText( container, child, limitHeight, actualTextLow, actualTextHi );
+            this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
         }
 
     },
