@@ -278,7 +278,7 @@ APP = {
         child.text( actualTextLow + '[...]' + actualTextHi );
 
         // break recursion for browser width resize below 480 px to avoid infinite loop and stack overflow
-        while( container.height() >= limitHeight && $( window ).width() > 480 ){
+        while( container.height() >= limitHeight && $( window ).width() > 1024 ){
             this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
         }
 

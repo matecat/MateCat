@@ -120,7 +120,7 @@ class Revise_JobQA {
             /*
              * maxErr is the number of Major Tolerated Errors, Major counts as 1
              */
-            self::$error_info[ $field ][ 'acceptance' ] = ( $this->job_words / 2500 ) * self::$error_info[ $field ][ 'maxErr' ];
+            self::$error_info[ $field ][ 'acceptance' ] = ( $this->job_words / Constants_Revise::WORD_INTERVAL ) * self::$error_info[ $field ][ 'maxErr' ];
         }
     }
 

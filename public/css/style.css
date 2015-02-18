@@ -2283,9 +2283,7 @@ footer nav
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {display: block;}
-    	.review.justdone .breadcrumbs {width: 250px;}
-    	.review.justdone .breadcrumbs #pname {width:140px;}
-    	.justdone .breadcrumbs a {width:200px;}
+    .review .breadcrumbs a {width: 100%;}
 
 }
 @media screen and (max-width: 1280px){
@@ -2294,8 +2292,6 @@ footer nav
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
 	.review .breadcrumbs a {width: 100%;}
-    .review.justdone .breadcrumbs {width: 180px;}
-    .review.justdone .breadcrumbs #pname {width:45px;}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
 }
 @media screen and (max-width: 1260px){
@@ -2326,7 +2322,7 @@ footer nav
 	.con-input{width:63%;}
 	.con-input{width:62% !important;}
 	.languages{text-indent:-62px }
-	.review.justdone .breadcrumbs {width: 220px;}
+    .review .breadcrumbs a {width: 100%;}
 	.review .wrapper {width: 98%;}
 	.text .target{padding-left:45px;}
 	.graysmall li{width:43%;}
@@ -2342,10 +2338,9 @@ footer nav
 
 @media screen and (max-width: 1100px){
 	.review .breadcrumbs a {width: 110px; padding-left:15px!important;}
-	.review.justdone .breadcrumbs {width: 200px;}
 	.review .breadcrumbs a {width: 150px;}
     #notifbox,#filterSwitch {width: 45px;}
-    .review.justdone .breadcrumbs a {width:200px;}
+    .review .breadcrumbs a {width: 100%;}
 	.cattool .breadcrumbs {padding: 19px 0 4px 0px;}
 	.cattool #quality-report {padding:5px 10px!important;}
 	.header-menu li a, .header-menu li input {font-size:14px;}

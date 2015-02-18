@@ -72,7 +72,7 @@
             <table class="tablestats revision" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <th class="issue">Type of Issue</th>
-                    <th>Issues Found / Max tolerated Major Issues <br />for ${job_stats/TOTAL_FORMATTED} words<br /><small class="weight-normal">1 Major = 5 Minor</small></th>
+                    <th>Issues Found / Max tolerated Issues <br />for ${job_stats/TOTAL_FORMATTED} words<br /><small class="weight-normal">1 Enhancement = 0,05 Error</small></th>
                     <th class="score">Score</th>
                 </tr>
 
@@ -87,41 +87,41 @@
             </table>
             <div class="vote-howto">
                 <h2>How MateCat Helps Objective Quality Measurements</h2>
-                <p>MateCat uses an analytical approach to assess quality. It sets a maximum number of tolerated issues (1 Major = 5 Minor) and uses the data provided by the reviser to calculate an objective score.</p>
+                <p>MateCat uses an analytical approach to assess quality. It sets a maximum number of tolerated issues (1 Enhancement = 0,05 Error) and uses the data provided by the reviser to calculate an objective score.</p>
                 <p>The level of quality can be agreed upon with your provider. For some projects "Good" or "Acceptable" may be ok, whereas others will require an "Excellent" score.</p>
-                
+
                 <h3>Type of Issues and Quality Threshold</h3>
                 <table class="tablestats revision-info" width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
                         <th>Type of Issues</th>
-                        <th>Max Tolerated Major Issues for 2,500 words<br /><small class="weight-normal">1 Major = 5 Minor</small></th>
+                        <th>Max Tolerated Issues for 1,000 words<br /><small class="weight-normal">1 Enhancement = 0,05 Error</small></th>
                     </tr>
                     <tr> 
                         <td>Typing errors, double spaces and tags issues</td>
-                        <td class="text-center"><b>5</b><br />(99.8% Accuracy)</td>
+                        <td class="text-center"><b>3</b><br />(99.7% Accuracy)</td>
                     </tr>
                     <tr> 
                         <td>Translation errors (mistranslation, additions/omissions)</td>
-                        <td class="text-center"><b>2</b><br />(99.9% Accuracy)</td>
+                        <td class="text-center"><b>2</b><br />(99.8% Accuracy)</td>
                     </tr>                
                     <tr> 
                         <td>Terminology and translation consistency</td>
-                        <td class="text-center"><b>3</b><br />(99.9% Accuracy)</td>
+                        <td class="text-center"><b>3</b><br />(99.7% Accuracy)</td>
                     </tr>  
                     <tr> 
                         <td>Language quality (grammar, punctuation, spelling)</td>
-                        <td class="text-center"><b>4</b><br />(99.8% Accuracy)</td>
+                        <td class="text-center"><b>3</b><br />(99.7% Accuracy)</td>
                     </tr>                                 
                     <tr> 
                         <td>Style (readability, consistent style and tone)</td>
-                        <td class="text-center"><b>5</b><br />(99.8% Accuracy)</td>
+                        <td class="text-center"><b>3</b><br />(99.7% Accuracy)</td>
                     </tr>                 
                 </table>
 
                 <a name="details" class="details-anchor"></a><h3>Score Calculation</h3>
 
                 <p>MateCat uses the following formula to calculate the number of tolerated issues for the Job:</p>
-                <blockquote>N° of Tolerated Issues per Job = ( N° of Payable Words / 2500 ) * N° of Tolerated Issues for 2,500 words</blockquote>
+                <blockquote>N° of Tolerated Issues per Job = ( N° of Payable Words / 1,000 ) * N° of Tolerated Issues for 1,000 words</blockquote>
 
                 <p>For each type of issue, MateCat calculates the score using in this way:</p>
                 <blockquote>N° of Issues Found / N° of Tolerated Issues per Job</blockquote>
