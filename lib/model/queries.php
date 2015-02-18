@@ -2546,7 +2546,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
         }
     }
 
-    $chunks_st = array_chunk( $st_values, 500 );
+    $chunks_st = array_chunk( $st_values, 200 );
 
 //	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
     Log::doLog( 'Insert Segment Translations: ' . count( $st_values ) );
@@ -2603,7 +2603,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
     if ( count( $st_queue_values ) ) {
 
-        $chunks_st_queue = array_chunk( $st_queue_values, 500 );
+        $chunks_st_queue = array_chunk( $st_queue_values, 200 );
 
 //		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
         Log::doLog( 'Insert Segment Translations Queue: ' . count( $st_queue_values ) );
