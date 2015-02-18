@@ -253,12 +253,11 @@ APP = {
             $( child ).attr( 'data-originalText', $( child ).text() );
         }
 
-
         var originalText = $( child ).text();
 
         //tail recursion exit control
         if ( originalText.length < escapeTextLen || ( actualTextLow + actualTextHi ).length < escapeTextLen ) {
-            return;
+            return false;
         }
 
         if( typeof actualTextHi == 'undefined' && typeof actualTextLow == 'undefined' ){
@@ -277,10 +276,13 @@ APP = {
 
         child.text( actualTextLow + '[...]' + actualTextHi );
 
-        // break recursion for browser width resize below 480 px to avoid infinite loop and stack overflow
-        while( container.height() >= limitHeight && $( window ).width() > 1024 ){
-            this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
+        var test = true;
+        // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
+        while( container.height() >= limitHeight && $( window ).width() > 1024 && test == true ){
+             test = this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
         }
+
+        return false;
 
     },
     objectSize: function(obj) {
