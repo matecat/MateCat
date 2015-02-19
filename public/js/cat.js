@@ -9661,7 +9661,7 @@ $.extend(UI, {
                 '        <a class="btn-grey pull-left addtmx">' +
                 '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
-                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Download</span></a>' +
+                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Export TMX</span></a>' +
                 '    </td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
