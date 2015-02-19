@@ -136,6 +136,9 @@ class newProjectController extends viewController {
 
         $this->generateAuthURL();
 
+
+        //TODO Custom MT add cache for engines if user is logged
+
         $this->mt_engines  = getEngines( 'MT' );
         $this->tms_engines = getEngines( 'TM' );
 

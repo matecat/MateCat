@@ -1637,6 +1637,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
         //otherwise get the first one in the list
         $nSegment = $results[ 0 ]['id'];
         foreach ( $results as $seg ) {
+            if( $seg['status'] == null ) $seg['status'] = Constants_TranslationStatus::STATUS_NEW;
             if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg['status'] ] == $statusWeight[ $status ] ) {
                 $nSegment = $seg[ 'id' ];
                 break;
