@@ -396,31 +396,6 @@ class CatUtils {
         return $text;
     }
 
-    public static function raw2DatabaseXliff( $segment ){
-
-        // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-        // output : <g> bang &amp; olufsen are > 555 </g> <x/>
-        // caso controverso <g id="4" x="&lt; dfsd &gt;">
-        $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars(
-                html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
-                ENT_NOQUOTES, 'UTF-8', false
-        );
-
-        //Replace ALL UTF-8 Multibytes string with corresponding HTML Entities;
-        $segment = mb_convert_encoding( $segment, 'HTML-ENTITIES', 'UTF-8' );
-
-        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
-
-        //encode all not valid XML entities
-        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,4};)/', '&amp;' , $segment );
-
-        $segment = self::restore_xliff_tags($segment);
-        return $segment;
-
-    }
-
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders
@@ -445,7 +420,7 @@ class CatUtils {
         $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
-        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,4};)/', '&amp;' , $segment );
+        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,6};)/', '&amp;' , $segment );
 
         $segment = self::restore_xliff_tags($segment);
         return $segment;

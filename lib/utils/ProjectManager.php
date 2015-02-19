@@ -1220,7 +1220,7 @@ class ProjectManager {
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
-                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => CatUtils::raw2DatabaseXliff( $target ) ) ) );
+                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => $target ) ) );
 
                                         //seg-source and target translation can have different mrk id
                                         //override the seg-source surrounding mrk-id with them of target
@@ -1239,7 +1239,7 @@ class ProjectManager {
 
                             $mid               = $this->dbHandler->escape( $seg_source[ 'mid' ] );
                             $ext_tags          = $this->dbHandler->escape( $seg_source[ 'ext-prec-tags' ] );
-                            $source            = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ) );
+                            $source            = $this->dbHandler->escape( $seg_source[ 'raw-content' ] );
                             $source_hash       = $this->dbHandler->escape( md5( $seg_source[ 'raw-content' ] ) );
                             $ext_succ_tags     = $this->dbHandler->escape( $seg_source[ 'ext-succ-tags' ] );
                             $num_words         = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
@@ -1283,13 +1283,14 @@ class ProjectManager {
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
-                                    $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => CatUtils::raw2DatabaseXliff( $target ) ) ) );
+                                    $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => $target ) ) );
 
                                 }
 
                             }
                         }
 
+//                        $source = CatUtils::placeholdnbsp( $xliff_trans_unit['source']['raw-content'] );
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
 
                         //we do the word count after the place-holding with <x id="nbsp"/>
@@ -1297,7 +1298,7 @@ class ProjectManager {
                         $num_words = CatUtils::segment_raw_wordcount( $source, $xliff_file[ 'attr' ][ 'source-language' ] );
 
                         //applying escaping after raw count
-                        $source      = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $source ) );
+                        $source      = $this->dbHandler->escape( $source );
                         $source_hash = $this->dbHandler->escape( md5( $source ) );
 
                         $trans_unit_id = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
