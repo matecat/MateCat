@@ -435,6 +435,9 @@ class CatUtils {
             ENT_NOQUOTES, 'UTF-8', false
         );
 
+        //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
+
         //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
         $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
 
@@ -457,6 +460,8 @@ class CatUtils {
         $segment = preg_replace('/\s{2}/', " &nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
+
         // restore < e >
         $segment = str_replace("<", "&lt;", $segment);
         $segment = str_replace(">", "&gt;", $segment);
