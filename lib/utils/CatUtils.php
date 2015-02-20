@@ -396,6 +396,28 @@ class CatUtils {
         return $text;
     }
 
+    public static function raw2DatabaseXliff( $segment ){
+
+        $segment = self::placehold_xliff_tags($segment);
+        $segment = htmlspecialchars(
+                html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
+                ENT_NOQUOTES, 'UTF-8', false
+        );
+
+        //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
+        $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
+
+        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
+        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+
+        //encode all not valid XML entities
+        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
+
+        $segment = self::restore_xliff_tags($segment);
+        return $segment;
+
+    }
+
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders
@@ -420,7 +442,7 @@ class CatUtils {
         $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
-        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,6};)/', '&amp;' , $segment );
+        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
 
         $segment = self::restore_xliff_tags($segment);
         return $segment;
@@ -1084,6 +1106,70 @@ class CatUtils {
 
         return array( $charset, $converted );
 
+    }
+
+    /**
+     * Get the char code from a multi byte char
+     *
+     * 2 times faster than the old implementation
+     *
+     * @param $c string Unicode Multibyte Char String
+     * @return int
+     *
+     * @deprecated Too slow
+     */
+    public static function unicode2ord($c) {
+        if (ord($c{0}) >= 0 && ord($c{0}) <= 127)
+            return ord($c{0});
+        if (ord($c{0}) >= 192 && ord($c{0}) <= 223)
+            return (ord($c{0}) - 192) * 64 + (ord($c{1}) - 128);
+        if (ord($c{0}) >= 224 && ord($c{0}) <= 239)
+            return (ord($c{0}) - 224) * 4096 + (ord($c{1}) - 128) * 64 + (ord($c{2}) - 128);
+        if (ord($c{0}) >= 240 && ord($c{0}) <= 247)
+            return (ord($c{0}) - 240) * 262144 + (ord($c{1}) - 128) * 4096 + (ord($c{2}) - 128) * 64 + (ord($c{3}) - 128);
+        if (ord($c{0}) >= 248 && ord($c{0}) <= 251)
+            return (ord($c{0}) - 248) * 16777216 + (ord($c{1}) - 128) * 262144 + (ord($c{2}) - 128) * 4096 + (ord($c{3}) - 128) * 64 + (ord($c{4}) - 128);
+        if (ord($c{0}) >= 252 && ord($c{0}) <= 253)
+            return (ord($c{0}) - 252) * 1073741824 + (ord($c{1}) - 128) * 16777216 + (ord($c{2}) - 128) * 262144 + (ord($c{3}) - 128) * 4096 + (ord($c{4}) - 128) * 64 + (ord($c{5}) - 128);
+        if (ord($c{0}) >= 254 && ord($c{0}) <= 255)    //  error
+            return FALSE;
+        return 0;
+    }
+
+    /**
+     * Get the char code from a multi byte char
+     *
+     * 2/3 times faster than the old implementation
+     *
+     * @param $str string Unicode Multibyte Char String
+     * @return int
+     *
+     */
+    public static function fastUnicode2ord( $str ){
+        switch( strlen($str) ){
+            case 1:
+                return ord($str);
+                break;
+            case 2:
+                return ( ord( $str[0] ) - 0xC0 ) * 0x40 +
+                         ord( $str[1] ) - 0x80;
+                break;
+            case 3:
+                return ( ord( $str[0] ) - 0xE0 ) * 0x1000 +
+                       ( ord( $str[1] ) - 0x80 ) * 0x40 +
+                         ord( $str[2] ) - 0x80;
+                break;
+            case 4:
+                return ( ord( $str[0] ) - 0xF0 ) * 0x40000 +
+                       ( ord( $str[1] ) - 0x80 ) * 0x1000 +
+                       ( ord( $str[2] ) - 0x80 ) * 0x40 +
+                         ord( $str[3] ) - 0x80;
+                break;
+        }
+    }
+
+    public static function htmlentitiesFromUnicode( $str ){
+        return "&#" . self::fastUnicode2ord( $str[1] ) . ";";
     }
 
     public static function getTMProps( $job_data ){
