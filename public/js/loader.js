@@ -4,7 +4,7 @@
 */
 
 Loader = {
-	concatSources: true, // set to true if you want to load all the js source components instead of the whole cat.js
+	concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
 //	components: new Array (
 //		'common',
 //		'cat'
