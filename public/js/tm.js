@@ -244,7 +244,7 @@ $.extend(UI, {
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
             var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
-            $(this).parents('tr').first().append(msg);
+            if(!$(this).parents('tr').find('td.notify').length) $(this).parents('tr').first().append(msg);
         });
 
 
