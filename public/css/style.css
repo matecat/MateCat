@@ -1446,8 +1446,8 @@ z-index: 10000;
     list-style: none;
     height: 95%;
     outline: none;
-    word-wrap: break-word;
-    word-break: break-all;
+    /*word-wrap: break-word;*/
+    /*word-break: break-all;*/
 }
 .text a{text-decoration:none;color:#000 }
 
@@ -1527,6 +1527,7 @@ body.archived section .status-container
 	border:1px solid #727272;
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
+    word-break: normal;
 /*	-moz-transition:background-color 2s;
 	-webkit-transition:background-color 2s !important;
 	-o-transition:background-color 2s;
@@ -1615,7 +1616,7 @@ textarea, input, .editarea, .search-editarea, select  {
 .translation
 {
     word-wrap: break-word;
-    word-break: break-all;
+    /*word-break: break-all;*/
 }
 .graysmall .translation
 {
