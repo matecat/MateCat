@@ -104,6 +104,12 @@ UI = {
 				$(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/"), '_blank'
 			);
 			win.focus();
+        }).on('mousedown','td.actions .download-manage, td.actions .sdlxliff',function(e) {
+            e.preventDefault();
+            var win = window.open(
+                $(this).attr('href'), '_blank'
+            );
+            win.focus();
 	    }).on('mousedown','td.actions .archive',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'archived');
