@@ -23,10 +23,10 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
         $this->_validateNotNullFields( $obj );
 
-        $query = "INSERT INTO " . self::TABLE.
+        $query = "INSERT INTO " . self::TABLE .
                 " ( name, type, description, base_url, translate_relative_url, contribute_relative_url,
                 delete_relative_url, others, extra_parameters, google_api_compliant_version, penalty, active, uid)
-                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d ) ON DUPLICATE KEY UPDATE
+                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE
                         active = VALUES(active),
                         others = VALUES(others),
                         name = VALUES(name)
@@ -34,19 +34,20 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
         $query = sprintf(
                 $query,
-                ($obj->name  == null) ? "NULL" : "'" . $obj->name . "'",
-                ($obj->type == null) ? "NULL" : "'" . $obj->type . "'",
-                ($obj->description  == null) ? "NULL" : "'" . $obj->description . "'",
-                ($obj->base_url  == null) ? "NULL" : "'" . $obj->base_url . "'",
-                ($obj->translate_relative_url  == null) ? "NULL" : "'" . $obj->translate_relative_url . "'",
-                ($obj->contribute_relative_url  == null) ? "NULL" : "'" . $obj->contribute_relative_url . "'",
-                ($obj->delete_relative_url  == null) ? "NULL" : "'" . $obj->delete_relative_url . "'",
-                ($obj->others == null) ? "NULL" : "'" . $obj->others . "'",
-                ($obj->extra_parameters  == null) ? "NULL" : "'" . $obj->extra_parameters . "'",
+                ( $obj->name == null ) ? "NULL" : "'" . $obj->name . "'",
+                ( $obj->type == null ) ? "NULL" : "'" . $obj->type . "'",
+                ( $obj->description == null ) ? "NULL" : "'" . $obj->description . "'",
+                ( $obj->base_url == null ) ? "NULL" : "'" . $obj->base_url . "'",
+                ( $obj->translate_relative_url == null ) ? "NULL" : "'" . $obj->translate_relative_url . "'",
+                ( $obj->contribute_relative_url == null ) ? "NULL" : "'" . $obj->contribute_relative_url . "'",
+                ( $obj->delete_relative_url == null ) ? "NULL" : "'" . $obj->delete_relative_url . "'",
+                ( $obj->others == null ) ? "NULL" : "'" . $obj->others . "'",
+                ( $obj->extra_parameters == null ) ? "NULL" : "'" . $obj->extra_parameters . "'",
                 2,
-                (int)$obj->penalty,
-                (int)$obj->active,
-                (int)$obj->uid
+                //harcoded because we're planning to implement variable penalty
+                ( $obj->penalty == null ) ? "14" : $obj->penalty,
+                ( $obj->active == null ) ? "NULL" : $obj->active,
+                ( $obj->uid == null ) ? "NULL" : $obj->uid
         );
 
         $this->con->query( $query );
@@ -155,7 +156,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
         $this->_validatePrimaryKey( $obj );
 
-        $query            = "DELETE FROM " . self::TABLE . " WHERE id = %d";
+        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d";
 
         if ( $obj->id !== null ) {
             $query = sprintf( $query, $obj->id );
@@ -191,9 +192,9 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                     'others'                       => json_decode( $item[ 'others' ], true ),
                     'extra_parameters'             => $item[ 'extra_parameters' ],
                     'google_api_compliant_version' => $item[ 'google_api_compliant_version' ],
-                    'penalty'                      => (int)$item[ 'penalty' ],
-                    'active'                       => (int)$item[ 'active' ],
-                    'uid'                          => (int)$item[ 'uid' ]
+                    'penalty'                      => $item[ 'penalty' ],
+                    'active'                       => $item[ 'active' ],
+                    'uid'                          => $item[ 'uid' ]
             );
 
             $obj = new Engine_EngineStruct( $build_arr );
@@ -214,19 +215,21 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        if(is_array($input->others) && empty($input->others)) $input->others = "{}";
+        if ( is_array( $input->others ) && empty( $input->others ) ) {
+            $input->others = "{}";
+        }
 
-        $input->name                    = ($input->name !== null ) ? $con->escape( $input->name ) : null;
-        $input->description             = ($input->description !== null ) ? $con->escape( $input->description ) : null;
-        $input->base_url                = ($input->base_url !== null ) ? $con->escape( $input->base_url ) : null;
-        $input->translate_relative_url  = ($input->translate_relative_url !== null ) ? $con->escape( $input->translate_relative_url ) : null;
-        $input->contribute_relative_url = ($input->contribute_relative_url !== null ) ? $con->escape( $input->contribute_relative_url ) : null;
-        $input->delete_relative_url     = ($input->delete_relative_url !== null ) ? $con->escape( $input->delete_relative_url ) : null;
-        $input->others                  = ($input->others !== null ) ? json_encode(  $input->others ) : "{}";
-        $input->extra_parameters        = ($input->extra_parameters !== null ) ? $con->escape( $input->extra_parameters ) : null;
-        $input->penalty                 = ($input->penalty !== null ) ? (int)$input->penalty : null;
-        $input->active                  = ($input->active !== null ) ? (int)$input->active : null;
-        $input->uid                     = ($input->uid !== null ) ? (int)$input->uid : null;
+        $input->name                    = ( $input->name !== null ) ? $con->escape( $input->name ) : null;
+        $input->description             = ( $input->description !== null ) ? $con->escape( $input->description ) : null;
+        $input->base_url                = ( $input->base_url !== null ) ? $con->escape( $input->base_url ) : null;
+        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? $con->escape( $input->translate_relative_url ) : null;
+        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $con->escape( $input->contribute_relative_url ) : null;
+        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $con->escape( $input->delete_relative_url ) : null;
+        $input->others                  = ( $input->others !== null ) ? json_encode( $input->others ) : "{}";
+        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( $input->extra_parameters ) : null;
+        $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
+        $input->active                  = ( $input->active !== null ) ? $input->active : null;
+        $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;
 
         return $input;
     }
@@ -239,10 +242,10 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
             throw new Exception( "Base URL cannot be null" );
         }
 
-        $reflect = new ReflectionClass( 'Constants_Revise' );
-        $constants =  $reflect->getConstants();
+        $reflect   = new ReflectionClass( 'Constants_Revise' );
+        $constants = $reflect->getConstants();
 
-        if( !empty ($obj->type) && !in_array( $obj->type, $constants ) ) {
+        if ( !empty ( $obj->type ) && !in_array( $obj->type, $constants ) ) {
             throw new Exception( "Type not allowed" );
         }
 

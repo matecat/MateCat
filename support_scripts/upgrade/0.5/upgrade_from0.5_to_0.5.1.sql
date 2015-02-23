@@ -7,4 +7,6 @@ DROP COLUMN `gloss_update_relative_url`,
 DROP COLUMN `gloss_delete_relative_url`,
 DROP COLUMN `tmx_import_relative_url`,
 DROP COLUMN `tmx_status_relative_url`,
-ADD COLUMN `uid`  int(11) UNSIGNED NULL DEFAULT NULL AFTER `active`;
+ADD COLUMN `uid`  int(11) UNSIGNED NULL DEFAULT NULL AFTER `active`,
+ADD index uid_idx(uid),
+CHANGE COLUMN penalty penalty int(11) NOT NULL DEFAULT '14';
