@@ -15,6 +15,12 @@ abstract class DataAccess_AbstractDao {
     protected $con;
 
     /**
+     * The cache connection object
+     * @var MemcacheHandler
+     */
+    protected $cache_con;
+
+    /**
      * @var string This property will be overridden in the sub-classes.
      *             This means that const assignment cannot be done. We don't have PHP>5.3
      */
@@ -24,6 +30,11 @@ abstract class DataAccess_AbstractDao {
      * @var int The maximum number of tuples that can be inserted for a single query
      */
     const MAX_INSERT_NUMBER = 1;
+
+    /**
+     * @var int Cache expiry time, expressed in seconds
+     */
+    protected $cacheTTL = 0;
 
     public function __construct( $con ) {
         /**
@@ -157,6 +168,69 @@ abstract class DataAccess_AbstractDao {
     protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ){
         //to be overridden in sub-classes
         return true;
+    }
+
+    /**
+     * @param $query string A query
+     *
+     * @return mixed
+     */
+    protected function getFromCache($query){
+        if($this->cacheTTL == 0 ) return null;
+
+        if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
+            try {
+                $this->cache_con = MemcacheHandler::getInstance();
+
+                $_existingResult = $this->cache_con->get( $query );
+                if ( !empty( $_existingResult ) ) {
+                    return $_existingResult;
+                }
+
+            } catch ( Exception $e ) {
+                Log::doLog( $e->getMessage() );
+                Log::doLog( "No Memcache server(s) configured." );
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param $memcacheHandler MemcacheHandler
+     * @param $query string
+     * @param $value DataAccess_IDaoStruct
+     */
+    protected function setInCache($query, $value){
+        if($this->cacheTTL == 0 ) return null;
+
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            $this->cache_con->set( $query, $value, $this->cacheTTL );
+        }
+    }
+
+    /**
+     * @param int $cacheTTL
+     */
+    public function setCacheTTL( $cacheTTL ) {
+        $this->cacheTTL = $cacheTTL;
+    }
+
+    /**
+     * @param $query string A query
+     *
+     * @return array|mixed
+     */
+    protected function fetch_array($query){
+        $_cacheResult = $this->getFromCache($query);
+
+        if($_cacheResult !== null)
+            return $_cacheResult;
+
+        $result = $this->con->fetch_array($query);
+
+        $this->setInCache($query, $result);
+
+        return $result;
     }
 
     protected abstract function _buildResult( $array_result );
