@@ -1536,7 +1536,7 @@ body.archived section .status-container
 /*	transition:none;
 	-webkit-transition: none;*/
 
-    /*word-break: normal;*/
+    word-break: normal !important;
 	/*background-color: transparent;*/
 }
 .editor.highlighted1 .editarea
@@ -2965,6 +2965,7 @@ display: inline-block;
 overflow: hidden;
 position: relative;
 margin: 0px 4px;
+width: 7px;
 height: 8px;
 padding-top: 0px;
 }
