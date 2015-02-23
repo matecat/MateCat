@@ -2965,6 +2965,7 @@ display: inline-block;
 overflow: hidden;
 position: relative;
 margin: 0px 4px;
+width: 7px;
 height: 8px;
 padding-top: 0px;
 }
