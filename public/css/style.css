@@ -1536,7 +1536,7 @@ body.archived section .status-container
 /*	transition:none;
 	-webkit-transition: none;*/
 
-    /*word-break: normal;*/
+    word-break: normal !important;
 	/*background-color: transparent;*/
 }
 .editor.highlighted1 .editarea
