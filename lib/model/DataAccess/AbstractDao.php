@@ -178,27 +178,24 @@ abstract class DataAccess_AbstractDao {
     protected function getFromCache($query){
         if($this->cacheTTL == 0 ) return null;
 
+        $_existingResult = null;
         if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
             try {
                 $this->cache_con = MemcacheHandler::getInstance();
-
                 $_existingResult = $this->cache_con->get( $query );
-                if ( !empty( $_existingResult ) ) {
-                    return $_existingResult;
-                }
-
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
                 Log::doLog( "No Memcache server(s) configured." );
             }
         }
-        return null;
+        return $_existingResult;
     }
 
     /**
-     * @param $memcacheHandler MemcacheHandler
      * @param $query string
      * @param $value DataAccess_IDaoStruct
+     *
+     * @return void|null
      */
     protected function setInCache($query, $value){
         if($this->cacheTTL == 0 ) return null;
@@ -210,9 +207,12 @@ abstract class DataAccess_AbstractDao {
 
     /**
      * @param int $cacheTTL
+     *
+     * @return $this
      */
     public function setCacheTTL( $cacheTTL ) {
         $this->cacheTTL = $cacheTTL;
+        return $this;
     }
 
     /**
