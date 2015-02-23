@@ -1581,7 +1581,7 @@ UI = {
             t = 'draft';
         }
 		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
-		var label = (t == 'translated') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
+        var label = (t == 'translated' || t == 'approved') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
 		$('#downloadProject').attr('value', label);
 	},
 	setProgress: function(stats) {

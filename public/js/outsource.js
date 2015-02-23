@@ -245,7 +245,7 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
 function changeTimezone( date, timezoneFrom, timezoneTo ){
     var dd = new Date(date);
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
-    $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + dd.getUTCHours() + ":" + $.format.date(dd, "mm") );
+    $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
 
     $( "span.time").attr("data-timezone", timezoneTo);
     $( "span.time").attr("data-rawtime", dd.toUTCString());

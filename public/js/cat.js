@@ -1581,7 +1581,7 @@ UI = {
             t = 'draft';
         }
 		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
-		var label = (t == 'translated') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
+		var label = (t == 'translated' || t == 'approved') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
 		$('#downloadProject').attr('value', label);
 	},
 	setProgress: function(stats) {
@@ -3230,7 +3230,7 @@ $.extend(UI, {
 //        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
-			$('#filterSwitch').show();
+            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
         this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
@@ -8736,7 +8736,9 @@ if(config.enableReview && config.isReview) {
         UI.trackChanges(this);
     }).on('click', '.editor .outersource .copy', function(e) {
         UI.trackChanges(UI.editarea);
-    }).on('click', '.approved', function(e) {
+    }).on('click', 'a.approved', function(e) {
+        // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
+        // because of the event is triggered even on download button
         e.preventDefault();
         UI.tempDisablingReadonlyAlert = true;
         UI.hideEditToolbar();
@@ -9177,8 +9179,9 @@ $.extend(UI, {
 */
             $(this).parents('tr').append(nr);
 //            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
-        }).on('change', '#new-tm-key', function() {
-            UI.checkTMKey('change');
+        }).on('change paste', '#new-tm-key', function(event) {
+            // set Timeout to get the text value after paste event, otherwise it is empty
+            setTimeout( function(){ UI.checkTMKey('change'); }, 200 );
         }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
             UI.checkTMKey('key');
@@ -9658,7 +9661,7 @@ $.extend(UI, {
                 '        <a class="btn-grey pull-left addtmx">' +
                 '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
-                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Download</span></a>' +
+                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Export TMX</span></a>' +
                 '    </td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);

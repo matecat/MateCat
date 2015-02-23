@@ -173,7 +173,7 @@ abstract class viewController extends controller {
         //even if no login in required, if user data is present, pull it out
         if ( !empty( $_SESSION[ 'cid' ] ) ){
             $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
-            $this->logged_user['short']=trim( substr($this->logged_user[ 'first_name' ],0,1) . "" . substr($this->logged_user[ 'last_name' ],0,1) );
+            $this->logged_user['short'] = trim( mb_substr($this->logged_user[ 'first_name' ],0,1) . "" . mb_substr($this->logged_user[ 'last_name' ],0,1) );
         }
 
         if( $isAuthRequired  ) {

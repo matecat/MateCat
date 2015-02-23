@@ -67,7 +67,8 @@ class convertFileController extends ajaxController {
 			return false;
 		}
 
-		$file_path = $this->intDir . DIRECTORY_SEPARATOR . html_entity_decode( $this->file_name, ENT_QUOTES );
+        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
+		$file_path = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
 
 		if ( !file_exists( $file_path ) ) {
 			$this->result[ 'code' ]      = -6; // No Good, Default

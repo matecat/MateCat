@@ -779,13 +779,18 @@ UI = {
     		projects += newProject;
         });
         if(action == 'append') {
-	        $('#projects').append(projects);  	
+	        $('#projects').append(projects);
         } else if(action == 'single') {
             $( '.article[data-pid=' + d[0].id + ']' ).replaceWith( projects );
         } else {
 	        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
 	        $('#projects').html(projects);        	        	
         }
+
+        //fit Text for long project names
+        $(".article").each(function() {
+            APP.fitText( $( '.head', $( this ) ), $( '.head h2', $( this ) ), 78, 50 );
+        });
 
     }, // renderProjects
 

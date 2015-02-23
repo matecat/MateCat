@@ -43,7 +43,7 @@ $.extend(UI, {
 //        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
-			$('#filterSwitch').show();
+            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
         this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)

@@ -31,7 +31,7 @@ class Constants_Revise {
     );
 
     const SERV_VALUE_NONE  = 0;
-    const SERV_VALUE_MINOR = 0.2;
+    const SERV_VALUE_MINOR = 0.05;
     const SERV_VALUE_MAJOR = 1;
 
     const CLIENT_VALUE_NONE  = 0;
@@ -41,12 +41,12 @@ class Constants_Revise {
     /**
      * Max allowed errors for category
      */
-    const WORD_INTERVAL    = 2500;
-    const MAX_TYPING       = 5;
+    const WORD_INTERVAL    = 1000;
+    const MAX_TYPING       = 3;
     const MAX_TRANSLATION  = 2;
     const MAX_TERMINOLOGY  = 3;
-    const MAX_QUALITY      = 4;
-    const MAX_STYLE        = 5;
+    const MAX_QUALITY      = 3;
+    const MAX_STYLE        = 3;
 
     const ERR_TYPING       = 'Typing';
     const ERR_TRANSLATION  = 'Translation';

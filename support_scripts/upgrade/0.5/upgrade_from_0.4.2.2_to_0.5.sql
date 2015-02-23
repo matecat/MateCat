@@ -19,6 +19,9 @@ ADD COLUMN `revision_stats_terminology_maj` int(11) NOT NULL DEFAULT 0 AFTER `re
 ADD COLUMN `revision_stats_language_quality_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_terminology_maj`,
 ADD COLUMN `revision_stats_style_maj` int(11) NOT NULL DEFAULT 0 AFTER `revision_stats_language_quality_maj`;
 
+ALTER TABLE `converters`
+ADD COLUMN `cpu_weight`  int(11) NOT NULL DEFAULT 1 AFTER `ip_converter`;
+
 CREATE TABLE `segment_revisions` (
 `id_job`  bigint(20) NOT NULL ,
 `id_segment`  bigint(20) NOT NULL ,

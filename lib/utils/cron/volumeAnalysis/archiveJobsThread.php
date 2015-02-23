@@ -7,12 +7,14 @@ Log::$fileName = "archive_jobs.log";
 Log::doLog("[ARCHIVEJOBS] started");
 Log::doLog("[ARCHIVEJOBS] inactivity days threshold: ". INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
-if(!is_file(".last_archived_id"))
-    touch(".last_archived_id");
+$lastArchivedIdFileName = ".last_archived_id";
+
+if(!is_file($lastArchivedIdFileName))
+    touch($lastArchivedIdFileName);
 
 //select last max before INIT::JOB_ARCHIVABILITY_THRESHOLD days ago
 //with status not archived so we skip them in the next cycle
-$first_id = file_get_contents(".last_archived_id");
+$first_id = file_get_contents($lastArchivedIdFileName);
 $first_id = $first_id * 1;
 
 $last_id = getMaxJobUntilDaysAgo( INIT::JOB_ARCHIVABILITY_THRESHOLD );
@@ -21,7 +23,7 @@ Log::doLog("[ARCHIVEJOBS] last job id is: " . $last_id );
 
 //number of rows to be selected for each query,
 //after some tests,decide to set the upper bound to 100
-$row_interval = 100;
+$row_interval = 50;
 
 for($i = $first_id; $i <= $last_id; $i += $row_interval){
     echo "[ARCHIVEJOBS] searching jobs between $i and ".($i + $row_interval)."\n";
@@ -57,6 +59,6 @@ for($i = $first_id; $i <= $last_id; $i += $row_interval){
 	}
 
 }
-file_put_contents(".last_archived_id", $last_id);
+file_put_contents($lastArchivedIdFileName, $last_id);
 
 Log::doLog("[ARCHIVEJOBS] Goodbye");
