@@ -802,6 +802,11 @@ color:#333;}
 
 }
 */
+
+span.notify {
+display: block;
+}
+
 td.addtmxtd {
 width: 804px;
 }
@@ -815,7 +820,7 @@ width: 804px;
 }
 
 .downloading .uploadloader {
-	right: 126px;
+right: 130px;
 margin-top: -2px;
 background-size: 15px;
 background-color: #D6D6D6;
