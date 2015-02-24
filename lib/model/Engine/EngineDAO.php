@@ -103,7 +103,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return $this->_buildResult( $arr_result );
     }
 
-    public function update( DataAccess_IDaoStruct $obj ) {
+    public function update( Engine_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -151,18 +151,28 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return null;
     }
 
-    public function delete( DataAccess_IDaoStruct $obj ) {
+    public function delete( Engine_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
 
-        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d";
+        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d %s";
 
-        if ( $obj->id !== null ) {
-            $query = sprintf( $query, $obj->id );
-        } else {
-            throw new Exception( "Engine ID required" );
+        $uidQuery = '';
+        if( $obj->uid !== null ) {
+            $uidQuery = 'and uid = %d';
+            $uidQuery = sprintf(
+                    $uidQuery,
+                    $obj->uid
+            );
         }
+
+        $query = sprintf(
+                $query,
+                $obj->id,
+                $uidQuery
+        );
+
 
         $this->con->query( $query );
 
@@ -250,5 +260,13 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         }
 
     }
+
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+        if ( $obj->id === null ) {
+            throw new Exception( "Engine ID required" );
+        }
+    }
+
+
 }
 
