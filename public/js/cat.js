@@ -9199,12 +9199,14 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
-        } ).on('click', '.mgmt-tm .downloadtmx', function(){
+        }).on('click', '.mgmt-tm .downloadtmx', function(){
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
-            var msg = '<span class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
-            $(this).parents('td').prepend(msg);
+            var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
+            $(this).parents('tr').first().append(msg);
+        }).on('click', '.mgmt-tm .deleteTM', function(){
+            UI.deleteTM($(this));
         });
 
 
@@ -10139,7 +10141,25 @@ $.extend(UI, {
 
         }
 
-    }
+    },
+    deleteTM: function (button) {
+        tr = $(button).parents('tr').first();
+        $(tr).remove();
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'delete',
+                key: tr.find('.privatekey').text()
+            },
+            error: function() {
+                console.log('Error deleting TM!!');
+            },
+            success: function(d) {
+
+            }
+        });
+    },
+
 
 });
 
