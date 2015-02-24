@@ -805,6 +805,8 @@ color:#333;}
 
 span.notify {
 display: block;
+margin-bottom: 5px;
+font-size: 12px;
 }
 
 td.addtmxtd {
@@ -5676,6 +5678,7 @@ display: inline-block;
 overflow: hidden;
 position: relative;
 margin: 0px 4px;
+width: 7px;
 height: 8px;
 padding-top: 0px;
 }
