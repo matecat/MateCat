@@ -2352,8 +2352,12 @@ cursor: pointer;
 	width: 98%;
 }
 
-
-
+.error-type th.tleft {
+    text-align:left;
+}
+.error-type th a {
+    text-align:center;
+}
 
 .error-type tbody {
 border: 1px solid #efefef;
