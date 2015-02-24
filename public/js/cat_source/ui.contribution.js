@@ -276,12 +276,42 @@ $.extend(UI, {
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
+        console.log('setContribution');
+        this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
+        if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+    },
+    addToSetContributionTail: function (operation, segment_id, status, byStatus) {
+        console.log('addToSetContributionTail');
+        var item = {
+            operation: operation,
+            segment_id: segment_id,
+            status: status,
+            byStatus: byStatus
+        }
+        this.setContributionTail.push(item);
+    },
+    execSetContributionTail: function () {
+        console.log('execSetContributionTail');
+        if(this.setContributionTail.length) {
+            item = this.setContributionTail[0];
+            this.setContributionTail.shift();
+            if(item.operation == 'setContribution') {
+                this.execSetContribution(item.segment_id, item.status, item.byStatus);
+            } else {
+                this.execSetContributionMT(item.segment_id, item.status, item.byStatus);
+            }
+        }
+    },
+
+    execSetContribution: function(segment_id, status, byStatus) {
+        console.log('execSetContribution');
+        this.executingSetContribution = true;
         logData = {
             segment_id: segment_id,
             status: status,
             byStatus: byStatus
         };
-        this.log('setContribution1', reqData);
+        this.log('setContribution1', logData);
 		segment = $('#segment-' + segment_id);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
@@ -337,12 +367,22 @@ $.extend(UI, {
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
+                console.log('execSetContribution success');
+                UI.executingSetContribution = false;
+                UI.execSetContributionTail();
 				if (d.error.length)
 					UI.processErrors(d.error, 'setContribution');
 			}
 		});
 	},
-	setContributionMT: function(segment_id, status, byStatus) {
+    setContributionMT: function(segment_id, status, byStatus) {
+        console.log('setContribution');
+        this.addToSetContributionTail('setContributionMT', segment_id, status, byStatus);
+        if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+    },
+    execSetContributionMT: function(segment_id, status, byStatus) {
+        console.log('execSetContribution');
+        this.executingSetContributionMT = true;
 		segment = $('#segment-' + segment_id);
 		reqArguments = arguments;
 		if ((status == 'draft') || (status == 'rejected'))
@@ -397,6 +437,9 @@ $.extend(UI, {
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
+                console.log('execSetContributionMT success');
+                UI.executingSetContributionMT = false;
+                UI.execSetContributionTail();
 				if (d.error.length)
 					UI.processErrors(d.error, 'setContributionMT');
 			}

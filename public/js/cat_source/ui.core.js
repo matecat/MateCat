@@ -2046,10 +2046,36 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller) {
+        console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
-//        console.log('setTranslation sul segmento ', UI.currentSegmentId);
-		reqArguments = arguments;
+        // add to setTranslation tail
+        this.addToSetTranslationTail(id_segment, status, caller);
+        if(!this.executingSetTranslation) this.execSetTranslationTail();
+
+    },
+    addToSetTranslationTail: function (id_segment, status, caller) {
+        console.log('addToSetTranslationTail');
+        var item = {
+            id_segment: id_segment,
+            status: status,
+            caller: caller
+        }
+        this.setTranslationTail.push(item);
+    },
+    execSetTranslationTail: function () {
+        console.log('execSetTranslationTail');
+        if(this.setTranslationTail.length) {
+            item = this.setTranslationTail[0];
+            this.setTranslationTail.shift();
+            this.execSetTranslation(item.id_segment, item.status, item.caller);
+        }
+    },
+
+    execSetTranslation: function(id_segment, status, caller) {
+        console.log('execSetTranslation');
+        this.executingSetTranslation = true;
+        reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
@@ -2124,6 +2150,9 @@ UI = {
 				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
+                console.log('execSetTranslation success');
+                UI.executingSetTranslation = false;
+                UI.execSetTranslationTail();
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
