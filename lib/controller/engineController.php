@@ -22,8 +22,6 @@ class engineController extends ajaxController {
 
         //Session Enabled
         $this->checkLogin();
-        $_SESSION['cid'] = 'roberto@translated.net';
-        $_SESSION['uid'] = '930';
         //Session Disabled
 
         $filterArgs = array(
