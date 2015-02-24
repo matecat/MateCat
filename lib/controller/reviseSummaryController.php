@@ -125,9 +125,21 @@ class reviseSummaryController extends viewController {
                 Constants_Revise::ERR_STYLE       => 'Style (readability, consistent style and tone)',
         );
 
+        $error_max_thresholds = array(
+                Constants_Revise::ERR_TYPING      => Constants_Revise::MAX_TYPING,
+                Constants_Revise::ERR_TRANSLATION => Constants_Revise::MAX_TRANSLATION,
+                Constants_Revise::ERR_TERMINOLOGY => Constants_Revise::MAX_TERMINOLOGY,
+                Constants_Revise::ERR_LANGUAGE    => Constants_Revise::MAX_QUALITY,
+                Constants_Revise::ERR_STYLE       => Constants_Revise::MAX_STYLE
+        );
+
+
+
         foreach( $this->qa_data as $k => $value ){
             $this->qa_data[ $k ][ 'text_content' ] = $error_info[ $value[ 'type' ] ];
         }
+
+//        $nrFormatter = new NumberFormatter("en-US", NumberFormatter::DECIMAL);
 
         //now set the field values of the qa
         $this->template->totalJobWords         = $this->totalJobWords;
@@ -136,7 +148,8 @@ class reviseSummaryController extends viewController {
         $this->template->qa_overall_avg        = $this->qa_overall_avg;
         $this->template->qa_equivalent_class   = $this->qa_equivalent_class;
         $this->template->overall_quality_class = ucfirst( strtolower( str_replace( ' ', '', $this->qa_overall_text ) ) );
-
+        $this->template->error_max_thresholds = $error_max_thresholds;
+//        $this->template->word_interval = $nrFormatter->format( Constants_Revise::WORD_INTERVAL );
 	}
 }
 
