@@ -161,7 +161,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
      * @return Revise_ReviseStruct
      * @throws Exception
      */
-    public static function sanitize( $input ) {
+    public function sanitize( Revise_ReviseStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
