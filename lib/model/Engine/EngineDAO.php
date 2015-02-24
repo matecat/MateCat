@@ -103,7 +103,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return $this->_buildResult( $arr_result );
     }
 
-    public function update( DataAccess_IDaoStruct $obj ) {
+    public function update( Engine_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -113,6 +113,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         $where_conditions[ ] = "id = " . (int)$obj->id;
+        $where_conditions[ ] = "uid = " . (int)$obj->id;
 
         if ( $obj->active !== null ) {
             $condition    = "active = '%s'";
@@ -151,18 +152,19 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return null;
     }
 
-    public function delete( DataAccess_IDaoStruct $obj ) {
+    public function delete( Engine_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
 
-        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d";
+        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d and uid = %d";
 
-        if ( $obj->id !== null ) {
-            $query = sprintf( $query, $obj->id );
-        } else {
-            throw new Exception( "Engine ID required" );
-        }
+        $query = sprintf(
+                $query,
+                $obj->id,
+                $obj->uid
+        );
+
 
         $this->con->query( $query );
 
@@ -250,5 +252,17 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         }
 
     }
+
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+        if ( $obj->id === null ) {
+            throw new Exception( "Engine ID required" );
+        }
+
+        if ( $obj->uid === null ) {
+            throw new Exception( "User's uid required" );
+        }
+    }
+
+
 }
 
