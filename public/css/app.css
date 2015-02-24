@@ -880,7 +880,7 @@ text-align: right;
 {
 	font-size: 18px;
     }
-    .popup h1, .slide-panel h1
+    .popup h1, .popup-tm h1, .popup-languages.slide h1, .slide-panel h1
     {
 	    overflow: visible;
 	    max-height: inherit;
@@ -892,11 +892,7 @@ text-align: right;
 	    margin: 0 !important;
 	    text-align: left;
     }
-
-    .popup-tm h1 {
-        border-bottom: 0;
-    }
-    .slide-panel h1 {
+    .popup-tm h1, .popup-languages.slide h1 {
     	height: 30px;
     	padding: 10px 23px 7px 58px;
     }
@@ -1098,8 +1094,10 @@ float: none!important;
     {
 	    float: right;
     }    
-	
-	
+	#chooseMultilang, #cancelMultilang {
+		padding: 4px 18px;
+		margin-left: 10px;
+	}
 	
 	#myTab  {
 background: #4D4D4D;
@@ -5095,6 +5093,7 @@ footer nav
 	.graysmall .b{ padding-left:55px !Important;width:42% !important}
 	.graysmall-message{left:55px !important}
 	
+
 
 }
 

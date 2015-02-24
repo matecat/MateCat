@@ -880,23 +880,19 @@ text-align: right;
 {
 	font-size: 18px;
     }
-    .popup h1, .slide-panel h1
+    .popup h1, .popup-tm h1, .popup-languages.slide h1
     {
 	    overflow: visible;
 	    max-height: inherit;
 	    font-size: 24px;
 	    background: #4D4D4D url(../img/sprite.png) 10px 10px no-repeat;
 	    padding: 10px 10px 7px 58px;
-	    border-bottom: 1px solid #000;
+	    /*border-bottom: 1px solid #000;*/
 	    color: #fff;
 	    margin: 0 !important;
 	    text-align: left;
     }
-
-    .popup-tm h1 {
-        border-bottom: 0;
-    }
-    .slide-panel h1 {
+    .popup-tm h1, .popup-languages.slide h1 {
     	height: 30px;
     	padding: 10px 23px 7px 58px;
     }
@@ -1093,13 +1089,17 @@ float: none!important;
 
     .popup .btn-ok.right,
     .popup .btn-cancel.right,
-    .slide-panel .btn-ok.right,
-    .slide-panel .btn-cancel.right
+    .popup-tm .btn-ok.right,
+    .popup-tm .btn-cancel.right,
+    .popup-languages.slide .btn-ok.right,
+    .popup-languages.slide .btn-cancel.right
     {
 	    float: right;
     }    
-	
-	
+	#chooseMultilang, #cancelMultilang {
+		padding: 4px 18px;
+		margin-left: 10px;
+	}
 	
 	#myTab  {
 background: #4D4D4D;
@@ -1107,7 +1107,7 @@ display: block;
 text-align: left;
 width: 100%;
 border-bottom: 1px solid #666;
-padding-top: 5px;
+/*padding-top: 5px;*/
 }
 
     .manage .searchbox {	
