@@ -8923,16 +8923,71 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-        $(".mgmt-tm").click(function() {
-            $(".mgmt-panel-gl").hide();
-            $(".mgmt-panel-tm").show();
-            $("table.mgmt-tm").show();
+// codice inserito da Daniele per aprire la tm e settare l'active nel tab
+
+        $(".mgmt-tm").click(function(e) {
+            e.preventDefault();
+            $(this).addClass("active");
+            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-table-mt").hide();
+            $(".mgmt-table-tm").show();
+        });
+        $(".tm-mgmt").click(function(e) {
+            e.preventDefault();
+            $(".mgmt-mt").addClass("active");
+            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-table-tm").hide();
+            $(".mgmt-table-mt").show();
         });
 
-        $(".mgmt-gl").click(function() {
-            $(".mgmt-panel-tm").hide();
-            $("table.mgmt-tm").hide();
-            $(".mgmt-panel-gl").show();
+        
+
+        $(".mgmt-mt").click(function(e) {
+            e.preventDefault();
+            $(this).addClass("active");
+            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-table-tm").hide();
+            $(".mgmt-table-mt").show();
+        });
+
+        $("#mt_engine_int").change(function() {
+            $(".step2").show();
+            provider = $(this).val();
+            if(provider == 'none') {
+                $('.step2 .fields').html('');
+                $(".step2").hide();
+                $(".step3").hide();
+            } else {
+                $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step3").show();
+            }
+        });
+// fine codice di Daniele
+
+        $('#add-mt-provider-confirm').click(function(e) {
+            e.preventDefault();
+            if($(this).hasClass('disabled')) return false;
+            provider = $("#mt_engine_int").val();
+            providerName = $("#mt_engine_int option:selected").text();
+            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
+            $('#mt_engine option:selected').removeAttr('selected');
+            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
+            $('.popup-tm h1 .btn-ok').click();
+        });
+        $('#add-mt-provider-cancel').click(function(e) {
+            $('.popup-tm h1 .btn-ok').click();
+        });
+
+        $('html').on('input', '#mt-provider-details input', function() {
+            num = 0;
+            $('#mt-provider-details input').each(function () {
+                if($(this).val() == '') num++;
+            })
+            if(num) {
+                $('#add-mt-provider-confirm').addClass('disabled');
+            } else {
+                $('#add-mt-provider-confirm').removeClass('disabled');
+            }
         });
 
         $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
@@ -9146,7 +9201,7 @@ $.extend(UI, {
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
             var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
-            if(!$(this).parents('tr').find('td.notify').length) $(this).parents('tr').first().append(msg);
+            $(this).parents('tr').first().append(msg);
         });
 
 

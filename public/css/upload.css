@@ -923,9 +923,9 @@ top: 5%;
 	{
 	float:left;
 	padding:0 0 0 0;
-	margin:0 10px 0 5px;
+	margin:0 10px 50px 5px;
 	width:220px;
-	font-size:120%;
+	font-size:100%;
 	}
 
 .listlang li
@@ -937,14 +937,11 @@ top: 5%;
 	padding:1px 0 1px 0;
 	overflow:hidden !important;
 	border-bottom:1px dotted #ccc;
-	line-height:20px;
+	line-height:24px;
 	}
 	.listlang li.on
 		{
 		font-weight:bold;
-font-size:18px;
-line-height:20px;
-padding-bottom:3px;
 		}		
 
 .listlang label
@@ -1076,6 +1073,36 @@ height: 28px;
 font-size: 17px!important;
 }
 }
+
+
+@media only screen and (max-width : 1100px) {
+
+.popup-languages ul {
+-webkit-column-count: 4;
+column-count: 4;
+-moz-column-count: 4;
+}
+
+.popup-languages.slide, .popup-tm {
+width: 850px!important;
+}
+
+}
+
+@media only screen and (max-width : 900px) {
+
+.popup-languages ul {
+-webkit-column-count: 3;
+column-count: 3;
+-moz-column-count: 3;
+}
+
+.popup-languages.slide, .popup-tm {
+width: 750px!important;
+}
+
+}
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),

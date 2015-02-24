@@ -208,7 +208,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     </select>
     <br/>
-    <a href="#" id="multiple-link">Multiple languages?</a>
+     <a href="#" id="multiple-link">Multiple languages?</a>
 </div>
 
 <div class="translate-box subject">
@@ -838,7 +838,34 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         </div>
     </div>
 </div>
+<div class="popup-outer lang-slide hide"></div>
+<div class="modal popup-languages slide" data-type="view">
+    
+    <div class="">
+      
 
+        <h1>
+            
+            Choose Multiple Languages (<span class="number">1</span>)
+            <a href="#" id="deselectMultilang">Deselect all</a>
+            <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
+            <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
+        </h1>
+
+        <div class="popup-box">
+            <ul class="listlang">
+
+                <tal:block tal:repeat="language target_languages">
+                    <li tal:attributes="class language/top">
+                        <input type="checkbox" tal:attributes="value language/code; id language/code"/>
+                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
+                    </li>
+                </tal:block>
+
+            </ul>
+        </div>
+    </div>
+</div>
 
 <div class="modal popup-languages" data-type="view">
     <div class="popup-outer"></div>
