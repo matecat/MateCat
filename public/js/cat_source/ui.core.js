@@ -180,7 +180,7 @@ UI = {
         $(this.currentSegment).trigger('copySourceToTarget');
 	},
     clearMarks: function (str) {
-        str = str.replace('<mark class="inGlossary">', '').replace('</mark>', '');
+        str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
         return str;
     },
     highlightEditarea: function(seg) {
