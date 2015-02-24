@@ -211,7 +211,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
      * @return Engine_EngineStruct
      * @throws Exception
      */
-    public static function sanitize( $input ) {
+    public function sanitize( $input ) {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
