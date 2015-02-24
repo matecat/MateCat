@@ -377,6 +377,12 @@ margin-top: 2px;
 float: left;
 }
 
+.tm-mgmt {
+	padding: 0;
+	margin:0;
+	text-decoration: underline;
+}
+
 .fileinput-button input {
   position: absolute;
   top: 0;
@@ -573,7 +579,8 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 	{
 	margin: 0;
 	}
-.translate-box select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0}
+.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0}
+.mgmt-table-mt select {font-size:14px;}
 .upload-input{width:95%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
 {
