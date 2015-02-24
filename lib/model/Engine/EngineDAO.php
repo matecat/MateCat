@@ -113,6 +113,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         $where_conditions[ ] = "id = " . (int)$obj->id;
+        $where_conditions[ ] = "uid = " . (int)$obj->id;
 
         if ( $obj->active !== null ) {
             $condition    = "active = '%s'";
@@ -156,21 +157,12 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
         $this->_validatePrimaryKey( $obj );
 
-        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d %s";
-
-        $uidQuery = '';
-        if( $obj->uid !== null ) {
-            $uidQuery = 'and uid = %d';
-            $uidQuery = sprintf(
-                    $uidQuery,
-                    $obj->uid
-            );
-        }
+        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d and uid = %d";
 
         $query = sprintf(
                 $query,
                 $obj->id,
-                $uidQuery
+                $obj->uid
         );
 
 
@@ -264,6 +256,10 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
     protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
         if ( $obj->id === null ) {
             throw new Exception( "Engine ID required" );
+        }
+
+        if ( $obj->uid === null ) {
+            throw new Exception( "User's uid required" );
         }
     }
 
