@@ -161,8 +161,7 @@ UI = {
         }
 	},
 	copySource: function() {
-
-		var source_val = $.trim($(".source", this.currentSegment).html());
+		var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 //		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
@@ -180,7 +179,11 @@ UI = {
 		this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
 	},
-	highlightEditarea: function(seg) {
+    clearMarks: function (str) {
+        str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
+        return str;
+    },
+    highlightEditarea: function(seg) {
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
 		setTimeout(function() {
