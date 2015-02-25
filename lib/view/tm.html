@@ -51,7 +51,7 @@
                                     <th class="description">Description</th>
                                     <th class="check">Lookup</th>
                                     <th class="check">Update</th>
-                                    <th class="action">Action</th>
+                                    <th class="action">Actions</th>
                                 </tr>
                                 </thead>
 
@@ -72,7 +72,9 @@
                                             <a class="btn-grey pull-left downloadtmx">
                                                 <span class="text">Export TMX</span>
                                             </a>
-                                            <a class="deleteTM" href="#"></a>
+                                            <a class="btn-grey pull-left deleteTM" title="Delete TMX" alt="Delete TMX">
+                                                <span class="text">Delete</span>
+                                            </a>
                                         </td>
                                         <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"></td>
                                     </tr>
@@ -150,7 +152,7 @@
                                         <th class="description">Description</th>
                                         <th class="check">Lookup</th>
                                         <th class="check">Update</th>
-                                        <th class="action">Action</th>
+                                        <th class="action">Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list">
@@ -170,7 +172,8 @@
                                                 <a class="btn-grey pull-left downloadtmx">
                                                     <span class="text">Export TMX</span>
                                                 </a>
-                                                <a class="deleteTM" href="#"></a>
+                                                <a class="btn-grey pull-left deleteTM" title="Delete TMX" alt="Delete TMX">
+                                                <span class="text">Delete</span></a>
                                             </td>
                                         </tr>
                                     </tal:block>
@@ -184,13 +187,24 @@
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn-grey pull-left addtmx">
-                                                    <span class="text">Import TMX</span>
-                                                </a>
-                                                <a class="btn-grey pull-left downloadtmx">
-                                                    <span class="text">Export TMX</span>
-                                                </a>
-                                                <a class="deleteTM" href="#"></a>
+                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">
+                                                    &nbsp;              
+          <ul class="dropdown pull-left">
+
+            <li>  <a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
+            
+            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
+                                                    <span class="icon-download"></span>Export TMX
+                                                </a></li>
+            <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
+                                               <span class="icon-trash-o"></span>Delete TM
+                                            </a></li>
+           
+        </ul>
+
+</div>
+                                               
                                             </td>
                                         </tr>
                                     </tal:block>
@@ -317,7 +331,36 @@
 
 
 </div>
+<script>
 
+        function DropDown(el) {
+                this.dd = el;
+                this.initEvents();
+            }
+            DropDown.prototype = {
+                initEvents : function() {
+                    var obj = this;
+
+                    obj.dd.on('click', function(event){
+                        $(this).toggleClass('active');
+                        event.stopPropagation();
+                    }); 
+                }
+            }
+
+            $(function() {
+
+                var dd = new DropDown( $('#dd') );
+
+                $(document).click(function() {
+                    // all dropdowns
+                    $('.wrapper-dropdown-5').removeClass('active');
+                });
+
+            });
+
+        
+</script>
 
 </body>
 </html>
