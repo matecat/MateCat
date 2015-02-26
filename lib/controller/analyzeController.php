@@ -324,6 +324,7 @@ class analyzeController extends viewController {
         $this->template->standard_wc_time           = $this->standard_wc_time;
         $this->template->raw_wc_unit                = $this->raw_wc_unit;
         $this->template->project_status             = $this->project_status;
+        $this->template->mt_enabled             = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
         $this->template->num_segments               = $this->num_segments;
         $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
         $this->template->logged_user                = $this->logged_user['short'];
