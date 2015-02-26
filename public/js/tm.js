@@ -717,7 +717,7 @@ $.extend(UI, {
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
-        $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
