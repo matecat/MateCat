@@ -2051,8 +2051,16 @@ UI = {
 //        console.log('status: ', status);
         // add to setTranslation tail
         this.addToSetTranslationTail(id_segment, status, caller);
-        if(!this.executingSetTranslation) this.execSetTranslationTail();
+        console.log(UI.offline);
+        console.log(config.offlineModeEnabled);
 
+        if((this.offline)&&(config.offlineModeEnabled)) {
+            UI.offlineCacheRemaining--;
+            $('#messageBar .remainingSegments').text(UI.offlineCacheRemaining);
+            $(window).trigger('offlineSegmentSave');
+        } else {
+            if(!this.executingSetTranslation) this.execSetTranslationTail();
+        }
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
         console.log('addToSetTranslationTail');
@@ -4015,7 +4023,7 @@ $.extend(UI, {
                 }
             }, 600);
         }).on('offlineON', function(d) {
-            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
+//            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
@@ -5689,7 +5697,9 @@ $.extend(UI, {
 	setContribution: function(segment_id, status, byStatus) {
         console.log('setContribution');
         this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
-        if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        if(!this.offline) {
+            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        }
     },
     addToSetContributionTail: function (operation, segment_id, status, byStatus) {
         console.log('addToSetContributionTail');
@@ -5789,7 +5799,9 @@ $.extend(UI, {
     setContributionMT: function(segment_id, status, byStatus) {
         console.log('setContribution');
         this.addToSetContributionTail('setContributionMT', segment_id, status, byStatus);
-        if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        if(!this.offline) {
+            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        }
     },
     execSetContributionMT: function(segment_id, status, byStatus) {
         console.log('execSetContribution');
@@ -10222,58 +10234,36 @@ $.extend(UI, {
  Component: ui.offline
  */
 if(config.offlineModeEnabled) {
+    UI.offlineCacheSize = 10;
+    UI.offlineCacheRemaining = UI.offlineCacheSize
 
     $(window).on('offlineON', function(d) {
         UI.offline = true;
+        UI.body.attr('data-offline-mode', 'light-off');
 //        numUntranslated = $('section.status-new, section.status-draft');
         UI.showMessage({
-            msg: 'No connection available. You can still translate in offline mode until you reach the maximum storage size.'})
+            msg: 'No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+        })
     }).on('offlineOFF', function(d) {
         console.log('offlineOFF');
         UI.offline = false;
+        UI.body.removeAttr('data-offline-mode');
+
         UI.showMessage({
-            msg: "Connection is back. We are saving translated segments in the database."})
-        UI.checkConnection();
+            msg: "Connection is back. We are saving translated segments in the database."
+        })
+//        UI.checkConnection();
     }).on('stillNoConnection', function(d) {
         setTimeout(function() {
             UI.checkConnection();
         }, 30000);
-    })
-
-    $.extend(UI, {
-        failover: function(reqArguments, operation) {
-            console.log('test offline failover on ' + operation);
-            /*
-            if(operation != 'getWarning') {
-                var pendingConnection = {
-                    operation: operation,
-                    args: reqArguments
-                };
-//			console.log('pendingConnection: ', pendingConnection);
-                var dd = new Date();
-                if(pendingConnection.args) {
-                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-                }
-                if(!UI.checkConnectionTimeout) {
-                    UI.checkConnectionTimeout = setTimeout(function() {
-                        UI.checkConnection();
-                        UI.checkConnectionTimeout = false;
-                    }, 5000);
-                }
-            }
-            */
-        }
-    });
-
-}
-/**
- Component: ui.noconnection
- */
-
-if(!config.offlineModeEnabled) {
-
-    $(window).on('offlineON', function(d) {
-
+    }).on('offlineSegmentSave', function(d) {
+        UI.checkOfflineCacheSize();
+    }).on('offlineCacheIsFull', function(d) {
+        $('#messageBar .close').click();
+        UI.offline = false;
+        UI.body.removeAttr('data-offline-mode');
+        UI.blockUIForNoConnection();
     })
 
     $.extend(UI, {
@@ -10323,17 +10313,20 @@ if(!config.offlineModeEnabled) {
                 };
                 UI.abortedOperations.push(pendingConnection);
             }
-            if(!config.offlineModeEnabled) {
-                if(!$('.noConnection').length) {
-                    UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-                    $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
-                }
+            if(!$('.noConnection').length) {
+                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
             }
-
         },
-
+        goOffline: function () {
+            $(window).trigger('offlineON');
+        },
+        goOnline: function () {
+            $(window).trigger('offlineOFF');
+        },
         checkConnection: function() {
             console.log('check connection');
+
             APP.doRequest({
                 data: {
                     action: 'ajaxUtils',
@@ -10346,30 +10339,32 @@ if(!config.offlineModeEnabled) {
                             UI.checkConnection();
                         }, 5000);
                     } else {
-                        if(config.offlineModeEnabled) {
+                        if(UI.offline) {
                             $(window).trigger('stillNoConnection');
                         } else {
                             $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
                             $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
                         }
-
-
                     }
                 },
                 success: function() {
                     console.log('connection is back');
+                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+
+                    /*
                     if(config.offlineModeEnabled) {
                         $(window).trigger('offlineOFF');
                     } else {
                         if(!UI.restoringAbortedOperations) UI.connectionIsBack();
                     }
+                    */
                 }
             });
         },
         connectionIsBack: function() {
-            UI.restoringAbortedOperations = true;
+            this.restoringAbortedOperations = true;
             this.execAbortedOperations();
-            if(!UI.autoFailoverEnabled) {
+            if(!this.autoFailoverEnabled) {
                 $('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
                 setTimeout(function() {
                     $('.noConnection').addClass('reConnection');
@@ -10378,7 +10373,8 @@ if(!config.offlineModeEnabled) {
                     }, 500);
                 }, 3000);
             }
-            UI.restoringAbortedOperations = false;
+            this.restoringAbortedOperations = false;
+            this.execSetTranslationTail();
 
         },
         execAbortedOperations: function() {
@@ -10412,8 +10408,38 @@ if(!config.offlineModeEnabled) {
             });
             UI.abortedOperations = [];
             UI.clearStorage('pending');
+        },
+        checkOfflineCacheSize: function () {
+            if(!UI.offlineCacheRemaining) {
+                console.log('la cache è finita, andate in pace');
+                $(window).trigger('offlineCacheIsFull');
+            }
         }
 
+        /*
+        failover: function(reqArguments, operation) {
+            console.log('test offline failover on ' + operation);
+
+            if(operation != 'getWarning') {
+                var pendingConnection = {
+                    operation: operation,
+                    args: reqArguments
+                };
+//			console.log('pendingConnection: ', pendingConnection);
+                var dd = new Date();
+                if(pendingConnection.args) {
+                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+                }
+                if(!UI.checkConnectionTimeout) {
+                    UI.checkConnectionTimeout = setTimeout(function() {
+                        UI.checkConnection();
+                        UI.checkConnectionTimeout = false;
+                    }, 5000);
+                }
+            }
+
+        }
+        */
     });
 
 }

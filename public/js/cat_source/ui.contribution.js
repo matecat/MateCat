@@ -278,7 +278,9 @@ $.extend(UI, {
 	setContribution: function(segment_id, status, byStatus) {
         console.log('setContribution');
         this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
-        if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        if(!this.offline) {
+            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        }
     },
     addToSetContributionTail: function (operation, segment_id, status, byStatus) {
         console.log('addToSetContributionTail');
@@ -378,7 +380,9 @@ $.extend(UI, {
     setContributionMT: function(segment_id, status, byStatus) {
         console.log('setContribution');
         this.addToSetContributionTail('setContributionMT', segment_id, status, byStatus);
-        if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        if(!this.offline) {
+            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        }
     },
     execSetContributionMT: function(segment_id, status, byStatus) {
         console.log('execSetContribution');

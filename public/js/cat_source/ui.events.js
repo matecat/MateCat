@@ -637,7 +637,7 @@ $.extend(UI, {
                 }
             }, 600);
         }).on('offlineON', function(d) {
-            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
+//            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 

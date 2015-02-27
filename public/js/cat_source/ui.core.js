@@ -2051,8 +2051,16 @@ UI = {
 //        console.log('status: ', status);
         // add to setTranslation tail
         this.addToSetTranslationTail(id_segment, status, caller);
-        if(!this.executingSetTranslation) this.execSetTranslationTail();
+        console.log(UI.offline);
+        console.log(config.offlineModeEnabled);
 
+        if((this.offline)&&(config.offlineModeEnabled)) {
+            UI.offlineCacheRemaining--;
+            $('#messageBar .remainingSegments').text(UI.offlineCacheRemaining);
+            $(window).trigger('offlineSegmentSave');
+        } else {
+            if(!this.executingSetTranslation) this.execSetTranslationTail();
+        }
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
         console.log('addToSetTranslationTail');
