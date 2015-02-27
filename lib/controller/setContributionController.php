@@ -1,12 +1,5 @@
 <?php
-/**
- * Class engine already included in tms.class.php
- * BUT Not remove include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
- * Some PHP Version ( Ex: Debian 5.2.6-1+lenny13 does not work )
- */
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
+
 
 class setContributionController extends ajaxController {
 
@@ -121,7 +114,12 @@ class setContributionController extends ajaxController {
 
         if ( $id_tms != 0 ) {
 
-            $config = TMS::getConfigStruct();
+            $tms = Engine::getInstance( 1 );
+
+            /**
+             * @var $tms Engines_MyMemory
+             */
+            $config = $tms->getConfigStruct();
 
             $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->source );
             $config[ 'translation' ] = CatUtils::view2rawxliff( $this->target );
@@ -133,7 +131,6 @@ class setContributionController extends ajaxController {
             $config[ 'prop' ] = json_encode( CatUtils::getTMProps( $job_data ) );
 
             //instantiate TMS object
-            $tms    = new TMS( $id_tms );
             $result = array();
 
             $this->checkLogin();

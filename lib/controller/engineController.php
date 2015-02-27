@@ -104,6 +104,7 @@ class engineController extends ajaxController {
      * This method adds an engine in a user's keyring
      */
     private function add() {
+
         $newEngine = Engine_EngineStruct::getStruct();
 
         $newEngine->type = "MT";
@@ -112,9 +113,10 @@ class engineController extends ajaxController {
         $validEngine = true;
 
         switch ( $this->provider ) {
-            case 'microsofthub':
-                $newEngine->description = $this->name;
-                $newEngine->others = array(
+            case strtolower( Constants_Engines::MICROSOFT_HUB ):
+                $newEngine->description      = $this->name;
+                $newEngine->class_load       = Constants_Engines::MICROSOFT_HUB;
+                $newEngine->others           = array(
                         'client_id'     => $this->clientID,
                         'client_secret' => $this->clientSecret
                 );

@@ -1,6 +1,6 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setContributionMTController extends ajaxController {

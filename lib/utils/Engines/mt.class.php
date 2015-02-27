@@ -1,7 +1,7 @@
 <?
 
-include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT."/engines/mt_result.class.php";
+include_once INIT::$UTILS_ROOT."/Engines/engine.class.php";
+include_once INIT::$UTILS_ROOT."/Engines/mt_result.class.php";
 
 
 

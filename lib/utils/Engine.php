@@ -1,0 +1,40 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 27/02/15
+ * Time: 11.34
+ * 
+ */
+
+class Engine {
+
+    /**
+     * @param $id
+     *
+     * @return Engines_EngineInterface
+     * @throws Exception
+     */
+    public static function getInstance( $id ) {
+
+        if ( is_null( $id ) || $id == '' ) {
+            throw new Exception( "Missing id engineRecord", -1 );
+        }
+
+        $engineDAO        = new Engine_EngineDAO( Database::obtain() );
+        $engineStruct     = Engine_EngineStruct::getStruct();
+        $engineStruct->id = $id;
+
+        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+        $engineRecord = @$eng[0];
+
+        if ( empty( $engineRecord ) ) {
+            throw new Exception( "Engine $id not found", -2 );
+        }
+
+        $className = 'Engines_' . $engineRecord->class_load;
+        return new $className( $engineRecord );
+
+    }
+
+}

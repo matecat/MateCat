@@ -1,8 +1,8 @@
 <?
 
 error_reporting(E_ALL);
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms_result.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/TMS.php";
 
 
 class TMS extends Engine {

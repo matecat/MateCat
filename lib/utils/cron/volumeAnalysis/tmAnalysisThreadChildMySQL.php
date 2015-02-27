@@ -1,8 +1,8 @@
 <?php
 set_time_limit(0);
 include "main.php";
-include INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include INIT::$UTILS_ROOT . "/engines/tms.class.php";
+include INIT::$UTILS_ROOT . "/Engines/mt.class.php";
+include INIT::$UTILS_ROOT . "/Engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
 
 define("PID_FOLDER", ".pidlist");

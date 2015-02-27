@@ -1,7 +1,5 @@
 <?php
 
-include_once 'Database.class.php';
-
 function doSearchQuery( ArrayObject $queryParams ) {
     $db = Database::obtain();
 

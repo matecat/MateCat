@@ -193,11 +193,11 @@ abstract class DataAccess_AbstractDao {
 
     /**
      * @param $query string
-     * @param $value DataAccess_IDaoStruct
+     * @param $value array
      *
      * @return void|null
      */
-    protected function setInCache($query, $value){
+    protected function setInCache( $query, $value ){
         if($this->cacheTTL == 0 ) return null;
 
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
@@ -220,19 +220,25 @@ abstract class DataAccess_AbstractDao {
      *
      * @return array|mixed
      */
-    protected function fetch_array($query){
-        $_cacheResult = $this->getFromCache($query);
+    protected function fetch_array( $query ) {
+        $_cacheResult = $this->getFromCache( $query );
 
-        if($_cacheResult !== null)
+        if ( $_cacheResult !== false ) {
             return $_cacheResult;
+        }
 
-        $result = $this->con->fetch_array($query);
+        $result = $this->con->fetch_array( $query );
 
-        $this->setInCache($query, $result);
+        $this->setInCache( $query, $result );
 
         return $result;
     }
 
+    /**
+     * @param $array_result array
+     *
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
+     */
     protected abstract function _buildResult( $array_result );
 
 }

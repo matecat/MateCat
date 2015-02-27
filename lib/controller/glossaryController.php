@@ -7,9 +7,9 @@
  * Time: 15.55
  *
  */
-include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
+include_once INIT::$UTILS_ROOT . '/Engines/engine.class.php';
+include_once INIT::$UTILS_ROOT . "/Engines/mt.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class glossaryController extends ajaxController {

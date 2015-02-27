@@ -42,7 +42,9 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                 ( $obj->contribute_relative_url == null ) ? "NULL" : "'" . $obj->contribute_relative_url . "'",
                 ( $obj->delete_relative_url == null ) ? "NULL" : "'" . $obj->delete_relative_url . "'",
                 ( $obj->others == null ) ? "NULL" : "'" . $obj->others . "'",
-                ( $obj->extra_parameters == null ) ? "NULL" : "'" . $obj->extra_parameters . "'",
+
+                //This parameter MUST be set from Engine, Needed to load the right Engine
+                ( $obj->class_load == null ) ? "NULL" : "'" . $obj->class_load . "'",
                 2,
                 //harcoded because we're planning to implement variable penalty
                 ( $obj->penalty == null ) ? "14" : $obj->penalty,
@@ -192,7 +194,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                     'contribute_relative_url'      => $item[ 'contribute_relative_url' ],
                     'delete_relative_url'          => $item[ 'delete_relative_url' ],
                     'others'                       => json_decode( $item[ 'others' ], true ),
-                    'extra_parameters'             => $item[ 'extra_parameters' ],
+                    'class_load'                   => $item[ 'class_load' ],
                     'google_api_compliant_version' => $item[ 'google_api_compliant_version' ],
                     'penalty'                      => $item[ 'penalty' ],
                     'active'                       => $item[ 'active' ],
@@ -228,7 +230,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $con->escape( $input->contribute_relative_url ) : null;
         $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $con->escape( $input->delete_relative_url ) : null;
         $input->others                  = ( $input->others !== null ) ? json_encode( $input->others ) : "{}";
-        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( $input->extra_parameters ) : null;
+        $input->class_load              = ( $input->class_load !== null ) ? $con->escape( $input->class_load ) : null;
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;

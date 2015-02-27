@@ -1,6 +1,6 @@
 <?
 include_once INIT::$UTILS_ROOT."/CatUtils.php";
-
+include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
 
 class TmKeyManagement_LocalAPIKeyService extends Engine {
 

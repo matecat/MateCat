@@ -1,12 +1,6 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
-include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getContributionController extends ajaxController {
 
@@ -136,9 +130,9 @@ class getContributionController extends ajaxController {
 
         $this->tm_keys      = $jobData[ 'tm_keys' ];
 
-        $config = TMS::getConfigStruct();
-
+        $config = array();
         if ( $this->id_tms == 1 ) {
+
             /**
              * MyMemory Enabled
              */
@@ -172,6 +166,11 @@ class getContributionController extends ajaxController {
          */
         if ( isset( $_TMS ) ) {
 
+            /**
+             * @var $tms Engines_MyMemory
+             */
+            $tms = Engine::getInstance( $_TMS );
+
             $config[ 'segment' ]       = $this->text;
             $config[ 'source_lang' ]   = $this->source;
             $config[ 'target_lang' ]   = $this->target;
@@ -179,8 +178,6 @@ class getContributionController extends ajaxController {
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
-
-            $tms = new TMS( $_TMS );
 
             //get job's TM keys
             $this->checkLogin();

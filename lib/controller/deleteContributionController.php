@@ -1,11 +1,11 @@
 <?php
 /**
  * Class engine already included in tms.class.php
- * BUT Not remove include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
+ * BUT Not remove include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
  * Some PHP Version ( Ex: Debian 5.2.6-1+lenny13 does not work )
  */
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
+include_once INIT::$UTILS_ROOT . "/Engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 

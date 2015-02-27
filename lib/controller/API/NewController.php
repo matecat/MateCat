@@ -4,7 +4,7 @@
 //include_once INIT::$UTILS_ROOT . "/API/Upload.php";
 //include_once INIT::$UTILS_ROOT . "/Utils.php";
 
-include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
+include_once INIT::$UTILS_ROOT."/Engines/engine.class.php";
 
 /**
  *
@@ -78,11 +78,11 @@ class NewController extends ajaxController {
 
 		try {
 			if ( $this->tms_engine != 0 ) {
-				include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
+				include_once INIT::$UTILS_ROOT . "/Engines/tms.class.php";
 				$test_valid_TMS = new TMS( $this->tms_engine );
 			}
 			if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-				include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
+				include_once INIT::$UTILS_ROOT . "/Engines/mt.class.php";
 				$test_valid_MT = new MT( $this->mt_engine );
 			}
 		} catch ( Exception $ex ) {

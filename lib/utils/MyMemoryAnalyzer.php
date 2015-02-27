@@ -9,7 +9,7 @@ include_once( INIT::$UTILS_ROOT . "/Utils.php" ); //only for testing purpose
    Thank you for keeping is confidential.
  */
 
-class MyMemoryAnalyzer extends Engine {
+class MyMemoryAnalyzer extends Engines {
 
     public function fastAnalysis( $segs_array ) {
         if ( !is_array( $segs_array ) ) {

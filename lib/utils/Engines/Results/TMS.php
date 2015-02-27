@@ -1,9 +1,6 @@
 <?
 
-include_once INIT::$UTILS_ROOT . "/engines/tms_get_matches.class.php";
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-
-class TMS_RESULT {
+class Engines_Results_TMS {
 
     public $responseStatus = "";
     public $responseDetails = "";
@@ -27,7 +24,7 @@ class TMS_RESULT {
                     $match[ 'raw_translation' ] = $match[ 'translation' ];
                     $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'translation' ] );
 
-                    $currMatch        = new TMS_GET_MATCHES( $match );
+                    $currMatch        = new Engines_Results_MyMemoryMatches( $match );
                     $this->matches[ ] = $currMatch;
                 }
 
@@ -64,4 +61,3 @@ class TMS_RESULT {
     }
 
 }
-?>
