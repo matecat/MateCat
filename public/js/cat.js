@@ -160,26 +160,29 @@ UI = {
             return true;
         }
 	},
-	copySource: function() {
-
-		var source_val = $.trim($(".source", this.currentSegment).html());
+    copySource: function() {
+        var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 //		var source_val = $.trim($(".source", this.currentSegment).text());
-		// Test
-		//source_val = source_val.replace(/&quot;/g,'"');
+        // Test
+        //source_val = source_val.replace(/&quot;/g,'"');
 
-		// Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
-		// I hope it still works.
+        // Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
+        // I hope it still works.
 
-		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).html(source_val).keyup().focus();
+        this.saveInUndoStack('copysource');
+        $(".editarea", this.currentSegment).html(source_val).keyup().focus();
 //		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
-		this.saveInUndoStack('copysource');
+        this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
-		this.highlightEditarea();
+        this.highlightEditarea();
 
-		this.currentSegmentQA();
+        this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
-	},
+    },
+    clearMarks: function (str) {
+        str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
+        return str;
+    },
 	highlightEditarea: function(seg) {
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
@@ -9286,12 +9289,14 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
-        } ).on('click', '.mgmt-tm .downloadtmx', function(){
+        }).on('click', '.mgmt-tm .downloadtmx', function(){
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
             var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
             $(this).parents('tr').first().append(msg);
+        }).on('click', '.mgmt-tm .deleteTM', function(){
+            UI.deleteTM($(this));
         });
 
 
@@ -10226,7 +10231,25 @@ $.extend(UI, {
 
         }
 
-    }
+    },
+    deleteTM: function (button) {
+        tr = $(button).parents('tr').first();
+        $(tr).remove();
+        APP.doRequest({
+            data: {
+                action: 'userKeys',
+                exec: 'delete',
+                key: tr.find('.privatekey').text()
+            },
+            error: function() {
+                console.log('Error deleting TM!!');
+            },
+            success: function(d) {
+
+            }
+        });
+    },
+
 
 });
 

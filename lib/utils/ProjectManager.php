@@ -1215,12 +1215,12 @@ class ProjectManager {
 
                                     if ( $src != $trg && !is_numeric( $src ) ) { //treat 0,1,2.. as translated content!
 
-//                                        $target = CatUtils::placeholdnbsp($target_extract_external['seg']);
+                                        $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
                                         $target = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
-                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => CatUtils::raw2DatabaseXliff( $target ) ) ) );
+                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => $target ) ) );
 
                                         //seg-source and target translation can have different mrk id
                                         //override the seg-source surrounding mrk-id with them of target
@@ -1278,12 +1278,12 @@ class ProjectManager {
 
                                 if ( $xliff_trans_unit[ 'source' ][ 'raw-content' ] != $target_extract_external[ 'seg' ] ) {
 
-//                                    $target = CatUtils::placeholdnbsp( $target_extract_external[ 'seg' ] );
-                                    $target = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
+                                    $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
+                                    $target = $this->dbHandler->escape( $target );
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
-                                    $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => CatUtils::raw2DatabaseXliff( $target ) ) ) );
+                                    $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => $target ) ) );
 
                                 }
 

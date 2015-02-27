@@ -1509,6 +1509,10 @@ top: 17%;
     /*display: none !important; */
 }
 
+.mgmt-tm .deleteTM:before {
+    content: "\f014";
+}
+
 tr.mine.ui-sortable-helper {
 border-bottom: 1px solid #ccc;
 border-left:1px solid #ccc;
@@ -2427,8 +2431,12 @@ cursor: pointer;
 	width: 98%;
 }
 
-
-
+.error-type th.tleft {
+    text-align:left;
+}
+.error-type th a {
+    text-align:center;
+}
 
 .error-type tbody {
 border: 1px solid #efefef;
