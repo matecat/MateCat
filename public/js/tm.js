@@ -23,13 +23,13 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-        $(".mgmt-tm").click(function(e) {
-            e.preventDefault();
-            $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
-            $(".mgmt-table-mt").hide();
-            $(".mgmt-table-tm").show();
-        });
+        //$(".mgmt-tm").click(function(e) {
+        //    e.preventDefault();
+        //    $(this).addClass("active");
+        //    $(".mgmt-mt").removeClass("active");
+        //    $(".mgmt-table-mt").hide();
+        //    $(".mgmt-table-tm").show();
+        //});
         $(".tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");

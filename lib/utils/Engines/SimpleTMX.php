@@ -1,12 +1,10 @@
 <?
 
-include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
-
-class TmKeyManagement_SimpleTMX extends Engine {
+class Engines_SimpleTMX extends Engines_MyMemory {
 
 
-    public function __construct( $id ) {
-        parent::__construct( $id );
+    public function __construct( $engineRecord ) {
+        parent::__construct($engineRecord);
     }
 
     public function import( $file, $key, $name = false ) {
@@ -18,10 +16,12 @@ class TmKeyManagement_SimpleTMX extends Engine {
 
         $postFields[ 'key' ] = trim( $key );
 
-        //query db
-        $this->doQuery( 'tmx_import', $postFields, true );
+        $curl_post_option = array(
+                CURLOPT_POSTFIELDS => $postFields
+        );
+        $this->call( $this->engineRecord->base_url. "/" . $this->engineRecord->tmx_import_relative_url, $curl_post_option, true );
 
-        return $this->raw_result;
+        return $this->result;
     }
 
     public function getStatus( $key, $name = false ) {

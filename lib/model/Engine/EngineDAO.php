@@ -179,6 +179,11 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return null;
     }
 
+    /**
+     * @param array $array_result
+     *
+     * @return array|Engine_EngineStruct|Engine_EngineStruct[]
+     */
     protected function _buildResult( $array_result ) {
         $result = array();
 
