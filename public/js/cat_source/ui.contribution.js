@@ -366,6 +366,7 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
+//                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {

@@ -2052,10 +2052,12 @@ UI = {
         console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
+//        console.log('caller: ', caller);
         // add to setTranslation tail
         this.addToSetTranslationTail(id_segment, status, caller);
-        console.log(UI.offline);
-        console.log(config.offlineModeEnabled);
+        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
+//        console.log(UI.offline);
+//        console.log(config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
             UI.offlineCacheRemaining--;
@@ -2158,7 +2160,8 @@ UI = {
 */
 			context: [reqArguments, segment, status],
 			error: function() {
-				UI.failedConnection(this[0], 'setTranslation');
+                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
+                UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
                 console.log('execSetTranslation success');

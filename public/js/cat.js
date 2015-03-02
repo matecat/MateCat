@@ -2052,10 +2052,12 @@ UI = {
         console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
+//        console.log('caller: ', caller);
         // add to setTranslation tail
         this.addToSetTranslationTail(id_segment, status, caller);
-        console.log(UI.offline);
-        console.log(config.offlineModeEnabled);
+        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
+//        console.log(UI.offline);
+//        console.log(config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
             UI.offlineCacheRemaining--;
@@ -2158,7 +2160,8 @@ UI = {
 */
 			context: [reqArguments, segment, status],
 			error: function() {
-				UI.failedConnection(this[0], 'setTranslation');
+                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
+                UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
                 console.log('execSetTranslation success');
@@ -5788,6 +5791,7 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
+//                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
@@ -10313,7 +10317,6 @@ if(config.offlineModeEnabled) {
 
         failedConnection: function(reqArguments, operation) {
             console.log('failed connection');
-            console.log('UI.offline: ', UI.offline);
             if(UI.offline) {
                 $(window).trigger('stillNoConnection');
             } else {

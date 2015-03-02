@@ -58,7 +58,6 @@ if(config.offlineModeEnabled) {
 
         failedConnection: function(reqArguments, operation) {
             console.log('failed connection');
-            console.log('UI.offline: ', UI.offline);
             if(UI.offline) {
                 $(window).trigger('stillNoConnection');
             } else {
