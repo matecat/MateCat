@@ -338,9 +338,9 @@ $.extend(UI, {
             this.log('setContribution6', {});
 			return false;
 		}
-		this.updateContribution(source, target);
+		this.updateContribution(source, target, segment_id, status, byStatus);
 	},
-	updateContribution: function(source, target) {
+	updateContribution: function(source, target, segment_id, status, byStatus) {
 		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
@@ -366,7 +366,7 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
-//                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
+                UI.addToSetContributionTail('setContribution', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
@@ -410,7 +410,11 @@ $.extend(UI, {
 		if (target === '') {
 			return false;
 		}
-		target = view2rawxliff(target);
+        this.updateContributionMT(source, target, segment_id, status, byStatus);
+    },
+    updateContributionMT: function (source, target, segment_id, status, byStatus) {
+        reqArguments = arguments;
+        target = view2rawxliff(target);
 //		var languages = $(segment).parents('article').find('.languages');
 //		var source_lang = $('.source-lang', languages).text();
 //		var target_lang = $('.target-lang', languages).text();
@@ -439,6 +443,7 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
+                UI.addToSetContributionTail('setContributionMT', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {

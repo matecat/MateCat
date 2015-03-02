@@ -1508,10 +1508,11 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
+            console.log('clicking on translated button');
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
-
+            console.log('a');
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
@@ -1532,15 +1533,21 @@ $.extend(UI, {
 					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
+                console.log($(UI.currentSegment).nextAll('section:not(.readonly)').length);
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
-				}
+                }
+
 			}
+            console.log('b');
 			UI.checkHeaviness();
+            console.log('c');
+            console.log('UI.blockButtons: ', UI.blockButtons);
+            console.log('UI.autoFailoverEnabled: ', UI.autoFailoverEnabled);
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
- //               console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
+                console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {
@@ -1553,18 +1560,25 @@ $.extend(UI, {
  //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
-			UI.blockButtons = true;
+			if(!UI.offline) UI.blockButtons = true;
+            console.log('d');
 
 			UI.unlockTags();
 			UI.setStatusButtons(this);
+            console.log('e');
 
-            if (!skipChange)
+            if (!skipChange) {
+                console.log('f');
                 UI.changeStatus(this, 'translated', 0);
+                console.log('g');
+            }
 
 			if (w == 'translated') {
-				UI.gotoNextSegment();
+                console.log('h');
+                UI.gotoNextSegment();
 			} else {
-				$(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
+                console.log('i');
+                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
 //			UI.markTags();
@@ -1577,7 +1591,9 @@ $.extend(UI, {
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-		}).on('click', 'a.approved', function() {
+            console.log('l');
+
+        }).on('click', 'a.approved', function() {
 /*
 			UI.setStatusButtons(this);
 			$(".editarea", UI.nextUntranslatedSegment).click();

@@ -28,13 +28,23 @@ if(config.offlineModeEnabled) {
     }).on('offlineSegmentSave', function(d) {
         UI.checkOfflineCacheSize();
     }).on('offlineCacheIsFull', function(d) {
-        $('#messageBar .close').click();
-        UI.offline = false;
-        UI.body.removeAttr('data-offline-mode');
+        UI.closeOfflineMode('total');
         UI.blockUIForNoConnection();
     })
 
     $.extend(UI, {
+        closeOfflineMode: function (from) {
+            if(this.offline) {
+                UI.showMessage({
+                    msg: "Connection is back. We are saving translated segments in the database."
+                })
+                setTimeout(function() {
+                    $('#messageBar .close').click();
+                }, 10000);
+                UI.offline = false;
+                UI.body.removeAttr('data-offline-mode');
+            }
+        },
         failover: function(reqArguments, operation) {
             console.log('failover on ' + operation);
             if(operation != 'getWarning') {
@@ -55,10 +65,9 @@ if(config.offlineModeEnabled) {
                 }
             }
         },
-
         failedConnection: function(reqArguments, operation) {
             console.log('failed connection');
-            if(UI.offline) {
+            if(this.offline) {
                 $(window).trigger('stillNoConnection');
             } else {
                 $(window).trigger({
@@ -115,7 +124,7 @@ if(config.offlineModeEnabled) {
                     }
                 },
                 success: function() {
-                    console.log('connection is back');
+                    console.log('check connection success');
                     if(!UI.restoringAbortedOperations) UI.connectionIsBack();
 
                     /*
@@ -129,6 +138,8 @@ if(config.offlineModeEnabled) {
             });
         },
         connectionIsBack: function() {
+            console.log('connection is back');
+            if(this.offline) this.closeOfflineMode('light');
             this.restoringAbortedOperations = true;
             this.execAbortedOperations();
             if(!this.autoFailoverEnabled) {

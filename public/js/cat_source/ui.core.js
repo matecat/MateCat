@@ -2060,12 +2060,40 @@ UI = {
 //        console.log(config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
-            UI.offlineCacheRemaining--;
-            $('#messageBar .remainingSegments').text(UI.offlineCacheRemaining);
-            $(window).trigger('offlineSegmentSave');
+            this.decrementOfflineCacheRemaining();
+            this.changeStatusOffline(id_segment);
         } else {
             if(!this.executingSetTranslation) this.execSetTranslationTail();
         }
+    },
+    changeStatusOffline: function (sid) {
+        if($('#segment-' + sid + ' .editarea').text() != '') {
+            $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
+        }
+    },
+    decrementOfflineCacheRemaining: function () {
+        this.offlineCacheRemaining--;
+/*
+        console.log('this.offlineCacheRemaining: ', this.offlineCacheRemaining);
+        console.log('messageBar 1: ', $('#messageBar').text());
+        $( '#messageBar .remainingSegments' ).ready(function() {
+            console.log('messageBar 2: ', $('#messageBar').text());
+        });
+*/
+/*
+        //da provare:
+
+        this.decrementOfflineCacheRemaining = this.decrementOfflineCacheRemaining || 0;
+        if($('#messageBar .remainingSegments').text == '') {
+            this.decrementOfflineCacheRemaining++;
+        } else {
+            this.offlineCacheRemaining = this.offlineCacheRemaining - this.decrementOfflineCacheRemaining;
+            this.decrementOfflineCacheRemaining = null;
+//            $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
+        }
+*/
+        $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
+        $(window).trigger('offlineSegmentSave');
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
         console.log('addToSetTranslationTail');
@@ -2161,8 +2189,10 @@ UI = {
 			context: [reqArguments, segment, status],
 			error: function() {
                 UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
+                UI.changeStatusOffline(this[0][0]);
                 UI.failedConnection(this[0], 'setTranslation');
-			},
+                UI.decrementOfflineCacheRemaining();
+            },
 			success: function(d) {
                 console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;

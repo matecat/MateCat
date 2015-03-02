@@ -2060,12 +2060,40 @@ UI = {
 //        console.log(config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
-            UI.offlineCacheRemaining--;
-            $('#messageBar .remainingSegments').text(UI.offlineCacheRemaining);
-            $(window).trigger('offlineSegmentSave');
+            this.decrementOfflineCacheRemaining();
+            this.changeStatusOffline(id_segment);
         } else {
             if(!this.executingSetTranslation) this.execSetTranslationTail();
         }
+    },
+    changeStatusOffline: function (sid) {
+        if($('#segment-' + sid + ' .editarea').text() != '') {
+            $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
+        }
+    },
+    decrementOfflineCacheRemaining: function () {
+        this.offlineCacheRemaining--;
+/*
+        console.log('this.offlineCacheRemaining: ', this.offlineCacheRemaining);
+        console.log('messageBar 1: ', $('#messageBar').text());
+        $( '#messageBar .remainingSegments' ).ready(function() {
+            console.log('messageBar 2: ', $('#messageBar').text());
+        });
+*/
+/*
+        //da provare:
+
+        this.decrementOfflineCacheRemaining = this.decrementOfflineCacheRemaining || 0;
+        if($('#messageBar .remainingSegments').text == '') {
+            this.decrementOfflineCacheRemaining++;
+        } else {
+            this.offlineCacheRemaining = this.offlineCacheRemaining - this.decrementOfflineCacheRemaining;
+            this.decrementOfflineCacheRemaining = null;
+//            $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
+        }
+*/
+        $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
+        $(window).trigger('offlineSegmentSave');
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
         console.log('addToSetTranslationTail');
@@ -2161,8 +2189,10 @@ UI = {
 			context: [reqArguments, segment, status],
 			error: function() {
                 UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
+                UI.changeStatusOffline(this[0][0]);
                 UI.failedConnection(this[0], 'setTranslation');
-			},
+                UI.decrementOfflineCacheRemaining();
+            },
 			success: function(d) {
                 console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;
@@ -4900,10 +4930,11 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
+            console.log('clicking on translated button');
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
-
+            console.log('a');
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
@@ -4924,15 +4955,21 @@ $.extend(UI, {
 					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
+                console.log($(UI.currentSegment).nextAll('section:not(.readonly)').length);
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
-				}
+                }
+
 			}
+            console.log('b');
 			UI.checkHeaviness();
+            console.log('c');
+            console.log('UI.blockButtons: ', UI.blockButtons);
+            console.log('UI.autoFailoverEnabled: ', UI.autoFailoverEnabled);
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
- //               console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
+                console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {
@@ -4945,18 +4982,25 @@ $.extend(UI, {
  //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
-			UI.blockButtons = true;
+			if(!UI.offline) UI.blockButtons = true;
+            console.log('d');
 
 			UI.unlockTags();
 			UI.setStatusButtons(this);
+            console.log('e');
 
-            if (!skipChange)
+            if (!skipChange) {
+                console.log('f');
                 UI.changeStatus(this, 'translated', 0);
+                console.log('g');
+            }
 
 			if (w == 'translated') {
-				UI.gotoNextSegment();
+                console.log('h');
+                UI.gotoNextSegment();
 			} else {
-				$(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
+                console.log('i');
+                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
 //			UI.markTags();
@@ -4969,7 +5013,9 @@ $.extend(UI, {
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-		}).on('click', 'a.approved', function() {
+            console.log('l');
+
+        }).on('click', 'a.approved', function() {
 /*
 			UI.setStatusButtons(this);
 			$(".editarea", UI.nextUntranslatedSegment).click();
@@ -5763,9 +5809,9 @@ $.extend(UI, {
             this.log('setContribution6', {});
 			return false;
 		}
-		this.updateContribution(source, target);
+		this.updateContribution(source, target, segment_id, status, byStatus);
 	},
-	updateContribution: function(source, target) {
+	updateContribution: function(source, target, segment_id, status, byStatus) {
 		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
@@ -5791,7 +5837,7 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
-//                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
+                UI.addToSetContributionTail('setContribution', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
@@ -5835,7 +5881,11 @@ $.extend(UI, {
 		if (target === '') {
 			return false;
 		}
-		target = view2rawxliff(target);
+        this.updateContributionMT(source, target, segment_id, status, byStatus);
+    },
+    updateContributionMT: function (source, target, segment_id, status, byStatus) {
+        reqArguments = arguments;
+        target = view2rawxliff(target);
 //		var languages = $(segment).parents('article').find('.languages');
 //		var source_lang = $('.source-lang', languages).text();
 //		var target_lang = $('.target-lang', languages).text();
@@ -5864,6 +5914,7 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
+                UI.addToSetContributionTail('setContributionMT', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
@@ -10287,13 +10338,23 @@ if(config.offlineModeEnabled) {
     }).on('offlineSegmentSave', function(d) {
         UI.checkOfflineCacheSize();
     }).on('offlineCacheIsFull', function(d) {
-        $('#messageBar .close').click();
-        UI.offline = false;
-        UI.body.removeAttr('data-offline-mode');
+        UI.closeOfflineMode('total');
         UI.blockUIForNoConnection();
     })
 
     $.extend(UI, {
+        closeOfflineMode: function (from) {
+            if(this.offline) {
+                UI.showMessage({
+                    msg: "Connection is back. We are saving translated segments in the database."
+                })
+                setTimeout(function() {
+                    $('#messageBar .close').click();
+                }, 10000);
+                UI.offline = false;
+                UI.body.removeAttr('data-offline-mode');
+            }
+        },
         failover: function(reqArguments, operation) {
             console.log('failover on ' + operation);
             if(operation != 'getWarning') {
@@ -10314,10 +10375,9 @@ if(config.offlineModeEnabled) {
                 }
             }
         },
-
         failedConnection: function(reqArguments, operation) {
             console.log('failed connection');
-            if(UI.offline) {
+            if(this.offline) {
                 $(window).trigger('stillNoConnection');
             } else {
                 $(window).trigger({
@@ -10374,7 +10434,7 @@ if(config.offlineModeEnabled) {
                     }
                 },
                 success: function() {
-                    console.log('connection is back');
+                    console.log('check connection success');
                     if(!UI.restoringAbortedOperations) UI.connectionIsBack();
 
                     /*
@@ -10388,6 +10448,8 @@ if(config.offlineModeEnabled) {
             });
         },
         connectionIsBack: function() {
+            console.log('connection is back');
+            if(this.offline) this.closeOfflineMode('light');
             this.restoringAbortedOperations = true;
             this.execAbortedOperations();
             if(!this.autoFailoverEnabled) {
