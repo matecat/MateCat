@@ -1446,8 +1446,8 @@ z-index: 10000;
     list-style: none;
     height: 95%;
     outline: none;
-    /*word-wrap: break-word;*/
-    /*word-break: break-all;*/
+    word-wrap: break-word;
+    word-break: break-all;
 }
 .text a{text-decoration:none;color:#000 }
 
