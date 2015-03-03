@@ -53,24 +53,22 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         }
 
         $result_object = null;
-        switch ( $functionName ) {
+        switch ($functionName){
             case 'api_key_check_auth_url':
-                $result_object = new Engines_Results_AuthKeyResponse( $decoded );
+                $result_object =  new Engines_Results_AuthKeyResponse($decoded);
                 break;
             case 'api_key_create_user_url':
-                $result_object = new Engines_Results_CreateUserResponse( $decoded );
+                $result_object =  new Engines_Results_CreateUserResponse($decoded);
+                break;
+            case 'tmx_import_relative_url':
+            case 'tmx_status_relative_url':
+                $result_object = new Engines_Results_TmxResponse($decoded);
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
-                $result_object = new Engines_Results_ExportResponse( $decoded );
+                $result_object = new Engines_Results_ExportResponse($decoded);
                 break;
-            case
-                'tmx_import_relative_url' :
-                $result_object = new Engines_Results_TmxImportResponse( $decoded );
-                break;
-            case 'tmx_status_relative_url' :
-                $result_object = new Engines_Results_TmxStatusResponse( $decoded );
-                break;
+
             default:
                 $result_object = new Engines_Results_TMS( $decoded );
                 break;
@@ -111,6 +109,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
     public function set( $_config ) {
 
         $parameters               = array();
@@ -138,6 +141,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
     public function delete( $_config ) {
 
         $parameters               = array();
@@ -162,6 +170,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
+    /**
+     * @param $_config
+     *
+     * @return bool
+     */
     public function update( $_config ) {
 
         $parameters               = array();
@@ -185,7 +198,6 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
-    /***********************************************/
 
     public function import( $file, $key, $name = false ) {
 
@@ -252,7 +264,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * Memory Export check for status,
      * <br />invoke with the same parameters of createExport
      *
-     * @see TmKeyManagement_SimpleTMX::createExport
+     * @see Engines_MyMemory::createExport
      * @param      $key
      * @param null $source
      * @param null $target
@@ -293,9 +305,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'key' ] = trim( $key );
         $parameters[ 'pass' ] = trim( $hashPass );
 
-        $this->buildGetQuery( 'tmx_export_download', $parameters );
+//        $this->call( 'tmx_export_download_url', $parameters );
 
-        $parsed_url = parse_url ( $this->url );
+        $url = $this->base_url . "/" .$this->tmx_export_download_url . "?";
+        $url .= http_build_query( $parameters );;
+
+//        $parsed_url = parse_url ( $this->url );
+        $parsed_url = parse_url ( $url );
 
         $isSSL = stripos( $parsed_url['scheme'], "https" ) !== false;
 
@@ -324,7 +340,8 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $ch = curl_init();
 
         // set URL and other appropriate options
-        curl_setopt( $ch, CURLOPT_URL, $this->url );
+//        curl_setopt( $ch, CURLOPT_URL, $this->url );
+        curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_HEADER, 0 );
         curl_setopt( $ch, CURLOPT_FILE, $handle ); // write curl response to file
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );

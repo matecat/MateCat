@@ -6,7 +6,7 @@
  * Time: 15.33
  */
 
-class Engines_Results_TmxStatusResponse extends Engines_Results_AbstractResponse{
+class Engines_Results_TmxResponse extends Engines_Results_AbstractResponse{
 
     //response example: {"responseStatus":"202","responseData":{"id":495779}}
 
@@ -15,7 +15,13 @@ class Engines_Results_TmxStatusResponse extends Engines_Results_AbstractResponse
     public function __construct($response){
         $this->responseStatus = $response['responseStatus'];
         $this->responseData = $response['responseData'];
-        $this->id = $response['id'];
+
+        if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
+            $this->id = $response[ 'id' ];
+        }
+        else {
+            Log::doLog($response);
+        }
     }
 
 } 

@@ -21,6 +21,9 @@ class glossaryController extends ajaxController {
     private $translation;
     private $comment;
     private $automatic;
+    /**
+     * @var Engines_MyMemory
+     */
     private $_TMS;
     private $job_info;
 
@@ -59,16 +62,16 @@ class glossaryController extends ajaxController {
         /**
          * For future reminder
          *
-         * MyMemory should not be the only Glossary provider
+         * MyMemory (id=1) should not be the only Glossary provider
          *
          */
-        $this->_TMS = new TMS( 1 /* MyMemory */ );
+        $this->_TMS = Engine::getInstance( 1 );
 
         $this->checkLogin();
 
         try {
 
-            $config = TMS::getConfigStruct();
+            $config = $this->_TMS->getConfigStruct();
 
             $config[ 'segment' ]     = $this->segment;
             $config[ 'translation' ] = $this->translation;
