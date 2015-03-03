@@ -9,9 +9,10 @@
 
 interface Engines_EngineInterface {
 
-    public function get( $config );
-    public function set( $config );
-    public function update( $config );
-    public function delete( $config );
+    public function get( $_config );
+    public function set( $_config );
+    public function update( $_config );
+    public function delete( $_config );
+    public function getConfigStruct();
 
 }

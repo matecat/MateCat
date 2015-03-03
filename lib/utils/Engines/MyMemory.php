@@ -13,8 +13,8 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             'segment'       => null,
             'translation'   => null,
             'tnote'         => null,
-            'source_lang'   => null,
-            'target_lang'   => null,
+            'source'        => null,
+            'target'        => null,
             'email'         => null,
             'prop'          => null,
             'get_mt'        => 1,
@@ -55,7 +55,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $parameters               = array();
         $parameters[ 'q' ]        = $_config[ 'segment' ];
-        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]   = $_config[ 'num_result' ];
@@ -84,7 +84,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
-        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
 
@@ -110,7 +110,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
@@ -134,7 +134,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
 
@@ -143,7 +143,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             $parameters['key'] = implode(",", $_config['id_user']);
         }
 
-        $this->call( "gloss_update_relative_url" , $parameters);
+        $this->call( "gloss_update_relative_url" , $parameters );
 
         if ($this->result->responseStatus != "200") {
             return false;

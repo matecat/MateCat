@@ -73,8 +73,8 @@ class glossaryController extends ajaxController {
             $config[ 'segment' ]     = $this->segment;
             $config[ 'translation' ] = $this->translation;
             $config[ 'tnote' ]       = $this->comment;
-            $config[ 'source_lang' ] = $this->job_info[ 'source' ];
-            $config[ 'target_lang' ] = $this->job_info[ 'target' ];
+            $config[ 'source' ]      = $this->job_info[ 'source' ];
+            $config[ 'target' ]      = $this->job_info[ 'target' ];
             $config[ 'email' ]       = "demo@matecat.com";
             $config[ 'id_user' ]     = $this->job_info[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;

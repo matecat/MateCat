@@ -123,8 +123,8 @@ class setContributionController extends ajaxController {
 
             $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->source );
             $config[ 'translation' ] = CatUtils::view2rawxliff( $this->target );
-            $config[ 'source_lang' ] = $this->source_lang;
-            $config[ 'target_lang' ] = $this->target_lang;
+            $config[ 'source' ]      = $this->source_lang;
+            $config[ 'target' ]      = $this->target_lang;
             $config[ 'email' ]       = "demo@matecat.com";
 
             //Props

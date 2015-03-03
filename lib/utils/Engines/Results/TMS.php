@@ -57,7 +57,7 @@ class Engines_Results_TMS {
     }
 
     public function get_as_array() {
-        return ((array) $this);
+        return (array) $this;
     }
 
 }

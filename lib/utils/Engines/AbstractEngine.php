@@ -116,12 +116,26 @@ abstract class Engines_AbstractEngine {
         }
 
         $rawValue = $this->_call( $url, $curl_opt );
-        $this->result = $this->_decode( $rawValue );
+
+        /*
+         * $parameters['segment'] is used in MT engines,
+         * they does not return original segment, only the translation.
+         * Taken when needed as "variadic function parameter" ( func_get_args )
+        */
+        $this->result = $this->_decode( $rawValue, $parameters );
 
     }
 
     public function getConfigStruct(){
         return $this->_config;
+    }
+
+    public function getPenalty() {
+        return $this->engineRecord->penalty;
+    }
+
+    public function getName() {
+        return $this->engineRecord->name;
     }
 
 }

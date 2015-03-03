@@ -172,8 +172,8 @@ class getContributionController extends ajaxController {
             $tms = Engine::getInstance( $_TMS );
 
             $config[ 'segment' ]       = $this->text;
-            $config[ 'source_lang' ]   = $this->source;
-            $config[ 'target_lang' ]   = $this->target;
+            $config[ 'source' ]        = $this->source;
+            $config[ 'target' ]        = $this->target;
             $config[ 'email' ]         = "demo@matecat.com";
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
@@ -206,27 +206,26 @@ class getContributionController extends ajaxController {
             $tms_match = $tms_match->get_matches_as_array();
         }
 
-        $mt_res   = array();
-        $mt_match = "";
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
-            $mt        = new MT( $this->id_mt_engine );
-            $mt_result = $mt->get( $this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
+            /**
+             * @var $mt Engines_Moses
+             */
+            $mt        = Engine::getInstance( $this->id_mt_engine );
 
-            if ( $mt_result->error->code < 0 ) {
-                $mt_match = '';
-            } else {
-                $mt_match = $mt_result->translatedText;
-                $penalty  = $mt->getPenalty();
-                $mt_score = 100 - $penalty;
-                $mt_score .= "%";
+            $config = $mt->getConfigStruct();
+            $config[ 'segment' ] = $this->text;
+            $config[ 'source' ]  = $this->source;
+            $config[ 'target' ]  = $this->target;
+            $config[ 'id_user' ] = "demo@matecat.com";
+            $config[ 'segid' ]   = $this->id_segment;
 
-                $mt_match_res = new TMS_GET_MATCHES( $this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date( "Y-m-d" ) );
+            $mt_result = $mt->get( $config );
 
-                $mt_res                          = $mt_match_res->get_as_array();
-                $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
-
+            if ( $mt_result['error']['code'] < 0 ) {
+                $mt_result = false;
             }
+
         }
         $matches = array();
 
@@ -234,8 +233,8 @@ class getContributionController extends ajaxController {
             $matches = $tms_match;
         }
 
-        if ( !empty( $mt_match ) ) {
-            $matches[ ] = $mt_res;
+        if ( !empty( $mt_result ) ) {
+            $matches[ ] = $mt_result;
             usort( $matches, array( "getContributionController", "__compareScore" ) );
             //this is necessary since usort sorts is ascending order, thus inverting the ranking
             $matches = array_reverse( $matches );
