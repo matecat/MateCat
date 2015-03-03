@@ -37,6 +37,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         }
     }
 
+    /**
+     * @param $rawValue
+     *
+     * @return Engines_Results_AbstractResponse
+     */
     protected function _decode( $rawValue ){
         $args = func_get_args();
         $functionName = $args[2];
@@ -55,8 +60,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             case 'api_key_create_user_url':
                 $result_object =  new Engines_Results_CreateUserResponse($decoded);
                 break;
+            case 'tmx_export_create_url' :
+            case 'tmx_export_check_url' :
+                $result_object = new Engines_Results_ExportResult($decoded);
+                break;
             default:
-                $result_object = new Engines_Results_TMS( $decoded );;
+                $result_object = new Engines_Results_TMS( $decoded );
                 break;
         }
 
@@ -238,13 +247,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * <br />invoke with the same parameters of createExport
      *
      * @see TmKeyManagement_SimpleTMX::createExport
-     *
      * @param      $key
      * @param null $source
      * @param null $target
      * @param null $strict
      *
-     * @return array
+     * @return mixed
      */
     public function checkExport(  $key, $source = null, $target = null, $strict = null  ){
 
