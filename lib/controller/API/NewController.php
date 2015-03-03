@@ -1,11 +1,5 @@
 <?php
 
-//NO More needed
-//include_once INIT::$UTILS_ROOT . "/API/Upload.php";
-//include_once INIT::$UTILS_ROOT . "/Utils.php";
-
-include_once INIT::$UTILS_ROOT."/Engines/engine.class.php";
-
 /**
  *
  * Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol
@@ -78,12 +72,10 @@ class NewController extends ajaxController {
 
 		try {
 			if ( $this->tms_engine != 0 ) {
-				include_once INIT::$UTILS_ROOT . "/Engines/tms.class.php";
-				$test_valid_TMS = new TMS( $this->tms_engine );
+				$test_valid_TMS = Engine::getInstance( $this->tms_engine );
 			}
 			if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-				include_once INIT::$UTILS_ROOT . "/Engines/mt.class.php";
-				$test_valid_MT = new MT( $this->mt_engine );
+				$test_valid_MT = Engine::getInstance( $this->mt_engine );
 			}
 		} catch ( Exception $ex ) {
 			$this->api_output[ 'message' ] = $ex->getMessage();

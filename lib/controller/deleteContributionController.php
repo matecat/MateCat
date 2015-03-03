@@ -77,7 +77,9 @@ class deleteContributionController extends ajaxController {
         $this->tm_keys      = $job_data[ 'tm_keys' ];
         $this->checkLogin();
 
-        $config = TMS::getConfigStruct();
+        $tms = Engine::getInstance( $job_data['id_tms'] );
+        $config = $tms->getConfigStruct();
+//        $config = TMS::getConfigStruct();
 
         $config[ 'segment' ]       = CatUtils::view2rawxliff( $this->source );
         $config[ 'translation' ]   = CatUtils::view2rawxliff( $this->target );
@@ -85,9 +87,6 @@ class deleteContributionController extends ajaxController {
         $config[ 'target' ]        = $this->target_lang;
         $config[ 'email' ]         = "demo@matecat.com";
         $config[ 'id_user' ]       = array();
-
-
-        $tms = new TMS( $job_data['id_tms'] );
 
         //get job's TM keys
         try{
