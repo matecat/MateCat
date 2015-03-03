@@ -272,7 +272,12 @@ $.extend(UI, {
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			if(config.mt_enabled) $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+			if((config.mt_enabled)&&(!config.id_translator)) {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+            } else {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
+
+            }
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
