@@ -25,35 +25,12 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
         }
     }
 
-    protected function fixLangCode( $lang ) {
+    protected function _fixLangCode( $lang ) {
 
-        if ( empty( $lang ) or strlen( $lang ) == 2 ) {
-            return strtolower( trim( $lang ) );
-        }
+        $lang = strtolower( trim( $lang ) );
+        $l = explode( "-", $lang );
+        return $l[0];
 
-        $l = strtolower( trim( $lang ) );
-
-        if ( strpos( $l, "en" ) !== false ) {
-            $l = 'en';
-        }
-
-        if ( strpos( $l, "it" ) !== false ) {
-            $l = 'it';
-        }
-
-        if ( strpos( $l, "de" ) !== false ) {
-            $l = 'de';
-        }
-
-        if ( strpos( $l, "fr" ) !== false ) {
-            $l = 'fr';
-        }
-
-        if ( strpos( $l, "es" ) !== false ) {
-            $l = 'es';
-        }
-
-        return $l;
     }
 
     protected function _decode( $rawValue ){
@@ -68,6 +45,12 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
 
         $mt_result = new Engines_Results_MT( $decoded );
 
+        if ( $mt_result->error->code < 0 ) {
+            $mt_result = $mt_result->get_as_array();
+            $mt_result['error'] = (array)$mt_result['error'];
+            return $mt_result;
+        }
+
         $mt_match_res = new Engines_Results_MyMemoryMatches(
                 $all_args[ 1 ][ 'q' ],
                 $mt_result->translatedText,
@@ -80,12 +63,13 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
         $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
 
         return $mt_res;
+
     }
 
     public function get( $_config ) {
 
-        $_config[ 'source' ] = $this->fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
 		$parameters['q'] = $_config[ 'segment' ];
@@ -116,8 +100,8 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
             return true;
         }
 
-        $_config[ 'source' ] = $this->fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters                  = array();
         $parameters[ 'segment' ]     = $_config[ 'segment' ];
@@ -159,8 +143,8 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
             return true;
         }
 
-        $_config[ 'source' ] = $this->fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters                  = array();
         $parameters[ 'segment' ]     = $_config[ 'segment' ];

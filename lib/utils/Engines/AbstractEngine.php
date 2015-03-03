@@ -20,9 +20,21 @@ abstract class Engines_AbstractEngine {
     protected $result;
     protected $error = array();
 
+    protected $curl_additional_params = array();
+
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
         $this->className = get_class( $this );
+
+        $this->curl_additional_params = array(
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
+        );
+
     }
 
     public function __get( $key ) {
@@ -39,47 +51,39 @@ abstract class Engines_AbstractEngine {
 
     protected function _call( $url, Array $curl_options = array() ){
 
-        $default_options = array(
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER         => 0,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
-        );
+            $mh = new MultiCurlHandler();
+            $uniq_uid = uniqid();
 
-        $mh = new MultiCurlHandler();
-        $uniq_uid = uniqid();
+            /*
+             * Append array elements from the second array
+             * to the first array while not overwriting the elements from
+             * the first array and not re-indexing
+             *
+             * Use the + array union operator
+             */
+            $resourceHash = $mh->createResource( $url,
+                    $this->curl_additional_params + $curl_options, $uniq_uid
+            );
+            $mh->multiExec();
 
-        /*
-         * Append array elements from the second array
-         * to the first array while not overwriting the elements from
-         * the first array and not re-indexing
-         *
-         * Use the + array union operator
-         */
-        $resourceHash = $mh->createResource( $url, $curl_options + $default_options, $uniq_uid );
-        $mh->multiExec();
+            if ( $mh->hasError( $resourceHash ) ) {
+                $curl_error = $mh->getError( $resourceHash );
+                Log::doLog( 'Curl Error: ' . $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
+                $rawValue = array(
+                        'error' => array(
+                                'code'    => -$curl_error[ 'errno' ],
+                                'message' => " {$curl_error['error']}. Server Not Available"
+                        )
+                ); //return negative number
+            } else {
+                $rawValue = $mh->getSingleContent( $resourceHash );
+            }
 
-        if ( $mh->hasError( $resourceHash ) ) {
-            $curl_error = $mh->getError( $resourceHash );
-            Log::doLog( 'Curl Error: ' . $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
-            $rawValue = array(
-                    'error' => array(
-                            'code'    => -$curl_error[ 'errno' ],
-                            'message' => " {$curl_error['error']}. Server Not Available"
-                    )
-            ); //return negative number
-        } else {
-            $rawValue = $mh->getSingleContent( $resourceHash );
-        }
+            $mh->multiCurlCloseAll();
 
-        $mh->multiCurlCloseAll();
+            Log::doLog( $uniq_uid . " ... Received... " . $rawValue );
 
-        Log::doLog( $uniq_uid . " ... Received... " . $rawValue );
-
-        return $rawValue;
+            return $rawValue;
 
     }
 
@@ -102,7 +106,6 @@ abstract class Engines_AbstractEngine {
             $url = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
                     CURLOPT_POSTFIELDS => $parameters,
-                    CURLOPT_POST => true,
                     CURLOPT_TIMEOUT => 120
             );
         } else {
@@ -115,45 +118,8 @@ abstract class Engines_AbstractEngine {
             );
         }
 
-//        $rawValue = $this->_call( $url, $curl_opt );
-        $ch = curl_init();
+        $rawValue = $this->_call( $url, $curl_opt );
 
-        curl_setopt( $ch, CURLOPT_URL, $url );
-        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-        curl_setopt( $ch, CURLOPT_USERAGENT, "user agent" );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-
-        //if some postfields are passed, switch to post mode, set parameters and prolong timeout
-        if ( $isPostRequest ) {
-            curl_setopt( $ch, CURLOPT_POST, true );
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, $parameters );
-            curl_setopt( $ch, CURLOPT_TIMEOUT, 120 ); //wait max 2 mins
-        } else {
-            curl_setopt( $ch, CURLOPT_HTTPGET, true );
-            curl_setopt( $ch, CURLOPT_TIMEOUT, 10 ); //we can wait max 10 seconds
-        }
-
-        //if it's an HTTPS call
-        //verify CA in certificate
-        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true );
-        //verify that the common name exists and that it matches the host name of the server
-        curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
-
-        $output     = curl_exec( $ch );
-        $curl_errno = curl_errno( $ch );
-        $curl_error = curl_error( $ch );
-
-        if ( $curl_errno > 0 ) {
-            Log::doLog( 'Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ), true ) );
-            $output = json_encode( array(
-                    'error' => array(
-                            'code' => -$curl_errno, 'message' => " $curl_error. Server Not Available"
-                    )
-            ) ); //return negative number
-        }
-
-        // Chiude la risorsa curl
-        curl_close( $ch );
         /*
          * $parameters['segment'] is used in MT engines,
          * they does not return original segment, only the translation.
@@ -161,8 +127,20 @@ abstract class Engines_AbstractEngine {
          * 
          * Pass the called $function also
         */
-        $this->result = $this->_decode( $output, $parameters, $function );
+        $this->result = $this->_decode( $rawValue, $parameters, $function );
 
+    }
+
+    protected function _setAdditionalCurlParams( Array $curlOptParams = array() ){
+
+        /*
+         * Append array elements from the second array
+         * to the first array while not overwriting the elements from
+         * the first array and not re-indexing
+         *
+         * Use the + array union operator
+         */
+        $this->curl_additional_params = $curlOptParams + $this->curl_additional_params;
     }
 
     public function getConfigStruct(){

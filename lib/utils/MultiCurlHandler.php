@@ -117,7 +117,7 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]               = curl_getinfo( $curl_resource, CURLINFO_SIZE_DOWNLOAD );
             Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
 
-            Log::doLog( curl_getinfo($curl_resource) );
+//            Log::doLog( curl_getinfo($curl_resource) );
 
         }
 

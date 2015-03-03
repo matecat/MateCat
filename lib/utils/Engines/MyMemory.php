@@ -53,22 +53,23 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         }
 
         $result_object = null;
-        switch ($functionName){
+        switch ( $functionName ) {
             case 'api_key_check_auth_url':
-                $result_object =  new Engines_Results_AuthKeyResponse($decoded);
+                $result_object = new Engines_Results_AuthKeyResponse( $decoded );
                 break;
             case 'api_key_create_user_url':
-                $result_object =  new Engines_Results_CreateUserResponse($decoded);
+                $result_object = new Engines_Results_CreateUserResponse( $decoded );
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
-                $result_object = new Engines_Results_ExportResponse($decoded);
+                $result_object = new Engines_Results_ExportResponse( $decoded );
                 break;
-            case 'tmx_import_relative_url':
-                $result_object = new Engines_Results_TmxImportResponse($decoded);
+            case
+                'tmx_import_relative_url' :
+                $result_object = new Engines_Results_TmxImportResponse( $decoded );
                 break;
-            case 'tmx_status_relative_url':
-                $result_object = new Engines_Results_TmxStatusResponse($decoded);
+            case 'tmx_status_relative_url' :
+                $result_object = new Engines_Results_TmxStatusResponse( $decoded );
                 break;
             default:
                 $result_object = new Engines_Results_TMS( $decoded );
@@ -189,13 +190,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
     public function import( $file, $key, $name = false ) {
 
         $postFields = array(
-                'tmx'  => "@" . realpath( $file ) . "filename=" . basename($file) .";type=application/xml",
+                'tmx'  => "@" . realpath( $file ),
                 'name' => $name
         );
 
         $postFields[ 'key' ] = trim( $key );
 
-        Log::doLog($postFields);
         $this->call( "tmx_import_relative_url", $postFields, true );
 
         return $this->result;
