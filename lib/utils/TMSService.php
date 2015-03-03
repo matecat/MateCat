@@ -150,13 +150,13 @@ class TMSService {
     public function tmxUploadStatus() {
 
         //remove spaces because of MyMemory remove them and status check does not works
-        $replace_spaces = str_replace( " ", "_", $this->name );
+        $name_space_replaced = str_replace( " ", "_", $this->name );
 
-        $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $replace_spaces );
+        $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $name_space_replaced );
 
 //        Log::doLog( $allMemories );
 
-        if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
+        if ( $allMemories->responseStatus != "200" || count( $allMemories->responseData[ 'tm' ] ) == 0 ) {
 
             Log::doLog( "Can't find TMX files to check for status" );
 
@@ -168,7 +168,7 @@ class TMSService {
         $current_tm = array();
 
         //scan through memories
-        foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
+        foreach ( $allMemories->responseData[ 'tm' ] as $memory ) {
             //obtain max id
             $tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
 
@@ -260,7 +260,7 @@ class TMSService {
     public function downloadTMX() {
 
         /**
-         * @var $result Engines_Results_ExportResult
+         * @var $result Engines_Results_ExportResponse
          */
         $result = $this->mymemory_engine->createExport( $this->tm_key );
 
@@ -271,7 +271,7 @@ class TMSService {
             do {
 
                 /**
-                 * @var $result Engines_Results_ExportResult
+                 * @var $result Engines_Results_ExportResponse
                  */
                 $result = $this->mymemory_engine->checkExport( $this->tm_key );
 

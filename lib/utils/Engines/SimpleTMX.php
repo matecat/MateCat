@@ -16,9 +16,6 @@ class Engines_SimpleTMX extends Engines_MyMemory {
 
         $postFields[ 'key' ] = trim( $key );
 
-        $curl_post_option = array(
-                CURLOPT_POSTFIELDS => $postFields
-        );
         $this->call( $this->engineRecord->base_url. "/" . $this->engineRecord->tmx_import_relative_url, $curl_post_option, true );
 
         return $this->result;
