@@ -2054,18 +2054,40 @@ UI = {
 //        console.log('status: ', status);
 //        console.log('caller: ', caller);
         // add to setTranslation tail
-        this.addToSetTranslationTail(id_segment, status, caller);
-        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
+        alreadySet = this.alreadyInSetTranslationTail(id_segment);
+        console.log('prova: ', '"' + $('#segment-' + id_segment + ' .editarea').text().trim().length + '"');
+        emptyTranslation = ($('#segment-' + id_segment + ' .editarea').text().trim().length)? false : true;
+        toSave = ((!alreadySet)&&(!emptyTranslation));
+        console.log('alreadySet: ', alreadySet);
+        console.log('emptyTranslation: ', emptyTranslation);
+        console.log('toSave: ', toSave);
+
+        if(toSave) this.addToSetTranslationTail(id_segment, status, caller);
+//        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
+//        this.addToSetTranslationTail(id_segment, status, caller);
+//        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
 //        console.log(UI.offline);
 //        console.log(config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
-            this.decrementOfflineCacheRemaining();
+            if(toSave) this.decrementOfflineCacheRemaining();
             this.changeStatusOffline(id_segment);
+            this.checkConnection();
         } else {
+//            console.log('this.executingSetTranslation: ', this.executingSetTranslation);
             if(!this.executingSetTranslation) this.execSetTranslationTail();
         }
     },
+    alreadyInSetTranslationTail: function (sid) {
+        console.log('qqqq');
+        console.log('UI.setTranslationTail.length: ', UI.setTranslationTail.length);
+        alreadySet = false;
+        $.each(UI.setTranslationTail, function (index) {
+            if(this.id_segment == sid) alreadySet = true;
+        });
+        return alreadySet;
+    },
+
     changeStatusOffline: function (sid) {
         if($('#segment-' + sid + ' .editarea').text() != '') {
             $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
@@ -2073,30 +2095,19 @@ UI = {
     },
     decrementOfflineCacheRemaining: function () {
         this.offlineCacheRemaining--;
-/*
-        console.log('this.offlineCacheRemaining: ', this.offlineCacheRemaining);
-        console.log('messageBar 1: ', $('#messageBar').text());
-        $( '#messageBar .remainingSegments' ).ready(function() {
-            console.log('messageBar 2: ', $('#messageBar').text());
-        });
-*/
-/*
-        //da provare:
-
-        this.decrementOfflineCacheRemaining = this.decrementOfflineCacheRemaining || 0;
+        this.pendingOfflineCacheRemaining = this.pendingOfflineCacheRemaining || 0;
         if($('#messageBar .remainingSegments').text == '') {
-            this.decrementOfflineCacheRemaining++;
+            this.pendingOfflineCacheRemaining++;
         } else {
-            this.offlineCacheRemaining = this.offlineCacheRemaining - this.decrementOfflineCacheRemaining;
-            this.decrementOfflineCacheRemaining = null;
-//            $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
+            this.offlineCacheRemaining = this.offlineCacheRemaining - this.pendingOfflineCacheRemaining;
+            this.pendingOfflineCacheRemaining = null;
         }
-*/
+
         $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
         $(window).trigger('offlineSegmentSave');
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
-        console.log('addToSetTranslationTail');
+//        console.log('addToSetTranslationTail');
         var item = {
             id_segment: id_segment,
             status: status,
@@ -2105,7 +2116,7 @@ UI = {
         this.setTranslationTail.push(item);
     },
     execSetTranslationTail: function () {
-        console.log('execSetTranslationTail');
+//        console.log('execSetTranslationTail');
         if(this.setTranslationTail.length) {
             item = this.setTranslationTail[0];
             this.setTranslationTail.shift();
@@ -2114,7 +2125,7 @@ UI = {
     },
 
     execSetTranslation: function(id_segment, status, caller) {
-        console.log('execSetTranslation');
+//        console.log('execSetTranslation');
         this.executingSetTranslation = true;
         reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
@@ -2194,7 +2205,7 @@ UI = {
                 UI.decrementOfflineCacheRemaining();
             },
 			success: function(d) {
-                console.log('execSetTranslation success');
+//                console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
@@ -3027,8 +3038,10 @@ UI = {
 			if ((tt.length) && (!ss))
 				return;
 		}
+        console.log('currentItem: ', currentItem);
+        console.log('this.editarea.html(): ', this.editarea.html());
 
-		var diff = (typeof currentItem != 'undefined') ? this.dmp.diff_main(currentItem, this.editarea.html())[1][1] : 'null';
+		var diff = (typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main(currentItem, this.editarea.html())[1][1];
 		if (diff == ' selected')
 			return;
 

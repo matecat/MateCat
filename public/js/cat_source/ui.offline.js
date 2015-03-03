@@ -46,7 +46,7 @@ if(config.offlineModeEnabled) {
             }
         },
         failover: function(reqArguments, operation) {
-            console.log('failover on ' + operation);
+//            console.log('failover on ' + operation);
             if(operation != 'getWarning') {
                 var pendingConnection = {
                     operation: operation,
@@ -66,7 +66,7 @@ if(config.offlineModeEnabled) {
             }
         },
         failedConnection: function(reqArguments, operation) {
-            console.log('failed connection');
+//            console.log('failed connection');
             if(this.offline) {
                 $(window).trigger('stillNoConnection');
             } else {
@@ -101,7 +101,7 @@ if(config.offlineModeEnabled) {
             $(window).trigger('offlineOFF');
         },
         checkConnection: function() {
-            console.log('check connection');
+//            console.log('check connection');
 
             APP.doRequest({
                 data: {
@@ -138,7 +138,7 @@ if(config.offlineModeEnabled) {
             });
         },
         connectionIsBack: function() {
-            console.log('connection is back');
+//            console.log('connection is back');
             if(this.offline) this.closeOfflineMode('light');
             this.restoringAbortedOperations = true;
             this.execAbortedOperations();
@@ -152,7 +152,9 @@ if(config.offlineModeEnabled) {
                 }, 3000);
             }
             this.restoringAbortedOperations = false;
+            this.executingSetTranslation = false;
             this.execSetTranslationTail();
+            this.execSetContributionTail();
 
         },
         execAbortedOperations: function() {

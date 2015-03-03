@@ -1512,7 +1512,6 @@ $.extend(UI, {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
-            console.log('a');
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
@@ -1533,7 +1532,6 @@ $.extend(UI, {
 					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
-                console.log($(UI.currentSegment).nextAll('section:not(.readonly)').length);
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
@@ -1541,13 +1539,8 @@ $.extend(UI, {
                 }
 
 			}
-            console.log('b');
 			UI.checkHeaviness();
-            console.log('c');
-            console.log('UI.blockButtons: ', UI.blockButtons);
-            console.log('UI.autoFailoverEnabled: ', UI.autoFailoverEnabled);
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
-                console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {
@@ -1561,37 +1554,31 @@ $.extend(UI, {
 				return;
 			}
 			if(!UI.offline) UI.blockButtons = true;
-            console.log('d');
 
 			UI.unlockTags();
 			UI.setStatusButtons(this);
-            console.log('e');
 
             if (!skipChange) {
-                console.log('f');
                 UI.changeStatus(this, 'translated', 0);
-                console.log('g');
             }
 
 			if (w == 'translated') {
-                console.log('h');
                 UI.gotoNextSegment();
 			} else {
-                console.log('i');
                 $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
 //			UI.markTags();
-            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
-            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+//            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
+//            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
+//            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+//            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-            console.log('l');
+//            console.log('l');
 
         }).on('click', 'a.approved', function() {
 /*
