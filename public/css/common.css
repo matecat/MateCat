@@ -1184,7 +1184,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:370px!important;
+	width:470px!important;
 }
 
 .owner {width: 57px!important;}
@@ -1202,7 +1202,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .action {
 		/*width:22%!important;*/
-		width: 260px!important;
+		width: 160px!important;
 }
 
 
@@ -1745,7 +1745,8 @@ header .searchbox {
     /* Styles */
     /*   border-radius: 0 0 5px 5px;*/
     border: 1px solid rgba(0, 0, 0, 0.2);
-    border-bottom-width: 0;
+    border-bottom: none;
+    border-top:none;
 
     list-style: none;
     transition: all 0.3s ease-out;
@@ -1818,6 +1819,7 @@ header .searchbox {
 
 .wrapper-dropdown-5.active .dropdown {
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
     max-height: 400px;
 }
 
