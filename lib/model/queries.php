@@ -714,7 +714,7 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
         JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) ."'
 
             WHERE segment_translations.id_job = " . (int)$jid . "
-            AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+            AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '".Constants_TranslationStatus::STATUS_APPROVED."')
             AND show_in_cattool = 1
 ";
 

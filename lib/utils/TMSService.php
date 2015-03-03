@@ -2,42 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-/**
- *
- * Class addTMController
- * This class has the responsibility to load a TM into MyMemory
- * whether a tm key is valid or not.<br/>
- *
- * Handled cases:<br/>
- * <ul>
- *  <li>Existing TM        -> tm key provided</li>
- *  <li>Non-existing TM    -> tmx file uploaded</li>
- *  <li>Logged user        -> tm associated to the user and to the job</li>
- *  <li>Non-logged user    -> tm associated to the job</li>
- * </ul>
- * <br/>
- * <b>Error codes and messages:</b><br/>
- * <table>
- *  <tr><th>Conditions</th><th>Code</th><th>Message</th></tr>
- *  <tr>
- *      <td>tm_key not set</td>
- *      <td>-2</td>
- *      <td>Please specify a TM key.</td></tr>
- *  <tr>
- *      <td>Provided tm_key is not valid</td>
- *      <td>-9</td>
- *      <td>Please upload a TMX.</td></tr>
- *  <tr>
- *      <td>File upload failed or file import in MyMemory failed</td>
- *      <td>-15</td>
- *      <td>Cant't load TMX files right now, try later.</td></tr>
- *  <tr>
- *      <td>Invalid key provided while importing a file in MyMemory</td>
- *      <td>-15</td>
- *      <td>Invalid key provided</td></tr>
- * </table>
- *
- */
 class TMSService {
 
     /**
@@ -56,14 +20,9 @@ class TMSService {
     private $file;
 
     /**
-     * @var TmKeyManagement_SimpleTMX
+     * @var Engines_MyMemory
      */
-    private $tmxServiceWrapper;
-
-    /**
-     * @var TmKeyManagement_LocalAPIKeyService
-     */
-    private $apiKeyService;
+    private $mymemory_engine;
 
     /**
      *
@@ -72,10 +31,7 @@ class TMSService {
     public function __construct() {
 
         //get MyMemory service
-        $this->tmxServiceWrapper = new TmKeyManagement_SimpleTMX( 1 );
-
-        //get MyMemory apiKey service
-        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService( 1 );
+        $this->mymemory_engine = Engine::getInstance( 1 );
 
     }
 
@@ -92,7 +48,7 @@ class TMSService {
         //This piece of code need to be executed every time
         try {
 
-           $isValid = $this->apiKeyService->checkCorrectKey( $this->tm_key );
+           $isValid = $this->mymemory_engine->checkCorrectKey( $this->tm_key );
 
         } catch ( Exception $e ) {
 
@@ -115,7 +71,7 @@ class TMSService {
     public function createMyMemoryKey(){
 
         try {
-            $newUser =  $this->apiKeyService->createMyMemoryKey();
+            $newUser =  $this->mymemory_engine->createMyMemoryKey();
         } catch ( Exception $e ){
             //            Log::doLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -7);
@@ -161,7 +117,7 @@ class TMSService {
 
             foreach ( $this->file as $k => $fileInfo ) {
 
-                $importStatus = $this->tmxServiceWrapper->import(
+                $importStatus = $this->mymemory_engine->import(
                         $fileInfo->file_path,
                         $this->tm_key
                 );
@@ -195,7 +151,7 @@ class TMSService {
         //remove spaces because of MyMemory remove them and status check does not works
         $replace_spaces = str_replace( " ", "_", $this->name );
 
-        $allMemories              = $this->tmxServiceWrapper ->getStatus( $this->tm_key, $replace_spaces );
+        $allMemories              = $this->mymemory_engine ->getStatus( $this->tm_key, $replace_spaces );
 
 //        Log::doLog( $allMemories );
 
@@ -302,13 +258,13 @@ class TMSService {
      */
     public function downloadTMX(){
 
-        $result = $this->tmxServiceWrapper->createExport( $this->tm_key );
+        $result = $this->mymemory_engine->createExport( $this->tm_key );
 
         if( @$result['status'] == 'QUEUED' && $result['responseStatus'] == 202 ){
 
             do {
 
-                $result = $this->tmxServiceWrapper->checkExport( $this->tm_key );
+                $result = $this->mymemory_engine->checkExport( $this->tm_key );
 
                 usleep(1500000); // 1.5 seconds
 
@@ -328,7 +284,7 @@ class TMSService {
 
         }
 
-        $resource_pointer = $this->tmxServiceWrapper->downloadExport( $this->tm_key, $pass );
+        $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
 
         return $resource_pointer;
 

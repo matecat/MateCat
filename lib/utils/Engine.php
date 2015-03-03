@@ -26,6 +26,10 @@ class Engine {
         $engineStruct->id = $id;
 
         $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+
+        /**
+         * @var $engineRecord Engine_EngineStruct
+         */
         $engineRecord = @$eng[0];
 
         if ( empty( $engineRecord ) ) {

@@ -86,7 +86,7 @@ abstract class Engines_AbstractEngine {
     public function call( $function, Array $parameters = array(), $isPostRequest = false ){
 
         $this->error = array(); // reset last error
-        if ( !$this->engineRecord[$function] ) {
+        if ( !$this->$function ) {
             Log::doLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = array(
                     'error' => array(
@@ -99,7 +99,7 @@ abstract class Engines_AbstractEngine {
 
         if( $isPostRequest ){
             $function  = strtolower( trim( $function ) );
-            $url = "{$this->engineRecord['base_url']}/" . $this->engineRecord[$function];
+            $url = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
                     CURLOPT_POSTFIELDS => $parameters,
                     CURLOPT_POST => true,
@@ -107,7 +107,7 @@ abstract class Engines_AbstractEngine {
             );
         } else {
             $function  = strtolower( trim( $function ) );
-            $url = "{$this->engineRecord['base_url']}/" . $this->engineRecord[$function] . "?";
+            $url = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
             $url .= http_build_query( $parameters );
             $curl_opt = array(
                     CURLOPT_HTTPGET => true,
@@ -121,8 +121,10 @@ abstract class Engines_AbstractEngine {
          * $parameters['segment'] is used in MT engines,
          * they does not return original segment, only the translation.
          * Taken when needed as "variadic function parameter" ( func_get_args )
+         * 
+         * Pass the called $function also
         */
-        $this->result = $this->_decode( $rawValue, $parameters );
+        $this->result = $this->_decode( $rawValue, $parameters, $function );
 
     }
 
