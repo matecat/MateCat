@@ -60,6 +60,12 @@ class Engine_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements 
      */
     public $class_load;
 
+
+    /**
+     * @var string
+     */
+    public $extra_parameters;
+
     /**
      * @var int
      */

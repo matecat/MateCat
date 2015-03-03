@@ -86,7 +86,7 @@ abstract class Engines_AbstractEngine {
     public function call( $function, Array $parameters = array(), $isPostRequest = false ){
 
         $this->error = array(); // reset last error
-        if ( !$this->$function && 0) {
+        if ( !$this->$function ) {
             Log::doLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = array(
                     'error' => array(

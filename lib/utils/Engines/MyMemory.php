@@ -183,7 +183,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
     public function import( $file, $key, $name = false ) {
 
         $postFields = array(
-                'tmx'  => "@" . realpath( $file ),
+                'tmx'  => "@" . realpath( $file ) . "filename=" . basename($file) .";type=application/xml",
                 'name' => $name
         );
 

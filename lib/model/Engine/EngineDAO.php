@@ -25,8 +25,8 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
         $query = "INSERT INTO " . self::TABLE .
                 " ( name, type, description, base_url, translate_relative_url, contribute_relative_url,
-                delete_relative_url, others, extra_parameters, google_api_compliant_version, penalty, active, uid)
-                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE
+                delete_relative_url, others, extra_parameters, class_load, google_api_compliant_version, penalty, active, uid)
+                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE
                         active = VALUES(active),
                         others = VALUES(others),
                         name = VALUES(name)
@@ -43,8 +43,11 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                 ( $obj->delete_relative_url == null ) ? "NULL" : "'" . $obj->delete_relative_url . "'",
                 ( $obj->others == null ) ? "NULL" : "'" . $obj->others . "'",
 
+                ( $obj->extra_parameters == null ) ? "NULL" : "'" . $obj->extra_parameters . "'",
+
                 //This parameter MUST be set from Engine, Needed to load the right Engine
                 ( $obj->class_load == null ) ? "NULL" : "'" . $obj->class_load . "'",
+
                 2,
                 //harcoded because we're planning to implement variable penalty
                 ( $obj->penalty == null ) ? "14" : $obj->penalty,
@@ -127,6 +130,11 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
             $set_array[ ] = sprintf( $condition, $obj->others );
         }
 
+        if ( $obj->extra_parameters !== null ) {
+            $condition    = "extra_parameters = '%s'";
+            $set_array[ ] = sprintf( $condition, $obj->extra_parameters );
+        }
+
         if ( $obj->name !== null ) {
             $condition    = "name = '%s'";
             $set_array[ ] = sprintf( $condition, $obj->name );
@@ -199,6 +207,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                     'contribute_relative_url'      => $item[ 'contribute_relative_url' ],
                     'delete_relative_url'          => $item[ 'delete_relative_url' ],
                     'others'                       => json_decode( $item[ 'others' ], true ),
+                    'extra_parameters'             => json_decode( $item[ 'extra_parameters' ] ),
                     'class_load'                   => $item[ 'class_load' ],
                     'google_api_compliant_version' => $item[ 'google_api_compliant_version' ],
                     'penalty'                      => $item[ 'penalty' ],
@@ -236,6 +245,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $con->escape( $input->delete_relative_url ) : null;
         $input->others                  = ( $input->others !== null ) ? json_encode( $input->others ) : "{}";
         $input->class_load              = ( $input->class_load !== null ) ? $con->escape( $input->class_load ) : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( $input->extra_parameters ) : null;
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;

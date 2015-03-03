@@ -21,7 +21,7 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
     public function __construct($engineRecord) {
         parent::__construct($engineRecord);
         if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a TMS engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
         }
     }
 

@@ -102,6 +102,7 @@ class MultiCurlHandler {
 
         do {
             curl_multi_exec( $this->multi_handler, $still_running );
+            curl_multi_select( $this->multi_handler ); //Prevent eating CPU
         } while ( $still_running > 0 );
 
         foreach ( $this->curl_handlers as $tokenHash => $curl_resource ) {

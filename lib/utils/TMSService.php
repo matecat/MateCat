@@ -48,7 +48,7 @@ class TMSService {
         //This piece of code need to be executed every time
         try {
 
-//            $isValid = $this->mymemory_engine->checkCorrectKey( $this->tm_key );
+            $isValid = $this->mymemory_engine->checkCorrectKey( $this->tm_key );
 
         } catch ( Exception $e ) {
 
@@ -119,7 +119,8 @@ class TMSService {
 
                 $importStatus = $this->mymemory_engine->import(
                         $fileInfo->file_path,
-                        $this->tm_key
+                        $this->tm_key,
+                        $fileInfo->name
                 );
 
                 //check for errors during the import
