@@ -9200,6 +9200,7 @@ $.extend(UI, {
                 UI.filterInactiveTM($('#filterInactive').val());
             }
         }).on('click', '.mgmt-tm .downloadtmx', function(){
+            if($(this).hasClass('downloading')) return false;
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
