@@ -767,7 +767,6 @@ color: white;
 
 .progress-extended{display:none}
 
-.error{color:#FF3300;text-align:left !Important;font-size:14px;}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
