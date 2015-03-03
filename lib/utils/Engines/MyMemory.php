@@ -62,7 +62,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
-                $result_object = new Engines_Results_ExportResult($decoded);
+                $result_object = new Engines_Results_ExportResponse($decoded);
+                break;
+            case 'tmx_import_relative_url':
+                $result_object = new Engines_Results_TmxImportResponse($decoded);
+                break;
+            case 'tmx_status_relative_url':
+                $result_object = new Engines_Results_TmxStatusResponse($decoded);
                 break;
             default:
                 $result_object = new Engines_Results_TMS( $decoded );

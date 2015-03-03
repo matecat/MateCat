@@ -86,7 +86,7 @@ abstract class Engines_AbstractEngine {
     public function call( $function, Array $parameters = array(), $isPostRequest = false ){
 
         $this->error = array(); // reset last error
-        if ( !$this->$function && 0) {
+        if ( !$this->$function ) {
             Log::doLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = array(
                     'error' => array(
@@ -115,8 +115,45 @@ abstract class Engines_AbstractEngine {
             );
         }
 
-        $rawValue = $this->_call( $url, $curl_opt );
+//        $rawValue = $this->_call( $url, $curl_opt );
+        $ch = curl_init();
 
+        curl_setopt( $ch, CURLOPT_URL, $url );
+        curl_setopt( $ch, CURLOPT_HEADER, 0 );
+        curl_setopt( $ch, CURLOPT_USERAGENT, "user agent" );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+
+        //if some postfields are passed, switch to post mode, set parameters and prolong timeout
+        if ( $isPostRequest ) {
+            curl_setopt( $ch, CURLOPT_POST, true );
+            curl_setopt( $ch, CURLOPT_POSTFIELDS, $parameters );
+            curl_setopt( $ch, CURLOPT_TIMEOUT, 120 ); //wait max 2 mins
+        } else {
+            curl_setopt( $ch, CURLOPT_HTTPGET, true );
+            curl_setopt( $ch, CURLOPT_TIMEOUT, 10 ); //we can wait max 10 seconds
+        }
+
+        //if it's an HTTPS call
+        //verify CA in certificate
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true );
+        //verify that the common name exists and that it matches the host name of the server
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
+
+        $output     = curl_exec( $ch );
+        $curl_errno = curl_errno( $ch );
+        $curl_error = curl_error( $ch );
+
+        if ( $curl_errno > 0 ) {
+            Log::doLog( 'Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ), true ) );
+            $output = json_encode( array(
+                    'error' => array(
+                            'code' => -$curl_errno, 'message' => " $curl_error. Server Not Available"
+                    )
+            ) ); //return negative number
+        }
+
+        // Chiude la risorsa curl
+        curl_close( $ch );
         /*
          * $parameters['segment'] is used in MT engines,
          * they does not return original segment, only the translation.
@@ -124,7 +161,7 @@ abstract class Engines_AbstractEngine {
          * 
          * Pass the called $function also
         */
-        $this->result = $this->_decode( $rawValue, $parameters, $function );
+        $this->result = $this->_decode( $output, $parameters, $function );
 
     }
 

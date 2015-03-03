@@ -6,7 +6,7 @@
  * Date: 03/03/15
  * Time: 12.33
  */
-class Engines_Results_ExportResult extends Engines_Results_AbstractResponse {
+class Engines_Results_ExportResponse extends Engines_Results_AbstractResponse {
 
     public $id;
     public $resourceLink;
