@@ -223,7 +223,7 @@ abstract class DataAccess_AbstractDao {
     protected function fetch_array( $query ) {
         $_cacheResult = $this->getFromCache( $query );
 
-        if ( $_cacheResult !== false ) {
+        if ( !is_null ($_cacheResult) && $_cacheResult !== false ) {
             return $_cacheResult;
         }
 

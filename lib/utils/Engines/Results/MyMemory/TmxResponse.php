@@ -6,7 +6,7 @@
  * Time: 15.33
  */
 
-class Engines_Results_TmxResponse extends Engines_Results_AbstractResponse{
+class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractResponse{
 
     //response example: {"responseStatus":"202","responseData":{"id":495779}}
 

@@ -1,6 +1,6 @@
 <?
 
-class Engines_Results_TMS extends Engines_Results_AbstractResponse {
+class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     /**
      * @var Engines_Results_MyMemoryMatches[]|array
      */

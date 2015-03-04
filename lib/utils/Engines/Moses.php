@@ -33,6 +33,11 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
 
     }
 
+    /**
+     * @param $rawValue
+     *
+     * @return array
+     */
     protected function _decode( $rawValue ){
 
         $all_args =  func_get_args();
