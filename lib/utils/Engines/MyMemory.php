@@ -1,12 +1,12 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 25/02/15
  * Time: 18.53
- * 
+ *
  */
-
 class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected $_config = array(
@@ -42,35 +42,37 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return Engines_Results_AbstractResponse
      */
-    protected function _decode( $rawValue ){
-        $args = func_get_args();
-        $functionName = $args[2];
+    protected function _decode( $rawValue ) {
+        $args         = func_get_args();
+        $functionName = $args[ 2 ];
 
-        if( is_string( $rawValue ) ) {
+        if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
 
         $result_object = null;
-        switch ($functionName){
+        switch ( $functionName ) {
             case 'api_key_check_auth_url':
-                $result_object =  new Engines_Results_AuthKeyResponse($decoded);
+                $result_object = new Engines_Results_MyMemory_AuthKeyResponse( $decoded );
                 break;
             case 'api_key_create_user_url':
-                $result_object =  new Engines_Results_CreateUserResponse($decoded);
+                $result_object = new Engines_Results_MyMemory_CreateUserResponse( $decoded );
                 break;
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
-                $result_object = new Engines_Results_TmxResponse($decoded);
+                $result_object = new Engines_Results_MyMemory_TmxResponse( $decoded );
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
-                $result_object = new Engines_Results_ExportResponse($decoded);
+                $result_object = new Engines_Results_MyMemory_ExportResponse( $decoded );
                 break;
-
+            case 'analyze_url':
+                $result_object = new Engines_Results_MyMemory_AnalyzeResponse( $decoded );
+                break;
             default:
-                $result_object = new Engines_Results_TMS( $decoded );
+                $result_object = new Engines_Results_MyMemory_TMS( $decoded );
                 break;
         }
 
@@ -80,7 +82,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
     /**
      * @param $_config
      *
-     * @return Engines_Results_TMS
+     * @return Engines_Results_MyMemory_TMS
      */
     public function get( $_config ) {
 
@@ -125,11 +127,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
-            $parameters['key'] = implode(",", $_config['id_user']);
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        ( !$_config['isGlossary']   ? $function = "contribute_relative_url" : $function = "gloss_set_relative_url" );
+        ( !$_config[ 'isGlossary' ] ? $function = "contribute_relative_url" : $function = "gloss_set_relative_url" );
 
         $this->call( $function, $parameters );
 
@@ -155,19 +159,35 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
-            $parameters['key'] = implode(",", $_config['id_user']);
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        ( !$_config['isGlossary']   ? $function = "delete_relative_url" : $function = "gloss_delete_relative_url" );
+        ( !$_config[ 'isGlossary' ] ? $function = "delete_relative_url" : $function = "gloss_delete_relative_url" );
 
         $this->call( $function, $parameters );
 
-        if ($this->result->responseStatus != "200") {
+        /*
+         * If the segment to be deleted is not present in the current TM,
+         * MyMemory response is
+         * {"responseData":{"translatedText":"NO ID FOUND"},
+         *  "responseDetails":"NO ID FOUND",
+         *  "responseStatus":"403",
+         *  "matches":""
+         * }
+         *
+         * but the result is the one expected: the segment is not present in the current TM.
+         **/
+        if ( $this->result->responseStatus != "200" &&
+                ( $this->result->responseStatus != "404" ||
+                        $this->result->responseDetails != "NO ID FOUND" )
+        ) {
             return false;
         }
-        return true;
 
+        return true;
     }
 
     /**
@@ -185,15 +205,18 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
-            $parameters['key'] = implode(",", $_config['id_user']);
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        $this->call( "gloss_update_relative_url" , $parameters );
+        $this->call( "gloss_update_relative_url", $parameters );
 
-        if ($this->result->responseStatus != "200") {
+        if ( $this->result->responseStatus != "200" ) {
             return false;
         }
+
         return true;
 
     }
@@ -215,7 +238,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     public function getStatus( $key, $name = false ) {
 
-        $parameters = array();
+        $parameters          = array();
         $parameters[ 'key' ] = trim( $key );
 
         //if provided, add name parameter
@@ -265,6 +288,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * <br />invoke with the same parameters of createExport
      *
      * @see Engines_MyMemory::createExport
+     *
      * @param      $key
      * @param null $source
      * @param null $target
@@ -272,7 +296,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return mixed
      */
-    public function checkExport(  $key, $source = null, $target = null, $strict = null  ){
+    public function checkExport( $key, $source = null, $target = null, $strict = null ) {
 
         $parameters = array();
 
@@ -298,22 +322,22 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @throws Exception
      */
-    public function downloadExport( $key, $hashPass ){
+    public function downloadExport( $key, $hashPass ) {
 
         $parameters = array();
 
-        $parameters[ 'key' ] = trim( $key );
+        $parameters[ 'key' ]  = trim( $key );
         $parameters[ 'pass' ] = trim( $hashPass );
 
 //        $this->call( 'tmx_export_download_url', $parameters );
 
-        $url = $this->base_url . "/" .$this->tmx_export_download_url . "?";
+        $url = $this->base_url . "/" . $this->tmx_export_download_url . "?";
         $url .= http_build_query( $parameters );;
 
 //        $parsed_url = parse_url ( $this->url );
-        $parsed_url = parse_url ( $url );
+        $parsed_url = parse_url( $url );
 
-        $isSSL = stripos( $parsed_url['scheme'], "https" ) !== false;
+        $isSSL = stripos( $parsed_url[ 'scheme' ], "https" ) !== false;
 
 //        if( $isSSL ){
 //            $fp = fsockopen( "ssl://" . $parsed_url['host'], 443, $errno, $err_str, 120 );
@@ -333,9 +357,9 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
 //        fwrite($fp, $out);
 
-        $streamFileName = tempnam("/tmp", "TMX");
+        $streamFileName = tempnam( "/tmp", "TMX" );
 
-        $handle = fopen( $streamFileName, "w+");
+        $handle = fopen( $streamFileName, "w+" );
 
         $ch = curl_init();
 
@@ -347,7 +371,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
 
         // grab URL and pass it to the browser
-        curl_exec($ch);
+        curl_exec( $ch );
 
         rewind( $handle );
 
@@ -356,12 +380,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
     }
 
     /*****************************************/
-    public function createMyMemoryKey(){
+    public function createMyMemoryKey() {
 
         //query db
-        $this->call('api_key_create_user_url');
+        $this->call( 'api_key_create_user_url' );
 
-        if(!$this->result instanceof Engines_Results_CreateUserResponse) {
+        if ( !$this->result instanceof Engines_Results_MyMemory_CreateUserResponse ) {
             if ( empty( $this->result ) || $this->result[ 'error' ] || $this->result[ 'error' ][ 'code' ] != 200 ) {
                 throw new Exception( "Private TM key .", -1 );
             }
@@ -396,7 +420,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $this->result['error']['message'] . " ErrNum: " . $this->result['error']['code'] );
+            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered seems to be invalid. Please, check that the key is correct.", -2 );
         }
 
@@ -408,6 +432,140 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         return $isValidKey;
 
+    }
+
+    /******************************************/
+
+    public function fastAnalysis( $segs_array ) {
+        if ( !is_array( $segs_array ) ) {
+
+            return null;
+        }
+        $json_segs = json_encode( $segs_array );
+
+        $parameters[ 'fast' ] = "1";
+        $parameters[ 'df' ]   = "matecat_array";
+        $parameters[ 'segs' ] = $json_segs;
+
+        $this->call( "analyze_url", $parameters, true );
+
+        return $this->result;
+
+    }
+
+    /**
+     * Detect language for an array of file's segments.
+     *
+     * @param $segs_array Array An array whose keys are file IDs and values are array of segments.
+     *
+     * @return mixed
+     */
+    public function detectLanguage( $segs_array, $lang_detect_files ) {
+        //In this array we will put a significative string for each job.
+        $segmentsToBeDetected = array();
+
+
+        /**
+         * @var $segs_array ArrayObject
+         */
+        $arrayIterator = $segs_array->getIterator();
+
+        $counter = 0;
+        //iterate through files and extract a significative
+        //string long at least 150 characters for language detection
+        while ( $arrayIterator->valid() ) {
+            $currFileName = key( $lang_detect_files );
+
+            if ( $lang_detect_files[ $currFileName ] == "skip" ) {
+                //this will force google to answer with "und" language code
+                $segmentsToBeDetected[ ] = "q[$counter]=1";
+
+                next( $lang_detect_files );
+                $arrayIterator->next();
+                $counter++;
+                continue;
+            }
+
+            $currFileId = $arrayIterator->key();
+
+            $currFile = $arrayIterator->current();
+
+            /**
+             * @var $currFileIterator ArrayIterator
+             */
+            $segmentArray = $currFile->getIterator()->current();
+
+            //take first 50 segments
+            $segmentArray = array_slice( $segmentArray, 0, 50 );
+
+            foreach ( $segmentArray as $i => $singleSegment ) {
+                $singleSegment = explode( ",", $singleSegment );
+                $singleSegment = array_slice( $singleSegment, 3, 1 );
+
+                //remove tags, duplicated spaces and all not Unicode Letter
+                $singleSegment[ 0 ] = preg_replace( array( "#<[^<>]*>#", "#\x20{2,}#", '#\PL+#u' ), array(
+                        "", " ", " "
+                ), $singleSegment[ 0 ] );
+
+                //remove not useful spaces
+                $singleSegment[ 0 ] = preg_replace( "#\x20{2,}#", " ", $singleSegment[ 0 ] );
+
+                $segmentArray[ $i ] = $singleSegment[ 0 ];
+            }
+
+            if ( !function_exists( 'sortByStrLenAsc' ) ) {
+                function sortByStrLenAsc( $a, $b ) {
+                    return strlen( $a ) >= strlen( $b );
+                }
+            }
+
+            usort( $segmentArray, array( 'sortByStrLenAsc' ) );
+
+            $textToBeDetected = "";
+            /**
+             * take first 150 characters starting from the longest segment in the slice
+             */
+            for ( $i = count( $segmentArray ) - 1; $i >= 0; $i-- ) {
+                $textToBeDetected .= " " . trim( $segmentArray[ $i ], "'" );
+                if ( mb_strlen( $textToBeDetected ) > 150 ) {
+                    break;
+                }
+            }
+            $segmentsToBeDetected[ ] = "q[$counter]=" . urlencode( $textToBeDetected );
+
+            next( $lang_detect_files );
+            $arrayIterator->next();
+            $counter++;
+        }
+
+        $curl_parameters = implode( "&", $segmentsToBeDetected ) . "&of=json";
+
+        log::dolog( "DETECT LANG :", $segmentsToBeDetected );
+
+        $options = array(
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER         => 0,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $curl_parameters,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
+        );
+
+        $url = strtolower( $this->base_url . "/" . $this->detect_language_url );
+
+        $mh        = new MultiCurlHandler();
+        $tokenHash = $mh->createResource( $url, $options );
+        Log::dolog( "DETECT LANG TOKENHASH: $tokenHash" );
+
+        $mh->multiExec();
+
+        $res = $mh->getAllContents();
+        Log::dolog( "DETECT LANG RES:", $res );
+
+        return json_decode( $res[ $tokenHash ], true );
     }
 
 }

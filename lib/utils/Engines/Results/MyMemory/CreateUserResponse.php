@@ -6,7 +6,7 @@
  * Date: 02/03/15
  * Time: 19.17
  */
-class Engines_Results_CreateUserResponse extends Engines_Results_AbstractResponse {
+class Engines_Results_MyMemory_CreateUserResponse extends Engines_Results_AbstractResponse {
 
     public $key;
     public $id;

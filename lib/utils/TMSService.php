@@ -260,7 +260,7 @@ class TMSService {
     public function downloadTMX() {
 
         /**
-         * @var $result Engines_Results_ExportResponse
+         * @var $result Engines_Results_MyMemory_ExportResponse
          */
         $result = $this->mymemory_engine->createExport( $this->tm_key );
 
@@ -271,7 +271,7 @@ class TMSService {
             do {
 
                 /**
-                 * @var $result Engines_Results_ExportResponse
+                 * @var $result Engines_Results_MyMemory_ExportResponse
                  */
                 $result = $this->mymemory_engine->checkExport( $this->tm_key );
 
