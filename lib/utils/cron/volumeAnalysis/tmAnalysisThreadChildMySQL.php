@@ -184,7 +184,7 @@ while (1) {
 
         $mt_result = $mt->get( $config );
 
-        if ( $mt_result[ 'error' ][ 'code' ] < 0 ) {
+        if ( @$mt_result[ 'error' ][ 'code' ] < 0 ) {
             $mt_result = false;
         }
     }
@@ -194,7 +194,7 @@ while (1) {
     }
 
     if ( !empty( $mt_result ) ) {
-        $matches[ ] = $mt_res;
+        $matches[ ] = $mt_result;
         usort( $matches, "compareScore" );
     }
 
