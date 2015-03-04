@@ -832,13 +832,25 @@ background-color: #D6D6D6;
 
 .uploadloader{background:url(../img/loader.gif) center center no-repeat;display:block;width:20px;height:20px;float:right;margin-top:35px;display:none;position:absolute;right:260px;background-size: 20px 20px;}
 
+td.action .btn {
+cursor: pointer;
+height: 22px;
+color:#333!important;
+width: 75px!important;
+background: #dcdedf!important;
+border-right: 0 solid;
+border-radius: 2px 0 0 2px;
+-moz-box-shadow: 0 1px 2px #ccc;
+-webkit-box-shadow: 0 1px 2px #ccc;
+box-shadow: 0 1px 2px #ccc;
+}
 
 td.action {
 padding: 10px 5px!important;
 }
-#inactivetm td.action .addtmx {
-    visibility: hidden;
-}
+/*#inactivetm td.action .addtmx {
+    display: none;
+}*/
 #activetm tr:hover td {
 background: #f1f8fc;
 }
@@ -1172,7 +1184,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:370px!important;
+	width:470px!important;
 }
 
 .owner {width: 57px!important;}
@@ -1190,7 +1202,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .action {
 		/*width:22%!important;*/
-		width: 260px!important;
+		width: 160px!important;
 }
 
 
@@ -1277,9 +1289,19 @@ box-shadow: inset 0 0 1px 1px #888;}
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {
 padding: 6px 10px!important;
-cursor:pointer!important;
+cursor: pointer!important;
 margin: 0px 10px 0px 0px;
 font-size:14px;
+}
+
+.mgmt-tm .btn-grey:last-child {
+    margin:0!important;
+}
+
+.action .notify {
+    border-top: none;
+    box-shadow: none;
+    float: left;
 }
 
 .btn-grey:hover {
@@ -1313,6 +1335,10 @@ body.cattool .mgmt-tm.mine thead,
  {width: 90px;
 display: block;
 text-align: center;}
+
+.btn-grey .text {
+    width: 55px;
+}
 
 .canceladdtmx.btn-grey .text, 
 .addtmxfile.btn-ok .text, 
@@ -1509,9 +1535,6 @@ top: 17%;
     /*display: none !important; */
 }
 
-.mgmt-tm .deleteTM:before {
-    content: "\f014";
-}
 
 tr.mine.ui-sortable-helper {
 border-bottom: 1px solid #ccc;
@@ -1672,6 +1695,133 @@ header .searchbox {
     line-height: 15px;
 }
 
+.wrapper-dropdown-5 {
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    background: #dcdedf;
+    font-weight: bold;
+    width: 12px;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+    font-size: 17px !important;
+    cursor: pointer;
+    color: #000;
+    border: 1px solid #666;
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border-radius: 0 2px 2px 0;
+    text-decoration: none;
+    text-align: center;
+    padding: 4px 10px !Important;
+    margin: 0 !important;
+    float: right;
+}
+
+.wrapper-dropdown-5:after {
+    /* Little arrow */
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    margin-top: -3px;
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+    border-color: #666 transparent;
+}
+
+.wrapper-dropdown-5 .dropdown {
+    /* Size & position */
+    position: absolute;
+    top: 98%;
+    left: -116px;
+    width: 147px;
+    right: 0;
+    margin-top: 1px;
+
+    /* Styles */
+    /*   border-radius: 0 0 5px 5px;*/
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom: none;
+    border-top:none;
+
+    list-style: none;
+    transition: all 0.3s ease-out;
+
+    /* Hiding */
+    max-height: 0;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.wrapper-dropdown-5:hover {
+    /*-moz-box-shadow: 0 1px 1px #666;*/
+    /*-webkit-box-shadow: 0 1px 1px #666;*/
+    /*box-shadow: 0 1px 1px #666;*/
+}
+
+.wrapper-dropdown-5:active {
+    -moz-box-shadow: inset 0 0 1px 1px #888;
+    -webkit-box-shadow: inset 0 0 1px 1px #888;
+    box-shadow: inset 0 0 1px 1px #888;
+}
+
+.wrapper-dropdown-5 .dropdown li {
+    width: 100%;
+}
+
+.wrapper-dropdown-5 .dropdown li a {
+    display: block;
+    text-decoration: none;
+    background: #fff;
+    color: #666;
+    text-align: left;
+    padding: 5px 0px 5px 5px;
+    transition: all 0.3s ease-out;
+    border-bottom: 1px solid #e6e8ea;
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.wrapper-dropdown-5 .dropdown li a:hover {
+    background: #f7f8f9;
+}
+
+.wrapper-dropdown-5 .dropdown li:last-of-type a {
+    border: none;
+}
+
+.wrapper-dropdown-5 .dropdown li i {
+    margin-right: 5px;
+    color: inherit;
+    vertical-align: middle;
+}
+
+/* Hover state */
+
+.wrapper-dropdown-5 .dropdown li:hover a {
+    color: black;
+}
+
+/* Active state */
+
+.wrapper-dropdown-5.active {
+    box-shadow: none;
+    color: black;
+}
+
+.wrapper-dropdown-5.active:after {
+    border-color: black transparent;
+}
+
+.wrapper-dropdown-5.active .dropdown {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    max-height: 400px;
+}
 
 
 
@@ -2214,6 +2364,7 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
+.deleteTM .text:before,
 .sorting:after,
 .noticon:after,
 td.actions a:before,
@@ -2323,9 +2474,12 @@ float: left;
 	content: "\f00d";
 	padding-right: 8px;
 	vertical-align: text-top;
-
 }
-
+.deleteTM .text:before {
+content: "\f014";
+padding-right: 5px;
+vertical-align: text-top;
+}
 .noticon:after {
 content: "\e605";
 color: red;

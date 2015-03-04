@@ -23,15 +23,13 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-        $(".mgmt-tm").click(function(e) {
-            e.preventDefault();
-            $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
-            $(".mgmt-table-mt").hide();
-            $(".mgmt-table-tm").show();
-        });
+         $(".mgmt-tm").click(function(e) {
+              $(this).addClass("active");
+              $(".mgmt-mt").removeClass("active");
+              $(".mgmt-table-mt").hide();
+              $(".mgmt-table-tm").show();
+       });
         $(".tm-mgmt").click(function(e) {
-            e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
             $(".mgmt-table-tm").hide();
@@ -49,7 +47,7 @@ $.extend(UI, {
         });
 
         $("#mt_engine_int").change(function() {
-            $(".step2").show();
+            $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
                 $('.step2 .fields').html('');
@@ -59,6 +57,10 @@ $.extend(UI, {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
                 $(".step3").show();
             }
+        });
+         $(".add-mt-engine").click(function() {
+            $(this).hide();
+            $(".insert-tm").removeClass('hide');
         });
 // fine codice di Daniele
 
@@ -295,11 +297,12 @@ $.extend(UI, {
                 UI.filterInactiveTM($('#filterInactive').val());
             }
         }).on('click', '.mgmt-tm .downloadtmx', function(){
+            if($(this).hasClass('downloading')) return false;
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
             var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
-            $(this).parents('tr').first().append(msg);
+            $(this).parents('td').first().append(msg);
         }).on('click', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
         });
@@ -373,6 +376,8 @@ $.extend(UI, {
         $("#sign-in").click(function() {
             $(".loginpopup").show();
         });
+
+       
 
 //    	$('#sort td:first').addClass('index');
 
@@ -678,14 +683,15 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-//                '        <a class="btn-grey pull-left disabletm">' +
-//                '            <span class="text stopuse">Stop Use</span>' +
-//                '        </a>' +
-                '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Import TMX</span>' +
-                '        </a>' +
-                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Export TMX</span></a>' +
-                '    </td>' +
+                '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
+                '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '              <ul class="dropdown pull-left">' +
+                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
+                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
+                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
+                '               </ul>'+ 
+                '                    </div>'+    
+                '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
         if(uploading) {
@@ -717,7 +723,7 @@ $.extend(UI, {
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
-        $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');

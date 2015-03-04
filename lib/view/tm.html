@@ -27,7 +27,7 @@
             <div class="mgmt-panel mgmt-panel-tm">
                 <div class="mgmt-wrapper">
                     <ul id="myTab" class="nav nav-tabs hide" role="tablist">
-                 <li class="active mgmt-tm"><a href="#tm">TM Management</a></li>
+                 <li class="active mgmt-tm"><a href="#tm">Translation Memory</a></li>
                  <li class="mgmt-mt"><a href="#mt">Machine Translation</a></li>
 
                </ul>
@@ -51,7 +51,7 @@
                                     <th class="description">Description</th>
                                     <th class="check">Lookup</th>
                                     <th class="check">Update</th>
-                                    <th class="action">Action</th>
+                                    <th class="action">Actions</th>
                                 </tr>
                                 </thead>
 
@@ -65,14 +65,15 @@
                                         <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe ? key.name : '**********' ) : key.name}</div></td>
                                         <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                         <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
-                                        <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Import TMX</span>
-                                            </a>
-                                            <a class="btn-grey pull-left downloadtmx">
-                                                <span class="text">Export TMX</span>
-                                            </a>
-                                            <a class="deleteTM" href="#"></a>
+                                        <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">      
+                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
+                                                    <ul class="dropdown pull-left">
+                                                        <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
+                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                    </ul>
+                                                </div>
                                         </td>
                                         <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"></td>
                                     </tr>
@@ -150,7 +151,7 @@
                                         <th class="description">Description</th>
                                         <th class="check">Lookup</th>
                                         <th class="check">Update</th>
-                                        <th class="action">Action</th>
+                                        <th class="action">Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list">
@@ -164,13 +165,14 @@
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn-grey pull-left addtmx">
-                                                    <span class="text">Import TMX</span>
-                                                </a>
-                                                <a class="btn-grey pull-left downloadtmx">
-                                                    <span class="text">Export TMX</span>
-                                                </a>
-                                                <a class="deleteTM" href="#"></a>
+                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
+                                                    <ul class="dropdown pull-left">
+                                                        <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
+                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                    </ul>
+                                                </div>
                                             </td>
                                         </tr>
                                     </tal:block>
@@ -184,13 +186,24 @@
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn-grey pull-left addtmx">
-                                                    <span class="text">Import TMX</span>
-                                                </a>
-                                                <a class="btn-grey pull-left downloadtmx">
-                                                    <span class="text">Export TMX</span>
-                                                </a>
-                                                <a class="deleteTM" href="#"></a>
+                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">
+                                                    &nbsp;              
+          <ul class="dropdown pull-left">
+
+            <li>  <a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
+            
+            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
+                                                    <span class="icon-download"></span>Export TMX
+                                                </a></li>
+            <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
+                                               <span class="icon-trash-o"></span>Delete TM
+                                            </a></li>
+           
+        </ul>
+
+</div>
+                                               
                                             </td>
                                         </tr>
                                     </tal:block>
@@ -210,22 +223,17 @@
                             <!-- div class="block pull-right ">
                                 <a class="btn-ok clear add-tm hide">Add a MT</a>
                             </div-->
-                            <h3 class="pull-left">Add MT engine</h3>
-                            <br class="clear" />
-                                <div class="insert-tm">
-                                    <div class="step1 pull-left">
-                                        <h4>Select the MT provider</h4>
-                                        <div class="prova">
-                                            <select name="mt_engine" id="mt_engine_int">
-                                                <option value="none" selected="">Select</option>
+                           
+                                <div class="insert-tm hide">
+                                 <h3 class="pull-left">Add MT engine</h3> <select name="mt_engine" id="mt_engine_int" class="pull-left">
+                                                <option value="none" selected="">Choose the MT provider</option>
                                                 <option value="microsofthub">Microsoft HUB</option>
                                                 <option value="iptranslator" >IP Translator</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
                                             </select>
-                                        </div>
-                                    </div>
-                                    <div class="step2 hide pull-left">
+                                    <br class="clear" />
+                                    <div class="step2">
                                         <h4>Provide details to connect</h4>
                                         <form id="mt-provider-details">
                                             <span class="fields"></span>
@@ -252,26 +260,50 @@
                                     </div>
                                 </div>
                             <br class="clear" />
+                            <div class="block pull-right ">
+                                <a class="btn-ok clear add-mt-engine">Add a MT engine</a>
+                            </div>
                             <h3 class="pull-left">Available MT</h3>
+
                             <table class="mgmt-mt">
                                 <thead>
                                 <tr>
                                     <th class="privatekey">Engine name</th>
-                                    <th class="description">Description</th>
+                                    <th class="enable-mt text-center">Use MT</th>   
                                     <th class="action">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <td class="privatekey">MyMemory</td>
-                                    <td class="description">Description here</td>
-                                    <td class="action">
-                                         <a class="btn-grey pull-left">
-                                           <span class="text">Use</span>
-                                        </a>
-                                        <a class="btn-grey pull-left">
-                                           <span class="text">Delete</span>
-                                        </a>
-                                    </td>
+                                    <tr id="activemt">
+                                        <td class="privatekey">MyMemory <span class="icon-info">
+                                            <div id="more-info" style="display: none;" class="more-info-tip">
+                                                <strong>ClientID:</strong> 19216894100<br />
+                                                <strong>Client Secret:</strong> 1023787<br />
+                                            </div>
+                                        </span>
+                                        </td>
+                                        <td class="enable-mt text-center"><input type="checkbox" checked="checked" /></td>   
+                                        <td class="action">
+                                            
+                                           <a class="btn pull-left"><span class="text">Delete</span></a>
+                                        </td>
+                                    </tr>
+                                    <tr id="inactivemt">
+                                        <td class="privatekey">DeepLingo</td>
+                                        <td class="enable-mt text-center"><input type="checkbox"/></td>   
+                                        <td class="action">
+                                            
+                                           <a class="btn pull-left"><span class="text">Delete</span></a>
+                                        </td>
+                                    </tr>
+                                    <tr id="inactivemt" class="pending">
+                                        <td class="privatekey">Microsoft Hub</td>
+                                        <td class="enable-mt text-center"><a href="#" target="_blank">Pending</a></td>   
+                                        <td class="action">
+                                            
+                                           <a class="btn pull-left"><span class="text">Delete</span></a>
+                                        </td>
+                                    </tr>
                                 </tbody>
 
                             </table>
@@ -290,17 +322,18 @@
     <!-- fine popup glossary mgmt -->
 
     <template id="mt-provider-microsofthub">
-        <label>Engine name</label>
+        <span class="required pull-left">Fields marked in <sup>*</sup> are required</span>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <label class="error">Engine name</label>
+        <input class="error" placeholder="here" />
+        <br class="clear" />
+        <label>ClientID<sup>*</sup></label>
         <input placeholder="here" />
         <br class="clear" />
-        <label>ClientID</label>
+        <label>Client Secret<sup>*</sup></label>
         <input placeholder="here" />
         <br class="clear" />
-        <label>Client Secret</label>
-        <input placeholder="here" />
-        <br class="clear" />
-        <label>Category</label>
-        <input placeholder="here" />
     </template>
 
     <template id="mt-provider-iptranslator">
@@ -317,7 +350,36 @@
 
 
 </div>
+<script>
 
+        function DropDown(el) {
+                this.dd = el;
+                this.initEvents();
+            }
+            DropDown.prototype = {
+                initEvents : function() {
+                    var obj = this;
+
+                    obj.dd.on('click', function(event){
+                        $(this).toggleClass('active');
+                        event.stopPropagation();
+                    }); 
+                }
+            }
+
+            $(function() {
+
+                var dd = new DropDown( $('#dd') );
+
+                $(document).click(function() {
+                    // all dropdowns
+                    $('.wrapper-dropdown-5').removeClass('active');
+                });
+
+            });
+
+        
+</script>
 
 </body>
 </html>
