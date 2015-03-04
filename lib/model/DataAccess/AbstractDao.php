@@ -171,23 +171,36 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param $query string A query
+     * Cache Initialization
      *
-     * @return mixed
+     * @return $this
      */
-    protected function getFromCache($query){
-        if($this->cacheTTL == 0 ) return null;
-
-        $_existingResult = null;
+    protected function _cacheSetConnection(){
         if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
             try {
                 $this->cache_con = MemcacheHandler::getInstance();
-                $_existingResult = $this->cache_con->get( $query );
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
                 Log::doLog( "No Memcache server(s) configured." );
             }
         }
+    }
+
+    /**
+     * @param $query string A query
+     *
+     * @return mixed
+     */
+    protected function _getFromCache($query){
+        if($this->cacheTTL == 0 ) return null;
+
+        $this->_cacheSetConnection();
+
+        $_existingResult = null;
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            $_existingResult = $this->cache_con->get( $query );
+        }
+
         return $_existingResult;
     }
 
@@ -197,7 +210,7 @@ abstract class DataAccess_AbstractDao {
      *
      * @return void|null
      */
-    protected function setInCache( $query, $value ){
+    protected function _setInCache( $query, $value ){
         if($this->cacheTTL == 0 ) return null;
 
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
@@ -220,18 +233,34 @@ abstract class DataAccess_AbstractDao {
      *
      * @return array|mixed
      */
-    protected function fetch_array( $query ) {
-        $_cacheResult = $this->getFromCache( $query );
+    protected function _fetch_array( $query ) {
+        $_cacheResult = $this->_getFromCache( $query );
 
-        if ( $_cacheResult !== false ) {
+        if ( $_cacheResult !== false && $_cacheResult !== null ) {
             return $_cacheResult;
         }
 
         $result = $this->con->fetch_array( $query );
 
-        $this->setInCache( $query, $result );
+        $this->_setInCache( $query, $result );
 
         return $result;
+    }
+
+    /**
+     * @param $query
+     *
+     * @return bool
+     */
+    protected function _destroyCache( $query ){
+
+        $this->_cacheSetConnection();
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            return $this->cache_con->delete( $query );
+        }
+
+        return false;
+
     }
 
     /**

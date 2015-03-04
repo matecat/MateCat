@@ -62,7 +62,7 @@ class Engine_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements 
 
 
     /**
-     * @var string
+     * @var array
      */
     public $extra_parameters;
 

@@ -12,6 +12,45 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "Engine_EngineStruct";
 
+
+    /**
+     * Build the query,
+     * needed for get the exact query when invalidating cache
+     *
+     * @param Engine_EngineStruct $obj
+     *
+     * @return string
+     * @throws Exception
+     */
+    protected function _buildQueryForEngine( Engine_EngineStruct $obj  ){
+
+        $where_conditions = array();
+        $query            = "SELECT *
+                             FROM " . self::TABLE . " WHERE %s";
+
+        if ( $obj->id !== null ) {
+            $where_conditions[ ] = "id = " . (int)$obj->id;
+        }
+
+        if ( $obj->uid !== null ) {
+            $where_conditions[ ] = "uid = " . (int)$obj->uid;
+        }
+
+        if ( $obj->active !== null ) {
+            $where_conditions[ ] = "active = " . (int)$obj->active;
+        }
+
+
+        if ( count( $where_conditions ) ) {
+            $where_string = implode( " AND ", $where_conditions );
+        } else {
+            throw new Exception( "Where condition needed." );
+        }
+
+        return sprintf( $query, $where_string );
+
+    }
+
     /**
      * @param Engine_EngineStruct $obj
      *
@@ -74,38 +113,37 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public function read( Engine_EngineStruct $obj ) {
+
         $obj = $this->sanitize( $obj );
 
-        $where_conditions = array();
-        $query            = "SELECT *
-                             FROM " . self::TABLE . " WHERE %s";
-
-        if ( $obj->id !== null ) {
-            $where_conditions[ ] = "id = " . (int)$obj->id;
-        }
-
-        if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . (int)$obj->uid;
-        }
-
-        if ( $obj->active !== null ) {
-            $where_conditions[ ] = "active = " . (int)$obj->active;
-        }
-
-
-        if ( count( $where_conditions ) ) {
-            $where_string = implode( " AND ", $where_conditions );
-        } else {
-            throw new Exception( "Where condition needed." );
-        }
-
-        $query = sprintf( $query, $where_string );
-
-        $arr_result = $this->fetch_array( $query );
-
+        /*
+         * build the query
+         */
+        $query = $this->_buildQueryForEngine( $obj );
+        $arr_result = $this->_fetch_array( $query );
         $this->_checkForErrors();
-
         return $this->_buildResult( $arr_result );
+
+    }
+
+    /**
+     * Destroy a cached object
+     *
+     * @param Engine_EngineStruct $obj
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function destroyCache( Engine_EngineStruct $obj ){
+
+        $obj = $this->sanitize( $obj );
+
+        /*
+        * build the query
+        */
+        $query = $this->_buildQueryForEngine( $obj );
+        return $this->_destroyCache( $query );
+
     }
 
     public function update( Engine_EngineStruct $obj ) {
@@ -118,7 +156,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         $where_conditions[ ] = "id = " . (int)$obj->id;
-        $where_conditions[ ] = "uid = " . (int)$obj->id;
+        $where_conditions[ ] = "uid = " . (int)$obj->uid;
 
         if ( $obj->active !== null ) {
             $condition    = "active = '%s'";
@@ -207,7 +245,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                     'contribute_relative_url'      => $item[ 'contribute_relative_url' ],
                     'delete_relative_url'          => $item[ 'delete_relative_url' ],
                     'others'                       => json_decode( $item[ 'others' ], true ),
-                    'extra_parameters'             => json_decode( $item[ 'extra_parameters' ] ),
+                    'extra_parameters'             => json_decode( $item[ 'extra_parameters' ], true ),
                     'class_load'                   => $item[ 'class_load' ],
                     'google_api_compliant_version' => $item[ 'google_api_compliant_version' ],
                     'penalty'                      => $item[ 'penalty' ],
@@ -233,19 +271,15 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        if ( is_array( $input->others ) && empty( $input->others ) ) {
-            $input->others = "{}";
-        }
-
         $input->name                    = ( $input->name !== null ) ? $con->escape( $input->name ) : null;
         $input->description             = ( $input->description !== null ) ? $con->escape( $input->description ) : null;
         $input->base_url                = ( $input->base_url !== null ) ? $con->escape( $input->base_url ) : null;
         $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? $con->escape( $input->translate_relative_url ) : null;
         $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $con->escape( $input->contribute_relative_url ) : null;
         $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $con->escape( $input->delete_relative_url ) : null;
-        $input->others                  = ( $input->others !== null ) ? json_encode( $input->others ) : "{}";
+        $input->others                  = ( $input->others !== null ) ? $con->escape( json_encode( $input->others ) ) : "{}";
         $input->class_load              = ( $input->class_load !== null ) ? $con->escape( $input->class_load ) : null;
-        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( $input->extra_parameters ) : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( json_encode( $input->extra_parameters ) ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;

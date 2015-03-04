@@ -37,13 +37,36 @@ abstract class Engines_AbstractEngine {
 
     }
 
+    /**
+     * @param $key
+     *
+     * @return null
+     */
     public function __get( $key ) {
         if ( property_exists( $this->engineRecord, $key ) ) {
             return $this->engineRecord->$key;
         } elseif ( array_key_exists( $key, $this->engineRecord->others ) ) {
             return $this->engineRecord->others[ $key ];
+        } elseif ( array_key_exists( $key, $this->engineRecord->extra_parameters ) ) {
+            return $this->engineRecord->extra_parameters[ $key ];
         } else {
             return null;
+        }
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    public function __set( $key, $value ) {
+        if ( property_exists( $this->engineRecord, $key ) ) {
+            $this->engineRecord->$key = $value;
+        } elseif ( array_key_exists( $key, $this->engineRecord->others ) ) {
+            $this->engineRecord->others[ $key ] = $value;
+        } elseif ( array_key_exists( $key, $this->engineRecord->extra_parameters ) ) {
+            $this->engineRecord->extra_parameters[ $key ] = $value;
+        } else {
+            throw new DomainException( "Property $key does not exists in " . get_class($this) );
         }
     }
 

@@ -20,6 +20,10 @@ class engineController extends ajaxController {
 
     public function __construct() {
 
+        $this->result[ 'code' ]       = 0;
+        $this->result[ 'data' ]       = "KO";
+        unset($this->result['error']);
+
         //Session Enabled
         $this->checkLogin();
         //Session Disabled
@@ -105,21 +109,22 @@ class engineController extends ajaxController {
      */
     private function add() {
 
-        $newEngine = Engine_EngineStruct::getStruct();
-
-        $newEngine->type = "MT";
-        $newEngine->name = $this->provider;
-
+        $newEngine = null;
         $validEngine = true;
 
         switch ( $this->provider ) {
             case strtolower( Constants_Engines::MICROSOFT_HUB ):
-                $newEngine->description      = $this->name;
-                $newEngine->class_load       = Constants_Engines::MICROSOFT_HUB;
-                $newEngine->others           = array(
-                        'client_id'     => $this->clientID,
-                        'client_secret' => $this->clientSecret
-                );
+
+                /**
+                 * Create a record of type MicrosoftHub
+                 */
+                $newEngine = Engine_MicrosoftHubStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->extra_parameters[ 'client_id' ]     = $this->clientID;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->clientSecret;
+
                 break;
             default:
                 $validEngine = false;
@@ -130,17 +135,16 @@ class engineController extends ajaxController {
             return;
         }
 
-        //TODO: retrieve base_url from an internal source
-        $newEngine->base_url = "http://www.example.com";
-        $newEngine->active = 1;
-        $newEngine->uid = $this->uid;
-
         $engineDAO = new Engine_EngineDAO( Database::obtain() );
         $result = $engineDAO->create( $newEngine );
 
         if(! $result instanceof Engine_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
+            return;
         }
+
+        $this->result[ 'code' ]       = 1;
+        $this->result[ 'data' ]       = "OK";
 
     }
 
