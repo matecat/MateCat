@@ -182,9 +182,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
          **/
         if ( $this->result->responseStatus != "200" &&
                 ( $this->result->responseStatus != "404" ||
-                        $this->result->responseDetails != "NO ID FOUND" )) {
+                        $this->result->responseDetails != "NO ID FOUND" )
+        ) {
             return false;
         }
+
         return true;
     }
 
@@ -193,8 +195,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return bool
      */
-    public
-    function update( $_config ) {
+    public function update( $_config ) {
 
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
@@ -221,8 +222,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
     }
 
 
-    public
-    function import( $file, $key, $name = false ) {
+    public function import( $file, $key, $name = false ) {
 
         $postFields = array(
                 'tmx'  => "@" . realpath( $file ),
@@ -236,8 +236,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         return $this->result;
     }
 
-    public
-    function getStatus( $key, $name = false ) {
+    public function getStatus( $key, $name = false ) {
 
         $parameters          = array();
         $parameters[ 'key' ] = trim( $key );
@@ -269,8 +268,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return array
      */
-    public
-    function createExport( $key, $source = null, $target = null, $strict = null ) {
+    public function createExport( $key, $source = null, $target = null, $strict = null ) {
 
         $parameters = array();
 
@@ -298,8 +296,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return mixed
      */
-    public
-    function checkExport( $key, $source = null, $target = null, $strict = null ) {
+    public function checkExport( $key, $source = null, $target = null, $strict = null ) {
 
         $parameters = array();
 
@@ -325,8 +322,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @throws Exception
      */
-    public
-    function downloadExport( $key, $hashPass ) {
+    public function downloadExport( $key, $hashPass ) {
 
         $parameters = array();
 
@@ -384,8 +380,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
     }
 
     /*****************************************/
-    public
-    function createMyMemoryKey() {
+    public function createMyMemoryKey() {
 
         //query db
         $this->call( 'api_key_create_user_url' );
@@ -414,8 +409,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * @return bool|null
      * @throws Exception
      */
-    public
-    function checkCorrectKey( $apiKey ) {
+    public function checkCorrectKey( $apiKey ) {
 
         $postFields = array(
                 'key' => trim( $apiKey )
@@ -442,8 +436,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     /******************************************/
 
-    public
-    function fastAnalysis( $segs_array ) {
+    public function fastAnalysis( $segs_array ) {
         if ( !is_array( $segs_array ) ) {
 
             return null;
@@ -467,8 +460,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return mixed
      */
-    public
-    function detectLanguage( $segs_array, $lang_detect_files ) {
+    public function detectLanguage( $segs_array, $lang_detect_files ) {
         //In this array we will put a significative string for each job.
         $segmentsToBeDetected = array();
 

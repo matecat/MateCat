@@ -133,9 +133,7 @@ while ( 1 ) {
 
     $_config                  = array();
     $_config[ 'segment' ]     = $text;
-    $_config[ 'source_lang' ] = $source;
     $_config[ 'source' ] = $source;
-    $_config[ 'target_lang' ] = $target;
     $_config[ 'target' ] = $target;
     $_config[ 'email' ]       = "tmanalysis@matecat.com";
 
