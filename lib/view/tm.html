@@ -225,16 +225,20 @@
                             </div-->
                            
                                 <div class="insert-tm hide">
-                                 <h3 class="pull-left">Add MT engine</h3> <select name="mt_engine" id="mt_engine_int" class="pull-left">
-                                                <option value="none" selected="">Choose the MT provider</option>
+                                 <h3 class="pull-left">Add MT engine</h3> 
+                                  <div class="step1 pull-left">
+                                       
+                                        <select name="mt_engine" id="mt_engine_int">
+                                                <option value="none" selected="">Choose provider...</option>
                                                 <option value="microsofthub">Microsoft HUB</option>
                                                 <option value="iptranslator" >IP Translator</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
                                             </select>
-                                    <br class="clear" />
-                                    <div class="step2">
-                                        <h4>Provide details to connect</h4>
+
+                                    </div>
+                                    <div class="step2 pull-left">
+                                    
                                         <form id="mt-provider-details">
                                             <span class="fields"></span>
                                             <br class="clear" />
@@ -250,38 +254,34 @@
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="step3 hide">
-                                        <div class="text-left pull-left">
+                                    <div class="step3 pull-left hide">
+                                        <div class="text-left">
                                                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dignissim lobortis leo ut elementum. Sed venenatis hendrerit risus, et elementum diam. Morbi cursus tellus ullamcorper ipsum venenatis vulputate. Cras vel auctor enim, quis lobortis magna. Nullam tempus porttitor libero quis pharetra. Etiam convallis mi eu faucibus pharetra. Aliquam erat volutpat. Donec massa quam, aliquam eget cursus porttitor, tempor id elit.</p>
                                         </div>
-                                        <div class="pull-right contact-box">
+                                        <div class="contact-box">
                                             Contact Box
                                         </div>
                                     </div>
                                 </div>
-                            <br class="clear" />
+                           
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-mt-engine">Add a MT engine</a>
+                                <a class="btn-ok clear add-tm add-mt-engine">Add a MT engine</a>
                             </div>
                             <h3 class="pull-left">Available MT</h3>
 
                             <table class="mgmt-mt">
                                 <thead>
                                 <tr>
-                                    <th class="privatekey">Engine name</th>
-                                    <th class="enable-mt text-center">Use MT</th>   
+                                    <th class="privatekey">MT provider</th>
+                                    <th class="description">Engine name</th>
+                                    <th class="enable-mt text-center">Use in this project</th>   
                                     <th class="action">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                     <tr id="activemt">
-                                        <td class="privatekey">MyMemory <span class="icon-info">
-                                            <div id="more-info" style="display: none;" class="more-info-tip">
-                                                <strong>ClientID:</strong> 19216894100<br />
-                                                <strong>Client Secret:</strong> 1023787<br />
-                                            </div>
-                                        </span>
-                                        </td>
+                                        <td class="privatekey">MyMemory</td>
+                                        <td class="description">MyMemory</td>
                                         <td class="enable-mt text-center"><input type="checkbox" checked="checked" /></td>   
                                         <td class="action">
                                             
@@ -290,15 +290,8 @@
                                     </tr>
                                     <tr id="inactivemt">
                                         <td class="privatekey">DeepLingo</td>
+                                        <td class="description">Euro Parl 2</td>
                                         <td class="enable-mt text-center"><input type="checkbox"/></td>   
-                                        <td class="action">
-                                            
-                                           <a class="btn pull-left"><span class="text">Delete</span></a>
-                                        </td>
-                                    </tr>
-                                    <tr id="inactivemt" class="pending">
-                                        <td class="privatekey">Microsoft Hub</td>
-                                        <td class="enable-mt text-center"><a href="#" target="_blank">Pending</a></td>   
                                         <td class="action">
                                             
                                            <a class="btn pull-left"><span class="text">Delete</span></a>
@@ -322,7 +315,7 @@
     <!-- fine popup glossary mgmt -->
 
     <template id="mt-provider-microsofthub">
-        <span class="required pull-left">Fields marked in <sup>*</sup> are required</span>
+        <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
         <label class="error">Engine name</label>

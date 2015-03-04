@@ -55,13 +55,22 @@ $.extend(UI, {
                 $(".step3").hide();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step2").show();
                 $(".step3").show();
+                $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
          $(".add-mt-engine").click(function() {
             $(this).hide();
+            $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
         });
+
+         
+
+
+
+        
 // fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
@@ -75,7 +84,8 @@ $.extend(UI, {
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
         });
 
         $('html').on('input', '#mt-provider-details input', function() {

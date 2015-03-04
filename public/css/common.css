@@ -553,6 +553,11 @@ float: left;
 position: relative;
 }
 
+.deleteTM span {
+    margin-right: 11px;
+font-size: 16px;
+margin-left: 2px;
+}
 
 #loginlink {
 		color:#fff;
@@ -855,6 +860,11 @@ box-shadow: 0 1px 2px #ccc;
 td.action {
 padding: 10px 5px!important;
 }
+
+.mgmt-table-mt th.description {
+width: 450px;
+}
+
 th.enable-mt {
 width: 190px;
 }
@@ -1224,10 +1234,10 @@ padding: 15px 70px 10px 10px;
 }
 
 select#mt_engine_int {
-    margin-left: 10px;
-    font-size: 14px;
+    font-size: 18px;
 height: 30px;
 margin-top: 5px;
+width: 100%;
 }
 
 
@@ -1303,9 +1313,7 @@ color: #bbb;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;}
 
-.required {
-margin-top: -10px;
-}
+
 
 .error{color:#FF3300; font-size:14px;}
 input.error {border: 1px solid red;}
@@ -1321,11 +1329,15 @@ span.mt-error-key {
 display: block;
 color: red;
 padding: 5px 0 10px;
-margin-left: 145px;
+margin-left: 175px;
 }
 
 .uploadtm.btn-ok {
     margin-bottom: 10px;
+
+}
+.mgmt-table-mt .uploadtm.btn-ok {
+    margin-left: 20px;
 }
 
 .mgmt-tm .btn-grey:last-child {
@@ -1721,7 +1733,6 @@ margin-top: 3px;
 
 .insert-tm .canceladdtmx {
     margin-bottom: 15px;
-    margin-right: 20px;
 }
 
 .nonumber {display:none;}
@@ -1925,8 +1936,8 @@ body.filterOpen .searchbox
     font-weight: bold;
 }
 
-.step2 label {
-    width: 130px!important;
+.insert-tm label {
+    width: 162px!important;
     text-align: right;
     font-size: 16px;
     display: inline-block;
@@ -1934,7 +1945,7 @@ body.filterOpen .searchbox
     margin-right: 10px;
 }
 
-.step2 input {
+.insert-tm input {
     border: 1px solid #999;
     background: #fff;
     height: auto;
@@ -1944,7 +1955,7 @@ body.filterOpen .searchbox
     white-space: initial;
     overflow: initial;
     text-overflow: initial;
-    width: 444px;
+    width: 312px;
     height: 25px;
     padding: 2px 5px;
     border-radius: 2px;
@@ -1963,14 +1974,11 @@ body.filterOpen .searchbox
 }
 
 
-.text-left {
-width: 60%;
-}
-
 .contact-box {
-    width: 25%;
 border: 1px dashed #ccc;
 height: 90px;
+border-radius: 4px;
+margin-top: 20px;
 padding: 2%;
 }
 
@@ -1978,19 +1986,23 @@ padding: 2%;
 margin-right: 14%;
 }
 
-.step2 {
+.step2,.step1 {
 clear: both;
 margin: 0 auto;
 overflow: hidden;
-width: 600px;
+width: 500px;
 }
 
 .step3 {
-border-top: 1px solid #ccc;
 margin: 0 auto;
 overflow: hidden;
-clear: left;
-padding: 20px 0 10px;
+width: 45%;
+border: 1px solid #ccc;
+background: #FAFAFA;
+border-radius: 4px;
+margin-top: -8%;
+margin-left: 3%;
+padding: 1%;
 }
 
 
@@ -2420,11 +2432,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-iiogpz');
-	src:url('fonts/icomoon.eot?#iefix-iiogpz') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-iiogpz') format('woff'),
-		url('fonts/icomoon.ttf?-iiogpz') format('truetype'),
-		url('fonts/icomoon.svg?-iiogpz#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-wlh2v9');
+	src:url('fonts/icomoon.eot?#iefix-wlh2v9') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-wlh2v9') format('woff'),
+		url('fonts/icomoon.ttf?-wlh2v9') format('truetype'),
+		url('fonts/icomoon.svg?-wlh2v9#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2577,12 +2589,12 @@ a.cancel-project:before, a.resume-project:before{
 	content: "\f014";
 }
 a.archive-project:before, a.unarchive-project:before {
-    content: "\e604";
+    content: "\e605";
     font-size: 14px;
 }
 
 .noticon:after, a.unarchive-project:after, a.resume-project:after {
-content: "\e605";
+content: "\e606";
 color: red;
 font-size: 16px;
 position: absolute;
@@ -2707,229 +2719,215 @@ text-align: left;
     content: "\e604";
 }
 
-.icon-minus:before {
-	content: "\e605";
-}
-
-.icon-drawer:before {
-	content: "\e604";
-    font-size: 14px;
-}
-
-.icon-download:before {
-	content: "\e602";
-}
-
-.icon-upload:before {
-	content: "\e601";
-
-}
-
-.icon-user2:before {
-	content: "\e600";
-}
-
-.icon-stop:before {
-	content: "\e603";
-}
-
 .icon-search:before {
-	content: "\f002";
+    content: "\f002";
 }
 
 .icon-envelope-o:before {
-	content: "\f003";
+    content: "\f003";
 }
 
 .icon-heart:before {
-	content: "\f004";
+    content: "\f004";
 }
 
 .icon-star:before {
-	content: "\f005";
-}
-
-.icon-refresh:before {
-	content: "\f021";
-    font-size: 14px;
-margin-right: -2px;
+    content: "\f005";
 }
 
 .icon-user:before {
-	content: "\f007";
+    content: "\f007";
 }
 
 .icon-check:before {
-	content: "\f00c";
+    content: "\f00c";
 }
 
 .icon-times:before {
-	content: "\f00d";
+    content: "\f00d";
 }
 
 .icon-power-off:before {
-	content: "\f011";
+    content: "\f011";
 }
 
 .icon-gear:before {
-	content: "\f013";
+    content: "\f013";
 }
 
 .icon-trash-o:before {
-	content: "\f014";
+    content: "\f014";
 }
 
-.icon-download2:before {
-	content: "\f019";
+.icon-refresh:before {
+    content: "\f021";
 }
 
 .icon-edit:before {
-	content: "\f044";
+    content: "\f044";
 }
 
 .icon-share-square-o:before {
-	content: "\f045";
+    content: "\f045";
 }
 
 .icon-play:before {
-	content: "\f04b";
+    content: "\f04b";
 }
 
 .icon-chevron-left:before {
-	content: "\f053";
+    content: "\f053";
 }
 
 .icon-chevron-right:before {
-	content: "\f054";
+    content: "\f054";
 }
 
 .icon-plus-circle:before {
-	content: "\f055";
+    content: "\f055";
 }
 
 .icon-minus-circle:before {
-	content: "\f056";
+    content: "\f056";
 }
 
 .icon-times-circle:before {
-	content: "\f057";
+    content: "\f057";
 }
 
 .icon-check-circle:before {
-	content: "\f058";
+    content: "\f058";
 }
 
 .icon-times-circle-o:before {
-	content: "\f05c";
+    content: "\f05c";
 }
 
 .icon-check-circle-o:before {
-	content: "\f05d";
-}
-
-.icon-ban:before {
-	content: "\f05e";
+    content: "\f05d";
 }
 
 .icon-expand:before {
-	content: "\f065";
+    content: "\f065";
 }
 
 .icon-compress:before {
-	content: "\f066";
+    content: "\f066";
 }
 
 .icon-plus:before {
-	content: "\f067";
-}
-
-.icon-minus2:before {
-	content: "\f068";
+    content: "\f067";
 }
 
 .icon-eye:before {
-	content: "\f06e";
+    content: "\f06e";
 }
 
 .icon-warning:before {
-	content: "\f071";
+    content: "\f071";
 }
 
 .icon-sign-in:before {
-	content: "\f090";
+    content: "\f090";
 }
 
 .icon-wrench:before {
-	content: "\f0ad";
+    content: "\f0ad";
 }
 
 .icon-tasks:before {
-	content: "\f0ae";
+    content: "\f0ae";
 }
 
 .icon-filter:before {
-	content: "\f0b0";
+    content: "\f0b0";
 }
 
 .icon-navicon:before {
-	content: "\f0c9";
+    content: "\f0c9";
 }
 
 .icon-google-plus-square:before {
-	content: "\f0d4";
+    content: "\f0d4";
 }
 
 .icon-unsorted:before {
-	content: "\f0dc";
+    content: "\f0dc";
 }
 
 .icon-sort-down:before {
-	content: "\f0dd";
+    content: "\f0dd";
 }
 
 .icon-sort-up:before {
-	content: "\f0de";
+    content: "\f0de";
 }
 
 .icon-exchange:before {
-	content: "\f0ec";
+    content: "\f0ec";
 }
 
 .icon-mail-reply:before {
-	content: "\f112";
+    content: "\f112";
 }
 
 .icon-code:before {
-	content: "\f121";
+    content: "\f121";
 }
 
 .icon-star-half-empty:before {
-	content: "\f123";
+    content: "\f123";
 }
 
 .icon-play-circle:before {
-	content: "\f144";
+    content: "\f144";
 }
 
 .icon-minus-square-o:before {
-	content: "\f147";
+    content: "\f147";
 }
 
 .icon-stack-exchange:before {
-	content: "\f18d";
+    content: "\f18d";
 }
 
 .icon-plus-square-o:before {
-	content: "\f196";
+    content: "\f196";
 }
 
 .icon-language:before {
-	content: "\f1ab";
+    content: "\f1ab";
 }
 
 .icon-paw:before {
-	content: "\f1b0";
+    content: "\f1b0";
 }
+
+.icon-drawer:before {
+    content: "\e605";
+}
+
+.icon-download:before {
+    content: "\e602";
+}
+
+.icon-upload:before {
+    content: "\e601";
+}
+
+.icon-user2:before {
+    content: "\e600";
+}
+
+.icon-minus:before {
+    content: "\e606";
+}
+
+.icon-stop:before {
+    content: "\e603";
+}
+
+
 
 
 
