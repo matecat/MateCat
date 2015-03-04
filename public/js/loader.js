@@ -22,8 +22,7 @@ Loader = {
 		'functions',
 		'ui.customization',
         'ui.review',
-        'ui.offline',
-        'ui.noconnection'
+        'ui.offline'
 	),
     other_components: new Array (
         'tm'

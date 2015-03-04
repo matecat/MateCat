@@ -767,7 +767,6 @@ color: white;
 
 .progress-extended{display:none}
 
-.error{color:#FF3300;text-align:left !Important;font-size:14px;}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
@@ -1084,7 +1083,11 @@ column-count: 4;
 }
 
 .popup-languages.slide, .popup-tm {
-width: 850px!important;
+width: 1000px!important;
+}
+
+.mgmt-tm .description {
+width: 370px!important;
 }
 
 }

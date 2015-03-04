@@ -5651,7 +5651,12 @@ $.extend(UI, {
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+			if((config.mt_enabled)&&(!config.id_translator)) {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+            } else {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
+
+            }
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
@@ -8928,13 +8933,13 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-        $(".mgmt-tm").click(function(e) {
-            e.preventDefault();
-            $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
-            $(".mgmt-table-mt").hide();
-            $(".mgmt-table-tm").show();
-        });
+   //     $(".mgmt-tm").click(function(e) {
+     //       e.preventDefault();
+       //     $(this).addClass("active");
+         //   $(".mgmt-mt").removeClass("active");
+           // $(".mgmt-table-mt").hide();
+//            $(".mgmt-table-tm").show();
+  //      });
         $(".tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
@@ -9200,11 +9205,12 @@ $.extend(UI, {
                 UI.filterInactiveTM($('#filterInactive').val());
             }
         }).on('click', '.mgmt-tm .downloadtmx', function(){
+            if($(this).hasClass('downloading')) return false;
             UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' ).addClass('downloading');
             $(this).prepend('<span class="uploadloader"></span>');
             var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
-            $(this).parents('tr').first().append(msg);
+            $(this).parents('td').first().append(msg);
         }).on('click', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
         });
@@ -9622,7 +9628,7 @@ $.extend(UI, {
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
-        $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
@@ -10162,7 +10168,6 @@ $.extend(UI, {
 
 
 });
-
 /*
  Component: ui.offline
  */
