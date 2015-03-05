@@ -1,11 +1,9 @@
 <?php
 /**
  * Class engine already included in tms.class.php
- * BUT Not remove include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
+ * BUT Not remove include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
  * Some PHP Version ( Ex: Debian 5.2.6-1+lenny13 does not work )
  */
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
@@ -77,17 +75,16 @@ class deleteContributionController extends ajaxController {
         $this->tm_keys      = $job_data[ 'tm_keys' ];
         $this->checkLogin();
 
-        $config = TMS::getConfigStruct();
+        $tms = Engine::getInstance( $job_data['id_tms'] );
+        $config = $tms->getConfigStruct();
+//        $config = TMS::getConfigStruct();
 
         $config[ 'segment' ]       = CatUtils::view2rawxliff( $this->source );
         $config[ 'translation' ]   = CatUtils::view2rawxliff( $this->target );
-        $config[ 'source_lang' ]   = $this->source_lang;
-        $config[ 'target_lang' ]   = $this->target_lang;
+        $config[ 'source' ]        = $this->source_lang;
+        $config[ 'target' ]        = $this->target_lang;
         $config[ 'email' ]         = "demo@matecat.com";
         $config[ 'id_user' ]       = array();
-
-
-        $tms = new TMS( $job_data['id_tms'] );
 
         //get job's TM keys
         try{

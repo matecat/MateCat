@@ -4,13 +4,10 @@ $skip = true;
 
 include '/var/www/cattool/inc/config.inc.php';
 @INIT::obtain();
-include_once INIT::$UTILS_ROOT . '/Utils.php';
-include_once INIT::$UTILS_ROOT . '/Log.php';
-include_once INIT::$MODEL_ROOT . '/Database.class.php';
 include_once INIT::$MODEL_ROOT . '/queries.php';
-include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
-include_once INIT::$UTILS_ROOT . '/engines/tms.class.php';
-include_once INIT::$UTILS_ROOT . '/engines/mt.class.php';
+include_once INIT::$UTILS_ROOT . '/Engines/engine.class.php';
+include_once INIT::$UTILS_ROOT . '/Engines/tms.class.php';
+include_once INIT::$UTILS_ROOT . '/Engines/mt.class.php';
 $db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 $db->debug = INIT::$DEBUG;
 $db->connect ();

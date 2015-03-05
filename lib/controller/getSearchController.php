@@ -2,8 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class getSearchController extends ajaxController {

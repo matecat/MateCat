@@ -1,6 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setContributionMTController extends ajaxController {
@@ -20,24 +18,34 @@ class setContributionMTController extends ajaxController {
 	public function __construct() {
 
 		parent::__construct();
-        //segment
-        $this->segment = $this->get_from_get_post( 'source' );
-        //translation
-        $this->translation = $this->get_from_get_post( 'target' );
-        //source
-        $this->source_lang = $this->get_from_get_post( 'source_lang' );
-        //target
-        $this->target_lang = $this->get_from_get_post( 'target_lang' );
-        //id of translation unit in workbench
-        $this->id_segment = $this->get_from_get_post( 'id_segment' );
-        //id job
-        $this->id_job = $this->get_from_get_post( 'id_job' );
-        //index of suggestions from which the translator drafted the contribution
-        $this->chosen_suggestion_index = $this->get_from_get_post( 'chosen_suggestion_index' );
-        //how much time it needed to translate this segment
-        $this->time_to_edit = $this->get_from_get_post( 'time_to_edit' );
 
-        $this->password = $this->get_from_get_post( 'password' );
+        $filterArgs = array(
+                'source'                  => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'target'                  => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'source_lang'             => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'target_lang'             => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'id_segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'id_job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'password'                => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'time_to_edit'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+        );
+
+        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$this->__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->segment                 = $this->__postInput[ 'source' ];
+        $this->target                  = $this->__postInput[ 'target' ];
+        $this->source_lang             = $this->__postInput[ 'source_lang' ];
+        $this->target_lang             = $this->__postInput[ 'target_lang' ];
+        $this->id_segment              = (int)$this->__postInput[ 'id_segment' ];
+        $this->id_job                  = (int)$this->__postInput[ 'id_job' ];
+        $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
+        $this->password                = $this->__postInput[ 'password' ];
+        $this->time_to_edit            = $this->__postInput[ 'time_to_edit' ];
 
     }
 
@@ -87,7 +95,7 @@ class setContributionMTController extends ajaxController {
 			return false;
 		}
 
-		$this->mt = new MT($job_data['id_mt_engine']);
+        $this->mt = Engine::getInstance( $job_data['id_mt_engine'] );
 
 		//array of storicised suggestions for current segment
         $this->suggestion_json_array = json_decode( getArrayOfSuggestionsJSON( $this->id_segment ), true );
@@ -102,7 +110,19 @@ class setContributionMTController extends ajaxController {
                     )
         );
         //send stuff
-        $outcome = $this->mt->set( CatUtils::view2rawxliff( $this->segment ), CatUtils::view2rawxliff( $this->translation ), $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra, $this->id_segment );
+
+        $config                  = $this->mt->getConfigStruct();
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->segment );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $this->translation );
+        $config[ 'source' ]      = $this->source_lang;
+        $config[ 'target' ]      = $this->target_lang;
+        $config[ 'email' ]       = "demo@matecat.com";
+        $config[ 'segid' ]       = $this->id_segment;
+        $config[ 'extra' ]       = $extra;
+        $config[ 'id_user' ]     = array("TESTKEY");
+
+
+        $outcome = $this->mt->set( $config );
 
         if ( $outcome->error->code < 0 ) {
             $this->result[ 'errors' ] = $outcome->error->get_as_array();
@@ -111,4 +131,3 @@ class setContributionMTController extends ajaxController {
 	}
 
 }
-?>

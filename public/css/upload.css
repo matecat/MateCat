@@ -1083,7 +1083,11 @@ column-count: 4;
 }
 
 .popup-languages.slide, .popup-tm {
-width: 850px!important;
+width: 1000px!important;
+}
+
+.mgmt-tm .description {
+width: 370px!important;
 }
 
 }

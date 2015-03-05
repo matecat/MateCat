@@ -1,8 +1,6 @@
 <?php
 set_time_limit(0);
 include "main.php";
-include INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
 
 define("PID_FOLDER", ".pidlist");
@@ -100,24 +98,23 @@ while (1) {
     $tms_match = array();
     $mt_res    = array();
 
-    $config = TMS::getConfigStruct();
-    $config[ 'segment' ]       = $text;
-    $config[ 'source_lang' ]   = $source;
-    $config[ 'target_lang' ]   = $target;
-    $config[ 'email' ]         = "tmanalysis@matecat.com";
+    $_config                  = array();
+    $_config[ 'segment' ]     = $text;
+    $_config[ 'source' ] = $source;
+    $_config[ 'target' ] = $source;
+    $_config[ 'email' ]       = "tmanalysis@matecat.com";
 
-//    $config[ 'id_user' ]       = $id_translator;
-    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($segment[ 'tm_keys' ], 'r', 'tm' );
+    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $segment[ 'tm_keys' ], 'r', 'tm' );
     if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
         foreach ( $tm_keys as $tm_key ) {
-            $config[ 'id_user' ][ ] = $tm_key->key;
+            $_config[ 'id_user' ][ ] = $tm_key->key;
         }
     }
-    
-    $config[ 'num_result' ]    = 3;
 
-    $id_mt_engine    = $segment[ 'id_mt_engine' ];
-    $id_tms          = $segment[ 'id_tms' ];
+    $_config[ 'num_result' ] = 3;
+
+    $id_mt_engine = $segment[ 'id_mt_engine' ];
+    $id_tms       = $segment[ 'id_tms' ];
 
     $_TMS = $id_tms; //request
 
@@ -125,30 +122,28 @@ while (1) {
      * Call Memory Server for matches if it's enabled
      */
     $tms_enabled = false;
-    if( $id_tms == 1 ){
+    if ( $_TMS == 1 ) {
         /**
          * MyMemory Enabled
          */
-        $config[ 'get_mt' ]  = true;
-        $config[ 'mt_only' ] = false;
-        if( $id_mt_engine != 1 ){
+        $_config[ 'get_mt' ]  = true;
+        $_config[ 'mt_only' ] = false;
+        if ( $id_mt_engine != 1 ) {
             /**
              * Don't get MT contribution from MyMemory ( Custom MT )
              */
-            $config[ 'get_mt' ] = false;
+            $_config[ 'get_mt' ] = false;
         }
-
-        $_TMS = $id_tms;
 
         $tms_enabled = true;
 
-    } elseif ( $id_tms == 0 && $id_mt_engine == 1 ) {
+    } elseif ( $_TMS == 0 && $id_mt_engine == 1 ) {
         /**
          * MyMemory disabled but MT Enabled and it is NOT a Custom one
          * So tell to MyMemory to get MT only
          */
-        $config[ 'get_mt' ]  = true;
-        $config[ 'mt_only' ] = true;
+        $_config[ 'get_mt' ]  = true;
+        $_config[ 'mt_only' ] = true;
 
         $_TMS = 1; /* MyMemory */
 
@@ -164,43 +159,43 @@ while (1) {
      * So don't worry, perform TMS Analysis
      *
      */
-    if( $tms_enabled ){
-        $tms = new TMS( $_TMS );
+    if ( $tms_enabled ) {
+        /**
+         * @var $tms Engines_MyMemory
+         */
+        $tms = Engine::getInstance( $_TMS );
+
+        $config = $tms->getConfigStruct();
+        $config = array_merge( $config, $_config );
+
         $tms_match = $tms->get( $config );
+
         $tms_match = $tms_match->get_matches_as_array();
+
     }
 
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
      */
-    $mt_match = "";
     if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
-        $mt = new MT($id_mt_engine);
-        $mt_result = $mt->get($text, $source, $target);
+        $mt     = Engine::getInstance( $id_mt_engine );
+        $config = $mt->getConfigStruct();
+        $config = array_merge( $config, $_config );
 
-        if ( $mt_result->error->code < 0) {
-            $mt_match = '';
-        } else {
-            $mt_match = $mt_result->translatedText;
-            $penalty = $mt->getPenalty();
-            $mt_score = 100 - $penalty;
-            $mt_score.="%";
+        $mt_result = $mt->get( $config );
 
-            $mt_match_res = new TMS_GET_MATCHES($text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
-
-            $mt_res = $mt_match_res->get_as_array();
-            $mt_res['sentence_confidence'] = $mt_result->sentence_confidence; //can be null
-
+        if ( @$mt_result[ 'error' ][ 'code' ] < 0 ) {
+            $mt_result = false;
         }
     }
 
-    if (!empty($tms_match)) {
+    if ( !empty( $tms_match ) ) {
         $matches = $tms_match;
     }
 
-    if (!empty($mt_match)) {
-        $matches[] = $mt_res;
-        usort($matches, "compareScore");
+    if ( !empty( $mt_result ) ) {
+        $matches[ ] = $mt_result;
+        usort( $matches, "compareScore" );
     }
 
     /**
