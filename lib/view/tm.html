@@ -279,22 +279,27 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="activemt" data-id="12345">
-                                        <td class="mt-provider">MyMemory</td>
-                                        <td class="engine-name">MyMemory</td>
-                                        <td class="enable-mt text-center"><input type="checkbox" checked="checked" /></td>   
+                                    <tal:block tal:repeat="engine mt_engines">
+                                    <tr class="activemt" data-id="${engine/id}">
+                                        <td class="mt-provider">${engine/name}</td>
+                                        <td class="engine-name">${engine/description}</td>
+                                        <td class="enable-mt text-center">
+                                            <input tal:condition="php: page == 'home'" type="checkbox" />
+                                            <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
+                                        </td>
                                         <td class="action">
                                             <a class="btn pull-left"><span class="text">Delete</span></a>
                                         </td>
                                     </tr>
-                                    <tr class="inactivemt" data-id="12345">
+                                    </tal:block>
+                                    <!-- tr class="inactivemt" data-id="12345">
                                         <td class="mt-provider">DeepLingo</td>
                                         <td class="engine-name">Euro Parl 2</td>
-                                        <td class="enable-mt text-center"><input type="checkbox"/></td>   
+                                        <td class="enable-mt text-center"><input type="checkbox"/></td>
                                         <td class="action">
-                                           <a class="btn pull-left"><span class="text">Delete</span></a>
+                                            <a class="btn pull-left"><span class="text">Delete</span></a>
                                         </td>
-                                    </tr>
+                                    </tr -->
                                 </tbody>
 
                             </table>

@@ -136,9 +136,7 @@ class newProjectController extends viewController {
         $this->generateAuthURL();
 
         list( $uid, $cid ) = $this->getLoginUserParams();
-
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
-
         $engineQuery         = new EnginesModel_EngineStruct();
         $engineQuery->type   = 'MT';
 
@@ -149,7 +147,6 @@ class newProjectController extends viewController {
         }
 
         $engineQuery->active = 1;
-
         $this->mt_engines = $engine->read( $engineQuery );
 
 //        $this->tms_engines = getEngines( 'TM' );
