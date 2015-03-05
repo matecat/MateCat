@@ -570,8 +570,8 @@ UI = {
 		});
 	},
 	getMoreSegments_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getMoreSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getMoreSegments');
 		where = d.data.where;
         section = $('section');
 		if (typeof d.data.files != 'undefined') {
@@ -699,8 +699,8 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
@@ -1447,8 +1447,8 @@ UI = {
 		});
 	},
 	setCurrentSegment_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setCurrentSegment');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
@@ -2635,8 +2635,8 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status, byStatus) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setTranslation');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
@@ -5721,8 +5721,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContribution');
 			}
 		});
 	},
@@ -5781,8 +5781,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContributionMT');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -5824,8 +5824,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 
@@ -7216,8 +7216,8 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {				
-				if(d.error.length) {
-					APP.alert({msg: d.error[0].message});
+				if(d.errors.length) {
+					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
 				$('#outer').empty();

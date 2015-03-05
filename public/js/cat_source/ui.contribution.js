@@ -342,8 +342,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContribution');
 			}
 		});
 	},
@@ -402,8 +402,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContributionMT');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -445,8 +445,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 
