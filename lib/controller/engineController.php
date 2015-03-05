@@ -140,6 +140,8 @@ class engineController extends ajaxController {
             return;
         }
 
+        $this->result['data']['id'] = $result->id;
+
     }
 
     /**
@@ -163,5 +165,8 @@ class engineController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
         }
 
+        $this->result['data']['id'] = $result->id;
+
     }
+
 } 

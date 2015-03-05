@@ -33,13 +33,24 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         }
 
         if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . (int)$obj->uid;
+
+            if( $obj->uid == 'NULL' ){
+                $where_conditions[ ] = "uid IS " . $obj->uid;
+            } elseif( is_numeric( $obj->uid ) ){
+                $where_conditions[ ] = "uid = " . (int)$obj->uid;
+            } elseif( $obj->uid == 'all' ) {
+                $where_conditions[ ] = "( uid = " . (int)$obj->uid . " OR uid IS NULL )";
+            }
+
         }
 
         if ( $obj->active !== null ) {
             $where_conditions[ ] = "active = " . (int)$obj->active;
         }
 
+        if ( $obj->type !== null ) {
+            $where_conditions[ ] = "type = '" . $this->con->escape( $obj->type ) . "'";
+        }
 
         if ( count( $where_conditions ) ) {
             $where_string = implode( " AND ", $where_conditions );
