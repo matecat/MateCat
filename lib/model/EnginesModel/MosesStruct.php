@@ -16,12 +16,6 @@
 class EnginesModel_MosesStruct extends EnginesModel_EngineStruct {
 
     /**
-     * @var string A string from the ones in Constants_EngineType
-     * @see Constants_EngineType
-     */
-    public $type = Constants_Engines::MT;
-
-    /**
      * @var string
      */
     public $description = "Moses Engine";
