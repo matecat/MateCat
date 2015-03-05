@@ -13,7 +13,7 @@
  * This class contains the default parameters for a Microsoft Hub Engine CREATION
  *
  */
-class Engine_MicrosoftHubStruct extends Engine_EngineStruct {
+class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
 
     /**
      * @var string A string from the ones in Constants_EngineType
@@ -62,7 +62,7 @@ class Engine_MicrosoftHubStruct extends Engine_EngineStruct {
     /**
      * @var int
      */
-    public $google_api_compliant_version;
+    public $google_api_compliant_version = 2;
 
     /**
      * @var int
@@ -70,16 +70,11 @@ class Engine_MicrosoftHubStruct extends Engine_EngineStruct {
     public $penalty = 14;
 
     /**
-     * @var int 0 or 1
-     */
-    public $active = 1;
-
-    /**
      * An empty struct
-     * @return Engine_EngineStruct
+     * @return EnginesModel_EngineStruct
      */
     public static function getStruct() {
-        return new Engine_MicrosoftHubStruct();
+        return new EnginesModel_MicrosoftHubStruct();
     }
 
 }

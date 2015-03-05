@@ -171,6 +171,7 @@ class getContributionController extends ajaxController {
              */
             $tms = Engine::getInstance( $_TMS );
 
+            $config                    = $tms->getConfigStruct();
             $config[ 'segment' ]       = $this->text;
             $config[ 'source' ]        = $this->source;
             $config[ 'target' ]        = $this->target;
@@ -222,7 +223,7 @@ class getContributionController extends ajaxController {
 
             $mt_result = $mt->get( $config );
 
-            if ( $mt_result['error']['code'] < 0 ) {
+            if ( isset( $mt_result['error']['code'] ) ) {
                 $mt_result = false;
             }
 

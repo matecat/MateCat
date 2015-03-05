@@ -11,7 +11,7 @@
 abstract class Engines_AbstractEngine {
 
     /**
-     * @var Engine_EngineStruct
+     * @var EnginesModel_EngineStruct
      */
     protected $engineRecord;
 

@@ -217,9 +217,10 @@ while ( 1 ) {
 
         $mt_result = $mt->get( $config );
 
-        if ( @$mt_result[ 'error' ][ 'code' ] < 0 ) {
+        if ( isset( $mt_result['error']['code'] ) ) {
             $mt_result = false;
         }
+
     }
 
     if ( !empty( $tms_match ) ) {

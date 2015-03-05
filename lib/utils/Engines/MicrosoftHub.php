@@ -205,14 +205,14 @@ TAG;
 
         $record = clone( $this->engineRecord );
 
-        $engineDAO        = new Engine_EngineDAO( Database::obtain() );
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
 
         /**
          * Use a generic Engine and not Engine_MicrosoftHubStruct
          * because the Engine Factory Class built the query as generic engine
          *
          */
-        $engineStruct     = Engine_EngineStruct::getStruct();
+        $engineStruct     = EnginesModel_MicrosoftHubStruct::getStruct();
         $engineStruct->id = $record->id;
 
         $engineDAO->destroyCache( $engineStruct );
