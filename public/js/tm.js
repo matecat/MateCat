@@ -23,13 +23,15 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-         $(".mgmt-tm").click(function(e) {
+         $(".popup-tm .mgmt-tm").click(function(e) {
+             e.preventDefault();
               $(this).addClass("active");
               $(".mgmt-mt").removeClass("active");
               $(".mgmt-table-mt").hide();
               $(".mgmt-table-tm").show();
        });
-        $(".tm-mgmt").click(function(e) {
+        $(".popup-tm .tm-mgmt").click(function(e) {
+            e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
             $(".mgmt-table-tm").hide();
@@ -55,13 +57,23 @@ $.extend(UI, {
                 $(".step3").hide();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step2").show();
                 $(".step3").show();
+                $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
          $(".add-mt-engine").click(function() {
+             console.log($(this));
             $(this).hide();
+            $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
         });
+
+         
+
+
+
+        
 // fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
@@ -75,7 +87,8 @@ $.extend(UI, {
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
         });
 
         $('html').on('input', '#mt-provider-details input', function() {
@@ -413,11 +426,15 @@ $.extend(UI, {
 
 
     },
-    openLanguageResourcesPanel: function() {
+    openLanguageResourcesPanel: function(tab, elToClick) {
+        tab = tab || 'tm';
+        elToClick = elToClick || null;
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
+        $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+        if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {

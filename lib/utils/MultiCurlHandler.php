@@ -102,6 +102,7 @@ class MultiCurlHandler {
 
         do {
             curl_multi_exec( $this->multi_handler, $still_running );
+            curl_multi_select( $this->multi_handler ); //Prevent eating CPU
         } while ( $still_running > 0 );
 
         foreach ( $this->curl_handlers as $tokenHash => $curl_resource ) {
@@ -114,7 +115,10 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ]               = curl_getinfo( $curl_resource, CURLINFO_EFFECTIVE_URL );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_upload' ]                 = curl_getinfo( $curl_resource, CURLINFO_SIZE_UPLOAD );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]               = curl_getinfo( $curl_resource, CURLINFO_SIZE_DOWNLOAD );
-            Log::doLog( "Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
+            Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
+
+//            Log::doLog( curl_getinfo($curl_resource) );
+
         }
 
     }
@@ -225,6 +229,7 @@ class MultiCurlHandler {
         $res = array();
         $res['httpcode'] = curl_getinfo( $this->curl_handlers[ $tokenHash ], CURLINFO_HTTP_CODE );
         $res['error']    = curl_error( $this->curl_handlers[ $tokenHash ] );
+        $res['errno']    = curl_errno( $this->curl_handlers[ $tokenHash ] );
         return $res;
     }
 

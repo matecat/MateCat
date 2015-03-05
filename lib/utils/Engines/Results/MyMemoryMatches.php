@@ -1,5 +1,6 @@
 <?
-class TMS_GET_MATCHES {
+
+class Engines_Results_MyMemoryMatches {
 
     public $id;
     public $raw_segment;
@@ -89,4 +90,3 @@ class TMS_GET_MATCHES {
     }
 
 }
-?>

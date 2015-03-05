@@ -570,8 +570,8 @@ UI = {
 		});
 	},
 	getMoreSegments_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getMoreSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getMoreSegments');
 		where = d.data.where;
         section = $('section');
 		if (typeof d.data.files != 'undefined') {
@@ -699,8 +699,8 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
@@ -1447,8 +1447,8 @@ UI = {
 		});
 	},
 	setCurrentSegment_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setCurrentSegment');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
@@ -2716,8 +2716,8 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status, byStatus) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setTranslation');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
@@ -5589,8 +5589,8 @@ $.extend(UI, {
 			},
 			success: function(d) {
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
@@ -5850,7 +5850,7 @@ $.extend(UI, {
                 UI.executingSetContribution = false;
                 UI.execSetContributionTail();
 				if (d.error.length)
-					UI.processErrors(d.error, 'setContribution');
+					UI.processErrors(d.errors, 'setContribution');
 			}
 		});
 	},
@@ -5927,7 +5927,7 @@ $.extend(UI, {
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
 				if (d.error.length)
-					UI.processErrors(d.error, 'setContributionMT');
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -5969,8 +5969,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 
@@ -7361,8 +7361,8 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {				
-				if(d.error.length) {
-					APP.alert({msg: d.error[0].message});
+				if(d.errors.length) {
+					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
 				$('#outer').empty();
@@ -9078,14 +9078,14 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-   //     $(".mgmt-tm").click(function(e) {
-     //       e.preventDefault();
-       //     $(this).addClass("active");
-         //   $(".mgmt-mt").removeClass("active");
-           // $(".mgmt-table-mt").hide();
-//            $(".mgmt-table-tm").show();
-  //      });
-        $(".tm-mgmt").click(function(e) {
+         $(".popup-tm .mgmt-tm").click(function(e) {
+             e.preventDefault();
+              $(this).addClass("active");
+              $(".mgmt-mt").removeClass("active");
+              $(".mgmt-table-mt").hide();
+              $(".mgmt-table-tm").show();
+       });
+        $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
@@ -9104,7 +9104,7 @@ $.extend(UI, {
         });
 
         $("#mt_engine_int").change(function() {
-            $(".step2").show();
+            $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
                 $('.step2 .fields').html('');
@@ -9112,9 +9112,23 @@ $.extend(UI, {
                 $(".step3").hide();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step2").show();
                 $(".step3").show();
+                $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
+         $(".add-mt-engine").click(function() {
+             console.log($(this));
+            $(this).hide();
+            $("#add-mt-provider-confirm").addClass('hide');
+            $(".insert-tm").removeClass('hide');
+        });
+
+         
+
+
+
+        
 // fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
@@ -9128,7 +9142,8 @@ $.extend(UI, {
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
         });
 
         $('html').on('input', '#mt-provider-details input', function() {
@@ -9430,6 +9445,8 @@ $.extend(UI, {
             $(".loginpopup").show();
         });
 
+       
+
 //    	$('#sort td:first').addClass('index');
 
 
@@ -9464,11 +9481,15 @@ $.extend(UI, {
 
 
     },
-    openLanguageResourcesPanel: function() {
+    openLanguageResourcesPanel: function(tab, elToClick) {
+        tab = tab || 'tm';
+        elToClick = elToClick || null;
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
+        $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+        if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {
@@ -9734,14 +9755,15 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-//                '        <a class="btn-grey pull-left disabletm">' +
-//                '            <span class="text stopuse">Stop Use</span>' +
-//                '        </a>' +
-                '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Import TMX</span>' +
-                '        </a>' +
-                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Export TMX</span></a>' +
-                '    </td>' +
+                '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
+                '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '              <ul class="dropdown pull-left">' +
+                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
+                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
+                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
+                '               </ul>'+ 
+                '                    </div>'+    
+                '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
         if(uploading) {
