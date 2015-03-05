@@ -280,7 +280,7 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
                                 </thead>
                                 <tbody>
                                     <tal:block tal:repeat="engine mt_engines">
-                                    <tr class="activemt" data-id="${engine/id}">
+                                    <tr class="" data-id="${engine/id}">
                                         <td class="mt-provider">${engine/name}</td>
                                         <td class="engine-name">${engine/description}</td>
                                         <td class="enable-mt text-center">
@@ -292,7 +292,7 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
                                         </td>
                                     </tr>
                                     </tal:block>
-                                    <!-- tr class="inactivemt" data-id="12345">
+                                    <!-- tr class="" data-id="12345">
                                         <td class="mt-provider">DeepLingo</td>
                                         <td class="engine-name">Euro Parl 2</td>
                                         <td class="enable-mt text-center"><input type="checkbox"/></td>
