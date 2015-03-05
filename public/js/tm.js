@@ -363,16 +363,19 @@ $.extend(UI, {
             $(this).toggleClass('clicked');
         });
 
-        $(".add-tm").click(function() {
+        $(".add-mt-engine").click(function() {
             $(this).hide();
-            $(".mgmt-tm tr.new").removeClass('hide').show();
+            $(".mgmt-table-mt tr.new").removeClass('hide').show();
         });
-
+        $(".mgmt-table-tm .add-tm").click(function() {
+            $(this).hide();
+            $(".mgmt-table-tm tr.new").removeClass('hide').show();
+        });
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
             $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
-            $(".add-tm").show();
+            $(".mgmt-table-tm .add-tm").show();
             UI.clearAddTMRow();
         });
 
