@@ -21,14 +21,14 @@ class Engine {
             throw new Exception( "Missing id engineRecord", -1 );
         }
 
-        $engineDAO        = new Engine_EngineDAO( Database::obtain() );
-        $engineStruct     = Engine_EngineStruct::getStruct();
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineStruct     = EnginesModel_EngineStruct::getStruct();
         $engineStruct->id = $id;
 
         $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
 
         /**
-         * @var $engineRecord Engine_EngineStruct
+         * @var $engineRecord EnginesModel_EngineStruct
          */
         $engineRecord = @$eng[0];
 

@@ -20,9 +20,6 @@ class engineController extends ajaxController {
 
     public function __construct() {
 
-        $this->result[ 'code' ]       = 0;
-        $this->result[ 'data' ]       = "KO";
-
         //Session Enabled
         $this->checkLogin();
         //Session Disabled
@@ -117,12 +114,13 @@ class engineController extends ajaxController {
                 /**
                  * Create a record of type MicrosoftHub
                  */
-                $newEngine = Engine_MicrosoftHubStruct::getStruct();
+                $newEngine = EnginesModel_MicrosoftHubStruct::getStruct();
 
                 $newEngine->name                                = $this->name;
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->clientID;
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->clientSecret;
+                $newEngine->extra_parameters[ 'active' ]        = 1;
 
                 break;
             default:
@@ -134,16 +132,13 @@ class engineController extends ajaxController {
             return;
         }
 
-        $engineDAO = new Engine_EngineDAO( Database::obtain() );
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result = $engineDAO->create( $newEngine );
 
-        if(! $result instanceof Engine_EngineStruct){
+        if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
             return;
         }
-
-        $this->result[ 'code' ]       = 1;
-        $this->result[ 'data' ]       = "OK";
 
     }
 
@@ -151,21 +146,22 @@ class engineController extends ajaxController {
      * This method deletes an engine from a user's keyring
      */
     private function delete(){
-        if(empty($this->id)){
-            $this->result['errors'][] = array( 'code' => -5, 'message' => "Engine id required" );
+
+        if ( empty( $this->id ) ) {
+            $this->result[ 'errors' ][ ] = array( 'code' => -5, 'message' => "Engine id required" );
             return;
         }
 
-        $engineToBeDeleted = Engine_EngineStruct::getStruct();
+        $engineToBeDeleted = EnginesModel_EngineStruct::getStruct();
         $engineToBeDeleted->id = $this->id;
         $engineToBeDeleted->uid = $this->uid;
 
-
-        $engineDAO = new Engine_EngineDAO( Database::obtain() );
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result = $engineDAO->delete( $engineToBeDeleted );
 
-        if(! $result instanceof Engine_EngineStruct){
+        if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
         }
+
     }
 } 

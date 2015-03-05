@@ -6,23 +6,23 @@
  * Date: 23/02/15
  * Time: 14.55
  */
-class Engine_EngineDAO extends DataAccess_AbstractDao {
+class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     const TABLE = "engines";
 
-    const STRUCT_TYPE = "Engine_EngineStruct";
+    const STRUCT_TYPE = "EnginesModel_EngineStruct";
 
 
     /**
      * Build the query,
      * needed for get the exact query when invalidating cache
      *
-     * @param Engine_EngineStruct $obj
+     * @param EnginesModel_EngineStruct $obj
      *
      * @return string
      * @throws Exception
      */
-    protected function _buildQueryForEngine( Engine_EngineStruct $obj  ){
+    protected function _buildQueryForEngine( EnginesModel_EngineStruct $obj  ){
 
         $where_conditions = array();
         $query            = "SELECT *
@@ -52,12 +52,12 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Engine_EngineStruct $obj
+     * @param EnginesModel_EngineStruct $obj
      *
-     * @return Engine_EngineStruct|null
+     * @return EnginesModel_EngineStruct|null
      * @throws Exception
      */
-    public function create( Engine_EngineStruct $obj ) {
+    public function create( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validateNotNullFields( $obj );
@@ -107,12 +107,12 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Engine_EngineStruct $obj
+     * @param EnginesModel_EngineStruct $obj
      *
      * @return array|void
      * @throws Exception
      */
-    public function read( Engine_EngineStruct $obj ) {
+    public function read( EnginesModel_EngineStruct $obj ) {
 
         $obj = $this->sanitize( $obj );
 
@@ -129,12 +129,12 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
     /**
      * Destroy a cached object
      *
-     * @param Engine_EngineStruct $obj
+     * @param EnginesModel_EngineStruct $obj
      *
      * @return bool
      * @throws Exception
      */
-    public function destroyCache( Engine_EngineStruct $obj ){
+    public function destroyCache( EnginesModel_EngineStruct $obj ){
 
         $obj = $this->sanitize( $obj );
 
@@ -146,7 +146,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
 
     }
 
-    public function update( Engine_EngineStruct $obj ) {
+    public function update( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -200,7 +200,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return null;
     }
 
-    public function delete( Engine_EngineStruct $obj ) {
+    public function delete( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -228,7 +228,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
     /**
      * @param array $array_result
      *
-     * @return array|Engine_EngineStruct|Engine_EngineStruct[]
+     * @return array|EnginesModel_EngineStruct|EnginesModel_EngineStruct[]
      */
     protected function _buildResult( $array_result ) {
         $result = array();
@@ -253,7 +253,7 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
                     'uid'                          => $item[ 'uid' ]
             );
 
-            $obj = new Engine_EngineStruct( $build_arr );
+            $obj = new EnginesModel_EngineStruct( $build_arr );
 
             $result[ ] = $obj;
         }
@@ -262,9 +262,9 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Engine_EngineStruct $input
+     * @param EnginesModel_EngineStruct $input
      *
-     * @return Engine_EngineStruct
+     * @return EnginesModel_EngineStruct
      * @throws Exception
      */
     public function sanitize( $input ) {
@@ -287,9 +287,9 @@ class Engine_EngineDAO extends DataAccess_AbstractDao {
         return $input;
     }
 
-    protected function _validateNotNullFields( Engine_EngineStruct $obj ) {
+    protected function _validateNotNullFields( EnginesModel_EngineStruct $obj ) {
         /**
-         * @var $obj Engine_EngineStruct
+         * @var $obj EnginesModel_EngineStruct
          */
         if ( empty( $obj->base_url ) ) {
             throw new Exception( "Base URL cannot be null" );

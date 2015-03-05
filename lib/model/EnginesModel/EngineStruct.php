@@ -6,7 +6,7 @@
  * Date: 23/02/15
  * Time: 14.54
  */
-class Engine_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class EnginesModel_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, ArrayAccess {
 
     /**
      * @var int
@@ -88,10 +88,10 @@ class Engine_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements 
 
     /**
      * An empty struct
-     * @return Engine_EngineStruct
+     * @return EnginesModel_EngineStruct
      */
     public static function getStruct() {
-        return new Engine_EngineStruct();
+        return new EnginesModel_EngineStruct();
     }
 
     /**
