@@ -1146,18 +1146,20 @@ float: none!important;
 		margin-left: 10px;
 	}
 	
-	#myTab  {
-background: #4D4D4D;
-display: block;
-text-align: left;
-width: 100%;
-border-bottom: 1px solid #666;
-/*padding-top: 5px;*/
+.mgmt-panel-tm .nav-tabs
+{
+    background: #4D4D4D;
+    display: block;
+    text-align: left;
+    width: 100%;
+    border-bottom: 1px solid #666;
+    /*padding-top: 5px;*/
 }
 
-    .manage .searchbox {	
-	    min-height: 20px;
-	    height: 48px;
+.manage .searchbox
+{
+    min-height: 20px;
+    height: 48px;
 }
 
 .searchbox, .mgmt-panel-tm, .mgmt-panel-gl

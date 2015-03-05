@@ -118,8 +118,8 @@ $.extend(UI, {
 			},
 			success: function(d) {
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
