@@ -225,6 +225,30 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         return null;
     }
 
+    public function disable( EnginesModel_EngineStruct $obj ){
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+        $query = "UPDATE " . self::TABLE . " SET active = 0 WHERE id = %d and uid = %d";
+
+        $query = sprintf(
+                $query,
+                $obj->id,
+                $obj->uid
+        );
+
+        $this->con->query( $query );
+
+        $this->_checkForErrors();
+
+        if ( $this->con->affected_rows > 0 ) {
+            return $obj;
+        }
+
+        return null;
+    }
+
     /**
      * @param array $array_result
      *

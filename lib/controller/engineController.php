@@ -157,7 +157,7 @@ class engineController extends ajaxController {
         $engineToBeDeleted->uid = $this->uid;
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-        $result = $engineDAO->delete( $engineToBeDeleted );
+        $result = $engineDAO->disable( $engineToBeDeleted );
 
         if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
