@@ -8933,15 +8933,13 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-   //     $(".mgmt-tm").click(function(e) {
-     //       e.preventDefault();
-       //     $(this).addClass("active");
-         //   $(".mgmt-mt").removeClass("active");
-           // $(".mgmt-table-mt").hide();
-//            $(".mgmt-table-tm").show();
-  //      });
+         $(".mgmt-tm").click(function(e) {
+              $(this).addClass("active");
+              $(".mgmt-mt").removeClass("active");
+              $(".mgmt-table-mt").hide();
+              $(".mgmt-table-tm").show();
+       });
         $(".tm-mgmt").click(function(e) {
-            e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
             $(".mgmt-table-tm").hide();
@@ -8959,7 +8957,7 @@ $.extend(UI, {
         });
 
         $("#mt_engine_int").change(function() {
-            $(".step2").show();
+            $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
                 $('.step2 .fields').html('');
@@ -8967,9 +8965,22 @@ $.extend(UI, {
                 $(".step3").hide();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step2").show();
                 $(".step3").show();
+                $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
+         $(".add-mt-engine").click(function() {
+            $(this).hide();
+            $("#add-mt-provider-confirm").addClass('hide');
+            $(".insert-tm").removeClass('hide');
+        });
+
+         
+
+
+
+        
 // fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
@@ -8983,7 +8994,8 @@ $.extend(UI, {
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
         });
 
         $('html').on('input', '#mt-provider-details input', function() {
@@ -9284,6 +9296,8 @@ $.extend(UI, {
         $("#sign-in").click(function() {
             $(".loginpopup").show();
         });
+
+       
 
 //    	$('#sort td:first').addClass('index');
 
@@ -9589,14 +9603,15 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-//                '        <a class="btn-grey pull-left disabletm">' +
-//                '            <span class="text stopuse">Stop Use</span>' +
-//                '        </a>' +
-                '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Import TMX</span>' +
-                '        </a>' +
-                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Export TMX</span></a>' +
-                '    </td>' +
+                '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
+                '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '              <ul class="dropdown pull-left">' +
+                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
+                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
+                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
+                '               </ul>'+ 
+                '                    </div>'+    
+                '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
         if(uploading) {
