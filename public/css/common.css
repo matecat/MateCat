@@ -1638,7 +1638,7 @@ margin-bottom: 10px;
 color: #999;}
 #activetm tr.ownergroup td.dragrow .status {border: none; cursor:auto;}
 #activetm tr.uploadfile td {background: #fff;}
-#inactivetm td, .inactivemt td {background: #f3f3f3 !important;}
+#inactivetm td, table.mgmt-mt td {background: #f3f3f3;}
 .mgmt-tm th, .mgmt-mt th {
     padding: 8px 5px;
     background: #fff;
