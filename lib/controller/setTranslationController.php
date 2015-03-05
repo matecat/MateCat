@@ -79,11 +79,11 @@ class setTranslationController extends ajaxController {
         }
 
         if ( empty( $this->id_segment ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -2, "message" => "missing id_job" );
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing id_job" );
         } else {
 
             //get Job Info, we need only a row of jobs ( split )
@@ -100,26 +100,26 @@ class setTranslationController extends ajaxController {
 
             if ( $errno != 0 ) {
                 $msg                        = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-                $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
 
                 throw new Exception( $msg, -1 );
             }
 
             //add check for job status archived.
             if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
-                $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "job archived" );
+                $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
             if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
-                $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+                $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
             }
 
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
-        if ( !empty( $this->result[ 'error' ] ) ) {
+        if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             throw new Exception( $msg, -1 );
         }
@@ -127,7 +127,7 @@ class setTranslationController extends ajaxController {
         if ( is_null( $this->translation ) || $this->translation === '' ) {
             Log::doLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
 
-            // won't save empty translation but there is no need to return an error
+            // won't save empty translation but there is no need to return an errors
             throw new Exception( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
         }
 
@@ -205,7 +205,7 @@ class setTranslationController extends ajaxController {
             $res = addTranslation( $_Translation );
 
             if( $res < 0 ){
-                $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
                 $db->rollback();
                 return $res;
             }
@@ -239,8 +239,8 @@ class setTranslationController extends ajaxController {
 
         $res = CatUtils::addSegmentTranslation( $_Translation );
 
-        if ( !empty( $res[ 'error' ] ) ) {
-            $this->result[ 'error' ] = $res[ 'error' ];
+        if ( !empty( $res[ 'errors' ] ) ) {
+            $this->result[ 'errors' ] = $res[ 'errors' ];
 
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
@@ -326,7 +326,7 @@ class setTranslationController extends ajaxController {
             try{
                 $newTotals = $counter->updateDB( $newValues );
             } catch ( Exception $e ){
-                $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
 //                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
 //                $x1 = explode( "\n" , var_export( $old_translation, true) );
 //                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );

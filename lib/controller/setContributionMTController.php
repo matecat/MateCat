@@ -51,28 +51,28 @@ class setContributionMTController extends ajaxController {
 
 	public function doAction() {
 		if (empty($this->segment)) {
-			$this->result['error'][] = array("code" => -1, "message" => "missing source segment");
+			$this->result['errors'][] = array("code" => -1, "message" => "missing source segment");
 		}
 
 		if (empty($this->translation)) {
-			$this->result['error'][] = array("code" => -2, "message" => "missing target translation");
+			$this->result['errors'][] = array("code" => -2, "message" => "missing target translation");
 		}
 
 
 		if (empty($this->source_lang)) {
-			$this->result['error'][] = array("code" => -3, "message" => "missing source lang");
+			$this->result['errors'][] = array("code" => -3, "message" => "missing source lang");
 		}
 
 		if (empty($this->target_lang)) {
-			$this->result['error'][] = array("code" => -4, "message" => "missing target lang");
+			$this->result['errors'][] = array("code" => -4, "message" => "missing target lang");
 		}
 
 		if (empty($this->time_to_edit)) {
-			$this->result['error'][] = array("code" => -5, "message" => "missing time to edit");
+			$this->result['errors'][] = array("code" => -5, "message" => "missing time to edit");
 		}
 
 		if (empty($this->id_segment)) {
-			$this->result['error'][] = array("code" => -6, "message" => "missing segment id");
+			$this->result['errors'][] = array("code" => -6, "message" => "missing segment id");
 		}
 
         //get Job Infos, we need only a row of jobs ( split )
@@ -81,7 +81,7 @@ class setContributionMTController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
-            $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
+            $this->result['errors'][] = array( "code" => -10, "message" => "wrong password" );
 
             $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
