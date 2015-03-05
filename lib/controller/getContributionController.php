@@ -86,7 +86,7 @@ class getContributionController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
 
             return -1;
         }
@@ -198,7 +198,7 @@ class getContributionController extends ajaxController {
 
             }
             catch(Exception $e){
-                $this->result[ 'error' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+                $this->result[ 'errors' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
                 return;
             }
 
