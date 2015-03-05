@@ -33,13 +33,24 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         }
 
         if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . (int)$obj->uid;
+
+            if( $obj->uid == 'NULL' ){
+                $where_conditions[ ] = "uid IS " . $obj->uid;
+            } elseif( is_numeric( $obj->uid ) ){
+                $where_conditions[ ] = "uid = " . (int)$obj->uid;
+            } elseif( $obj->uid == 'all' ) {
+                $where_conditions[ ] = "( uid = " . (int)$obj->uid . " OR uid IS NULL )";
+            }
+
         }
 
         if ( $obj->active !== null ) {
             $where_conditions[ ] = "active = " . (int)$obj->active;
         }
 
+        if ( $obj->type !== null ) {
+            $where_conditions[ ] = "type = '" . $this->con->escape( $obj->type ) . "'";
+        }
 
         if ( count( $where_conditions ) ) {
             $where_string = implode( " AND ", $where_conditions );
@@ -213,6 +224,30 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 $obj->uid
         );
 
+
+        $this->con->query( $query );
+
+        $this->_checkForErrors();
+
+        if ( $this->con->affected_rows > 0 ) {
+            return $obj;
+        }
+
+        return null;
+    }
+
+    public function disable( EnginesModel_EngineStruct $obj ){
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+        $query = "UPDATE " . self::TABLE . " SET active = 0 WHERE id = %d and uid = %d";
+
+        $query = sprintf(
+                $query,
+                $obj->id,
+                $obj->uid
+        );
 
         $this->con->query( $query );
 

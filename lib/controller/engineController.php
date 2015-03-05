@@ -118,6 +118,7 @@ class engineController extends ajaxController {
 
                 $newEngine->name                                = $this->name;
                 $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->clientID;
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->clientSecret;
                 $newEngine->extra_parameters[ 'active' ]        = 1;
@@ -140,6 +141,8 @@ class engineController extends ajaxController {
             return;
         }
 
+        $this->result['data']['id'] = $result->id;
+
     }
 
     /**
@@ -157,11 +160,14 @@ class engineController extends ajaxController {
         $engineToBeDeleted->uid = $this->uid;
 
         $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-        $result = $engineDAO->delete( $engineToBeDeleted );
+        $result = $engineDAO->disable( $engineToBeDeleted );
 
         if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
         }
 
+        $this->result['data']['id'] = $result->id;
+
     }
+
 } 

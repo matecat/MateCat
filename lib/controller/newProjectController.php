@@ -2,7 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
-
 include_once INIT::$UTILS_ROOT . "/Utils.php";
 
 
@@ -136,11 +135,21 @@ class newProjectController extends viewController {
 
         $this->generateAuthURL();
 
+        list( $uid, $cid ) = $this->getLoginUserParams();
+        $engine = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineQuery         = new EnginesModel_EngineStruct();
+        $engineQuery->type   = 'MT';
 
-        //TODO Custom MT add cache for engines if user is logged
+        if ( @(bool)$_GET[ 'amt' ] == true ) {
+            $engineQuery->uid    = 'all';
+        } else {
+            $engineQuery->uid    = $uid;
+        }
 
-        $this->mt_engines  = getEngines( 'MT' );
-        $this->tms_engines = getEngines( 'TM' );
+        $engineQuery->active = 1;
+        $this->mt_engines = $engine->read( $engineQuery );
+
+//        $this->tms_engines = getEngines( 'TM' );
 
         if ( $this->isLoggedIn() ) {
 
@@ -272,13 +281,8 @@ class newProjectController extends viewController {
 
         $this->template->upload_session_id = $this->guid;
 
-        if ( @(bool)$_GET[ 'amt' ] == true ) {
-            $this->template->mt_engines = $this->mt_engines;
-        } else {
-            $this->template->mt_engines = array();
-        }
-
-        $this->template->tms_engines        = $this->tms_engines;
+        $this->template->mt_engines         = $this->mt_engines;
+//        $this->template->tms_engines        = $this->tms_engines;
         $this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
 
         $this->template->isUploadTMXAllowed = false;
