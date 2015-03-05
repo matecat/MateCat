@@ -22,7 +22,6 @@ class engineController extends ajaxController {
 
         $this->result[ 'code' ]       = 0;
         $this->result[ 'data' ]       = "KO";
-        unset($this->result['error']);
 
         //Session Enabled
         $this->checkLogin();

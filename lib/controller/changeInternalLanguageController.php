@@ -21,15 +21,15 @@ class changeInternalLanguageController extends ajaxController {
 	public function doAction() {
 
 		if (empty($this->file_name)) {
-			$this->result['error'][] = array("code" => -1, "message" => "missing file_name");
+			$this->result['errors'][] = array("code" => -1, "message" => "missing file_name");
 		}
 
 		if (empty($this->source_language)) {
-			$this->result['error'][] = array("code" => -2, "message" => "missing source_language");
+			$this->result['errors'][] = array("code" => -2, "message" => "missing source_language");
 		}
 
 		if (empty($this->target_language)) {
-			$this->result['error'][] = array("code" => -3, "message" => "missing target_language");
+			$this->result['errors'][] = array("code" => -3, "message" => "missing target_language");
 		}
 
 		$intDir=INIT::$UPLOAD_REPOSITORY.'/'.$_COOKIE['upload_session'];
@@ -37,7 +37,7 @@ class changeInternalLanguageController extends ajaxController {
 
 		if (file_exists($filename)) {
 		} else {
-			$this->result['error'][] = array("code" => -4, "message" => "file non trovato");
+			$this->result['errors'][] = array("code" => -4, "message" => "file non trovato");
 		}
 
 		$preg_file_html = '|(<file original=".*?" source-language=")(.*?)(" datatype=".*?" target-language=")(.*?)(">)|m';
