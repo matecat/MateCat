@@ -133,8 +133,8 @@ while ( 1 ) {
 
     $_config                  = array();
     $_config[ 'segment' ]     = $text;
-    $_config[ 'source' ] = $source;
-    $_config[ 'target' ] = $target;
+    $_config[ 'source' ]      = $source;
+    $_config[ 'target' ]      = $target;
     $_config[ 'email' ]       = "tmanalysis@matecat.com";
 
     $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $segment[ 'tm_keys' ], 'r', 'tm' );

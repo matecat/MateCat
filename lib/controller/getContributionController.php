@@ -171,7 +171,7 @@ class getContributionController extends ajaxController {
              */
             $tms = Engine::getInstance( $_TMS );
 
-            $config                    = $tms->getConfigStruct();
+            $config = array_merge( $tms->getConfigStruct(), $config );
             $config[ 'segment' ]       = $this->text;
             $config[ 'source' ]        = $this->source;
             $config[ 'target' ]        = $this->target;
@@ -179,6 +179,7 @@ class getContributionController extends ajaxController {
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
+
 
             //get job's TM keys
             $this->checkLogin();
