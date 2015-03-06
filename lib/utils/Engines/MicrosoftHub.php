@@ -73,7 +73,7 @@ class Engines_MicrosoftHub extends Engines_AbstractEngine implements Engines_Eng
             return $mt_result;
         }
 
-        $mt_match_res = new Engines_Results_MyMemoryMatches(
+        $mt_match_res = new Engines_Results_MyMemory_Matches(
                 $all_args[ 1 ][ 'text' ],
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",

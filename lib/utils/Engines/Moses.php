@@ -56,7 +56,7 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
             return $mt_result;
         }
 
-        $mt_match_res = new Engines_Results_MyMemoryMatches(
+        $mt_match_res = new Engines_Results_MyMemory_Matches(
                 $all_args[ 1 ][ 'q' ],
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",

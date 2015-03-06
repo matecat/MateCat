@@ -1,6 +1,6 @@
 <?
 
-class Engines_Results_MyMemoryMatches {
+class Engines_Results_MyMemory_Matches {
 
     public $id;
     public $raw_segment;
