@@ -373,7 +373,11 @@ class catController extends viewController {
                         $jobKey    = $jobKey->hideKey( $uid );
                     } else {
                         if ( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                            $jobKey = $jobKey->hideKey( -1 );
+                            // I'm not the job owner, but i know the key because it is in my keyring
+                            // so, i can upload and download TMX, but i don't want it to be removed from job
+                            // in tm.html relaxed the control to "key.edit" to enable buttons
+//                            $jobKey = $jobKey->hideKey( $uid ); // enable editing
+
                         } else {
                             if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
                                 //do Nothing
