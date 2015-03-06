@@ -336,6 +336,7 @@ class INIT {
                         'dita'        => array( '', '', 'extdit' ),
                         'sgml'        => array( '', '', 'extsgm' ),
                         'Android xml' => array( '', '', 'extxml' ),
+                        'strings'     => array( '', '', 'extstr' ),
                         'sgm'         => array( '', '', 'extsgm' )
                 )
         );
