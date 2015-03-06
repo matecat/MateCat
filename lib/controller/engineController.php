@@ -104,20 +104,25 @@ class engineController extends ajaxController {
      * This method adds an engine in a user's keyring
      */
     private function add() {
-        $newEngine = Engine_EngineStruct::getStruct();
 
-        $newEngine->type = "MT";
-        $newEngine->name = $this->provider;
-
+        $newEngine = null;
         $validEngine = true;
 
         switch ( $this->provider ) {
-            case 'microsofthub':
-                $newEngine->description = $this->name;
-                $newEngine->others = array(
-                        'client_id'     => $this->clientID,
-                        'client_secret' => $this->clientSecret
-                );
+            case strtolower( Constants_Engines::MICROSOFT_HUB ):
+
+                /**
+                 * Create a record of type MicrosoftHub
+                 */
+                $newEngine = EnginesModel_MicrosoftHubStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_id' ]     = $this->clientID;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->clientSecret;
+                $newEngine->extra_parameters[ 'active' ]        = 1;
+
                 break;
             default:
                 $validEngine = false;
@@ -128,17 +133,15 @@ class engineController extends ajaxController {
             return;
         }
 
-        //TODO: retrieve base_url from an internal source
-        $newEngine->base_url = "http://www.example.com";
-        $newEngine->active = 1;
-        $newEngine->uid = $this->uid;
-
-        $engineDAO = new Engine_EngineDAO( Database::obtain() );
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result = $engineDAO->create( $newEngine );
 
-        if(! $result instanceof Engine_EngineStruct){
+        if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
+            return;
         }
+
+        $this->result['data']['id'] = $result->id;
 
     }
 
@@ -146,21 +149,25 @@ class engineController extends ajaxController {
      * This method deletes an engine from a user's keyring
      */
     private function delete(){
-        if(empty($this->id)){
-            $this->result['errors'][] = array( 'code' => -5, 'message' => "Engine id required" );
+
+        if ( empty( $this->id ) ) {
+            $this->result[ 'errors' ][ ] = array( 'code' => -5, 'message' => "Engine id required" );
             return;
         }
 
-        $engineToBeDeleted = Engine_EngineStruct::getStruct();
+        $engineToBeDeleted = EnginesModel_EngineStruct::getStruct();
         $engineToBeDeleted->id = $this->id;
         $engineToBeDeleted->uid = $this->uid;
 
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $result = $engineDAO->disable( $engineToBeDeleted );
 
-        $engineDAO = new Engine_EngineDAO( Database::obtain() );
-        $result = $engineDAO->delete( $engineToBeDeleted );
-
-        if(! $result instanceof Engine_EngineStruct){
+        if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
         }
+
+        $this->result['data']['id'] = $result->id;
+
     }
+
 } 

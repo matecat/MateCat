@@ -118,8 +118,8 @@ $.extend(UI, {
 			},
 			success: function(d) {
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
@@ -378,7 +378,7 @@ $.extend(UI, {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
+				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
 			}
 		});
@@ -455,7 +455,7 @@ $.extend(UI, {
                 console.log('execSetContributionMT success');
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
+				if (d.errors.length)
 					UI.processErrors(d.error, 'setContributionMT');
 			}
 		});
@@ -498,8 +498,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 

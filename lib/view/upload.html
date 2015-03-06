@@ -279,7 +279,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
             </tal:block>
         </select>
         <br/>
-    <a href="#" class="memory-mgmt tm-mgmt">Add MT engine</a>
+    <a href="#" class="memory-mgmt tm-mgmt" data-tab="mt" data-el-to-click=".add-mt-engine">Add MT engine</a>
     </div>
 
     <div class="translate-box">
@@ -297,7 +297,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     <div class="translate-box">
         <h2 class="resource" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
-        <a href="#" class="memory-mgmt">
+        <a href="#" class="memory-mgmt" data-tab="tm">
             <span class="text"> Manage language resources</span>
             <span class="tm-added">(<span class="num"></span><span class="msg"> TM added</span>)</span>
         </a>
@@ -999,7 +999,9 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     $( ".memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
-        UI.openLanguageResourcesPanel();
+        tab = $(this).attr('data-tab') || 'tm';
+        elToClick = $(this).attr('data-el-to-click') || null;
+        UI.openLanguageResourcesPanel(tab, elToClick);
     } );
 
     $( function () {

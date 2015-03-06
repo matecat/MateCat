@@ -23,13 +23,15 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-         $(".mgmt-tm").click(function(e) {
+         $(".popup-tm .mgmt-tm").click(function(e) {
+             e.preventDefault();
               $(this).addClass("active");
               $(".mgmt-mt").removeClass("active");
               $(".mgmt-table-mt").hide();
               $(".mgmt-table-tm").show();
        });
-        $(".tm-mgmt").click(function(e) {
+        $(".popup-tm .tm-mgmt").click(function(e) {
+            e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
             $(".mgmt-table-tm").hide();
@@ -55,13 +57,23 @@ $.extend(UI, {
                 $(".step3").hide();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $(".step2").show();
                 $(".step3").show();
+                $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
          $(".add-mt-engine").click(function() {
+             console.log($(this));
             $(this).hide();
+            $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
         });
+
+         
+
+
+
+        
 // fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
@@ -75,7 +87,8 @@ $.extend(UI, {
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
         });
 
         $('html').on('input', '#mt-provider-details input', function() {
@@ -264,9 +277,31 @@ $.extend(UI, {
             $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
-        }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+        }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
+            console.log('change');
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
+        }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
+            console.log('vediamo');
+//            console.log($(this).prop('checked'));
+//            $(this).prop('checked', true);
+            if($(this).is(':checked')) {
+                console.log('era unchecked, lo devo spostare su');
+                tr = $(this).parents('tr');
+                $(this).replaceWith('<input type="checkbox" checked class="temp" />');
+                cbox = tr.find('input[type=checkbox]');
+                tbody = tr.parents('tbody');
+                $(tbody).prepend(tr);
+                tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
+                tbody.find('.activemt').removeClass('activemt');
+                tr.addClass('activemt').removeClass('temp');
+            } else {
+                tr = $(this).parents('tr');
+                $(this).replaceWith('<input type="checkbox" />');
+                tr.removeClass('activemt');
+            }
+//            if(APP.isCattool) UI.saveTMdata(false);
+//            UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
@@ -344,22 +379,25 @@ $.extend(UI, {
                         });
             */
         });
-
+/*
         $('tr').click(function() {
             $('tr').not(this).removeClass('clicked');
             $(this).toggleClass('clicked');
         });
-
-        $(".add-tm").click(function() {
+*/
+        $(".add-mt-engine").click(function() {
             $(this).hide();
-            $(".mgmt-tm tr.new").removeClass('hide').show();
+            $(".mgmt-table-mt tr.new").removeClass('hide').show();
         });
-
+        $(".mgmt-table-tm .add-tm").click(function() {
+            $(this).hide();
+            $(".mgmt-table-tm tr.new").removeClass('hide').show();
+        });
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
             $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
-            $(".add-tm").show();
+            $(".mgmt-table-tm .add-tm").show();
             UI.clearAddTMRow();
         });
 
@@ -413,11 +451,15 @@ $.extend(UI, {
 
 
     },
-    openLanguageResourcesPanel: function() {
+    openLanguageResourcesPanel: function(tab, elToClick) {
+        tab = tab || 'tm';
+        elToClick = elToClick || null;
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
+        $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+        if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {

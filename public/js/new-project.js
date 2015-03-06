@@ -121,7 +121,7 @@ $(document).ready(function() {
 
 				});
 
-				if( typeof d.errors != 'undefined' ) {
+				if( typeof d.errors != 'undefined' && d.errors.length ) {
 
 					var alertComposedMessage = [];
 					$('.error-message').text('');
