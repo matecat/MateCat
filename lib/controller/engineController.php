@@ -26,27 +26,26 @@ class engineController extends ajaxController {
         $filterArgs = array(
                 'exec'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
                 'id' => array(
                         'filter'  => FILTER_SANITIZE_NUMBER_INT
                 ),
                 'name'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
                 'data'    => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES
                 ),
                 'provider'  => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 )
         );
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
-
 
         $this->exec         = $postInput[ 'exec' ];
         $this->id           = $postInput[ 'id' ];
@@ -114,7 +113,7 @@ class engineController extends ajaxController {
                 $newEngine->name                                = $this->name;
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->type                                = Constants_Engines::MT;
-                $newEngine->extra_parameters[ 'client_id' ]     = (int)$this->engineData['client_id'];
+                $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData['secret'];
                 $newEngine->extra_parameters[ 'active' ]        = 1;
 
