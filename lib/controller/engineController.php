@@ -26,22 +26,22 @@ class engineController extends ajaxController {
         $filterArgs = array(
                 'exec'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
                 ),
                 'id' => array(
                         'filter'  => FILTER_SANITIZE_NUMBER_INT
                 ),
                 'name'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
                 ),
                 'data'    => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
                 ),
                 'provider'  => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW 
                 )
         );
 

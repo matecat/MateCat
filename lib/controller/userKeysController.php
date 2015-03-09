@@ -31,15 +31,15 @@ class userKeysController extends ajaxController {
         $filterArgs = array(
                 'exec'        => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'key'         => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'description' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
         );
 
@@ -120,7 +120,7 @@ class userKeysController extends ajaxController {
 
             switch ( $this->exec ) {
                 case 'delete':
-                    $userMemoryKeys = $mkDao->delete($memoryKeyToUpdate);
+                    $userMemoryKeys = $mkDao->disable($memoryKeyToUpdate);
                     break;
                 case 'update':
                     $userMemoryKeys = $mkDao->update( $memoryKeyToUpdate );
