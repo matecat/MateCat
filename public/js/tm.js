@@ -1314,7 +1314,7 @@ $.extend(UI, {
 
         APP.doRequest({
             data: {
-                action: 'engineController',
+                action: 'engine',
                 exec: 'add',
                 name: $('#new-engine-name').val(),
                 provider: provider,
