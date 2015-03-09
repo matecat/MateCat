@@ -8931,15 +8931,13 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-// codice inserito da Daniele per aprire la tm e settare l'active nel tab
-
-         $(".popup-tm .mgmt-tm").click(function(e) {
-             e.preventDefault();
-              $(this).addClass("active");
-              $(".mgmt-mt").removeClass("active");
-              $(".mgmt-table-mt").hide();
-              $(".mgmt-table-tm").show();
-       });
+        $(".popup-tm .mgmt-tm").click(function(e) {
+            e.preventDefault();
+            $(this).addClass("active");
+            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-table-mt").hide();
+            $(".mgmt-table-tm").show();
+        });
         $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
@@ -8959,6 +8957,7 @@ $.extend(UI, {
         });
 
         $("#mt_engine_int").change(function() {
+            $('#add-mt-provider-cancel').hide();
             $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
@@ -8972,19 +8971,12 @@ $.extend(UI, {
                 $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
-         $(".add-mt-engine").click(function() {
-             console.log($(this));
+        $(".add-mt-engine").click(function() {
             $(this).hide();
+            $('#add-mt-provider-cancel').show();
             $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
         });
-
-         
-
-
-
-        
-// fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
             e.preventDefault();
@@ -8996,12 +8988,18 @@ $.extend(UI, {
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
             UI.addMTEngine(provider);
             $('.popup-tm h1 .btn-ok').click();
+            $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
             $(".add-mt-engine").show();
             $(".insert-tm").addClass('hide');
         });
-
+        $('#add-mt-provider-cancel-int').click(function(e) {
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
+            $('#mt_engine_int').val('none').trigger('change');
+            $(".insert-tm").addClass('hide').removeAttr('style');
+        });
         $('html').on('input', '#mt-provider-details input', function() {
             num = 0;
             $('#mt-provider-details input').each(function () {
@@ -10219,21 +10217,28 @@ $.extend(UI, {
             field = $(this).find('input').first();
             providerData[field.attr('data-field-name')] = field.val();
         })
-        console.log(providerData);
+//        console.log(providerData);
+        name = $('#new-engine-name').val();
+        data = {
+            action: 'engine',
+            exec: 'add',
+            name: name,
+            provider: provider,
+            data: JSON.stringify(providerData)
+        }
 //        return false;
 
         APP.doRequest({
-            data: {
-                action: 'engineController',
-                exec: 'add',
-                name: $('#new-engine-name').val(),
-                provider: provider,
-                data: JSON.stringify(providerData)
-            },
+            data: data,
+            context: data,
             error: function() {
-                console.log('checkTMKey error!!');
+                console.log('error');
             },
             success: function(d) {
+                console.log('success');
+                // temp
+                d.data.id = '123';
+                //end temp
 
             }
         });
