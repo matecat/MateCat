@@ -329,15 +329,21 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
         <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
-        <label>Engine name</label>
-        <input class="error" placeholder="here" />
+        <label for="new-engine-name">Engine name</label>
+        <input id="new-engine-name" placeholder="here" />
         <br class="clear" />
-        <label>ClientID<sup>*</sup></label>
-        <input placeholder="here" />
-        <br class="clear" />
-        <label>Client Secret<sup>*</sup></label>
-        <input placeholder="here" />
-        <br class="clear" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>ClientID<sup>*</sup></label>
+                <input data-field-name="client_id" placeholder="here" />
+                <br class="clear" />
+            </div>
+            <div class="provider-field">
+                <label>Client Secret<sup>*</sup></label>
+                <input data-field-name="secret" placeholder="here" />
+                <br class="clear" />
+            </div>
+        </div>
     </template>
 
     <template id="mt-provider-iptranslator">

@@ -1145,7 +1145,7 @@ float: none!important;
 		padding: 4px 18px;
 		margin-left: 10px;
 	}
-	
+
 .mgmt-panel-tm .nav-tabs
 {
     background: #4D4D4D;
@@ -1401,7 +1401,7 @@ text-align: center;}
     width: 55px;
 }
 
-.canceladdtmx.btn-grey .text, 
+.canceladdtmx.btn-grey .text,
 .addtmxfile.btn-ok .text, 
 .uploadtm.btn-ok .text {
 	color:#fff;
@@ -4494,8 +4494,8 @@ z-index: 10000;
     list-style: none;
     height: 95%;
     outline: none;
-    /*word-wrap: break-word;*/
-    /*word-break: break-all;*/
+    word-wrap: break-word;
+    word-break: normal;
 }
 .text a{text-decoration:none;color:#000 }
 
