@@ -233,7 +233,8 @@ TAG;
         $engineStruct     = EnginesModel_MicrosoftHubStruct::getStruct();
         $engineStruct->id = $record->id;
 
-        $engineDAO->destroyCache( $engineStruct );
+        //variable assignment only used for debugging purpose
+        $debugParam = $engineDAO->destroyCache( $engineStruct );
         $engineDAO->update( $record );
 
     }
