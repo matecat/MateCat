@@ -115,7 +115,6 @@ class engineController extends ajaxController {
                 $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData['secret'];
-                $newEngine->extra_parameters[ 'active' ]        = 1;
 
                 break;
             default:
