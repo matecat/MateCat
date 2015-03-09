@@ -25,19 +25,19 @@ class convertFileController extends ajaxController {
 		$filterArgs = array(
 				'file_name'         => array(
 					'filter' => FILTER_SANITIZE_STRING,
-					'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
 					),
 				'source_lang'       => array(
 					'filter' => FILTER_SANITIZE_STRING,
-					'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
 					),
 				'target_lang'       => array(
 					'filter' => FILTER_SANITIZE_STRING,
-					'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
 					),
 				'segmentation_rule' => array(
 					'filter' => FILTER_SANITIZE_STRING,
-					'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
 					)
 				);
 

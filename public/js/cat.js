@@ -8983,10 +8983,10 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
-            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
+            $('#mt_engine').append('<option value="' + provider + '">' + $('#new-engine-name').val() + '</option>');
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
-            UI.addMTEngine(provider);
+            UI.addMTEngine(provider, providerName);
             $('.popup-tm h1 .btn-ok').click();
             $('#mt_engine_int').val('none').trigger('change');
         });
@@ -9211,6 +9211,23 @@ $.extend(UI, {
             }
 //            if(APP.isCattool) UI.saveTMdata(false);
 //            UI.checkTMGrantsModifications(this);
+        }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
+            id = $(this).parents('tr').first().attr('data-id');
+            APP.doRequest({
+                data: {
+                    action: 'engine',
+                    exec: 'delete',
+                    id: id
+                },
+                context: id,
+                error: function() {
+                    console.log('error');
+                },
+                success: function(d) {
+                    console.log('success');
+                    $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                }
+            });
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
@@ -10211,7 +10228,7 @@ $.extend(UI, {
             }
         });
     },
-    addMTEngine: function (provider) {
+    addMTEngine: function (provider, providerName) {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
             field = $(this).find('input').first();
@@ -10226,22 +10243,36 @@ $.extend(UI, {
             provider: provider,
             data: JSON.stringify(providerData)
         }
+        context = data;
+        context.providerName = providerName;
 //        return false;
 
         APP.doRequest({
             data: data,
-            context: data,
+            context: context,
             error: function() {
                 console.log('error');
             },
             success: function(d) {
                 console.log('success');
-                // temp
-                d.data.id = '123';
-                //end temp
-
+                UI.renderNewMT(this, d.data.id);
             }
         });
+    },
+    renderNewMT: function (data, id) {
+        newTR =    '<tr class="activemt" data-id="' + id + '">' +
+                    '    <td class="mt-provider">' + data.providerName + '</td>' +
+                    '    <td class="engine-name">' + data.name + '</td>' +
+                    '    <td class="enable-mt text-center">' +
+                    '        <input type="checkbox" checked />' +
+                    '    </td>' +
+                    '    <td class="action">' +
+                    '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
+                    '    </td>' +
+                    '</tr>';
+        console.log('newTR: ', newTR);
+        $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
+        $('table.mgmt-mt tbody').prepend(newTR);
     },
 
 

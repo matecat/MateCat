@@ -30,7 +30,7 @@ class updateJobKeysController extends ajaxController {
                 ),
                 'job_pass' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
         );
 
