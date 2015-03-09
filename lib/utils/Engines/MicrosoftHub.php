@@ -151,7 +151,7 @@ TAG;
              *
              */
             return $this->get( $_config, $cycle + 1 ); //do this request again!
-            
+
         }
 
         return $this->result;
