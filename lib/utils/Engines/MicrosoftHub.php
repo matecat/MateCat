@@ -13,10 +13,22 @@
  * @property string oauth_url
  * @property int token_endlife
  * @property string token
- * @property null   client_id
- * @property null   client_secret
+ * @property string   client_id
+ * @property string   client_secret
  */
 class Engines_MicrosoftHub extends Engines_AbstractEngine implements Engines_EngineInterface {
+
+    protected $rawXmlErrStruct = <<<TAG
+            <html>
+                <body>
+                    <h1>%s</h1>
+                    <p>Method: %s</p>
+                    <p>Parameter: </p>
+                    <p>Message: %s</p>
+                    <code></code>
+                </body>
+            </html>
+TAG;
 
     protected $_config = array(
             'segment'     => null,
@@ -87,6 +99,12 @@ class Engines_MicrosoftHub extends Engines_AbstractEngine implements Engines_Eng
 
     public function get( $_config ) {
 
+        $cycle = (int)func_get_arg(1);
+
+        if( $cycle == 10 ){
+            return sprintf( $this->rawXmlErrStruct, 'Too Much Recursion', 'get', 'Maximum recursion limit reached' );
+        }
+
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
@@ -128,7 +146,12 @@ class Engines_MicrosoftHub extends Engines_AbstractEngine implements Engines_Eng
                 return $this->result;
             }
 
-            return $this->get( $_config ); //do this request again!
+            /**
+             * Warning this is a recursion!!!
+             *
+             */
+            return $this->get( $_config, $cycle + 1 ); //do this request again!
+            
         }
 
         return $this->result;
@@ -182,25 +205,20 @@ class Engines_MicrosoftHub extends Engines_AbstractEngine implements Engines_Eng
         if ( isset( $objResponse['error'] ) ) {
 
             //format as a normal Translate Response and send to decoder to output the data
-            $rawValue = <<<TAG
-            <html>
-                <body>
-                    <h1>{$objResponse['error']}</h1>
-                    <p>Method: getToken</p>
-                    <p>Parameter: </p>
-                    <p>Message: {$objResponse['error_description']}</p>
-                    <code></code>
-                </body>
-            </html>
-TAG;
-
+            $rawValue = sprintf( $this->rawXmlErrStruct, $objResponse['error'], 'getToken', $objResponse['error_description'] );
             $this->result = $this->_decode( $rawValue, $parameters );
 
             throw new Exception( $objResponse->error_description );
 
         } else {
             $this->token = $objResponse['access_token'];
-            $this->token_endlife = time() + $objResponse['expires_in'];
+
+            /**
+             * Gain a minute to not fallback into a recursion
+             *
+             * @see Engines_MicrosoftHub::get
+             */
+            $this->token_endlife = time() + $objResponse['expires_in'] - 60;
         }
 
         $record = clone( $this->engineRecord );

@@ -12,8 +12,7 @@ class engineController extends ajaxController {
     private $provider;
     private $id;
     private $name;
-    private $clientID;
-    private $clientSecret;
+    private $engineData;
     private static $allowed_actions = array(
             'add', 'delete'
     );
@@ -36,11 +35,7 @@ class engineController extends ajaxController {
                         'filter'  => FILTER_SANITIZE_STRING,
                         'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
                 ),
-                'client_id' => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
-                ),
-                'secret'    => array(
+                'data'    => array(
                         'filter'  => FILTER_SANITIZE_STRING,
                         'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
                 ),
@@ -52,14 +47,14 @@ class engineController extends ajaxController {
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+
         $this->exec         = $postInput[ 'exec' ];
         $this->id           = $postInput[ 'id' ];
-        $this->clientID     = $postInput[ 'client_id' ];
-        $this->clientSecret = $postInput[ 'secret' ];
         $this->name         = $postInput[ 'name' ];
         $this->provider     = $postInput[ 'provider' ];
+        $this->engineData   = json_decode( $postInput[ 'data' ], true );
 
-        if ( is_null( $this->exec ) || empty( $this->clientID ) ) {
+        if ( is_null( $this->exec ) ) {
             $this->result[ 'errors' ][ ] = array( 'code' => -1, 'message' => "Exec field required" );
 
         }
@@ -119,8 +114,8 @@ class engineController extends ajaxController {
                 $newEngine->name                                = $this->name;
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->type                                = Constants_Engines::MT;
-                $newEngine->extra_parameters[ 'client_id' ]     = $this->clientID;
-                $newEngine->extra_parameters[ 'client_secret' ] = $this->clientSecret;
+                $newEngine->extra_parameters[ 'client_id' ]     = (int)$this->engineData['client_id'];
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData['secret'];
                 $newEngine->extra_parameters[ 'active' ]        = 1;
 
                 break;
