@@ -84,6 +84,7 @@ $.extend(UI, {
             $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
+            UI.addMTEngine(provider);
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -1296,6 +1297,31 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error deleting TM!!');
+            },
+            success: function(d) {
+
+            }
+        });
+    },
+    addMTEngine: function (provider) {
+        providerData = {};
+        $('.insert-tm .provider-data .provider-field').each(function () {
+            field = $(this).find('input').first();
+            providerData[field.attr('data-field-name')] = field.val();
+        })
+        console.log(providerData);
+//        return false;
+
+        APP.doRequest({
+            data: {
+                action: 'engineController',
+                exec: 'add',
+                name: $('#new-engine-name').val(),
+                provider: provider,
+                data: JSON.stringify(providerData)
+            },
+            error: function() {
+                console.log('checkTMKey error!!');
             },
             success: function(d) {
 
