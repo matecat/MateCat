@@ -76,7 +76,7 @@ $.extend(UI, {
             $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
-            UI.addMTEngine(provider);
+            UI.addMTEngine(provider, providerName);
             $('.popup-tm h1 .btn-ok').click();
             $('#mt_engine_int').val('none').trigger('change');
         });
@@ -1301,7 +1301,7 @@ $.extend(UI, {
             }
         });
     },
-    addMTEngine: function (provider) {
+    addMTEngine: function (provider, providerName) {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
             field = $(this).find('input').first();
@@ -1316,11 +1316,13 @@ $.extend(UI, {
             provider: provider,
             data: JSON.stringify(providerData)
         }
+        context = data;
+        context.providerName = providerName;
 //        return false;
 
         APP.doRequest({
             data: data,
-            context: data,
+            context: context,
             error: function() {
                 console.log('error');
             },
@@ -1329,9 +1331,24 @@ $.extend(UI, {
                 // temp
                 d.data.id = '123';
                 //end temp
-
+                UI.renderNewMT(this, d.data.id);
             }
         });
+    },
+    renderNewMT: function (data, id) {
+        newTR =    '<tr class="activemt" data-id="' + id + '">' +
+                    '    <td class="mt-provider">' + data.providerName + '</td>' +
+                    '    <td class="engine-name">' + data.name + '</td>' +
+                    '    <td class="enable-mt text-center">' +
+                    '        <input type="checkbox" checked />' +
+                    '    </td>' +
+                    '    <td class="action">' +
+                    '        <a class="btn pull-left"><span class="text">Delete</span></a>' +
+                    '    </td>' +
+                    '</tr>';
+        console.log('newTR: ', newTR);
+        $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
+        $('table.mgmt-mt tbody').prepend(newTR);
     },
 
 
