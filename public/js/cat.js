@@ -5849,8 +5849,8 @@ $.extend(UI, {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
-					UI.processErrors(d.errors, 'setContribution');
+				if (d.errors.length)
+					UI.processErrors(d.error, 'setContribution');
 			}
 		});
 	},
@@ -5926,8 +5926,8 @@ $.extend(UI, {
                 console.log('execSetContributionMT success');
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
-					UI.processErrors(d.errors, 'setContributionMT');
+				if (d.errors.length)
+					UI.processErrors(d.error, 'setContributionMT');
 			}
 		});
 	},
@@ -9078,14 +9078,14 @@ $.extend(UI, {
 
 // codice inserito da Daniele per aprire la tm e settare l'active nel tab
 
-         $(".popup-tm .mgmt-tm").click(function(e) {
-             e.preventDefault();
-              $(this).addClass("active");
-              $(".mgmt-mt").removeClass("active");
-              $(".mgmt-table-mt").hide();
-              $(".mgmt-table-tm").show();
-       });
-        $(".popup-tm .tm-mgmt").click(function(e) {
+   //     $(".mgmt-tm").click(function(e) {
+     //       e.preventDefault();
+       //     $(this).addClass("active");
+         //   $(".mgmt-mt").removeClass("active");
+           // $(".mgmt-table-mt").hide();
+//            $(".mgmt-table-tm").show();
+  //      });
+        $(".tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
