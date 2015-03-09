@@ -316,7 +316,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $input->class_load              = ( $input->class_load !== null ) ? $con->escape( $input->class_load ) : null;
         $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( json_encode( $input->extra_parameters ) ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
-        $input->active                  = ( $input->active !== null ) ? $input->active : null;
+        $input->active                  = ( $input->active !== null ) ? $input->active : 1;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;
 
         return $input;
