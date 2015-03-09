@@ -84,6 +84,7 @@ $.extend(UI, {
             $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
+            UI.addMTEngine(provider);
             $('.popup-tm h1 .btn-ok').click();
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -277,9 +278,31 @@ $.extend(UI, {
             $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
-        }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+        }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
+            console.log('change');
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
+        }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
+            console.log('vediamo');
+//            console.log($(this).prop('checked'));
+//            $(this).prop('checked', true);
+            if($(this).is(':checked')) {
+                console.log('era unchecked, lo devo spostare su');
+                tr = $(this).parents('tr');
+                $(this).replaceWith('<input type="checkbox" checked class="temp" />');
+                cbox = tr.find('input[type=checkbox]');
+                tbody = tr.parents('tbody');
+                $(tbody).prepend(tr);
+                tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
+                tbody.find('.activemt').removeClass('activemt');
+                tr.addClass('activemt').removeClass('temp');
+            } else {
+                tr = $(this).parents('tr');
+                $(this).replaceWith('<input type="checkbox" />');
+                tr.removeClass('activemt');
+            }
+//            if(APP.isCattool) UI.saveTMdata(false);
+//            UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
@@ -357,22 +380,25 @@ $.extend(UI, {
                         });
             */
         });
-
+/*
         $('tr').click(function() {
             $('tr').not(this).removeClass('clicked');
             $(this).toggleClass('clicked');
         });
-
-        $(".add-tm").click(function() {
+*/
+        $(".add-mt-engine").click(function() {
             $(this).hide();
-            $(".mgmt-tm tr.new").removeClass('hide').show();
+            $(".mgmt-table-mt tr.new").removeClass('hide').show();
         });
-
+        $(".mgmt-table-tm .add-tm").click(function() {
+            $(this).hide();
+            $(".mgmt-table-tm tr.new").removeClass('hide').show();
+        });
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
             $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
-            $(".add-tm").show();
+            $(".mgmt-table-tm .add-tm").show();
             UI.clearAddTMRow();
         });
 
@@ -1271,6 +1297,31 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error deleting TM!!');
+            },
+            success: function(d) {
+
+            }
+        });
+    },
+    addMTEngine: function (provider) {
+        providerData = {};
+        $('.insert-tm .provider-data .provider-field').each(function () {
+            field = $(this).find('input').first();
+            providerData[field.attr('data-field-name')] = field.val();
+        })
+        console.log(providerData);
+//        return false;
+
+        APP.doRequest({
+            data: {
+                action: 'engineController',
+                exec: 'add',
+                name: $('#new-engine-name').val(),
+                provider: provider,
+                data: JSON.stringify(providerData)
+            },
+            error: function() {
+                console.log('checkTMKey error!!');
             },
             success: function(d) {
 

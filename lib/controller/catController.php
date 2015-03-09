@@ -51,6 +51,9 @@ class catController extends viewController {
      * @var string
      */
     private $thisUrl;
+    private $mt_engines;
+
+    private $mt_id;
 
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
@@ -184,10 +187,6 @@ class catController extends viewController {
 
             if ( empty( $this->pid ) ) {
                 $this->pid = $job[ 'pid' ];
-            }
-
-            if ( empty( $this->tid ) ) {
-                $this->tid = $job[ 'tid' ];
             }
 
             if ( empty( $this->create_date ) ) {
@@ -346,6 +345,8 @@ class catController extends viewController {
          */
         $job_keyList = json_decode( $data[ 0 ][ 'tm_keys' ], true );
 
+        $this->tid = count( $job_keyList ) > 0;
+
         /**
          * Start this N^2 cycle from keys of the job,
          * these should be statistically lesser than the keys of the user
@@ -373,7 +374,11 @@ class catController extends viewController {
                         $jobKey    = $jobKey->hideKey( $uid );
                     } else {
                         if ( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                            $jobKey = $jobKey->hideKey( -1 );
+                            // I'm not the job owner, but i know the key because it is in my keyring
+                            // so, i can upload and download TMX, but i don't want it to be removed from job
+                            // in tm.html relaxed the control to "key.edit" to enable buttons
+//                            $jobKey = $jobKey->hideKey( $uid ); // enable editing
+
                         } else {
                             if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
                                 //do Nothing
@@ -428,6 +433,17 @@ class catController extends viewController {
         $jobVote = $jobQA->evalJobVote();
         $this->qa_data    = json_encode( $jobQA->getQaData() );
         $this->qa_overall = $jobVote[ 'minText' ];
+
+
+        $engine = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineQuery         = new EnginesModel_EngineStruct();
+        $engineQuery->type   = 'MT';
+        $engineQuery->uid    = $uid;
+
+        $engineQuery->active = 1;
+        $this->mt_engines = $engine->read( $engineQuery );
+
+
     }
 
     public function setTemplateVars() {
@@ -453,12 +469,15 @@ class catController extends viewController {
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname       = $this->pname;
-        $this->template->tid         = $this->tid;
+        $this->template->tid         = var_export( $this->tid, true );
         $this->template->source      = $this->source;
         $this->template->source_rtl  = $this->source_rtl;
         $this->template->target_rtl  = $this->target_rtl;
 
         $this->template->authURL = $this->authURL;
+
+        $this->template->mt_engines         = $this->mt_engines;
+        $this->template->mt_id              = $this->project_status[ 'id_mt_engine' ];
 
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_job_segment    = $this->last_job_segment;

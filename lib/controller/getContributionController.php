@@ -171,7 +171,7 @@ class getContributionController extends ajaxController {
              */
             $tms = Engine::getInstance( $_TMS );
 
-            $config                    = $tms->getConfigStruct();
+            $config = array_merge( $tms->getConfigStruct(), $config );
             $config[ 'segment' ]       = $this->text;
             $config[ 'source' ]        = $this->source;
             $config[ 'target' ]        = $this->target;
@@ -179,6 +179,7 @@ class getContributionController extends ajaxController {
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
+
 
             //get job's TM keys
             $this->checkLogin();
@@ -414,7 +415,8 @@ class getContributionController extends ajaxController {
          * \x{AB} => «
          * \x{BB} => »
          */
-        $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\-\*]+#u', chr( 0x20 ), $this->text );
+        $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\*]+#u', chr( 0x20 ), $this->text );
+        $tmp_text = str_replace( ' - ', chr( 0x20 ), $tmp_text );
         $tmp_text = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $tmp_text );
 
         $tokenizedBySpaces  = explode( " ", $tmp_text );

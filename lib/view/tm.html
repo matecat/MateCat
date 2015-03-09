@@ -61,10 +61,10 @@
                                         <td class="dragrow"><div class="status"></div></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
-                                        <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe ? key.name : '**********' ) : key.name}</div></td>
+                                        <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
                                         <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                         <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
-                                        <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">      
+                                        <td tal:condition="php: key.edit" class="action">
                                                 <a class="btn pull-left"><span class="text">Import TMX</span></a>
                                                 <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
@@ -178,31 +178,39 @@
 
                                     <tal:block tal:condition="php: page == 'home'" tal:repeat="key user_keys">
                                         <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
-                                            <td class="dragrow"><div class="status">&nbsp;</div></td>
+                                            <td class="dragrow">
+                                                <div class="status">&nbsp;</div>
+                                            </td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
-                                            <td class="description"><div class="edit-desc">${key/name}</div></td>
-                                            <td class="lookup text-center check"><input type="checkbox" /></td>
-                                            <td class="update text-center check"><input type="checkbox" /></td>
+                                            <td class="description">
+                                                <div class="edit-desc">${key/name}</div>
+                                            </td>
+                                            <td class="lookup text-center check"><input type="checkbox"/></td>
+                                            <td class="update text-center check"><input type="checkbox"/></td>
                                             <td class="action">
                                                 <a class="btn pull-left"><span class="text">Import TMX</span></a>
+
                                                 <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">
-                                                    &nbsp;              
-          <ul class="dropdown pull-left">
+                                                    &nbsp;
+                                                    <ul class="dropdown pull-left">
 
-            <li>  <a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
-            
-            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
-                                                    <span class="icon-download"></span>Export TMX
-                                                </a></li>
-            <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
-                                               <span class="icon-trash-o"></span>Delete TM
-                                            </a></li>
-           
-        </ul>
+                                                        <li>
+                                                            <a class="addtmx">
+                                                                <span class="icon-upload"></span>Import TMX
+                                                            </a>
+                                                        </li>
 
-</div>
-                                               
+                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
+                                                            <span class="icon-download"></span>Export TMX
+                                                        </a></li>
+                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
+                                                            <span class="icon-trash-o"></span>Delete TM
+                                                        </a></li>
+
+                                                    </ul>
+                                                </div>
+
                                             </td>
                                         </tr>
                                     </tal:block>
@@ -279,24 +287,27 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr id="activemt">
-                                        <td class="privatekey">MyMemory</td>
-                                        <td class="description">MyMemory</td>
-                                        <td class="enable-mt text-center"><input type="checkbox" checked="checked" /></td>   
+                                    <tal:block tal:repeat="engine mt_engines">
+                                    <tr class="" data-id="${engine/id}">
+                                        <td class="mt-provider">${engine/name}</td>
+                                        <td class="engine-name">${engine/description}</td>
+                                        <td class="enable-mt text-center">
+                                            <input tal:condition="php: page == 'home'" type="checkbox" />
+                                            <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
+                                        </td>
                                         <td class="action">
-                                            
-                                           <a class="btn pull-left"><span class="text">Delete</span></a>
+                                            <a class="btn pull-left"><span class="text">Delete</span></a>
                                         </td>
                                     </tr>
-                                    <tr id="inactivemt">
-                                        <td class="privatekey">DeepLingo</td>
-                                        <td class="description">Euro Parl 2</td>
-                                        <td class="enable-mt text-center"><input type="checkbox"/></td>   
+                                    </tal:block>
+                                    <!-- tr class="" data-id="12345">
+                                        <td class="mt-provider">DeepLingo</td>
+                                        <td class="engine-name">Euro Parl 2</td>
+                                        <td class="enable-mt text-center"><input type="checkbox"/></td>
                                         <td class="action">
-                                            
-                                           <a class="btn pull-left"><span class="text">Delete</span></a>
+                                            <a class="btn pull-left"><span class="text">Delete</span></a>
                                         </td>
-                                    </tr>
+                                    </tr -->
                                 </tbody>
 
                             </table>
@@ -318,15 +329,21 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
         <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
-        <label class="error">Engine name</label>
-        <input class="error" placeholder="here" />
+        <label for="new-engine-name">Engine name</label>
+        <input id="new-engine-name" placeholder="here" />
         <br class="clear" />
-        <label>ClientID<sup>*</sup></label>
-        <input placeholder="here" />
-        <br class="clear" />
-        <label>Client Secret<sup>*</sup></label>
-        <input placeholder="here" />
-        <br class="clear" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>ClientID<sup>*</sup></label>
+                <input data-field-name="client_id" placeholder="here" />
+                <br class="clear" />
+            </div>
+            <div class="provider-field">
+                <label>Client Secret<sup>*</sup></label>
+                <input data-field-name="secret" placeholder="here" />
+                <br class="clear" />
+            </div>
+        </div>
     </template>
 
     <template id="mt-provider-iptranslator">

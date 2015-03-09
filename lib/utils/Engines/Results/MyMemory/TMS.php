@@ -2,7 +2,7 @@
 
 class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     /**
-     * @var Engines_Results_MyMemoryMatches[]|array
+     * @var Engines_Results_MyMemory_Matches[]|array
      */
     public $matches = array();
 
@@ -25,7 +25,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
                     $match[ 'raw_translation' ] = $match[ 'translation' ];
                     $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'translation' ] );
 
-                    $currMatch        = new Engines_Results_MyMemoryMatches( $match );
+                    $currMatch        = new Engines_Results_MyMemory_Matches( $match );
                     $this->matches[ ] = $currMatch;
                 }
 

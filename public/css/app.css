@@ -1145,7 +1145,7 @@ float: none!important;
 		padding: 4px 18px;
 		margin-left: 10px;
 	}
-	
+
 .mgmt-panel-tm .nav-tabs
 {
     background: #4D4D4D;
@@ -1341,10 +1341,10 @@ font-size:14px;
 }
 
 span.mt-error-key {
-display: block;
-color: red;
-padding: 5px 0 10px;
-margin-left: 175px;
+    display: none;
+    color: red;
+    padding: 5px 0 10px;
+    margin-left: 175px;
 }
 
 .uploadtm.btn-ok {
@@ -1401,7 +1401,7 @@ text-align: center;}
     width: 55px;
 }
 
-.canceladdtmx.btn-grey .text, 
+.canceladdtmx.btn-grey .text,
 .addtmxfile.btn-ok .text, 
 .uploadtm.btn-ok .text {
 	color:#fff;
@@ -1633,12 +1633,12 @@ float: right;
 margin-bottom: 10px;
 }
 
-#activetm td, #activemt td {background: #e4f2fb;}
+#activetm td, .activemt td {background: #e4f2fb !important;}
 #activetm tr.ownergroup td {background: #f4f4f4;
 color: #999;}
 #activetm tr.ownergroup td.dragrow .status {border: none; cursor:auto;}
 #activetm tr.uploadfile td {background: #fff;}
-#inactivetm td, #inactivemt td {background: #f3f3f3;}
+#inactivetm td, table.mgmt-mt td {background: #f3f3f3;}
 .mgmt-tm th, .mgmt-mt th {
     padding: 8px 5px;
     background: #fff;
@@ -4507,8 +4507,8 @@ z-index: 10000;
     list-style: none;
     height: 95%;
     outline: none;
-    /*word-wrap: break-word;*/
-    /*word-break: break-all;*/
+    word-wrap: break-word;
+    word-break: normal;
 }
 .text a{text-decoration:none;color:#000 }
 
