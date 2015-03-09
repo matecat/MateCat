@@ -73,7 +73,7 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
-            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
+            $('#mt_engine').append('<option value="' + provider + '">' + $('#new-engine-name').val() + '</option>');
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
             UI.addMTEngine(provider, providerName);
@@ -301,6 +301,23 @@ $.extend(UI, {
             }
 //            if(APP.isCattool) UI.saveTMdata(false);
 //            UI.checkTMGrantsModifications(this);
+        }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
+            id = $(this).parents('tr').first().attr('data-id');
+            APP.doRequest({
+                data: {
+                    action: 'engine',
+                    exec: 'delete',
+                    id: id
+                },
+                context: id,
+                error: function() {
+                    console.log('error');
+                },
+                success: function(d) {
+                    console.log('success');
+                    $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                }
+            });
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
@@ -1328,9 +1345,6 @@ $.extend(UI, {
             },
             success: function(d) {
                 console.log('success');
-                // temp
-                d.data.id = '123';
-                //end temp
                 UI.renderNewMT(this, d.data.id);
             }
         });
@@ -1343,7 +1357,7 @@ $.extend(UI, {
                     '        <input type="checkbox" checked />' +
                     '    </td>' +
                     '    <td class="action">' +
-                    '        <a class="btn pull-left"><span class="text">Delete</span></a>' +
+                    '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
                     '    </td>' +
                     '</tr>';
         console.log('newTR: ', newTR);
