@@ -304,7 +304,7 @@ class Database {
 
 #-#insert()
 
-	private function last_insert($table, $PK_name="", $PK_value="") {
+	public function last_insert($table, $PK_name="", $PK_value="") {
 		$query = "select LAST_INSERT_ID() as last";
 		$id = $this->query_first($query);
 		$ret = $id['last'];
