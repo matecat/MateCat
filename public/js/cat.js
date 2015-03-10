@@ -8993,11 +8993,7 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
-//            $('#mt_engine').append('<option value="' + provider + '">' + $('#new-engine-name').val() + '</option>');
-//            $('#mt_engine option:selected').removeAttr('selected');
-//            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
             UI.addMTEngine(provider, providerName);
-//            $('.popup-tm h1 .btn-ok').click();
             $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -10262,10 +10258,12 @@ $.extend(UI, {
             success: function(d) {
                 console.log('success');
                 UI.renderNewMT(this, d.data.id);
-                UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
-                $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
-                $('#mt_engine option:selected').removeAttr('selected');
-                $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                if(!APP.isCattool) {
+                    UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
+                    $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                    $('#mt_engine option:selected').removeAttr('selected');
+                    $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                }
             }
         });
     },
@@ -10281,8 +10279,21 @@ $.extend(UI, {
                     '    </td>' +
                     '</tr>';
         console.log('newTR: ', newTR);
-        $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
-        $('table.mgmt-mt tbody').prepend(newTR);
+        if(APP.isCattool) {
+            $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR);
+/*
+            if(config.ownerIsMe) {
+
+            } else {
+                $('table.mgmt-mt tbody').prepend(newTR);
+            }
+*/
+        } else {
+            $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
+            $('table.mgmt-mt tbody').prepend(newTR);
+        }
+
+
     },
     resetMTProviderPanel: function () {
         if($('.insert-tm .step2').css('display') == 'block') {
