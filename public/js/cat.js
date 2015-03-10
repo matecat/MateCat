@@ -8964,6 +8964,7 @@ $.extend(UI, {
                 $('.step2 .fields').html('');
                 $(".step2").hide();
                 $(".step3").hide();
+                $('#add-mt-provider-cancel').show();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
                 $(".step2").show();
@@ -8999,10 +9000,11 @@ $.extend(UI, {
             $(".insert-tm").addClass('hide');
             $('#mt_engine_int').val('none').trigger('change');
             $(".insert-tm").addClass('hide').removeAttr('style');
+            $('#add-mt-provider-cancel').show();
         });
         $('html').on('input', '#mt-provider-details input', function() {
             num = 0;
-            $('#mt-provider-details input').each(function () {
+            $('#mt-provider-details input.required').each(function () {
                 if($(this).val() == '') num++;
             })
             if(num) {
@@ -9204,13 +9206,16 @@ $.extend(UI, {
                 tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
                 tbody.find('.activemt').removeClass('activemt');
                 tr.addClass('activemt').removeClass('temp');
+                $('#mt_engine option').removeAttr('selected');
+                $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
             } else {
                 tr = $(this).parents('tr');
                 $(this).replaceWith('<input type="checkbox" />');
                 tr.removeClass('activemt');
+                $('#mt_engine option').removeAttr('selected');
+                $('#mt_engine option[value=0]').attr('selected', 'selected');
             }
-//            if(APP.isCattool) UI.saveTMdata(false);
-//            UI.checkTMGrantsModifications(this);
+
         }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
             id = $(this).parents('tr').first().attr('data-id');
             APP.doRequest({
