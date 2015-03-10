@@ -102,7 +102,7 @@ class engineController extends ajaxController {
         $newEngine = null;
         $validEngine = true;
 
-        switch ( $this->provider ) {
+        switch ( strtolower( $this->provider ) ) {
             case strtolower( Constants_Engines::MICROSOFT_HUB ):
 
                 /**
@@ -115,6 +115,20 @@ class engineController extends ajaxController {
                 $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData['secret'];
+
+                break;
+            case strtolower( Constants_Engines::MOSES ):
+
+                /**
+                 * Create a record of type Moses
+                 */
+                $newEngine = EnginesModel_MosesStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->base_url                            = $this->engineData[ 'url' ];
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
             default:
