@@ -118,7 +118,7 @@ class reviseSummaryController extends viewController {
 
         //set the labels
         $error_info = array(
-                Constants_Revise::ERR_TYPING      => 'Typing errors, double spaces and tags issues',
+                Constants_Revise::ERR_TYPING      => 'Tag issues (mismatches, whitespaces)',
                 Constants_Revise::ERR_TRANSLATION => 'Translation errors (mistranslation, additions/omissions)',
                 Constants_Revise::ERR_TERMINOLOGY => 'Terminology and translation consistency',
                 Constants_Revise::ERR_LANGUAGE     => 'Language quality (grammar, punctuation, spelling)',
