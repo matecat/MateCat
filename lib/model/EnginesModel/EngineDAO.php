@@ -58,7 +58,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
             throw new Exception( "Where condition needed." );
         }
 
-        Log::doLog( sprintf( $query, $where_string ) );
+//        Log::doLog( sprintf( $query, $where_string ) );
 
         return sprintf( $query, $where_string );
 
