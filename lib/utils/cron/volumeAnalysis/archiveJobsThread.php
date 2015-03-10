@@ -56,6 +56,8 @@ for($i = $first_id; $i <= $last_id; $i += $row_interval){
             Log::doLog("[ARCHIVEJOBS] FAILED !!!");
         }
 
+        sleep(1);
+
 	}
 
 }
