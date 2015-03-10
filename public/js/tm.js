@@ -21,15 +21,13 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-// codice inserito da Daniele per aprire la tm e settare l'active nel tab
-
-         $(".popup-tm .mgmt-tm").click(function(e) {
-             e.preventDefault();
-              $(this).addClass("active");
-              $(".mgmt-mt").removeClass("active");
-              $(".mgmt-table-mt").hide();
-              $(".mgmt-table-tm").show();
-       });
+        $(".popup-tm .mgmt-tm").click(function(e) {
+            e.preventDefault();
+            $(this).addClass("active");
+            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-table-mt").hide();
+            $(".mgmt-table-tm").show();
+        });
         $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
@@ -49,12 +47,14 @@ $.extend(UI, {
         });
 
         $("#mt_engine_int").change(function() {
+            $('#add-mt-provider-cancel').hide();
             $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
                 $('.step2 .fields').html('');
                 $(".step2").hide();
                 $(".step3").hide();
+                $('#add-mt-provider-cancel').show();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
                 $(".step2").show();
@@ -62,39 +62,39 @@ $.extend(UI, {
                 $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
-         $(".add-mt-engine").click(function() {
-             console.log($(this));
+        $(".add-mt-engine").click(function() {
             $(this).hide();
+            $('#add-mt-provider-cancel').show();
             $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
         });
-
-         
-
-
-
-        
-// fine codice di Daniele
 
         $('#add-mt-provider-confirm').click(function(e) {
             e.preventDefault();
             if($(this).hasClass('disabled')) return false;
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
-            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
+            $('#mt_engine').append('<option value="' + provider + '">' + $('#new-engine-name').val() + '</option>');
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
-            UI.addMTEngine(provider);
-            $('.popup-tm h1 .btn-ok').click();
+            UI.addMTEngine(provider, providerName);
+//            $('.popup-tm h1 .btn-ok').click();
+            $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
             $(".add-mt-engine").show();
             $(".insert-tm").addClass('hide');
         });
-
+        $('#add-mt-provider-cancel-int').click(function(e) {
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
+            $('#mt_engine_int').val('none').trigger('change');
+            $(".insert-tm").addClass('hide').removeAttr('style');
+            $('#add-mt-provider-cancel').show();
+        });
         $('html').on('input', '#mt-provider-details input', function() {
             num = 0;
-            $('#mt-provider-details input').each(function () {
+            $('#mt-provider-details input.required').each(function () {
                 if($(this).val() == '') num++;
             })
             if(num) {
@@ -296,13 +296,35 @@ $.extend(UI, {
                 tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
                 tbody.find('.activemt').removeClass('activemt');
                 tr.addClass('activemt').removeClass('temp');
+                $('#mt_engine option').removeAttr('selected');
+                $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
             } else {
                 tr = $(this).parents('tr');
                 $(this).replaceWith('<input type="checkbox" />');
                 tr.removeClass('activemt');
+                $('#mt_engine option').removeAttr('selected');
+                $('#mt_engine option[value=0]').attr('selected', 'selected');
             }
-//            if(APP.isCattool) UI.saveTMdata(false);
-//            UI.checkTMGrantsModifications(this);
+
+        }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
+            id = $(this).parents('tr').first().attr('data-id');
+            APP.doRequest({
+                data: {
+                    action: 'engine',
+                    exec: 'delete',
+                    id: id
+                },
+                context: id,
+                error: function() {
+                    console.log('error');
+                },
+                success: function(d) {
+                    console.log('success');
+                    $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                    $('#mt_engine option[value=' + this + ']').remove();
+                    if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
+                }
+            });
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
@@ -1303,30 +1325,56 @@ $.extend(UI, {
             }
         });
     },
-    addMTEngine: function (provider) {
+    addMTEngine: function (provider, providerName) {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
             field = $(this).find('input').first();
             providerData[field.attr('data-field-name')] = field.val();
         })
-        console.log(providerData);
+//        console.log(providerData);
+        name = $('#new-engine-name').val();
+        data = {
+            action: 'engine',
+            exec: 'add',
+            name: name,
+            provider: provider,
+            data: JSON.stringify(providerData)
+        }
+        context = data;
+        context.providerName = providerName;
 //        return false;
 
         APP.doRequest({
-            data: {
-                action: 'engineController',
-                exec: 'add',
-                name: $('#new-engine-name').val(),
-                provider: provider,
-                data: JSON.stringify(providerData)
-            },
+            data: data,
+            context: context,
             error: function() {
-                console.log('checkTMKey error!!');
+                console.log('error');
             },
             success: function(d) {
-
+                console.log('success');
+                UI.renderNewMT(this, d.data.id);
+/*
+                $('#mt_engine').append('<option value="' + d.data.id + '">' + $('#new-engine-name').val() + '</option>');
+                $('#mt_engine option:selected').removeAttr('selected');
+                $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                */
             }
         });
+    },
+    renderNewMT: function (data, id) {
+        newTR =    '<tr class="activemt" data-id="' + id + '">' +
+                    '    <td class="mt-provider">' + data.providerName + '</td>' +
+                    '    <td class="engine-name">' + data.name + '</td>' +
+                    '    <td class="enable-mt text-center">' +
+                    '        <input type="checkbox" checked />' +
+                    '    </td>' +
+                    '    <td class="action">' +
+                    '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
+                    '    </td>' +
+                    '</tr>';
+        console.log('newTR: ', newTR);
+        $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
+        $('table.mgmt-mt tbody').prepend(newTR);
     },
 
 

@@ -1,6 +1,8 @@
 <?php
+
 /**
  * Created by PhpStorm.
+ * @property string client_secret
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 02/03/15
  * Time: 12.10
@@ -81,11 +83,8 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
 		$parameters['source'] = $_config[ 'source' ];
 		$parameters['target'] = $_config[ 'target' ];
 
-        if ( !empty( $_config[ 'id_user' ] ) ) {
-            if ( !is_array( $_config[ 'id_user' ] ) ) {
-                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
-            }
-            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+        if (  $this->client_secret != '' && $this->client_secret != null ) {
+            $parameters[ 'key' ] = $this->client_secret;
         }
 
         if ( isset( $_config[ 'segid' ] ) && is_numeric( $_config[ 'segid' ] ) ) {

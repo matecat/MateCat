@@ -241,10 +241,13 @@
                                                 <option value="iptranslator" >IP Translator</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
-                                            </select>
+                                        </select>
+                                      <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
+                                          <span class="text">Cancel</span>
+                                      </a>
 
                                     </div>
-                                    <div class="step2 pull-left">
+                                    <div class="step2 pull-left hide">
                                     
                                         <form id="mt-provider-details">
                                             <span class="fields"></span>
@@ -253,7 +256,8 @@
                                                 <span class="text uploadkey">Confirm</span>
                                             </a>
 
-                                            <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
+                                            <a id="add-mt-provider-cancel-int"
+                                               class="pull-right btn-grey canceladdtmx">
                                                 <span class="text">Cancel</span>
                                             </a>
                                             <div class="error">
@@ -263,9 +267,9 @@
                                     </div>
                                     <div class="step3 pull-left hide">
                                         <div class="text-left">
-                                                <p>With Microsoft Translator Hub you can build your own machine translation system starting from your own data and/or public data. Microsoft Translator Hub will require many hours or days to build the system. Time varies based on the amount of data provided. 
-
-Once the system is ready, use the parameters provided by Microsoft Translator Hub to fill out the form above.
+                                                <p>With <b>Microsoft Translator Hub</b> you can build your own machine translation system starting from your own data and/or public data.<br/> 
+<b>Microsoft Translator Hub</b> will require many hours or days to build the system: time varies based on the amount of data provided.<br/> 
+Once the system is ready, use the parameters provided by <b>Microsoft Translator Hub</b> to fill out the form above.
 </p>
                                         </div>
                                         <a href="#" class="continuebtn btn-ok">Connect your MT system</a>
@@ -296,7 +300,7 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
                                             <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
                                         </td>
                                         <td class="action">
-                                            <a class="btn pull-left"><span class="text">Delete</span></a>
+                                            <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
                                         </td>
                                     </tr>
                                     </tal:block>
@@ -329,18 +333,18 @@ Once the system is ready, use the parameters provided by Microsoft Translator Hu
         <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
-        <label for="new-engine-name">Engine name</label>
-        <input id="new-engine-name" placeholder="here" />
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>ClientID<sup>*</sup></label>
-                <input data-field-name="client_id" placeholder="here" />
+                <input class="required" data-field-name="client_id" placeholder="here" />
                 <br class="clear" />
             </div>
             <div class="provider-field">
                 <label>Client Secret<sup>*</sup></label>
-                <input data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" placeholder="here" />
                 <br class="clear" />
             </div>
         </div>
