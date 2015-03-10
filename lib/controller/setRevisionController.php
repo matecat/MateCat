@@ -32,7 +32,7 @@ class setRevisionController extends ajaxController {
                 'segment'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'jpassword'       => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
                 'err_typing'      => array(
                         'filter'  => FILTER_CALLBACK,
@@ -55,8 +55,7 @@ class setRevisionController extends ajaxController {
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
                 'original'        => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'filter'  => FILTER_UNSAFE_RAW
                 )
         );
 
