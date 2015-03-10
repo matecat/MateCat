@@ -438,7 +438,7 @@ class catController extends viewController {
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery         = new EnginesModel_EngineStruct();
         $engineQuery->type   = 'MT';
-        $engineQuery->uid    = $uid;
+        $engineQuery->uid    = ( $uid == null ? -1 : $uid );
 
         $engineQuery->active = 1;
         $this->mt_engines = $engine->read( $engineQuery );
