@@ -54,6 +54,7 @@ $.extend(UI, {
                 $('.step2 .fields').html('');
                 $(".step2").hide();
                 $(".step3").hide();
+                $('#add-mt-provider-cancel').show();
             } else {
                 $('.step2 .fields').html($('#mt-provider-' + provider).html());
                 $(".step2").show();
@@ -63,6 +64,7 @@ $.extend(UI, {
         });
         $(".add-mt-engine").click(function() {
             $(this).hide();
+//            $('.add-mt-provider-cancel-int').click();
             $('#add-mt-provider-cancel').show();
             $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
@@ -77,10 +79,11 @@ $.extend(UI, {
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
             UI.addMTEngine(provider, providerName);
-            $('.popup-tm h1 .btn-ok').click();
+//            $('.popup-tm h1 .btn-ok').click();
             $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
+            console.log('clicked add-mt-provider-cancel');
             $(".add-mt-engine").show();
             $(".insert-tm").addClass('hide');
         });
@@ -89,10 +92,11 @@ $.extend(UI, {
             $(".insert-tm").addClass('hide');
             $('#mt_engine_int').val('none').trigger('change');
             $(".insert-tm").addClass('hide').removeAttr('style');
+            $('#add-mt-provider-cancel').show();
         });
         $('html').on('input', '#mt-provider-details input', function() {
             num = 0;
-            $('#mt-provider-details input').each(function () {
+            $('#mt-provider-details input.required').each(function () {
                 if($(this).val() == '') num++;
             })
             if(num) {
@@ -294,13 +298,16 @@ $.extend(UI, {
                 tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
                 tbody.find('.activemt').removeClass('activemt');
                 tr.addClass('activemt').removeClass('temp');
+                $('#mt_engine option').removeAttr('selected');
+                $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
             } else {
                 tr = $(this).parents('tr');
                 $(this).replaceWith('<input type="checkbox" />');
                 tr.removeClass('activemt');
+                $('#mt_engine option').removeAttr('selected');
+                $('#mt_engine option[value=0]').attr('selected', 'selected');
             }
-//            if(APP.isCattool) UI.saveTMdata(false);
-//            UI.checkTMGrantsModifications(this);
+
         }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
             id = $(this).parents('tr').first().attr('data-id');
             APP.doRequest({
@@ -316,6 +323,8 @@ $.extend(UI, {
                 success: function(d) {
                     console.log('success');
                     $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                    $('#mt_engine option[value=' + this + ']').remove();
+                    if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
                 }
             });
         }).on('click', 'a.usetm', function() {
@@ -403,6 +412,9 @@ $.extend(UI, {
 */
         $(".add-mt-engine").click(function() {
             $(this).hide();
+            console.log('ADD MT ENGINE');
+            UI.resetMTProviderPanel();
+//            $('#add-mt-provider-cancel-int').click();
             $(".mgmt-table-mt tr.new").removeClass('hide').show();
         });
         $(".mgmt-table-tm .add-tm").click(function() {
@@ -1346,6 +1358,11 @@ $.extend(UI, {
             success: function(d) {
                 console.log('success');
                 UI.renderNewMT(this, d.data.id);
+/*
+                $('#mt_engine').append('<option value="' + d.data.id + '">' + $('#new-engine-name').val() + '</option>');
+                $('#mt_engine option:selected').removeAttr('selected');
+                $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                */
             }
         });
     },
@@ -1364,6 +1381,18 @@ $.extend(UI, {
         $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
         $('table.mgmt-mt tbody').prepend(newTR);
     },
-
-
+    resetMTProviderPanel: function () {
+        if($('.insert-tm .step2').css('display') == 'block') {
+            $('#add-mt-provider-cancel-int').click();
+            $('.add-mt-engine').click();
+//            $('.insert-tm .step2').css('display', 'none');
+        };
+        /*
+        $(".add-mt-engine").show();
+        $(".insert-tm").addClass('hide');
+        $('#mt_engine_int').val('none').trigger('change');
+        $(".insert-tm").addClass('hide').removeAttr('style');
+        $('#add-mt-provider-cancel').show();
+        */
+    },
 });

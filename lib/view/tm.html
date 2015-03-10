@@ -291,6 +291,16 @@ Once the system is ready, use the parameters provided by <b>Microsoft Translator
                                 </tr>
                                 </thead>
                                 <tbody>
+                                    <tr class="" data-id="1">
+                                        <td class="mt-provider">MyMemory ( All Pairs )</td>
+                                        <td class="engine-name">MyMemory: next generation Translation Memory technology</td>
+                                        <td class="enable-mt text-center">
+                                            <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
+                                        </td>
+                                        <td class="action">
+                                            &nbsp;
+                                        </td>
+                                    </tr>
                                     <tal:block tal:repeat="engine mt_engines">
                                     <tr class="" data-id="${engine/id}">
                                         <td class="mt-provider">${engine/name}</td>
@@ -333,18 +343,18 @@ Once the system is ready, use the parameters provided by <b>Microsoft Translator
         <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
-        <label for="new-engine-name">Engine name</label>
-        <input id="new-engine-name" placeholder="here" />
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
                 <label>ClientID<sup>*</sup></label>
-                <input data-field-name="client_id" placeholder="here" />
+                <input class="required" data-field-name="client_id" placeholder="here" />
                 <br class="clear" />
             </div>
             <div class="provider-field">
                 <label>Client Secret<sup>*</sup></label>
-                <input data-field-name="secret" placeholder="here" />
+                <input class="required" data-field-name="secret" placeholder="here" />
                 <br class="clear" />
             </div>
         </div>
