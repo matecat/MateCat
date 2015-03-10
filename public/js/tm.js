@@ -78,7 +78,7 @@ $.extend(UI, {
             $('#mt_engine option:selected').removeAttr('selected');
             $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
             UI.addMTEngine(provider, providerName);
-            $('.popup-tm h1 .btn-ok').click();
+//            $('.popup-tm h1 .btn-ok').click();
             $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -321,6 +321,8 @@ $.extend(UI, {
                 success: function(d) {
                     console.log('success');
                     $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                    $('#mt_engine option[value=' + this + ']').remove();
+                    if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
                 }
             });
         }).on('click', 'a.usetm', function() {
@@ -1351,6 +1353,11 @@ $.extend(UI, {
             success: function(d) {
                 console.log('success');
                 UI.renderNewMT(this, d.data.id);
+/*
+                $('#mt_engine').append('<option value="' + d.data.id + '">' + $('#new-engine-name').val() + '</option>');
+                $('#mt_engine option:selected').removeAttr('selected');
+                $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                */
             }
         });
     },
