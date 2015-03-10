@@ -291,6 +291,16 @@ Once the system is ready, use the parameters provided by <b>Microsoft Translator
                                 </tr>
                                 </thead>
                                 <tbody>
+                                    <tr class="" data-id="1">
+                                        <td class="mt-provider">MyMemory ( All Pairs )</td>
+                                        <td class="engine-name">MyMemory: next generation Translation Memory technology</td>
+                                        <td class="enable-mt text-center">
+                                            <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
+                                        </td>
+                                        <td class="action">
+                                            &nbsp;
+                                        </td>
+                                    </tr>
                                     <tal:block tal:repeat="engine mt_engines">
                                     <tr class="" data-id="${engine/id}">
                                         <td class="mt-provider">${engine/name}</td>
