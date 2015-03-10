@@ -3124,6 +3124,7 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.
