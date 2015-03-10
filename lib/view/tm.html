@@ -266,12 +266,7 @@
                                         </form>
                                     </div>
                                     <div class="step3 pull-left hide">
-                                        <div class="text-left">
-                                                <p>With <b>Microsoft Translator Hub</b> you can build your own machine translation system starting from your own data and/or public data.<br/> 
-<b>Microsoft Translator Hub</b> will require many hours or days to build the system: time varies based on the amount of data provided.<br/> 
-Once the system is ready, use the parameters provided by <b>Microsoft Translator Hub</b> to fill out the form above.
-</p>
-                                        </div>
+                                        <div class="text-left"></div>
                                         <a href="#" class="continuebtn btn-ok">Connect your MT system</a>
                                     </div>
                                 </div>
@@ -291,7 +286,7 @@ Once the system is ready, use the parameters provided by <b>Microsoft Translator
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="" data-id="1">
+                                    <tr class="activemt" data-id="1">
                                         <td class="mt-provider">MyMemory ( All Pairs )</td>
                                         <td class="engine-name">MyMemory: next generation Translation Memory technology</td>
                                         <td class="enable-mt text-center">
@@ -339,7 +334,7 @@ Once the system is ready, use the parameters provided by <b>Microsoft Translator
     </div>
     <!-- fine popup glossary mgmt -->
 
-    <template id="mt-provider-microsofthub">
+    <template id="mt-provider-microsofthub-fields">
         <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
@@ -358,6 +353,13 @@ Once the system is ready, use the parameters provided by <b>Microsoft Translator
                 <br class="clear" />
             </div>
         </div>
+    </template>
+
+    <template id="mt-provider-microsofthub-msg">
+        <p>With <b>Microsoft Translator Hub</b> you can build your own machine translation system starting from your own data and/or public data.<br/>
+            <b>Microsoft Translator Hub</b> will require many hours or days to build the system: time varies based on the amount of data provided.<br/>
+            Once the system is ready, use the parameters provided by <b>Microsoft Translator Hub</b> to fill out the form above.
+        </p>
     </template>
 
     <template id="mt-provider-iptranslator">
