@@ -8974,6 +8974,7 @@ $.extend(UI, {
         });
         $(".add-mt-engine").click(function() {
             $(this).hide();
+//            $('.add-mt-provider-cancel-int').click();
             $('#add-mt-provider-cancel').show();
             $("#add-mt-provider-confirm").addClass('hide');
             $(".insert-tm").removeClass('hide');
@@ -8992,6 +8993,7 @@ $.extend(UI, {
             $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
+            console.log('clicked add-mt-provider-cancel');
             $(".add-mt-engine").show();
             $(".insert-tm").addClass('hide');
         });
@@ -9320,6 +9322,9 @@ $.extend(UI, {
 */
         $(".add-mt-engine").click(function() {
             $(this).hide();
+            console.log('ADD MT ENGINE');
+            UI.resetMTProviderPanel();
+//            $('#add-mt-provider-cancel-int').click();
             $(".mgmt-table-mt tr.new").removeClass('hide').show();
         });
         $(".mgmt-table-tm .add-tm").click(function() {
@@ -10286,8 +10291,20 @@ $.extend(UI, {
         $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
         $('table.mgmt-mt tbody').prepend(newTR);
     },
-
-
+    resetMTProviderPanel: function () {
+        if($('.insert-tm .step2').css('display') == 'block') {
+            $('#add-mt-provider-cancel-int').click();
+            $('.add-mt-engine').click();
+//            $('.insert-tm .step2').css('display', 'none');
+        };
+        /*
+        $(".add-mt-engine").show();
+        $(".insert-tm").addClass('hide');
+        $('#mt_engine_int').val('none').trigger('change');
+        $(".insert-tm").addClass('hide').removeAttr('style');
+        $('#add-mt-provider-cancel').show();
+        */
+    },
 });
 /*
  Component: ui.offline
