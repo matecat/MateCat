@@ -202,7 +202,7 @@ UI = {
 		new UI.DropDown( $( '.wrapper-dropdown-5' ) );
 
 		//set control events
-		$( '.dropdown' ).mouseleave( function(){
+		$( '.wrapper-dropdown-5' ).mouseleave( function(){
 			$( '.wrapper-dropdown-5' ).removeClass( 'active' );
 		} );
 

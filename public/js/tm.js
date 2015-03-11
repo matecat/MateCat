@@ -10,8 +10,9 @@ $.extend(UI, {
 //        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
-
-
+        
+        UI.setDropDown();
+        
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
             UI.closeTMPanel();
@@ -152,7 +153,7 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
+        $('body').on('click', '#activetm tr.mine a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
             $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
@@ -161,13 +162,14 @@ $.extend(UI, {
                         $(".addtmx").show();
                         UI.clearAddTMRow();
                         */
-        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
-            $('#activetm tr.uploadpanel').addClass('hide');
-            $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
-        }).on('click', '.addtmx:not(.disabled)', function() {
+        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx, #inactivetm tr.uploadpanel a.canceladdtmx', function() {
+            $('#activetm tr.uploadpanel, #inactivetm tr.uploadpanel').addClass('hide');
+            $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
+        }).on('click', '.addtmx:not(.disabled)', function(e) {
+            e.preventDefault();
+            console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-//                     '  <div class="standard">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
@@ -183,7 +185,6 @@ $.extend(UI, {
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
                     '   <span class="error"></span>' +
-//                    '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
                     '           <span class="inner"></span>' +
@@ -347,10 +348,10 @@ $.extend(UI, {
             }
         }).on('click', '.mgmt-tm .downloadtmx', function(){
             if($(this).hasClass('downloading')) return false;
-            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
-            $(this).addClass('disabled' ).addClass('downloading');
+           UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' );
             $(this).prepend('<span class="uploadloader"></span>');
-            var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
+            var msg = '<span class="notify"><span class="uploadloader"></span> Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
             $(this).parents('td').first().append(msg);
         }).on('click', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
@@ -621,7 +622,7 @@ $.extend(UI, {
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
-                if(APP.isAnonymousUser()) {
+                if(config.isAnonymousUser()) {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
@@ -748,8 +749,8 @@ $.extend(UI, {
                 '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
-                '               </ul>'+ 
-                '                    </div>'+    
+                '              </ul>'+ 
+                '          </div>'+    
                 '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
@@ -778,7 +779,6 @@ $.extend(UI, {
         $('#new-tm-key, #new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
-
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
@@ -974,7 +974,7 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
-                                if(APP.isAnonymousUser()) {
+                                if(config.isAnonymousUser()) {
                                     console.log('anonimo');
                                 } else {
                                     console.log('loggato');
@@ -1252,7 +1252,7 @@ $.extend(UI, {
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
-                        $(tm).find('td.notify').remove();
+                        $(tm).find('span.notify').remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $('#' + iFrameID).contents().find('body').text();
@@ -1370,6 +1370,7 @@ $.extend(UI, {
         console.log('newTR: ', newTR);
         if(APP.isCattool) {
             $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR);
+
 /*
             if(config.ownerIsMe) {
 
@@ -1383,6 +1384,19 @@ $.extend(UI, {
         }
 
 
+    },
+
+/* codice inserito da Daniele */
+    pulseMTadded: function (row) {
+        setTimeout(function() {
+            $('.activemt').animate({scrollTop: 5000}, 0);
+            row.fadeOut();
+            row.fadeIn();
+        }, 10);
+        setTimeout(function() {
+            $('.activemt').animate({scrollTop: 5000}, 0);
+        }, 1000);
+//        $('.mgmt-tm tr.new .message').text('The key ' + this + ' has been added!');
     },
     resetMTProviderPanel: function () {
         if($('.insert-tm .step2').css('display') == 'block') {
@@ -1410,6 +1424,8 @@ $.extend(UI, {
         tr.addClass('activemt').removeClass('temp');
         $('#mt_engine option').removeAttr('selected');
         $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
+        UI.pulseMTadded($('.activemt').last()); /* codice inserito da Daniele */
+
     },
     deactivateMT: function (el) {
         tr = $(el).parents('tr');
@@ -1422,4 +1438,35 @@ $.extend(UI, {
         newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
         $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
     },
+    
+    /* codice inserito da Daniele */
+    setDropDown: function(){
+
+        //init dropdown events on every class
+        new UI.DropDown( $( '.wrapper-dropdown-5' ) );
+
+        //set control events
+        $( '.action' ).mouseleave( function(){
+            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
+        } );
+
+        $(document).click(function() {
+            // all dropdowns
+            $('.wrapper-dropdown-5').removeClass('active');
+        });
+
+    },
+
+    DropDown: function(el){
+        this.initEvents = function () {
+            var obj = this;
+            obj.dd.on( 'click', function ( event ) {console.log('this: ', this);
+                $( this ).toggleClass( 'active' );
+                event.preventDefault();
+                if($( this ).hasClass( 'active' )) event.stopPropagation();
+            } );
+        };
+        this.dd = el;
+        this.initEvents();
+    }
 });

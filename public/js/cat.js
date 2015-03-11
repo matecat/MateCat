@@ -1204,7 +1204,7 @@ UI = {
 */
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+						'	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +
@@ -8921,8 +8921,9 @@ $.extend(UI, {
 //        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
-
-
+        
+        UI.setDropDown();
+        
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
             UI.closeTMPanel();
@@ -9075,7 +9076,9 @@ $.extend(UI, {
         }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
             $('#activetm tr.uploadpanel').addClass('hide');
             $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
-        }).on('click', '.addtmx:not(.disabled)', function() {
+        }).on('click', '.addtmx:not(.disabled)', function(e) {
+            e.preventDefault();
+            console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
 //                     '  <div class="standard">' +
@@ -9532,7 +9535,7 @@ $.extend(UI, {
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
-                if(APP.isAnonymousUser()) {
+                if(config.isAnonymousUser()) {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
@@ -9659,8 +9662,8 @@ $.extend(UI, {
                 '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
-                '               </ul>'+ 
-                '                    </div>'+    
+                '              </ul>'+ 
+                '          </div>'+    
                 '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
@@ -9689,7 +9692,6 @@ $.extend(UI, {
         $('#new-tm-key, #new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
-
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
@@ -9885,7 +9887,7 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
-                                if(APP.isAnonymousUser()) {
+                                if(config.isAnonymousUser()) {
                                     console.log('anonimo');
                                 } else {
                                     console.log('loggato');
@@ -10281,6 +10283,7 @@ $.extend(UI, {
         console.log('newTR: ', newTR);
         if(APP.isCattool) {
             $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR);
+
 /*
             if(config.ownerIsMe) {
 
@@ -10294,6 +10297,19 @@ $.extend(UI, {
         }
 
 
+    },
+
+/* codice inserito da Daniele */
+    pulseMTadded: function (row) {
+        setTimeout(function() {
+            $('.activemt').animate({scrollTop: 5000}, 0);
+            row.fadeOut();
+            row.fadeIn();
+        }, 10);
+        setTimeout(function() {
+            $('.activemt').animate({scrollTop: 5000}, 0);
+        }, 1000);
+//        $('.mgmt-tm tr.new .message').text('The key ' + this + ' has been added!');
     },
     resetMTProviderPanel: function () {
         if($('.insert-tm .step2').css('display') == 'block') {
@@ -10321,6 +10337,8 @@ $.extend(UI, {
         tr.addClass('activemt').removeClass('temp');
         $('#mt_engine option').removeAttr('selected');
         $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
+        UI.pulseMTadded($('.activemt').last()); /* codice inserito da Daniele */
+
     },
     deactivateMT: function (el) {
         tr = $(el).parents('tr');
@@ -10333,6 +10351,37 @@ $.extend(UI, {
         newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
         $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
     },
+    
+    /* codice inserito da Daniele */
+    setDropDown: function(){
+
+        //init dropdown events on every class
+        new UI.DropDown( $( '.wrapper-dropdown-5' ) );
+
+        //set control events
+        $( '.action' ).mouseleave( function(){
+            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
+        } );
+
+        $(document).click(function() {
+            // all dropdowns
+            $('.wrapper-dropdown-5').removeClass('active');
+        });
+
+    },
+
+    DropDown: function(el){
+        this.initEvents = function () {
+            var obj = this;
+            obj.dd.on( 'click', function ( event ) {console.log('this: ', this);
+                $( this ).toggleClass( 'active' );
+                event.preventDefault();
+                if($( this ).hasClass( 'active' )) event.stopPropagation();
+            } );
+        };
+        this.dd = el;
+        this.initEvents();
+    }
 });
 /*
  Component: ui.offline
@@ -10532,4 +10581,29 @@ if(!config.offlineModeEnabled) {
 
     });
 
+}
+/**
+ * Component ui.split
+ * Created by andreamartines on 11/03/15.
+ */
+if(config.splitSegmentEnabled) {
+    $('html').on('click', '.sid .txt', function() {
+        actions = $(this).parent().find('.actions');
+        actions.toggle();
+    }).on('click', '.sid .actions .split', function(e) {
+        e.preventDefault();
+        console.log('split');
+        UI.createSplitArea($(this).parents('section'));
+    })
+
+    $.extend(UI, {
+        createSplitArea: function (segment) {
+            source = $(segment).find('.source');
+            source.after('<div class="splitBar"><p>Click to add Split points</p><div class="buttons"><a href="#">Cancel</a><a href="#">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+//            console.log(segment.find('splitArea'));
+
+            segment.find('.splitArea').html(source.attr('data-original'));
+        },
+
+    })
 }
