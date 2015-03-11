@@ -170,13 +170,13 @@ $.extend(UI, {
             console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
+                    '<form><input type="file" name="prova" /></form><form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" name="tmx_file" />' +
+                    '    <input type="file" name="tmx_file" onclick="alert(\'cliccato 1\')" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -1042,14 +1042,19 @@ $.extend(UI, {
         tt = $('#activetm tbody tr.' + cat);
         dataOb = [];
         $(tt).each(function () {
+            r = (($(this).find('.lookup input').is(':checked'))? 1 : 0);
+            w = (($(this).find('.update input').is(':checked'))? 1 : 0);
+            if(!r && !w) {
+                return true;
+            }
             dd = {
                 tm: $(this).attr('data-tm'),
                 glos: $(this).attr('data-glos'),
                 owner: $(this).attr('data-owner'),
                 key: $(this).find('.privatekey').text(),
                 name: $(this).find('.description').text(),
-                r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
-                w: (($(this).find('.update input').is(':checked'))? 1 : 0)
+                r: r,
+                w: w
             }
             dataOb.push(dd);
         })

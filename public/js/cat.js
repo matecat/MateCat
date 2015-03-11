@@ -9081,13 +9081,13 @@ $.extend(UI, {
             console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
+                    '<form><input type="file" name="prova" /></form><form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" name="tmx_file" />' +
+                    '    <input type="file" name="tmx_file" onclick="alert(\'cliccato 1\')" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -9953,14 +9953,19 @@ $.extend(UI, {
         tt = $('#activetm tbody tr.' + cat);
         dataOb = [];
         $(tt).each(function () {
+            r = (($(this).find('.lookup input').is(':checked'))? 1 : 0);
+            w = (($(this).find('.update input').is(':checked'))? 1 : 0);
+            if(!r && !w) {
+                return true;
+            }
             dd = {
                 tm: $(this).attr('data-tm'),
                 glos: $(this).attr('data-glos'),
                 owner: $(this).attr('data-owner'),
                 key: $(this).find('.privatekey').text(),
                 name: $(this).find('.description').text(),
-                r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
-                w: (($(this).find('.update input').is(':checked'))? 1 : 0)
+                r: r,
+                w: w
             }
             dataOb.push(dd);
         })
@@ -10587,9 +10592,12 @@ if(!config.offlineModeEnabled) {
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
-    $('html').on('click', '.sid .txt', function() {
+    $('html').on('mouseover', '.sid', function() {
         actions = $(this).parent().find('.actions');
-        actions.toggle();
+        actions.show();
+    }).on('mouseout', '.sid', function() {
+        actions = $(this).parent().find('.actions');
+        actions.hide();
     }).on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
         console.log('split');
@@ -10617,11 +10625,14 @@ if(config.splitSegmentEnabled) {
 
     $.extend(UI, {
         splitSegment: function (segment) {
+            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"></span>');
+            numSplit = splittedSource.length;
+            console.log('numSplit: ', numSplit);
 
         },
         createSplitArea: function (segment) {
             source = $(segment).find('.source');
-            source.after('<div class="splitBar"><p>Click to add Split points</p><div class="splitNum">: <span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+            source.after('<div class="splitBar"><div class="splitNum"><span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
 //            console.log(segment.find('splitArea'));
 
             segment.find('.splitArea').html(source.attr('data-original'));
