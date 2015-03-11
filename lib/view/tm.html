@@ -332,7 +332,7 @@
     <!-- fine popup glossary mgmt -->
     <!-- inizio blocco microsoft -->
     <template id="mt-provider-microsofthub-fields">
-        <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
@@ -359,7 +359,7 @@
     <!-- inizio blocco iptranslator -->
     <template id="mt-provider-iptranslator-fields">
         <p>Fill out the form with the parameters provided by Iconic Translation Machines to connect to IPTranslator.</p>
-        <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
@@ -367,7 +367,7 @@
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
-                <label>Client Secret<sup>*</sup></label>
+                <label>Key<sup>*</sup></label>
                 <input class="required" data-field-name="secret" placeholder="here" />
                 <br class="clear" />
             </div>
@@ -377,13 +377,13 @@
         <p>IPTranslator from Iconic Translation Machines is a specialised machine translation system for the patent and legal translation industry. It delivers high-quality machine translation adapted specifically for this domain based on scientific expertise and deep domain knowledge. It does not require any additional data.</p>
         <p><strong>Warning</strong>: IPTranslator has a startup time of some minutes. Make sure your engine is up before analyzing a document. IPTranslator can only serve few requests per second, analysis may be slow.</p>
         <p>Contact Iconic Translation Machines to get your MT system.</p>
-        <a href="#" class="continuebtn btn-ok">Contact Iconic</a>
+        <a href="http://iconictranslation.com/about/contact/" target="_blank" class="continuebtn btn-ok">Contact Iconic</a>
     </template>
     <!-- fine blocco iptranslator -->
     <!-- inizio blocco deeplingo -->
     <template id="mt-provider-deeplingo-fields">
         <p>Fill out the form with the data to connect to your DeepLingo MT system.</p>
-        <p class="required pull-left">Please provide the following information. Fields marked in <sup>*</sup> are required.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
@@ -406,8 +406,8 @@
     <!-- fine blocco deeplingo -->
     <!-- inizio blocco moses -->
    <template id="mt-provider-moses-fields">
-            <p>Fill out the form above with the connection data to your own Moses MT system.</p>
-            <p class="required pull-left">Fields marked in <sup>*</sup> are required.</p>
+            <p>Fill out the form with the connection data to your own Moses MT system.</p>
+            <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
         <label for="new-engine-name">Engine name<sup>*</sup></label>
@@ -415,7 +415,7 @@
         <br class="clear" />
         <div class="provider-data">
             <div class="provider-field">
-                <label>Client Secret<sup>*</sup></label>
+                <label>API key<sup>*</sup></label>
                 <input class="required" data-field-name="secret" placeholder="here" />
                 <br class="clear" />
             </div>
@@ -424,42 +424,13 @@
     <template id="mt-provider-moses-msg">
         <p>If you host your own machine translation systems based on Moses, you can use the Moses server component to connect to MateCat or expose your MT system via API compliant with these specs.</p>
         <p><strong>Warning</strong>: Moses, if running on a single machine can only serve few requests per second, in that case, analysis may be slower than MyMemory, Google Translate or Microsoft (more than 100 segments per second).</p>
-        <a href="#" class="continuebtn btn-ok">Contact MateCat for more information</a>
+        <a href="mailto:support@matecat.com" class="continuebtn btn-ok">Contact MateCat</a>
     </template>
     <!-- fine blocco moses -->
 
 
 </div>
-<script>
 
-        function DropDown(el) {
-                this.dd = el;
-                this.initEvents();
-            }
-            DropDown.prototype = {
-                initEvents : function() {
-                    var obj = this;
-
-                    obj.dd.on('click', function(event){
-                        $(this).toggleClass('active');
-                        event.stopPropagation();
-                    }); 
-                }
-            }
-
-            $(function() {
-
-                var dd = new DropDown( $('#dd') );
-
-                $(document).click(function() {
-                    // all dropdowns
-                    $('.wrapper-dropdown-5').removeClass('active');
-                });
-
-            });
-
-        
-</script>
 
 </body>
 </html>

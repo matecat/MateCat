@@ -1412,8 +1412,6 @@ text-align: center;}
     display: none;
 }
 
-
-
  .canceladdtmx.btn-grey {
     background:#f26522;
 }
@@ -1433,11 +1431,10 @@ text-align: center;}
     height: auto;
     outline: 0;
     box-shadow: inset 0 1px 2px #ddd;
--webkit-box-shadow: inset 0 1px 2px #ddd;
+    -webkit-box-shadow: inset 0 1px 2px #ddd;
     white-space: initial;
-overflow: initial;
-text-overflow: initial;
-
+    overflow: initial;
+    text-overflow: initial;
 }
 
 
