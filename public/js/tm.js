@@ -285,11 +285,10 @@ $.extend(UI, {
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
         }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
-            console.log('change');
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
+            UI.toggleTM(this);
         }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
-            console.log('vediamo');
 //            console.log($(this).prop('checked'));
 //            $(this).prop('checked', true);
             if($(this).is(':checked')) {
@@ -1419,5 +1418,8 @@ $.extend(UI, {
         $('#mt_engine option').removeAttr('selected');
         $('#mt_engine option[value=0]').attr('selected', 'selected');
     },
-
+    toggleTM: function (el) {
+        newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+        $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+    },
 });
