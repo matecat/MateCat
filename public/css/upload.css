@@ -362,6 +362,9 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
     */
     text-decoration: none;
 }
+body.isAnonymous .memory-mgmt {
+    display: none;
+}
 .memory-mgmt .text {
     text-decoration: underline;
 }

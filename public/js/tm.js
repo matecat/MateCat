@@ -285,11 +285,10 @@ $.extend(UI, {
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
         }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
-            console.log('change');
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
+            UI.toggleTM(this);
         }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
-            console.log('vediamo');
 //            console.log($(this).prop('checked'));
 //            $(this).prop('checked', true);
             if($(this).is(':checked')) {
@@ -622,7 +621,7 @@ $.extend(UI, {
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
-                if(APP.isAnonymousUser()) {
+                if(config.isAnonymousUser()) {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
@@ -975,7 +974,7 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
-                                if(APP.isAnonymousUser()) {
+                                if(config.isAnonymousUser()) {
                                     console.log('anonimo');
                                 } else {
                                     console.log('loggato');
@@ -1419,5 +1418,8 @@ $.extend(UI, {
         $('#mt_engine option').removeAttr('selected');
         $('#mt_engine option[value=0]').attr('selected', 'selected');
     },
-
+    toggleTM: function (el) {
+        newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+        $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+    },
 });
