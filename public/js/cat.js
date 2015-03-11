@@ -1204,7 +1204,7 @@ UI = {
 */
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+						'	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +
@@ -10532,4 +10532,29 @@ if(!config.offlineModeEnabled) {
 
     });
 
+}
+/**
+ * Component ui.split
+ * Created by andreamartines on 11/03/15.
+ */
+if(config.splitSegmentEnabled) {
+    $('html').on('click', '.sid .txt', function() {
+        actions = $(this).parent().find('.actions');
+        actions.toggle();
+    }).on('click', '.sid .actions .split', function(e) {
+        e.preventDefault();
+        console.log('split');
+        UI.createSplitArea($(this).parents('section'));
+    })
+
+    $.extend(UI, {
+        createSplitArea: function (segment) {
+            source = $(segment).find('.source');
+            source.after('<div class="splitBar"><p>Click to add Split points</p><div class="buttons"><a href="#">Cancel</a><a href="#">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+//            console.log(segment.find('splitArea'));
+
+            segment.find('.splitArea').html(source.attr('data-original'));
+        },
+
+    })
 }

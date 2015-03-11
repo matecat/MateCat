@@ -3461,9 +3461,17 @@ section.currSearchSegment .sid
 .editor .sid{
 	top:43px !Important;}
 
-span.sid .implicit {
+div.sid .implicit {
 /*    display: none; */
 }
+
+div.sid .actions {
+    display: none;
+}
+
+
+
+
 /*.comment{position:absolute;right:0;}*/
 /*
 .editor .status-container{display:none;}
@@ -6571,4 +6579,17 @@ body.cattool table.mgmt-mt tbody .enable-mt {
 }
 body.isAnonymous .add-mt-engine {
     display: none;
+}
+
+.splitArea {
+    width: 45.5%;
+    z-index: 9999999;
+    position: absolute;
+    background: #fff;
+    min-height: 20px;
+    border: 2px solid #F00;
+    padding: 3px 1%;
+    font-size: 18px;
+    text-align: left;
+    line-height: 30px;
 }
