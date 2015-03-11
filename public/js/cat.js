@@ -9064,7 +9064,7 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
+        $('body').on('click', '#activetm tr.mine a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
             $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
@@ -9073,15 +9073,14 @@ $.extend(UI, {
                         $(".addtmx").show();
                         UI.clearAddTMRow();
                         */
-        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
-            $('#activetm tr.uploadpanel').addClass('hide');
-            $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
+        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx, #inactivetm tr.uploadpanel a.canceladdtmx', function() {
+            $('#activetm tr.uploadpanel, #inactivetm tr.uploadpanel').addClass('hide');
+            $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
         }).on('click', '.addtmx:not(.disabled)', function(e) {
             e.preventDefault();
             console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-//                     '  <div class="standard">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
@@ -9097,7 +9096,6 @@ $.extend(UI, {
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
                     '   <span class="error"></span>' +
-//                    '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
                     '           <span class="inner"></span>' +
@@ -9261,10 +9259,10 @@ $.extend(UI, {
             }
         }).on('click', '.mgmt-tm .downloadtmx', function(){
             if($(this).hasClass('downloading')) return false;
-            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
-            $(this).addClass('disabled' ).addClass('downloading');
+           UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' );
             $(this).prepend('<span class="uploadloader"></span>');
-            var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
+            var msg = '<span class="notify"><span class="uploadloader"></span> Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
             $(this).parents('td').first().append(msg);
         }).on('click', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
@@ -9535,7 +9533,7 @@ $.extend(UI, {
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
-                if(config.isAnonymousUser()) {
+                if(config.isAnonymousUser) {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
@@ -10165,7 +10163,7 @@ $.extend(UI, {
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
-                        $(tm).find('td.notify').remove();
+                        $(tm).find('span.notify').remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $('#' + iFrameID).contents().find('body').text();
@@ -10348,8 +10346,10 @@ $.extend(UI, {
         $('#mt_engine option[value=0]').attr('selected', 'selected');
     },
     toggleTM: function (el) {
-        newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
-        $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+        setTimeout(function() {
+            newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+            $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+        }, 200);
     },
     
     /* codice inserito da Daniele */
@@ -10594,15 +10594,50 @@ if(config.splitSegmentEnabled) {
         e.preventDefault();
         console.log('split');
         UI.createSplitArea($(this).parents('section'));
+    }).on('keydown', '.splitArea', function(e) {
+        e.preventDefault();
+    }).on('click', '.splitArea', function(e) {
+        if($(this).hasClass('splitpoint')) return false;
+        pasteHtmlAtCaret('<span class="splitpoint"></span>');
+        UI.updateSplitNumber($(this));
+    }).on('click', '.splitArea .splitpoint', function() {
+        segment = $(this).parents('section');
+        $(this).remove();
+        UI.updateSplitNumber($(segment).find('.splitArea'));
+    }).on('click', '.splitBar .buttons .cancel', function(e) {
+        e.preventDefault();
+        segment = $(this).parents('section');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
+    }).on('click', '.splitBar .buttons .done', function(e) {
+        segment = $(this).parents('section');
+        e.preventDefault();
+        UI.splitSegment(segment);
     })
 
     $.extend(UI, {
+        splitSegment: function (segment) {
+
+        },
         createSplitArea: function (segment) {
             source = $(segment).find('.source');
-            source.after('<div class="splitBar"><p>Click to add Split points</p><div class="buttons"><a href="#">Cancel</a><a href="#">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+            source.after('<div class="splitBar"><p>Click to add Split points</p><div class="splitNum">: <span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
 //            console.log(segment.find('splitArea'));
 
             segment.find('.splitArea').html(source.attr('data-original'));
+        },
+        updateSplitNumber: function (area) {
+            segment = $(area).parents('section');
+            numSplits = $(area).find('.splitpoint').length + 1;
+            splitnum = $(segment).find('.splitNum');
+            $(splitnum).find('.num').text(numSplits);
+            if (numSplits > 1) {
+                $(splitnum).find('.plural').text('s');
+                splitnum.show();
+            } else {
+                $(splitnum).find('.plural').text('');
+                splitnum.hide();
+            }
         },
 
     })
