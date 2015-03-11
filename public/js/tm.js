@@ -165,7 +165,9 @@ $.extend(UI, {
         }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
             $('#activetm tr.uploadpanel').addClass('hide');
             $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
-        }).on('click', '.addtmx:not(.disabled)', function() {
+        }).on('click', '.addtmx:not(.disabled)', function(e) {
+            e.preventDefault();
+            console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
 //                     '  <div class="standard">' +
@@ -1463,7 +1465,7 @@ $.extend(UI, {
             obj.dd.on( 'click', function ( event ) {console.log('this: ', this);
                 $( this ).toggleClass( 'active' );
                 event.preventDefault();
-                event.stopPropagation();
+                if($( this ).hasClass( 'active' )) event.stopPropagation();
             } );
         };
         this.dd = el;
