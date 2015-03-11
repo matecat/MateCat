@@ -160,5 +160,11 @@ class EnginesModel_EngineStruct extends DataAccess_AbstractDaoObjectStruct imple
         $this->$offset = null;
     }
 
+    /**
+     * Cast an Engine to String. Useful for engine comparison inside a list ( catController )
+     */
+    public function __toString(){
+        return $this->id . $this->name . $this->description;
+    }
 
 }
