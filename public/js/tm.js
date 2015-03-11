@@ -1437,8 +1437,10 @@ $.extend(UI, {
         $('#mt_engine option[value=0]').attr('selected', 'selected');
     },
     toggleTM: function (el) {
-        newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
-        $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+        setTimeout(function() {
+            newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+            $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+        }, 200);
     },
     
     /* codice inserito da Daniele */

@@ -3552,10 +3552,15 @@ body.isAnonymous .add-mt-engine {
     position: absolute;
     top: -3px;
 }
-.splitBar p
+.splitBar p,
+.splitBar .splitNum
 {
     float: left;
     margin: 0;
+}
+.splitBar .splitNum
+{
+    display: none;
 }
 .splitBar .buttons
 {
@@ -3565,4 +3570,17 @@ body.isAnonymous .add-mt-engine {
 .splitBar .buttons a
 {
     margin-left: 20px;
+}
+.splitBar .buttons a:hover
+{
+    text-decoration: underline;
+}
+.splitpoint
+{
+    display: inline-block;
+    width: 8px;
+    background: #F00;
+    height: 20px;
+    cursor: pointer;
+    margin: 0 2px;
 }
