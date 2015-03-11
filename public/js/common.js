@@ -312,14 +312,7 @@ APP = {
 			o = s + o;
 		}
 		return o;
-	},
-    isAnonymousUser: function () {
-        return config.isAnonymousUser;
-/*
-        anonymous = $('#welcomebox span').text() == "Anonymous";
-        return anonymous;
-        */
-    },
+	}
 };
 
 $.extend($.expr[":"], {
