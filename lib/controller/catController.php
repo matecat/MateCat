@@ -51,7 +51,7 @@ class catController extends viewController {
      * @var string
      */
     private $thisUrl;
-    private $mt_engines;
+    private $translation_engines;
 
     private $mt_id;
 
@@ -441,7 +441,15 @@ class catController extends viewController {
         $engineQuery->uid    = ( $uid == null ? -1 : $uid );
 
         $engineQuery->active = 1;
-        $this->mt_engines = $engine->read( $engineQuery );
+        $mt_engines = $engine->read( $engineQuery );
+
+        $engineQuery         = new EnginesModel_EngineStruct();
+        $engineQuery->type   = 'TM';
+        $engineQuery->active = 1;
+        $tms_engines = $engine->read( $engineQuery );
+
+
+        $this->translation_engines = $tms_engines + $mt_engines;
 
 
     }
@@ -476,7 +484,7 @@ class catController extends viewController {
 
         $this->template->authURL = $this->authURL;
 
-        $this->template->mt_engines         = $this->mt_engines;
+        $this->template->mt_engines         = $this->translation_engines;
         $this->template->mt_id              = $this->project_status[ 'id_mt_engine' ];
 
         $this->template->first_job_segment   = $this->first_job_segment;

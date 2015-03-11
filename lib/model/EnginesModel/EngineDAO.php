@@ -38,8 +38,6 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 $where_conditions[ ] = "uid IS " . $obj->uid;
             } elseif( is_numeric( $obj->uid ) ){
                 $where_conditions[ ] = "uid = " . (int)$obj->uid;
-            } elseif( $obj->uid == 'all' ) {
-                $where_conditions[ ] = "( uid = " . (int)$obj->uid . " OR uid IS NULL )";
             }
 
         }
