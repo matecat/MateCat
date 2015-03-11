@@ -809,9 +809,15 @@ color:#333;}
 */
 
 span.notify {
-display: block;
-margin-bottom: 5px;
-font-size: 12px;
+margin-top: 10px;
+}
+
+.action .dropdown a.disabled {
+    opacity: 1!important;
+  color: #B5B5B5!important;
+    border: none;
+  border-bottom: 1px solid #e6e8ea!important;
+  background: #F1F1F1!important;
 }
 
 td.addtmxtd {
@@ -1524,12 +1530,15 @@ margin-top: 10px;
 }
 
 
-#activetm tr:not(.new) {
+#activetm tr:not(.new),
+#inactivetm tr:not(.new) {
     display: block;
     width: 100%;
 }
 
-#activetm td.uploadfile {
+#activetm td.uploadfile,
+#inactivetm td.uploadfile
+ {
     display: block;
     background: #fff;
     padding: 15px 5px;
@@ -1537,12 +1546,13 @@ margin-top: 10px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
 }
-#activetm td.uploadfile .msg{
+#activetm td.uploadfile .msg,
+#inactivetm td.uploadfile .msg {
     float: right;
     margin-right: 100px;
     color: green;
 }
-#activetm td.dragrow{
+#activetm td.dragrow {
    position: relative;
 	padding: 5px 5px 5px 5px!important;
 }
@@ -2165,23 +2175,28 @@ tr.new.badgrants .fileupload
 #inactivetm .dataTables_empty {
     display: none;
 }
-#activetm .startUploading
+#activetm .startUploading, 
+#inactivetm .startUploading
 {
     background: url(../img/loading.gif) 77.5% 16px no-repeat !important;
 background-size: 2% !important;
 }
-#activetm .uploadprogress {
+#activetm .uploadprogress, 
+#inactivetm .uploadprogress {
     display: none;
     margin-right: 8px;
 	margin-top: -5px;
 	float: right;
 }
 
-#activetm .uploadprogress .msgText {
+#activetm .uploadprogress .msgText,
+#inactivetm .uploadprogress .msgText
+ {
 	display: block;
 }
 
-#activetm .uploadprogress .progress .inner {
+#activetm .uploadprogress .progress .inner,
+#inactivetm .uploadprogress .progress .inner {
     display: block;
     height: 15px;
     margin-bottom:5px;
@@ -2191,7 +2206,8 @@ background-size: 2% !important;
     border-radius: 0;
 }
 
-#activetm .uploadprogress .progress:after {
+#activetm .uploadprogress .progress:after,
+#inactivetm .uploadprogress .progress:after {
 content: "";
 position: absolute;
 top: 0;
