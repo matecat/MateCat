@@ -3521,6 +3521,6 @@ body.cattool table.mgmt-mt th.enable-mt {
 body.cattool table.mgmt-mt tbody .enable-mt {
     display: none;
 }
-body.cattool.isAnonymous .add-mt-engine {
+body.isAnonymous .add-mt-engine {
     display: none;
 }
