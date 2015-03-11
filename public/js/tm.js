@@ -622,7 +622,7 @@ $.extend(UI, {
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
-                if(config.isAnonymousUser()) {
+                if(config.isAnonymousUser) {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
@@ -1435,8 +1435,10 @@ $.extend(UI, {
         $('#mt_engine option[value=0]').attr('selected', 'selected');
     },
     toggleTM: function (el) {
-        newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
-        $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+        setTimeout(function() {
+            newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+            $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+        }, 200);
     },
     
     /* codice inserito da Daniele */
