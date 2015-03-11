@@ -179,7 +179,7 @@
                                     <tal:block tal:condition="php: page == 'home'" tal:repeat="key user_keys">
                                         <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow">
-                                                <div class="status">&nbsp;</div>
+                                                <div class="status"></div>
                                             </td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
@@ -438,6 +438,7 @@
             <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
+        <br class="clear" />
         <label for="new-engine-name">Engine name<sup>*</sup></label>
         <input class="required" id="new-engine-name" placeholder="here" />
         <br class="clear" />
