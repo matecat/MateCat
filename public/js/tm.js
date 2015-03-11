@@ -749,8 +749,8 @@ $.extend(UI, {
                 '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
-                '               </ul>'+ 
-                '                    </div>'+    
+                '              </ul>'+ 
+                '          </div>'+    
                 '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
@@ -779,7 +779,6 @@ $.extend(UI, {
         $('#new-tm-key, #new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
-
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
@@ -1447,7 +1446,7 @@ $.extend(UI, {
         new UI.DropDown( $( '.wrapper-dropdown-5' ) );
 
         //set control events
-        $( '.wrapper-dropdown-5' ).mouseleave( function(){
+        $( '.action' ).mouseleave( function(){
             $( '.wrapper-dropdown-5' ).removeClass( 'active' );
         } );
 
