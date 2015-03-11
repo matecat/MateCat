@@ -131,6 +131,35 @@ class engineController extends ajaxController {
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
+
+            case strtolower( Constants_Engines::IP_TRANSLATOR ):
+
+                /**
+                 * Create a record of type IPTranslator
+                 */
+                $newEngine = EnginesModel_IPTranslatorStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::DEEPLINGO ):
+
+                /**
+                 * Create a record of type IPTranslator
+                 */
+                $newEngine = EnginesModel_DeepLingoStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
             default:
                 $validEngine = false;
         }

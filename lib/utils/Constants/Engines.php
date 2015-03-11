@@ -15,5 +15,7 @@ class Constants_Engines {
     const MY_MEMORY     = 'MyMemory';
     const MOSES         = 'Moses';
     const MICROSOFT_HUB = 'MicrosoftHub';
+    const IP_TRANSLATOR = 'IPTranslator';
+    const DEEPLINGO     = 'DeepLingo';
 
 } 
