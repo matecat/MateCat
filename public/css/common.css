@@ -1251,7 +1251,7 @@ padding: 15px 70px 10px 10px;
 select#mt_engine_int {
     font-size: 18px;
 height: 30px;
-margin-top: 5px;
+margin: 5px 0 9px;
 width: 100%;
 }
 
@@ -1352,7 +1352,8 @@ span.mt-error-key {
 
 }
 .mgmt-table-mt .uploadtm.btn-ok {
-    margin-left: 20px;
+    margin: 15px 0 15px 20px;
+
 }
 
 .mgmt-tm .btn-grey:last-child {
@@ -1646,13 +1647,17 @@ color: #999;}
 
 
 
-.slide-panel td, .mgmt-gl td
+.slide-panel td
 {
     padding: 15px 5px 4px 5px;
     background: #fff;
     vertical-align: top;
     border-top: 1px solid #ccc;
     box-shadow: inset 0px 1px 0px 0px #fff;
+}
+
+.mgmt-panel-tm td {
+  padding: 15px 5px 15px 5px;
 }
 
 .addtmxrow td, .new td {
@@ -1683,10 +1688,14 @@ margin: 10px 0;
 .addrow label {float:left;}
 
 .mgmt-panel p {
-margin: 0;
+margin: 0 0 5px;
 clear: both;
 text-align: left;
 line-height: 30px;
+}
+
+p.required {
+  margin-bottom: 10px;
 }
 
 .mgmt-add-tm input, .mgmt-add-gl input {
@@ -1747,7 +1756,7 @@ margin-top: 3px;
 }
 
 .insert-tm .canceladdtmx {
-    margin-bottom: 15px;
+    margin: 15px 0;
 }
 
 .nonumber {display:none;}
@@ -2017,7 +2026,7 @@ background: #FAFAFA;
 border-radius: 4px;
 margin-top: -4%;
 margin-left: 3%;
-padding: 1% 2% 2%;
+padding: 1% 2% 0;
 }
 
 
