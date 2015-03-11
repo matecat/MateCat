@@ -86,7 +86,7 @@ class engineController extends ajaxController {
                 $this->add();
                 break;
             case 'delete':
-                $this->delete();
+                $this->disable();
                 break;
             default:
                 break;
@@ -177,6 +177,25 @@ class engineController extends ajaxController {
             return;
         }
 
+        if( $newEngine instanceof EnginesModel_MicrosoftHubStruct ){
+
+            $engine_test = Engine::getInstance( $result->id );
+            $config = $engine_test->getConfigStruct();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+            $config[ 'id_user' ] = "demo@matecat.com";
+
+            $mt_result = $engine_test->get( $config );
+
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $mt_result['error'];
+                $engineDAO->delete( $result );
+                return;
+            }
+
+        }
+
         $this->result['data']['id'] = $result->id;
 
     }
@@ -184,7 +203,7 @@ class engineController extends ajaxController {
     /**
      * This method deletes an engine from a user's keyring
      */
-    private function delete(){
+    private function disable(){
 
         if ( empty( $this->id ) ) {
             $this->result[ 'errors' ][ ] = array( 'code' => -5, 'message' => "Engine id required" );
