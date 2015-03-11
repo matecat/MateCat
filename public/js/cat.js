@@ -3124,6 +3124,7 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.
@@ -8955,7 +8956,14 @@ $.extend(UI, {
             $(".mgmt-table-tm").hide();
             $(".mgmt-table-mt").show();
         });
-
+        $("#mt_engine").change(function() {
+            if($(this).val() == 0) {
+                $('table.mgmt-mt tr.activemt').removeClass('activemt');
+            } else {
+                checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
+                UI.activateMT(checkbox);
+            };
+        });
         $("#mt_engine_int").change(function() {
             $('#add-mt-provider-cancel').hide();
             $(".insert-tm").show();
@@ -8966,7 +8974,8 @@ $.extend(UI, {
                 $(".step3").hide();
                 $('#add-mt-provider-cancel').show();
             } else {
-                $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $('.step2 .fields').html($('#mt-provider-' + provider + '-fields').html());
+                $('.step3 .text-left').html($('#mt-provider-' + provider + '-msg').html());
                 $(".step2").show();
                 $(".step3").show();
                 $("#add-mt-provider-confirm").removeClass('hide');
@@ -8985,11 +8994,7 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
-            $('#mt_engine').append('<option value="' + provider + '">' + $('#new-engine-name').val() + '</option>');
-            $('#mt_engine option:selected').removeAttr('selected');
-            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
             UI.addMTEngine(provider, providerName);
-//            $('.popup-tm h1 .btn-ok').click();
             $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -9199,23 +9204,9 @@ $.extend(UI, {
 //            console.log($(this).prop('checked'));
 //            $(this).prop('checked', true);
             if($(this).is(':checked')) {
-                console.log('era unchecked, lo devo spostare su');
-                tr = $(this).parents('tr');
-                $(this).replaceWith('<input type="checkbox" checked class="temp" />');
-                cbox = tr.find('input[type=checkbox]');
-                tbody = tr.parents('tbody');
-                $(tbody).prepend(tr);
-                tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
-                tbody.find('.activemt').removeClass('activemt');
-                tr.addClass('activemt').removeClass('temp');
-                $('#mt_engine option').removeAttr('selected');
-                $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
+                UI.activateMT(this);
             } else {
-                tr = $(this).parents('tr');
-                $(this).replaceWith('<input type="checkbox" />');
-                tr.removeClass('activemt');
-                $('#mt_engine option').removeAttr('selected');
-                $('#mt_engine option[value=0]').attr('selected', 'selected');
+                UI.deactivateMT(this);
             }
 
         }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
@@ -10268,16 +10259,17 @@ $.extend(UI, {
             success: function(d) {
                 console.log('success');
                 UI.renderNewMT(this, d.data.id);
-/*
-                $('#mt_engine').append('<option value="' + d.data.id + '">' + $('#new-engine-name').val() + '</option>');
-                $('#mt_engine option:selected').removeAttr('selected');
-                $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
-                */
+                if(!APP.isCattool) {
+                    UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
+                    $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                    $('#mt_engine option:selected').removeAttr('selected');
+                    $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                }
             }
         });
     },
     renderNewMT: function (data, id) {
-        newTR =    '<tr class="activemt" data-id="' + id + '">' +
+        newTR =    '<tr data-id="' + id + '">' +
                     '    <td class="mt-provider">' + data.providerName + '</td>' +
                     '    <td class="engine-name">' + data.name + '</td>' +
                     '    <td class="enable-mt text-center">' +
@@ -10288,8 +10280,21 @@ $.extend(UI, {
                     '    </td>' +
                     '</tr>';
         console.log('newTR: ', newTR);
-        $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
-        $('table.mgmt-mt tbody').prepend(newTR);
+        if(APP.isCattool) {
+            $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR);
+/*
+            if(config.ownerIsMe) {
+
+            } else {
+                $('table.mgmt-mt tbody').prepend(newTR);
+            }
+*/
+        } else {
+            $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
+            $('table.mgmt-mt tbody').prepend(newTR);
+        }
+
+
     },
     resetMTProviderPanel: function () {
         if($('.insert-tm .step2').css('display') == 'block') {
@@ -10305,6 +10310,27 @@ $.extend(UI, {
         $('#add-mt-provider-cancel').show();
         */
     },
+    activateMT: function (el) {
+        console.log('era unchecked, lo devo spostare su');
+        tr = $(el).parents('tr');
+        $(el).replaceWith('<input type="checkbox" checked class="temp" />');
+        cbox = tr.find('input[type=checkbox]');
+        tbody = tr.parents('tbody');
+        $(tbody).prepend(tr);
+        tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
+        tbody.find('.activemt').removeClass('activemt');
+        tr.addClass('activemt').removeClass('temp');
+        $('#mt_engine option').removeAttr('selected');
+        $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
+    },
+    deactivateMT: function (el) {
+        tr = $(el).parents('tr');
+        $(el).replaceWith('<input type="checkbox" />');
+        tr.removeClass('activemt');
+        $('#mt_engine option').removeAttr('selected');
+        $('#mt_engine option[value=0]').attr('selected', 'selected');
+    },
+
 });
 /*
  Component: ui.offline

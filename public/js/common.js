@@ -314,8 +314,11 @@ APP = {
 		return o;
 	},
     isAnonymousUser: function () {
+        return config.isAnonymousUser;
+/*
         anonymous = $('#welcomebox span').text() == "Anonymous";
         return anonymous;
+        */
     },
 };
 

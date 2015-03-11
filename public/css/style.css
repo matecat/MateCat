@@ -3515,3 +3515,12 @@ th a.tooltip {
     text-decoration: none;
 }
 
+body.cattool table.mgmt-mt th.enable-mt {
+    display: none;
+}
+body.cattool table.mgmt-mt tbody .enable-mt {
+    display: none;
+}
+body.cattool.isAnonymous .add-mt-engine {
+    display: none;
+}

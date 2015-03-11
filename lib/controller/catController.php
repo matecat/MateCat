@@ -438,7 +438,7 @@ class catController extends viewController {
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery         = new EnginesModel_EngineStruct();
         $engineQuery->type   = 'MT';
-        $engineQuery->uid    = $uid;
+        $engineQuery->uid    = ( $uid == null ? -1 : $uid );
 
         $engineQuery->active = 1;
         $this->mt_engines = $engine->read( $engineQuery );
@@ -484,7 +484,7 @@ class catController extends viewController {
         $this->template->last_opened_segment = $this->last_opened_segment;
         $this->template->owner_email         = $this->job_owner;
         $this->template->ownerIsMe           = ( $this->logged_user[ 'email' ] == $this->job_owner );
-
+        $this->template->isAnonymousUser     = var_export( !$this->isLoggedIn() , true );
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
