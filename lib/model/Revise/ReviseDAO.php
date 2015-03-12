@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: roberto <roberto@translated.net>
  * Date: 19/01/15
  * Time: 17.44
  */
-class Revise_ReviseDAO extends DataAccess_AbstractDao{
+class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
     const TABLE = "segment_revisions";
 
@@ -102,29 +103,29 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
         $where_conditions[ ] = "id_job = " . (int)$obj->id_job;
         $where_conditions[ ] = "id_segment = " . (int)$obj->id_segment;
 
-        if($obj->err_typing !== null){
-            $condition = "err_typing = '%s'";
-            $set_array[ ] = sprintf($condition, $obj->err_typing);
+        if ( $obj->err_typing !== null ) {
+            $condition    = "err_typing = '%s'";
+            $set_array[ ] = sprintf( $condition, $obj->err_typing );
         }
 
-        if($obj->err_typing !== null){
-            $condition = "err_translation = '%s'";
-            $set_array[ ] = sprintf($condition, $obj->err_translation);
+        if ( $obj->err_typing !== null ) {
+            $condition    = "err_translation = '%s'";
+            $set_array[ ] = sprintf( $condition, $obj->err_translation );
         }
 
-        if($obj->err_typing !== null){
-            $condition = "err_terminology = '%s'";
-            $set_array[ ] = sprintf($condition, $obj->err_terminology);
+        if ( $obj->err_typing !== null ) {
+            $condition    = "err_terminology = '%s'";
+            $set_array[ ] = sprintf( $condition, $obj->err_terminology );
         }
 
-        if($obj->err_typing !== null){
-            $condition = "err_language = '%s'";
-            $set_array[ ] = sprintf($condition, $obj->err_language);
+        if ( $obj->err_typing !== null ) {
+            $condition    = "err_language = '%s'";
+            $set_array[ ] = sprintf( $condition, $obj->err_language );
         }
 
-        if($obj->err_typing !== null){
-            $condition = "err_style = '%s'";
-            $set_array[ ] = sprintf($condition, $obj->err_style);
+        if ( $obj->err_typing !== null ) {
+            $condition    = "err_style = '%s'";
+            $set_array[ ] = sprintf( $condition, $obj->err_style );
         }
 
 //        if($obj->original_translation !== null){
@@ -160,7 +161,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
      * @return Revise_ReviseStruct
      * @throws Exception
      */
-    public static function sanitize( $input ) {
+    public function sanitize( Revise_ReviseStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
@@ -185,14 +186,14 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao{
         foreach ( $array_result as $item ) {
 
             $build_arr = array(
-                    'id_job'          => $item['id_job'],
-                    'id_segment'      => $item['id_segment'],
-                    'err_typing'      => $item['err_typing'],
-                    'err_translation' => $item['err_translation'],
-                    'err_terminology' => $item['err_terminology'],
-                    'err_language'    => $item['err_language'],
-                    'err_style'       => $item['err_style'],
-                    'original_translation' => $item['original_translation']
+                    'id_job'               => $item[ 'id_job' ],
+                    'id_segment'           => $item[ 'id_segment' ],
+                    'err_typing'           => $item[ 'err_typing' ],
+                    'err_translation'      => $item[ 'err_translation' ],
+                    'err_terminology'      => $item[ 'err_terminology' ],
+                    'err_language'         => $item[ 'err_language' ],
+                    'err_style'            => $item[ 'err_style' ],
+                    'original_translation' => $item[ 'original_translation' ]
             );
 
             $obj = new Revise_ReviseStruct( $build_arr );

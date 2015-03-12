@@ -20,4 +20,29 @@ if(config.offlineModeEnabled) {
         }, 30000);
     })
 
+    $.extend(UI, {
+        failover: function(reqArguments, operation) {
+            console.log('test offline failover on ' + operation);
+            /*
+            if(operation != 'getWarning') {
+                var pendingConnection = {
+                    operation: operation,
+                    args: reqArguments
+                };
+//			console.log('pendingConnection: ', pendingConnection);
+                var dd = new Date();
+                if(pendingConnection.args) {
+                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+                }
+                if(!UI.checkConnectionTimeout) {
+                    UI.checkConnectionTimeout = setTimeout(function() {
+                        UI.checkConnection();
+                        UI.checkConnectionTimeout = false;
+                    }, 5000);
+                }
+            }
+            */
+        }
+    });
+
 }

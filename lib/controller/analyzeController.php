@@ -60,7 +60,7 @@ class analyzeController extends viewController {
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 )
         );
 

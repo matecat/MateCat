@@ -63,11 +63,11 @@ class Revise_ReviseStruct extends DataAccess_AbstractDaoObjectStruct implements 
 
     /**
      * Set default values for the current struct only if values are missing
-     * @param $struct
+     * @param $struct Revise_ReviseStruct
      *
-     * @return mixed
+     * @return Revise_ReviseStruct
      */
-    public static function setDefaultValues($struct){
+    public static function setDefaultValues(Revise_ReviseStruct $struct){
         //TODO: improve this method. What if this structure contains non-standard fields?
 
         $allowed_values = array(

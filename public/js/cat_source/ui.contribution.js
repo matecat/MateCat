@@ -118,8 +118,8 @@ $.extend(UI, {
 			},
 			success: function(d) {
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
@@ -272,7 +272,12 @@ $.extend(UI, {
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+			if((config.mt_enabled)&&(!config.id_translator)) {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+            } else {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
+
+            }
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
@@ -337,8 +342,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContribution');
 			}
 		});
 	},
@@ -397,8 +402,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContributionMT');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -440,8 +445,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 
