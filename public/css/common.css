@@ -1930,16 +1930,23 @@ header .searchbox {
 
 /* Active state */
 
-.wrapper-dropdown-5.active1 {
+.wrapper-dropdown-5.active,
+.wrapper-dropdown-5.activeMenu
+{
     box-shadow: none;
     color: black;
 }
 
-.wrapper-dropdown-5.active1:after {
+.wrapper-dropdown-5.active:after,
+.wrapper-dropdown-5.activeMenu:after
+
+{
     border-color: black transparent;
 }
 
-.wrapper-dropdown-5.active1 .dropdown {
+.wrapper-dropdown-5.active .dropdown,
+.wrapper-dropdown-5.activeMenu .dropdown
+{
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(0, 0, 0, 0.2);
     max-height: 400px;

@@ -167,9 +167,8 @@ $.extend(UI, {
         }).on('click', '#activetm tr.uploadpanel a.canceladdtmx, #inactivetm tr.uploadpanel a.canceladdtmx', function() {
             $('#activetm tr.uploadpanel, #inactivetm tr.uploadpanel').addClass('hide');
             $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
-        }).on('click', '.addtmx:not(.disabled)', function(e) {
+        }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
             e.preventDefault();
-            console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
@@ -348,23 +347,16 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
-        }).on('click', '.mgmt-tm .downloadtmx', function(){
+        }).on('mousedown', '.mgmt-tm .downloadtmx', function(){
             if($(this).hasClass('downloading')) return false;
            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
             $(this).addClass('disabled' );
             $(this).prepend('<span class="uploadloader"></span>');
             var msg = '<span class="notify"><span class="uploadloader"></span> Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
             $(this).parents('td').first().append(msg);
-        }).on('click', '.mgmt-tm .deleteTM', function(){
+        }).on('mousedown', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
-/*
-        }).on('click', 'table.mgmt-tm .wrapper-dropdown-5', function(){
-            UI.openTMActionDropdown($(this));
-        }).on('click', '.action .dropdown a', function(){
-            UI.closeTMActionDropdown($(this));
-*/
-        });
-
+        })
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
@@ -1478,12 +1470,12 @@ $.extend(UI, {
 
         //set control events
         $( '.action' ).mouseleave( function(){
-            $( '.wrapper-dropdown-5' ).removeClass( 'active1' );
+            $( '.wrapper-dropdown-5' ).removeClass( 'activeMenu' );
         } );
 
         $(document).click(function() {
             // all dropdowns
-            $('.wrapper-dropdown-5').removeClass('active1');
+            $('.wrapper-dropdown-5').removeClass('activeMenu');
         });
 
     },
@@ -1494,10 +1486,11 @@ $.extend(UI, {
         this.initEvents = function () {
             var obj = this;
             obj.dd.on( 'click', function ( event ) {
-                console.log('this: ', this);
-                $( this ).toggleClass( 'active1' );
+                $( this ).toggleClass( 'activeMenu' );
                 event.preventDefault();
-                if($( this ).hasClass( 'active1' )) event.stopPropagation();
+                if($( this ).hasClass( 'activeMenu' )) {
+                    event.stopPropagation();
+                }
             } );
         };
         this.dd = el;
