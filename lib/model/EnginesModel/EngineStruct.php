@@ -6,7 +6,9 @@
  * Date: 23/02/15
  * Time: 14.54
  */
-class EnginesModel_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class EnginesModel_EngineStruct
+        extends DataAccess_AbstractDaoObjectStruct
+        implements DataAccess_IDaoStruct, ArrayAccess {
 
     /**
      * @var int

@@ -79,6 +79,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                     VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE
                         active = VALUES(active),
                         others = VALUES(others),
+                        extra_parameters = VALUES(extra_parameters),
                         name = VALUES(name)
             ";
 
@@ -101,7 +102,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 2,
                 //harcoded because we're planning to implement variable penalty
                 ( $obj->penalty == null ) ? "14" : $obj->penalty,
-                ( $obj->active == null ) ? "NULL" : $obj->active,
+                ( $obj->active == null ) ? "1" : $obj->active,
                 ( $obj->uid == null ) ? "NULL" : $obj->uid
         );
 
@@ -317,7 +318,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $input->class_load              = ( $input->class_load !== null ) ? $con->escape( $input->class_load ) : null;
         $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( json_encode( $input->extra_parameters ) ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
-        $input->active                  = ( $input->active !== null ) ? $input->active : 1;
+        $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;
 
         return $input;
