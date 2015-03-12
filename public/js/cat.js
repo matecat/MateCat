@@ -9626,14 +9626,15 @@ $.extend(UI, {
         },
     */
     execAddTM: function(el) {
+        table = $(el).parents('table');
         existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
             $(el).parents('.uploadfile').addClass('uploading');
         } else {
-            $('#activetm tr.uploadpanel .uploadfile').addClass('uploading');
+            $(table).find('tr.uploadpanel .uploadfile').addClass('uploading');
         }
         var trClass = (existing)? 'mine' : 'uploadpanel';
-        form = $('#activetm tr.' + trClass + ' .add-TM-Form')[0];
+        form = $(table).find('tr.' + trClass + ' .add-TM-Form')[0];
         path = $(el).parents('.uploadfile').find('input[type="file"]').val();
         file = path.split('\\')[path.split('\\').length-1];
         this.TMFileUpload(form, '/?action=loadTMX','uploadCallback', file);
@@ -9710,8 +9711,6 @@ $.extend(UI, {
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
-        console.log('div_id: ', div_id);
-        console.log('form: ', form);
         // Create the iframe...
         ts = new Date().getTime();
         ifId = "upload_iframe-" + ts;
