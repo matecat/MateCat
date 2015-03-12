@@ -898,7 +898,7 @@ background: #f8f8f8;
 }
 form.add-TM-Form {
     display: inline;
-    padding: 0px 0 10px;
+    padding: 5px 0 10px;
 }
 #uploadCallback {
     display: none;
@@ -1541,7 +1541,7 @@ margin-top: 10px;
  {
     display: block;
     background: #fff;
-    padding: 15px 5px;
+    padding: 10px 5px 20px;
     height: 20px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
