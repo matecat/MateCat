@@ -18,7 +18,7 @@ class engineController extends ajaxController {
     );
 
     public function __construct() {
-
+//throw new Exception();
         //Session Enabled
         $this->checkLogin();
         //Session Disabled

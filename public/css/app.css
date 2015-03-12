@@ -1336,7 +1336,7 @@ box-shadow: inset 0 0 1px 1px #888;}
 
 
 
-.error{color:#FF3300; font-size:14px;}
+.error{color:#FF3300; font-size:14px; float: left;}
 input.error {border: 1px solid red;}
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {

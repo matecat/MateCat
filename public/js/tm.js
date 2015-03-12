@@ -56,6 +56,8 @@ $.extend(UI, {
         });
         $("#mt_engine_int").change(function() {
             $('#add-mt-provider-cancel').hide();
+            $('#mt-provider-details .error').empty();
+
             $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
@@ -85,7 +87,6 @@ $.extend(UI, {
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
             UI.addMTEngine(provider, providerName);
-            $('#mt_engine_int').val('none').trigger('change');
         });
         $('#add-mt-provider-cancel').click(function(e) {
             console.log('clicked add-mt-provider-cancel');
@@ -1350,14 +1351,22 @@ $.extend(UI, {
                 console.log('error');
             },
             success: function(d) {
-                console.log('success');
-                UI.renderNewMT(this, d.data.id);
-                if(!APP.isCattool) {
-                    UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
-                    $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
-                    $('#mt_engine option:selected').removeAttr('selected');
-                    $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                if(d.errors.length) {
+                    console.log('error');
+                    $('#mt-provider-details .error').text(d.errors[0].message);
+                } else {
+                    console.log('success');
+                    UI.renderNewMT(this, d.data.id);
+                    if(!APP.isCattool) {
+                        console.log('d.data: ', d.data);
+                        UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
+                        $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                        $('#mt_engine option:selected').removeAttr('selected');
+                        $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                    }
+                    $('#mt_engine_int').val('none').trigger('change');
                 }
+
             }
         });
     },
