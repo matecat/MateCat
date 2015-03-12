@@ -2529,6 +2529,9 @@ width: 98.8%;
 color: #000;
 }
 
+.tm-warning-message, .tm-error-message {
+    margin: 0 0 15px !important;
+}
 
 
 
