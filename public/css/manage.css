@@ -136,6 +136,8 @@ body.manage .article:last-child .wrapper-dropdown-5 .dropdown li:first-child{
 border-top:1px solid #ccc;
 }
 
+
+
 body.manage input[type=button].revise {
 	cursor: pointer;
 	height: 29px;
