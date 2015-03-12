@@ -11,7 +11,7 @@ $.extend(UI, {
 // script per lo slide del pannello di manage tmx
 
         
-//        UI.setDropDown();
+        UI.setDropDown();
         
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
@@ -357,10 +357,12 @@ $.extend(UI, {
             $(this).parents('td').first().append(msg);
         }).on('click', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
+/*
         }).on('click', 'table.mgmt-tm .wrapper-dropdown-5', function(){
             UI.openTMActionDropdown($(this));
         }).on('click', '.action .dropdown a', function(){
             UI.closeTMActionDropdown($(this));
+*/
         });
 
 
@@ -751,12 +753,13 @@ $.extend(UI, {
                 '    <td class="action">' +
                 '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
                 '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
-                '          </div>'+
                 '              <ul class="dropdown pull-left">' +
                 '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
-                '              </ul>'+                 '</td>' +
+                '              </ul>'+
+                '          </div>'+
+                '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
         if(uploading) {
