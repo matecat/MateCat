@@ -300,24 +300,12 @@ $.extend(UI, {
             }
 
         }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
-            id = $(this).parents('tr').first().attr('data-id');
-            APP.doRequest({
-                data: {
-                    action: 'engine',
-                    exec: 'delete',
-                    id: id
-                },
-                context: id,
-                error: function() {
-                    console.log('error');
-                },
-                success: function(d) {
-                    console.log('success');
-                    $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
-                    $('#mt_engine option[value=' + this + ']').remove();
-                    if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
-                }
-            });
+//            UI.deleteMT($(this));
+            $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? <a href="#" class="continueDeletingMT" data-id="' + $(this).parents('tr').attr('data-id') + '">Continue</a>').show();
+        }).on('click', '.continueDeletingMT', function(e){
+            e.preventDefault();
+            UI.deleteMT($('.mgmt-table-mt table.mgmt-mt tr[data-id="' + $(this).attr('data-id') + '"] .deleteMT'));
+            $('.mgmt-table-mt .tm-warning-message').empty().hide();
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
@@ -356,6 +344,16 @@ $.extend(UI, {
             $(this).parents('td').first().append(msg);
         }).on('mousedown', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
+/*
+            $('.mgmt-container .tm-warning-message').html('Do you really want to delete this TM? <a href="#" class="continueDeletingTM" data-key="' + $(this).parents('tr').attr('data-key') + '">Continue</a>').show();
+//            UI.deleteTM($(this));
+        }).on('click', '.continueDeletingTM', function(e){
+            e.preventDefault();
+            console.log('continue');
+            console.log($('table.mgmt-tm tr[data-key=' + $(this).attr('data-key') + ']'));
+            UI.deleteTM($('table.mgmt-tm tr[data-key="' + $(this).attr('data-key') + '"] .deleteTM'));
+            $('.mgmt-container .tm-warning-message').empty().hide();
+*/
         })
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
@@ -1324,6 +1322,27 @@ $.extend(UI, {
             }
         });
     },
+    deleteMT: function (button) {
+        id = $(button).parents('tr').first().attr('data-id');
+        APP.doRequest({
+            data: {
+                action: 'engine',
+                exec: 'delete',
+                id: id
+            },
+            context: id,
+            error: function() {
+                console.log('error');
+            },
+            success: function(d) {
+                console.log('success');
+                $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                $('#mt_engine option[value=' + this + ']').remove();
+                if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
+            }
+        });
+    },
+
     addMTEngine: function (provider, providerName) {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
@@ -1357,7 +1376,6 @@ $.extend(UI, {
                     console.log('success');
                     UI.renderNewMT(this, d.data.id);
                     if(!APP.isCattool) {
-                        console.log('d.data: ', d.data);
                         UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
                         $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
                         $('#mt_engine option:selected').removeAttr('selected');
@@ -1380,7 +1398,6 @@ $.extend(UI, {
                     '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
                     '    </td>' +
                     '</tr>';
-        console.log('newTR: ', newTR);
         if(APP.isCattool) {
             $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR);
 
@@ -1426,7 +1443,6 @@ $.extend(UI, {
         */
     },
     activateMT: function (el) {
-        console.log('era unchecked, lo devo spostare su');
         tr = $(el).parents('tr');
         $(el).replaceWith('<input type="checkbox" checked class="temp" />');
         cbox = tr.find('input[type=checkbox]');
