@@ -1337,7 +1337,7 @@ box-shadow: inset 0 0 1px 1px #888;}
 
 
 .error{color:#FF3300; font-size:14px; float: left;}
-input.error {border: 1px solid red;}
+input.error {border: 1px solid red !important; font-size: inherit;}
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {
 padding: 7px 30px!important;
@@ -1855,15 +1855,14 @@ header .searchbox {
     border-color: #666 transparent;
 }
 
-.wrapper-dropdown-5 .dropdown {
+.action .dropdown {
     /* Size & position */
     position: absolute;
-    top: 98%;
-    left: -116px;
+/*    top: 98%;
+    left: 0px;*/
     width: 147px;
     right: 0;
-    margin-top: 1px;
-
+    margin: 29px 36px 0 36px;
     /* Styles */
     /*   border-radius: 0 0 5px 5px;*/
     border: 1px solid rgba(0, 0, 0, 0.2);
@@ -1878,6 +1877,9 @@ header .searchbox {
     overflow: hidden;
     z-index: 1;
 }
+#activetm .action .dropdown {
+/*    margin: 5px 0 0 0; */
+}
 
 .wrapper-dropdown-5:hover {
     /*-moz-box-shadow: 0 1px 1px #666;*/
@@ -1891,11 +1893,11 @@ header .searchbox {
     box-shadow: inset 0 0 1px 1px #888;
 }
 
-.wrapper-dropdown-5 .dropdown li {
+.action .dropdown li {
     width: 100%;
 }
 
-.wrapper-dropdown-5 .dropdown li a {
+.action .dropdown li a {
     display: block;
     text-decoration: none;
     background: #fff;
@@ -1908,15 +1910,15 @@ header .searchbox {
     font-size: 16px;
 }
 
-.wrapper-dropdown-5 .dropdown li a:hover {
+.action .dropdown li a:hover {
     background: #f7f8f9;
 }
 
-.wrapper-dropdown-5 .dropdown li:last-of-type a {
+.action .dropdown li:last-of-type a {
     border: none;
 }
 
-.wrapper-dropdown-5 .dropdown li i {
+.action .dropdown li i {
     margin-right: 5px;
     color: inherit;
     vertical-align: middle;
@@ -1924,22 +1926,23 @@ header .searchbox {
 
 /* Hover state */
 
-.wrapper-dropdown-5 .dropdown li:hover a {
+.action .dropdown li:hover a {
     color: black;
 }
 
 /* Active state */
 
-.wrapper-dropdown-5.active {
+.wrapper-dropdown-5.active1 {
     box-shadow: none;
     color: black;
 }
 
-.wrapper-dropdown-5.active:after {
+.wrapper-dropdown-5.active1:after {
     border-color: black transparent;
 }
 
-.wrapper-dropdown-5.active .dropdown {
+.action .dropdown {
+    display: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(0, 0, 0, 0.2);
     max-height: 400px;

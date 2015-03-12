@@ -67,12 +67,12 @@
                                         <td tal:condition="php: key.edit" class="action">
                                                 <a class="btn pull-left"><span class="text">Import TMX</span></a>
                                                 <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
-                                                    <ul class="dropdown pull-left">
-                                                        <li><a class="addtmx" href="#"><span class="icon-upload"></span>Import TMX</a></li>
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
-                                                    </ul>
                                                 </div>
+                                                <ul class="dropdown pull-left">
+                                                    <li><a class="addtmx" href="#"><span class="icon-upload"></span>Import TMX</a></li>
+                                                    <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                    <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                </ul>
                                         </td>
                                         <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"></td>
                                     </tr>
@@ -166,12 +166,12 @@
                                             <td class="action">
                                                 <a class="btn pull-left"><span class="text">Import TMX</span></a>
                                                 <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
-                                                    <ul class="dropdown pull-left">
-                                                        <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
-                                                    </ul>
                                                 </div>
+                                                <ul class="dropdown pull-left">
+                                                    <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
+                                                    <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                    <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                </ul>
                                             </td>
                                         </tr>
                                     </tal:block>

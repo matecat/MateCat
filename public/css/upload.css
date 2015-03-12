@@ -362,7 +362,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
     */
     text-decoration: none;
 }
-body.isAnonymous .memory-mgmt {
+body.isAnonymous .memory-mgmt.tm-mgmt {
     display: none;
 }
 .memory-mgmt .text {

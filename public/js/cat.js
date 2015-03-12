@@ -8922,7 +8922,7 @@ $.extend(UI, {
 // script per lo slide del pannello di manage tmx
 
         
-        UI.setDropDown();
+//        UI.setDropDown();
         
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
@@ -8933,8 +8933,9 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-        $(".popup-tm .mgmt-tm").click(function(e) {
+        $(".popup-tm li.mgmt-tm").click(function(e) {
             e.preventDefault();
+            console.log('questo');
             $(this).addClass("active");
             $(".mgmt-mt").removeClass("active");
             $(".mgmt-table-mt").hide();
@@ -9065,7 +9066,7 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $('body').on('click', '#activetm tr.mine a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
+        $('body').on('click', 'tr.mine a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
             $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
@@ -9082,13 +9083,13 @@ $.extend(UI, {
             console.log('eccolo');
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-                    '<form><input type="file" name="prova" /></form><form class="existing add-TM-Form pull-left" action="/" method="post">' +
+                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" name="tmx_file" onclick="alert(\'cliccato 1\')" />' +
+                    '    <input type="file" name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -9149,7 +9150,7 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
-        }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
+        }).on('click', 'tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             $(this).parents('.uploadfile').find('.error').text('').hide();
 
@@ -9200,7 +9201,7 @@ $.extend(UI, {
         }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
-            UI.toggleTM(this);
+//            UI.toggleTM(this);
         }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
 //            console.log($(this).prop('checked'));
 //            $(this).prop('checked', true);
@@ -9233,7 +9234,7 @@ $.extend(UI, {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
-        }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+        }).on('change', 'tr.mine td.uploadfile input[type="file"]', function() {
             if(this.files[0].size > config.maxTMXFileSize) {
                 numMb = config.maxTMXFileSize/(1024*1024);
                 APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
@@ -9267,6 +9268,10 @@ $.extend(UI, {
             $(this).parents('td').first().append(msg);
         }).on('click', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
+        }).on('click', 'table.mgmt-tm .wrapper-dropdown-5', function(){
+            UI.openTMActionDropdown($(this));
+        }).on('click', '.action .dropdown a', function(){
+            UI.closeTMActionDropdown($(this));
         });
 
 
@@ -9657,13 +9662,12 @@ $.extend(UI, {
                 '    <td class="action">' +
                 '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
                 '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '          </div>'+
                 '              <ul class="dropdown pull-left">' +
-                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+ 
-                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+ 
-                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+ 
-                '              </ul>'+ 
-                '          </div>'+    
-                '</td>' +
+                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+
+                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
+                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
+                '              </ul>'+                 '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
         if(uploading) {
@@ -10359,13 +10363,21 @@ $.extend(UI, {
         $('#mt_engine option').removeAttr('selected');
         $('#mt_engine option[value=0]').attr('selected', 'selected');
     },
-    toggleTM: function (el) {
-        setTimeout(function() {
-            newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
-            $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
-        }, 200);
+    openTMActionDropdown: function (switcher) {
+        $(switcher).parents('td').find('.dropdown').toggle();
     },
-    
+    closeTMActionDropdown: function (el) {
+        $(el).parents('td').find('.wrapper-dropdown-5').click();
+    },
+
+    /*
+        toggleTM: function (el) {
+            setTimeout(function() {
+                newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+                $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+            }, 200);
+        },
+    */
     /* codice inserito da Daniele */
     setDropDown: function(){
 
@@ -10374,23 +10386,26 @@ $.extend(UI, {
 
         //set control events
         $( '.action' ).mouseleave( function(){
-            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
+            $( '.wrapper-dropdown-5' ).removeClass( 'active1' );
         } );
 
         $(document).click(function() {
             // all dropdowns
-            $('.wrapper-dropdown-5').removeClass('active');
+            $('.wrapper-dropdown-5').removeClass('active1');
         });
 
     },
 
+
+
     DropDown: function(el){
         this.initEvents = function () {
             var obj = this;
-            obj.dd.on( 'click', function ( event ) {console.log('this: ', this);
-                $( this ).toggleClass( 'active' );
+            obj.dd.on( 'click', function ( event ) {
+                console.log('this: ', this);
+                $( this ).toggleClass( 'active1' );
                 event.preventDefault();
-                if($( this ).hasClass( 'active' )) event.stopPropagation();
+                if($( this ).hasClass( 'active1' )) event.stopPropagation();
             } );
         };
         this.dd = el;
