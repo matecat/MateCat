@@ -51,7 +51,7 @@ class catController extends viewController {
      * @var string
      */
     private $thisUrl;
-    private $mt_engines;
+    private $translation_engines;
 
     private $mt_id;
 
@@ -436,13 +436,35 @@ class catController extends viewController {
 
 
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->type   = 'MT';
-        $engineQuery->uid    = ( $uid == null ? -1 : $uid );
 
-        $engineQuery->active = 1;
-        $this->mt_engines = $engine->read( $engineQuery );
+        //this gets all engines of the user
+        if( $this->isLoggedIn() ){
+            $engineQuery         = new EnginesModel_EngineStruct();
+            $engineQuery->type   = 'MT';
+            $engineQuery->uid    = $uid;
+            $engineQuery->active = 1;
+            $mt_engines          = $engine->read( $engineQuery );
+        } else $mt_engines = array();
 
+        // this gets MyMemory
+        $engineQuery                      = new EnginesModel_EngineStruct();
+        $engineQuery->type                = 'TM';
+        $engineQuery->active              = 1;
+        $tms_engine                       = $engine->setCacheTTL( 3600 * 24 * 30 )->read( $engineQuery );
+
+        //this gets MT engine active for the job
+        $engineQuery                            = new EnginesModel_EngineStruct();
+        $engineQuery->id                        = $this->project_status[ 'id_mt_engine' ];
+        $engineQuery->active                    = 1;
+        $active_mt_engine                       = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
+
+        /*
+         * array_unique cast EnginesModel_EngineStruct to string
+         *
+         * EnginesModel_EngineStruct implements __toString method
+         *
+         */
+        $this->translation_engines = array_unique( array_merge( $active_mt_engine, $tms_engine, $mt_engines ) );
 
     }
 
@@ -476,7 +498,7 @@ class catController extends viewController {
 
         $this->template->authURL = $this->authURL;
 
-        $this->template->mt_engines         = $this->mt_engines;
+        $this->template->mt_engines         = $this->translation_engines;
         $this->template->mt_id              = $this->project_status[ 'id_mt_engine' ];
 
         $this->template->first_job_segment   = $this->first_job_segment;
@@ -484,7 +506,10 @@ class catController extends viewController {
         $this->template->last_opened_segment = $this->last_opened_segment;
         $this->template->owner_email         = $this->job_owner;
         $this->template->ownerIsMe           = ( $this->logged_user[ 'email' ] == $this->job_owner );
-        $this->template->isAnonymousUser     = var_export( !$this->isLoggedIn() , true );
+
+        $this->template->isLogged            = $this->isLoggedIn(); // used in template
+        $this->template->isAnonymousUser     = var_export( !$this->isLoggedIn() , true );  // used by the client
+
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 

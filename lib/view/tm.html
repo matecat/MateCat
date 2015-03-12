@@ -179,7 +179,7 @@
                                     <tal:block tal:condition="php: page == 'home'" tal:repeat="key user_keys">
                                         <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow">
-                                                <div class="status">&nbsp;</div>
+                                                <div class="status"></div>
                                             </td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
@@ -285,37 +285,65 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="activemt" data-id="1">
-                                        <td class="mt-provider">MyMemory ( All Pairs )</td>
-                                        <td class="engine-name">MyMemory: next generation Translation Memory technology</td>
-                                        <td class="enable-mt text-center">
-                                            <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
-                                        </td>
-                                        <td class="action">
-                                            &nbsp;
-                                        </td>
-                                    </tr>
-                                    <tal:block tal:repeat="engine mt_engines">
-                                    <tr class="" data-id="${engine/id}">
-                                        <td class="mt-provider">${engine/name}</td>
-                                        <td class="engine-name">${engine/description}</td>
-                                        <td class="enable-mt text-center">
-                                            <input tal:condition="php: page == 'home'" type="checkbox" />
-                                            <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
-                                        </td>
-                                        <td class="action">
-                                            <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
-                                        </td>
-                                    </tr>
+
+                                    <tal:block tal:condition="php: page == 'home'">
+                                        <tr class="activemt" data-id="1">
+                                            <td class="mt-provider">MyMemory ( All Pairs )</td>
+                                            <td class="engine-name">MyMemory: next generation Translation Memory technology</td>
+                                            <td class="enable-mt text-center">
+                                                <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
+                                            </td>
+                                            <td class="action">
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                        <tal:block tal:repeat="engine mt_engines">
+                                        <tr class="" data-id="${engine/id}">
+                                            <td class="mt-provider">${engine/name}</td>
+                                            <td class="engine-name">${engine/description}</td>
+                                            <td class="enable-mt text-center">
+                                                <input tal:condition="php: page == 'home'" type="checkbox" />
+                                                <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
+                                            </td>
+                                            <td class="action">
+                                                <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>
+                                            </td>
+                                        </tr>
+                                        </tal:block>
                                     </tal:block>
-                                    <!-- tr class="" data-id="12345">
-                                        <td class="mt-provider">DeepLingo</td>
-                                        <td class="engine-name">Euro Parl 2</td>
-                                        <td class="enable-mt text-center"><input type="checkbox"/></td>
-                                        <td class="action">
-                                            <a class="btn pull-left"><span class="text">Delete</span></a>
-                                        </td>
-                                    </tr -->
+
+                                    <tal:block tal:condition="php: page == 'cattool'">
+                                        <tal:block tal:repeat="engine mt_engines">
+                                            <tal:block tal:condition="php: mt_id == engine.id">
+                                                <tr class="activemt" data-id="${engine/id}">
+                                                    <td class="mt-provider">${engine/name}</td>
+                                                    <td class="engine-name">${engine/description}</td>
+                                                    <td class="enable-mt text-center">
+                                                        <input type="checkbox" checked="checked" />
+                                                    </td>
+                                                    <td class="action">
+                                                        <a tal:condition="php: engine.id != 1 && ownerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
+                                                    </td>
+                                                </tr>
+                                            </tal:block>
+                                        </tal:block>
+
+                                        <tal:block tal:repeat="engine mt_engines">
+                                            <tal:block tal:condition="php: mt_id != engine.id">
+                                                <tr class="" data-id="${engine/id}">
+                                                    <td class="mt-provider">${engine/name}</td>
+                                                    <td class="engine-name">${engine/description}</td>
+                                                    <td class="enable-mt text-center">
+                                                        <input type="checkbox"/>
+                                                    </td>
+                                                    <td class="action">
+                                                        <a tal:condition="php: engine.id != 1 && ownerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
+                                                    </td>
+                                                </tr>
+                                            </tal:block>
+                                        </tal:block>
+                                    </tal:block>
+
                                 </tbody>
 
                             </table>
@@ -410,6 +438,7 @@
             <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
+        <br class="clear" />
         <label for="new-engine-name">Engine name<sup>*</sup></label>
         <input class="required" id="new-engine-name" placeholder="here" />
         <br class="clear" />
