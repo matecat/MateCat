@@ -9,9 +9,9 @@ ALTER TABLE `engines`
   DROP COLUMN `tmx_status_relative_url`,
   ADD COLUMN `uid`  int(11) UNSIGNED NULL DEFAULT NULL AFTER `active`,
   ADD INDEX uid_idx(uid),
-  CHANGE COLUMN penalty penalty int(11) NOT NULL DEFAULT '14',
-  CHANGE COLUMN `extra_parameters`  varchar(2048) NOT NULL DEFAULT '{}',
-  ADD COLUMN `class_load` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `others`;
+  MODIFY COLUMN penalty int(11) NOT NULL DEFAULT '14',
+  MODIFY COLUMN `extra_parameters` varchar(2048) NOT NULL DEFAULT '{}',
+  ADD COLUMN `class_load` varchar(255) NULL DEFAULT NULL AFTER `others`;
 
 ALTER TABLE `memory_keys`
   ADD COLUMN `deleted` int(11) default 0;
