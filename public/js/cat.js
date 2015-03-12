@@ -9882,7 +9882,7 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
-                                if(config.isAnonymousUser()) {
+                                if(config.isAnonymousUser) {
                                     console.log('anonimo');
                                 } else {
                                     console.log('loggato');
