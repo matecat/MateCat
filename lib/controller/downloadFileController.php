@@ -259,175 +259,192 @@ class downloadFileController extends downloadController {
                 }
             }
 
-            $debug[ 'do_conversion' ][ ] = time();
-            $convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
+			$debug[ 'do_conversion' ][ ] = time();
+			$convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
 
-            foreach ( array_keys( $files_buffer ) as $fileID ) {
+			foreach ( array_keys( $files_buffer ) as $fileID ) {
 
-                $output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
+				$output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
 
-            }
+				//in case of .strings, they are required to be in UTF-16
+				//get extension to perform file detection
+				$extension   = pathinfo( $output_content[ $fileID ][ 'filename' ], PATHINFO_EXTENSION );
+				if(strtoupper( $extension ) == 'STRINGS'){
+					//use this function to convert stuff        
+					$encodingConvertedFile=CatUtils::convertEncoding('UTF-16',$output_content[ $fileID ][ 'documentContent' ]);
 
-//            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
-            unset( $convertResult );
-            $debug[ 'do_conversion' ][ ] = time();
-        }
 
-        //set the file Name
-        $pathinfo       = pathinfo( $this->fname );
-        $this->filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
+					//strip previously added BOM
+					$encodingConvertedFile[1]=$converter->stripBOM($encodingConvertedFile[1],16);
 
-        //qui prodest to check download type?
-        if ( count( $output_content ) > 1 ) {
+					//store new content
+					$output_content[ $fileID ][ 'documentContent' ]=$encodingConvertedFile[1];
 
-            if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                if ( $this->forceXliff ) {
-                    $this->filename = $this->id_job . ".zip";
-                } else {
-                    $this->filename = $pathinfo[ 'basename' ] . ".zip";
-                }
-            }
+					//trash temporary data
+					unset($encodingConvertedFile);
+				}
+			}
 
-            $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
+			//            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
+			unset( $convertResult );
+			$debug[ 'do_conversion' ][ ] = time();
+		}
 
-        } else {
-            //always an array with 1 element, pop it, Ex: array( array() )
-            $output_content = array_pop( $output_content );
-            $this->setContent( $output_content );
-        }
+		//set the file Name
+		$pathinfo       = pathinfo( $this->fname );
+		$this->filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
-        $debug[ 'total' ][ ] = time();
+		//qui prodest to check download type?
+		if ( count( $output_content ) > 1 ) {
 
-        Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+			if ( $pathinfo[ 'extension' ] != 'zip' ) {
+				if ( $this->forceXliff ) {
+					$this->filename = $this->id_job . ".zip";
+				} else {
+					$this->filename = $pathinfo[ 'basename' ] . ".zip";
+				}
+			}
 
-    }
+			$this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
 
-    protected function setContent( $output_content ) {
+		} else {
+			//always an array with 1 element, pop it, Ex: array( array() )
+			$output_content = array_pop( $output_content );
+			$this->setContent( $output_content );
+		}
 
-        $this->filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
-        $this->content  = $output_content[ 'documentContent' ];
+		$debug[ 'total' ][ ] = time();
 
-    }
+		Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
-    protected function sanitizeFileExtension( $filename ) {
+	}
 
-        $pathinfo = pathinfo( $filename );
+	protected function setContent( $output_content ) {
 
-        if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
-            $filename = $pathinfo[ 'basename' ] . ".docx";
-        }
+		$this->filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
+		$this->content  = $output_content[ 'documentContent' ];
 
-        return $filename;
+	}
 
-    }
+	protected function sanitizeFileExtension( $filename ) {
 
-    protected function composeZip( $output_content, $sourceLang ) {
+		$pathinfo = pathinfo( $filename );
 
-        $file = tempnam( "/tmp", "zipmatecat" );
-        $zip  = new ZipArchive();
-        $zip->open( $file, ZipArchive::OVERWRITE );
+		if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
+			$filename = $pathinfo[ 'basename' ] . ".docx";
+		}
 
-        $rev_index_name = array();
+		return $filename;
 
-        // Staff with content
-        foreach ( $output_content as $f ) {
+	}
 
-            $f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
+	protected function composeZip( $output_content, $sourceLang ) {
 
-            //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'filename' ] );
-            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
-            $fName = str_replace( '_.', ".", $fName );
+		$file = tempnam( "/tmp", "zipmatecat" );
+		$zip  = new ZipArchive();
+		$zip->open( $file, ZipArchive::OVERWRITE );
 
-            $nFinfo = pathinfo( $fName );
-            $_name  = $nFinfo[ 'filename' ];
-            if ( strlen( $_name ) < 3 ) {
-                $fName = substr( uniqid(), -5 ) . "_" . $fName;
-            }
+		$rev_index_name = array();
 
-            if( array_key_exists( $fName, $rev_index_name ) ){
-                $fName = uniqid() . $fName;
-            }
+		// Staff with content
+		foreach ( $output_content as $f ) {
 
-            $rev_index_name[$fName] = $fName;
+			$f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
 
-            $zip->addFromString( $fName, $f[ 'documentContent' ] );
+			//Php Zip bug, utf-8 not supported
+			$fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'filename' ] );
+			$fName = preg_replace( '/[_]{2,}/', "_", $fName );
+			$fName = str_replace( '_.', ".", $fName );
 
-        }
+			$nFinfo = pathinfo( $fName );
+			$_name  = $nFinfo[ 'filename' ];
+			if ( strlen( $_name ) < 3 ) {
+				$fName = substr( uniqid(), -5 ) . "_" . $fName;
+			}
 
-        // Close and send to users
-        $zip->close();
-        $zip_content = file_get_contents( "$file" );
-        unlink( $file );
+			if( array_key_exists( $fName, $rev_index_name ) ){
+				$fName = uniqid() . $fName;
+			}
 
-        $this->content = $zip_content;
+			$rev_index_name[$fName] = $fName;
 
-    }
+			$zip->addFromString( $fName, $f[ 'documentContent' ] );
 
-    /**
-     * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
-     *
-     * Also, check for encoding and transform utf16 to utf8 and back
-     *
-     * @param $documentContent
-     * @param $path
-     *
-     * @return string
-     */
-    public function removeTargetMarks( $documentContent, $path ){
+		}
 
-        $extension = pathinfo( $path );
-        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ){
-            return $documentContent;
-        }
+		// Close and send to users
+		$zip->close();
+		$zip_content = file_get_contents( "$file" );
+		unlink( $file );
 
-        $is_utf8 = true;
-        $original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
+		$this->content = $zip_content;
 
-        //The file is UTF-16 Encoded
-        if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
+	}
 
-            $is_utf8 = false;
-            list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+	/**
+	 * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
+	 *
+	 * Also, check for encoding and transform utf16 to utf8 and back
+	 *
+	 * @param $documentContent
+	 * @param $path
+	 *
+	 * @return string
+	 */
+	public function removeTargetMarks( $documentContent, $path ){
 
-        }
+		$extension = pathinfo( $path );
+		if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ){
+			return $documentContent;
+		}
 
-        //avoid in memory copy of very large files if possible
-        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+		$is_utf8 = true;
+		$original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
 
-        //clean mrk tags for GlobalSight application compatibility
-        //this should be a sax parser instead of in memory copy for every trans-unit
-        if( $detect_result['proprietary_short_name'] == 'globalsight' ){
+		//The file is UTF-16 Encoded
+		if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
 
-            // Getting Trans-units
-            $trans_units = explode( '<trans-unit', $documentContent );
+			$is_utf8 = false;
+			list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
 
-            foreach ($trans_units as $pos => $trans_unit) {
+		}
 
-                // First element in the XLIFF split is the header, not the first file
-                if ($pos > 0) {
+		//avoid in memory copy of very large files if possible
+		$detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
-                    //remove seg-source tags
-                    $trans_unit = preg_replace('|<seg-source.*?</seg-source>|si', '', $trans_unit );
-                    //take the target content
-                    $trans_unit = preg_replace('#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
+		//clean mrk tags for GlobalSight application compatibility
+		//this should be a sax parser instead of in memory copy for every trans-unit
+		if( $detect_result['proprietary_short_name'] == 'globalsight' ){
 
-                    $trans_units[ $pos ] = $trans_unit;
+			// Getting Trans-units
+			$trans_units = explode( '<trans-unit', $documentContent );
 
-                }
+			foreach ($trans_units as $pos => $trans_unit) {
 
-            } // End of trans-units
+				// First element in the XLIFF split is the header, not the first file
+				if ($pos > 0) {
 
-            $documentContent = implode('<trans-unit',$trans_units);
+					//remove seg-source tags
+					$trans_unit = preg_replace('|<seg-source.*?</seg-source>|si', '', $trans_unit );
+					//take the target content
+					$trans_unit = preg_replace('#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
 
-        }
+					$trans_units[ $pos ] = $trans_unit;
 
-        if( !$is_utf8 ){
-            list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
-        }
+				}
 
-        return $documentContent;
+			} // End of trans-units
 
-    }
+			$documentContent = implode('<trans-unit',$trans_units);
+
+		}
+
+		if( !$is_utf8 ){
+			list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+		}
+
+		return $documentContent;
+
+	}
 
 }
