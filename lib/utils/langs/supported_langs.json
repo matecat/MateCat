@@ -144,6 +144,16 @@
 	,
 		{
 			"localized":[{
+				"en":"Belgian French"
+			}],
+			"isocode":"fr",
+			"enabled":true,
+			"rtl":false,
+			"rfc3066code":"fr-BE"
+		}
+	,
+		{
+			"localized":[{
 				"en":"Bislama" 
 			}],
 			"isocode":"bi",

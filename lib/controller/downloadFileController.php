@@ -143,7 +143,7 @@ class downloadFileController extends downloadController {
                 $original_xliff   = $file[ 'xliff_file' ];
 
                 //get path
-                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) .'.sdlxliff';
+                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.sdlxliff';
 
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $path ) ) ) {
@@ -187,10 +187,10 @@ class downloadFileController extends downloadController {
 
                     $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
                     $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
-                    if( $sanitized_src != null ){
+                    if ( $sanitized_src != null ) {
                         $data[ $i ][ 'segment' ] = $sanitized_src;
                     }
-                    if( $sanitized_trg != null ){
+                    if ( $sanitized_trg != null ) {
                         $data[ $i ][ 'translation' ] = $sanitized_trg;
                     }
 
@@ -211,12 +211,12 @@ class downloadFileController extends downloadController {
 
                 $output_xliff = file_get_contents( $path . '.out.sdlxliff' );
 
-                $output_content[ $fileID ][ 'documentContent' ]  = $output_xliff;
-                $output_content[ $fileID ][ 'filename' ] = $current_filename;
+                $output_content[ $fileID ][ 'documentContent' ] = $output_xliff;
+                $output_content[ $fileID ][ 'filename' ]        = $current_filename;
                 unset( $output_xliff );
 
                 if ( $this->forceXliff ) {
-                    $file_info_details                        = pathinfo( $output_content[ $fileID ][ 'filename' ] );
+                    $file_info_details                       = pathinfo( $output_content[ $fileID ][ 'filename' ] );
                     $output_content[ $fileID ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
                 }
 
@@ -266,9 +266,26 @@ class downloadFileController extends downloadController {
 
                 $output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
 
+                //in case of .strings, they are required to be in UTF-16
+                //get extension to perform file detection
+                $extension = pathinfo( $output_content[ $fileID ][ 'filename' ], PATHINFO_EXTENSION );
+                if ( strtoupper( $extension ) == 'STRINGS' ) {
+                    //use this function to convert stuff
+                    $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'documentContent' ] );
+
+
+                    //strip previously added BOM
+                    $encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
+
+                    //store new content
+                    $output_content[ $fileID ][ 'documentContent' ] = $encodingConvertedFile[ 1 ];
+
+                    //trash temporary data
+                    unset( $encodingConvertedFile );
+                }
             }
 
-//            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
+            //            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
             unset( $convertResult );
             $debug[ 'do_conversion' ][ ] = time();
         }
@@ -345,11 +362,11 @@ class downloadFileController extends downloadController {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
             }
 
-            if( array_key_exists( $fName, $rev_index_name ) ){
+            if ( array_key_exists( $fName, $rev_index_name ) ) {
                 $fName = uniqid() . $fName;
             }
 
-            $rev_index_name[$fName] = $fName;
+            $rev_index_name[ $fName ] = $fName;
 
             $zip->addFromString( $fName, $f[ 'documentContent' ] );
 
@@ -374,14 +391,14 @@ class downloadFileController extends downloadController {
      *
      * @return string
      */
-    public function removeTargetMarks( $documentContent, $path ){
+    public function removeTargetMarks( $documentContent, $path ) {
 
         $extension = pathinfo( $path );
-        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ){
+        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
             return $documentContent;
         }
 
-        $is_utf8 = true;
+        $is_utf8          = true;
         $original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
 
         //The file is UTF-16 Encoded
@@ -397,20 +414,20 @@ class downloadFileController extends downloadController {
 
         //clean mrk tags for GlobalSight application compatibility
         //this should be a sax parser instead of in memory copy for every trans-unit
-        if( $detect_result['proprietary_short_name'] == 'globalsight' ){
+        if ( $detect_result[ 'proprietary_short_name' ] == 'globalsight' ) {
 
             // Getting Trans-units
             $trans_units = explode( '<trans-unit', $documentContent );
 
-            foreach ($trans_units as $pos => $trans_unit) {
+            foreach ( $trans_units as $pos => $trans_unit ) {
 
                 // First element in the XLIFF split is the header, not the first file
-                if ($pos > 0) {
+                if ( $pos > 0 ) {
 
                     //remove seg-source tags
-                    $trans_unit = preg_replace('|<seg-source.*?</seg-source>|si', '', $trans_unit );
+                    $trans_unit = preg_replace( '|<seg-source.*?</seg-source>|si', '', $trans_unit );
                     //take the target content
-                    $trans_unit = preg_replace('#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
+                    $trans_unit = preg_replace( '#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
 
                     $trans_units[ $pos ] = $trans_unit;
 
@@ -418,11 +435,11 @@ class downloadFileController extends downloadController {
 
             } // End of trans-units
 
-            $documentContent = implode('<trans-unit',$trans_units);
+            $documentContent = implode( '<trans-unit', $trans_units );
 
         }
 
-        if( !$is_utf8 ){
+        if ( !$is_utf8 ) {
             list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
         }
 
