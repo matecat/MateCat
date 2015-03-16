@@ -37,16 +37,67 @@ if(config.splitSegmentEnabled) {
     $.extend(UI, {
         splitSegment: function (segment) {
             splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"></span>');
-            numSplit = splittedSource.length;
-            console.log('numSplit: ', numSplit);
-
+            segment.find('.splitBar .buttons .cancel').click();
+            newSegments = [];
+            oldSid = segment.attr('id').split('-')[1];
+            $.each(splittedSource, function (index) {
+                segData = {
+                    autopropagated_from: "0",
+                    has_reference: "false",
+                    parsed_time_to_edit: ["00", "00", "00", "00"],
+                    readonly: "false",
+                    segment: this.toString(),
+                    segment_hash: segment.attr('data-hash'),
+                    sid: oldSid + '-' + (index + 1),
+                    status: "DRAFT",
+                    time_to_edit: "0",
+                    translation: "",
+                    warning: "0"
+                }
+                newSegments.push(segData);
+            });
+            console.log('newSegments: ', newSegments);
+            this.currentSegment.after(UI.renderSegments(newSegments));
+            this.currentSegment.hide();
+            this.gotoSegment(oldSid + '-1');
+            this.setSegmentSplit(oldSid, splittedSource);
         },
+        setSegmentSplit: function (sid, splittedSource) {
+            splitAr = [];
+            splitIndex = 0;
+            $.each(splittedSource, function (index) {
+                console.log(UI.removeLockTagsFromString(this));
+                ll = UI.removeLockTagsFromString(this).length;
+                splitIndex += ll;
+                splitAr.push(splitIndex);
+            })
+            splitAr.pop();
+            APP.doRequest({
+                data: {
+                    action:         "setSegmentSplit",
+                    split_points:     splitAr.toString(),
+                    id:             sid
+                },
+                error: function(d){
+                    console.log('error');
+                },
+                success: function(d){
+                    console.log('success');
+                    if(d.data == 'OK') {
+
+                    }
+                }
+            });
+        },
+
         createSplitArea: function (segment) {
             source = $(segment).find('.source');
             source.after('<div class="splitBar"><div class="splitNum"><span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
 //            console.log(segment.find('splitArea'));
 
-            segment.find('.splitArea').html(source.attr('data-original'));
+//            segment.find('.splitArea').html(source.attr('data-original'));
+            segment.find('.splitArea').html(source.html());
+            this.lockTags(segment.find('.splitArea'));
         },
         updateSplitNumber: function (area) {
             segment = $(area).parents('section');
