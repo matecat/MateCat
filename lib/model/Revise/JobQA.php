@@ -140,7 +140,11 @@ class Revise_JobQA {
             $errNumber    = $errNumberMin + $errNumberMaj;
 
             self::$error_info[ $field ][ 'foundErr' ] = $errNumber;
-            self::$error_info[ $field ][ 'vote' ]     = $errNumber / self::$error_info[ $field ][ 'acceptance' ];
+            self::$error_info[ $field ][ 'vote' ]     = $errNumber / (
+                    self::$error_info[ $field ][ 'acceptance' ] == 0
+                            ? 1
+                            : self::$error_info[ $field ][ 'acceptance' ]
+                    );
             self::$error_info[ $field ][ 'textVote' ] = self::vote2text( self::$error_info[ $field ][ 'vote' ] );
         }
     }

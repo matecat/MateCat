@@ -58,7 +58,8 @@
             maxFileSize: ${maxFileSize},
             maxTMXFileSize: ${maxTMXFileSize},
             maxNumberFiles: ${maxNumberFiles},
-            ownerIsMe: true
+            ownerIsMe: true,
+            isAnonymousUser: ${isAnonymousUser}
         };
     </script>
 
@@ -208,7 +209,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     </select>
     <br/>
-    <a href="#" id="multiple-link">Multiple languages?</a>
+     <a href="#" id="multiple-link">Multiple languages?</a>
 </div>
 
 <div class="translate-box subject">
@@ -278,6 +279,8 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
                 <option value="--" tal:attributes="value mt_engine/id" tal:content="mt_engine/name">---</option>
             </tal:block>
         </select>
+        <br/>
+    <a href="#" class="memory-mgmt tm-mgmt" data-tab="mt" data-el-to-click=".add-mt-engine">Add MT engine</a>
     </div>
 
     <div class="translate-box">
@@ -295,7 +298,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     <div class="translate-box">
         <h2 class="resource" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
-        <a href="#" class="memory-mgmt">
+        <a href="#" class="memory-mgmt" data-tab="tm">
             <span class="text"> Manage language resources</span>
             <span class="tm-added">(<span class="num"></span><span class="msg"> TM added</span>)</span>
         </a>
@@ -836,7 +839,34 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         </div>
     </div>
 </div>
+<div class="popup-outer lang-slide hide"></div>
+<div class="modal popup-languages slide" data-type="view">
+    
+    <div class="">
+      
 
+        <h1>
+            
+            Choose Multiple Languages (<span class="number">1</span>)
+            <a href="#" id="deselectMultilang">Deselect all</a>
+            <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
+            <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
+        </h1>
+
+        <div class="popup-box">
+            <ul class="listlang">
+
+                <tal:block tal:repeat="language target_languages">
+                    <li tal:attributes="class language/top">
+                        <input type="checkbox" tal:attributes="value language/code; id language/code"/>
+                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
+                    </li>
+                </tal:block>
+
+            </ul>
+        </div>
+    </div>
+</div>
 
 <div class="modal popup-languages" data-type="view">
     <div class="popup-outer"></div>
@@ -970,7 +1000,9 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     $( ".memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
-        UI.openLanguageResourcesPanel();
+        tab = $(this).attr('data-tab') || 'tm';
+        elToClick = $(this).attr('data-el-to-click') || null;
+        UI.openLanguageResourcesPanel(tab, elToClick);
     } );
 
     $( function () {

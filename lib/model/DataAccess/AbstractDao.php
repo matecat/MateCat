@@ -15,6 +15,12 @@ abstract class DataAccess_AbstractDao {
     protected $con;
 
     /**
+     * The cache connection object
+     * @var MemcacheHandler
+     */
+    protected $cache_con;
+
+    /**
      * @var string This property will be overridden in the sub-classes.
      *             This means that const assignment cannot be done. We don't have PHP>5.3
      */
@@ -24,6 +30,11 @@ abstract class DataAccess_AbstractDao {
      * @var int The maximum number of tuples that can be inserted for a single query
      */
     const MAX_INSERT_NUMBER = 1;
+
+    /**
+     * @var int Cache expiry time, expressed in seconds
+     */
+    protected $cacheTTL = 0;
 
     public function __construct( $con ) {
         /**
@@ -66,7 +77,7 @@ abstract class DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct The input object, sanitized.
      * @throws Exception This function throws exception input is not a DataAccess_IDaoStruct object
      */
-    public static function sanitize( $input ) {
+    public function sanitize( $input ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
@@ -159,6 +170,104 @@ abstract class DataAccess_AbstractDao {
         return true;
     }
 
+    /**
+     * Cache Initialization
+     *
+     * @return $this
+     */
+    protected function _cacheSetConnection(){
+        if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
+            try {
+                $this->cache_con = MemcacheHandler::getInstance();
+            } catch ( Exception $e ) {
+                Log::doLog( $e->getMessage() );
+                Log::doLog( "No Memcache server(s) configured." );
+            }
+        }
+    }
+
+    /**
+     * @param $query string A query
+     *
+     * @return mixed
+     */
+    protected function _getFromCache($query){
+        if($this->cacheTTL == 0 ) return null;
+
+        $this->_cacheSetConnection();
+
+        $_existingResult = null;
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            $_existingResult = $this->cache_con->get( $query );
+        }
+
+        return $_existingResult;
+    }
+
+    /**
+     * @param $query string
+     * @param $value array
+     *
+     * @return void|null
+     */
+    protected function _setInCache( $query, $value ){
+        if($this->cacheTTL == 0 ) return null;
+
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            $this->cache_con->set( $query, $value, $this->cacheTTL );
+        }
+    }
+
+    /**
+     * @param int $cacheTTL
+     *
+     * @return $this
+     */
+    public function setCacheTTL( $cacheTTL ) {
+        $this->cacheTTL = $cacheTTL;
+        return $this;
+    }
+
+    /**
+     * @param $query string A query
+     *
+     * @return array|mixed
+     */
+    protected function _fetch_array( $query ) {
+        $_cacheResult = $this->_getFromCache( $query );
+
+        if ( $_cacheResult !== false && $_cacheResult !== null ) {
+            return $_cacheResult;
+        }
+
+        $result = $this->con->fetch_array( $query );
+
+        $this->_setInCache( $query, $result );
+
+        return $result;
+    }
+
+    /**
+     * @param $query
+     *
+     * @return bool
+     */
+    protected function _destroyCache( $query ){
+
+        $this->_cacheSetConnection();
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            return $this->cache_con->delete( $query );
+        }
+
+        return false;
+
+    }
+
+    /**
+     * @param $array_result array
+     *
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
+     */
     protected abstract function _buildResult( $array_result );
 
 }

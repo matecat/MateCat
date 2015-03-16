@@ -172,8 +172,8 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {				
-				if(d.error.length) {
-					APP.alert({msg: d.error[0].message});
+				if(d.errors.length) {
+					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
 				$('#outer').empty();

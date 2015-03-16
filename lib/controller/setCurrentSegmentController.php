@@ -40,18 +40,18 @@ class setCurrentSegmentController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if ( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
         }
 
         if ( empty( $this->id_segment ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing segment id" );
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing segment id" );
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -2, "message" => "missing Job id" );
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing Job id" );
         }
 
-        if ( !empty( $this->result[ 'error' ] ) ) {
+        if ( !empty( $this->result[ 'errors' ] ) ) {
             //no action on errors
             return;
         }

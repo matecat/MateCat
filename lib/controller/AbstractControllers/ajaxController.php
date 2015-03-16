@@ -18,7 +18,7 @@ abstract class ajaxController extends controller {
      *
      * @var array
      */
-    protected $result = array("error" => array(), "data" => array());
+    protected $result = array("errors" => array(), "data" => array());
 
     protected $uid;
     protected $userIsLogged = false;

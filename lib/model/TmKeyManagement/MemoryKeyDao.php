@@ -67,7 +67,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                     key_name,
                                     key_tm AS tm,
                                     key_glos AS glos
-                             FROM " . self::TABLE . " WHERE %s";
+                             FROM " . self::TABLE . " WHERE %s and deleted = 0";
 
         if ( $obj->uid !== null ) {
             $where_conditions[ ] = "uid = " . $obj->uid;
@@ -170,6 +170,57 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         return null;
     }
+
+    public function delete( TmKeyManagement_MemoryKeyStruct $obj ) {
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+        $query = "DELETE FROM " . self::TABLE . " WHERE uid = %d and key_value = '%s'";
+//        $query = "UPDATE " . self::TABLE . "set deleted = 1 WHERE uid = %d and key_value = '%s'";
+
+        $query = sprintf(
+                $query,
+                $obj->uid,
+                $obj->tm_key->key
+                );
+
+        $this->con->query( $query );
+
+        $this->_checkForErrors();
+
+        if ( $this->con->affected_rows > 0 ) {
+            return $obj;
+        }
+
+        return null;
+    }
+
+    public function disable( TmKeyManagement_MemoryKeyStruct $obj ) {
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+//        $query = "DELETE FROM " . self::TABLE . " WHERE uid = %d and key_value = '%s'";
+        $query = "UPDATE " . self::TABLE . " set deleted = 1 WHERE uid = %d and key_value = '%s'";
+
+        $query = sprintf(
+                $query,
+                $obj->uid,
+                $obj->tm_key->key
+        );
+
+        $this->con->query( $query );
+
+        $this->_checkForErrors();
+
+        if ( $this->con->affected_rows > 0 ) {
+            return $obj;
+        }
+
+        return null;
+    }
+
 
     /**
      * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
@@ -405,7 +456,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @return TmKeyManagement_MemoryKeyStruct
      * @throws Exception
      */
-    public static function sanitize( $input ) {
+    public function sanitize( $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
@@ -439,7 +490,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             throw new Exception( "Invalid Uid" );
         }
 
-        if ( is_null( $obj->tm_key->key ) ) {
+        if ( is_null( $obj->tm_key ) || is_null( $obj->tm_key->key ) ) {
             throw new Exception( "Invalid Key value" );
         }
 

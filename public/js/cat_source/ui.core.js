@@ -160,30 +160,30 @@ UI = {
             return true;
         }
 	},
-	copySource: function() {
-		var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
+    copySource: function() {
+        var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 //		var source_val = $.trim($(".source", this.currentSegment).text());
-		// Test
-		//source_val = source_val.replace(/&quot;/g,'"');
+        // Test
+        //source_val = source_val.replace(/&quot;/g,'"');
 
-		// Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
-		// I hope it still works.
+        // Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
+        // I hope it still works.
 
-		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).html(source_val).keyup().focus();
+        this.saveInUndoStack('copysource');
+        $(".editarea", this.currentSegment).html(source_val).keyup().focus();
 //		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
-		this.saveInUndoStack('copysource');
+        this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
-		this.highlightEditarea();
+        this.highlightEditarea();
 
-		this.currentSegmentQA();
+        this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
-	},
+    },
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
         return str;
     },
-    highlightEditarea: function(seg) {
+	highlightEditarea: function(seg) {
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
 		setTimeout(function() {
@@ -570,8 +570,8 @@ UI = {
 		});
 	},
 	getMoreSegments_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getMoreSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getMoreSegments');
 		where = d.data.where;
         section = $('section');
 		if (typeof d.data.files != 'undefined') {
@@ -699,8 +699,8 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
@@ -1204,7 +1204,7 @@ UI = {
 */
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+						'	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +
@@ -1447,8 +1447,8 @@ UI = {
 		});
 	},
 	setCurrentSegment_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setCurrentSegment');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
@@ -2131,143 +2131,11 @@ UI = {
 			}
 		});
 	},
-	failover: function(reqArguments, operation) {
-		console.log('failover on ' + operation);
-		if(operation != 'getWarning') {
-			var pendingConnection = {
-				operation: operation,
-				args: reqArguments
-			};
-//			console.log('pendingConnection: ', pendingConnection);
-			var dd = new Date();
-			if(pendingConnection.args) {
-				localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-			}
-			if(!UI.checkConnectionTimeout) {
-				UI.checkConnectionTimeout = setTimeout(function() {
-					UI.checkConnection();
-					UI.checkConnectionTimeout = false;
-				}, 5000);	
-			}
-		}
-	},
-
-	failedConnection: function(reqArguments, operation) {
-        console.log('failed connection');
-        $(window).trigger({
-            type: "offlineON",
-            reqArguments: reqArguments,
-            operation: operation
-        });
-
-	},
-    blockUIForNoConnection: function (reqArguments, operation) {
-        if(this.autoFailoverEnabled) {
-            this.failover(reqArguments, operation);
-            return false;
+    checkPendingOperations: function() {
+        if(this.checkInStorage('pending')) {
+            UI.execAbortedOperations();
         }
-        if(operation != 'getWarning') {
-            var pendingConnection = {
-                operation: operation,
-                args: reqArguments
-            };
-            UI.abortedOperations.push(pendingConnection);
-        }
-        if(!config.offlineModeEnabled) {
-            if(!$('.noConnection').length) {
-                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
-            }
-        }
-
     },
-
-    checkConnection: function() {
-        console.log('check connection');
-		APP.doRequest({
-			data: {
-				action: 'ajaxUtils',
-				exec: 'ping'
-			},
-			error: function() {
-				console.log('error on checking connection');
-                if(UI.autoFailoverEnabled) {
-                    setTimeout(function() {
-                        UI.checkConnection();
-                    }, 5000);
-                } else {
-                    if(config.offlineModeEnabled) {
-                        $(window).trigger('stillNoConnection');
-                    } else {
-                        $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-                        $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
-                    }
-
-
-                }
-			},
-			success: function() {
-				console.log('connection is back');
-                if(config.offlineModeEnabled) {
-                    $(window).trigger('offlineOFF');
-                } else {
-                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
-                }
-			}
-		});
-	},
-	connectionIsBack: function() {
-		UI.restoringAbortedOperations = true;
-		this.execAbortedOperations();
-		if(!UI.autoFailoverEnabled) {
-			$('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
-			setTimeout(function() {
-				$('.noConnection').addClass('reConnection');
-				setTimeout(function() {
-					$('.noConnection, .noConnectionMsg').remove();
-				}, 500);		
-			}, 3000);	
-		}
-		UI.restoringAbortedOperations = false;
-
-	},
-	execAbortedOperations: function() {
-		if(UI.autoFailoverEnabled) {
-//			console.log(localStorage);
-			var pendingArray = [];
-			inp = 'pending';
-			$.each(localStorage, function(k,v) {
-				if(k.substring(0, inp.length) === inp) {
-					pendingArray.push(JSON.parse(v));
-				}
-			});
-//			console.log(pendingArray);
-			UI.abortedOperations = pendingArray;
-		}
-//		console.log(UI.abortedOperations);
-		$.each(UI.abortedOperations, function() {
-			args = this.args;
-			operation = this.operation;
-			if(operation == 'setTranslation') {
-				UI[operation](args[0], args[1], args[2]);
-			} else if(operation == 'updateContribution') {
-				UI[operation](args[0], args[1]);
-			} else if(operation == 'setContributionMT') {
-				UI[operation](args[0], args[1], args[2]);
-			} else if(operation == 'setCurrentSegment') {
-				UI[operation](args[0]);
-			} else if(operation == 'getSegments') {
-				UI.reloadWarning();
-			}
-		});
-		UI.abortedOperations = [];
-		UI.clearStorage('pending');
-	},
-	checkPendingOperations: function() {
-		if(this.checkInStorage('pending')) {
-			UI.execAbortedOperations();
-		}
-	},
 	checkInStorage: function(what) {
 		var found = false;
 		$.each(localStorage, function(k) {
@@ -2767,8 +2635,8 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status, byStatus) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setTranslation');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);

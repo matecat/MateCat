@@ -4,7 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "";
+		this.version = "0.5";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -66,6 +66,7 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.

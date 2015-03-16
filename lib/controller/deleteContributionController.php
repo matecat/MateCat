@@ -1,11 +1,9 @@
 <?php
 /**
  * Class engine already included in tms.class.php
- * BUT Not remove include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
+ * BUT Not remove include_once INIT::$UTILS_ROOT . "/Engines/engine.class.php";
  * Some PHP Version ( Ex: Debian 5.2.6-1+lenny13 does not work )
  */
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
@@ -49,19 +47,19 @@ class deleteContributionController extends ajaxController {
 
 
         if ( empty( $this->source_lang ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing source_lang" );
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing source_lang" );
         }
 
         if ( empty( $this->target_lang ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -2, "message" => "missing target_lang" );
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing target_lang" );
         }
 
         if ( empty( $this->source ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "missing source" );
+            $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "missing source" );
         }
 
         if ( empty( $this->target ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -4, "message" => "missing target" );
+            $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "missing target" );
         }
 
         //get Job Infos
@@ -70,24 +68,23 @@ class deleteContributionController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
-            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
             return;
         }
 
         $this->tm_keys      = $job_data[ 'tm_keys' ];
         $this->checkLogin();
 
-        $config = TMS::getConfigStruct();
+        $tms = Engine::getInstance( $job_data['id_tms'] );
+        $config = $tms->getConfigStruct();
+//        $config = TMS::getConfigStruct();
 
         $config[ 'segment' ]       = CatUtils::view2rawxliff( $this->source );
         $config[ 'translation' ]   = CatUtils::view2rawxliff( $this->target );
-        $config[ 'source_lang' ]   = $this->source_lang;
-        $config[ 'target_lang' ]   = $this->target_lang;
+        $config[ 'source' ]        = $this->source_lang;
+        $config[ 'target' ]        = $this->target_lang;
         $config[ 'email' ]         = "demo@matecat.com";
         $config[ 'id_user' ]       = array();
-
-
-        $tms = new TMS( $job_data['id_tms'] );
 
         //get job's TM keys
         try{
@@ -112,11 +109,11 @@ class deleteContributionController extends ajaxController {
 
         }
         catch(Exception $e){
-            $this->result[ 'error' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+            $this->result[ 'errors' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
             return;
         }
 
-        //prepare the error report
+        //prepare the errors report
         $set_code = array();
 
         /**
@@ -140,7 +137,7 @@ class deleteContributionController extends ajaxController {
 
 		$set_successful = true;
 		if( array_search( false, $set_code, true ) ){
-			//There's an error
+			//There's an errors
 			$set_successful = false;
 		}
 

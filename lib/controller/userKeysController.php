@@ -17,6 +17,10 @@ class userKeysController extends ajaxController {
 
     private $exec;
 
+    private static $allowed_exec = array(
+            'delete', 'update', 'newKey'
+    );
+
     public function __construct() {
 
         //Session Enabled
@@ -27,15 +31,15 @@ class userKeysController extends ajaxController {
         $filterArgs = array(
                 'exec'        => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'key'         => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'description' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
         );
 
@@ -56,10 +60,18 @@ class userKeysController extends ajaxController {
             );
         }
 
-        if ( array_search( $this->exec, array( 'update', 'newKey' ) ) === false ) {
+        if ( array_search( $this->exec, self::$allowed_exec ) === false ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -5,
                     'message' => "No method $this->exec allowed."
+            );
+        }
+
+        //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS
+        if ( !$this->userIsLogged ) {
+            $this->result[ 'errors' ][ ] = array(
+                    'code'    => -1,
+                    'message' => "Login is required to perform this action"
             );
         }
 
@@ -71,27 +83,12 @@ class userKeysController extends ajaxController {
      * @return void
      */
     function doAction() {
-
-
-        //raise an error only if user is not logged and if he want update a key
-        if ( !$this->userIsLogged && $this->exec == 'update' ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -1,
-                    'message' => "Login is required to perform this action"
-            );
-        } elseif( !$this->userIsLogged && $this->exec == 'new Key' ) {
-            //if the user is not logged
-            //ONLY LOGGED USERS CAN ADD KEYS TO THEIR KEYRING
-            return;
-        }
-
         //if some error occured, stop execution.
         if ( count( @$this->result[ 'errors' ] ) ) {
             return;
         }
 
         try {
-
             $tmService = new TMSService();
             $tmService->setTmKey( $this->key );
 
@@ -122,6 +119,9 @@ class userKeysController extends ajaxController {
             $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 
             switch ( $this->exec ) {
+                case 'delete':
+                    $userMemoryKeys = $mkDao->disable($memoryKeyToUpdate);
+                    break;
                 case 'update':
                     $userMemoryKeys = $mkDao->update( $memoryKeyToUpdate );
                     break;

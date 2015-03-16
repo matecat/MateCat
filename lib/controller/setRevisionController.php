@@ -32,7 +32,7 @@ class setRevisionController extends ajaxController {
                 'segment'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'jpassword'       => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
                 'err_typing'      => array(
                         'filter'  => FILTER_CALLBACK,
@@ -55,8 +55,7 @@ class setRevisionController extends ajaxController {
                         'options' => array( "setRevisionController", "sanitizeFieldValue" )
                 ),
                 'original'        => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'filter'  => FILTER_UNSAFE_RAW
                 )
         );
 
@@ -108,20 +107,20 @@ class setRevisionController extends ajaxController {
 
         if ( $errno != 0 ) {
             $msg                        = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-            $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+            $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
 
             throw new Exception( $msg, -1 );
         }
 
         //add check for job status archived.
         if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
-            $this->result[ 'error' ][ ] = array( "code" => -6, "message" => "job archived" );
+            $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "job archived" );
         }
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password_job, $this->id_segment ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -7, "message" => "wrong password" );
+            $this->result[ 'errors' ][ ] = array( "code" => -7, "message" => "wrong password" );
         }
 
         $wStruct = new WordCount_Struct();

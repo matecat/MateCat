@@ -1,12 +1,5 @@
 <?php
-/**
- * Class engine already included in tms.class.php
- * BUT Not remove include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
- * Some PHP Version ( Ex: Debian 5.2.6-1+lenny13 does not work )
- */
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
+
 
 class setContributionController extends ajaxController {
 
@@ -67,23 +60,23 @@ class setContributionController extends ajaxController {
     public function doAction() {
 
         if ( is_null( $this->source ) || $this->source === '' ) {
-            $this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing source segment" );
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing source segment" );
         }
 
         if ( is_null( $this->target ) || $this->target === '' ) {
-            $this->result[ 'error' ][ ] = array( "code" => -2, "message" => "missing target segment" );
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing target segment" );
         }
 
         if ( empty( $this->source_lang ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "missing source lang" );
+            $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "missing source lang" );
         }
 
         if ( empty( $this->target_lang ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -2, "message" => "missing target lang" );
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing target lang" );
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -4, "message" => "id_job not valid" );
+            $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "id_job not valid" );
 
             $msg = "\n\n Critical. Quit. \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
@@ -99,14 +92,14 @@ class setContributionController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if ( empty( $job_data ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "error fetching job data" );
+            $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "error fetching job data" );
         }
 
-        if ( empty( $this->result[ 'error' ] ) && !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+        if ( empty( $this->result[ 'errors' ] ) && !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
         }
 
-        if ( !empty( $this->result[ 'error' ] ) ) {
+        if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
@@ -121,19 +114,23 @@ class setContributionController extends ajaxController {
 
         if ( $id_tms != 0 ) {
 
-            $config = TMS::getConfigStruct();
+            $tms = Engine::getInstance( 1 );
+
+            /**
+             * @var $tms Engines_MyMemory
+             */
+            $config = $tms->getConfigStruct();
 
             $config[ 'segment' ]     = CatUtils::view2rawxliff( $this->source );
             $config[ 'translation' ] = CatUtils::view2rawxliff( $this->target );
-            $config[ 'source_lang' ] = $this->source_lang;
-            $config[ 'target_lang' ] = $this->target_lang;
+            $config[ 'source' ]      = $this->source_lang;
+            $config[ 'target' ]      = $this->target_lang;
             $config[ 'email' ]       = "demo@matecat.com";
 
             //Props
             $config[ 'prop' ] = json_encode( CatUtils::getTMProps( $job_data ) );
 
             //instantiate TMS object
-            $tms    = new TMS( $id_tms );
             $result = array();
 
             $this->checkLogin();
@@ -156,7 +153,7 @@ class setContributionController extends ajaxController {
 
                         if ( !$res ) {
                             $result[ ] = $res;
-                            $this->result[ 'error' ][ ] = array(
+                            $this->result[ 'errors' ][ ] = array(
                                 "code"    => -5,
                                 "message" => "Set contribution error for key " . $tm_info->name );
 
@@ -168,7 +165,7 @@ class setContributionController extends ajaxController {
 
                     if ( !$res ) {
                         $result[ ]                  = $res;
-                        $this->result[ 'error' ][ ] = array(
+                        $this->result[ 'errors' ][ ] = array(
                                 "code"    => -5,
                                 "message" => "Set contribution error"
                         );
@@ -179,7 +176,7 @@ class setContributionController extends ajaxController {
 
 
             } catch ( Exception $e ) {
-                $this->result[ 'error' ][ ] = array( "code" => -6, "message" => "Error while retrieving job's TM." );
+                $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Error while retrieving job's TM." );
                 Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
             }
 

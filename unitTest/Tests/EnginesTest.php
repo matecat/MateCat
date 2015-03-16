@@ -8,9 +8,9 @@
  */
 include_once("AbstractTest.php");
 include_once INIT::$MODEL_ROOT . '/queries.php';
-include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
-include_once INIT::$UTILS_ROOT . '/engines/tms.class.php';
-include_once INIT::$UTILS_ROOT . '/engines/mt.class.php';
+include_once INIT::$UTILS_ROOT . '/Engines/engine.class.php';
+include_once INIT::$UTILS_ROOT . '/Engines/tms.class.php';
+include_once INIT::$UTILS_ROOT . '/Engines/mt.class.php';
 
 //Mock Objects for Mute the curl
 class MUTE_TMS extends TMS {

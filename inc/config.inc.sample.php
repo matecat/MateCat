@@ -123,7 +123,7 @@ class INIT {
         if( !empty($custom_paths) ){
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path ( get_include_path() . PATH_SEPARATOR . implode( PATH_SEPARATOR, $def_path ) );
+        set_include_path ( implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path() );
     }
 
     public static function loadClass( $className ) {
@@ -249,7 +249,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.5';
+        self::$BUILD_NUMBER = '0.5.1';
         self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$AUTHCOOKIENAME='matecat_login_v2';

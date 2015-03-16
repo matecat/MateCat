@@ -496,3 +496,17 @@ background-position: 300px 35px;
     margin-top:-40px;
 }
 }
+
+.popup-languages.slide {
+height: 100%!important;
+width: 1100px;
+margin: 0 auto;
+overflow-x: hidden;
+overflow-y: auto;
+position: fixed;
+z-index: 10000000000000;
+top: 0;
+right: 0;
+background: #fff;
+box-shadow: -2px 5px 7px #7B7B7B;
+}
