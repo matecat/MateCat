@@ -17,7 +17,12 @@ class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractRespo
         $this->responseData = $response['responseData'];
 
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
-            $this->id = $response[ 'id' ];
+
+            if( !isset( $this->responseData[ 'tm' ] ) ){
+                //TMX IMPORT STATUS CARRIES A LIST and not a single element, skip the id assignment
+                $this->id = $this->responseData[ 'id' ];
+            }
+
         }
         else {
             Log::doLog($response);
