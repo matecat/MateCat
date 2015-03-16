@@ -243,6 +243,7 @@ class ProjectManager {
 
                 $file            = new stdClass();
                 $file->file_path = "$uploadDir/$fileName";
+                $this->tmxServiceWrapper->setName( $fileName );
                 $this->tmxServiceWrapper->setFile( array( $file ) );
 
                 try {
@@ -481,7 +482,10 @@ class ProjectManager {
 
                     //compare localized target languages array (in case it's a multilingual project) to the TM supplied
                     //if nothing matches, then the TM supplied can't have matches for this project
-                    foreach ( $this->projectStructure[ 'target_language' ] as $projectTarget ) {
+
+                    //create an empty var and add the source language too
+                    $project_languages = array_merge( (array)$this->projectStructure[ 'target_language' ], (array)$this->projectStructure[ 'source_language' ] );
+                    foreach ( $project_languages as $projectTarget ) {
                         if ( in_array( $this->langService->getLocalizedName( $projectTarget ), $tmTargets ) ) {
                             $found = true;
                             break;
@@ -490,8 +494,29 @@ class ProjectManager {
 
                     //if this TM matches the project lagpair and something has been found
                     if ( $found and $result['data'][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+
                         //the TMX is good to go
                         $this->checkTMX = 0;
+
+                    } elseif( $found and $result['data'][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+
+                        /*
+                         * This means that the TMX has a srclang as specification in the header. Warn the user.
+                         * Ex:
+                         * <header creationtool="SDL Language Platform"
+                         *      creationtoolversion="8.0"
+                         *      datatype="rtf"
+                         *      segtype="sentence"
+                         *      adminlang="DE-DE"
+                         *      srclang="DE-DE" />
+                         */
+                        $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                                "code" => -16, "message" => "The TMX you provided explicitly specifies {$result['data'][ 'source_lang' ]} as source language. Check that the specified language source in the TMX file match the language source of your project or remove that specification in TMX file."
+                        );
+
+                        $this->checkTMX = 0;
+
+                        Log::doLog( $this->projectStructure['result'] );
                     }
 
                 }

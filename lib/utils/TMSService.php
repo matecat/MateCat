@@ -110,7 +110,7 @@ class TMSService {
 
         $this->checkCorrectKey();
 
-//        Log::doLog($this->file);
+        Log::doLog($this->file);
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
@@ -120,7 +120,7 @@ class TMSService {
                 $importStatus = $this->mymemory_engine->import(
                         $fileInfo->file_path,
                         $this->tm_key,
-                        $fileInfo->name
+                        $this->name
                 );
 
                 //check for errors during the import
