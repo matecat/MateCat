@@ -426,9 +426,17 @@ section.currSearchSegment .sid
 .editor .sid{
 	top:43px !Important;}
 
-span.sid .implicit {
+div.sid .implicit {
 /*    display: none; */
 }
+
+div.sid .actions {
+    display: none;
+}
+
+
+
+
 /*.comment{position:absolute;right:0;}*/
 /*
 .editor .status-container{display:none;}
@@ -3528,3 +3536,64 @@ th a.tooltip {
     text-decoration: none;
 }
 
+body.cattool table.mgmt-mt th.enable-mt {
+    display: none;
+}
+body.cattool table.mgmt-mt tbody .enable-mt {
+    display: none;
+}
+body.isAnonymous .add-mt-engine {
+    display: none;
+}
+
+.splitArea {
+    width: 45.5%;
+    z-index: 9999999;
+    position: absolute;
+    background: #fff;
+    min-height: 20px;
+    border: 2px solid #F00;
+    padding: 3px 1%;
+    font-size: 18px;
+    text-align: left;
+    line-height: 30px;
+}
+
+.splitBar
+{
+    width: 45.5%;
+    position: absolute;
+    top: -3px;
+}
+.splitBar p,
+.splitBar .splitNum
+{
+    float: left;
+    margin: 0;
+}
+.splitBar .splitNum
+{
+    display: none;
+}
+.splitBar .buttons
+{
+    float: right;
+    margin: 0;
+}
+.splitBar .buttons a
+{
+    margin-left: 20px;
+}
+.splitBar .buttons a:hover
+{
+    text-decoration: underline;
+}
+.splitpoint
+{
+    display: inline-block;
+    width: 8px;
+    background: #F00;
+    height: 20px;
+    cursor: pointer;
+    margin: 0 2px;
+}

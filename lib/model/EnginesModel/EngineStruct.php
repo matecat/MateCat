@@ -6,7 +6,9 @@
  * Date: 23/02/15
  * Time: 14.54
  */
-class EnginesModel_EngineStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class EnginesModel_EngineStruct
+        extends DataAccess_AbstractDaoObjectStruct
+        implements DataAccess_IDaoStruct, ArrayAccess {
 
     /**
      * @var int
@@ -160,5 +162,11 @@ class EnginesModel_EngineStruct extends DataAccess_AbstractDaoObjectStruct imple
         $this->$offset = null;
     }
 
+    /**
+     * Cast an Engine to String. Useful for engine comparison inside a list ( catController )
+     */
+    public function __toString(){
+        return $this->id . $this->name . $this->description;
+    }
 
 }

@@ -124,7 +124,7 @@ body.manage a.copy
 	}
 
 
-
+table .btn{width:auto !important;padding:0px 20px 0 20px !important;}
 
 body.manage .article:last-child .wrapper-dropdown-5 .dropdown {
 	bottom: 100%;
@@ -136,11 +136,12 @@ body.manage .article:last-child .wrapper-dropdown-5 .dropdown li:first-child{
 border-top:1px solid #ccc;
 }
 
+
+
 body.manage input[type=button].revise {
 	cursor: pointer;
 	height: 29px;
 	width: 77% !important;
-	border-right: 0 solid;
 	border-radius: 2px 0 0 2px;
 	-moz-box-shadow: 0 1px 2px #ccc;
 	-webkit-box-shadow: 0 1px 2px #ccc;

@@ -1204,7 +1204,7 @@ UI = {
 */
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+						'	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +

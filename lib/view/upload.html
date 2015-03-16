@@ -58,7 +58,8 @@
             maxFileSize: ${maxFileSize},
             maxTMXFileSize: ${maxTMXFileSize},
             maxNumberFiles: ${maxNumberFiles},
-            ownerIsMe: true
+            ownerIsMe: true,
+            isAnonymousUser: ${isAnonymousUser}
         };
     </script>
 
@@ -120,21 +121,21 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         <h2>State-of-the-art MT <br/>and public TMs</h2>
 
         <p>Translation and post-editing <br/>in 80 languages with zero <br/>start-up time</p>
-        <img src="/public/img/box1.jpg"/>
+        <img src="${basepath}public/img/box1.jpg"/>
 
     </div>
     <div class="col-3">
         <h2>Outsource your extra projects <br/>in one click</h2>
 
         <p>Take on any projects,<br/>even in languages<br/>that you do not cover yourself</p>
-        <img src="/public/img/box2.jpg"/>
+        <img src="${basepath}public/img/box2.jpg"/>
 
     </div>
     <div class="col-3">
         <h2><strong>It’s free</strong><br/>and always will be</h2>
 
         <p>A free CAT tool for LSPs, <br/> professional translators <br/>and customers</p>
-        <img src="/public/img/box3.jpg"/>
+        <img src="${basepath}public/img/box3.jpg"/>
 
     </div>
     <div class="bottom-lm">
@@ -944,10 +945,10 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
         <p>MateCat works great with the following browsers</p>
         <ul>
-            <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
+            <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="${basepath}public/img/chrome.jpg" width="140" /><br />
     Chrome</a></li>
 
-            <li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
+            <li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="${basepath}public/img/safari.jpg" width="140" /><br />
     Safari</a></li>
         </ul>
     </div>

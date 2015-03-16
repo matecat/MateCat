@@ -72,6 +72,7 @@ $.extend(UI, {
         this.executingSetContribution = false;
         this.executingSetContributionMT = false;
 
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.

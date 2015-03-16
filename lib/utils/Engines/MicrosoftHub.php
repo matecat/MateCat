@@ -99,7 +99,7 @@ TAG;
 
     public function get( $_config ) {
 
-        $cycle = (int)func_get_arg(1);
+        $cycle = @(int)func_get_arg(1);
 
         if( $cycle == 10 ){
             return sprintf( $this->rawXmlErrStruct, 'Too Much Recursion', 'get', 'Maximum recursion limit reached' );
@@ -208,7 +208,7 @@ TAG;
             $rawValue = sprintf( $this->rawXmlErrStruct, $objResponse['error'], 'getToken', $objResponse['error_description'] );
             $this->result = $this->_decode( $rawValue, $parameters );
 
-            throw new Exception( $objResponse->error_description );
+            throw new Exception( $objResponse['error_description'] );
 
         } else {
             $this->token = $objResponse['access_token'];

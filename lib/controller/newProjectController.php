@@ -143,13 +143,11 @@ class newProjectController extends viewController {
         if ( @(bool)$_GET[ 'amt' ] == true ) {
             $engineQuery->uid    = 'all';
         } else {
-            $engineQuery->uid    = $uid;
+            $engineQuery->uid    = ( $uid == null ? -1 : $uid );
         }
 
         $engineQuery->active = 1;
         $this->mt_engines = $engine->read( $engineQuery );
-
-//        $this->tms_engines = getEngines( 'TM' );
 
         if ( $this->isLoggedIn() ) {
 
@@ -313,6 +311,8 @@ class newProjectController extends viewController {
         $this->template->authURL     = $this->authURL;
 
         $this->template->user_keys = $this->keyList;
+
+        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
 
     }
 

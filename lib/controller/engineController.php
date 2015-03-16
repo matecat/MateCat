@@ -18,7 +18,7 @@ class engineController extends ajaxController {
     );
 
     public function __construct() {
-
+//throw new Exception();
         //Session Enabled
         $this->checkLogin();
         //Session Disabled
@@ -86,7 +86,7 @@ class engineController extends ajaxController {
                 $this->add();
                 break;
             case 'delete':
-                $this->delete();
+                $this->disable();
                 break;
             default:
                 break;
@@ -131,6 +131,35 @@ class engineController extends ajaxController {
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
+
+            case strtolower( Constants_Engines::IP_TRANSLATOR ):
+
+                /**
+                 * Create a record of type IPTranslator
+                 */
+                $newEngine = EnginesModel_IPTranslatorStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::DEEPLINGO ):
+
+                /**
+                 * Create a record of type IPTranslator
+                 */
+                $newEngine = EnginesModel_DeepLingoStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
             default:
                 $validEngine = false;
         }
@@ -148,6 +177,25 @@ class engineController extends ajaxController {
             return;
         }
 
+        if( $newEngine instanceof EnginesModel_MicrosoftHubStruct ){
+
+            $engine_test = Engine::getInstance( $result->id );
+            $config = $engine_test->getConfigStruct();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+            $config[ 'id_user' ] = "demo@matecat.com";
+
+            $mt_result = $engine_test->get( $config );
+
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $mt_result['error'];
+                $engineDAO->delete( $result );
+                return;
+            }
+
+        }
+
         $this->result['data']['id'] = $result->id;
 
     }
@@ -155,7 +203,7 @@ class engineController extends ajaxController {
     /**
      * This method deletes an engine from a user's keyring
      */
-    private function delete(){
+    private function disable(){
 
         if ( empty( $this->id ) ) {
             $this->result[ 'errors' ][ ] = array( 'code' => -5, 'message' => "Engine id required" );
@@ -171,6 +219,7 @@ class engineController extends ajaxController {
 
         if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
+            return;
         }
 
         $this->result['data']['id'] = $result->id;
