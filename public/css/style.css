@@ -2958,14 +2958,17 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag
 {
 /*visibility: hidden;*/
 text-indent: -10000px;
