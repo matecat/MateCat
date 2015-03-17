@@ -581,7 +581,7 @@ UI = {
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
 			});
-			this.renderSegments(d.data.files, where, false);
+			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event 
 			if ((where == 'before') && (numsegToAdd)) {
@@ -709,7 +709,7 @@ UI = {
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
 		if (typeof d.data.files != 'undefined') {
-			this.renderSegments(d.data.files, where, this.firstLoad);
+			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
 				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
@@ -873,10 +873,12 @@ UI = {
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
-//        console.log('gotoSegment: ', id);
-		var el = $("#segment-" + id + "-target").find(".editarea");
+        if((!this.segmentIsLoaded(id))&&(id.toString().split('-').length > 1)) {
+            id = id.toString().split('-')[0];
+        }
+        var el = $("#segment-" + id + "-target").find(".editarea");
         $(el).click();
-	},
+    },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
 			$('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
@@ -1143,7 +1145,7 @@ UI = {
 	removeStatusMenu: function(statusMenu) {
 		statusMenu.empty().hide();
 	},
-	renderSegments: function(files, where, starting) {
+	renderFiles: function(files, where, starting) {
 		$.each(files, function(k) {
 			var newFile = '';
 //            var fid = fs['ID_FILE'];
@@ -1176,85 +1178,8 @@ UI = {
 						'	</ul>';
 			}
 
-			var t = config.time_to_edit_enabled;
-			$.each(this.segments, function() {
-//                this.readonly = true;
-				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
-                var autoPropagated = this.autopropagated_from != 0;
-				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
-
-                /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
-                escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-                escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-
-				/* tab placeholders replacement */
- //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
-				
-                /* see also replacement made in source content below */
-                /* this is to show line feed in source too, because server side we replace \n with placeholders */
-/*
-                tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
-                    '</li>' +
-//                    '						   <li class="crunched">&lt;&gt;</li>' +
-//                    '						   <li class="extended">&lt;...&gt;</li>' +
-                    '						</ul>' : '';
-*/
-                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
-						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
-((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
-((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
-						'	<div class="body">' +
-						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
-//						'			<h2 title="" class="percentuage"><span></span></h2>' + 
-//						'			<a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
-//						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
-						'		</div>' +
-						'		<div class="text">' +
-						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
-						'				<div class="copy" title="Copy source to target">' +
-						'                   <a href="#"></a>' +
-						'                   <p>ALT+CTRL+I</p>' +
-//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
-						'				</div>' +
-						'				<div class="target item" id="segment-' + this.sid + '-target">' +
-						'					<span class="hide toggle"> ' +
-						'						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
-						'					</span>' +
-						'					<div class="textarea-container">' +
-						'						<span class="loader"></span>' +
-//                        tagModes +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-                        '                       <div class="toolbar">' +
-((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
-						'                           <ul class="editToolbar">' +
-						'                               <li class="uppercase" title="Uppercase"></li>' +
-						'                               <li class="lowercase" title="Lowercase"></li>' +
-						'                               <li class="capitalize" title="Capitalized"></li>' +
-						'                           </ul>' +
-                        '                       </div>' +
-						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
-						'					</div> <!-- .textarea-container -->' +
-						'				</div> <!-- .target -->' +
-						'			</div></div> <!-- .wrap -->' +
-						'						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>' +
-						'			<div class="status-container">' +
-						'				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
-						'			</div> <!-- .status-container -->' +
-						'		</div> <!-- .text -->' +
-						'		<div class="timetoedit" data-raw_time_to_edit="' + this.time_to_edit + '">' +
-						((t) ? '			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:' : '') +
-						((t) ? '			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s' : '') +
-						'		</div>' +
-						'		<div class="footer toggle"></div> <!-- .footer -->     ' +
-						'	</div> <!-- .body -->' +
-						'	<ul class="statusmenu"></ul>' +
-						'</section> ';
-			});
+            newSegments = UI.renderSegments(this.segments);
+            newFile += newSegments;
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -1284,7 +1209,91 @@ UI = {
 			this.init();
 		}
 	},
-	saveSegment: function(segment) {
+    renderSegments: function (segments) {
+        var t = config.time_to_edit_enabled;
+        newSegments = '';
+        $.each(segments, function() {
+//                this.readonly = true;
+            var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
+            var autoPropagated = this.autopropagated_from != 0;
+            var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
+
+            /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+            escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+            escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+
+            /* tab placeholders replacement */
+            //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
+
+            /* see also replacement made in source content below */
+            /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            /*
+             tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
+             '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
+             '</li>' +
+             //                    '						   <li class="crunched">&lt;&gt;</li>' +
+             //                    '						   <li class="extended">&lt;...&gt;</li>' +
+             '						</ul>' : '';
+             */
+            newSegments += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
+                '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
+                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
+                ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+                ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
+                '	<div class="body">' +
+                '		<div class="header toggle" id="segment-' + this.sid + '-header">' +
+//						'			<h2 title="" class="percentuage"><span></span></h2>' +
+//						'			<a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
+//						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
+                '		</div>' +
+                '		<div class="text">' +
+                '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
+                '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
+                '				<div class="copy" title="Copy source to target">' +
+                '                   <a href="#"></a>' +
+                '                   <p>ALT+CTRL+I</p>' +
+//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
+                '				</div>' +
+                '				<div class="target item" id="segment-' + this.sid + '-target">' +
+                '					<span class="hide toggle"> ' +
+                '						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
+                '					</span>' +
+                '					<div class="textarea-container">' +
+                '						<span class="loader"></span>' +
+//                        tagModes +
+                '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
+                '                       <div class="toolbar">' +
+                ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
+                '                           <ul class="editToolbar">' +
+                '                               <li class="uppercase" title="Uppercase"></li>' +
+                '                               <li class="lowercase" title="Lowercase"></li>' +
+                '                               <li class="capitalize" title="Capitalized"></li>' +
+                '                           </ul>' +
+                '                       </div>' +
+                '						<p class="save-warning" title="Segment modified but not saved"></p>' +
+                '					</div> <!-- .textarea-container -->' +
+                '				</div> <!-- .target -->' +
+                '			</div></div> <!-- .wrap -->' +
+                '						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>' +
+                '			<div class="status-container">' +
+                '				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
+                '			</div> <!-- .status-container -->' +
+                '		</div> <!-- .text -->' +
+                '		<div class="timetoedit" data-raw_time_to_edit="' + this.time_to_edit + '">' +
+                ((t) ? '			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:' : '') +
+                ((t) ? '			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s' : '') +
+                '		</div>' +
+                '		<div class="footer toggle"></div> <!-- .footer -->     ' +
+                '	</div> <!-- .body -->' +
+                '	<ul class="statusmenu"></ul>' +
+                '</section> ';
+        });
+        return newSegments;
+    },
+
+    saveSegment: function(segment) {
 		var status = (segment.hasClass('status-translated')) ? 'translated' : (segment.hasClass('status-approved')) ? 'approved' : (segment.hasClass('status-rejected')) ? 'rejected' : (segment.hasClass('status-new')) ? 'new' : 'draft';
 		if (status == 'new') {
 			status = 'draft';
@@ -1358,6 +1367,7 @@ UI = {
 		}, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
+//        segmentId = segmentId.toString().split('-')[0];
 		if ($('#segment-' + segmentId).length) {
 			return true;
 		} else {
@@ -1427,6 +1437,7 @@ UI = {
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
+//        if(id_segment.toString().split('-').length > 1) id_segment = id_segment.toString().split('-');
 //		var file = this.currentFile;
 		if (this.readonly)
 			return;
@@ -1434,7 +1445,7 @@ UI = {
 			data: {
 				action: 'setCurrentSegment',
 				password: config.password,
-				id_segment: id_segment,
+				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
 			context: reqArguments,
@@ -1462,13 +1473,13 @@ UI = {
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
          * is sent as response in getMoreSegments and added as data in the "section" Tag and
-         * rendered/prepared in renderSegments/createHeader
+         * rendered/prepared in renderFiles/createHeader
          * and managed in propagateTranslation
          *
          * TODO
          * I leave them here but they should be removed
          *
-         * @see renderSegments
+         * @see renderFiles
          * @see createHeader
          * @see propagateTranslation
          *

@@ -289,7 +289,7 @@
                                     <tal:block tal:condition="php: page == 'home'">
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
-                                            <td class="engine-name">MyMemory: next generation Translation Memory technology</td>
+                                            <td class="engine-name">MMachine translation from Google Translate and Microsoft Translator.</td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
                                             </td>
@@ -418,6 +418,11 @@
         <input class="required" id="new-engine-name" placeholder="here" />
         <br class="clear" />
         <div class="provider-data">
+            <div class="provider-field">
+                <label>URL<sup>*</sup></label>
+                <input class="required" data-field-name="url" placeholder="here" />
+                <br class="clear" />
+            </div>
             <div class="provider-field">
                 <label>Client Secret<sup>*</sup></label>
                 <input class="required" data-field-name="secret" placeholder="here" />
