@@ -3,15 +3,17 @@
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
-    $('html').on('mouseover', '.sid', function() {
+    $('html').on('mouseover', '.editor .sid', function() {
         actions = $(this).parent().find('.actions');
         actions.show();
-    })
-    .on('mouseout', '.sid', function() {
+    }).on('mouseout', '.sid', function() {
+        actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
-    }).on('mouseover', '.opened .source', function() {
+    }).on('mouseover', '.editor .source', function() {
+        actions = $('.editor .sid').parent().find('.actions');
         actions.show();
-    }).on('mouseout', '.opened', function() {
+    }).on('mouseout', '.editor .source', function() {
+        actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
     }).on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
