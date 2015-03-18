@@ -1477,8 +1477,9 @@ z-index: 10000;
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	
-    word-break: break-all;
+
+    word-wrap: break-word;
+    word-break: normal;
 	
     hyphens: auto;
 	-moz-hyphens: auto;
@@ -1505,25 +1506,13 @@ body.archived section .text
     /*color: #fff;*/
 }
 
-
-
 section.readonly .status-container,
 body.archived section .status-container
 {
     /*display: none;*/
 }
 
-
-
 .editarea div:last-child {margin-bottom:-22px !important;}
-
-
-
-
-
-
-
-
 
 .editor .editarea
 {
@@ -1544,7 +1533,6 @@ body.archived section .status-container
 /*	transition:none;
 	-webkit-transition: none;*/
 
-    word-break: normal !important;
 	/*background-color: transparent;*/
 }
 .editor.highlighted1 .editarea
