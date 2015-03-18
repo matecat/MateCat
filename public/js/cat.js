@@ -9085,7 +9085,7 @@ $.extend(UI, {
             $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
         }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
             e.preventDefault();
-            $(this).addClass('disabled');
+            $(this).parents('.action').find('.addtmx').each( function(el) { $(this).addClass('disabled'); } );
             var nr = '<td class="uploadfile">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
