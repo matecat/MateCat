@@ -11,7 +11,6 @@ class Engines_Results_MT {
         $this->error = new Engines_Results_ErrorMatches();
         if ( is_array( $result ) and array_key_exists( "data", $result ) ) {
             $this->translatedText = $result[ 'data' ][ 'translations' ][ 0 ][ 'translatedText' ];
-            $this->translatedText = CatUtils::rawxliff2view( $this->translatedText );
             if ( isset( $result[ 'data' ][ 'translations' ][ 0 ][ 'sentence_confidence' ] ) ) {
                 $this->sentence_confidence = $result[ 'data' ][ 'translations' ][ 0 ][ 'sentence_confidence' ];
             }

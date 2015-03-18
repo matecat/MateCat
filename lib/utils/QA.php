@@ -872,8 +872,8 @@ class QA {
         $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
 
-            $rrorList = libxml_get_errors();
-            foreach( $rrorList as $error ){
+            $errorList = libxml_get_errors();
+            foreach( $errorList as $error ){
                 if( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ){
                     if( preg_match( '#<x[^/>]+>#', $xmlString  ) && preg_match( '# x #', $error->message ) ){
                         $this->_addError(self::ERR_UNCLOSED_X_TAG);
@@ -881,7 +881,7 @@ class QA {
                 }
             }
 //            Log::doLog($xmlString);
-//            Log::doLog($rrorList);
+//            Log::doLog($errorList);
 
             $this->_addError($targetErrorType);
         }
@@ -1074,10 +1074,10 @@ class QA {
         /*
          * Check for corresponding self closing tags like <g id="pt673"/>
          */
-        preg_match_all( '#<[^>]+/>#', $this->source_seg, $selfClosingTags_src );
-        preg_match_all( '#<[^>]+/>#', $this->target_seg, $selfClosingTags_trg );
-        $selfClosingTags_src = $selfClosingTags_src[0];
-        $selfClosingTags_trg = $selfClosingTags_trg[0];
+        preg_match_all( '#<([^>]+)/>#', $this->source_seg, $selfClosingTags_src );
+        preg_match_all( '#<([^>]+)/>#', $this->target_seg, $selfClosingTags_trg );
+        $selfClosingTags_src = $selfClosingTags_src[1];
+        $selfClosingTags_trg = $selfClosingTags_trg[1];
         foreach( $selfClosingTags_trg as $pos => $tag ){
             if( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ){
                 $this->_addError( self::ERR_TAG_MISMATCH );

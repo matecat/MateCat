@@ -129,7 +129,7 @@ while ( 1 ) {
     //reset vectors
     $matches   = array();
     $tms_match = array();
-    $mt_res    = array();
+    $mt_result = array();
 
     $_config                  = array();
     $_config[ 'segment' ]     = $text;

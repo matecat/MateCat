@@ -2529,6 +2529,9 @@ width: 98.8%;
 color: #000;
 }
 
+.tm-warning-message, .tm-error-message {
+    margin: 0 0 15px !important;
+}
 
 
 
@@ -2574,10 +2577,13 @@ a.resume-project:after,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.endTag:before,
@@ -2610,8 +2616,10 @@ body.manage header .filter:before {
 }
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
@@ -2629,6 +2637,7 @@ left: 10000px;
 
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
 {
@@ -2646,6 +2655,8 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.sta
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag:before,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before
 {
@@ -2655,6 +2666,7 @@ body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .lock
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
+body.rtl-source.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag:before,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before
 {
 	left: auto !important;
@@ -6106,14 +6118,17 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag
 {
 /*visibility: hidden;*/
 text-indent: -10000px;

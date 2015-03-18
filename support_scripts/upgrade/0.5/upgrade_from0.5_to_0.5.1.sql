@@ -13,9 +13,6 @@ ALTER TABLE `engines`
   MODIFY COLUMN `extra_parameters` varchar(2048) NOT NULL DEFAULT '{}',
   ADD COLUMN `class_load` varchar(255) NULL DEFAULT NULL AFTER `others`;
 
-ALTER TABLE `memory_keys`
-  ADD COLUMN `deleted` int(11) default 0;
-
 CREATE UNIQUE INDEX `id_UNIQUE` ON `converters`(`id`) USING BTREE ;
 
 ALTER TABLE `jobs`

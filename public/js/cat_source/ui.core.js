@@ -63,10 +63,10 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
 //        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-		segment_id = $(segment).attr('id').split('-')[1];
+		segment_id = this.getSegmentId(segment);
 		$('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
-		this.setTranslation($(segment).attr('id').split('-')[1], status, false);
+		this.setTranslation(this.getSegmentId(segment), status, false);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -82,7 +82,12 @@ UI = {
 			status: status
 		});
 	},
-	checkHeaviness: function() {
+    getSegmentId: function (segment) {
+//        return $(segment).attr('id').split('-')[1];
+        return $(segment).attr('id').replace('segment-', '');
+    },
+
+    checkHeaviness: function() {
 //		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
 //		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
 //		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
@@ -287,7 +292,7 @@ UI = {
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -476,7 +481,7 @@ UI = {
 //		var step = this.moreSegNum;
 		var section = $('section');
         var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
-		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
+		var segId = (seg.length) ? this.getSegmentId(seg) : 0;
 		return segId;
 	},
 	detectStartSegment: function() {
@@ -499,7 +504,8 @@ UI = {
 
     nextUnloadedResultSegment: function() {
 		var found = '';
-		var last = $('section').last().attr('id').split('-')[1];
+		var last = this.getSegmentId($('section').last());
+//		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
 //            var start = new Date().getTime();
 //            for (var i = 0; i < 1e7; i++) {
@@ -540,7 +546,7 @@ UI = {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
 //				if ($(this).offset().top > $(window).scrollTop()) {
-					UI.segMoving = $(this).attr('id').split('-')[1];
+					UI.segMoving = UI.getSegmentId($(this));
 					return false;
 				}
 			});
@@ -625,7 +631,7 @@ UI = {
 //		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
 //			console.log('1');
-			this.nextUntranslatedSegmentId = $(n).attr('id').split('-')[1];
+			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
 		}
@@ -643,7 +649,7 @@ UI = {
 			i = $(seg).parents('article').next().find('section').first();
 		}
 		if (i.length) {
-			this.nextSegmentId = $(i).attr('id').split('-')[1];
+			this.nextSegmentId = this.getSegmentId($(i));
 		} else {
 			this.nextSegmentId = 0;
 		}
@@ -780,8 +786,10 @@ UI = {
 				data: {
 					action: 'getUpdatedTranslations',
 					last_timestamp: lastUpdateRequested.getTime(),
-					first_segment: $('section').first().attr('id').split('-')[1],
-					last_segment: $('section').last().attr('id').split('-')[1]
+					first_segment: UI.getSegmentId($('section').first()),
+//					first_segment: $('section').first().attr('id').split('-')[1],
+					last_segment: UI.getSegmentId($('section').last())
+//					last_segment: $('section').last().attr('id').split('-')[1]
 				},
 				error: function() {
 					UI.failedConnection(0, 'getUpdatedTranslations');
@@ -1239,7 +1247,7 @@ UI = {
              */
             newSegments += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
                 '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
+                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
                 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
                 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
                 '	<div class="body">' +
@@ -1299,7 +1307,7 @@ UI = {
 			status = 'draft';
 		}
 		console.log('SAVE SEGMENT');
-		this.setTranslation($(segment).attr('id').split('-')[1], status, 'autosave');
+		this.setTranslation(this.getSegmentId(segment), status, 'autosave');
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {

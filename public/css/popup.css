@@ -178,6 +178,14 @@ margin: 1px 0 5px 0;
 	-moz-box-shadow: 0 0px 6px #888;
 -webkit-box-shadow: 0 0px 6px #888;}
 
+
+.split-box3 .total:hover {
+    border: none;
+    box-shadow: none;
+    -moz-box-shadow:none;
+    -webkit-box-shadow: none;
+}
+
 .paylater, .gmt {
 font-size: 14px;
 font-weight: normal;
