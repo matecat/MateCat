@@ -2771,7 +2771,9 @@ cursor: pointer;
 	vertical-align: text-top;
 }
 
-.addtmxfile .text:before, .addtmx .text:before, .open-popup-addtm-tr:before
+.addtmxfile .text:before,
+/*.addtmx .text:before, */
+.open-popup-addtm-tr:before
  {
 	content: "\e601";
 	padding-right: 5px;
