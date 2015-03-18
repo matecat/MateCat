@@ -40,12 +40,12 @@ echo "--- (child $my_pid) : parent pid is $parent_pid\n";
 $memcacheHandler = MemcacheHandler::getInstance();
 
 while ( 1 ) {
-    if ( !processFileExists( $my_pid ) ) {
+    if ( 0 && !processFileExists( $my_pid ) ) {
         die( "(child $my_pid) :  EXITING!  my file does not exists anymore\n" );
     }
 
     // control if parent is still running
-    if ( !isRunningProcess( $parent_pid ) ) {
+    if ( 0 && !isRunningProcess( $parent_pid ) ) {
         echo "--- (child $my_pid) : EXITING : parent seems to be died.\n";
         exit ( -1 );
     }
@@ -129,7 +129,7 @@ while ( 1 ) {
     //reset vectors
     $matches   = array();
     $tms_match = array();
-    $mt_res    = array();
+    $mt_result = array();
 
     $_config                  = array();
     $_config[ 'segment' ]     = $text;
