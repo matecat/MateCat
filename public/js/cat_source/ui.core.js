@@ -1247,7 +1247,7 @@ UI = {
              */
             newSegments += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
                 '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
+                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
                 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
                 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
                 '	<div class="body">' +
