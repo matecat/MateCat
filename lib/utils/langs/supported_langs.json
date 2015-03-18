@@ -451,6 +451,16 @@
 			"rfc3066code":"fr-FR"
 		}
 	,
+  		{
+                        "localized":[{
+                                "en":"French Canada"
+                        }],
+                        "isocode":"fr",
+                        "enabled":true,
+                        "rtl":false,
+                        "rfc3066code":"fr-CA"
+                }
+	,
 		{
 			"localized":[{
 				"en":"Galician"
@@ -1139,16 +1149,6 @@
 			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pot-US"
-		}
-	,
-		{
-			"localized":[{
-				"en":"Quebecois"
-			}],
-			"isocode":"fr",
-			"enabled":true,
-			"rtl":false,
-			"rfc3066code":"fr-CA"
 		}
 	,
 		{
