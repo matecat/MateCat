@@ -374,6 +374,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	width: auto !important;
 	position: absolute;	
 	top: 18px;
+	padding: 0 15px 70px 0px;
 	left: -4.8%;
 	text-align: center;
 	display: block;
@@ -420,6 +421,11 @@ div.sid .implicit {
 div.sid .actions {
     display: none;
 }
+
+.split-action .actions {
+    display: block!important;
+}
+
 
 
 
@@ -607,7 +613,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
     display: none;
     position: absolute;
     float: left;
-    margin-left: 47%;
+    margin-left: 47.4%;
     margin-top: 5px;
     width: 50px !important;
 	background: url(../img/sprite.png) 5px -853px no-repeat;
@@ -2895,6 +2901,32 @@ float: left;
     float: left;
 }
 
+.split {
+  background: #9E9E9E;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 1px 2px 2px;
+  border: 1px solid #5F5F5F;
+  border-radius: 4px;
+  width: 31px;
+  font-size: 20px;
+  margin-top: 15px;
+  display: block;
+  margin-left: 7px;
+  transform: rotate(-90deg);
+}
+
+.split-action .split {
+	background: #09beec;
+  -moz-box-shadow: inset 0 0 1px 1px #888;
+  -webkit-box-shadow: inset 0 0 1px 1px #888;
+  box-shadow: inset 0 0 1px 1px #888;
+}
+
+.splitBar .buttons a {
+
+}
+
 /*
 
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag,
@@ -3537,23 +3569,36 @@ body.isAnonymous .add-mt-engine {
 }
 
 .splitArea {
-    width: 45.5%;
-    z-index: 9999999;
-    position: absolute;
-    background: #fff;
-    min-height: 20px;
-    border: 2px solid #F00;
-    padding: 3px 1%;
-    font-size: 18px;
-    text-align: left;
-    line-height: 30px;
+  width: 44.5%;
+  z-index: 9999999;
+  position: absolute;
+  min-height: 20px;
+  border: 2px solid #F00;
+  padding: 3px 0px 5px 3px;
+  margin: 3px 1.4%;
+  background: #efefef; 
+  border-bottom: 1px solid #ccc;  
+  font-size: 18px;
+  min-height: 70px;
+  outline:0;
+  text-align: left;
+  border-radius: 2px;
+  line-height: 30px;
+  font-size: 18px;
+  color: #000;
+  border: 1px solid #727272;
+  box-shadow:  0 1px 2px #ccc;
+  -webkit-box-shadow:  0 1px 2px #ccc;
+  word-break: normal;
+  word-break: normal !important;
+  cursor: col-resize;
 }
 
 .splitBar
 {
-    width: 45.5%;
+    width: 46.3%;
     position: absolute;
-    top: -3px;
+    bottom: 55px;
 }
 .splitBar p,
 .splitBar .splitNum
@@ -3564,6 +3609,7 @@ body.isAnonymous .add-mt-engine {
 .splitBar .splitNum
 {
     display: none;
+     margin-top: 7px;
 }
 .splitBar .buttons
 {
@@ -3573,17 +3619,16 @@ body.isAnonymous .add-mt-engine {
 .splitBar .buttons a
 {
     margin-left: 20px;
+    color:#fff;
 }
-.splitBar .buttons a:hover
-{
-    text-decoration: underline;
-}
+
 .splitpoint
 {
-    display: inline-block;
-    width: 8px;
-    background: #F00;
-    height: 20px;
-    cursor: pointer;
-    margin: 0 2px;
+  display: inline-block;
+  width: 8px;
+  height: 26px;
+  color: #767676;
+  cursor: pointer;
+  width: 19px;
+  margin: 0px 5px;
 }

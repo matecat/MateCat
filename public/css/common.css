@@ -2537,11 +2537,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-wlh2v9');
-	src:url('fonts/icomoon.eot?#iefix-wlh2v9') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-wlh2v9') format('woff'),
-		url('fonts/icomoon.ttf?-wlh2v9') format('truetype'),
-		url('fonts/icomoon.svg?-wlh2v9#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-qu6ecd');
+	src:url('fonts/icomoon.eot?#iefix-qu6ecd') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-qu6ecd') format('woff'),
+		url('fonts/icomoon.ttf?-qu6ecd') format('truetype'),
+		url('fonts/icomoon.svg?-qu6ecd#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2574,6 +2574,8 @@ a.resume-project:before,
 a.unarchive-project:before,
 a.unarchive-project:after, 
 a.resume-project:after,
+.splitpoint:before,
+.splitpoint-delete:after,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
@@ -2647,6 +2649,20 @@ position: absolute;
 font-size: 10px;
 top: -2px;
 left: 9999px;
+}
+
+.splitpoint:before {
+    content: "\f03d";
+}
+
+
+.splitpoint:hover .splitpoint-delete:after {
+        content: "\f00d";
+  color: red;
+  position: absolute;
+  font-size: 18px;
+  margin-left: -16px;
+  margin-top: 3px;
 }
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
@@ -2937,6 +2953,10 @@ text-align: left;
 
 .icon-eye:before {
     content: "\f06e";
+}
+
+.icon-split:before {
+    content: "\f03d";
 }
 
 .icon-warning:before {
