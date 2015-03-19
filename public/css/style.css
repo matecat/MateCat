@@ -3508,28 +3508,28 @@ th a.tooltip {
 .track-changes p {
 	width: 100%;
 	line-height: 30px;
-	margin: 0 auto;
+	margin: 17px auto 17px auto;
 	min-height: 70px;
 	text-align: left;
 	height: 96% !important;
 	padding: 5px;
 	font-size: 18px;
-	margin-top: 32px;
 	cursor: default!important;
-	border-bottom: 1px solid #ccc;
-	padding: 5px;
 	background: #efefef;
-	box-shadow: 0px 1px 0px #000;
 	border-radius: 2px;
 	border: 1px solid #727272;
-	box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #DFDFDF;
 	-webkit-box-shadow: 0 1px 2px #DFDFDF;
-	    -webkit-touch-callout: none;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+
+    word-wrap: break-word;
+    word-break: normal;
+
 }
 
 .sub-editor.review .track-changes .deleted,

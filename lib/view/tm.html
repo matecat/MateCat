@@ -68,7 +68,6 @@
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
-                                                        <li><a class="addtmx" href="#"><span class="icon-upload"></span>Import TMX</a></li>
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                         <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
                                                     </ul>
@@ -167,7 +166,6 @@
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
-                                                        <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                         <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
                                                     </ul>
@@ -194,13 +192,6 @@
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">
                                                     &nbsp;
                                                     <ul class="dropdown pull-left">
-
-                                                        <li>
-                                                            <a class="addtmx">
-                                                                <span class="icon-upload"></span>Import TMX
-                                                            </a>
-                                                        </li>
-
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
                                                             <span class="icon-download"></span>Export TMX
                                                         </a></li>
@@ -237,8 +228,8 @@
                                        
                                         <select name="mt_engine" id="mt_engine_int">
                                                 <option value="none" selected="">Choose provider...</option>
-                                                <option value="microsofthub">Microsoft HUB</option>
-                                                <option value="iptranslator" >IP Translator</option>
+                                                <option value="microsofthub">Microsoft Translator HUB</option>
+                                                <option value="iptranslator" >IP Translator from Iconic</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
                                         </select>
@@ -289,7 +280,7 @@
                                     <tal:block tal:condition="php: page == 'home'">
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
-                                            <td class="engine-name">MMachine translation from Google Translate and Microsoft Translator.</td>
+                                            <td class="engine-name">Machine translation from Google Translate and Microsoft Translator.</td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
                                             </td>
