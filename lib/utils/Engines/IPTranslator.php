@@ -63,13 +63,30 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
 
             $decoded = json_decode( $rawValue, true );
 
-            $decoded = array(
-                    'data' => array(
-                            "translations" => array(
-                                    array( 'translatedText' => $decoded['text'][0] )
-                            )
-                    )
-            );
+            if ( $all_args[ 2 ] == 'ping_url' ) {
+
+                if ( !isset( $decoded[ 'status' ] ) && !isset( $decoded[ 'error' ] ) ) {
+                    $decoded = array(
+                            'error' => array( "message" => "Connection Failed. Please contact IPTranslator support", 'code' => -1 )
+                    );
+
+                } elseif( isset( $decoded['error'] ) ) {
+                    $decoded = array(
+                            'error' => array( "message" => $decoded['description'], 'code' => -2 )
+                    );
+                } else {
+                    return array(); //All right
+                }
+
+            } else {
+                $decoded = array(
+                        'data' => array(
+                                "translations" => array(
+                                        array( 'translatedText' => $decoded[ 'text' ][ 0 ] )
+                                )
+                        )
+                );
+            }
 
         } else {
             $decoded = $rawValue; // already decoded in case of error
@@ -153,5 +170,40 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
 
     }
 
+    public function ping( $_config ){
+
+        try {
+            $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+            $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+        } catch ( Exception $e ){
+            return array(
+                    'error' => array( "message" => $e->getMessage(), 'code' => $e->getCode() )
+            );
+        }
+
+        $parameters            = array();
+        $parameters[ 'from' ]  = $_config[ 'source' ];
+        $parameters[ 'to' ]    = $_config[ 'target' ];
+
+        if (  $this->client_secret != '' && $this->client_secret != null ) {
+            $parameters[ 'key' ] = $this->client_secret;
+        }
+
+        $this->_setAdditionalCurlParams( array(
+                        CURLOPT_HTTPHEADER     => array(
+                                "Content-Type: application/json"
+                        ),
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_TIMEOUT        => 10,
+                        CURLOPT_POST       => true,
+                        CURLOPT_POSTFIELDS => json_encode( $parameters )
+                )
+        );
+
+        $this->call( "ping_url", array(), true );
+
+        return $this->result;
+
+    }
 
 }
