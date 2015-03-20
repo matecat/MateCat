@@ -101,7 +101,7 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_resetSpecialStrings( $all_args[0][ 'text' ][0] ),
+                $this->_resetSpecialStrings( $all_args[1][ 'input' ][0] ),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -147,7 +147,7 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
                 )
         );
 
-		$this->call( "translate_relative_url", array(), true );
+		$this->call( "translate_relative_url", $parameters, true );
 
         return $this->result;
 
