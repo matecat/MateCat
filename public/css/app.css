@@ -2537,11 +2537,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-wlh2v9');
-	src:url('fonts/icomoon.eot?#iefix-wlh2v9') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-wlh2v9') format('woff'),
-		url('fonts/icomoon.ttf?-wlh2v9') format('truetype'),
-		url('fonts/icomoon.svg?-wlh2v9#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-qu6ecd');
+	src:url('fonts/icomoon.eot?#iefix-qu6ecd') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-qu6ecd') format('woff'),
+		url('fonts/icomoon.ttf?-qu6ecd') format('truetype'),
+		url('fonts/icomoon.svg?-qu6ecd#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2574,6 +2574,8 @@ a.resume-project:before,
 a.unarchive-project:before,
 a.unarchive-project:after, 
 a.resume-project:after,
+.splitpoint:before,
+.splitpoint-delete:after,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
@@ -2647,6 +2649,20 @@ position: absolute;
 font-size: 10px;
 top: -2px;
 left: 9999px;
+}
+
+.splitpoint:before {
+    content: "\f03d";
+}
+
+
+.splitpoint:hover .splitpoint-delete:after {
+        content: "\f00d";
+  color: red;
+  position: absolute;
+  font-size: 18px;
+  margin-left: -16px;
+  margin-top: 3px;
 }
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
@@ -2771,7 +2787,9 @@ cursor: pointer;
 	vertical-align: text-top;
 }
 
-.addtmxfile .text:before, .addtmx .text:before, .open-popup-addtm-tr:before
+.addtmxfile .text:before,
+/*.addtmx .text:before, */
+.open-popup-addtm-tr:before
  {
 	content: "\e601";
 	padding-right: 5px;
@@ -2935,6 +2953,10 @@ text-align: left;
 
 .icon-eye:before {
     content: "\f06e";
+}
+
+.icon-split:before {
+    content: "\f03d";
 }
 
 .icon-warning:before {
@@ -3521,6 +3543,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	width: auto !important;
 	position: absolute;	
 	top: 18px;
+	padding: 0 15px 70px 0px;
 	left: -4.8%;
 	text-align: center;
 	display: block;
@@ -3567,6 +3590,11 @@ div.sid .implicit {
 div.sid .actions {
     display: none;
 }
+
+.split-action .actions {
+    display: block!important;
+}
+
 
 
 
@@ -3754,7 +3782,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
     display: none;
     position: absolute;
     float: left;
-    margin-left: 47%;
+    margin-left: 47.4%;
     margin-top: 5px;
     width: 50px !important;
 	background: url(../img/sprite.png) 5px -853px no-repeat;
@@ -4603,6 +4631,7 @@ z-index: 10000;
     outline: none;
     word-wrap: break-word;
     word-break: normal;
+    max-width: 520px;
 }
 .text a{text-decoration:none;color:#000 }
 
@@ -4624,8 +4653,9 @@ z-index: 10000;
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	
-    word-break: break-all;
+
+    word-wrap: break-word;
+    word-break: normal;
 	
     hyphens: auto;
 	-moz-hyphens: auto;
@@ -4652,25 +4682,13 @@ body.archived section .text
     /*color: #fff;*/
 }
 
-
-
 section.readonly .status-container,
 body.archived section .status-container
 {
     /*display: none;*/
 }
 
-
-
 .editarea div:last-child {margin-bottom:-22px !important;}
-
-
-
-
-
-
-
-
 
 .editor .editarea
 {
@@ -4691,7 +4709,6 @@ body.archived section .status-container
 /*	transition:none;
 	-webkit-transition: none;*/
 
-    word-break: normal !important;
 	/*background-color: transparent;*/
 }
 .editor.highlighted1 .editarea
@@ -6042,6 +6059,32 @@ float: left;
     float: left;
 }
 
+.split {
+  background: #9E9E9E;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 1px 2px 2px;
+  border: 1px solid #5F5F5F;
+  border-radius: 4px;
+  width: 31px;
+  font-size: 20px;
+  margin-top: 15px;
+  display: block;
+  margin-left: 7px;
+  transform: rotate(-90deg);
+}
+
+.split-action .split {
+	background: #09beec;
+  -moz-box-shadow: inset 0 0 1px 1px #888;
+  -webkit-box-shadow: inset 0 0 1px 1px #888;
+  box-shadow: inset 0 0 1px 1px #888;
+}
+
+.splitBar .buttons a {
+
+}
+
 /*
 
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag,
@@ -6634,28 +6677,28 @@ th a.tooltip {
 .track-changes p {
 	width: 100%;
 	line-height: 30px;
-	margin: 0 auto;
+	margin: 17px auto 17px auto;
 	min-height: 70px;
 	text-align: left;
 	height: 96% !important;
 	padding: 5px;
 	font-size: 18px;
-	margin-top: 32px;
 	cursor: default!important;
-	border-bottom: 1px solid #ccc;
-	padding: 5px;
 	background: #efefef;
-	box-shadow: 0px 1px 0px #000;
 	border-radius: 2px;
 	border: 1px solid #727272;
-	box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #DFDFDF;
 	-webkit-box-shadow: 0 1px 2px #DFDFDF;
-	    -webkit-touch-callout: none;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+
+    word-wrap: break-word;
+    word-break: normal;
+
 }
 
 .sub-editor.review .track-changes .deleted,
@@ -6684,23 +6727,36 @@ body.isAnonymous .add-mt-engine {
 }
 
 .splitArea {
-    width: 45.5%;
-    z-index: 9999999;
-    position: absolute;
-    background: #fff;
-    min-height: 20px;
-    border: 2px solid #F00;
-    padding: 3px 1%;
-    font-size: 18px;
-    text-align: left;
-    line-height: 30px;
+  width: 44.5%;
+  z-index: 9999999;
+  position: absolute;
+  min-height: 20px;
+  border: 2px solid #F00;
+  padding: 3px 0px 5px 3px;
+  margin: 3px 1.4%;
+  background: #efefef; 
+  border-bottom: 1px solid #ccc;  
+  font-size: 18px;
+  min-height: 70px;
+  outline:0;
+  text-align: left;
+  border-radius: 2px;
+  line-height: 30px;
+  font-size: 18px;
+  color: #000;
+  border: 1px solid #727272;
+  box-shadow:  0 1px 2px #ccc;
+  -webkit-box-shadow:  0 1px 2px #ccc;
+  word-break: normal;
+  word-break: normal !important;
+  cursor: col-resize;
 }
 
 .splitBar
 {
-    width: 45.5%;
+    width: 46.3%;
     position: absolute;
-    top: -3px;
+    bottom: 55px;
 }
 .splitBar p,
 .splitBar .splitNum
@@ -6711,6 +6767,7 @@ body.isAnonymous .add-mt-engine {
 .splitBar .splitNum
 {
     display: none;
+     margin-top: 7px;
 }
 .splitBar .buttons
 {
@@ -6720,17 +6777,16 @@ body.isAnonymous .add-mt-engine {
 .splitBar .buttons a
 {
     margin-left: 20px;
+    color:#fff;
 }
-.splitBar .buttons a:hover
-{
-    text-decoration: underline;
-}
+
 .splitpoint
 {
-    display: inline-block;
-    width: 8px;
-    background: #F00;
-    height: 20px;
-    cursor: pointer;
-    margin: 0 2px;
+  display: inline-block;
+  width: 8px;
+  height: 26px;
+  color: #767676;
+  cursor: pointer;
+  width: 19px;
+  margin: 0px 5px;
 }
