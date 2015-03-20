@@ -253,8 +253,7 @@ class MultiCurlHandler {
      * @return bool
      */
     public function hasError( $tokenHash ){
-        $err_str = curl_error( $this->curl_handlers[ $tokenHash ] );
-        return !empty( $err_str );
+        return !empty( $this->multi_curl_info[ $tokenHash ][ 'error' ] ) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0;
     }
 
 } 

@@ -248,6 +248,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 //            console.log('.edit-desc');
 //            $(this).addClass('current');
+            $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
