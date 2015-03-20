@@ -617,6 +617,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+        $(window).trigger('segmentsAdded');
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;

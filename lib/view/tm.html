@@ -280,7 +280,9 @@
                                     <tal:block tal:condition="php: page == 'home'">
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
-                                            <td class="engine-name">Machine translation from Google Translate and Microsoft Translator.</td>
+                                            <td class="engine-name">
+                                                <div class="edit-desc">Machine translation from Google Translate and Microsoft Translator.</div>
+                                            </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
                                             </td>
@@ -291,7 +293,9 @@
                                         <tal:block tal:repeat="engine mt_engines">
                                         <tr class="" data-id="${engine/id}">
                                             <td class="mt-provider">${engine/name}</td>
-                                            <td class="engine-name">${engine/description}</td>
+                                            <td class="engine-name">
+                                                <div class="edit-desc">${engine/description}</div>
+                                            </td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" />
                                                 <input tal:condition="php: page == 'cattool'" type="checkbox" checked="${php: ( mt_id == engine.id ? 'checked' : '' )" />
@@ -308,7 +312,9 @@
                                             <tal:block tal:condition="php: mt_id == engine.id">
                                                 <tr class="activemt" data-id="${engine/id}">
                                                     <td class="mt-provider">${engine/name}</td>
-                                                    <td class="engine-name">${engine/description}</td>
+                                                    <td class="engine-name">
+                                                        <div class="edit-desc">${engine/description}</div>
+                                                    </td>
                                                     <td class="enable-mt text-center">
                                                         <input type="checkbox" checked="checked" />
                                                     </td>
@@ -323,7 +329,9 @@
                                             <tal:block tal:condition="php: mt_id != engine.id">
                                                 <tr class="" data-id="${engine/id}">
                                                     <td class="mt-provider">${engine/name}</td>
-                                                    <td class="engine-name">${engine/description}</td>
+                                                    <td class="engine-name">
+                                                        <div class="edit-desc">${engine/description}</div>
+                                                    </td>
                                                     <td class="enable-mt text-center">
                                                         <input type="checkbox"/>
                                                     </td>
