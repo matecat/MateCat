@@ -277,12 +277,14 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
-					'</div>'+
-					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
-					'	<div class="overflow"></div>' +
 					'</div>';
         UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+                               '	<div class="overflow"></div>' +
+                               '</div>';
+        $('.footer .tab.glossary').after(alternativesTabHtml);
+//        console.log('footer html: ', $('.footer', segment).html());
         UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
@@ -6677,27 +6679,27 @@ $.extend(UI, {
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
-			$.each(d.data.matches, function(index) {
-				if ((this.segment === '') || (this.translation === ''))
-					return;
-				prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
+            $.each(d.data.matches, function(index) {
+                if ((this.segment === '') || (this.translation === ''))
+                    return;
+                prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
 
-				var disabled = (this.id == '0') ? true : false;
-				cb = this.created_by;
-				cl_suggestion = UI.getPercentuageClass(this.match);
+                var disabled = (this.id == '0') ? true : false;
+                cb = this.created_by;
+                cl_suggestion = UI.getPercentuageClass(this.match);
 
-				var leftTxt = (in_target) ? this.translation : this.segment;
+                var leftTxt = (in_target) ? this.translation : this.segment;
                 leftTxt = UI.decodePlaceholdersToText( leftTxt );
-				leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
-				leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
 
                 var rightTxt = (in_target) ? this.segment : this.translation;
                 rightTxt = UI.decodePlaceholdersToText( rightTxt );
-				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
-				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
 
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-			});
+                $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
 			if(UI.custom.extended_concordance) {
 				UI.setExtendedConcordances(true);			
 			} else {
@@ -8592,12 +8594,13 @@ if(config.enableReview && config.isReview) {
         var div = $('<div>' + UI.footerHTML + '</div>');
         div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
- /*
-        setTimeout(function() {// fixes a bug in setting defaults in radio buttons
-            UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
-            UI.trackChanges(UI.editarea);
-        }, 100);
- */
+
+        /*
+               setTimeout(function() {// fixes a bug in setting defaults in radio buttons
+                   UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
+                   UI.trackChanges(UI.editarea);
+               }, 100);
+        */
         UI.footerHTML = div.html();
         UI.currentSegment.find('.tab-switcher-review').click();
 
@@ -9164,6 +9167,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 //            console.log('.edit-desc');
 //            $(this).addClass('current');
+            $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
