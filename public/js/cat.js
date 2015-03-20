@@ -6677,27 +6677,27 @@ $.extend(UI, {
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
-			$.each(d.data.matches, function(index) {
-				if ((this.segment === '') || (this.translation === ''))
-					return;
-				prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
+            $.each(d.data.matches, function(index) {
+                if ((this.segment === '') || (this.translation === ''))
+                    return;
+                prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
 
-				var disabled = (this.id == '0') ? true : false;
-				cb = this.created_by;
-				cl_suggestion = UI.getPercentuageClass(this.match);
+                var disabled = (this.id == '0') ? true : false;
+                cb = this.created_by;
+                cl_suggestion = UI.getPercentuageClass(this.match);
 
-				var leftTxt = (in_target) ? this.translation : this.segment;
+                var leftTxt = (in_target) ? this.translation : this.segment;
                 leftTxt = UI.decodePlaceholdersToText( leftTxt );
-				leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
-				leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
 
                 var rightTxt = (in_target) ? this.segment : this.translation;
                 rightTxt = UI.decodePlaceholdersToText( rightTxt );
-				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
-				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
 
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-			});
+                $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
 			if(UI.custom.extended_concordance) {
 				UI.setExtendedConcordances(true);			
 			} else {
@@ -9164,6 +9164,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 //            console.log('.edit-desc');
 //            $(this).addClass('current');
+            $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
