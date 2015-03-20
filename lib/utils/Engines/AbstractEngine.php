@@ -22,6 +22,10 @@ abstract class Engines_AbstractEngine {
 
     protected $curl_additional_params = array();
 
+    const IOS_STRINGS_REGEXP = '#%[\']*[\+]*(([0-9]+)?\.[0-9]+|[0-9]+\$|[0-9]+)*(h{1,2}|l{1,2}|[qLztj])?[@%dDuUxXoOfFeEgGcCsSpaAi]{1}#';
+    protected $_patterns_found = array();
+
+
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
         $this->className = get_class( $this );
@@ -34,6 +38,44 @@ abstract class Engines_AbstractEngine {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         );
+
+    }
+
+    /**
+     *
+     *
+     * @param $_string
+     * @return string
+     */
+    protected function _preserveSpecialStrings( $_string ){
+
+        preg_match_all( self::IOS_STRINGS_REGEXP, $_string, $matches );
+        $matches = $matches[0];
+
+        $placeholders = array();
+        for( $i = 0; $i < count( $matches ); $i++ ){
+            $placeholders[] = CatUtils::generate_password();
+        }
+
+        $this->_patterns_found = array_combine(
+                $matches,
+                $placeholders
+        );
+
+        foreach( $this->_patterns_found as $str => $placeholder ){
+            $_string = str_replace( $str, $placeholder, $_string );
+        }
+
+        return $_string;
+    }
+
+    protected function _resetSpecialStrings( $_string ){
+
+        foreach( $this->_patterns_found as $str => $placeholder ){
+            $_string = str_ireplace( $placeholder, $str, $_string );
+        }
+
+        return $_string;
 
     }
 
@@ -72,41 +114,41 @@ abstract class Engines_AbstractEngine {
 
     abstract protected function _decode( $rawValue );
 
-    protected function _call( $url, Array $curl_options = array() ){
+    protected function _call( $url, Array $curl_options = array() ) {
 
-            $mh = new MultiCurlHandler();
-            $uniq_uid = uniqid();
+        $mh       = new MultiCurlHandler();
+        $uniq_uid = uniqid( '', true );
 
-            /*
-             * Append array elements from the second array
-             * to the first array while not overwriting the elements from
-             * the first array and not re-indexing
-             *
-             * Use the + array union operator
-             */
-            $resourceHash = $mh->createResource( $url,
-                    $this->curl_additional_params + $curl_options, $uniq_uid
-            );
-            $mh->multiExec();
+        /*
+         * Append array elements from the second array
+         * to the first array while not overwriting the elements from
+         * the first array and not re-indexing
+         *
+         * Use the + array union operator
+         */
+        $resourceHash = $mh->createResource( $url,
+                $this->curl_additional_params + $curl_options, $uniq_uid
+        );
+        $mh->multiExec();
 
-            if ( $mh->hasError( $resourceHash ) ) {
-                $curl_error = $mh->getError( $resourceHash );
-                Log::doLog( 'Curl Error: ' . $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
-                $rawValue = array(
-                        'error' => array(
-                                'code'    => -$curl_error[ 'errno' ],
-                                'message' => " {$curl_error['error']}. Server Not Available"
-                        )
-                ); //return negative number
-            } else {
-                $rawValue = $mh->getSingleContent( $resourceHash );
-            }
+        if ( $mh->hasError( $resourceHash ) ) {
+            $curl_error = $mh->getError( $resourceHash );
+            Log::doLog( 'Curl Error: ' . $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
+            $rawValue = array(
+                    'error' => array(
+                            'code'    => -$curl_error[ 'errno' ],
+                            'message' => " {$curl_error['error']}. Server Not Available"
+                    )
+            ); //return negative number
+        } else {
+            $rawValue = $mh->getSingleContent( $resourceHash );
+        }
 
-            $mh->multiCurlCloseAll();
+        $mh->multiCurlCloseAll();
 
-            Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
+        Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
 
-            return $rawValue;
+        return $rawValue;
 
     }
 

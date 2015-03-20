@@ -82,7 +82,7 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
                 $decoded = array(
                         'data' => array(
                                 "translations" => array(
-                                        array( 'translatedText' => $decoded[ 'text' ][ 0 ] )
+                                        array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ 'text' ][ 0 ] ) )
                                 )
                         )
                 );
@@ -101,7 +101,7 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $all_args[0][ 'text' ][0],
+                $this->_resetSpecialStrings( $all_args[0][ 'text' ][0] ),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -124,6 +124,8 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
                     'error' => array( "message" => $e->getMessage(), 'code' => $e->getCode() )
             );
         }
+
+        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
 
         $parameters = array();
         $parameters['input'] = array( $_config[ 'segment' ] );
