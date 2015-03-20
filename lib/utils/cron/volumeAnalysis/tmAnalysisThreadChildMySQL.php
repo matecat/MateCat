@@ -2,6 +2,7 @@
 set_time_limit(0);
 include "main.php";
 include INIT::$UTILS_ROOT . "/QA.php";
+include INIT::$UTILS_ROOT . "/PostProcess.php";
 
 define("PID_FOLDER", ".pidlist");
 define("NUM_PROCESSES", 1);
@@ -44,6 +45,7 @@ while (1) {
     }
 
     $res = getNextSegmentAndLock();
+    $pid = $res['pid'];
 
     if (empty($res)) {
         echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
@@ -71,9 +73,6 @@ while (1) {
         continue;
     }
 
-
-    $pid = $segment['pid'];
-
     echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
 
     //lock segment
@@ -96,12 +95,12 @@ while (1) {
     //reset vectors
     $matches   = array();
     $tms_match = array();
-    $mt_res    = array();
+    $mt_result = array();
 
     $_config                  = array();
     $_config[ 'segment' ]     = $text;
-    $_config[ 'source' ] = $source;
-    $_config[ 'target' ] = $source;
+    $_config[ 'source' ]      = $source;
+    $_config[ 'target' ]      = $target;
     $_config[ 'email' ]       = "tmanalysis@matecat.com";
 
     $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $segment[ 'tm_keys' ], 'r', 'tm' );

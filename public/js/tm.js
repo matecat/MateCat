@@ -169,7 +169,7 @@ $.extend(UI, {
             $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
         }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
             e.preventDefault();
-            $(this).addClass('disabled');
+            $(this).parents('.action').find('.addtmx').each( function(el) { $(this).addClass('disabled'); } );
             var nr = '<td class="uploadfile">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
@@ -744,10 +744,9 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
-                '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
+                '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
                 '              <ul class="dropdown pull-left">' +
-                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
                 '              </ul>'+

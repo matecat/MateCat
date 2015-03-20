@@ -82,8 +82,6 @@ while ( 1 ) {
         continue;
     }
 
-//    $pid = $segment['pid'];
-
     //get the number of segments in job
     $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
     if ( $_existingLock !== false ) {
@@ -129,7 +127,7 @@ while ( 1 ) {
     //reset vectors
     $matches   = array();
     $tms_match = array();
-    $mt_res    = array();
+    $mt_result = array();
 
     $_config                  = array();
     $_config[ 'segment' ]     = $text;

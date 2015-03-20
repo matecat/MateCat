@@ -737,7 +737,8 @@ color: white;
 }
 .warning-message
 {
-    background: #FFFA8B !important;
+    /*background: #FFFA8B !important;*/
+    background: rgba(255, 250, 139, 0.38)!important;
     border-color: #6D6E71;
     padding: 10px 0 10px 1%;
     text-indent: 0;

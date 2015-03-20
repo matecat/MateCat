@@ -3,21 +3,32 @@
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
-    $('html').on('mouseover', '.sid', function() {
+    $('html').on('mouseover', '.editor .sid', function() {
         actions = $(this).parent().find('.actions');
         actions.show();
     }).on('mouseout', '.sid', function() {
-        actions = $(this).parent().find('.actions');
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.hide();
+    }).on('mouseover', '.editor .source', function() {
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.show();
+    }).on('mouseout', '.editor .source', function() {
+        actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
     }).on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
+        $('.sid .actions .split').addClass('cancel');
+        $('.split-shortcut').html('CTRL + W');
         console.log('split');
+        UI.currentSegment.addClass('split-action');
+        actions = $(this).parent().find('.actions');
+        actions.show();
         UI.createSplitArea($(this).parents('section'));
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
         if($(this).hasClass('splitpoint')) return false;
-        pasteHtmlAtCaret('<span class="splitpoint"></span>');
+        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.updateSplitNumber($(this));
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
@@ -41,9 +52,23 @@ if(config.splitSegmentEnabled) {
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
-    }).on('click', '.splitBar .buttons .done', function(e) {
+    })
+    .on('click', '.sid .actions .split.cancel', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
+    })
+
+
+    .on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
@@ -51,7 +76,7 @@ if(config.splitSegmentEnabled) {
 
     $.extend(UI, {
         splitSegment: function (segment) {
-            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"></span>');
+            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
             newSegments = [];
             oldSid = segment.attr('id').split('-')[1];
@@ -111,7 +136,7 @@ if(config.splitSegmentEnabled) {
 
         createSplitArea: function (segment) {
             source = $(segment).find('.source');
-            source.after('<div class="splitBar"><div class="splitNum"><span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+            source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
             splitArea = segment.find('.splitArea');
             splitArea.html(source.attr('data-original'));
             this.lockTags(splitArea);

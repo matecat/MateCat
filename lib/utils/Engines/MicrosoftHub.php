@@ -57,7 +57,7 @@ TAG;
 
         $all_args =  func_get_args();
 
-        $xmlObj = simplexml_load_string( $rawValue );
+        $xmlObj = simplexml_load_string( $rawValue,'SimpleXMLElement', LIBXML_NOENT );
         foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
             if( $key === 'body' ){ //WHY IN THIS STUPID LANGUAGE EVERY STRING EQUALS TO ZERO???......
                 $error = (array)$val;
@@ -69,7 +69,7 @@ TAG;
                 $decoded = array(
                         'data' => array(
                                 "translations" => array(
-                                        array( 'translatedText' => $val )
+                                        array( 'translatedText' => html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) )
                                 )
                         )
                 );

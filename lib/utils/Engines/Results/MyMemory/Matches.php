@@ -56,8 +56,9 @@ class Engines_Results_MyMemory_Matches {
         }
 
         if ( count( $args ) == 5 and !is_array( $args[ 0 ] ) ) {
-            $match[ 'segment' ]          = $args[ 0 ];
-            $match[ 'translation' ]      = $args[ 1 ];
+            $match[ 'segment' ]          = CatUtils::rawxliff2view( $args[ 0 ] );
+            $match[ 'raw_segment' ]      = $args[ 0 ];
+            $match[ 'translation' ]      = CatUtils::rawxliff2view( $args[ 1 ] );
             $match[ 'raw_translation' ]  = $args[ 1 ];
             $match[ 'match' ]            = $args[ 2 ];
             $match[ 'created-by' ]       = $args[ 3 ];

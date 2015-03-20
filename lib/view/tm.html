@@ -65,10 +65,9 @@
                                         <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                         <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
                                         <td tal:condition="php: key.edit" class="action">
-                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
-                                                        <li><a class="addtmx" href="#"><span class="icon-upload"></span>Import TMX</a></li>
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                         <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
                                                     </ul>
@@ -164,10 +163,9 @@
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
-                                                        <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                         <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
                                                     </ul>
@@ -189,18 +187,11 @@
                                             <td class="lookup text-center check"><input type="checkbox"/></td>
                                             <td class="update text-center check"><input type="checkbox"/></td>
                                             <td class="action">
-                                                <a class="btn pull-left"><span class="text">Import TMX</span></a>
+                                                <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
 
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">
                                                     &nbsp;
                                                     <ul class="dropdown pull-left">
-
-                                                        <li>
-                                                            <a class="addtmx">
-                                                                <span class="icon-upload"></span>Import TMX
-                                                            </a>
-                                                        </li>
-
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
                                                             <span class="icon-download"></span>Export TMX
                                                         </a></li>
@@ -237,8 +228,8 @@
                                        
                                         <select name="mt_engine" id="mt_engine_int">
                                                 <option value="none" selected="">Choose provider...</option>
-                                                <option value="microsofthub">Microsoft HUB</option>
-                                                <option value="iptranslator" >IP Translator</option>
+                                                <option value="microsofthub">Microsoft Translator HUB</option>
+                                                <option value="iptranslator" >IP Translator from Iconic</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
                                         </select>
@@ -289,7 +280,7 @@
                                     <tal:block tal:condition="php: page == 'home'">
                                         <tr class="activemt" data-id="1">
                                             <td class="mt-provider">MyMemory ( All Pairs )</td>
-                                            <td class="engine-name">MMachine translation from Google Translate and Microsoft Translator.</td>
+                                            <td class="engine-name">Machine translation from Google Translate and Microsoft Translator.</td>
                                             <td class="enable-mt text-center">
                                                 <input tal:condition="php: page == 'home'" type="checkbox" checked="checked" />
                                             </td>
@@ -402,7 +393,7 @@
         </div>
     </template>
     <template id="mt-provider-iptranslator-msg">
-        <p>IPTranslator from Iconic Translation Machines is a specialised machine translation system for the patent and legal translation industry. It delivers high-quality machine translation adapted specifically for this domain based on scientific expertise and deep domain knowledge. It does not require any additional data.</p>
+        <p><b>IPTranslator from Iconic Translation Machines</b> is a specialised machine translation system for the patent and legal translation industry.</p><p> It delivers high-quality machine translation adapted specifically for this domain based on scientific expertise and deep domain knowledge. It does not require any additional data.</p>
         <p><strong>Warning</strong>: IPTranslator has a startup time of some minutes. Make sure your engine is up before analyzing a document. IPTranslator can only serve few requests per second, analysis may be slow.</p>
         <p>Contact Iconic Translation Machines to get your MT system.</p>
         <a href="http://iconictranslation.com/about/contact/" target="_blank" class="continuebtn btn-ok">Contact Iconic</a>
@@ -431,7 +422,7 @@
         </div>
     </template>
     <template id="mt-provider-deeplingo-msg">
-         <p>DeepLingo develops state of the art personalised statistical machine translation systems based on your custom data (requires few million words per language pair). It does not provide a out of the box generic engine like Google Translate.</p>
+         <p><strong>DeepLingo</strong> develops state of the art personalised statistical machine translation systems based on your custom data (requires few million words per language pair).</p><p> It does not provide a out of the box generic engine like Google Translate.</p>
         <p><strong>Warning</strong>: DeepLingo, if running on a single machine can only serve few requests per second, analysis may be slow.</p>
         <p>Contact DeepLingo to build your own machine translation system.</p>
         <a href="#" class="continuebtn btn-ok">Contact Deeplingo</a>
