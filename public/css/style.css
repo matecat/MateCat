@@ -3422,8 +3422,8 @@ color:red !important;
 .track-changes {
 	float: right;
 	width: 45%;
-margin-right: 3%;
-
+    margin-right: 3%;
+    margin-top: 2px;
 }
 
 .error-type h3, .track-changes h3 {
@@ -3440,16 +3440,12 @@ margin-right: 3%;
 	font-size: 9px;
 	height: 10px;
 	padding-left: 1px;
-	margin-top: 9px;
+	margin-top: 1px;
 	line-height: 11px;
 	background: #F3F3F3;
 	margin-left: 5px;
 	color: #888;
 	box-shadow: 1px 1px 1px #999;
-}
-
-th a.tooltip {
-	display: inline !important;
 }
 
 .tooltip:hover span {
@@ -3508,7 +3504,7 @@ th a.tooltip {
 .track-changes p {
 	width: 100%;
 	line-height: 30px;
-	margin: 17px auto 17px auto;
+	margin: 36px auto 17px auto;
 	min-height: 70px;
 	text-align: left;
 	height: 96% !important;
