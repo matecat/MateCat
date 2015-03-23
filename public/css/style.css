@@ -1462,6 +1462,7 @@ z-index: 10000;
     outline: none;
     word-wrap: break-word;
     word-break: normal;
+    max-width: 520px;
 }
 .text a{text-decoration:none;color:#000 }
 
@@ -1483,8 +1484,9 @@ z-index: 10000;
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	
-    word-break: break-all;
+
+    word-wrap: break-word;
+    word-break: normal;
 	
     hyphens: auto;
 	-moz-hyphens: auto;
@@ -1511,25 +1513,13 @@ body.archived section .text
     /*color: #fff;*/
 }
 
-
-
 section.readonly .status-container,
 body.archived section .status-container
 {
     /*display: none;*/
 }
 
-
-
 .editarea div:last-child {margin-bottom:-22px !important;}
-
-
-
-
-
-
-
-
 
 .editor .editarea
 {
@@ -1550,7 +1540,6 @@ body.archived section .status-container
 /*	transition:none;
 	-webkit-transition: none;*/
 
-    word-break: normal !important;
 	/*background-color: transparent;*/
 }
 .editor.highlighted1 .editarea
@@ -3433,8 +3422,8 @@ color:red !important;
 .track-changes {
 	float: right;
 	width: 45%;
-margin-right: 3%;
-
+    margin-right: 3%;
+    margin-top: 2px;
 }
 
 .error-type h3, .track-changes h3 {
@@ -3451,16 +3440,12 @@ margin-right: 3%;
 	font-size: 9px;
 	height: 10px;
 	padding-left: 1px;
-	margin-top: 9px;
+	margin-top: 1px;
 	line-height: 11px;
 	background: #F3F3F3;
 	margin-left: 5px;
 	color: #888;
 	box-shadow: 1px 1px 1px #999;
-}
-
-th a.tooltip {
-	display: inline !important;
 }
 
 .tooltip:hover span {
@@ -3519,28 +3504,28 @@ th a.tooltip {
 .track-changes p {
 	width: 100%;
 	line-height: 30px;
-	margin: 0 auto;
+	margin: 36px auto 17px auto;
 	min-height: 70px;
 	text-align: left;
 	height: 96% !important;
 	padding: 5px;
 	font-size: 18px;
-	margin-top: 32px;
 	cursor: default!important;
-	border-bottom: 1px solid #ccc;
-	padding: 5px;
 	background: #efefef;
-	box-shadow: 0px 1px 0px #000;
 	border-radius: 2px;
 	border: 1px solid #727272;
-	box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #DFDFDF;
 	-webkit-box-shadow: 0 1px 2px #DFDFDF;
-	    -webkit-touch-callout: none;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+
+    word-wrap: break-word;
+    word-break: normal;
+
 }
 
 .sub-editor.review .track-changes .deleted,
