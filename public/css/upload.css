@@ -464,6 +464,28 @@ float: left;
   margin-left: 3px;
 }
 
+@media (max-width: 1300px) {
+	.wrapper-upload {
+		width:96%!important;
+	}
+	.translate-box select, .mgmt-table-mt select {
+		width: 230px!important;
+	}
+
+	.translate-box a {
+  display: block;
+  width: 195px;
+  margin-top: 0;
+}
+}
+
+@media (max-width: 1150px) {
+	.translate-box select, .mgmt-table-mt select {
+		width: 200px!important;
+	}
+}
+
+
 @media (max-width: 480px) {
   .files .preview * {
     width: 40px;
@@ -1020,7 +1042,7 @@ footer a:hover{text-decoration:none}
 	{
 		background-image: none;
 width: 70px;
-margin-left: -32px;
+margin-left: -18px;
 padding: 8px 0 1px 0;
 margin-top: 7px;
 	}    
@@ -1079,11 +1101,11 @@ background: #d1581c url(../img/sprite2x.png) -4px -1157px no-repeat !Important;
 }
 
 .delete button {
-background: url(../img/sprite2x.png) 12px -1074px no-repeat !important;
+background: url(../img/sprite2x.png) -8px -1074px no-repeat !important;
 }
 
 .delete button:hover, .cancel button:hover {
-background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
+background: #ca2a2e url(../img/sprite2x.png) -8px -1115px no-repeat !important;
 }
 
 #swaplang, .fileinput-button, .cancel-btn, .cancel-btn:hover, .delete button, .delete button:hover, .cancel button:hover  {
