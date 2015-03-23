@@ -3569,13 +3569,13 @@ body.isAnonymous .add-mt-engine {
 }
 
 .splitArea {
-  width: 44.5%;
+  width: 45.5%;
   z-index: 9999999;
   position: absolute;
   min-height: 20px;
   border: 2px solid #F00;
   padding: 3px 0px 5px 3px;
-  margin: 3px 1.4%;
+  margin: 3px 1%;
   background: #efefef; 
   border-bottom: 1px solid #ccc;  
   font-size: 18px;
@@ -3596,7 +3596,7 @@ body.isAnonymous .add-mt-engine {
 
 .splitBar
 {
-    width: 46.3%;
+    width: 46.9%;
     position: absolute;
     bottom: 55px;
 }
