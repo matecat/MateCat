@@ -46,6 +46,7 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
 
         if( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
+            $decoded['data']['translations'][0]['translatedText'] =  $this->_resetSpecialStrings( $decoded['data']['translations'][0]['translatedText'] );
         } else {
             $decoded = $rawValue; // already decoded in case of error
         }
@@ -59,7 +60,7 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $all_args[ 1 ][ 'q' ],
+                $this->_resetSpecialStrings( $all_args[ 1 ][ 'q' ] ),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -75,8 +76,9 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
 
     public function get( $_config ) {
 
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
 		$parameters['q'] = $_config[ 'segment' ];

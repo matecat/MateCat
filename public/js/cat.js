@@ -282,12 +282,14 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
-					'</div>'+
-					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
-					'	<div class="overflow"></div>' +
 					'</div>';
         UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+                               '	<div class="overflow"></div>' +
+                               '</div>';
+        $('.footer .tab.glossary').after(alternativesTabHtml);
+//        console.log('footer html: ', $('.footer', segment).html());
         UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
@@ -615,6 +617,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+        $(window).trigger('segmentsAdded');
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
@@ -1247,7 +1250,7 @@ UI = {
              */
             newSegments += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
                 '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
+                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
                 ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
                 ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
                 '	<div class="body">' +
@@ -8745,12 +8748,13 @@ if(config.enableReview && config.isReview) {
         var div = $('<div>' + UI.footerHTML + '</div>');
         div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
- /*
-        setTimeout(function() {// fixes a bug in setting defaults in radio buttons
-            UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
-            UI.trackChanges(UI.editarea);
-        }, 100);
- */
+
+        /*
+               setTimeout(function() {// fixes a bug in setting defaults in radio buttons
+                   UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
+                   UI.trackChanges(UI.editarea);
+               }, 100);
+        */
         UI.footerHTML = div.html();
         UI.currentSegment.find('.tab-switcher-review').click();
 
@@ -9317,6 +9321,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 //            console.log('.edit-desc');
 //            $(this).addClass('current');
+            $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
@@ -9340,9 +9345,24 @@ $.extend(UI, {
 //            if(APP.isCattool) UI.saveTMdescription($(this));
             UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
-//            e.preventDefault();
-//            $(this).trigger('blur');
-         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+            e.preventDefault();
+            $(this).trigger('blur');
+        }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
+//            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
+            $(this).attr('contenteditable', true);
+        }).on('blur', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+//            UI.saveTMdata(false);
+//        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+//            $(this).removeAttr('contenteditable');
+//            if(APP.isCattool) UI.saveTMdescription($(this));
+//            UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-mt td.engine-name .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
@@ -9813,10 +9833,9 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
-                '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
+                '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
                 '              <ul class="dropdown pull-left">' +
-                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
                 '              </ul>'+
@@ -10814,21 +10833,32 @@ if(config.offlineModeEnabled) {
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
-    $('html').on('mouseover', '.sid', function() {
+    $('html').on('mouseover', '.editor .sid', function() {
         actions = $(this).parent().find('.actions');
         actions.show();
     }).on('mouseout', '.sid', function() {
-        actions = $(this).parent().find('.actions');
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.hide();
+    }).on('mouseover', '.editor .source', function() {
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.show();
+    }).on('mouseout', '.editor .source', function() {
+        actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
     }).on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
+        $('.sid .actions .split').addClass('cancel');
+        $('.split-shortcut').html('CTRL + W');
         console.log('split');
+        UI.currentSegment.addClass('split-action');
+        actions = $(this).parent().find('.actions');
+        actions.show();
         UI.createSplitArea($(this).parents('section'));
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
         if($(this).hasClass('splitpoint')) return false;
-        pasteHtmlAtCaret('<span class="splitpoint"></span>');
+        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.updateSplitNumber($(this));
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
@@ -10852,9 +10882,23 @@ if(config.splitSegmentEnabled) {
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
-    }).on('click', '.splitBar .buttons .done', function(e) {
+    })
+    .on('click', '.sid .actions .split.cancel', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
+    })
+
+
+    .on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
@@ -10862,7 +10906,7 @@ if(config.splitSegmentEnabled) {
 
     $.extend(UI, {
         splitSegment: function (segment) {
-            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"></span>');
+            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
             newSegments = [];
             oldSid = segment.attr('id').split('-')[1];
@@ -10922,7 +10966,7 @@ if(config.splitSegmentEnabled) {
 
         createSplitArea: function (segment) {
             source = $(segment).find('.source');
-            source.after('<div class="splitBar"><div class="splitNum"><span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+            source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
             splitArea = segment.find('.splitArea');
             splitArea.html(source.attr('data-original'));
             this.lockTags(splitArea);

@@ -282,12 +282,14 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
-					'</div>'+
-					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
-					'	<div class="overflow"></div>' +
 					'</div>';
         UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+                               '	<div class="overflow"></div>' +
+                               '</div>';
+        $('.footer .tab.glossary').after(alternativesTabHtml);
+//        console.log('footer html: ', $('.footer', segment).html());
         UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
@@ -615,6 +617,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+        $(window).trigger('segmentsAdded');
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;

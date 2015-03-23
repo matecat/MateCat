@@ -1423,7 +1423,9 @@ text-align: center;}
  .canceladdtmx.btn-grey {
     background:#f26522;
 }
-.popup-tm td.description .edit-desc {
+.popup-tm td.description .edit-desc,
+.popup-tm td.engine-name .edit-desc
+{
     height: 18px;
     width: 350px;
     height: 18px;
@@ -1433,7 +1435,9 @@ text-align: center;}
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.popup-tm tr.mine td.description .edit-desc[contenteditable='true'] {
+.popup-tm tr.mine td.description .edit-desc[contenteditable='true'],
+.popup-tm td.engine-name .edit-desc[contenteditable='true']
+{
     border: 1px solid #999;
     background: #fff;
     height: auto;
@@ -1447,7 +1451,9 @@ text-align: center;}
 
 
 
-.popup-tm tr.mine td.description .edit-desc:hover {
+.popup-tm tr.mine td.description .edit-desc:hover,
+.popup-tm td.engine-name .edit-desc:hover
+{
     box-shadow: 0px 0px 0px 1px #ccc;
     cursor: text;
 }
@@ -2839,7 +2845,7 @@ background: rgba(187, 187, 187, 0.14);
 
 .error-type th {
 text-align: center;
-padding: 0px 4px;
+padding: 10px 4px;
 font-size: 80%;
 }
 

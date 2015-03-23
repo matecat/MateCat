@@ -72,6 +72,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 $result_object = new Engines_Results_MyMemory_AnalyzeResponse( $decoded );
                 break;
             default:
+
+                foreach( $decoded['matches'] as $pos => $match ){
+                    $decoded[ 'matches' ][ $pos ][ 'segment' ] = $this->_resetSpecialStrings( $match[ 'segment' ] );
+                    $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
+                }
+
                 $result_object = new Engines_Results_MyMemory_TMS( $decoded );
                 break;
         }
@@ -85,6 +91,8 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * @return Engines_Results_MyMemory_TMS
      */
     public function get( $_config ) {
+
+        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
 
         $parameters               = array();
         $parameters[ 'q' ]        = $_config[ 'segment' ];
@@ -105,6 +113,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         }
 
         ( !$_config[ 'isGlossary' ] ? $function = "translate_relative_url" : $function = "gloss_get_relative_url" );
+
 
         $this->call( $function, $parameters );
 

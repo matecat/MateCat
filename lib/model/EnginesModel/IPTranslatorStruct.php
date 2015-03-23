@@ -28,7 +28,7 @@ class EnginesModel_IPTranslatorStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $translate_relative_url = "translate/text";
+    public $translate_relative_url = "translate/xliff";
 
     /**
      * @var string
@@ -41,6 +41,12 @@ class EnginesModel_IPTranslatorStruct extends EnginesModel_EngineStruct {
      */
     public $class_load = Constants_Engines::IP_TRANSLATOR;
 
+    /**
+     * @var array
+     */
+    public $others = array(
+            'ping_url' => 'instance/ping'
+    );
 
     /**
      * @var int

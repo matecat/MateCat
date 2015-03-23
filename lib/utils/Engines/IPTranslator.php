@@ -63,13 +63,31 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
 
             $decoded = json_decode( $rawValue, true );
 
-            $decoded = array(
-                    'data' => array(
-                            "translations" => array(
-                                    array( 'translatedText' => $decoded['text'][0] )
-                            )
-                    )
-            );
+            if ( $all_args[ 2 ] == 'ping_url' ) {
+
+                if ( !isset( $decoded[ 'status' ] ) && !isset( $decoded[ 'error' ] ) ) {
+                    $decoded = array(
+                            'error' => array( "message" => "Connection Failed. Please contact IPTranslator support", 'code' => -1 )
+                    );
+
+                } elseif( isset( $decoded['error'] ) ) {
+                    $decoded = array(
+                            'error' => array( "message" => $decoded['description'], 'code' => -2 )
+                    );
+                } else {
+                    return array(); //All right
+                }
+
+            } else {
+                preg_match( '#<source>(.*)</source>#', $decoded[ 'xliff' ][ 0 ], $translated_text );
+                $decoded = array(
+                        'data' => array(
+                                "translations" => array(
+                                        array( 'translatedText' =>  $this->_resetSpecialStrings( $translated_text[ 1 ] ) )
+                                )
+                        )
+                );
+            }
 
         } else {
             $decoded = $rawValue; // already decoded in case of error
@@ -83,8 +101,10 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
             return $mt_result;
         }
 
+        preg_match( '#<source>(.*)</source>#', $all_args[1][ 'input' ][0], $original_text );
+
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $all_args[0][ 'text' ][0],
+                $this->_resetSpecialStrings( $original_text[ 1 ] ),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -108,8 +128,10 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
             );
         }
 
+        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+
         $parameters = array();
-        $parameters['input'] = array( $_config[ 'segment' ] );
+        $parameters['input'] = array( "<trans-unit id='" . uniqid() . "'><source>" . $_config[ 'segment' ] . "</source></trans-unit>" );
         $parameters['from'] = $_config[ 'source' ];
         $parameters['to'] = $_config[ 'target' ];
 
@@ -128,7 +150,7 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
                 )
         );
 
-		$this->call( "translate_relative_url", array(), true );
+		$this->call( "translate_relative_url", $parameters, true );
 
         return $this->result;
 
@@ -153,5 +175,40 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
 
     }
 
+    public function ping( $_config ){
+
+        try {
+            $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+            $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+        } catch ( Exception $e ){
+            return array(
+                    'error' => array( "message" => $e->getMessage(), 'code' => $e->getCode() )
+            );
+        }
+
+        $parameters            = array();
+        $parameters[ 'from' ]  = $_config[ 'source' ];
+        $parameters[ 'to' ]    = $_config[ 'target' ];
+
+        if (  $this->client_secret != '' && $this->client_secret != null ) {
+            $parameters[ 'key' ] = $this->client_secret;
+        }
+
+        $this->_setAdditionalCurlParams( array(
+                        CURLOPT_HTTPHEADER     => array(
+                                "Content-Type: application/json"
+                        ),
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_TIMEOUT        => 10,
+                        CURLOPT_POST       => true,
+                        CURLOPT_POSTFIELDS => json_encode( $parameters )
+                )
+        );
+
+        $this->call( "ping_url", array(), true );
+
+        return $this->result;
+
+    }
 
 }
