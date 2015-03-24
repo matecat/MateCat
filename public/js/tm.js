@@ -272,6 +272,7 @@ $.extend(UI, {
 //            if(APP.isCattool) UI.saveTMdescription($(this));
             UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
+            console.log('return');
             e.preventDefault();
             $(this).trigger('blur');
         }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
