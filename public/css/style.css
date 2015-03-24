@@ -37,7 +37,6 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
 .header-menu li{
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
-.editing .header-menu li {padding: 7px 0px 3px 0;}
 .header-menu li a{padding:2px 15px;}
 #notifbox
 {
@@ -117,11 +116,7 @@ body.searchActive #filterSwitch
 
 .error a{display:block !important;}
 
-.downloadtr-button{float:right;margin:5px 0px 0px 15px !important;background: #09beec;font-weight:bold; float:right;font-size:16px;cursor:pointer;color:#fff;border:1px solid #ccc !important;border-radius: 2px;border-radius: 2px;padding:5px 17px !important;min-width:110px;background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-				   background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-				   background: linear-gradient(top,  #09beec,  #119ec4);}
 
-.downloadtr-button:hover{-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;}
 
 .tag-mismatch{float:left !important}
 
@@ -166,15 +161,19 @@ body.searchActive #filterSwitch
 
 .cattool .breadcrumbs{padding:22px 0 4px 15px;}
 
-.cattool .downloadtr-button
-{margin:2px -10px 0px 10px !important;}
+
 .cattool #quality-report
 {
-    display: none;
-    margin: 2px -10px 0px 10px !important;
-    padding: 5px 20px;
-    margin-right: 10px !important;
-    cursor: pointer;
+  margin: 3px -10px 0px 10px !important;
+  padding: 6px 20px;
+  margin-right: 10px !important;
+  cursor: pointer;
+  border-radius: 2px;
+  text-decoration: none;
+  border: 1px solid #848689;
+  font-size: 16px;
+  color: #333;
+    display: block;
 }
 .cattool #quality-report[data-vote=acceptable],
 .cattool #quality-report[data-vote=fail],
@@ -513,7 +512,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 /*done & draft*/
-.translated, .draft, .approved
+.translated, .approved
 {
     background: #09beec;
     border:1px solid #848689;
@@ -583,7 +582,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
     background:#7cc576;
     color:#fff !important;
 }
-.draft{
+.draft, .header-menu .wrapper-dropdown-5 {
 	background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d3d4d5));
 	background: -moz-linear-gradient(top,  #f5f5f5,  #d3d4d5);
 	background: linear-gradient(top,  #f5f5f5,  #d3d4d5);
@@ -596,9 +595,98 @@ article .translated:active, article .draft:active, article .btn:active, article 
 		 background: -moz-linear-gradient(top,  #f5f5f5,  #d3d4d5);
 		 background: linear-gradient(top,  #f5f5f5,  #d3d4d5);color:#333;text-decoration:none;}
 
-
+.downloadtr-button.backbtn {
+  float: right;
+  margin: 5px 0px 0px 15px !important;
+  font-weight: bold;
+  float: right;
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #ccc !important;
+  border-radius: 2px;
+  border-radius: 2px;
+  padding: 5px 17px !important;
+  min-width: 110px;
+}
 /*buttons editor*/
-.btn{height:26px;display:block;border:1px solid #848689;text-decoration:none;-moz-border-radius: 2px;border-radius: 2px;}
+
+td.action .btn {
+	width: 75px!important;
+
+}
+
+
+td.action .btn,
+.topmenu-drop 
+ {
+cursor: pointer;
+height: 22px;
+color:#333!important;
+background: #dcdedf!important;
+border-radius: 2px 0 0 2px;
+-moz-box-shadow: 0 1px 2px #ccc;
+-webkit-box-shadow: 0 1px 2px #ccc;
+box-shadow: 0 1px 2px #ccc;
+}
+
+.topmenu-drop {
+	  height: 31px!important;
+	    margin: 8px 0;
+	    box-shadow: none;
+}
+
+.topmenu-drop input,
+.wrapper-dropdown-5 input {
+  border: none!important;
+  box-shadow: none;
+    cursor: pointer;
+}
+
+
+
+.downloadtr-button.translated {
+	color: #666!important;
+}
+
+.topmenu-drop input {
+  font-weight: normal;
+  border: 0;
+  padding: 4px 20px!important;
+  font-size: 17px!important;
+  text-align: center;
+  width: 130px!important;
+
+}
+
+.topmenu-drop input.translated {
+  background: #09beec;
+  width: 235px!important;
+  color: #fff!important;
+ }
+
+.wrapper-dropdown-5 input {
+	width: auto!important;
+	float: left;
+}
+
+.header-menu .wrapper-dropdown-5 {
+	margin: 8px 0!important;
+	box-shadow: none;
+	width: 13px;
+	padding: 6px 10px !Important;
+}
+
+.header-menu .wrapper-dropdown-5 .dropdown {
+	  left: -131px;
+  width: 162px;
+}
+
+.topmenu-drop form {
+    margin-right: 0;
+}
+
+
+.btn{cursor:pointer;height:26px;display:block;border:1px solid #848689;text-decoration:none;-moz-border-radius: 2px;border-radius: 2px;}
 .buttons .btn{height:33px;}
 .copysource
 {
@@ -760,7 +848,7 @@ article
 	color:#4d4d4f;
 }
 
-.popup-tm .text, .popup-tm .text:hover {
+.popup-tm .text, .popup-tm .text:hover, .header-menu .text, .header-menu .text:hover {
 	background:transparent;
 	box-shadow: none;
 }
@@ -2441,11 +2529,7 @@ p.percent
 	display: none;
 }
 
-#originalDownload,
-#fileDownload
-{
-	margin-right: 20px;
-}
+
 
 #navSwitcher
 {
@@ -3408,7 +3492,7 @@ box-shadow: inset 0 0 1px 1px #888;
 {
     width: 49%;
     padding: 0 1%;
-margin: 0 0 2% 0;
+	margin: 0 0 2% 0;
     float: left;
     border: 3px solid #fff;
 }
@@ -3424,6 +3508,7 @@ color:red !important;
 	width: 45%;
     margin-right: 3%;
     margin-top: 2px;
+      max-width: 520px;
 }
 
 .error-type h3, .track-changes h3 {
