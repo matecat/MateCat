@@ -842,6 +842,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF (st.status='NEW',NULL,st.translation) AS translation,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
+	    '[{\"id\":0,\"status\":\"NEW\"}]' as split_points_source,
+	    '[{\"id\":0,\"status\":\"NEW\"}]' as split_points_target,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
@@ -862,7 +864,6 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
-
     return $results;
 }
 
