@@ -2849,6 +2849,11 @@ padding: 10px 4px;
 font-size: 80%;
 }
 
+.error-type th:nth-child(2) {
+    padding: 10px 0;
+      width: 80px;
+}
+
 td.align-left {
 text-align: left;
 }
