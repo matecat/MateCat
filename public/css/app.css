@@ -2624,10 +2624,10 @@ body.manage header .filter:before {
 }
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag:before,
+body.tagModes .splitArea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag:before,
+body.tagModes .splitArea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
@@ -2645,7 +2645,7 @@ left: 10000px;
 
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag:before,
+body.tagModes .splitArea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
 {
@@ -2847,6 +2847,11 @@ background: rgba(187, 187, 187, 0.14);
 text-align: center;
 padding: 10px 4px;
 font-size: 80%;
+}
+
+.error-type th:nth-child(2) {
+    padding: 10px 0;
+      width: 80px;
 }
 
 td.align-left {
@@ -3403,7 +3408,7 @@ body.searchActive #filterSwitch
 
 
 
-.grayed{background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;display:none;z-index:9;}
+.grayed{background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;display:none;z-index:0;}
 .blacked{background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.5;display:none;z-index:1000;}
 
 
@@ -6154,17 +6159,17 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
+body.tagModes .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
+body.tagModes .splitArea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag
+body.tagModes .splitArea .locked.endTag
 {
 /*visibility: hidden;*/
 text-indent: -10000px;
@@ -6181,19 +6186,24 @@ padding-top: 0px;
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag, 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag, 
-body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag, 
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag, 
+body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
+body.rtl-target.tagModes .splitArea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag, 
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag, 
-body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag {
+body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
+body.tagModes .splitArea .locked.endTag
+{
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
     transform: rotate(-180deg);
 }
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag, 
-body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag, 
-body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag {
+body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.rtl-target.tagModes .spliArea .locked.endTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
+{
  -ms-transform: rotate(0deg); /* IE 9 */
     -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
     transform: rotate(0deg);
@@ -6607,25 +6617,28 @@ color:red !important;
 }
 
 .tooltip {
-	cursor: help;
-	position: absolute;
-	border: 1px solid #ddd;
-	border-radius: 20px;
-	width: 10px;
-	font-size: 9px;
-	height: 10px;
-	padding-left: 1px;
-	margin-top: 1px;
-	line-height: 11px;
-	background: #F3F3F3;
-	margin-left: 5px;
-	color: #888;
-	box-shadow: 1px 1px 1px #999;
+  cursor: help;
+  position: absolute;
+  border: 1px solid #717171;
+  border-radius: 20px;
+  width: 13px;
+  font-size: 13px;
+  height: 11px;
+  font-weight: bold;
+  padding-left: 0px;
+  padding-top: 2px;
+  margin-top: -3px;
+  line-height: 11px;
+  background: #FBF3AA;
+  margin-left: 5px;
+  color: #717171;
+  box-shadow: 1px 1px 1px #999;
 }
+
 
 .tooltip:hover span {
 	opacity: 1;
-	top: -105px;
+	top: -90px;
 }
 
 .tooltip span {	
@@ -6644,7 +6657,7 @@ color:red !important;
 	border-radius: 5px;
 	position: absolute;
 	pointer-events: none;
-	top: -140px;
+	top: -110px;
 	opacity: 0;
 	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 	-webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
@@ -6729,13 +6742,13 @@ body.isAnonymous .add-mt-engine {
 }
 
 .splitArea {
-  width: 44.5%;
+  width: 45.5%;
   z-index: 9999999;
   position: absolute;
   min-height: 20px;
   border: 2px solid #F00;
   padding: 3px 0px 5px 3px;
-  margin: 3px 1.4%;
+  margin: 3px 1%;
   background: #efefef; 
   border-bottom: 1px solid #ccc;  
   font-size: 18px;
@@ -6756,7 +6769,7 @@ body.isAnonymous .add-mt-engine {
 
 .splitBar
 {
-    width: 46.3%;
+    width: 46.9%;
     position: absolute;
     bottom: 55px;
 }

@@ -78,32 +78,14 @@ if(config.splitSegmentEnabled) {
         splitSegment: function (segment) {
             splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
-            newSegments = [];
             oldSid = segment.attr('id').split('-')[1];
-            $.each(splittedSource, function (index) {
-                segData = {
-                    autopropagated_from: "0",
-                    has_reference: "false",
-                    parsed_time_to_edit: ["00", "00", "00", "00"],
-                    readonly: "false",
-                    segment: this.toString(),
-                    segment_hash: segment.attr('data-hash'),
-                    sid: oldSid + '-' + (index + 1),
-                    status: "DRAFT",
-                    time_to_edit: "0",
-                    translation: "",
-                    warning: "0"
-                }
-                newSegments.push(segData);
-            });
-            console.log('newSegments: ', newSegments);
-            this.currentSegment.after(UI.renderSegments(newSegments));
-            this.currentSegment.hide();
-            this.gotoSegment(oldSid + '-1');
             this.setSegmentSplit(oldSid, splittedSource);
+
+
+
         },
         setSegmentSplit: function (sid, splittedSource) {
-            splitAr = [];
+            splitAr = [0];
             splitIndex = 0;
             console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
@@ -119,19 +101,56 @@ if(config.splitSegmentEnabled) {
             APP.doRequest({
                 data: {
                     action:         "setSegmentSplit",
-                    split_points:     splitAr.toString(),
-                    id:             sid
+                    split_points:     '[' + splitAr.toString() + ']',
+                    id_segment:     sid,
+                    id_job:          config.job_id,
+                    password:       config.password
+                },
+                context: {
+                    splittedSource: splittedSource,
+                    sid: sid,
+                    splitAr: splitAr
                 },
                 error: function(d){
+                    // temp
+                    UI.setSegmentSplitSuccess(this);
                     console.log('error');
                 },
                 success: function(d){
+                    UI.setSegmentSplitSuccess(this);
                     console.log('success');
                     if(d.data == 'OK') {
 
                     }
                 }
             });
+        },
+        setSegmentSplitSuccess: function (data) {
+            oldSid = data.sid;
+            splittedSource = data.splittedSource;
+            splitAr = data.splitAr;
+            newSegments = [];
+            $.each(splittedSource, function (index) {
+                segData = {
+                    autopropagated_from: "0",
+                    has_reference: "false",
+                    parsed_time_to_edit: ["00", "00", "00", "00"],
+                    readonly: "false",
+                    segment: this.toString(),
+                    segment_hash: segment.attr('data-hash'),
+                    sid: oldSid + '-' + (index + 1),
+                    split_points_source: [],
+                    status: "DRAFT",
+                    time_to_edit: "0",
+                    translation: "",
+                    warning: "0"
+                }
+                newSegments.push(segData);
+            });
+            oldSegment = $('#segment-' + oldSid);
+            $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr));
+            $(oldSegment).hide();
+            this.gotoSegment(oldSid + '-1');
         },
 
         createSplitArea: function (segment) {
