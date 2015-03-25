@@ -553,6 +553,14 @@ float: left;
 position: relative;
 }
 
+.dropdown .cancel span {
+  margin-right: 13px;
+}
+
+.dropdown .change span {
+  margin-right: 9px;
+}
+
 .deleteTM span {
     margin-right: 11px;
 font-size: 16px;
