@@ -464,6 +464,16 @@ float: left;
   margin-left: 3px;
 }
 
+
+@media (max-width: 1300px) {
+.translate-box a {
+  display: block;
+  width: 195px;
+  margin-top: 0;
+}
+}
+
+
 @media (max-width: 480px) {
   .files .preview * {
     width: 40px;

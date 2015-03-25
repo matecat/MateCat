@@ -2394,7 +2394,7 @@ width: 190px;
     width:180px;
 }
 #private-tm-key {
-width: 169px;
+width: 169px!important;
 height: 28px;
 font-size: 17px!important;
 }
