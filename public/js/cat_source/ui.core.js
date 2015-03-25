@@ -61,10 +61,13 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
-//        console.log('byStatus: ', byStatus);
+        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = this.getSegmentId(segment);
-		$('.percentuage', segment).removeClass('visible');
+        console.log('segment: ', segment);
+        console.log('segment_id: ', segment_id);
+
+        $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
 		this.setTranslation(this.getSegmentId(segment), status, false);
 		segment.removeClass('saved');
@@ -83,8 +86,10 @@ UI = {
 		});
 	},
     getSegmentId: function (segment) {
-//        return $(segment).attr('id').split('-')[1];
+        if(typeof segment == 'undefined') return false;
+        console.log('segment qui: ', segment);
         return $(segment).attr('id').replace('segment-', '');
+//        return $(segment).attr('id').split('-')[1];
     },
 
     checkHeaviness: function() {
@@ -156,8 +161,10 @@ UI = {
             this.removeGlossaryMarksFormSource();
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
+
             this.body.removeClass('editing');
             $(segment).removeClass("editor");
+
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);
@@ -294,7 +301,7 @@ UI = {
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -888,6 +895,7 @@ UI = {
             id = id.toString().split('-')[0];
         }
         var el = $("#segment-" + id + "-target").find(".editarea");
+        console.log('el: ', el);
         $(el).click();
     },
 	initSegmentNavBar: function() {
@@ -1025,6 +1033,19 @@ UI = {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
 			if (lastOpened != 'segment-' + this.currentSegmentId)
 				this.closeSegment(this.lastOpenedSegment, 0, operation);
+            if(this.lastOpenedSegment) {
+ //               this.lastOpenedSegment.find('.editarea').html('ss');
+ /*
+                setTimeout(function() {
+                    UI.lastOpenedSegment.attr('data-hash', UI.lastOpenedSegment.attr('data-hash'));
+                }, 1000);
+                this.lastOpenedSegment.attr('data-hash', this.lastOpenedSegment.attr('data-hash'));
+                */
+            }
+
+                //console.log("this.lastOpenedSegment: ", this.lastOpenedSegment.attr('data-hash'));
+//            console.log("this.lastOpenedSegment.attr('data-tagmode): ", this.lastOpenedSegment.attr('data-tagmode'));
+//                this.lastOpenedSegment.attr('data-autopropagated', this.lastOpenedSegment.attr('data-autopropagated'));
 		}
 		this.opening = false;
 		this.body.addClass('editing');
@@ -1220,8 +1241,10 @@ UI = {
 			this.init();
 		}
 	},
-    getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr) {
-        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + '" data-split-array="' + ((splitAr.length)? splitAr.toString() : '')+ '" data-tagmode="crunched">' +
+    getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
+        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
+        splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
+        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
             '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
             ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
@@ -1275,23 +1298,34 @@ UI = {
             '</section> ';
         return newSegmentMarkup;
     },
+    stripSpans: function (str) {
+        return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
+    },
 
-    renderSegments: function (segments, justCreated, splitAr) {
+    renderSegments: function (segments, justCreated, splitAr, splitGroup) {
         splitAr = splitAr || [];
+        splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
         newSegments = '';
         $.each(segments, function() {
 //                this.readonly = true;
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
+//            console.log('this.segment: ', this.segment);
+            if($.parseHTML(this.segment).length) {
+                this.segment = UI.stripSpans(this.segment);
+            };
+//            console.log('corrected: ', this.segment.replace(/<span(.*?)>/gi, ''));
             var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//            console.log('escapedSegment: ', escapedSegment);
 
             /* this is to show line feed in source too, because server side we replace \n with placeholders */
             escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
             escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
             escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+            originalId = this.sid.split('-')[0];
             if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr);
+                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId);
             } else {
                 $.each(this.split_points_source, function (index) {
 
@@ -2074,8 +2108,9 @@ UI = {
 //        console.log('status: ', status);
 //        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
-		segment = $('#segment-' + id_segment); 
-		this.lastTranslatedSegmentId = id_segment;
+		segment = $('#segment-' + id_segment);
+
+        this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
@@ -2083,9 +2118,8 @@ UI = {
 		if( config.brPlaceholdEnabled ) {
 			translation = this.postProcessEditarea(segment);
 		} else {
-			translation = $('.editarea', segment ).text();
+            translation = $('.editarea', segment ).text();
 		}
-//        console.log('translation: ', translation);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);

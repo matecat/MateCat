@@ -15,15 +15,25 @@ if(config.splitSegmentEnabled) {
     }).on('mouseout', '.editor .source', function() {
         actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
-    }).on('click', '.sid .actions .split', function(e) {
+    }).on('click', '.sid .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
+        segment = $(this).parents('section');
         $('.sid .actions .split').addClass('cancel');
         $('.split-shortcut').html('CTRL + W');
         console.log('split');
         UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
-        UI.createSplitArea($(this).parents('section'));
+        UI.createSplitArea(segment);
+    }).on('click', '.sid .actions .split.cancel', function(e) {
+        e.preventDefault();
+        console.log('cancel');
+        $('.sid .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
@@ -57,21 +67,22 @@ if(config.splitSegmentEnabled) {
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
     })
-    .on('click', '.sid .actions .split.cancel', function(e) {
-        e.preventDefault();
-        $('.sid .actions .split').removeClass('cancel');
-        segment = $(this).parents('section');
-        UI.currentSegment.removeClass('split-action');
-        $('.split-shortcut').html('CTRL + S');
-        segment.find('.splitBar, .splitArea').remove();
-        segment.find('.sid .actions').hide();
-    })
+
 
 
     .on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
+
+        /*
+                alreadySplitted = segment.attr('data-split-group') != '';
+                if(alreadySplitted) {
+
+                } else {
+                    UI.splitSegment(segment);
+                }
+        */
     })
 
     $.extend(UI, {
@@ -80,9 +91,6 @@ if(config.splitSegmentEnabled) {
             segment.find('.splitBar .buttons .cancel').click();
             oldSid = segment.attr('id').split('-')[1];
             this.setSegmentSplit(oldSid, splittedSource);
-
-
-
         },
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
@@ -127,9 +135,11 @@ if(config.splitSegmentEnabled) {
         },
         setSegmentSplitSuccess: function (data) {
             oldSid = data.sid;
+            console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
             splitAr = data.splitAr;
             newSegments = [];
+            splitGroup = [];
             $.each(splittedSource, function (index) {
                 segData = {
                     autopropagated_from: "0",
@@ -146,18 +156,59 @@ if(config.splitSegmentEnabled) {
                     warning: "0"
                 }
                 newSegments.push(segData);
+                splitGroup.push(oldSid + '-' + (index + 1));
             });
             oldSegment = $('#segment-' + oldSid);
-            $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr));
-            $(oldSegment).hide();
-            this.gotoSegment(oldSid + '-1');
+            alreadySplitted = (oldSegment.length)? false : true;
+            if(alreadySplitted) {
+                prevSeg = $('#segment-' + oldSid + '-1').prev('section');
+                if(prevSeg.length) {
+                    $('section[data-split-original-id=' + oldSid + ']').remove();
+                    /*
+                    $.each(splitGroup, function (index) {
+                        $('#segment-' + this).remove();
+                    });
+                    */
+                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                    $.each(splitGroup, function (index) {
+                        UI.lockTags($('#segment-' + this + ' .source'));
+                    });
+                    this.gotoSegment(oldSid + '-1');
+                } else {
+
+                }
+            } else {
+                $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                $.each(splitGroup, function (index) {
+                    UI.lockTags($('#segment-' + this + ' .source'));
+                });
+                $(oldSegment).remove();
+                this.gotoSegment(oldSid + '-1');
+            }
+
+//            console.log('or ID: ', UI.currentSegment.attr('data-split-original-id'));
+//            console.log('oldSegment: ', oldSegment);
+//            $("section[data-split-original-id=" + UI.currentSegment.attr('data-split-original-id') + "]").remove();
         },
 
         createSplitArea: function (segment) {
+            isSplitted = segment.attr('data-split-group') != '';
             source = $(segment).find('.source');
             source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
             splitArea = segment.find('.splitArea');
-            splitArea.html(source.attr('data-original'));
+            if(isSplitted) {
+                console.log('ecco: ', '');
+                segments = segment.attr('data-split-group').split(',');
+                totalMarkup = '';
+                $.each(segments, function (index) {
+                    totalMarkup += $('#segment-' + this + ' .source').attr('data-original');
+                    if(index != segments.length - 1) totalMarkup += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
+                });
+                splitAreaMarkup = totalMarkup;
+            } else {
+                splitAreaMarkup = source.attr('data-original');
+            }
+            splitArea.html(splitAreaMarkup);
             this.lockTags(splitArea);
             splitArea.find('.rangySelectionBoundary').remove();
         },

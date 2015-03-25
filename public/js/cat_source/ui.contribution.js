@@ -286,7 +286,7 @@ $.extend(UI, {
             status: status,
             byStatus: byStatus
         };
-        this.log('setContribution1', reqData);
+        this.log('setContribution1', logData);
 		segment = $('#segment-' + segment_id);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
