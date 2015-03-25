@@ -471,6 +471,13 @@ float: left;
   width: 195px;
   margin-top: 0;
 }
+
+.translate-box select, .mgmt-table-mt select {
+  width: 230px!important;
+}
+.wrapper-upload {
+  width: 96%!important;
+}
 }
 
 
@@ -1030,7 +1037,7 @@ footer a:hover{text-decoration:none}
 	{
 		background-image: none;
 width: 70px;
-margin-left: -32px;
+margin-left: -18px;
 padding: 8px 0 1px 0;
 margin-top: 7px;
 	}    
