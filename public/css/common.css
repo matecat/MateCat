@@ -547,10 +547,14 @@ margin-right:4px;
 }
 
 .dropdown span {
-margin-right: 10px;
+margin-right: 8px;
 margin-top: 2px;
 float: left;
 position: relative;
+}
+
+.dropdown .cancel span {
+  margin-right: 13px;
 }
 
 .deleteTM span {
@@ -847,17 +851,9 @@ top: inherit;
 margin-top: 0;
 right: inherit;}
 
-td.action .btn {
-cursor: pointer;
-height: 22px;
-color:#333!important;
-width: 75px!important;
-background: #dcdedf!important;
-border-radius: 2px 0 0 2px;
--moz-box-shadow: 0 1px 2px #ccc;
--webkit-box-shadow: 0 1px 2px #ccc;
-box-shadow: 0 1px 2px #ccc;
-}
+
+
+
 
 .step3 .continuebtn {
 display: block;
@@ -1893,27 +1889,43 @@ header .searchbox {
     /*box-shadow: 0 1px 1px #666;*/
 }
 
+.header-menu .dropdown form span {
+  color: #666;
+  padding: 5px 0px 5px 5px;
+  margin-right: 3px;
+}
+
 .wrapper-dropdown-5:active {
     -moz-box-shadow: inset 0 0 1px 1px #888;
     -webkit-box-shadow: inset 0 0 1px 1px #888;
     box-shadow: inset 0 0 1px 1px #888;
 }
 
-.wrapper-dropdown-5 .dropdown li {
+.wrapper-dropdown-5 .dropdown li,
+.dropdown input {
     width: 100%;
+    background: #fff!important;
 }
 
-.wrapper-dropdown-5 .dropdown li a {
-    display: block;
-    text-decoration: none;
-    background: #fff;
-    color: #666;
-    text-align: left;
-    padding: 5px 0px 5px 5px;
-    transition: all 0.3s ease-out;
-    border-bottom: 1px solid #e6e8ea;
-    font-weight: normal;
-    font-size: 16px;
+.header-menu .wrapper-dropdown-5 .dropdown li {
+    padding:0!important;
+    height: auto!important;
+      border-bottom: 1px solid #e6e8ea;
+}
+
+.wrapper-dropdown-5 .dropdown li a,
+.dropdown input
+ {
+  display: block;
+  text-decoration: none;
+  background: #fff!important;
+  color: #666;
+  text-align: left;
+  padding: 6px 0px 6px 5px;
+  transition: all 0.3s ease-out;
+  border-bottom: 1px solid #e6e8ea;
+  font-weight: normal;
+  font-size: 16px;
 }
 
 .wrapper-dropdown-5 .dropdown li a:hover {
@@ -1932,7 +1944,9 @@ header .searchbox {
 
 /* Hover state */
 
-.wrapper-dropdown-5 .dropdown li:hover a {
+.wrapper-dropdown-5 .dropdown li:hover a,
+.wrapper-dropdown-5 .dropdown li:hover input
+ {
     color: black;
 }
 
@@ -2582,6 +2596,7 @@ a.unarchive-project:after,
 a.resume-project:after,
 .splitpoint:before,
 .splitpoint-delete:after,
+input.downloadtr-button:before,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
@@ -2700,6 +2715,8 @@ content: "...";
 margin-top: -5px;
 float: left;
 }
+
+
 
 .canceladdtmx.btn-grey .text:before {
 	content: "\f00d";
