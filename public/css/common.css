@@ -2065,6 +2065,18 @@ margin-left: 3%;
 padding: 1% 2% 0;
 }
 
+td.action .btn {
+  cursor: pointer;
+  height: 22px;
+  color: #333!important;
+  width: 75px!important;
+  background: #dcdedf!important;
+  border-radius: 2px 0 0 2px;
+  -moz-box-shadow: 0 1px 2px #ccc;
+  -webkit-box-shadow: 0 1px 2px #ccc;
+  box-shadow: 0 1px 2px #ccc;
+}
+
 
 table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:center;background:#fff;float:left}
 

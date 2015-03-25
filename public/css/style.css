@@ -370,11 +370,14 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 
 .sid
 {
-	width: auto !important;
 	position: absolute;	
 	top: 18px;
+/*	width: auto !important;
 	padding: 0 15px 70px 0px;
-	left: -4.8%;
+	left: -4.8%;*/
+	width: 6%;
+	padding-bottom: 70px;
+	left:-6%;
 	text-align: center;
 	display: block;
 	height: 10px;
@@ -651,7 +654,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-  padding: 4px 20px!important;
+  padding: 4px 10px!important;
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
@@ -2424,7 +2427,7 @@ footer nav
 	.search-editarea {width:200px !Important}
 	.text .item,.white li, .track-changes {width: 44% !important}
     article {margin-left: 6%;}
-    .sid {left: -6%;}
+    .sid {left: -7%;width: 7%;}
 
 }
 
@@ -2983,9 +2986,9 @@ float: left;
   border-radius: 4px;
   width: 31px;
   font-size: 20px;
+  margin: 0 auto;
   margin-top: 15px;
   display: block;
-  margin-left: 7px;
   transform: rotate(-90deg);
 }
 
