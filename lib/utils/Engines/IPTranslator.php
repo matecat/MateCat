@@ -79,10 +79,11 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
                 }
 
             } else {
+                preg_match( '#<source>(.*)</source>#', $decoded[ 'xliff' ][ 0 ], $translated_text );
                 $decoded = array(
                         'data' => array(
                                 "translations" => array(
-                                        array( 'translatedText' => $decoded[ 'text' ][ 0 ] )
+                                        array( 'translatedText' =>  $this->_resetSpecialStrings( $translated_text[ 1 ] ) )
                                 )
                         )
                 );
@@ -100,8 +101,10 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
             return $mt_result;
         }
 
+        preg_match( '#<source>(.*)</source>#', $all_args[1][ 'input' ][0], $original_text );
+
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $all_args[0][ 'text' ][0],
+                $this->_resetSpecialStrings( $original_text[ 1 ] ),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -125,8 +128,10 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
             );
         }
 
+        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+
         $parameters = array();
-        $parameters['input'] = array( $_config[ 'segment' ] );
+        $parameters['input'] = array( "<trans-unit id='" . uniqid() . "'><source>" . $_config[ 'segment' ] . "</source></trans-unit>" );
         $parameters['from'] = $_config[ 'source' ];
         $parameters['to'] = $_config[ 'target' ];
 
@@ -145,7 +150,7 @@ class Engines_IPTranslator extends Engines_AbstractEngine implements Engines_Eng
                 )
         );
 
-		$this->call( "translate_relative_url", array(), true );
+		$this->call( "translate_relative_url", $parameters, true );
 
         return $this->result;
 

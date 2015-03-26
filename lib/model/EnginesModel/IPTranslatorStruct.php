@@ -28,7 +28,7 @@ class EnginesModel_IPTranslatorStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $translate_relative_url = "translate/text";
+    public $translate_relative_url = "translate/xliff";
 
     /**
      * @var string
