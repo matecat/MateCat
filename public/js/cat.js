@@ -1246,7 +1246,8 @@ UI = {
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
         newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
-            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
+            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
+//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
             ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
             ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
             '	<div class="body">' +
@@ -1258,6 +1259,7 @@ UI = {
             '		<div class="text">' +
             '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
             '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
+            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
             '				<div class="copy" title="Copy source to target">' +
             '                   <a href="#"></a>' +
             '                   <p>ALT+CTRL+I</p>' +
@@ -1823,7 +1825,7 @@ UI = {
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
             //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('Downloading');
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
@@ -10716,36 +10718,40 @@ if(!config.offlineModeEnabled) {
  */
 if(config.splitSegmentEnabled) {
     $('html').on('mouseover', '.editor .sid', function() {
-        actions = $(this).parent().find('.actions');
-        actions.show();
+//        actions = $(this).parent().find('.actions');
+//        actions.show();
     }).on('mouseout', '.sid', function() {
-        actions = $('.editor .sid').parent().find('.actions');
-        actions.hide();
-    }).on('mouseover', '.editor .source', function() {
-        actions = $('.editor .sid').parent().find('.actions');
-        actions.show();
-    }).on('mouseout', '.editor .source', function() {
-        actions = $('.editor .sid').parent().find('.actions');
-        actions.hide();
-    }).on('click', '.sid .actions .split:not(.cancel)', function(e) {
+//        actions = $('.editor .sid').parent().find('.actions');
+//        actions.hide();
+    }).on('mouseover', '.editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
+//        actions = $('.editor').find('.outersource .actions');
+//        actions.show();
+    }).on('mouseout', '.editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
+ /*
+        setTimeout(function(){
+            actions = $('.editor').find('.outersource .actions');
+            actions.hide();
+        }, 1000);
+ */
+    }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
-        $('.sid .actions .split').addClass('cancel');
-        $('.split-shortcut').html('CTRL + W');
+//        $('.editor .outersource .actions .split').addClass('cancel');
+        $('.editor .split-shortcut').html('CTRL + W');
         console.log('split');
         UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea(segment);
-    }).on('click', '.sid .actions .split.cancel', function(e) {
+    }).on('click', '.outersource .actions .split.cancel', function(e) {
         e.preventDefault();
         console.log('cancel');
-        $('.sid .actions .split').removeClass('cancel');
+        $('.editor .outersource .actions .split').removeClass('cancel');
         segment = $(this).parents('section');
         UI.currentSegment.removeClass('split-action');
-        $('.split-shortcut').html('CTRL + S');
+        $('.editor .split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
-        segment.find('.sid .actions').hide();
+//        segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
@@ -10906,8 +10912,9 @@ if(config.splitSegmentEnabled) {
         createSplitArea: function (segment) {
             isSplitted = segment.attr('data-split-group') != '';
             source = $(segment).find('.source');
-            source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
+            source.after('<div class="splitArea" contenteditable="true" style="height: ' + $(source).height() + 'px"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
             splitArea = segment.find('.splitArea');
+            if(isSplitted) splitArea.removeAttr('style');
             if(isSplitted) {
                 console.log('ecco: ', '');
                 segments = segment.attr('data-split-group').split(',');
