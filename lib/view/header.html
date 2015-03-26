@@ -26,7 +26,7 @@
                                                 <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                                                 <input type="hidden" name="password" tal:attributes="value password" />
                                                 <input type="hidden" name="download_type" value="all" />
-                                                <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'Download Translation' : 'Preview'" />
+                                                <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'Download Translation' : 'PREVIEW'" />
                                             </form></span></a>
                         <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                             <ul class="dropdown pull-left">
@@ -40,11 +40,11 @@
                                             <input type="hidden" name="password" tal:attributes="value password" />
                                             <input type="hidden" name="download_type" value="all" />
                                             <span class="icon-download"></span>
-                                             <input name="submit" type="submit" value="Original" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                                             <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
                                         </form>
                                 </li>
                                  
-                                <li><a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF"><span class="icon-download"></span>Export SDLXLIFF</a></li>
+                                <li><a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF"><span class="icon-download"></span>EXPORT SDLXLIFF</a></li>
                             </ul>
                         </div>
               <!-- 

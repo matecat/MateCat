@@ -370,19 +370,54 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 
 .sid
 {
-	width: auto !important;
 	position: absolute;	
-	top: 18px;
+/*	top: 18px;
+	width: auto !important;
 	padding: 0 15px 70px 0px;
-	left: -4.8%;
+	left: -4.8%;	
+	padding-bottom: 70px;	
+	height: 10px;
+	margin-top: 3.8%;
+*/
+	width: 6%;
+	left:-6%;
 	text-align: center;
 	display: block;
-	height: 10px;
 	font-size: 12px;
 	z-index: 999;
 	color: #999;
 	text-decoration: none;
 	cursor: default;
+	height: inherit;
+	padding-bottom: 1px;
+}
+
+.sid .txt {
+  background: #ccc;
+    padding: 10px 0;
+    margin:20px 8px 0 8px;
+}
+
+
+p.split-shortcut {
+  background: #ccc;
+  padding: 15px 5px;
+  margin-right: 8px;
+  margin-top: 0px;
+  margin-left: 8px;
+}
+
+.splitStart .sid{
+	background: url(../img/split-bg.png) no-repeat;
+  	background-position: 37px top;;
+}
+.splitInner .sid {
+	background: url(../img/split-bg.png) no-repeat;
+  	background-position: 37px -40px;
+}
+.splitEnd .sid {
+  	background: url(../img/split-bg.png) no-repeat;
+  	background-position: 37px bottom;
 }
 .start-job-marker,
 .end-job-marker
@@ -411,7 +446,8 @@ section.currSearchSegment .sid
 	/*color: #0798BC;*/
 }
 .editor .sid{
-	top:43px !Important;}
+	height: inherit;
+}
 
 div.sid .implicit {
 /*    display: none; */
@@ -439,7 +475,7 @@ div.sid .actions {
 */
 .comments{position:absolute;right:10px;top:20px;width:30px !important; margin-right:-50px !important;height:100% !important;font-size:10px;text-align:center !important;z-index:99;}
 .comments a{display:block;padding:16px 0 10px 0px !important;}
-section{position:relative;float:left;width:100%;-webkit-transition: all  100ms ease-in; transition: all  100ms ease-in;}
+section{position:relative;float:left;width:100%;height:100%;-webkit-transition: all  100ms ease-in; transition: all  100ms ease-in;}
 
 /*projectbar*/
 .languages{text-align:center !important;padding:15px 0 0 50px; }
@@ -651,7 +687,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-  padding: 4px 20px!important;
+  padding: 4px 10px!important;
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
@@ -1521,6 +1557,8 @@ section.status-new.opened .editarea
 
 section.editor {
 z-index: 10000;
+  position: relative;
+  height: 100%;
 }
 
 .source{line-height:30px;padding-top:9px !important;}
@@ -1550,8 +1588,16 @@ z-index: 10000;
     outline: none;
     word-wrap: break-word;
     word-break: normal;
+}
+
+/*
+.track-changes,
+.text .item,
+.white li {
     max-width: 520px;
 }
+*/
+
 .text a{text-decoration:none;color:#000 }
 
 
@@ -2424,7 +2470,7 @@ footer nav
 	.search-editarea {width:200px !Important}
 	.text .item,.white li, .track-changes {width: 44% !important}
     article {margin-left: 6%;}
-    .sid {left: -6%;}
+    .sid {left: -7%;width: 7%;}
 
 }
 
@@ -2983,9 +3029,8 @@ float: left;
   border-radius: 4px;
   width: 31px;
   font-size: 20px;
-  margin-top: 15px;
+  margin: 0 auto;
   display: block;
-  margin-left: 7px;
   transform: rotate(-90deg);
 }
 
@@ -2999,6 +3044,7 @@ float: left;
 .splitBar .buttons a {
 
 }
+
 
 /*
 
@@ -3513,7 +3559,6 @@ color:red !important;
 	width: 45%;
     margin-right: 3%;
     margin-top: 2px;
-      max-width: 520px;
 }
 
 .error-type h3, .track-changes h3 {
@@ -3653,7 +3698,7 @@ body.isAnonymous .add-mt-engine {
   min-height: 20px;
   border: 2px solid #F00;
   padding: 3px 0px 5px 3px;
-  margin: 3px 1%;
+  margin: 0 0.7%;
   background: #efefef; 
   border-bottom: 1px solid #ccc;  
   font-size: 18px;
