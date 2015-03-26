@@ -464,6 +464,23 @@ float: left;
   margin-left: 3px;
 }
 
+
+@media (max-width: 1300px) {
+.translate-box a {
+  display: block;
+  width: 195px;
+  margin-top: 0;
+}
+
+.translate-box select, .mgmt-table-mt select {
+  width: 230px!important;
+}
+.wrapper-upload {
+  width: 96%!important;
+}
+}
+
+
 @media (max-width: 480px) {
   .files .preview * {
     width: 40px;
@@ -564,7 +581,7 @@ h2.payoff
 
 
 .delete .ui-button-text, .cancel .ui-button-text{color:#fff;text-align:left;margin:0px 0 0 10px !important}
-.delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;}
+.delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;width:65px!important;}
 .cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
 
 .delete button{background: url(../img/sprite.png) 12px -1074px no-repeat !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px;}
@@ -1020,7 +1037,7 @@ footer a:hover{text-decoration:none}
 	{
 		background-image: none;
 width: 70px;
-margin-left: -32px;
+margin-left: -18px;
 padding: 8px 0 1px 0;
 margin-top: 7px;
 	}    

@@ -553,6 +553,14 @@ float: left;
 position: relative;
 }
 
+.dropdown .cancel span {
+  margin-right: 13px;
+}
+
+.dropdown .change span {
+  margin-right: 9px;
+}
+
 .deleteTM span {
     margin-right: 11px;
 font-size: 16px;
@@ -2386,7 +2394,7 @@ width: 190px;
     width:180px;
 }
 #private-tm-key {
-width: 169px;
+width: 169px!important;
 height: 28px;
 font-size: 17px!important;
 }
