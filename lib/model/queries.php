@@ -1666,7 +1666,7 @@ function insertProject( ArrayObject $projectStructure ) {
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function updateTranslatorJob( $id_job, stdClass $newUser ) {
+function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
 
     $data                       = array();
     $data[ 'username' ]         = $newUser->id;
