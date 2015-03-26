@@ -442,6 +442,14 @@ INIT::obtain();
                                 <td>An object containing all the links to the jobs of the project</td>
                             </tr>
                             <tr>
+                                <td><code>job-quality-details</code></td>
+                                <td>A structure containing, for each job, an array of 5 objects: each object is a quality check performed on the job; the object contains the type of the check, the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio</td>
+                            </tr>
+                            <tr>
+                                <td><code>quality-overall</code></td>
+                                <td>A object containing the overall quality rating for each job</td>
+                            </tr>
+                            <tr>
                                 <td><code>TOTAL_PAYABLE</code></td>
                                 <td>A field containing the number of matecat payable words count in the project/chunk/file</td>
                             </tr>
