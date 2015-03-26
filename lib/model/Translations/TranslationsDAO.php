@@ -8,7 +8,7 @@
  */
 class Translations_TranslationsDAO extends DataAccess_AbstractDao {
 
-    const TABLE = "segment_translations2";
+    const TABLE = "segment_translations";
 
     const STRUCT_TYPE = "Translations_TranslationStruct";
 
