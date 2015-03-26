@@ -1722,7 +1722,7 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
-		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
+        segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
@@ -2054,10 +2054,17 @@ UI = {
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
 //        console.log('setTranslation sul segmento ', UI.currentSegmentId);
+
 		reqArguments = arguments;
-		segment = $('#segment-' + id_segment); 
-		this.lastTranslatedSegmentId = id_segment;
-		caller = (typeof caller == 'undefined') ? false : caller;
+		segment = $('#segment-' + id_segment);
+        //       this.setStatus(segment, status);
+
+//        UI.testSetTranslation_success(segment, status, reqArguments[3]);
+
+        this.lastTranslatedSegmentId = id_segment;
+//        $('#segment-' + this.lastOpenedSegmentId).removeClass('loaded');
+
+        caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
 		// Attention, to be modified when we will lock tags
@@ -2636,12 +2643,23 @@ UI = {
 		$('#contextMenu .shortcut .alt').html(alt);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
-	setTranslation_success: function(d, segment, status, byStatus) {
+    testSetTranslation_success: function (segment, status, byStatus) {
+        this.setStatus(segment, status);
+//        this.setDownloadStatus(d.stats);
+//        this.setProgress(d.stats);
+        //check status of global warnings
+        this.checkWarnings(false);
+        if(!byStatus) {
+            this.beforePropagateTranslation(segment, status);
+        }
+    },
+
+    setTranslation_success: function(d, segment, status, byStatus) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
 			this.setStatus(segment, status);
-			this.setDownloadStatus(d.stats);
+            this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
