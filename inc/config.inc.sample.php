@@ -383,7 +383,7 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.inc.php file is not up-to-date.";
 
 	}
 
