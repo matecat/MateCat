@@ -8,7 +8,7 @@
  */
 class Translations_TranslationsDAO extends DataAccess_AbstractDao {
 
-    const TABLE = "segment_translations";
+    const TABLE = "segment_translations_splits";
 
     const STRUCT_TYPE = "Translations_TranslationStruct";
 
@@ -65,34 +65,41 @@ class Translations_TranslationsDAO extends DataAccess_AbstractDao {
 
         $this->_validatePrimaryKey( $obj );
 
-        $set_array        = array();
-        $where_conditions = array();
-        $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
+        $values_array         = array();
+        $inserting_keys_array = array( 'id_segment', 'id_job' );
+        $query                = "INSERT INTO " . self::TABLE . " ( %s ) VALUES ( '%s' ) ON DUPLICATE KEY UPDATE %s ";
 
-        $where_conditions[ ] = "id_segment = " . (int)$obj->id_segment;
-        $where_conditions[ ] = "id_job = " . (int)$obj->id_job;
+        $values_array[ ] = (int)$obj->id_segment;
+        $values_array[ ] = (int)$obj->id_job;
 
         if ( $obj->split_points_source !== null ) {
-            $condition    = "split_points_source = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->split_points_source );
+            $inserting_keys_array[ ] = 'split_points_source';
+            $values_array[ ]         = $this->con->escape( $obj->split_points_source );
         }
 
         if ( $obj->split_points_target !== null ) {
-            $condition    = "split_points_target = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->split_points_target );
+            $inserting_keys_array[ ] = 'split_points_source';
+            $values_array[ ]         = $this->con->escape( $obj->split_points_target );
         }
 
-        $set_string   = null;
-        $where_string = implode( " AND ", $where_conditions );
+        $values_string = null;
 
-        if ( count( $set_array ) ) {
-            $set_string = implode( ", ", $set_array );
-        }
-        else {
+        if ( count( $inserting_keys_array ) == count( $values_array ) && count( $values_array ) ) {
+            $inserting_keys_string = implode( ", ", $inserting_keys_array );
+            $values_string         = implode( "', '", $values_array );
+
+            $update_string_array = array();
+            foreach( $inserting_keys_array as $position => $key ){
+                $update_string_array[] = $key . ' = VALUES( ' . $key . ' )';
+            }
+
+            $update_string = implode( ', ', $update_string_array );
+
+        } else {
             throw new Exception( "Array given is empty. Please set at least one value." );
         }
 
-        $query = sprintf( $query, $set_string, $where_string );
+        $query = sprintf( $query, $inserting_keys_string, $values_string, $update_string );
 
         $this->con->query( $query );
 

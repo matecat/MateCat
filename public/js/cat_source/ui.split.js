@@ -103,20 +103,27 @@ if(config.splitSegmentEnabled) {
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
                 console.log('prima: ', splittedSource[index]);
-                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2").replace(/"/gi, '&quot;');
+                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
+
+                //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
+                //and perform the count
+                ll = $('<div>').html(cc).text().length;
+
+                //WARNING for the length count, must be done BEFORE encoding of quotes '"' to &quot;
+                cc = cc.replace(/"/gi, '&quot;');
+
                 console.log('dopo: ', cc);
-                ll = cc.length;
                 splitIndex += ll;
-                splitAr.push(splitIndex);
-            })
+                splitAr.push( splitIndex );
+            });
             splitAr.pop();
             APP.doRequest({
                 data: {
-                    action:         "setSegmentSplit",
-                    split_points:     '[' + splitAr.toString() + ']',
-                    id_segment:     sid,
-                    id_job:          config.job_id,
-                    password:       config.password
+                    action:              "setSegmentSplit",
+                    split_points_source: '[' + splitAr.toString() + ']',
+                    id_segment:          sid,
+                    id_job:              config.job_id,
+                    password:            config.password
                 },
                 context: {
                     splittedSource: splittedSource,

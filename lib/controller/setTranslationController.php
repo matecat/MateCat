@@ -15,6 +15,7 @@ class setTranslationController extends ajaxController {
     protected $password = false;
 
     protected $id_segment;
+    protected $split_num = null;
     protected $id_translator;
     protected $time_to_edit;
     protected $translation;
@@ -111,7 +112,10 @@ class setTranslationController extends ajaxController {
             }
 
             $pCheck = new AjaxPasswordCheck();
-            //check for Password correctness
+            //check for Password correctness ( remove segment split )
+            if( stripos( '-', $this->id_segment ) ) {
+                list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
+            }
             if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
                 $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
             }

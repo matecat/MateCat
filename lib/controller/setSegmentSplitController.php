@@ -10,10 +10,6 @@ class setSegmentSplitController extends ajaxController {
     private $split_points_target;
     private $exec;
 
-    private static $allowed_execs = array(
-            'split', 'undo'
-    );
-
     public function __construct() {
 
         //Session Enabled
@@ -23,7 +19,7 @@ class setSegmentSplitController extends ajaxController {
         $filterArgs = array(
                 'id_job'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'id_segment'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'pass'                => array(
+                'password'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'split_points_source' => array(
@@ -41,17 +37,10 @@ class setSegmentSplitController extends ajaxController {
 
         $this->id_job              = $postInput[ 'id_job' ];
         $this->id_segment          = $postInput[ 'id_segment' ];
-        $this->job_pass            = $postInput[ 'pass' ];
+        $this->job_pass            = $postInput[ 'password' ];
         $this->split_points_source = json_decode( $postInput[ 'split_points_source' ], true );
         $this->split_points_target = json_decode( $postInput[ 'split_points_target' ], true );
         $this->exec                = $postInput[ 'exec' ];
-
-        if ( !in_array( $this->exec, self::$allowed_execs ) ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -1,
-                    'message' => 'Exec not allowed'
-            );
-        }
 
         if ( !$this->userIsLogged ) {
             $this->result[ 'errors' ][ ] = array(
@@ -95,20 +84,6 @@ class setSegmentSplitController extends ajaxController {
             );
         }
 
-        //this checks that the json is valid, but not its content
-        if ( is_null( $this->split_points_target ) ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -7,
-                    'message' => 'Invalid split_points_target json'
-            );
-        }
-        else if ( empty( $this->split_points_target ) ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -7,
-                    'message' => 'split_points_target cannot be empty'
-            );
-        }
-
     }
 
     public function doAction() {
@@ -116,24 +91,6 @@ class setSegmentSplitController extends ajaxController {
         if ( !empty( $this->result[ 'errors' ] ) ) {
             return;
         }
-
-//        switch ( $this->exec ) {
-//            case 'split':
-//                $this->split();
-//                break;
-//
-//            case 'undo':
-//                $this->undo();
-//                break;
-//            default:
-//                Log::doLog( "Exec not allowed. Found: " . $this->exec );
-//                $this->result[ 'errors' ][ ] = array(
-//                        'code'    => -1,
-//                        'message' => 'Exec not allowed'
-//                );
-//
-//                return;
-//        }
 
         //save the 2 arrays in the DB
 

@@ -842,8 +842,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF (st.status='NEW',NULL,st.translation) AS translation,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
-	    '[{\"id\":0,\"status\":\"NEW\"}]' as split_points_source,
-	    '[{\"id\":0,\"status\":\"NEW\"}]' as split_points_target,
+	    sts.split_points_source,
+	    sts.split_points_target,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
@@ -856,6 +856,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 			INNER JOIN files f ON f.id=fj.id_file
 			INNER JOIN segments s ON s.id_file=f.id
 			LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+			LEFT JOIN segment_translations_splits sts  ON sts.id_segment = s.id AND sts.id_job = j.id
 			LEFT JOIN file_references fr ON s.id_file_part = fr.id
 			WHERE j.id = $jid
 			AND j.password = '$password'
@@ -864,6 +865,13 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
+
+    $err = $db->get_error();
+
+    if ( $err[ 'error_code' ] != 0 ) {
+        throw new Exception( __METHOD__ . " -> " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ] );
+    }
+
     return $results;
 }
 
