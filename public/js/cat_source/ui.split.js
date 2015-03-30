@@ -195,13 +195,18 @@ if(config.splitSegmentEnabled) {
                     */
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
                     if(splitGroup.length) {
+                        console.log('dovrebbe esser qui');
+                        console.log('oldSid: ', oldSid);
                         $.each(splitGroup, function (index) {
                             UI.lockTags($('#segment-' + this + ' .source'));
                         });
                         this.gotoSegment(oldSid + '-1');
                     } else {
+                        console.log('o qui');
+                        console.log('oldSid: ', oldSid);
                         UI.lockTags($('#segment-' + oldSid + ' .source'));
                         this.gotoSegment(oldSid);
+
                     }
 
                 } else {
