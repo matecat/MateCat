@@ -3,23 +3,12 @@
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
-    $('html').on('mouseover', '.editor .sid', function() {
-        actions = $(this).parent().find('.actions');
+    $('html').on('mouseover', '.editor .source, .editor .sid', function() {
+        actions = $('.editor .sid').parent().find('.actions');
         actions.show();
-    }).on('mouseout', '.sid', function() {
+    }).on('mouseout', '.sid, .editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
         actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
-    }).on('mouseover', '.editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
-        actions = $('.editor').find('.outersource .actions');
-        actions.show();
-    }).on('mouseout', '.editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
-
-        setTimeout(function(){
-            actions = $('.editor').find('.outersource .actions');
-            actions.hide();
-        }, 1000);
-
- /*
     }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
@@ -39,7 +28,7 @@ if(config.splitSegmentEnabled) {
         $('.editor .split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
 //        segment.find('.sid .actions').hide();
-*/
+
     }).on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
         $('.sid .actions .split').addClass('cancel');
@@ -70,6 +59,7 @@ if(config.splitSegmentEnabled) {
         segment = $(this).parents('section');
         $(this).remove();
         UI.updateSplitNumber($(segment).find('.splitArea'));
+    
 
         /*
                 console.log('cliccato');
@@ -90,11 +80,9 @@ if(config.splitSegmentEnabled) {
         $('.split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
-    })
-
-
-
-    .on('click', '.splitBar .buttons .done', function(e) {
+    }).on('click', 'segment:not(.editor)', function(e) {
+        $('.splitBar .buttons .cancel').click();
+    }).on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
