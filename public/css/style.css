@@ -406,7 +406,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 
 
 p.split-shortcut {
-  background: transparent;
+  background: #ccc;
   padding: 8px 5px;
   margin-right: 8px;
   margin-top: 0px;
@@ -415,7 +415,7 @@ p.split-shortcut {
 
 .splitStart .sid{
 	background: url(../img/split-bg2.png) no-repeat;
-  	background-position: 37px top;;
+  	background-position: 37px 3px;;
 }
 .splitInner .sid {
 	background: url(../img/split-bg2.png) no-repeat;
@@ -423,16 +423,16 @@ p.split-shortcut {
 }
 .splitEnd .sid {
   	background: url(../img/split-bg2.png) no-repeat;
-  	background-position: 37px bottom;
+  	background-position: 37px -622px;
 }
 .editor.splitStart .sid {
-	background-position: 36px top;
+	background-position: 36px 3px;
 }
 .editor.splitInner .sid {
 	background-position: 36px -40px;
 }
 .editor.splitEnd .sid {
-	background-position: 36px bottom;
+	background-position: 36px -622px;
 }
 .start-job-marker,
 .end-job-marker
@@ -478,13 +478,10 @@ div.sid .implicit {
 .editor .outersource .actions {
     display: block;
 }
-.split-action .outersource .actions {
-    display: block !important;
+.split-action .outersource .actions,
+.split-action .actions {
+  display: block!important;
 }
-
-
-
-
 
 /*.comment{position:absolute;right:0;}*/
 /*
@@ -3741,7 +3738,7 @@ body.isAnonymous .add-mt-engine {
 
 .splitBar
 {
-    width: 46.9%;
+    width: 46.6%;
     position: absolute;
     bottom: 55px;
 }
