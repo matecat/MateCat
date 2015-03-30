@@ -3661,7 +3661,9 @@ section.currSearchSegment .sid
 div.sid .implicit {
 /*    display: none; */
 }
-
+.sid .actions {
+    display: none;
+}
 .outersource .actions {
     display: none;
     position: absolute;
@@ -6248,10 +6250,11 @@ float: left;
 }
 
 .editor.split-action .actions .split {
+    display: block !important;
 	background: #09beec;
-  -moz-box-shadow: inset 0 0 1px 1px #888;
-  -webkit-box-shadow: inset 0 0 1px 1px #888;
-  box-shadow: inset 0 0 1px 1px #888;
+    -moz-box-shadow: inset 0 0 1px 1px #888;
+    -webkit-box-shadow: inset 0 0 1px 1px #888;
+    box-shadow: inset 0 0 1px 1px #888;
 }
 
 .splitBar .buttons a {

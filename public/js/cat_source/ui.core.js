@@ -87,7 +87,7 @@ UI = {
 	},
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
-        console.log('segment qui: ', segment);
+//        console.log('segment qui: ', segment);
         return $(segment).attr('id').replace('segment-', '');
 //        return $(segment).attr('id').split('-')[1];
     },
@@ -1242,12 +1242,13 @@ UI = {
 		}
 	},
     getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
-        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
+//        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
+//        console.log('VEDIAMO: ', segment);
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
         newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
-            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
-//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
+//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
+            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
             ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
             ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
             '	<div class="body">' +
@@ -1259,7 +1260,7 @@ UI = {
             '		<div class="text">' +
             '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
             '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
-            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
+//            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
             '				<div class="copy" title="Copy source to target">' +
             '                   <a href="#"></a>' +
             '                   <p>ALT+CTRL+I</p>' +
@@ -1303,8 +1304,38 @@ UI = {
     stripSpans: function (str) {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
+    normalizeSplittedSegments: function (segments) {
+        newSegments = [];
+        $.each(segments, function (index) {
+            if(this.split_points_source.length) {
+                console.log('a');
+                segment = this;
+                sid = segment.sid;
+                $.each(this.split_points_source, function (i) {
+//                    console.log(segment.sid);
+//                    console.log(segment.sid + '-' + (i + 1));
+                    var newSegment = segment;
+                    newSegment.sid = sid + '-' + (i + 1);
+                    console.log('newSegment.sid 1: ', newSegment.sid);
+//                    console.log('dcd: ', segment.sid);
+                    newSegment.split_points_source = [];
+                    newSegments.push(newSegment);
+
+
+                });
+            } else {
+                console.log('b');
+                newSegments.push(this);
+            }
+
+        });
+console.log('newsegments 1: ', newSegments);
+        return newSegments;
+    },
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
+        segments = this.normalizeSplittedSegments(segments);
+        console.log('segments: ', segments);
         splitAr = splitAr || [];
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
@@ -1327,11 +1358,17 @@ UI = {
             escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
             originalId = this.sid.split('-')[0];
             if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId);
+                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
             } else {
-                $.each(this.split_points_source, function (index) {
+//                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
 
-                });
+                /*
+                                segment = this;
+                                $.each(this.split_points_source, function (index) {
+                                    newSegments += UI.getSegmentMarkup(segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, index+1);
+
+                                });
+                */
             }
 
         });
@@ -3063,6 +3100,8 @@ UI = {
 //        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
     },
     shortenId: function(id) {
+        console.log('id: ', id);
+        console.log('shortenId: ', id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>'));
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
     },
     isCJK: function () {

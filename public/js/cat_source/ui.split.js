@@ -4,21 +4,22 @@
  */
 if(config.splitSegmentEnabled) {
     $('html').on('mouseover', '.editor .sid', function() {
-//        actions = $(this).parent().find('.actions');
-//        actions.show();
+        actions = $(this).parent().find('.actions');
+        actions.show();
     }).on('mouseout', '.sid', function() {
-//        actions = $('.editor .sid').parent().find('.actions');
-//        actions.hide();
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.hide();
     }).on('mouseover', '.editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
-//        actions = $('.editor').find('.outersource .actions');
-//        actions.show();
+        actions = $('.editor').find('.outersource .actions');
+        actions.show();
     }).on('mouseout', '.editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
- /*
+
         setTimeout(function(){
             actions = $('.editor').find('.outersource .actions');
             actions.hide();
         }, 1000);
- */
+
+ /*
     }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
@@ -38,6 +39,25 @@ if(config.splitSegmentEnabled) {
         $('.editor .split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
 //        segment.find('.sid .actions').hide();
+*/
+    }).on('click', '.sid .actions .split', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').addClass('cancel');
+        $('.split-shortcut').html('CTRL + W');
+        console.log('split');
+        UI.currentSegment.addClass('split-action');
+        actions = $(this).parent().find('.actions');
+        actions.show();
+        UI.createSplitArea($(this).parents('section'));
+
+    }).on('click', '.sid .actions .split.cancel', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
