@@ -895,7 +895,7 @@ UI = {
             id = id.toString().split('-')[0];
         }
         var el = $("#segment-" + id + "-target").find(".editarea");
-        console.log('el: ', el);
+//        console.log('el: ', el);
         $(el).click();
     },
 	initSegmentNavBar: function() {
@@ -1244,6 +1244,8 @@ UI = {
     getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
 //        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
 //        console.log('VEDIAMO: ', segment);
+//        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
+        splitGroup = segment.split_group || splitGroup || '';
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
         newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
@@ -1308,34 +1310,47 @@ UI = {
         newSegments = [];
         $.each(segments, function (index) {
             if(this.split_points_source.length) {
-                console.log('a');
+//                console.log('a');
                 segment = this;
-                sid = segment.sid;
+                splitGroup = [];
                 $.each(this.split_points_source, function (i) {
-//                    console.log(segment.sid);
-//                    console.log(segment.sid + '-' + (i + 1));
-                    var newSegment = segment;
-                    newSegment.sid = sid + '-' + (i + 1);
-                    console.log('newSegment.sid 1: ', newSegment.sid);
-//                    console.log('dcd: ', segment.sid);
-                    newSegment.split_points_source = [];
-                    newSegments.push(newSegment);
+                    splitGroup.push(segment.sid + '-' + (i + 1));
+                });
 
-
+                $.each(this.split_points_source, function (i) {
+//                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
+                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+                    segData = {
+                        autopropagated_from: "0",
+                        has_reference: "false",
+                        parsed_time_to_edit: ["00", "00", "00", "00"],
+                        readonly: "false",
+                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
+                        segment_hash: segment.segment_hash,
+                        sid: segment.sid + '-' + (i + 1),
+                        split_group: splitGroup,
+                        split_points_source: [],
+                        status: "DRAFT",
+                        time_to_edit: "0",
+                        translation: translation,
+                        warning: "0"
+                    }
+                    newSegments.push(segData);
+                    segData = null;
                 });
             } else {
-                console.log('b');
+//                console.log('b');
                 newSegments.push(this);
             }
 
         });
-console.log('newsegments 1: ', newSegments);
+// console.log('newsegments 1: ', newSegments);
         return newSegments;
     },
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
         segments = this.normalizeSplittedSegments(segments);
-        console.log('segments: ', segments);
+//        console.log('segments: ', segments);
         splitAr = splitAr || [];
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
@@ -1360,19 +1375,10 @@ console.log('newsegments 1: ', newSegments);
             if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
                 newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
             } else {
-//                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
 
-                /*
-                                segment = this;
-                                $.each(this.split_points_source, function (index) {
-                                    newSegments += UI.getSegmentMarkup(segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, index+1);
-
-                                });
-                */
             }
 
         });
-//        console.log('newSegments 2: ', newSegments);
         return newSegments;
     },
 
@@ -3100,8 +3106,8 @@ console.log('newsegments 1: ', newSegments);
 //        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
     },
     shortenId: function(id) {
-        console.log('id: ', id);
-        console.log('shortenId: ', id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>'));
+//        console.log('id: ', id);
+//        console.log('shortenId: ', id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>'));
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
     },
     isCJK: function () {

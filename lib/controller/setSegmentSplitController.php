@@ -77,13 +77,14 @@ class setSegmentSplitController extends ajaxController {
                     'message' => 'Invalid split_points_source json'
             );
         }
+ /*
         else if ( empty( $this->split_points_source ) ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -6,
                     'message' => 'split_points_source cannot be empty'
             );
         }
-
+*/
     }
 
     public function doAction() {

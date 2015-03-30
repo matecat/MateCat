@@ -2406,7 +2406,7 @@ font-weight: normal !important;
 .translate-box select {
 width: 210px;
 }
-.translate-box input {
+.translate-box input[type="text"] {
     width:200px;
 }
 }
@@ -2414,8 +2414,8 @@ width: 210px;
 .translate-box select {
 width: 190px;
 }
-.translate-box input {
-    width:180px;
+.translate-box input[type="text"] {
+    width:180px!important;
 }
 #private-tm-key {
 width: 169px;
@@ -3436,7 +3436,7 @@ body.searchActive #filterSwitch
 
 
 
-.grayed{background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;display:none;z-index:0;}
+.grayed{background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;display:none;z-index:1;}
 .blacked{background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.5;display:none;z-index:1000;}
 
 
@@ -3601,10 +3601,16 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	padding-bottom: 1px;
 }
 
+
 .sid .txt {
-  background: #ccc;
     padding: 10px 0;
+    background:#fff;
     margin:20px 8px 0 8px;
+}
+
+
+.editing .sid .txt {
+  background: #ccc;
 }
 
 
@@ -3617,16 +3623,25 @@ p.split-shortcut {
 }
 
 .splitStart .sid{
-	background: url(../img/split-bg.png) no-repeat;
+	background: url(../img/split-bg2.png) no-repeat;
   	background-position: 37px top;;
 }
 .splitInner .sid {
-	background: url(../img/split-bg.png) no-repeat;
+	background: url(../img/split-bg2.png) no-repeat;
   	background-position: 37px -40px;
 }
 .splitEnd .sid {
-  	background: url(../img/split-bg.png) no-repeat;
+  	background: url(../img/split-bg2.png) no-repeat;
   	background-position: 37px bottom;
+}
+.editor.splitStart .sid {
+	background-position: 36px top;
+}
+.editor.splitInner .sid {
+	background-position: 36px -40px;
+}
+.editor.splitEnd .sid {
+	background-position: 36px bottom;
 }
 .start-job-marker,
 .end-job-marker

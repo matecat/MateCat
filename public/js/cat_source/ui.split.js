@@ -44,7 +44,7 @@ if(config.splitSegmentEnabled) {
         e.preventDefault();
         $('.sid .actions .split').addClass('cancel');
         $('.split-shortcut').html('CTRL + W');
-        console.log('split');
+//        console.log('split');
         UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
@@ -119,10 +119,10 @@ if(config.splitSegmentEnabled) {
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
             splitIndex = 0;
-            console.log('splittedSource: ', splittedSource);
+//            console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
-                console.log('prima: ', splittedSource[index]);
+//                console.log('prima: ', splittedSource[index]);
                 cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
 
                 //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
@@ -132,15 +132,18 @@ if(config.splitSegmentEnabled) {
                 //WARNING for the length count, must be done BEFORE encoding of quotes '"' to &quot;
                 cc = cc.replace(/"/gi, '&quot;');
 
-                console.log('dopo: ', cc);
+//                console.log('dopo: ', cc);
                 splitIndex += ll;
                 splitAr.push( splitIndex );
             });
             splitAr.pop();
+            onlyOne = (splittedSource.length == 1)? true : false;
+            splitArString = (splitAr.toString() == '0')? '' : splitAr.toString();
+
             APP.doRequest({
                 data: {
                     action:              "setSegmentSplit",
-                    split_points_source: '[' + splitAr.toString() + ']',
+                    split_points_source: '[' + splitArString + ']',
                     id_segment:          sid,
                     id_job:              config.job_id,
                     password:            config.password
@@ -166,11 +169,12 @@ if(config.splitSegmentEnabled) {
         },
         setSegmentSplitSuccess: function (data) {
             oldSid = data.sid;
-            console.log('oldSid: ', oldSid);
+//            console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
+            onlyOne = (splittedSource.length == 1)? true : false;
             $.each(splittedSource, function (index) {
                 segData = {
                     autopropagated_from: "0",
@@ -179,7 +183,7 @@ if(config.splitSegmentEnabled) {
                     readonly: "false",
                     segment: this.toString(),
                     segment_hash: segment.attr('data-hash'),
-                    sid: oldSid + '-' + (index + 1),
+                    sid: (onlyOne)? oldSid : oldSid + '-' + (index + 1),
                     split_points_source: [],
                     status: "DRAFT",
                     time_to_edit: "0",
@@ -191,6 +195,7 @@ if(config.splitSegmentEnabled) {
             });
             oldSegment = $('#segment-' + oldSid);
             alreadySplitted = (oldSegment.length)? false : true;
+            if(onlyOne) splitGroup = [];
             if(alreadySplitted) {
                 prevSeg = $('#segment-' + oldSid + '-1').prev('section');
                 if(prevSeg.length) {
@@ -201,10 +206,16 @@ if(config.splitSegmentEnabled) {
                     });
                     */
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                    $.each(splitGroup, function (index) {
-                        UI.lockTags($('#segment-' + this + ' .source'));
-                    });
-                    this.gotoSegment(oldSid + '-1');
+                    if(splitGroup.length) {
+                        $.each(splitGroup, function (index) {
+                            UI.lockTags($('#segment-' + this + ' .source'));
+                        });
+                        this.gotoSegment(oldSid + '-1');
+                    } else {
+                        UI.lockTags($('#segment-' + oldSid + ' .source'));
+                        this.gotoSegment(oldSid);
+                    }
+
                 } else {
 
                 }
