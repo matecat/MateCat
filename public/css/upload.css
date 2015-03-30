@@ -597,6 +597,9 @@ h2.payoff
 a{text-decoration:underline}
 a:hover{text-decoration:none}
 .translate-box a{display:block;}
+.translate-box label {
+  margin-left: 5px;
+}
 body{font-family:Calibri, Arial, Helvetica, sans-serif}
 .popup-languages .close
 	{
