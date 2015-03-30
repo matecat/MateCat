@@ -244,147 +244,178 @@ INIT::obtain();
                         
                         <p><strong>Sample JSON response</strong></p>
                                     <pre class="literal-block">
-{"data": {
+{
+  "errors": [],
+  "data": {
     "jobs": {
-        "5615": {
-            "chunks": {
-                "e77eeea779d2": {
-                    "6291": {
-                        "TOTAL_PAYABLE":
-                                [
-                                    143.15
-                                ],
-                        "REPETITIONS":
-                                [
-                                    0,
-                                    "0"
-                                ],
-                        "MT":
-                                [
-                                    166,
-                                    "166"
-                                ],
-                        "NEW":
-                                [
-                                    0,
-                                    "0"
-                                ],
-                        "TM_100":
-                                [
-                                    2,
-                                    "2"
-                                ],
-                        "TM_75_99":
-                                [
-                                    1,
-                                    "1"
-                                ],
-                        "INTERNAL_MATCHES":
-                                [
-                                    0,
-                                    "0"
-                                ],
-                        "ICE":
-                                [
-                                    0,
-                                    "0"
-                                ],
-                        "NUMBERS_ONLY":
-                                [
-                                    1,
-                                    "1"
-                                ],
-                        "FILENAME": "Test1.docx"
-                    }
-                }
-            },
-            "totals": {
-                "e77eeea779d2": {
-                    "TOTAL_PAYABLE":
-                            [
-                                143.15,
-                                "143"
-                            ],
-                    "REPETITIONS":
-                            [
-                                0,
-                                "0"
-                            ],
-                    "MT":
-                            [
-                                166,
-                                "166"
-                            ],
-                    "NEW":
-                            [
-                                0,
-                                "0"
-                            ],
-                    "TM_100":
-                            [
-                                2,
-                                "2"
-                            ],
-                    "TM_75_99":
-                            [
-                                1,
-                                "1"
-                            ],
-                    "INTERNAL_MATCHES":
-                            [
-                                0,
-                                "0"
-                            ],
-                    "ICE":
-                            [
-                                0,
-                                "0"
-                            ],
-                    "NUMBERS_ONLY":
-                            [
-                                1,
-                                "1"
-                            ],
-                    }
-                }
+      "19": {
+        "chunks": {
+          "2bfe688ec780": {
+            "34": {
+              "TOTAL_PAYABLE": [
+                166.4,
+                "166"
+              ],
+              "REPETITIONS": [
+                4,
+                "4"
+              ],
+              "MT": [
+                170,
+                "170"
+              ],
+              "NEW": [
+                0,
+                "0"
+              ],
+              "TM_100": [
+                9,
+                "9"
+              ],
+              "TM_75_99": [
+                26,
+                "26"
+              ],
+              "TM_50_74": [
+                0,
+                "0"
+              ],
+              "INTERNAL_MATCHES": [
+                4,
+                "4"
+              ],
+              "ICE": [
+                0,
+                "0"
+              ],
+              "NUMBERS_ONLY": [
+                0,
+                "0"
+              ],
+              "FILENAME": "Localizable.german+tagged.strings"
             }
+          }
         },
-        "summary": {
-            "IN_QUEUE_BEFORE": 0,
-            "STATUS": "DONE",
-            "TOTAL_SEGMENTS": 16,
-            "SEGMENTS_ANALYZED": 16,
-            "TOTAL_FAST_WC": "169.00",
-            "TOTAL_TM_WC": 143.15,
-            "TOTAL_STANDARD_WC": 168.2,
-            "STANDARD_WC_TIME": "27",
-            "FAST_WC_TIME": "27",
-            "TM_WC_TIME": "23",
-            "STANDARD_WC_UNIT": "minutes",
-            "TM_WC_UNIT": "minutes",
-            "FAST_WC_UNIT": "minutes",
-            "USAGE_FEE": "0.78",
-            "PRICE_PER_WORD": "0.030",
-            "DISCOUNT": "2",
-            "NAME": "MyProject4",
-            "TOTAL_RAW_WC": 170,
-            "TOTAL_PAYABLE": 143.15,
-            "PAYABLE_WC_TIME": "23",
-            "PAYABLE_WC_UNIT": "minutes",
-            "DISCOUNT_WC": "0"
+        "totals": {
+          "2bfe688ec780": {
+            "TOTAL_PAYABLE": [
+              166.4,
+              "166"
+            ],
+            "REPETITIONS": [
+              4,
+              "4"
+            ],
+            "MT": [
+              170,
+              "170"
+            ],
+            "NEW": [
+              0,
+              "0"
+            ],
+            "TM_100": [
+              9,
+              "9"
+            ],
+            "TM_75_99": [
+              26,
+              "26"
+            ],
+            "TM_50_74": [
+              0,
+              "0"
+            ],
+            "INTERNAL_MATCHES": [
+              4,
+              "4"
+            ],
+            "ICE": [
+              0,
+              "0"
+            ],
+            "NUMBERS_ONLY": [
+              0,
+              "0"
+            ]
+          }
         }
+      }
     },
-   "status": "DONE",
-   "analyze": "/analyze/MyProject4/5368-76ba60c027b9",
-   "jobs": {
-        "langpairs": {
-                "5615-e77eeea779d2": "de-DE|en-US"
+    "summary": {
+      "IN_QUEUE_BEFORE": 0,
+      "STATUS": "DONE",
+      "TOTAL_SEGMENTS": 84,
+      "SEGMENTS_ANALYZED": 82,
+      "TOTAL_FAST_WC": "208.60",
+      "TOTAL_TM_WC": 166.4,
+      "TOTAL_STANDARD_WC": 191.9,
+      "STANDARD_WC_TIME": "31",
+      "FAST_WC_TIME": "33",
+      "TM_WC_TIME": "27",
+      "STANDARD_WC_UNIT": "minutes",
+      "TM_WC_UNIT": "minutes",
+      "FAST_WC_UNIT": "minutes",
+      "USAGE_FEE": "1.27",
+      "PRICE_PER_WORD": "0.030",
+      "DISCOUNT": "1",
+      "NAME": "Localizable.german_tagged.strings",
+      "TOTAL_RAW_WC": 213,
+      "TOTAL_PAYABLE": 166.4,
+      "PAYABLE_WC_TIME": "27",
+      "PAYABLE_WC_UNIT": "minutes",
+      "DISCOUNT_WC": "0"
+    }
+  },
+  "status": "DONE",
+  "analyze": "/analyze/Localizable.german_tagged.strings/19-ef48a60d432f",
+  "jobs": {
+    "langpairs": {
+      "19-2bfe688ec780": "de-DE|en-US"
+    },
+    "job-url": {
+      "19-2bfe688ec780": "/translate/Localizable.german_tagged.strings/de-DE-en-US/19-2bfe688ec780"
+    },
+    "job-quality-details": {
+      "19-2bfe688ec780": [
+        {
+          "type": "Typing",
+          "allowed": 0.3,
+          "found": 0,
+          "vote": "Excellent"
         },
-       "job-url": {
-            "5615-e77eeea779d2": "/translate/MyProject4/de-DE-en-US/5615-e77eeea779d2"
+        {
+          "type": "Translation",
+          "allowed": 0.3,
+          "found": 0,
+          "vote": "Excellent"
+        },
+        {
+          "type": "Terminology",
+          "allowed": 0.5,
+          "found": 0,
+          "vote": "Excellent"
+        },
+        {
+          "type": "Language Quality",
+          "allowed": 0.5,
+          "found": 0,
+          "vote": "Excellent"
+        },
+        {
+          "type": "Style",
+          "allowed": 0.8,
+          "found": 0,
+          "vote": "Excellent"
         }
-   }
-}                                   </pre>
+      ]
+    },
+    "quality-overall": {
+      "19-2bfe688ec780": "Excellent"
+    }
+  }
+}
+</pre>
                         <p><strong>Return value definitions</strong></p>
                         <table id="metadata-status-details" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                         
@@ -394,132 +425,99 @@ INIT::obtain();
                                 <th>description</th>
                             </tr>
                             <tr>
-                                <td><code>jobs</code></td>
-                                <td>A structure containing all the info for the specified project.
-                                    The numerical keys on the first level are the ID of the Jobs contained in the project.
-                                    ( An ID identifies a language target, so, there are so many languages as there are IDs and vice versa  ).
+                                <td><code>errors</code></td>
+                                <td>A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in <code>config.inc.php</code> file and happens only after Matecat updates, so you should never see it ).
                                 </td>
                             </tr>
                             <tr>
-                                <td><code>chunks</code></td>
-                                <td>A structure containing the password for the associated job ID.
-                                    There may be multiple chunks ( passwords ) for the same job ID because of the split.
-                                    So this key can have multiple entries.
-                                    Inside every entry key ( passwords ) whe have one or more numerical key indicating the id of every file in the chunk
+                                <td><code>data</code></td>
+                                <td>Holds all progress statisticts for every <code>job</code> and for overall project.<br/>
+									It contains <code>jobs</code> and <code>summary</code> sub-sections.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>summary</code></td>
+                                <td>Sub-section <code>summary</code> holds statistict for the whole project that are not related to single <code>job</code> objects:
+								<ul>
+									<li><code>NAME</code>: the name of your project</li>
+									<li><code>STATUS</code>: the status the project is from analysis perspective
+										<ol>
+											<li><code>NEW</code>: just created, not analyzed yet</li>
+											<li><code>FAST_OK</code>: preliminary ("fast") analysis completed, now running translations ("TM") analysis</li>
+											<li><code>DONE</code>: analysis complete</li>
+										</ol>
+									</li>
+									<li><code>IN_QUEUE_BEFORE</code>: number of segments belonging to other projects that are being analyzed before yours; it's the wait time for you</li>
+									<li><code>TOTAL_SEGMENTS</code>: number of segments belonging to your project</li>
+									<li><code>SEGMENTS_ANALYZED</code>: analysis progress, on <code>TOTAL_SEGMENTS</code></li>
+									<li><code>TOTAL_RAW_WC</code>: number of words (word count) of your project, as extracted by the textual parsers</li>
+									<li><code>TOTAL_STANDARD_WC</code>: word count, minus the sentences that are repeated</li>
+									<li><code>TOTAL_FAST_WC</code>: word count, minus the sentences that are partially repeated</li>
+									<li><code>TOTAL_TM_WC</code>: word count, with sentences found in the cloud translation memory discounted from the total; this depends on the percentage of overlapping between the sentences of your project and the past translations</li>
+									<li><code>TOTAL_PAYABLE</code>: total word count, after analysis</li>
+								</ul>
+								</td>
+                            </tr>
+                            <tr>
+                                <td><code>jobs</code></td>
+                                <td>Sub-section <code>jobs</code> holds statistict for all the <code>job</code> objects.<br/>
+                                    The numerical keys on the first level are the IDs of the jobs contained in the project.<br/>
+									Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project.<br/>
+									A job holds a <code>chunks</code> and a <code>totals</code> section.
                                 </td>
                             </tr>
                             <tr>
                                 <td><code>totals</code></td>
-                                <td>Returns the total for every chunk. The entries inside this key are the sums of values for all the chunks of the job.</td>
+								<td>
+                                Contains all analysis statistics for all files in the current job (i.e., all files that have to be translated in a target language):
+								<ul>
+                                <li><code>TOTAL_PAYABLE</code>: total word count, after analysis</li>
+                                <li><code>REPETITIONS</code>: cumulative word count for the segments that repeat themselves in the file</li>
+                                <li><code>INTERNAL_MATCHES</code>: cumulative word count for the segments that fuzzily overlap with others in the file, while not being an exact repetition</li>
+                                <li><code>MT</code>: cumulative word count for all segments that can be translated with machine translation; it accounts for all the information that could not be discounted by repetitions, internal matches or translation memory</li>
+                                <li><code>NEW</code>: cumulative word count for segments that can't be discounted with repetition or internal matches; it's the net translation effort</li>
+                                <li><code>TM_100</code>: cumulative word count for the exact matches found in TM server</li>
+                                <li><code>TM_75_99</code>: cumulative word count for partial matches in the TM that cover 75-99% of each segment</li>
+                                <li><code>ICE</code>: cumulative word count for 100% TM matches that also share the same context with the TM</li>
+                                <li><code>NUMBERS_ONLY</code>: cumulative word counts for segments made of numberings, dates and similar not translatable data ( i.e.: 93/127 )</li>
+								</ul>
                             </tr>
                             <tr>
-                                <td><code>summary</code></td>
-                                <td>Returns the total for the project.</td>
+                                <td><code>chunks</code></td>
+                                <td>A structure modeling a portion of content to translate. <br/>
+									A whole file can be splitted in multiple chunks, to be distributed to multiple translators, or can be enveloped in a single chunk.<br/>
+                                    Each chunk has a password as first level key and a numerical ID as second level key to identify different chunks for the same file.<br/>
+                                    Each chunk contains the same structure of the <code>totals</code> section.<br/>
+									The sum of the <code>chunks</code> equals to the <code>totals</code>.
+                                </td>
                             </tr>
                             <tr id="project-status">
                                 <td><code>status</code></td>
-                                <td>Return the analysis status of the project. The statuses can be:
+                                <td>The analysis status of the project:
                                     <ul>
-                                        <li><code>ANALYZING</code> indicating that the analysis/creation still working.</li>
-                                        <li><code>NO_SEGMENTS_FOUND</code> indicating that the project has no segments to analyze.</li>
-                                        <li><code>ANALYSIS_NOT_ENABLED</code> indicating that no analysis will be performed because of matecat configurations.</li>
-                                        <li><code>DONE</code> indicating that the analysis/creation is completed.</li>
-                                        <li><code>FAIL</code> indicating that the analysis/creation is failed.</li>
+                                        <li><code>ANALYZING</code>: analysis/creation still in progress</li>
+                                        <li><code>NO_SEGMENTS_FOUND</code>: the project has no segments to analyze (have you uploaded a file containing only images?)</li>
+                                        <li><code>ANALYSIS_NOT_ENABLED</code>: no analysis will be performed because of Matecat configuration</li>
+                                        <li><code>DONE</code>: the analysis/creation is completed.</li>
+                                        <li><code>FAIL</code>: the analysis/creation is failed.</li>
                                     </ul>
                                 </td>
                             </tr>
                             <tr>
                                 <td><code>analyze</code></td>
-                                <td>A link to the analyze page where you can fine all these project info.</td>
+                                <td>A link to the analyze page; it's a human readable version of this API output</td>
                             </tr>
                             <tr>
-                                <td><code>langpairs</code></td>
-                                <td>The language pairs for every job/chunk in the project.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><code>job-url</code></td>
-                                <td>An object containing all the links to the jobs of the project</td>
-                            </tr>
-                            <tr>
-                                <td><code>job-quality-details</code></td>
-                                <td>A structure containing, for each job, an array of 5 objects: each object is a quality check performed on the job; the object contains the type of the check, the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio</td>
-                            </tr>
-                            <tr>
-                                <td><code>quality-overall</code></td>
-                                <td>A object containing the overall quality rating for each job</td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_PAYABLE</code></td>
-                                <td>A field containing the number of matecat payable words count in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>REPETITIONS</code></td>
-                                <td>A field containing the number of words repetition in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>INTERNAL_MATCHES</code></td>
-                                <td>A field containing the number of partial matches found in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>MT</code></td>
-                                <td>A field containing the number of matches by Machine Translation in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>NEW</code></td>
-                                <td>A field containing the number of words not found in Machine Translations nor in Memory Server in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>TM_100</code></td>
-                                <td>A field containing the number of exact matches found in Memory Server in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>TM_75_99</code></td>
-                                <td>A field containing the number of matches found in the Memory Server scored between 75% and 99% in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>ICE</code></td>
-                                <td>A field containing the number of exact matches in context found in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>NUMBERS_ONLY</code></td>
-                                <td>A field containing only number, dates and similar not translatable data ( <br />Ex: 93/127 ) found in the project/chunk/file</td>
-                            </tr>
-                            <tr>
-                                <td><code>IN_QUEUE_BEFORE</code></td>
-                                <td>A field containing the number of segments in the analysis queue before the project and not relative to the project.</td>
-                            </tr>
-                            <tr>
-                                <td><code>STATUS</code></td>
-                                <td>A field containing the analysis status of the project. See <a href="#project-status" >status</a></td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_SEGMENTS</code></td>
-                                <td>A field containing the total number of segments the project.</td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_FAST_WC</code></td>
-                                <td>A field containing the total number of words calculated in fast mode for the project.</td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_TM_WC</code></td>
-                                <td>A field containing the total number of segments found in the translation memory server.</td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_STANDARD_WC</code></td>
-                                <td>A field containing the total number of words calculated with standard word count system.</td>
-                            </tr>
-                            <tr>
-                                <td><code>STANDARD_WC_TIME</code></td>
-                                <td>A field containing the total number of words calculated with standard word count system.</td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_RAW_WC</code></td>
-                                <td>A field containing the total number of words calculated without any repetition check.</td>
-                            </tr>
-                            <tr>
-                                <td><code>TOTAL_PAYABLE</code></td>
-                                <td>A field containing the final total number of words calculated by Matecat.</td>
+                                <td><code>jobs</code></td>
+                                <td>Section <code>jobs</code> contains all metadata about <code>job</code> (like URIs, quality reports and languages):
+								<ul>
+                                <li><code>langpairs</code>: the language pairs for your project; an entry for every chunk in the project, with the id-password combination as key and the language pair as the value
+                                </li>
+                                <li><code>job-url</code>: the links to the chunks of the project; an entry for every chunk in the project, with the id-password combination as key and the link to the chunk as the value.</li>
+                                <li><code>job-quality-details</code>: a structure containing, for each chunk, an array of 5 objects: each object is a quality check performed on the job; the object contains the type of the check (<code>Typing</code>, <code>Translation</code>, <code>Terminology</code>, <code>Language Quality</code>, <code>Style</code>), the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio (same as <code>quality-overall</code>)
+								</li>
+                                <li><code>quality-overall</code>: the overall quality rating for each chunk (<code>Very good</code>, <code>Good</code>, <code>Acceptable</code>, <code>Poor</code>, <code>Fail</code>)</li>
+							</ul>
                             </tr>
                             </tbody>
                         </table>
