@@ -2406,7 +2406,7 @@ font-weight: normal !important;
 .translate-box select {
 width: 210px;
 }
-.translate-box input {
+.translate-box input[type="text"] {
     width:200px;
 }
 }
@@ -2414,8 +2414,8 @@ width: 210px;
 .translate-box select {
 width: 190px;
 }
-.translate-box input {
-    width:180px;
+.translate-box input[type="text"] {
+    width:180px!important;
 }
 #private-tm-key {
 width: 169px;
