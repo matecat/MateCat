@@ -163,7 +163,7 @@ UI = {
             this.lastOpenedEditarea.attr('contenteditable', 'false');
 
             this.body.removeClass('editing');
-            $(segment).removeClass("editor");
+            $(segment).removeClass("editor waiting_for_check_result opened");
 
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
