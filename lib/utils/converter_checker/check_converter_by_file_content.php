@@ -61,11 +61,6 @@ class ConvertersMonitor {
         require_once $this->ROOT . '/inc/config.inc.php';
         INIT::obtain();
 
-        require_once INIT::$UTILS_ROOT . "/Log.php";
-        require_once INIT::$UTILS_ROOT . "/Utils.php";
-        require_once INIT::$MODEL_ROOT . '/Database.class.php';
-        require_once INIT::$UTILS_ROOT . "/FileFormatConverter.php";
-
         $this->db = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->db->connect();
 
@@ -596,7 +591,7 @@ class ConvertersMonitor {
             $this->converterFactory->sendErrorReport = false;
 
             //10 seconds of timeout, average time is less than 5 seconds
-            $this->converterFactory->setCurlOpt( array( 'CURLOPT_TIMEOUT' => 15 ) );
+            $this->converterFactory->setCurlOpt( array( 'CURLOPT_TIMEOUT' => 20 ) );
 
             self::_prettyEcho( "> Trying conversion on " . $ip_converter, 4 );
 

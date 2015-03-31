@@ -30,7 +30,7 @@ class updateJobKeysController extends ajaxController {
                 ),
                 'job_pass' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
         );
 
@@ -71,9 +71,7 @@ class updateJobKeysController extends ajaxController {
 
         $this->checkLogin();
 
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-        if ( $url_request ) {
+        if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         } elseif( $this->userMail == $this->jobData['owner'] ){
             $this->userRole = TmKeyManagement_Filter::OWNER;

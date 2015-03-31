@@ -246,24 +246,44 @@ APP = {
 //            $('.popup.hide, .popup-outer.hide').hide();
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
-    fitText: function(container,child,limitHeight) {
-		if(container.height() < (limitHeight+1)) return;
-		txt = child.text();
-		var name = txt;
-		var ext = '';
-		if(txt.split('.').length > 1) {
-			var extension = txt.split('.')[txt.split('.').length-1];
-			name = txt.replace('.'+extension,'');
-			ext = '.' + extension;
-		}
-		firstHalf = name.substr(0 , Math.ceil(name.length/2));
-		secondHalf = name.replace(firstHalf,'');
-		child.text(firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext);
-		while (container.height() > limitHeight) {
-			num = child.text().length;
-			child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
-			if(num == child.text().length) break;
-		}
+    fitText: function( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ){
+
+        if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;
+        if ( typeof $( child ).attr( 'data-originalText' ) == 'undefined' ) {
+            $( child ).attr( 'data-originalText', $( child ).text() );
+        }
+
+        var originalText = $( child ).text();
+
+        //tail recursion exit control
+        if ( originalText.length < escapeTextLen || ( actualTextLow + actualTextHi ).length < escapeTextLen ) {
+            return false;
+        }
+
+        if( typeof actualTextHi == 'undefined' && typeof actualTextLow == 'undefined' ){
+
+            //we are in window.resize
+            if ( originalText.match( /\[\.\.\.]/ ) ) {
+                originalText = $( child ).attr( 'data-originalText' );
+            }
+
+            actualTextLow = originalText.substr( 0, Math.ceil( originalText.length / 2 ) );
+            actualTextHi = originalText.replace( actualTextLow, '' );
+        }
+
+        actualTextHi = actualTextHi.substr( 1 );
+        actualTextLow = actualTextLow.substr( 0, actualTextLow.length -1 );
+
+        child.text( actualTextLow + '[...]' + actualTextHi );
+
+        var test = true;
+        // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
+        while( container.height() >= limitHeight && $( window ).width() > 1024 && test == true ){
+             test = this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
+        }
+
+        return false;
+
     },
     objectSize: function(obj) {
         var size = 0, key;
@@ -292,11 +312,7 @@ APP = {
 			o = s + o;
 		}
 		return o;
-	},
-    isAnonymousUser: function () {
-        anonymous = $('#welcomebox span').text() == "Anonymous";
-        return anonymous;
-    },
+	}
 };
 
 $.extend($.expr[":"], {
@@ -304,3 +320,13 @@ $.extend($.expr[":"], {
         return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
     }
 });
+
+var _prum = [['id', '54fdb531abe53d014cfbfea5'],
+             ['mark', 'firstbyte', (new Date()).getTime()]];
+(function() {
+    var s = document.getElementsByTagName('script')[0]
+      , p = document.createElement('script');
+    p.async = 'async';
+    p.src = '//rum-static.pingdom.net/prum.min.js';
+    s.parentNode.insertBefore(p, s);
+})();

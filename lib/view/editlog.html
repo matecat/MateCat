@@ -34,14 +34,6 @@
             <div class="wrapper">       
                 <a href="${basepath}" class="logo"></a>
 
-                <div class="breadcrumbs">    
-                    <div id="pname" tal:content="pname">Project</div>
-                    <span style="float: left">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
-                </div>
-
-
-
-
                 <!--tal:block metal:fill-slot="actions"-->
                 <form action="${basepath}" method="post">
                     <input type="hidden" name="action" value="editlogDownload"/>
@@ -53,6 +45,10 @@
                 </form>
                 <!--/tal:block -->
 
+                <div class="breadcrumbs">    
+                    <span id="pname" tal:content="pname">Project</span>
+                    <span >&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
+                </div>
             </div>
         </header>
 
@@ -156,43 +152,77 @@
 
                 <nav>
                     <ul>
-                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
-					<li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
-                   </ul>
+                        <tal:block tal:condition="php: !empty(logged_user)">
+                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                        </tal:block>
+
+                        <tal:block tal:condition="php: empty(logged_user)">
+                            <li><a href="${incomingUrl}" class="authLink">Manage</a></li>
+                        </tal:block>
+
+                        <li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>
+                    </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${incomingUrl}">Login</a>)
                         </div>
                     </tal:block>
 
                     <tal:block tal:condition="php: !empty(logged_user)">
-                        <div id='welcomebox'>
-                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        <div id='welcomebox' tal:attributes="title extended_user">
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
                         </div>
                     </tal:block>
+                    
                 </nav>
-                
-                <div id="statistics">
 
-                    <p >Progress:</p>
-                    <div class="meter">
-                        <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC}%"></a>
-                        <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC}%"></a>
-                        <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC}%"></a>
-                        <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC}%"></a>
+
+                <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
+                    <!-- <p class="progress">Progress:</p> -->
+                    <div class="meter" style="width:10%">
+
+                        <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                        <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                        <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                        <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
                     </div>
-                    <p style="margin-left:-10px;margin-right:10px"><span tal:content="job_stats/PROGRESS_PERC_FORMATTED|default" id="stat-progress">0</span>%</p>
+                    <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                     <ul>
-                        <li id="stat-eqwords">Total Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
-                        <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                    </ul>
 
-                </div>
-            </div>
+                        <li id="stat-eqwords">
+                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                        </li>
+                        <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
+                        <!--
+                        <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
+                        <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
+                        -->
+                      
+            
+
+                   </ul> 
+                   <!-- ul class="statistics-details">
+
+                     <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
+                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
+                    </ul -->
+            
+        </div>
+
+            </div> <!-- .wrapper -->
         </footer>
 
 
+        <script type="text/javascript">
+            $( document ).ready(function() {
+                $('a.authLink').click(function(e){
+                    e.preventDefault();
+                    APP.googole_popup($(this).attr('href'));
+                });
+            });
+        </script>
         <script src="${basepath}public/js/lib/snapengage.js"></script>
-    </body> 
+
+    </body>
 </html>

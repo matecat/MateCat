@@ -2,7 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
-
 include_once INIT::$UTILS_ROOT . "/Utils.php";
 
 
@@ -21,16 +20,6 @@ class newProjectController extends viewController {
      * @var string The actual URL
      */
     private $incomingUrl;
-
-    /**
-     * @var string The Google's auth URL
-     */
-    private $authURL;
-
-    /**
-     * @var Google_Client
-     */
-    private $client;
 
     private $keyList = array();
 
@@ -146,8 +135,19 @@ class newProjectController extends viewController {
 
         $this->generateAuthURL();
 
-        $this->mt_engines  = getEngines( 'MT' );
-        $this->tms_engines = getEngines( 'TM' );
+        list( $uid, $cid ) = $this->getLoginUserParams();
+        $engine = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineQuery         = new EnginesModel_EngineStruct();
+        $engineQuery->type   = 'MT';
+
+        if ( @(bool)$_GET[ 'amt' ] == true ) {
+            $engineQuery->uid    = 'all';
+        } else {
+            $engineQuery->uid    = ( $uid == null ? -1 : $uid );
+        }
+
+        $engineQuery->active = 1;
+        $this->mt_engines = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
 
@@ -261,14 +261,6 @@ class newProjectController extends viewController {
 
     }
 
-    private function generateAuthURL() {
-
-        $this->client = OauthClient::getInstance()->getClient();
-
-        $this->authURL = $this->client->createAuthUrl();
-
-    }
-
     public function setTemplateVars() {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 
@@ -287,13 +279,8 @@ class newProjectController extends viewController {
 
         $this->template->upload_session_id = $this->guid;
 
-        if ( @(bool)$_GET[ 'amt' ] == true ) {
-            $this->template->mt_engines = $this->mt_engines;
-        } else {
-            $this->template->mt_engines = array();
-        }
-
-        $this->template->tms_engines        = $this->tms_engines;
+        $this->template->mt_engines         = $this->mt_engines;
+//        $this->template->tms_engines        = $this->tms_engines;
         $this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
 
         $this->template->isUploadTMXAllowed = false;
@@ -312,9 +299,11 @@ class newProjectController extends viewController {
         $this->template->targetLangHistory          = $this->targetLangArray;
         $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
         $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->extended_user              = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
+        $this->template->logged_user                = $this->logged_user['short'];
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
         $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
@@ -322,6 +311,8 @@ class newProjectController extends viewController {
         $this->template->authURL     = $this->authURL;
 
         $this->template->user_keys = $this->keyList;
+
+        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
 
     }
 

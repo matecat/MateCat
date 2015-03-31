@@ -2,42 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-/**
- *
- * Class addTMController
- * This class has the responsibility to load a TM into MyMemory
- * whether a tm key is valid or not.<br/>
- *
- * Handled cases:<br/>
- * <ul>
- *  <li>Existing TM        -> tm key provided</li>
- *  <li>Non-existing TM    -> tmx file uploaded</li>
- *  <li>Logged user        -> tm associated to the user and to the job</li>
- *  <li>Non-logged user    -> tm associated to the job</li>
- * </ul>
- * <br/>
- * <b>Error codes and messages:</b><br/>
- * <table>
- *  <tr><th>Conditions</th><th>Code</th><th>Message</th></tr>
- *  <tr>
- *      <td>tm_key not set</td>
- *      <td>-2</td>
- *      <td>Please specify a TM key.</td></tr>
- *  <tr>
- *      <td>Provided tm_key is not valid</td>
- *      <td>-9</td>
- *      <td>Please upload a TMX.</td></tr>
- *  <tr>
- *      <td>File upload failed or file import in MyMemory failed</td>
- *      <td>-15</td>
- *      <td>Cant't load TMX files right now, try later.</td></tr>
- *  <tr>
- *      <td>Invalid key provided while importing a file in MyMemory</td>
- *      <td>-15</td>
- *      <td>Invalid key provided</td></tr>
- * </table>
- *
- */
 class TMSService {
 
     /**
@@ -56,14 +20,9 @@ class TMSService {
     private $file;
 
     /**
-     * @var TmKeyManagement_SimpleTMX
+     * @var Engines_MyMemory
      */
-    private $tmxServiceWrapper;
-
-    /**
-     * @var TmKeyManagement_LocalAPIKeyService
-     */
-    private $apiKeyService;
+    private $mymemory_engine;
 
     /**
      *
@@ -72,10 +31,7 @@ class TMSService {
     public function __construct() {
 
         //get MyMemory service
-        $this->tmxServiceWrapper = new TmKeyManagement_SimpleTMX( 1 );
-
-        //get MyMemory apiKey service
-        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService( 1 );
+        $this->mymemory_engine = Engine::getInstance( 1 );
 
     }
 
@@ -84,15 +40,15 @@ class TMSService {
      *
      * @throws Exception
      */
-    public function checkCorrectKey(){
+    public function checkCorrectKey() {
 
-        $isValid = false;
+        $isValid = true;
 
         //validate the key
         //This piece of code need to be executed every time
         try {
 
-           $isValid = $this->apiKeyService->checkCorrectKey( $this->tm_key );
+            $isValid = $this->mymemory_engine->checkCorrectKey( $this->tm_key );
 
         } catch ( Exception $e ) {
 
@@ -112,13 +68,13 @@ class TMSService {
      * @return stdClass
      * @throws Exception
      */
-    public function createMyMemoryKey(){
+    public function createMyMemoryKey() {
 
         try {
-            $newUser =  $this->apiKeyService->createMyMemoryKey();
-        } catch ( Exception $e ){
+            $newUser = $this->mymemory_engine->createMyMemoryKey();
+        } catch ( Exception $e ) {
             //            Log::doLog( $e->getMessage() );
-            throw new Exception( $e->getMessage(), -7);
+            throw new Exception( $e->getMessage(), -7 );
         }
 
         return $newUser;
@@ -139,7 +95,7 @@ class TMSService {
 
         } catch ( Exception $e ) {
 //            Log::doLog( $e->getMessage() );
-            throw new Exception( $e->getMessage(), -8);
+            throw new Exception( $e->getMessage(), -8 );
         }
 
         return $this->file = $uploadedFiles;
@@ -154,25 +110,26 @@ class TMSService {
 
         $this->checkCorrectKey();
 
-//        Log::doLog($this->file);
+        Log::doLog($this->file);
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
 
             foreach ( $this->file as $k => $fileInfo ) {
 
-                $importStatus = $this->tmxServiceWrapper->import(
+                $importStatus = $this->mymemory_engine->import(
                         $fileInfo->file_path,
-                        $this->tm_key
+                        $this->tm_key,
+                        $this->name
                 );
 
                 //check for errors during the import
                 switch ( $importStatus ) {
                     case "400" :
-                        throw new Exception( "Can't load TMX files right now, try later", -15);
+                        throw new Exception( "Can't load TMX files right now, try later", -15 );
                         break;
                     case "403" :
-                        throw new Exception( "Invalid key provided", -15);
+                        throw new Exception( "Invalid key provided", -15 );
                         break;
                     default:
                 }
@@ -181,7 +138,7 @@ class TMSService {
             return true;
 
         } else {
-            throw new Exception( "Can't find uploaded TMX files", -15);
+            throw new Exception( "Can't find uploaded TMX files", -15 );
         }
 
     }
@@ -193,25 +150,25 @@ class TMSService {
     public function tmxUploadStatus() {
 
         //remove spaces because of MyMemory remove them and status check does not works
-        $replace_spaces = str_replace( " ", "_", $this->name );
+        $name_space_replaced = str_replace( " ", "_", $this->name );
 
-        $allMemories              = $this->tmxServiceWrapper ->getStatus( $this->tm_key, $replace_spaces );
+        $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $name_space_replaced );
 
 //        Log::doLog( $allMemories );
 
-        if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
+        if ( $allMemories->responseStatus != "200" || count( $allMemories->responseData[ 'tm' ] ) == 0 ) {
 
             Log::doLog( "Can't find TMX files to check for status" );
 
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( "Can't find TMX files to check for status", -15);
+            throw new Exception( "Can't find TMX files to check for status", -15 );
         }
 
         $tmx_max_id = 0;
         $current_tm = array();
 
         //scan through memories
-        foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
+        foreach ( $allMemories->responseData[ 'tm' ] as $memory ) {
             //obtain max id
             $tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
 
@@ -239,7 +196,7 @@ class TMSService {
             case "1":
                 //loaded (or error, in any case go ahead)
                 Log::doLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
-                $result[ 'data' ] = array(
+                $result[ 'data' ]      = array(
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
                         "source_lang" => $current_tm[ "source_lang" ],
@@ -248,7 +205,7 @@ class TMSService {
                 $result[ 'completed' ] = true;
                 break;
             default:
-                throw new Exception( "Invalid TMX (\"" . $current_tm[ 'file_name' ] . "\")", -14);
+                throw new Exception( "Invalid TMX (\"" . $current_tm[ 'file_name' ] . "\")", -14 );
                 break;
         }
 
@@ -300,26 +257,38 @@ class TMSService {
      * First basic implementation
      * TODO  in the future we would send a mail with link for direct prepared download
      */
-    public function downloadTMX(){
+    public function downloadTMX() {
 
-        $result = $this->tmxServiceWrapper->createExport( $this->tm_key );
+        /**
+         * @var $result Engines_Results_MyMemory_ExportResponse
+         */
+        $result = $this->mymemory_engine->createExport( $this->tm_key );
 
-        if( @$result['status'] == 'QUEUED' && $result['responseStatus'] == 202 ){
+        if ( $result->responseDetails == 'QUEUED' &&
+                $result->responseStatus == 202
+        ) {
 
             do {
 
-                $result = $this->tmxServiceWrapper->checkExport( $this->tm_key );
+                /**
+                 * @var $result Engines_Results_MyMemory_ExportResponse
+                 */
+                $result = $this->mymemory_engine->checkExport( $this->tm_key );
 
-                usleep(1500000); // 1.5 seconds
+                usleep( 1500000 ); // 1.5 seconds
 
-            } while( isset( $result['status'] ) && $result['status'] != 'READY' && $result['status'] != 'NO SEGMENTS' );
+            } while ( $result->responseDetails != 'READY' && $result->responseDetails != 'NO SEGMENTS' );
 
-            if( !isset( $result['status'] ) ) throw new Exception( "Status check failed. Export broken.", -16 );
+            if ( !isset( $result->responseDetails ) ) {
+                throw new Exception( "Status check failed. Export broken.", -16 );
+            }
 
-            if( $result['status'] == 'NO SEGMENTS' ) throw new DomainException( "No translation memories found to download.", -17 );
+            if ( $result->responseDetails == 'NO SEGMENTS' ) {
+                throw new DomainException( "No translation memories found to download.", -17 );
+            }
 
-            $_download_url = parse_url( $result['resourceLink'] );
-            parse_str( $_download_url['query'], $secrets );
+            $_download_url = parse_url( $result->resourceLink );
+            parse_str( $_download_url[ 'query' ], $secrets );
             list( $_key, $pass ) = array_values( $secrets );
 
         } else {
@@ -328,7 +297,7 @@ class TMSService {
 
         }
 
-        $resource_pointer = $this->tmxServiceWrapper->downloadExport( $this->tm_key, $pass );
+        $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
 
         return $resource_pointer;
 
@@ -345,17 +314,18 @@ class TMSService {
      * @return SplTempFileObject $tmpFile
      *
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ){
+    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang ) {
 
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
-<tmx version="1.4" xmlns="https://www.matecat.com">
+<tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
-            creationtoolversion="'. INIT::$BUILD_NUMBER .'"
+            creationtoolversion="' . INIT::$BUILD_NUMBER . '"
+	    o-tmf="Matecat"
             creationid="Matecat"
-            datatype="xml"
+            datatype="plaintext"
             segtype="sentence"
             adminlang="en-US"
             srclang="' . $sourceLang . '"/>
@@ -363,31 +333,31 @@ class TMSService {
 
         $result = getTranslationsForTMXExport( $jid, $jPassword );
 
-        foreach ( $result as $k => $row ){
+        foreach ( $result as $k => $row ) {
 
-            $dateCreate = new DateTime( $row['translation_date'], new DateTimeZone( 'UTC' ) );
+            $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
 
             $tmx = '
-    <tu tuid="' . $row['id_segment'] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
-        <prop type="x-MateCAT-id_job">' . $row['id_job'] . '</prop>
-        <prop type="x-MateCAT-id_segment">' . $row['id_segment'] . '</prop>
-        <prop type="x-MateCAT-filename">' . $row['filename'] . '</prop>
+    <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
+        <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
+        <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
+        <prop type="x-MateCAT-filename">' . $row[ 'filename' ] . '</prop>
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . htmlspecialchars($row['segment']) . '</seg>
+            <seg>' . htmlspecialchars( $row[ 'segment' ] ) . '</seg>
         </tuv>
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . htmlspecialchars($row['translation']) . '</seg>
+            <seg>' . htmlspecialchars( $row[ 'translation' ] ) . '</seg>
         </tuv>
     </tu>
 ';
 
-            $tmpFile->fwrite($tmx);
+            $tmpFile->fwrite( $tmx );
 
         }
 
-        $tmpFile->fwrite("
+        $tmpFile->fwrite( "
     </body>
-</tmx>");
+</tmx>" );
 
         $tmpFile->rewind();
 

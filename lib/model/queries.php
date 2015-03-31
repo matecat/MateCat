@@ -1,7 +1,5 @@
 <?php
 
-include_once 'Database.class.php';
-
 function doSearchQuery( ArrayObject $queryParams ) {
     $db = Database::obtain();
 
@@ -55,6 +53,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			WHERE fj.id_job = {$queryParams['job']}
 		AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
 			$where_status
+			AND show_in_cattool = 1
 			GROUP BY s.id WITH ROLLUP";
 
     } elseif ( $key == "target" ) {
@@ -116,7 +115,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
     //    Log::doLog($results);
 
-    $vector = array();
+    $vector = array( 'sidlist' => array(), 'count' => '0' );
     foreach ( $results as $occurrence ) {
         $vector[ 'sidlist' ][ ] = $occurrence[ 'id' ];
     }
@@ -131,8 +130,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
         //empty search values removed
         //ROLLUP counter rules!
         if ( $vector[ 'count' ] == 0 ) {
-            $vector[ 'sidlist' ] = null;
-            $vector[ 'count' ]   = null;
+            $vector[ 'sidlist' ] = array();
+            $vector[ 'count' ]   = 0;
         }
     }
 
@@ -715,7 +714,7 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
         JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) ."'
 
             WHERE segment_translations.id_job = " . (int)$jid . "
-            AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+            AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '".Constants_TranslationStatus::STATUS_APPROVED."')
             AND show_in_cattool = 1
 ";
 
@@ -1335,7 +1334,7 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
 
 function getCurrentTranslationAndLock( $id_job, $id_segment ) {
 
-    $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u FOR UPDATE";
+    $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
     $query = sprintf( $query, $id_segment, $id_job );
 
     $db      = Database::obtain();
@@ -1557,47 +1556,95 @@ function getEditLog( $jid, $pass ) {
     return $results;
 }
 
-function getNextUntranslatedSegment( $sid, $jid, $password ) {
+/**
+ * Used to get a resultset of segments id and statuses
+ *
+ * @param      $sid
+ * @param      $jid
+ * @param      $password
+ * @param bool $getTranslatedInstead
+ *
+ * @return array
+ */
+function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = false ) {
 
-    $query = "SELECT s.id, st.`status`
+    $db      = Database::obtain();
+
+    $jid      = (int)$jid;
+    $sid      = (int)$sid;
+
+    $and_password = '';
+    if( !empty( $password ) ){
+        $password = $db->escape( $password );
+        $and_password = "AND jobs.password = '$password'";
+    }
+
+    if( !$getTranslatedInstead ){
+        $translationStatus = " ( st.status IN (
+                '" . Constants_TranslationStatus::STATUS_NEW . "',
+                '" . Constants_TranslationStatus::STATUS_DRAFT . "',
+                '" . Constants_TranslationStatus::STATUS_REJECTED . "'
+            ) OR st.status IS NULL )"; //status NULL is not possible
+    } else {
+        $translationStatus = " st.status IN(
+            '" . Constants_TranslationStatus::STATUS_TRANSLATED . "',
+            '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+        )";
+    }
+
+    $query = "SELECT s.id, st.status
 		FROM segments AS s
 		JOIN files_job fj USING (id_file)
 		JOIN jobs ON jobs.id = fj.id_job
 		JOIN files f ON f.id = fj.id_file
 		LEFT JOIN segment_translations st ON st.id_segment = s.id AND fj.id_job = st.id_job
 		WHERE jobs.id = $jid AND jobs.password = '$password'
-		AND ( st.status IN ( 'NEW', 'DRAFT', 'REJECTED' ) OR st.status IS NULL )
+		AND $translationStatus
+		$and_password
 		AND s.show_in_cattool = 1
 		AND s.id <> $sid
 		AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		";
 
-    $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
 }
 
-function getNextSegmentId( $sid, $jid, $status ) {
-    $rules        = ( $status == 'untranslated' ) ? "'NEW','DRAFT','REJECTED'" : "'$status'";
-    $statusIsNull = ( $status == 'untranslated' ) ? " OR st.status IS NULL" : "";
-    // Warning this is a LEFT join a little slower...
-    $query = "select s.id as sid
-		from segments s
-		LEFT JOIN segment_translations st on st.id_segment = s.id
-		INNER JOIN files_job fj on fj.id_file=s.id_file 
-		INNER JOIN jobs j on j.id=fj.id_job 
-		where fj.id_job=$jid AND 
-		(st.status in ($rules)$statusIsNull) and s.id>$sid
-		and s.show_in_cattool=1
-		order by s.id
-		limit 1
-		";
+/**
+ * @param        $sid
+ * @param        $results array The resultset from previous getNextSegment()
+ * @param string $status
+ *
+ * @return null
+ */
 
-    $db      = Database::obtain();
-    $results = $db->query_first( $query );
+function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STATUS_NEW ){
 
-    return $results[ 'sid' ];
+    $statusWeight = array(
+        Constants_TranslationStatus::STATUS_NEW        => 10,
+        Constants_TranslationStatus::STATUS_DRAFT      => 10,
+        Constants_TranslationStatus::STATUS_REJECTED   => 10,
+        Constants_TranslationStatus::STATUS_TRANSLATED => 40,
+        Constants_TranslationStatus::STATUS_APPROVED   => 50
+    );
+
+    $nSegment = null;
+    if ( isset( $results[ 0 ][ 'id' ] ) ) {
+        //if there are results check for next id,
+        //otherwise get the first one in the list
+        $nSegment = $results[ 0 ]['id'];
+        foreach ( $results as $seg ) {
+            if( $seg['status'] == null ) $seg['status'] = Constants_TranslationStatus::STATUS_NEW;
+            if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg['status'] ] == $statusWeight[ $status ] ) {
+                $nSegment = $seg[ 'id' ];
+                break;
+            }
+        }
+    }
+
+    return $nSegment;
+
 }
 
 //function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
@@ -1618,7 +1665,7 @@ function insertProject( ArrayObject $projectStructure ) {
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function updateTranslatorJob( $id_job, stdClass $newUser ) {
+function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
 
     $data                       = array();
     $data[ 'username' ]         = $newUser->id;
@@ -1877,12 +1924,10 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 				   INNER JOIN segments s ON s.id_file=f.id
 				   LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
 				   WHERE p.id= '$pid'
-
 				   %s
 				   AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 				   %s
 				   %s
-
 				   GROUP BY f.id, j.id, j.password
 				   ORDER BY j.create_date, j.job_first_segment
 				   ";
@@ -2500,7 +2545,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
         }
     }
 
-    $chunks_st = array_chunk( $st_values, 500 );
+    $chunks_st = array_chunk( $st_values, 200 );
 
 //	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
     Log::doLog( 'Insert Segment Translations: ' . count( $st_values ) );
@@ -2557,7 +2602,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
     if ( count( $st_queue_values ) ) {
 
-        $chunks_st_queue = array_chunk( $st_queue_values, 500 );
+        $chunks_st_queue = array_chunk( $st_queue_values, 200 );
 
 //		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
         Log::doLog( 'Insert Segment Translations Queue: ' . count( $st_queue_values ) );

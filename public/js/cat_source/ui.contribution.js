@@ -1,6 +1,10 @@
 /*
 	Component: ui.contribution
  */
+$('html').on('copySourceToTarget', 'section', function() {
+    UI.setChosenSuggestion(0);
+});
+
 $.extend(UI, {
 	chooseSuggestion: function(w) {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
@@ -113,9 +117,9 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-//				console.log(d);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+//				console.log('getContribution from ' + this + ': ', d.data.matches);
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
@@ -231,7 +235,9 @@ $.extend(UI, {
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
                 escapedSegment = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
-				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+
+                $('.sub-editor.matches .overflow', segment).append('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
@@ -241,6 +247,7 @@ $.extend(UI, {
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
+//            UI.setContributionSourceDiff();
 			if (editareaLength === 0) {
 //				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
@@ -265,27 +272,43 @@ $.extend(UI, {
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+			if((config.mt_enabled)&&(!config.id_translator)) {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+            } else {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
+
+            }
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
+        logData = {
+            segment_id: segment_id,
+            status: status,
+            byStatus: byStatus
+        };
+        this.log('setContribution1', reqData);
 		segment = $('#segment-' + segment_id);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
+        this.log('setContribution2', {});
 
         if( config.brPlaceholdEnabled ) {
             source = this.postProcessEditarea(segment, '.source');
             target = this.postProcessEditarea(segment);
+            this.log('setContribution3', {});
         } else {
             source = $('.source', segment).text();
             // Attention: to be modified when we will be able to lock tags.
             target = $('.editarea', segment).text();
         }
+        this.log('setContribution4', {});
 
 		if ((target === '') && (byStatus)) {
+            this.log('setContribution5', {});
 			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
 		if (target === '') {
+            this.log('setContribution6', {});
 			return false;
 		}
 		this.updateContribution(source, target);
@@ -294,6 +317,12 @@ $.extend(UI, {
 		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
+        logData = {
+            source: source,
+            target: target
+        };
+        this.log('updateContribution', logData);
+
 		APP.doRequest({
 			data: {
 				action: 'setContribution',
@@ -313,8 +342,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContribution');
 			}
 		});
 	},
@@ -373,8 +402,8 @@ $.extend(UI, {
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
-				if (d.error.length)
-					UI.processErrors(d.error, 'setContributionMT');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -416,8 +445,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 
@@ -459,4 +488,54 @@ $.extend(UI, {
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
+    setContributionSourceDiff: function (segment) {
+        sourceText = '';
+        $.each($.parseHTML($('.editor .source').html()), function (index) {
+            if(this.nodeName == '#text') {
+                sourceText += this.data;
+            } else {
+                sourceText += this.innerText;
+            }
+        });
+        console.log('sourceText: ', sourceText);
+        UI.currentSegment.find('.sub-editor.matches ul.suggestion-item').each(function () {
+            ss = $(this).find('.suggestion_source');
+
+            suggestionSourceText = '';
+            $.each($.parseHTML($(ss).html()), function (index) {
+                if(this.nodeName == '#text') {
+                    suggestionSourceText += this.data;
+                } else {
+                    suggestionSourceText += this.innerText;
+                }
+            });
+            console.log('suggestionSourceText: ', suggestionSourceText);
+
+
+//            console.log('a: ', $('.editor .source').html());
+//            console.log($.parseHTML($('.editor .source').html()));
+//            console.log('b: ', $(ss).html());
+//            console.log($(this).find('.graysmall-details .percent').text());
+
+            diff = UI.dmp.diff_main(sourceText, suggestionSourceText);
+            diffTxt = '';
+            $.each(diff, function (index) {
+                if(this[0] == -1) {
+                    diffTxt += '<del>' + this[1] + '</del>';
+                } else if(this[0] == 1) {
+                    diffTxt += '<ins>' + this[1] + '</ins>';
+                } else {
+                    diffTxt += this[1];
+                }
+            });
+            console.log('diffTxt: ', diffTxt);
+            $(ss).html(diffTxt);
+            UI.lockTags();
+
+
+        })
+
+
+    },
+
 });

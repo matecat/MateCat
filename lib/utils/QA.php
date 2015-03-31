@@ -569,7 +569,7 @@ class QA {
         preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
 
 //        Log::doLog($source_seg);
-//        Log::hexDump($target_seg);
+//        Log::doLog($target_seg);
 
         if ( !empty( $matches_src[ 1 ] ) ) {
             $test_src = $source_seg;
@@ -872,8 +872,8 @@ class QA {
         $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
 
-            $rrorList = libxml_get_errors();
-            foreach( $rrorList as $error ){
+            $errorList = libxml_get_errors();
+            foreach( $errorList as $error ){
                 if( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ){
                     if( preg_match( '#<x[^/>]+>#', $xmlString  ) && preg_match( '# x #', $error->message ) ){
                         $this->_addError(self::ERR_UNCLOSED_X_TAG);
@@ -881,7 +881,7 @@ class QA {
                 }
             }
 //            Log::doLog($xmlString);
-//            Log::doLog($rrorList);
+//            Log::doLog($errorList);
 
             $this->_addError($targetErrorType);
         }
@@ -1067,6 +1067,21 @@ class QA {
             if( trim( $closing_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ){
                 $this->_addError( self::ERR_TAG_ORDER );
                 $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                return;
+            }
+        }
+
+        /*
+         * Check for corresponding self closing tags like <g id="pt673"/>
+         */
+        preg_match_all( '#<([^>]+)/>#', $this->source_seg, $selfClosingTags_src );
+        preg_match_all( '#<([^>]+)/>#', $this->target_seg, $selfClosingTags_trg );
+        $selfClosingTags_src = $selfClosingTags_src[1];
+        $selfClosingTags_trg = $selfClosingTags_trg[1];
+        foreach( $selfClosingTags_trg as $pos => $tag ){
+            if( trim( $selfClosingTags_src[ $pos ] ) != trim( $tag ) ){
+                $this->_addError( self::ERR_TAG_MISMATCH );
+                $this->tagPositionError[] = $selfClosingTags_trg[ $pos ];
                 return;
             }
         }
@@ -1602,6 +1617,9 @@ class QA {
                 }
 //                Log::hexDump($matches[1]);
             }
+
+            //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
+            $matches[1] = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $matches[1] );
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

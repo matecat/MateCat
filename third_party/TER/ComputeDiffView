@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#example how to call it:
+#sh ComputeDiffView language PostEditedSentence SuggestedSentence
+#sh ComputeDiffView en 'I love my dog!!!' 'I love Marco'\''s dog'
+
+#TO BE SET
+pwd=`pwd`
+pwd=$pwd"/third_party/TER"
+TER=${pwd}/tercpp.0.6.2
+PREPROC=${pwd}
+
+#INPUT PARAMETERS
+
+Lang=$1
+RefSentence=$2
+HypSentence=$3
+
+#echo $RefLang
+#echo $RefSentence
+#echo $HypSentence
+
+#Tokenization and normalization of the hypothesis and reference sentences
+
+TokRef=$($PREPROC/preprocSentence.sh $PREPROC $Lang $RefSentence) #&
+#echo $TokRef
+TokHyp=$($PREPROC/preprocSentence.sh $PREPROC $Lang $HypSentence) #&
+#echo $TokHyp
+#wait
+
+
+# Computation of the DiffView
+
+$TER --noTxtIds --TokenizedText --printDifferenceToHtmlToSTDO -s --HTER -rSent "$TokRef" -hSent "$TokHyp"
+

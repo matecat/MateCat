@@ -424,7 +424,12 @@ function saveSelection() {
 	}
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	try {
+		//we need this try because when we are in revision
+		// and we open a draft segment from a link we have not a editarea.html()
+		//so javascript crash
+		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -514,9 +519,9 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
+    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length || $('.popup-tm td.uploadfile.uploading').length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending download. Are you sure you want to quit?';
+		var leave_message = 'You have a pending operation. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
 			if(!e) e = window.event;
 			//e.cancelBubble is supported by IE - this will kill the bubbling process.
@@ -699,6 +704,21 @@ function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
+
+function getRangeObject(selectionObject) {
+//    console.log('getRangeObject');
+    if (!UI.isSafari) {
+//    if (selectionObject.getRangeAt) {
+        return selectionObject.getRangeAt(0);
+    }
+    else { // Safari!
+        var range = document.createRange();
+        range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
+        range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
+        return range;
+    }
+}
+
 
 if (typeof String.prototype.startsWith != 'function') {
     String.prototype.startsWith = function (str){

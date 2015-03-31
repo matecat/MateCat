@@ -18,7 +18,7 @@ abstract class ajaxController extends controller {
      *
      * @var array
      */
-    protected $result = array("error" => array(), "data" => array());
+    protected $result = array("errors" => array(), "data" => array());
 
     protected $uid;
     protected $userIsLogged = false;
@@ -92,6 +92,12 @@ abstract class ajaxController extends controller {
             parent::disableSessions();
         }
         
+    }
+
+    public static function isRevision(){
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
+        return $is_revision_url;
     }
 
 }

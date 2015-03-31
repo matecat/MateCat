@@ -69,7 +69,6 @@ $.extend(UI, {
 //        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 //        console.log('2: ', this.tagModesEnabled);
-
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
         } else {

@@ -1,12 +1,6 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
-include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getContributionController extends ajaxController {
 
@@ -92,7 +86,7 @@ class getContributionController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
 
             return -1;
         }
@@ -136,9 +130,9 @@ class getContributionController extends ajaxController {
 
         $this->tm_keys      = $jobData[ 'tm_keys' ];
 
-        $config = TMS::getConfigStruct();
-
+        $config = array();
         if ( $this->id_tms == 1 ) {
+
             /**
              * MyMemory Enabled
              */
@@ -172,25 +166,27 @@ class getContributionController extends ajaxController {
          */
         if ( isset( $_TMS ) ) {
 
+            /**
+             * @var $tms Engines_MyMemory
+             */
+            $tms = Engine::getInstance( $_TMS );
+
+            $config = array_merge( $tms->getConfigStruct(), $config );
             $config[ 'segment' ]       = $this->text;
-            $config[ 'source_lang' ]   = $this->source;
-            $config[ 'target_lang' ]   = $this->target;
+            $config[ 'source' ]        = $this->source;
+            $config[ 'target' ]        = $this->target;
             $config[ 'email' ]         = "demo@matecat.com";
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
 
-            $tms = new TMS( $_TMS );
 
             //get job's TM keys
             $this->checkLogin();
 
             try{
 
-                $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-                $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-
-                if ( $url_request ) {
+                if ( self::isRevision() ) {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
                 }
 
@@ -204,7 +200,7 @@ class getContributionController extends ajaxController {
 
             }
             catch(Exception $e){
-                $this->result[ 'error' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+                $this->result[ 'errors' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
                 return;
             }
 
@@ -212,27 +208,26 @@ class getContributionController extends ajaxController {
             $tms_match = $tms_match->get_matches_as_array();
         }
 
-        $mt_res   = array();
-        $mt_match = "";
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
-            $mt        = new MT( $this->id_mt_engine );
-            $mt_result = $mt->get( $this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
+            /**
+             * @var $mt Engines_Moses
+             */
+            $mt        = Engine::getInstance( $this->id_mt_engine );
 
-            if ( $mt_result->error->code < 0 ) {
-                $mt_match = '';
-            } else {
-                $mt_match = $mt_result->translatedText;
-                $penalty  = $mt->getPenalty();
-                $mt_score = 100 - $penalty;
-                $mt_score .= "%";
+            $config = $mt->getConfigStruct();
+            $config[ 'segment' ] = $this->text;
+            $config[ 'source' ]  = $this->source;
+            $config[ 'target' ]  = $this->target;
+            $config[ 'id_user' ] = "demo@matecat.com";
+            $config[ 'segid' ]   = $this->id_segment;
 
-                $mt_match_res = new TMS_GET_MATCHES( $this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date( "Y-m-d" ) );
+            $mt_result = $mt->get( $config );
 
-                $mt_res                          = $mt_match_res->get_as_array();
-                $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
-
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $mt_result = false;
             }
+
         }
         $matches = array();
 
@@ -240,8 +235,8 @@ class getContributionController extends ajaxController {
             $matches = $tms_match;
         }
 
-        if ( !empty( $mt_match ) ) {
-            $matches[ ] = $mt_res;
+        if ( !empty( $mt_result ) ) {
+            $matches[ ] = $mt_result;
             usort( $matches, array( "getContributionController", "__compareScore" ) );
             //this is necessary since usort sorts is ascending order, thus inverting the ranking
             $matches = array_reverse( $matches );
@@ -420,7 +415,8 @@ class getContributionController extends ajaxController {
          * \x{AB} => «
          * \x{BB} => »
          */
-        $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\-\*]+#u', chr( 0x20 ), $this->text );
+        $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\*]+#u', chr( 0x20 ), $this->text );
+        $tmp_text = str_replace( ' - ', chr( 0x20 ), $tmp_text );
         $tmp_text = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $tmp_text );
 
         $tokenizedBySpaces  = explode( " ", $tmp_text );

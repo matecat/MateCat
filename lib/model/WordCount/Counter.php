@@ -124,6 +124,8 @@ class WordCount_Counter {
         $newWCount->setIdSegment( $this->oldWCount->getIdSegment() );
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
+        $newWCount->setIdJob( $this->oldWCount->getIdJob() );
+        $newWCount->setJobPassword( $this->oldWCount->getJobPassword() );
         return $newWCount;
 
     }

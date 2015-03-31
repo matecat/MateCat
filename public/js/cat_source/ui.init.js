@@ -4,7 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "";
+		this.version = "0.5";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -27,6 +27,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
@@ -37,10 +38,13 @@ $.extend(UI, {
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
 		this.autoFailoverEnabled = false;
-		this.searchEnabled = true;
+//        this.offlineModeEnabled = false;
+        this.offline = false;
+//        if(this.offlineModeEnabled) this.autoFailoverEnabled
+        this.searchEnabled = true;
 		if (this.searchEnabled)
-			$('#filterSwitch').show();
-            this.fixHeaderHeightChange();
+            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
+        this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();
@@ -58,10 +62,11 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
-        this.logEnabled = false;
+        this.logEnabled = true;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.

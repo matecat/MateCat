@@ -151,7 +151,7 @@ class ManageUtils {
     private static function formatJobDate( $my_date ) {
 
         $date          = new DateTime( $my_date );
-        $formattedDate = $date->format( 'Y M d, H:i' );
+        $formattedDate = $date->format( 'Y M d H:i' );
 
         $now       = new DateTime();
         $yesterday = $now->sub( new DateInterval( 'P1D' ) );
@@ -166,11 +166,11 @@ class ManageUtils {
             } //this month
             else {
                 if ( $now->format( 'Y-m' ) == $date->format( 'Y-m' ) ) {
-                    $formattedDate = $date->format( 'F d l, H:i' );
+                    $formattedDate = $date->format( 'M d, H:i' );
                 } //this year
                 else {
                     if ( $now->format( 'Y' ) == $date->format( 'Y' ) ) {
-                        $formattedDate = $date->format( 'F d, H:i' );
+                        $formattedDate = $date->format( 'M d, H:i' );
                     }
                 }
             }

@@ -112,7 +112,7 @@ function query_to_csv($db_conn, $query, $filename, $attachment = false, $headers
 
 
 	    // output as an attachment
-	    query_to_csv($mysql_link, $sql, "test_$jid.csv", true);
+	    query_to_csv($mysql_link, $sql, "job_$jid.csv", true);
 
 	    // output to file system
 	    //query_to_csv($mysql_link, $sql, "test_$jid.csv", false);

@@ -2,7 +2,6 @@ module.exports = function(grunt) {
 	var basePath = '../../public/js/';
 	var incPath = '../../inc/';
 	var conf = grunt.file.read(incPath + 'config.inc.sample.php');
-//	var conf = grunt.file.read(incPath + 'config.inc.php');
 	var version = conf.match(/self\:\:\$BUILD\_NUMBER = \'(.*?)\'/gi)[0].replace(/self\:\:\$BUILD\_NUMBER = \'(.*?)\'/gi, "$1");
 
 	
@@ -22,7 +21,11 @@ module.exports = function(grunt) {
 					basePath + 'cat_source/ui.search.js',
 					basePath + 'cat_source/functions.js',
 					basePath + 'cat_source/ui.customization.js',
+                    basePath + 'cat_source/ui.review.js',
                     basePath + 'tm.js',
+                    basePath + 'cat_source/ui.offline.js',
+                    basePath + 'cat_source/ui.noconnection.js',
+                    basePath + 'cat_source/ui.split.js'
 				],
 				dest: basePath + 'cat.js'
 			},
@@ -121,7 +124,7 @@ module.exports = function(grunt) {
 //	grunt.registerTask('dev-watch', ['concat', 'uglify', 'removelogging']);
 //	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app']);
 //	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app', 'concat:styles']);
-	grunt.registerTask('dev-watch', ['jshint', 'concat:components', 'replace', 'uglify', 'concat:app', 'concat:styles']);
+	grunt.registerTask('dev-watch', ['jshint', 'concat:components', 'replace:example', 'uglify', 'concat:app', 'concat:styles']);
 };
 
 

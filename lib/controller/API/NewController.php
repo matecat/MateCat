@@ -1,11 +1,5 @@
 <?php
 
-//NO More needed
-//include_once INIT::$UTILS_ROOT . "/API/Upload.php";
-//include_once INIT::$UTILS_ROOT . "/Utils.php";
-
-include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
-
 /**
  *
  * Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol
@@ -76,6 +70,76 @@ class NewController extends ajaxController {
 		$this->mt_engine               = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
 		$this->private_tm_key          = $__postInput[ 'private_tm_key' ];
 
+		try {
+			if ( $this->tms_engine != 0 ) {
+				$test_valid_TMS = Engine::getInstance( $this->tms_engine );
+			}
+			if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
+				$test_valid_MT = Engine::getInstance( $this->mt_engine );
+			}
+		} catch ( Exception $ex ) {
+			$this->api_output[ 'message' ] = $ex->getMessage();
+			Log::doLog( $ex->getMessage() );
+
+			return -1;
+		}
+
+		//from api a key is sent and the value is 'new'
+		if ( $this->private_tm_key == 'new' ) {
+
+			try {
+
+				$APIKeySrv = new TMSService();
+
+				$newUser = $APIKeySrv->createMyMemoryKey();
+
+				$this->private_tm_user = $newUser->id;
+				$this->private_tm_pass = $newUser->pass;
+
+				$this->private_tm_key = array(
+						array(
+								'key'  => $newUser->key,
+								'name' => null,
+								'r'    => true,
+								'w'    => true
+						)
+				);
+
+			} catch ( Exception $e ) {
+
+				$this->api_output[ 'message' ] = 'Project Creation Failure';
+				$this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+
+				return -1;
+			}
+
+		} else {
+
+			//if a string is sent, transform it into a valid array
+			if ( !empty( $this->private_tm_key ) ) {
+				$this->private_tm_key = array(
+						array(
+								'key'  => $this->private_tm_key,
+								'name' => null,
+								'r'    => true,
+								'w'    => true
+						)
+				);
+			} else {
+				$this->private_tm_key = array();
+			}
+
+		}
+
+		//This is only an element, this seems redundant,
+		// but if we need more than a key in the next api version we can easily handle them here
+		$this->private_tm_key = array_filter( $this->private_tm_key, array( "self", "sanitizeTmKeyArr" ) );
+
+		if (empty($_FILES)) {
+			$this->result['errors'][] = array("code" => -1, "message" => "Missing file. Not Sent.");
+			return -1;
+		}
+
 	}
 
 	public function finalize() {
@@ -84,26 +148,6 @@ class NewController extends ajaxController {
 	}
 
 	public function doAction() {
-
-		try {
-			if( $this->tms_engine != 0 ){
-				include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-				$test_valid_TMS = new TMS( $this->tms_engine );
-			}
-			if( $this->mt_engine != 0 && $this->mt_engine != 1 ){
-				include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
-				$test_valid_MT = new MT( $this->mt_engine );
-			}
-		} catch ( Exception $ex ) {
-			$this->api_output[ 'message' ] = $ex->getMessage();
-			Log::doLog( $ex->getMessage() );
-			return -1;
-		}
-
-		if (empty($_FILES)) {
-			$this->result['errors'][] = array("code" => -1, "message" => "Missing file. Not Sent.");
-			return -1;
-		}
 
 		$uploadFile = new Upload();
 
@@ -171,61 +215,22 @@ class NewController extends ajaxController {
 		}
 		/* Do conversions here */
 
+		$projectManager = new ProjectManager();
+		$projectStructure = $projectManager->getProjectStructure();
 
-        //from api a key is sent and the value is 'new'
-        if ( $this->private_tm_key == 'new' ) {
-
-            try {
-
-                $APIKeySrv = new TMSService();
-
-                $newUser = $APIKeySrv->createMyMemoryKey();
-
-                $this->private_tm_key  = $newUser->key;
-                $this->private_tm_user = $newUser->id;
-                $this->private_tm_pass = $newUser->pass;
-
-            } catch ( Exception $e ) {
-
-                $this->api_output[ 'message' ] = 'Project Creation Failure';
-                $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
-
-                return -1;
-            }
-
-        }
-
-
-        $projectStructure = new RecursiveArrayObject(
-				array(
-					'id_project'         => null,
-					'id_customer'        => null,
-					'user_ip'            => null,
-					'project_name'       => $this->project_name,
-					'result'             => $this->result,
-					'private_tm_key'     => $this->private_tm_key,
-					'private_tm_user'    => $this->private_tm_user,
-					'private_tm_pass'    => $this->private_tm_pass,
-					'uploadToken'        => $uploadFile->getDirUploadToken(),
-					'array_files'        => $arFiles, //list of file names
-					'file_id_list'       => array(),
-					'file_references'    => array(),
-					'source_language'    => $this->source_lang,
-					'target_language'    => explode( ',', $this->target_lang ),
-					'mt_engine'          => $this->mt_engine,
-					'tms_engine'         => $this->tms_engine,
-					'ppassword'          => null, //project password
-					'array_jobs'         => array( 'job_list' => array(), 'job_pass' => array(), 'job_segments' => array(  ) ),
-					'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
-					'segments'           => array(), //array of files_id => segmentsArray()
-					'translations'       => array(), //one translation for every file because translations are files related
-					'query_translations' => array(),
-					'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-					'job_to_split'       => null,
-					'job_to_split_pass'  => null,
-					'split_result'       => null,
-					'skip_lang_validation' => true
-					) );
+		$projectStructure[ 'project_name' ]      = $this->project_name;
+		$projectStructure[ 'result' ]            = $this->result;
+		$projectStructure[ 'private_tm_key' ]    = $this->private_tm_key;
+		$projectStructure[ 'private_tm_user' ]   = $this->private_tm_user;
+		$projectStructure[ 'private_tm_pass' ]   = $this->private_tm_pass;
+		$projectStructure[ 'uploadToken' ]       = $uploadFile->getDirUploadToken();
+		$projectStructure[ 'array_files' ]       = $arFiles; //list of file name
+		$projectStructure[ 'source_language' ]   = $this->source_lang;
+		$projectStructure[ 'target_language' ]   = explode( ',', $this->target_lang );
+		$projectStructure[ 'mt_engine' ]         = $this->mt_engine;
+		$projectStructure[ 'tms_engine' ]        = $this->tms_engine;
+		$projectStructure[ 'status' ]            = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+		$projectStructure[ 'skip_lang_validation' ] = true;
 
 		$projectManager = new ProjectManager( $projectStructure );
 		$projectManager->createProject();
@@ -245,6 +250,13 @@ class NewController extends ajaxController {
 			$this->api_output[ 'id_project' ]   = $projectStructure['result']['id_project'];
 			$this->api_output[ 'project_pass' ]    = $projectStructure['result']['ppassword'];
 		}
+
+	}
+
+	private static function sanitizeTmKeyArr( $elem ){
+
+		$elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+		return $elem->toArray();
 
 	}
 

@@ -3,7 +3,8 @@
     <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:condition="php: !catController::isRevision()">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:condition="php: catController::isRevision()">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
@@ -17,7 +18,8 @@
             var config = {
                 basepath: '${basepath | string:/}',
                 maxFileSize: ${maxFileSize},
-                id_translator: '${tid | nothing}',
+                maxTMXFileSize: ${maxTMXFileSize},
+                id_translator: ${tid | false},
                 private_translator: '${private_translator | string:0}',
                 id_customer: '${id_customer | string:unknown_customer}',
                 private_customer: '${private_customer | string:0}',
@@ -34,6 +36,7 @@
                 source_lang: '${source}',
                 target_lang: '${target}',
                 ownerIsMe: ${ownerIsMe},
+                isAnonymousUser: ${isAnonymousUser},
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
@@ -45,7 +48,13 @@
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
                 survey: false,
-                optimized: false
+                optimized: false,
+                isReview: ${isReview},
+                enableReview: true,
+                stat_quality: ${structure php: stat_quality },
+                overall_quality: '${overall_quality}',
+                offlineModeEnabled: false,
+                splitSegmentEnabled: false
             };
             var renderStart = new Date();
             /*]]>*/
@@ -107,7 +116,7 @@
     </body>
 
 
-    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
+    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -153,7 +162,9 @@
 
 
         </header>
+        <h1>
 
+        </h1>
         <div id="outer">
 
        	</div>
@@ -203,6 +214,7 @@
 </div>
 
 
+
         <footer>
 			<a href="#" id="settingsSwitcher" title="Settings"></a>
 
@@ -221,19 +233,29 @@
                             <li><a href="${authURL}" class="authLink">Manage</a></li>
                         </tal:block>
 
+                        <tal:block tal:condition="php: !catController::isRevision()">
+                            <li><a
+                                    href="${basepath}revise/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
+                        </tal:block>
+
+                        <tal:block tal:condition="php: catController::isRevision()">
+                            <li><a
+                                    href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
+                        </tal:block>
+
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
-                        <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
+                        <li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
                         </div>
                     </tal:block>
 
                     <tal:block tal:condition="php: !empty(logged_user)">
-                        <div id='welcomebox'>
-                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        <div id='welcomebox' tal:attributes="title extended_user">
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
                         </div>
                     </tal:block>
 					
@@ -241,8 +263,8 @@
 
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <p class="progress">Progress:</p>
-                    <div class="meter">
+                    <!-- <p class="progress">Progress:</p> -->
+                    <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
                         <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
@@ -250,74 +272,28 @@
                         <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
                     </div>
                     <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
-                    <ul>
+                    <ul class="statistics-core">
 
                         <li id="stat-eqwords">
-                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
-                            <tal:block tal:condition="php: empty(analysis_enabled)">
-                                Payable Words
-                            </tal:block>
-                            : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
-
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
                         <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                         -->
-                        <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
-                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
-
+                   </ul>
+                    <ul class="statistics-details">
+<!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->
+                        <li id="stat-wph" title="Based on last 10 segments performance">Speed:
+                            <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
+                        </li>
+                        <li id="stat-completion">Completed in:
+                            <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
+                        </li>
                     </ul>
-
-                    <div class="stats">
-                        <div class="header-stats">Project stats (<a href="${basepath}?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
-                        <ul class="h-stats">
-
-
-                            <li class="first">&nbsp;</li>
-                            <li>Initial</li>
-                            <li>To-do</li>
-                            <li>%</li>
-                            <li>Cost</li>
-                        </ul>
-                        <ul>
-                            <li class="first">New</li>
-                            <li>---.---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Repetitions</li> <li>---</li>
-                            <li>90</li>
-                            <li>100</li>
-                            <li>30</li>
-                        </ul>
-                        <ul>
-                            <li class="first">100% match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">100% context match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Fuzzy match</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <ul>
-                            <li class="first">Machine translation</li> <li>---</li>
-                            <li>--</li> <li>---</li>
-                            <li>--</li>
-                        </ul>
-                        <a href="#" class="arrow-notification"></a>
-
-                    </div>
-
-                </div>
+			
+		</div>
 
                 <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
                     <p class="progress">Calculating word count...</p>
@@ -429,42 +405,95 @@ $(window).resize(function() {
 		</script>
 
 
-<style type="text/css">
-table.scroll {
-    /* width: 100%; */ /* Optional */
-    /* border-collapse: collapse; */
-    border-spacing: 0;
-}
 
-table.scroll tbody,
-table.scroll thead { display: block; }
-
-thead tr th { 
-    height: 30px;
-    line-height: 30px;
-    /* text-align: left; */
-}
-
-table.scroll tbody {
-    height: auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-
-tbody td, thead th {
-    /* width: 20%; */ /* Optional */
-    /* white-space: nowrap; */
-}
-
-tbody td:last-child, thead th:last-child {
-    border-right: none;
-}
-</style>
 
     <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
     </body>
 
+    <template id="tpl-review-tab">
 
+        <div class="error-type">
+            <h3>Select the type of issue</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>None</th>
+                        <th>Enhancement</th>
+                        <th class="tleft" colspan="2">Error <a class="tooltip">?<span>Error that changes the meaning of the segment</span></a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="radio" name="t1" value="0" /></td>
+                        <td><input type="radio" name="t1" value="1" /></td>
+                        <td><input type="radio" name="t1" value="2" /></td>
+                        <td class="align-left">Tag issues (mismatches, whitespaces)</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t2" value="0" /></td>
+                        <td><input type="radio" name="t2" value="1" /></td>
+                        <td><input type="radio" name="t2" value="2" /></td>
+                        <td class="align-left">Translation errors (mistranslation, additions/omissions)</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t3" value="0" /></td>
+                        <td><input type="radio" name="t3" value="1" /></td>
+                        <td><input type="radio" name="t3" value="2" /></td>
+                        <td class="align-left">Terminology and translation consistency</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t4" value="0" /></td>
+                        <td><input type="radio" name="t4" value="1" /></td>
+                        <td><input type="radio" name="t4" value="2" /></td>
+                        <td class="align-left">Language quality (grammar, punctuation, spelling)</td>
+                    </tr>
+                    <tr>
+                        <td><input type="radio" name="t5" value="0" /></td>
+                        <td><input type="radio" name="t5" value="1" /></td>
+                        <td><input type="radio" name="t5" value="2" /></td>
+                        <td class="align-left">Style (readability, consistent style and tone)</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="track-changes">
+            <h3>Revision (track changes)</h3>
+            <p></p>
+        </div>
+    </template>
+<!--
+    <template id="tpl-review-stat-quality">
+
+        <div class="popup-outer outer-stat-quality hide"></div>
+        <div class="popup-stat-quality slide-panel hide" data-type="view">
+
+            <h1>
+                <a href="#" class="btn-ok right">Close</a>
+                Overall Quality
+            </h1>
+            
+            <div class="popup-box">
+                <div class="slide-panel-body">
+                    <table>
+                        <thead>
+                        <th>Error Type</th>
+                        <th>Max Num. of Errors</th>
+                        <th>Found</th>
+                        <th>Vote</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p>Job's overall rate is calculated as the average of the ratings for each type of error.</p>
+        </div>
+
+    </template>
+-->
 </html>

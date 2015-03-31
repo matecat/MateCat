@@ -16,6 +16,7 @@ header
 
 
 h1{font-size:40px}
+
 body.manage h1
 	{
 	margin-bottom: 0px;
@@ -28,7 +29,8 @@ body.manage h2
 	float: left;
 	width: 100%;
 	margin-top: 20px;
-	margin-bottom: 0;
+	margin-bottom: 5px;
+    word-break: break-all;
 	}
 		
 h2{font-size:30px;margin:0;}
@@ -97,10 +99,7 @@ body.manage .urls
 	text-align: left;
 	}
 
-body.manage .urls a
-	{
-	display: block;
-	}
+
 
 body.manage .buttons
 	{
@@ -124,43 +123,32 @@ body.manage a.copy
 	background: url(../img/copy_url.gif) 0 0 no-repeat;
 	}
 
-body.manage .actions a
-	{
-	display: inline-block;
-	width: 18px;
-	height: 18px;
-	text-indent: -10000px;
-margin-left: 4px	}
 
-	body.manage .actions a.change
-		{
-		
-		background: url(../img/sprite.png) -13px -136px no-repeat;
-		}
-		
-	body.manage .actions a.cancel
-		{
-		background: url(../img/sprite.png) -13px -78px no-repeat;
-		}
-	body.manage .actions a.archive
-		{
-		background: url(../img/sprite.png) -13px -59px no-repeat;
-		}
-	body.manage .actions a.resume
-		{
-		background: url(../img/sprite.png) -13px -98px no-repeat;
-		}
-	body.manage .actions a.unarchive
-		{
-		margin-left: 63px !important;
-		background: url(../img/sprite.png) -13px -39px no-repeat;
-		}
+table .btn{width:auto !important;padding:0px 20px 0 20px !important;}
 
-    body.manage .actions a.sdlxliff {
-        text-indent: 0;
-text-decoration: none;
-color: #999;
-    }
+body.manage .article:last-child .wrapper-dropdown-5 .dropdown {
+	bottom: 100%;
+top: inherit;
+border-top: 0;
+}
+
+body.manage .article:last-child .wrapper-dropdown-5 .dropdown li:first-child{
+border-top:1px solid #ccc;
+}
+
+
+
+body.manage input[type=button].revise {
+	cursor: pointer;
+	height: 29px;
+	width: 77% !important;
+	border-radius: 2px 0 0 2px;
+	-moz-box-shadow: 0 1px 2px #ccc;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #ccc;
+}
+
+
 
 	body.manage tr[data-status=active] .actions a.resume,
 	body.manage tr[data-status=active] .actions a.unarchive,
@@ -177,6 +165,23 @@ color: #999;
 body.manage a.cancel-project,
 body.manage a.archive-project,
 body.manage a.resume-project,
+body.manage a.unarchive-project {
+	text-decoration: none;
+	color:#999;
+	margin-left: 10px;
+	font-size: 16px;
+	position: relative;
+}
+
+body.manage a.cancel-project:hover,
+body.manage a.archive-project:hover,
+body.manage a.resume-project:hover,
+body.manage a.unarchive-project:hover {
+	color:#000;
+}
+
+/*body.manage a.archive-project,
+body.manage a.resume-project,
 body.manage a.unarchive-project
 	{
 	display: inline-block;
@@ -187,45 +192,36 @@ body.manage a.unarchive-project
 	margin-left: 10px;
 	top: 5px;
 	background: url(../img/sprite.png) -13px -78px no-repeat;
-/*	background: url(../img/cancel-job.png) 0 0 no-repeat;
-
-	width: 18px;
-	height: 18px;
-	margin-left: 40px;
-	margin-top: 24px;
-	text-indent: -10000px;
-	position: absolute;
-	background: url(../img/icon_delete_02.png) 0 0 no-repeat;
-*/
 	}
+*/
 	body.manage .article.allCancelled a.cancel-project
 		{
 		display: none;
 		}	
 
-body.manage a.archive-project
+/*body.manage a.archive-project
 	{
 	background: url(../img/sprite.png) -13px -59px no-repeat;
-	}
+	}*/
 	body.manage .article.allArchived a.archive-project,
 	body.manage[data-filter-status=archived] a.archive-project,
 	body.manage[data-filter-status=cancelled] a.archive-project
 		{
 		display: none;
 		}
-body.manage a.resume-project
+/*body.manage a.resume-project
 	{
 	background: url(../img/sprite.png) -13px -98px no-repeat;
-	}
+	}*/
 	body.manage[data-filter-status=archived] a.resume-project
 		{
 		display: none;
 		}
 
-body.manage a.unarchive-project
+/*body.manage a.unarchive-project
 	{
 	background: url(../img/sprite.png) -13px -39px no-repeat;
-	}
+	}*/
 	body.manage[data-filter-status=cancelled] a.unarchive-project
 		{
 		display: none;
@@ -288,9 +284,9 @@ body.manage .meter
 
 body.manage th.create-date
 	{
-	width: 140px;
+	width: 100px;
 	}
-	
+
 body.manage th.job-detail
 	{
 	width: 33%;
@@ -312,7 +308,7 @@ body.manage th.progress
 
 body.manage th.actions
 	{
-	width: 110px;
+	width: 150px;
 	}
 
 body.manage tr.row
@@ -344,6 +340,11 @@ body.manage tr.row
 
 .tm-key .clear{
     clear: both;
+}
+
+#projects {
+float: left;
+margin-bottom: 30px;
 }
 
 /*	
@@ -470,6 +471,11 @@ body.manage .pagination a:hover
 body.manage header .filter
 	{
 	display: block !important;
+	text-decoration: none;
+	color: #eee;
+	padding: 12px;
+	font-size: 20px;
+	text-align: center;
 	}
 
 body.manage .search
@@ -547,6 +553,7 @@ body.manage input[type=button],
 body.manage input[type=submit]
 	{
 	width: 80px !important;
+	background: #dcdedf!important;
 	}
 
 body.manage .message
@@ -631,20 +638,27 @@ body.manage .id-project
 	color: #999;
 	}
 
-body.manage .urls .langs
+body.manage .urls .jobdata .langs
     {
-    font-size: 120%;
-    display: inline;
+    font-size: 100%;
+    font-weight: normal;
+	margin-left:10px;
     }
 body.manage .urls .jobdata
     {
     float: left;
     font-size: 120%;
     font-weight: bold;
-    width: 70px;
-   /* margin-top: 2px; */
+    width: 100%;
+   	margin-top: 2px; 
     
-    }	
+    }
+
+body.manage .urls .url{
+	position: relative;
+	left: 0;
+}
+
 body.manage #display
 	{
 	display: inline-block;
@@ -696,8 +710,7 @@ color: #666;
 			width: 100px;
 padding-right: 20px;
         }
-		.
-		
+
         .api dd {
             margin-left:120px;
         }
@@ -884,37 +897,265 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 
-.filter {
-	background: url(../img/sprite2x.png) 2px -214px no-repeat;
-}
-body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project {
-	background: url(../img/sprite2x.png) -13px -78px no-repeat;
-}
-body.manage a.archive-project {
-	background: url(../img/sprite2x.png) -13px -59px no-repeat;
-}
-body.manage a.resume-project {
-	background: url(../img/sprite2x.png) -13px -98px no-repeat;
-}
-body.manage a.unarchive-project {
-	background: url(../img/sprite2x.png) -13px -39px no-repeat;
-}
-body.manage .actions a.change {
-	background: url(../img/sprite2x.png) -13px -136px no-repeat;
-}
-body.manage .actions a.cancel {
-	background: url(../img/sprite2x.png) -13px -78px no-repeat;
-}
-body.manage .actions a.archive {
-	background: url(../img/sprite2x.png) -13px -59px no-repeat;
-}
-body.manage .actions a.unarchive {
-	background: url(../img/sprite2x.png) -13px -39px no-repeat;
-}
+
 .logosmall {
 	background: url(../img/sprite2x.png) 1px -1403px no-repeat;
 }
-.filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
+body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
 	background-size:42px;	
 }
 }
+/* revise page */
+
+.lang-info {
+margin-top: 40px;
+margin-left: 10px;
+color: #666;
+font-size: 20px;
+}
+
+.revision-info tr[data-vote='Excellent'],
+.revision-info tr[data-vote='Verygood'],
+.revision-info tr[data-vote='Good'],
+td[data-vote='Excellent'],
+td[data-vote='Verygood'],
+td[data-vote='Good']
+ {
+	background: #d8ead3;
+}
+
+.revision-info tr[data-vote='Poor'],
+td[data-vote='Poor'] {
+	background: #FDD7A4;
+}
+
+.revision-info tr[data-vote='Acceptable'],
+td[data-vote='Acceptable'] {
+	background: #fff3cd;
+}
+
+.revision-info tr[data-vote='Fail'],
+td[data-vote='Fail'] {
+	background: #f4cdcc;
+}
+
+.tablestats.revision {
+	font-size: 18px;
+}
+
+.tablestats.revision td,
+.tablestats.revision th {
+	padding: 20px;
+}
+
+.vote-howto p {
+	font-size: 18px;
+	line-height: 30px;
+}
+
+.reviselog .percent {
+	font-size:14px;
+}
+
+.details-anchor {
+	display: block; position: relative; top: -60px; visibility: hidden;
+}
+
+#details-link {
+font-size: 16px;
+color: #999;
+text-shadow: none;
+margin-top: 15px;
+display: block;
+clear: both;
+cursor: pointer;
+}
+
+#ribbon {
+	padding: .34em 2em;
+	margin: 5% -7px 0;
+	position:relative;
+	color: black;
+	font-size: 24px;
+	z-index: 100000000;
+	font-weight: bold;
+	text-align: center;
+	text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+	/*box-shadow: inset 0px 1px 0px rgba(255,255,255,.3),
+	   inset 0px 0px 20px rgba(0,0,0,0.0),
+	   0px 1px 1px rgba(0, 0, 0, 0.65); */
+	/* background: #09beec; */
+	display: inline-block;
+}
+
+/*
+#ribbon:before, #ribbon:after {
+		content: "";
+		width:.2em;
+		bottom:-.5em;
+		position:absolute;
+		display:block;
+		border: .9em solid #09beec;
+		box-shadow:0px 1px 0px rgba(0,0,0,0.4);
+		z-index:-2;
+	}
+
+#ribbon:before {
+		left:-1.35em;
+		border-right-width: .75em;
+		border-left-color:transparent;
+	}
+
+#ribbon:after {
+		right:-1.35em;
+		border-left-width: .75em;
+		border-right-color:transparent;
+	}
+	
+#content:before, #content:after {
+		content:"";
+		bottom:-.5em;
+		position:absolute;
+		display:block;
+		border-style:solid;
+		border-color: #0675b3 transparent transparent transparent;
+		z-index:-1;
+	}
+	
+#content:before {
+	  left: 0;
+	  border-width: .5em 0 0 .5em;
+	}
+	
+#content:after {
+	  right: 0;
+	  border-width: .5em .5em 0 0;
+	}
+*/
+#vote-box {
+width: 217px;
+background: #f7f7f7;
+height: 85px;
+position: absolute;
+right: 0px;
+top: 30px;
+text-align: center;
+font-size: 45px;
+font-weight: bold;
+text-shadow: 0px 1px 0px rgba(0,0,0,0.3);
+padding: 50px 5px 10px;
+z-index: 100000000;
+border-radius: 4px;
+border: 1px solid #ECECEC;
+box-shadow: 1px 1px 0px #E6E6E6;
+}
+
+.vote-area {
+margin: 0 auto;
+width: 100%;
+float: left;
+padding: 20px 0 30px 0;
+}
+
+.vote-area h3 {
+clear: both;
+}
+
+.blueline {
+width: 100%;
+height: 1px;
+background: #09beec;
+float: left;
+box-shadow: 0px 1px 0px #ccc;
+}
+
+#vote-box[data-vote='Excellent'],
+#vote-box[data-vote='Verygood'],
+#vote-box[data-vote='Good']
+ {
+	color: #3C9423;
+}
+
+#vote-box[data-vote='Acceptable'] {
+	color: #EABA22;
+}
+
+#vote-box[data-vote='Poor'] {
+	color: #FFA935;;
+}
+
+
+#vote-box[data-vote='Fail']
+ {
+	color: #E7504D;
+}
+
+table.tablestats.revision-info td,
+table.tablestats.revision-info th {
+padding: 15px;
+font-size: 16px;
+}
+
+/* Table Equivalent Translated Score Highlight */
+.qa_eq_tr[data-vote='Excellent'] td,
+.qa_eq_tr[data-vote='Verygood'] td,
+.qa_eq_tr[data-vote='Good'] td {
+	border-color: #3C9423 !important;
+}
+.qa_eq_tr[data-vote='Acceptable'] td {
+	border-color: #E5B007 !important;
+}
+.qa_eq_tr[data-vote='Poor'] td {
+	border-color: #FFA935 !important;
+}
+.qa_eq_tr[data-vote='Fail'] td {
+	border-color: #E7504D !important;
+}
+.qa_eq_tr {
+	font-weight: bold;
+}
+.qa_eq_td {
+	font-size: 18px !important;
+	border-top:1px solid;
+	border-bottom:1px solid !important;
+	border-left: 0 !important;
+}
+.qa_eq_td_first {
+	border-left: 4px solid !important;
+}
+.qa_eq_td_last {
+	border-right: 4px solid !important;
+}
+/* Table Equivalent Translated Score Highlight */
+
+.vote-howto h3 {
+	font-size: 22px;
+	margin-bottom: 20px;
+	font-weight: bold!important;
+	color: #333!important;
+}
+
+.vote-howto h2 {
+	 margin-top:20px;
+	 margin-bottom:20px
+}
+
+blockquote {
+padding: 10px 20px;
+margin: 20px 30px 30px 30px;
+background: #eee;
+font-size: 16px;
+border-left: 5px solid #aaa;
+width: 700px;
+}
+
+/**
+	QUALITY REPORT
+**/
+.qa-job-title{
+	margin-bottom:0;
+}
+.weight-normal {font-weight:normal;}
+.tablestats.revision th.issue {width:440px;}
+.tablestats.revision th.score {width:200px;}
+.tablestats.revision td, .tablestats.revision-info td {text-align: left;}

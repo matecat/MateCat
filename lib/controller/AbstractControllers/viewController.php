@@ -28,6 +28,16 @@ abstract class viewController extends controller {
     protected $supportedBrowser = false;
 
     /**
+     * @var Google_Client
+     */
+    protected $client;
+
+    /**
+     * @var string
+     */
+    protected $authURL;
+
+    /**
      * Flag to get info about user authentication
      *
      * @var bool
@@ -163,6 +173,7 @@ abstract class viewController extends controller {
         //even if no login in required, if user data is present, pull it out
         if ( !empty( $_SESSION[ 'cid' ] ) ){
             $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
+            $this->logged_user['short'] = trim( mb_substr($this->logged_user[ 'first_name' ],0,1) . "" . mb_substr($this->logged_user[ 'last_name' ],0,1) );
         }
 
         if( $isAuthRequired  ) {
@@ -201,6 +212,17 @@ abstract class viewController extends controller {
         }
 
         return true;
+    }
+
+    /**
+     * Get Client Instance and retrieve authentication url
+     *
+     */
+    protected function generateAuthURL() {
+
+        $this->client  = OauthClient::getInstance()->getClient();
+        $this->authURL = $this->client->createAuthUrl();
+
     }
 
     /**
@@ -321,6 +343,13 @@ abstract class viewController extends controller {
             exit;
         }
 
+    }
+
+    public static function isRevision(){
+        //TODO: IMPROVE
+        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
+        return $is_revision_url;
     }
 
 }

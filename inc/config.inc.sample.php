@@ -49,6 +49,7 @@ class INIT {
 	public static $SPELL_CHECK_TRANSPORT_TYPE;
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
+	public static $MAX_UPLOAD_TMX_FILE_SIZE;
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
 	public static $OAUTH_CLIENT_ID;
@@ -59,6 +60,7 @@ class INIT {
 
     public static $OAUTH_CONFIG;
 	public static $CONFIG_VERSION_ERR_MESSAGE;
+	public static $SUPPORT_MAIL;
 
     /**
      * Default Matecat user agent string
@@ -122,7 +124,7 @@ class INIT {
         if( !empty($custom_paths) ){
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path ( get_include_path() . PATH_SEPARATOR . implode( PATH_SEPARATOR, $def_path ) );
+        set_include_path ( implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path() );
     }
 
     public static function loadClass( $className ) {
@@ -248,8 +250,9 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.4.2.2';
+        self::$BUILD_NUMBER = '0.5.1';
         self::$VOLUME_ANALYSIS_ENABLED = true;
+        self::$SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
         self::$AUTHCOOKIENAME='matecat_login_v2';
         self::$AUTHCOOKIEDURATION=86400*60;
@@ -263,78 +266,81 @@ class INIT {
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
         self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
+        self::$MAX_UPLOAD_TMX_FILE_SIZE = 100 * 1024 * 1024; // bytes
         self::$MAX_NUM_FILES = 100;
 
         self::$SUPPORTED_FILE_TYPES = array(
-            'Office'              => array(
-                'doc'  => array( '','','extdoc'),
-                'dot'  => array( '','','extdoc'),
-                'docx' => array( '','','extdoc'),
-                'dotx' => array( '','','extdoc'),
-                'docm' => array( '','','extdoc'),
-                'dotm' => array( '','','extdoc'),
-                'pdf'  => array( '','','extpdf'),
-                'xls'  => array( '','','extxls'),
-                'xlt'  => array( '','','extxls'),
-                'xlsm' => array( '','','extxls'),
-                'xlsx' => array( '','','extxls'),
-                'xltx' => array( '','','extxls'),
-                'pot'  => array( '','','extppt'),
-                'pps'  => array( '','','extppt'),
-                'ppt'  => array( '','','extppt'),
-                'potm' => array( '','','extppt'),
-                'potx' => array( '','','extppt'),
-                'ppsm' => array( '','','extppt'),
-                'ppsx' => array( '','','extppt'),
-                'pptm' => array( '','','extppt'),
-                'pptx' => array( '','','extppt'),
-                'odp'  => array( '','','extppt'),
-                'ods'  => array( '','','extxls'),
-                'odt'  => array( '','','extdoc'),
-                'sxw'  => array( '','','extdoc'),
-                'sxc'  => array( '','','extxls'),
-                'sxi'  => array( '','','extppt'),
-                'txt'  => array( '','','exttxt'),
-                'csv'  => array( '','','extxls'),
-                'xml'  => array( '','','extxml'),
-                'rtf'  => array( '','','extrtf'),
-                //                'vxd' => array("Try converting to XML")
-            ),
-            'Web'                 => array(
-                'htm'   => array( '','','exthtm'),
-                'html'  => array( '','','exthtm'),
-                'xhtml' => array( '','','exthtm'),
-                'xml'   => array( '','','extxml')
-            ),
-            "Interchange Formats" => array(
-                'xliff'    => array( 'default','','extxif' ),
-                'sdlxliff' => array( 'default','','extixif' ),
-                'tmx'      => array( '','','exttmx'),
-                'ttx'      => array( '','','extttx'),
-                'itd'      => array( '','','extitd'),
-                'xlf'      => array( 'default', '', 'extxlf' )
-            ),
-            "Desktop Publishing"  => array(
-                //                'fm' => array('', "Try converting to MIF"),
-                'mif'  => array( '','','extmif'),
-                'inx'  => array( '','','extidd'),
-                'idml' => array( '','','extidd'),
-                'icml' => array( '','','extidd'),
-                //                'indd' => array('', "Try converting to INX"),
-                'xtg'  => array( '','','extqxp'),
-                'tag'  => array( '','','exttag'),
-                'xml'  => array( '','','extxml'),
-                'dita' => array( '','','extdit')
-            ),
-            "Localization"   => array(
-                'properties' => array( '','','extpro'),
-                'rc'         => array( '','','extrcc'),
-                'resx'       => array( '','','extres'),
-                'xml'        => array( '','','extxml'),
-                'dita'       => array( '','','extdit'),
-                'sgml'       => array( '','','extsgm'),
-                'sgm'        => array( '','','extsgm')
-            )
+                'Office'              => array(
+                        'doc'  => array( '', '', 'extdoc' ),
+                        'dot'  => array( '', '', 'extdoc' ),
+                        'docx' => array( '', '', 'extdoc' ),
+                        'dotx' => array( '', '', 'extdoc' ),
+                        'docm' => array( '', '', 'extdoc' ),
+                        'dotm' => array( '', '', 'extdoc' ),
+                        'pdf'  => array( '', '', 'extpdf' ),
+                        'xls'  => array( '', '', 'extxls' ),
+                        'xlt'  => array( '', '', 'extxls' ),
+                        'xlsm' => array( '', '', 'extxls' ),
+                        'xlsx' => array( '', '', 'extxls' ),
+                        'xltx' => array( '', '', 'extxls' ),
+                        'pot'  => array( '', '', 'extppt' ),
+                        'pps'  => array( '', '', 'extppt' ),
+                        'ppt'  => array( '', '', 'extppt' ),
+                        'potm' => array( '', '', 'extppt' ),
+                        'potx' => array( '', '', 'extppt' ),
+                        'ppsm' => array( '', '', 'extppt' ),
+                        'ppsx' => array( '', '', 'extppt' ),
+                        'pptm' => array( '', '', 'extppt' ),
+                        'pptx' => array( '', '', 'extppt' ),
+                        'odp'  => array( '', '', 'extppt' ),
+                        'ods'  => array( '', '', 'extxls' ),
+                        'odt'  => array( '', '', 'extdoc' ),
+                        'sxw'  => array( '', '', 'extdoc' ),
+                        'sxc'  => array( '', '', 'extxls' ),
+                        'sxi'  => array( '', '', 'extppt' ),
+                        'txt'  => array( '', '', 'exttxt' ),
+                        'csv'  => array( '', '', 'extxls' ),
+                        'xml'  => array( '', '', 'extxml' ),
+                        'rtf'  => array( '', '', 'extrtf' ),
+                    //                'vxd' => array("Try converting to XML")
+                ),
+                'Web'                 => array(
+                        'htm'   => array( '', '', 'exthtm' ),
+                        'html'  => array( '', '', 'exthtm' ),
+                        'xhtml' => array( '', '', 'exthtm' ),
+                        'xml'   => array( '', '', 'extxml' )
+                ),
+                "Interchange Formats" => array(
+                        'xliff'    => array( 'default', '', 'extxif' ),
+                        'sdlxliff' => array( 'default', '', 'extixif' ),
+                        'tmx'      => array( '', '', 'exttmx' ),
+                        'ttx'      => array( '', '', 'extttx' ),
+                        'itd'      => array( '', '', 'extitd' ),
+                        'xlf'      => array( 'default', '', 'extxlf' )
+                ),
+                "Desktop Publishing"  => array(
+                    //                'fm' => array('', "Try converting to MIF"),
+                        'mif'  => array( '', '', 'extmif' ),
+                        'inx'  => array( '', '', 'extidd' ),
+                        'idml' => array( '', '', 'extidd' ),
+                        'icml' => array( '', '', 'extidd' ),
+                    //                'indd' => array('', "Try converting to INX"),
+                        'xtg'  => array( '', '', 'extqxp' ),
+                        'tag'  => array( '', '', 'exttag' ),
+                        'xml'  => array( '', '', 'extxml' ),
+                        'dita' => array( '', '', 'extdit' )
+                ),
+                "Localization"        => array(
+                        'properties'  => array( '', '', 'extpro' ),
+                        'rc'          => array( '', '', 'extrcc' ),
+                        'resx'        => array( '', '', 'extres' ),
+                        'xml'         => array( '', '', 'extxml' ),
+                        'dita'        => array( '', '', 'extdit' ),
+                        'sgml'        => array( '', '', 'extsgm' ),
+                        'Android xml' => array( '', '', 'extxml' ),
+                        'strings' 	  => array( '', '', 'extstr' ),
+                        'sgm'         => array( '', '', 'extsgm' )
+                )
         );
 
         self::$UNSUPPORTED_FILE_TYPES = array(
@@ -377,7 +383,7 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.inc.php file is not up-to-date.";
 
 	}
 

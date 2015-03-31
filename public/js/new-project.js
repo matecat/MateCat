@@ -121,7 +121,7 @@ $(document).ready(function() {
 
 				});
 
-				if( typeof d.errors != 'undefined' ) {
+				if( typeof d.errors != 'undefined' && d.errors.length ) {
 
 					var alertComposedMessage = [];
 					$('.error-message').text('');
@@ -251,6 +251,37 @@ $(document).ready(function() {
 		}
 	});
 
+// codice di Daniele 
+	function closeMLPanel() {
+        $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
+        $("#SnapABug_Button").show();
+        $(".popup-outer.lang-slide").hide();
+        $('body').removeClass('side-popup');
+	};
+	$("#multiple-link").click(function(e) {
+        e.preventDefault();
+        $(".popup-languages.slide").addClass('open').show("slide", { direction: "right" }, 400);
+        var tlAr = $('#target-lang').val().split(',');
+        $.each(tlAr, function() {
+            var ll = $('.popup-languages.slide .listlang li #' + this);
+            ll.parent().addClass('on');
+            ll.attr('checked','checked');
+        });
+        $("#SnapABug_Button").hide();
+        $(".popup-outer.lang-slide").show();
+        $('body').addClass('side-popup');
+	});
+	
+	$(".popup-outer.lang-slide, #cancelMultilang, #chooseMultilang").click(function(e) {
+		closeMLPanel();
+	});
+	
+
+
+
+//
+/*
+// old version
 	$("#multiple-link").click(function(e) {
 		e.preventDefault();
 //        $("div.grayed").fadeIn();
@@ -264,8 +295,9 @@ $(document).ready(function() {
 			ll.attr('checked','checked');
 		});
 		$('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
-	});
 
+	});
+*/
 	$(".popup-languages .listlang li label").click(function(e) {
 		$(this).parent().toggleClass('on');
 		var c = $(this).parent().find('input');

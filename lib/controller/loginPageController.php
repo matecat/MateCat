@@ -7,7 +7,6 @@ header("Pragma: no-cache");
 class loginPageController extends viewController {
 
 	private $incomingUrl;
-	private $authURL;
 
 	public function __construct() {
 
@@ -35,10 +34,7 @@ class loginPageController extends viewController {
 	}
 
 	public function doAction() {
-		$this->client = OauthClient::getInstance()->getClient();
-
-		$this->authURL = $this->client->createAuthUrl();
-
+		$this->generateAuthURL();
 	}
 
 	public function setTemplateVars() {

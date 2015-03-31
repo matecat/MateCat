@@ -169,6 +169,9 @@ UI = {
             $('.tm-added .num').text('');
         }
     },
+    uploadingTMX: function () {
+        return $('.mgmt-tm td.uploadfile').length;
+    },
 
 
 }
@@ -727,7 +730,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					// Animation complete.
 				});
 
-           	} else if( d.code < 0 ){
+           	} else if( d.code <= 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
                 $(filerow).addClass('failed');
@@ -874,6 +877,10 @@ checkAnalyzability = function(who) {
 			return false;
 		}
 		if($('.upload-table tr.failed').length) res = false;
+        if(UI.uploadingTMX()) {
+            res = false;
+//            console.log('una tmx in caricamento');
+        }
 		return res;
 	} else {
 		return false;
@@ -975,6 +982,34 @@ unsupported = function() {
 	return pf;
 }
 
+function goodbye(e) {
+    if ($('.popup-tm .notify').length) {
+        var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+        var leave_message = 'You have a pending operation. Are you sure you want to quit?';
+        if(dont_confirm_leave!==1) {
+            if(!e) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = leave_message;
+            //e.stopPropagation works in Firefox.
+            if (e.stopPropagation)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            //return works for Chrome and Safari
+            return leave_message;
+        }
+    }
+}
+
+window.onbeforeunload = function(e) {
+    goodbye(e);
+//    UI.clearStorage('contribution');
+
+//			localStorage.clear();
+};
 
 $(document).ready(function() {
 	config.unsupported = unsupported();

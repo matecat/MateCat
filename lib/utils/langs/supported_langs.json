@@ -66,10 +66,10 @@
 				"en":"Azerbaijani"
 			}],
 			"isocode":"az",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"az-AZ",
-            "languageRegionCode":"az-Latn-AZ"
+            		"languageRegionCode":"az-Latn-AZ"
 		}
 	,
 		{
@@ -140,6 +140,16 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"be-BY"
+		}
+	,
+		{
+			"localized":[{
+				"en":"Belgian French"
+			}],
+			"isocode":"fr",
+			"enabled":true,
+			"rtl":false,
+			"rfc3066code":"fr-BE"
 		}
 	,
 		{
@@ -440,6 +450,16 @@
 			"top":"top5 top10 top20",
 			"rfc3066code":"fr-FR"
 		}
+	,
+  		{
+                        "localized":[{
+                                "en":"French Canada"
+                        }],
+                        "isocode":"fr",
+                        "enabled":true,
+                        "rtl":false,
+                        "rfc3066code":"fr-CA"
+                }
 	,
 		{
 			"localized":[{
@@ -1133,16 +1153,6 @@
 	,
 		{
 			"localized":[{
-				"en":"Quebecois"
-			}],
-			"isocode":"fr",
-			"enabled":true,
-			"rtl":false,
-			"rfc3066code":"fr-CA"
-		}
-	,
-		{
-			"localized":[{
 				"en":"Quechua"
 			}],
 			"isocode":"qu",
@@ -1565,9 +1575,10 @@
 				"en":"Uzbek" 
 			}],
 			"isocode":"uz",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"uz-UZ"
+			"rfc3066code":"uz-UZ",
+			"languageRegionCode":"uz-Latn-UZ"
 		}
 	,
 		{

@@ -52,41 +52,62 @@ class FileFormatConverter {
         $this->lang_handler        = Languages::getInstance();
 
         $this->conversionObject = new ArrayObject( array(
-                'ip_machine'    => null,
-                'ip_client'     => null,
-                'path_name'     => null,
-                'file_name'     => null,
-                'path_backup'   => null,
-                'direction'     => null,
-                'error_message' => null,
-                'src_lang'      => null,
-                'trg_lang'      => null,
-                'status'        => 'ok',
+                'ip_machine'      => null,
+                'ip_client'       => null,
+                'path_name'       => null,
+                'file_name'       => null,
+                'path_backup'     => null,
+                'file_size'       => 0,
+                'direction'       => null,
+                'error_message'   => null,
+                'src_lang'        => null,
+                'trg_lang'        => null,
+                'status'          => 'ok',
+                'conversion_time' => 0
         ), ArrayObject::ARRAY_AS_PROPS );
 
         $db         = Database::obtain();
-        $converters = $db->fetch_array( "SELECT ip_converter, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0" );
+        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0" );
 
         foreach ( $converters as $converter_storage ) {
-            self::$converters[ $converter_storage[ 'ip_converter' ] ]            = 1;
+            self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
             self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
             self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
         }
 
-//        self::$converters = array('10.11.0.106' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.11.0.106' => '10.11.0.107');//for debugging purposes
+//        self::$converters = array('10.11.0.186' => 1);//for debugging purposes
+//        self::$Storage_Lookup_IP_Map = array('10.11.0.186' => '10.11.0.187');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
     }
 
     //add UTF-8 BOM
-    private function addBOM( $string ) {
+    public function addBOM( $string ) {
         return BOM . $string;
     }
 
+    //remove UTF-8 BOM
+    public function stripBOM( $string, $utf = 8 ) {
+        //depending on encoding, different slices are to be cut
+        switch ( $utf ) {
+            case 16:
+                $string = substr( $string, 2 );
+                break;
+            case 32:
+                $string = substr( $string, 4 );
+                break;
+            case 8:
+            default:
+                $string = substr( $string, 3 );
+                break;
+        }
+
+        return $string;
+    }
+
     //check if it has BOM
-    private function hasBOM( $string ) {
+    public function hasBOM( $string ) {
         return ( substr( $string, 0, 3 ) == BOM );
     }
 
@@ -197,40 +218,45 @@ class FileFormatConverter {
         return is_array( $array ) AND (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
     }
 
-    private function __parseOutput( $res ) {
+    private function __parseOutput( $res, $conversionObject = array() ) {
+
+        if ( empty( $conversionObject ) ) {
+            $conversionObject = $this->conversionObject;
+        }
+
         $ret                = array();
         $ret[ 'isSuccess' ] = $res[ 'isSuccess' ];
         $is_success         = $res[ 'isSuccess' ];
 
         if ( !$is_success ) {
 
-            $ret[ 'errorMessage' ]                 = $res[ 'errorMessage' ];
-            $this->conversionObject->error_message = $res[ 'errorMessage' ];
+            $ret[ 'errorMessage' ]           = $res[ 'errorMessage' ];
+            $conversionObject->error_message = $res[ 'errorMessage' ];
 
-            $backUp_dir                          = INIT::$STORAGE_DIR . '/conversion_errors/' . @$_COOKIE[ 'upload_session' ];
-            $this->conversionObject->path_backup = $backUp_dir . "/" . $this->conversionObject->file_name;
+            $backUp_dir                    = INIT::$STORAGE_DIR . '/conversion_errors/' . @$_COOKIE[ 'upload_session' ];
+            $conversionObject->path_backup = $backUp_dir . "/" . $conversionObject->file_name;
 
             if ( !is_dir( $backUp_dir ) ) {
                 mkdir( $backUp_dir, 0755, true );
             }
 
-            $this->conversionObject->status = 'ko';
+            $conversionObject->status = 'ko';
 
             //when Launched by CRON Script send Error Report is disabled
             if ( $this->sendErrorReport ) {
-                @rename( $this->conversionObject->path_name, $this->conversionObject->path_backup );
-                $this->__saveConversionErrorLog();
-                $this->__notifyError();
+                @rename( $conversionObject->path_name, $conversionObject->path_backup );
+                $this->__saveConversionErrorLog( $conversionObject );
+                $this->__notifyError( $conversionObject );
             }
 
             return $ret;
 
         } else {
-            $this->conversionObject->path_backup = $this->conversionObject->path_name;
+            $conversionObject->path_backup = $conversionObject->path_name;
 
             //when Launched by CRON Script send Error Report is disabled
             if ( $this->sendErrorReport ) {
-                $this->__saveConversionErrorLog();
+                $this->__saveConversionErrorLog( $conversionObject );
             }
 
         }
@@ -310,10 +336,20 @@ class FileFormatConverter {
         $fileContent = file_get_contents( $file_path );
         $extension   = pathinfo( $file_path, PATHINFO_EXTENSION );
         $filename    = pathinfo( $file_path, PATHINFO_FILENAME );
-        if ( strtoupper( $extension ) == 'TXT' ) {
+        if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
             $encoding = mb_detect_encoding( $fileContent );
-            if ( $encoding != 'UTF-8' ) {
-                $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+
+            //in case of .strings, they may be in UTF-16
+            if ( strtoupper( $extension ) == 'STRINGS' ) {
+                //use this function to convert stuff
+                $convertedFile = CatUtils::convertEncoding( 'UTF-8', $fileContent );
+
+                //retrieve new content
+                $fileContent = $convertedFile[ 1 ];
+            } else {
+                if ( $encoding != 'UTF-8' ) {
+                    $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+                }
             }
 
             if ( !$this->hasBOM( $fileContent ) ) {
@@ -325,7 +361,7 @@ class FileFormatConverter {
         $tmp_name = tempnam( "/tmp", "MAT_FW" );
 
         //write encoded file to temporary location
-        file_put_contents( $tmp_name, ( $fileContent ) );
+        $fileSize = file_put_contents( $tmp_name, ( $fileContent ) );
 
         //assign file pointer for POST
         $data[ 'documentContent' ] = "@$tmp_name";
@@ -348,20 +384,23 @@ class FileFormatConverter {
         $data[ 'targetLocale' ]  = $this->lang_handler->getLangRegionCode( $target_lang );
 
         log::doLog( $this->ip . " start conversion to xliff of $file_path" );
-        $start_time = time();
 
-        $this->conversionObject->ip_machine = $this->ip;
-        $this->conversionObject->ip_client  = Utils::getRealIpAddr();
-        $this->conversionObject->path_name  = $file_path;
-        $this->conversionObject->file_name  = $data[ 'fileName' ];
-        $this->conversionObject->direction  = 'fw';
-        $this->conversionObject->src_lang   = $data[ 'sourceLocale' ];
-        $this->conversionObject->trg_lang   = $data[ 'targetLocale' ];
-
+        $start_time  = microtime( true );
         $curl_result = $this->curl_post( $url, $data, $this->opt );
-        $end_time    = time();
-        $time_diff   = $end_time - $start_time;
+        $end_time    = microtime( true );
+
+        $time_diff = $end_time - $start_time;
         log::doLog( $this->ip . " took $time_diff secs for $file_path" );
+
+        $this->conversionObject->ip_machine      = $this->ip;
+        $this->conversionObject->ip_client       = Utils::getRealIpAddr();
+        $this->conversionObject->path_name       = $file_path;
+        $this->conversionObject->file_name       = $data[ 'fileName' ];
+        $this->conversionObject->direction       = 'fw';
+        $this->conversionObject->src_lang        = $data[ 'sourceLocale' ];
+        $this->conversionObject->trg_lang        = $data[ 'targetLocale' ];
+        $this->conversionObject->file_size       = $fileSize;
+        $this->conversionObject->conversion_time = $time_diff;
 
         $decode      = json_decode( $curl_result, true );
         $curl_result = null;
@@ -398,7 +437,7 @@ class FileFormatConverter {
         $xliffContent = $xliffVector[ 'content' ];
         $xliffName    = $xliffVector[ 'out_xliff_name' ];
 
-//        Log::dolog( $xliffName );
+        //        Log::dolog( $xliffName );
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
@@ -421,29 +460,31 @@ class FileFormatConverter {
         $tmp_name = tempnam( "/tmp", "MAT_BW" );
 
         //write encoded file to temporary location
-        file_put_contents( $tmp_name, ( $xliffContent ) );
+        $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
 
 
         //$data['xliffContent'] = $xliffContent;
         $data[ 'xliffContent' ] = "@$tmp_name";
 
-        $this->conversionObject->ip_machine = $this->ip;
-        $this->conversionObject->ip_client  = Utils::getRealIpAddr();
-        $this->conversionObject->path_name  = $xliffVector[ 'out_xliff_name' ];
-        $this->conversionObject->file_name  = pathinfo( $xliffVector[ 'out_xliff_name' ], PATHINFO_BASENAME );
-        $this->conversionObject->direction  = 'bw';
-        $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
-        $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
-
         log::doLog( $this->ip . " start conversion back to original" );
-        $start_time = time();
+        $start_time = microtime( true );
 
         //TODO: this helper doesn't help!
         //How TODO: create a resource handler e return it, so it can be added to a MultiCurl Handler instance
         $curl_result = $this->curl_post( $url, $data, $this->opt );
-        $end_time    = time();
+        $end_time    = microtime( true );
         $time_diff   = $end_time - $start_time;
         log::doLog( $this->ip . " took $time_diff secs" );
+
+        $this->conversionObject->ip_machine      = $this->ip;
+        $this->conversionObject->ip_client       = Utils::getRealIpAddr();
+        $this->conversionObject->path_name       = $xliffVector[ 'out_xliff_name' ];
+        $this->conversionObject->file_name       = pathinfo( $xliffVector[ 'out_xliff_name' ], PATHINFO_BASENAME );
+        $this->conversionObject->direction       = 'bw';
+        $this->conversionObject->src_lang        = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
+        $this->conversionObject->trg_lang        = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
+        $this->conversionObject->file_size       = $fileSize;
+        $this->conversionObject->conversion_time = $time_diff;
 
         $decode = json_decode( $curl_result, true );
         unset( $curl_result );
@@ -457,6 +498,8 @@ class FileFormatConverter {
     public function multiConvertToOriginal( $xliffVector_array, $chosen_by_user_machine = false ) {
 
         $multiCurlObj = new MultiCurlHandler();
+
+        $conversionObjects = array();
 
         //iterate files.
         //For each file prepare a curl resource
@@ -485,7 +528,7 @@ class FileFormatConverter {
             $tmp_name = tempnam( "/tmp", "MAT_BW" );
 
             //write encoded file to temporary location
-            file_put_contents( $tmp_name, ( $xliffContent ) );
+            $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
 
             $data[ 'xliffContent' ] = "@$tmp_name";
             $xliffName              = $xliffVector[ 'out_xliff_name' ];
@@ -498,6 +541,9 @@ class FileFormatConverter {
             $this->conversionObject->direction  = 'bw';
             $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
             $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
+            $this->conversionObject->file_size  = $fileSize;
+
+            $conversionObjects[ $id_file ] = clone( $this->conversionObject );
 
             $options = array(
                     CURLOPT_URL            => $url,
@@ -517,12 +563,14 @@ class FileFormatConverter {
         $multiCurlObj->multiExec();
         Log::doLog( "multicurl_end" );
 
+        $multiInfo      = $multiCurlObj->getAllInfo();
         $multiResponses = $multiCurlObj->getAllContents();
 
         //decode response and return the result
         foreach ( $multiResponses as $hash => $json ) {
-            $multiResponses[ $hash ] = json_decode( $json, true );
-            $multiResponses[ $hash ] = $this->__parseOutput( $multiResponses[ $hash ] );
+            $multiResponses[ $hash ]                     = json_decode( $json, true );
+            $conversionObjects[ $hash ]->conversion_time = $multiInfo[ $hash ][ 'curlinfo_total_time' ];
+            $multiResponses[ $hash ]                     = $this->__parseOutput( $multiResponses[ $hash ], $conversionObjects[ $hash ] );
         }
 
         return $multiResponses;
@@ -541,26 +589,26 @@ class FileFormatConverter {
         return preg_replace( self::$Converter_Regexp, '="\\\\\\\\' . $storageIP . '\\\\tr', $xliffContent );
     }
 
-    private function __notifyError() {
+    private function __notifyError( $conversionObject ) {
 
         $remote_user = ( isset( $_SERVER[ 'REMOTE_USER' ] ) ) ? $_SERVER[ 'REMOTE_USER' ] : "N/A";
-        $link_file   = "http://" . $_SERVER[ 'SERVER_NAME' ] . "/" . INIT::$CONVERSIONERRORS_REPOSITORY_WEB . "/" . $_COOKIE[ 'upload_session' ] . "/" . rawurlencode( $this->conversionObject->file_name );
+        $link_file   = "http://" . $_SERVER[ 'SERVER_NAME' ] . "/" . INIT::$CONVERSIONERRORS_REPOSITORY_WEB . "/" . $_COOKIE[ 'upload_session' ] . "/" . rawurlencode( $conversionObject->file_name );
         $message     = "MATECAT : conversion error notifier\n\nDetails:
-    - machine_ip : " . $this->conversionObject->ip_machine . "
-    - client ip :  " . $this->conversionObject->ip_client . "
-    - source :     " . $this->conversionObject->src_lang . "
-    - target :     " . $this->conversionObject->trg_lang . "
-    - client user (if any used) : $remote_user
-    - direction : " . $this->conversionObject->direction . "
-    - error : " . $this->conversionObject->error_message . "
-    Download file clicking to $link_file
-	";
+			- machine_ip : " . $conversionObject->ip_machine . "
+			- client ip :  " . $conversionObject->ip_client . "
+			- source :     " . $conversionObject->src_lang . "
+			- target :     " . $conversionObject->trg_lang . "
+			- client user (if any used) : $remote_user
+										   - direction : " . $conversionObject->direction . "
+																- error : " . $conversionObject->error_message . "
+																				  Download file clicking to $link_file
+																							  ";
 
         Utils::sendErrMailReport( $message );
 
     }
 
-    private function __saveConversionErrorLog() {
+    private function __saveConversionErrorLog( $conversionObject ) {
 
         try {
             $_connection = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS,
@@ -577,8 +625,8 @@ class FileFormatConverter {
             return;
         }
 
-        $data = $this->conversionObject->getArrayCopy();
-        Log::doLog( $this->conversionObject );
+        $data = $conversionObject->getArrayCopy();
+        Log::doLog( $conversionObject );
 
         unset ( $data[ 'path_name' ] );
         unset ( $data[ 'file_name' ] );

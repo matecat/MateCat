@@ -1,0 +1,192 @@
+#Anything in this file, followed by a period (and an upper-case word), does NOT indicate an end-of-sentence marker.
+#Special cases are included for prefixes that ONLY appear before 0-9 numbers.
+
+#any single upper case letter  followed by a period is not a sentence ender (excluding I occasionally, but we leave it in)
+#usually upper case letters are initials in a name
+A
+B
+C
+D
+E
+F
+G
+H
+I
+J
+K
+L
+M
+N
+O
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+
+#List of titles. These are often followed by upper-case names, but do not indicate sentence breaks
+Adj
+adj
+Adv
+adv
+alb
+Alb
+apr
+Apr
+av
+Av
+AV
+avr
+Avr
+bibliogr
+boul
+Boul
+bull
+cell
+cf
+ch
+Ch
+chap
+cit
+Cne
+conf
+coll
+Col
+Corp
+dép
+div
+dr
+DR
+Dr
+Drs
+Ed
+éd
+Éd
+édit
+Édit
+env
+Env
+etc
+ét
+étym
+ex
+Ex
+ext
+fasc
+Fasc
+fig
+Fig
+hab
+ibid
+id
+ill
+Ill
+inc
+Inc
+incl
+inf
+Insp
+introd
+Introd
+ital
+janv
+juill
+ltd
+Ltd
+MM
+mm
+Maj
+maj
+math
+max
+mawsc
+Me
+Mes
+Messrs
+Mgr
+Mgrs
+Mlle
+Mlles
+Mme
+Mmes
+MR
+MRS
+MS
+Mr
+Mrs
+Ms
+ms
+Msgr
+NB
+nov
+obs
+oct
+Ont
+paragr
+Ph
+Prof
+pl
+Pl
+qq
+réf
+Réf
+Rep
+sask
+Sask
+Sec
+sec
+sect
+sem
+sept
+Sr
+St
+subst
+suiv
+sup
+suppl
+tél
+téléc
+trad
+trim
+univ
+Univ
+var
+Vol
+Vols
+vs
+zool 	
+
+
+#misc - odd period-ending items that NEVER indicate breaks (p.m. does NOT fall into this category - it sometimes ends a sentence)
+v
+vs
+i.e
+rev
+e.g
+
+#Numbers only. These should only induce breaks when followed by a numeric sequence
+# add NUMERIC_ONLY after the word for this function
+#This case is mostly for the english "No." which can either be a sentence of its own, or
+#if followed by a number, a non-breaking prefix
+No #NUMERIC_ONLY# 
+Nos
+Art #NUMERIC_ONLY#
+art #NUMERIC_ONLY#
+Nr
+pp #NUMERIC_ONLY#
+PP #NUMERIC_ONLY#
+vol #NUMERIC_ONLY#
+vols #NUMERIC_ONLY#
+
+# abbreviation of from English
+Ltd
+LTD
+Co
+CO
+

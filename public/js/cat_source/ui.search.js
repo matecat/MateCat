@@ -97,12 +97,13 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {
-				UI.execFind_success(d);
+                UI.execFind_success(d);
 			}
 		});
 
 	},
 	execFind_success: function(d) {
+        console.log('execFind_success');
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
@@ -171,8 +172,8 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {				
-				if(d.error.length) {
-					APP.alert({msg: d.error[0].message});
+				if(d.errors.length) {
+					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
 				$('#outer').empty();

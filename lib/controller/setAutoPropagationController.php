@@ -95,7 +95,7 @@ class setAutoPropagationController extends setTranslationController {
         Log::doLog( "Auto-propagation for already translated segments on Job " . $this->id_job . " set to '"
                 . var_export( $this->propagateAll, true ) ."'. Cookie Expire at " . $cookieLife->format('Y-m-d H:i:s') );
 
-        $this->result['error'][] = array("code" => 0, "message" => "OK");
+        $this->result['errors'][] = array("code" => 0, "message" => "OK");
 
     }
 
