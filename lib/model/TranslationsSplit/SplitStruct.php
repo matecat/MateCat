@@ -6,7 +6,7 @@
  * Date: 23/02/15
  * Time: 14.54
  */
-class Translations_TranslationStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class TranslationsSplit_SplitStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     public $id_segment;
 
@@ -39,10 +39,10 @@ class Translations_TranslationStruct extends DataAccess_AbstractDaoObjectStruct 
 
     /**
      * An empty struct
-     * @return Translations_TranslationStruct
+     * @return TranslationsSplit_SplitStruct
      */
     public static function getStruct() {
-        return new Translations_TranslationStruct();
+        return new TranslationsSplit_SplitStruct();
     }
 
 }

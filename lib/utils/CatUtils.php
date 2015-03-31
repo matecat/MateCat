@@ -401,7 +401,7 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
         $segment = htmlspecialchars(
                 html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
-                ENT_NOQUOTES, 'UTF-8', false
+                ENT_NOQUOTES | 16, 'UTF-8', false
         );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
