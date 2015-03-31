@@ -1488,7 +1488,14 @@ body.cattool .searchbox .block.right
 
 /*editor*/
 .editor{border:1px solid #58595b;width:100%;box-shadow: 0 1px 10px #666;-webkit-box-shadow: 0 1px 10px #666;position:relative;z-index:999;-moz-border-radius: 2px;border-radius: 2px;}
-.editor, .editor .text{background:#fff;}
+.editor, .editor .text
+{background:#fff;
+  -webkit-transition: background-color 1ms linear;
+  -moz-transition: background-color 1ms linear;
+  -o-transition: background-color 1ms linear;
+  -ms-transition: background-color 1ms linear;
+  transition: background-color 1ms linear;
+}
 
 .loader
 {
@@ -3811,4 +3818,11 @@ body.isAnonymous .add-mt-engine {
   cursor: pointer;
   width: 19px;
   margin: 0px 5px;
+}
+
+.splitArea .currentSplittedSegment
+{
+    background: yellow;
+    border: 1px solid yellow;
+    border-radius: 3px;
 }

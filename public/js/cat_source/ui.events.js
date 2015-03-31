@@ -854,11 +854,11 @@ $.extend(UI, {
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
         }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
-            console.log('MOUSEDOWN');
+//            console.log('MOUSEDOWN');
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
-            console.log('CLICK');
+//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');

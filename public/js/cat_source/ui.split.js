@@ -97,10 +97,19 @@ if(config.splitSegmentEnabled) {
         */
     })
 
+    $("html").bind('keydown', 'ctrl+s', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    }).bind('keydown', 'ctrl+w', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    })
+
     $.extend(UI, {
         splitSegment: function (segment) {
             splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
+//            segment.find('.source').removeAttr('style');
             oldSid = segment.attr('id').split('-')[1];
             this.setSegmentSplit(oldSid, splittedSource);
         },
@@ -163,7 +172,9 @@ if(config.splitSegmentEnabled) {
             newSegments = [];
             splitGroup = [];
             onlyOne = (splittedSource.length == 1)? true : false;
+            console.log('segmentxx: ', UI.editarea.html());
             $.each(splittedSource, function (index) {
+                translation = (index == 0)? UI.editarea.html() : '';
                 segData = {
                     autopropagated_from: "0",
                     has_reference: "false",
@@ -175,7 +186,7 @@ if(config.splitSegmentEnabled) {
                     split_points_source: [],
                     status: "DRAFT",
                     time_to_edit: "0",
-                    translation: "",
+                    translation: translation,
                     warning: "0"
                 }
                 newSegments.push(segData);
@@ -229,15 +240,33 @@ if(config.splitSegmentEnabled) {
         createSplitArea: function (segment) {
             isSplitted = segment.attr('data-split-group') != '';
             source = $(segment).find('.source');
-            source.after('<div class="splitArea" contenteditable="true" style="height: ' + $(source).height() + 'px"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
+            source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
             splitArea = segment.find('.splitArea');
+
+            setTimeout(function() {
+                sourceHeight = $(source).height();
+                splitAreaHeight = $(splitArea).height();
+                console.log(sourceHeight + ' - ' + splitAreaHeight);
+                console.log('css height del source: ', $(source).css('height'));
+                if(sourceHeight > splitAreaHeight) {
+                    $(splitArea).css('height', sourceHeight + 'px');
+                } else if(sourceHeight < splitAreaHeight){
+                    $(source).css('height', (splitAreaHeight + 0)+ 'px');
+
+                }
+            }, 100);
+
             if(isSplitted) splitArea.removeAttr('style');
             if(isSplitted) {
                 console.log('ecco: ', '');
                 segments = segment.attr('data-split-group').split(',');
                 totalMarkup = '';
                 $.each(segments, function (index) {
-                    totalMarkup += $('#segment-' + this + ' .source').attr('data-original');
+                    console.log(this + ' - ' + UI.currentSegmentId);
+                    newMarkup = $('#segment-' + this + ' .source').attr('data-original');
+                    if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
+                    totalMarkup += newMarkup;
+
                     if(index != segments.length - 1) totalMarkup += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
                 });
                 splitAreaMarkup = totalMarkup;

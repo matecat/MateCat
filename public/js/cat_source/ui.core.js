@@ -163,7 +163,7 @@ UI = {
             this.lastOpenedEditarea.attr('contenteditable', 'false');
 
             this.body.removeClass('editing');
-            $(segment).removeClass("editor");
+            $(segment).removeClass("editor waiting_for_check_result opened");
 
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
@@ -246,8 +246,10 @@ UI = {
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+		if ($('.footer', segment).text() !== '') {
+            return false;
+        }
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
