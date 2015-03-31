@@ -114,15 +114,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
+                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.errors.length)
 					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
+                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});
@@ -140,32 +143,45 @@ $.extend(UI, {
 		this.processContributions(d, segment);
 	},
 	processContributions: function(d, segment) {
+        console.log('F1');
 		this.renderContributions(d, segment);
+        console.log('F2');
 		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
 			this.currentSegmentQA();
+        console.log('F3');
 		this.lockTags(this.editarea);
 		this.spellCheck();
+        console.log('F4');
 
 		this.saveInUndoStack();
 
 		this.blockButtons = false;
 		if (d.data.matches.length > 0) {
+            console.log('F5');
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
+            console.log('F6');
 			$(".sbm > .matches", segment).hide();
 		}		
 	},
 	renderContributions: function(d, segment) {
+        if(!d) return true;
+        console.log('G1');
 		var isActiveSegment = $(segment).hasClass('editor');
+        console.log('G1A');
 		var editarea = $('.editarea', segment);
-//        console.log(d.data.matches.length);
+        console.log('G1B');
+        console.log('d:', d);
 
 
-		if (d.data.matches.length) {
+		if(d.data.matches.length) {
+            console.log('G2');
 			var editareaLength = editarea.text().trim().length;
 			if (isActiveSegment) {
+                console.log('G3');
 				editarea.removeClass("indent");
 			} else {
+                console.log('G4');
 				if (editareaLength === 0)
 					editarea.addClass("indent");
 			}
@@ -177,6 +193,7 @@ $.extend(UI, {
 
 			var copySuggestionDone = false;
 			var segment_id = segment.attr('id');
+            console.log('G5');
 /*
 			if (editareaLength === 0) {
 				console.log('translation AA: ', translation);
@@ -194,6 +211,7 @@ $.extend(UI, {
 */
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
+            console.log('G6');
 
 			$.each(d.data.matches, function(index) {
 				if ((this.segment === '') || (this.translation === ''))
@@ -240,13 +258,16 @@ $.extend(UI, {
 
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
+            console.log('G7');
             // start addtmxTmp
             $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
+            console.log('G8');
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
+            console.log('G9');
 //            UI.setContributionSourceDiff();
 			if (editareaLength === 0) {
 //				console.log('translation AA: ', translation);
@@ -254,10 +275,12 @@ $.extend(UI, {
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
 //				console.log($('#' + segment_id + ' .matches .graysmall'));
 //				console.log('translation BB: ', translation);
+                console.log('G10');
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
 				UI.setChosenSuggestion(1);
+                console.log('G11');
 				copySuggestionDone = true;
 			}						
 //			if (copySuggestionDone) {
@@ -268,6 +291,7 @@ $.extend(UI, {
 			$('.translated', segment).removeAttr('disabled');
 			$('.draft', segment).removeAttr('disabled');
 		} else {
+            console.log('G12');
 			if (UI.debug)
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')

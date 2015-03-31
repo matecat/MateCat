@@ -44,9 +44,13 @@ UI = {
 
 	},
 	activateSegment: function(isNotSimilar) {
+        console.log('D1');
 		this.createFooter(this.currentSegment, isNotSimilar);
+        console.log('D2');
 		this.createButtons();
+        console.log('D3');
 		this.createHeader();
+        console.log('D4');
 	},
 	cacheObjects: function(editarea) {
 		this.editarea = $(editarea);
@@ -239,15 +243,22 @@ UI = {
 	createFooter: function(segment, emptyContributions) {
 //		isNotSimilar = emptyContributions;
 //		console.log('emptyContributions: ', emptyContributions);
+        console.log('E1');
 		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
 		if ($('.matches .overflow', segment).text() !== '') {
+            console.log('E2');
 			if(!emptyContributions) {
 				$('.matches .overflow', segment).empty();
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+        console.log('E3');
+		if ($('.footer', segment).text() !== '') {
+            console.log('E4');
+            return false;
+        }
+        console.log('E5');
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
@@ -295,12 +306,15 @@ UI = {
         alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
                                '	<div class="overflow"></div>' +
                                '</div>';
+        console.log('E6');
         $('.footer .tab.glossary').after(alternativesTabHtml);
 //        console.log('footer html: ', $('.footer', segment).html());
         UI.currentSegment.trigger('afterFooterCreation');
+        console.log('E7');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
+            console.log('E8');
             var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
@@ -308,6 +322,7 @@ UI = {
 //			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 //			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
+        console.log('E9');
 
 	},
     createHeader: function(forceCreation) {
@@ -944,37 +959,46 @@ UI = {
 //        console.log('open segment - editarea: ', UI.currentSegmentId);
 //        console.log('operation: ', operation);
 //		if(UI.body.hasClass('archived')) return;
+        console.log('C');
 
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
         UI.openableSegment = true;
         segment.trigger('just-open');
 //        console.log('UI.openableSegment: ', UI.openableSegment);
+        console.log('C1');
         if(!UI.openableSegment) return false;
+        console.log('C2');
         UI.openableSegment = false;
         this.openSegmentStart = new Date();
 		if(UI.warningStopped) {
+            console.log('C3');
 			UI.warningStopped = false;
 			UI.checkWarnings(false);
 		}
+        console.log('C4');
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
 				return;
 		}
 
+        console.log('C5');
 
         this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
+        console.log('C6');
 		this.cacheObjects(editarea);
 		this.updateJobMenu();
 		$(window).trigger({
 			type: "segmentOpened",
 			segment: segment
 		});
+        console.log('C7');
 
 		this.clearUndoStack();
 		this.saveInUndoStack('open');
+        console.log('C8');
 		this.autoSave = true;
 
 		var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
@@ -984,7 +1008,9 @@ UI = {
 		
 		getNormally = isNotSimilar || isEqual;
 //		console.log('getNormally: ', getNormally);
+        console.log('C9');
 		this.activateSegment(getNormally);
+        console.log('C10');
         segment.trigger('open');
 
         this.getNextSegment(this.currentSegment, 'untranslated');
