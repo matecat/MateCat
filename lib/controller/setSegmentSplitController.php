@@ -77,12 +77,14 @@ class setSegmentSplitController extends ajaxController {
                     'message' => 'Invalid split_points_source json'
             );
         }
+        /*
         else if ( empty( $this->split_points_source ) ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -6,
                     'message' => 'split_points_source cannot be empty'
             );
         }
+        */
 
     }
 
@@ -94,17 +96,17 @@ class setSegmentSplitController extends ajaxController {
 
         //save the 2 arrays in the DB
 
-        $translationStruct = Translations_TranslationStruct::getStruct();
+        $translationStruct = TranslationsSplit_SplitStruct::getStruct();
 
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
         $translationStruct->split_points_source = $this->split_points_source;
         $translationStruct->split_points_target = $this->split_points_target;
 
-        $translationDao = new Translations_TranslationsDAO( Database::obtain() );
+        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
         $result = $translationDao->update($translationStruct);
 
-        if($result instanceof Translations_TranslationStruct){
+        if($result instanceof TranslationsSplit_SplitStruct){
             //return success
             $this->result['data'] = 'OK';
         }
@@ -118,24 +120,24 @@ class setSegmentSplitController extends ajaxController {
 
         //save the 2 arrays in the DB
 
-        $translationStruct = Translations_TranslationStruct::getStruct();
+        $translationStruct = TranslationsSplit_SplitStruct::getStruct();
 
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
         $translationStruct->split_points_source = $this->split_points_source;
         $translationStruct->split_points_target = $this->split_points_target;
 
-        $translationDao = new Translations_TranslationsDAO( Database::obtain() );
+        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
         $result = $translationDao->update($translationStruct);
 
-        if($result instanceof Translations_TranslationStruct){
+        if($result instanceof TranslationsSplit_SplitStruct){
             //return success
             $this->result['data'] = 'OK';
-        }
-        else{
+        } else {
             Log::doLog("Failed split segment.");
             Log::doLog($translationStruct);
         }
+
     }
 }
 

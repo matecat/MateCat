@@ -6,19 +6,19 @@
  * Date: 24/03/15
  * Time: 13.21
  */
-class Translations_TranslationsDAO extends DataAccess_AbstractDao {
+class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
 
     const TABLE = "segment_translations_splits";
 
-    const STRUCT_TYPE = "Translations_TranslationStruct";
+    const STRUCT_TYPE = "TranslationsSplit_SplitStruct";
 
     /**
-     * @param Translations_TranslationStruct $obj
+     * @param TranslationsSplit_SplitStruct $obj
      *
-     * @return Translations_TranslationStruct|Translations_TranslationStruct[]|void
+     * @return TranslationsSplit_SplitStruct|TranslationsSplit_SplitStruct[]|void
      * @throws Exception
      */
-    public function read( Translations_TranslationStruct $obj ) {
+    public function read( TranslationsSplit_SplitStruct $obj ) {
 
         $obj = $this->sanitize( $obj );
 
@@ -55,12 +55,12 @@ class Translations_TranslationsDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Translations_TranslationStruct $obj
+     * @param TranslationsSplit_SplitStruct $obj
      *
-     * @return null|Translations_TranslationStruct|void
+     * @return null|TranslationsSplit_SplitStruct|void
      * @throws Exception
      */
-    public function update( Translations_TranslationStruct $obj ) {
+    public function update( TranslationsSplit_SplitStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -113,9 +113,9 @@ class Translations_TranslationsDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Translations_TranslationStruct $input
+     * @param TranslationsSplit_SplitStruct $input
      *
-     * @return Translations_TranslationStruct
+     * @return TranslationsSplit_SplitStruct
      * @throws Exception
      */
     public function sanitize( $input ) {
@@ -132,12 +132,12 @@ class Translations_TranslationsDAO extends DataAccess_AbstractDao {
 
 
     /**
-     * @param Translations_TranslationStruct $obj
+     * @param TranslationsSplit_SplitStruct $obj
      *
      * @return bool|void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( Translations_TranslationStruct $obj ) {
+    protected function _validatePrimaryKey( TranslationsSplit_SplitStruct $obj ) {
         if ( $obj->id_segment === null ) {
             throw new Exception( "ID segment required" );
         }
@@ -151,7 +151,7 @@ class Translations_TranslationsDAO extends DataAccess_AbstractDao {
     /**
      * @param $array_result array
      *
-     * @return Translations_TranslationStruct|Translations_TranslationStruct[]
+     * @return TranslationsSplit_SplitStruct|TranslationsSplit_SplitStruct[]
      */
     protected function _buildResult( $array_result ) {
         $result = array();
@@ -165,7 +165,7 @@ class Translations_TranslationsDAO extends DataAccess_AbstractDao {
                     'split_points_target' => json_decode( $item[ 'split_points_target' ], true ),
             );
 
-            $obj = new Translations_TranslationStruct( $build_arr );
+            $obj = new TranslationsSplit_SplitStruct( $build_arr );
 
             $result[ ] = $obj;
         }
