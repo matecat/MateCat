@@ -256,7 +256,12 @@ class downloadFileController extends downloadController {
 
                     $files_buffer [ $fileID ] = $output_content[ $fileID ];
 
+                } elseif( $this->forceXliff ) {
+
+                    $this->cleanFilePath( $output_content[ $fileID ][ 'documentContent' ] );
+
                 }
+
             }
 
             $debug[ 'do_conversion' ][ ] = time();
@@ -352,7 +357,7 @@ class downloadFileController extends downloadController {
             $f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
 
             //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'filename' ] );
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§]/u', "_", $f[ 'filename' ] );
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
@@ -378,6 +383,23 @@ class downloadFileController extends downloadController {
         unlink( $file );
 
         $this->content = $zip_content;
+
+    }
+
+    public function cleanFilePath( &$documentContent ){
+
+        if( !function_exists( '_clean' ) ){
+            function _clean( $file ){
+                $file_parts = explode( "\\", $file[2] );
+                $file[0] = str_replace( $file[2], array_pop( $file_parts ), $file[0] );
+                return $file[0];
+            }
+        }
+
+        //remove system confidential information
+        $documentContent = preg_replace_callback( '|(<file [^>]*?original="([^>]*?)" [^>]*>)|si', '_clean', $documentContent );
+        $documentContent = preg_replace_callback( '|(o-path="([^>]*?))"|si', '_clean', $documentContent );
+        $documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
 
     }
 

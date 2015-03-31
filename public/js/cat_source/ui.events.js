@@ -1570,12 +1570,13 @@ $.extend(UI, {
 			}
 
 //			UI.markTags();
+/*
             console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
             console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
             console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
-
+*/
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+//            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
