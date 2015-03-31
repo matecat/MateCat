@@ -24,6 +24,8 @@ class TMSService {
      */
     private $mymemory_engine;
 
+    private $output_type;
+
     /**
      *
      * @throws Exception
@@ -33,6 +35,15 @@ class TMSService {
         //get MyMemory service
         $this->mymemory_engine = Engine::getInstance( 1 );
 
+        $this->output_type = 'translation';
+
+    }
+
+    /**
+     * @param string $output_type
+     */
+    public function setOutputType( $output_type ) {
+        $this->output_type = $output_type;
     }
 
     /**
@@ -110,7 +121,7 @@ class TMSService {
 
         $this->checkCorrectKey();
 
-        Log::doLog($this->file);
+        Log::doLog( $this->file );
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
@@ -137,7 +148,8 @@ class TMSService {
 
             return true;
 
-        } else {
+        }
+        else {
             throw new Exception( "Can't find uploaded TMX files", -15 );
         }
 
@@ -291,7 +303,8 @@ class TMSService {
             parse_str( $_download_url[ 'query' ], $secrets );
             list( $_key, $pass ) = array_values( $secrets );
 
-        } else {
+        }
+        else {
 
             throw new Exception( "Critical. Export Creation Failed.", -18 );
 
@@ -331,7 +344,22 @@ class TMSService {
             srclang="' . $sourceLang . '"/>
     <body>' );
 
-        $result = getTranslationsForTMXExport( $jid, $jPassword );
+        switch ( $this->output_type ) {
+
+            case 'translation':
+                $result = getTranslationsForTMXExport( $jid, $jPassword );
+                break;
+            case 'mt' :
+                $result = getMTForTMXExport( $jid, $jPassword );
+                break;
+            case 'tm' :
+                $result = getTMForTMXExport( $jid, $jPassword );
+                break;
+            default:
+                $result = getTranslationsForTMXExport( $jid, $jPassword );
+                break;
+        }
+
 
         foreach ( $result as $k => $row ) {
 

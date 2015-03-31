@@ -23,6 +23,8 @@ class XliffSAXTranslationReplacer {
 
     private $target_lang;
 
+    private $sourceInTarget;
+
     public function __construct( $filename, $segments, $trg_lang = null, $filePointer = null ) {
 
         $this->filename = $filename;
@@ -39,6 +41,7 @@ class XliffSAXTranslationReplacer {
         $this->outputFP    = fopen( $this->filename . '.out.sdlxliff', 'w+' );
         $this->segments    = $segments;
         $this->target_lang = $trg_lang;
+        $this->sourceInTarget = false;
 
     }
 
@@ -47,6 +50,13 @@ class XliffSAXTranslationReplacer {
         //to permit multiple concurrent downloads, so suppress warnings
         @fclose( $this->originalFP );
         fclose( $this->outputFP );
+    }
+
+    /**
+     * @param boolean $emptyTarget
+     */
+    public function setSourceInTarget( $emptyTarget ) {
+        $this->sourceInTarget = $emptyTarget;
     }
 
     public function replaceTranslation() {
@@ -260,9 +270,16 @@ class XliffSAXTranslationReplacer {
                     $translation = '';
                     foreach ( $id_list as $id ) {
                         $seg = $this->segments[ $id ];
-                        //add xliff markup, appending multiple MRKs
-                        $translation = $this->prepareSegment( $seg, $translation );
+
+                        if(!$this->sourceInTarget) {
+                            //add xliff markup, appending multiple MRKs
+                            $translation = $this->prepareSegment( $seg, $translation );
+                        }
+                        else{
+                            $translation = $seg['segment'];
+                        }
                     }
+
                     //append translation
                     $tag = "<target>$translation</target>";
                 }

@@ -866,30 +866,40 @@ $.extend(UI, {
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
             UI.removeHighlightCorrespondingTags();
+            console.log('A');
 
             if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+                console.log('B');
 				if (operation == 'moving') {
+                    console.log('B1');
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
+                        console.log('B2');
 						UI.segmentToOpen = segment;
 						UI.blockOpenSegment = true;
 
 						console.log('ctrl+down troppo vicini');
 					} else {
+                        console.log('B3');
 						UI.blockOpenSegment = false;
 					}
 
 					UI.recentMoving = true;
 					clearTimeout(UI.recentMovingTimeout);
+                    console.log('B4');
 					UI.recentMovingTimeout = setTimeout(function() {
 						UI.recentMoving = false;
 					}, 1000);
+                    console.log('B5');
 
 				} else {
+                    console.log('B6');
 					UI.blockOpenSegment = false;
 				}
 				UI.lastOperation = operation;
+                console.log('B7');
 
 				UI.openSegment(this, operation);
+                console.log('B8');
 				if (action == 'openConcordance')
 					UI.openConcordance();
 
@@ -900,6 +910,7 @@ $.extend(UI, {
                     }
                 }
 			}
+            console.log('Z');
 
             UI.lockTags(UI.editarea);
             UI.checkTagProximity();
