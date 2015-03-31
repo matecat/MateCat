@@ -69,7 +69,7 @@ TAG;
                 $decoded = array(
                         'data' => array(
                                 "translations" => array(
-                                        array( 'translatedText' => html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) )
+                                        array( 'translatedText' => $this->_resetSpecialStrings( html_entity_decode( $val, ENT_QUOTES | 16 /* ENT_XML1 */ ) ) )
                                 )
                         )
                 );
@@ -86,7 +86,7 @@ TAG;
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $all_args[ 1 ][ 'text' ],
+                $this->_resetSpecialStrings( $all_args[ 1 ][ 'text' ] ),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -105,6 +105,7 @@ TAG;
             return sprintf( $this->rawXmlErrStruct, 'Too Much Recursion', 'get', 'Maximum recursion limit reached' );
         }
 
+        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 

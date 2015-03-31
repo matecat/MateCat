@@ -733,6 +733,70 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
 
 }
 
+function getMTForTMXExport($jid, $jPassword){
+    //TODO: delete this function and put it in a DAO
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
+        IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
+            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+        FROM segment_translations st
+        JOIN segments ON id = id_segment
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE st.id_job = " . (int)$jid . "
+            AND show_in_cattool = 1
+            AND suggestion_source in ('MT','MT-')
+";
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
+}
+
+function getTMForTMXExport($jid, $jPassword){
+    //TODO: delete this function and put it in a DAO
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
+        IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
+            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+        FROM segment_translations st
+        JOIN segments ON id = id_segment
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE st.id_job = " . (int)$jid . "
+            AND show_in_cattool = 1
+            AND suggestion_source is not null
+            AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
+";
+
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
+}
+
 function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
     if ( !$no_status_new ) {
         $select_translation = " st.translation ";
@@ -842,6 +906,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF (st.status='NEW',NULL,st.translation) AS translation,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
+	    sts.split_points_source,
+	    sts.split_points_target,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
@@ -854,6 +920,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 			INNER JOIN files f ON f.id=fj.id_file
 			INNER JOIN segments s ON s.id_file=f.id
 			LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+			LEFT JOIN segment_translations_splits sts  ON sts.id_segment = s.id AND sts.id_job = j.id
 			LEFT JOIN file_references fr ON s.id_file_part = fr.id
 			WHERE j.id = $jid
 			AND j.password = '$password'
@@ -862,6 +929,12 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
+
+    $err = $db->get_error();
+
+    if ( $err[ 'error_code' ] != 0 ) {
+        throw new Exception( __METHOD__ . " -> " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ] );
+    }
 
     return $results;
 }
@@ -1665,7 +1738,7 @@ function insertProject( ArrayObject $projectStructure ) {
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function updateTranslatorJob( $id_job, stdClass $newUser ) {
+function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
 
     $data                       = array();
     $data[ 'username' ]         = $newUser->id;

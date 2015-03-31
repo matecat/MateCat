@@ -187,6 +187,11 @@ class getSegmentsController extends ajaxController {
 
             $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
 
+            $seg['split_points_source'] = json_decode( $seg['split_points_source'], true );
+            $seg['split_points_target'] = json_decode( $seg['split_points_target'], true );
+            ( $seg['split_points_source'] === null ? $seg['split_points_source'] = array() : null );
+            ( $seg['split_points_source'] === null ? $seg['split_points_target'] = array() : null );
+
             $this->data["$id_file"]['segments'][] = $seg;
         }
 

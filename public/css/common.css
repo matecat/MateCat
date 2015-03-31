@@ -547,10 +547,14 @@ margin-right:4px;
 }
 
 .dropdown span {
-margin-right: 10px;
+margin-right: 8px;
 margin-top: 2px;
 float: left;
 position: relative;
+}
+
+.dropdown .cancel span {
+  margin-right: 13px;
 }
 
 .deleteTM span {
@@ -847,17 +851,9 @@ top: inherit;
 margin-top: 0;
 right: inherit;}
 
-td.action .btn {
-cursor: pointer;
-height: 22px;
-color:#333!important;
-width: 75px!important;
-background: #dcdedf!important;
-border-radius: 2px 0 0 2px;
--moz-box-shadow: 0 1px 2px #ccc;
--webkit-box-shadow: 0 1px 2px #ccc;
-box-shadow: 0 1px 2px #ccc;
-}
+
+
+
 
 .step3 .continuebtn {
 display: block;
@@ -1423,7 +1419,9 @@ text-align: center;}
  .canceladdtmx.btn-grey {
     background:#f26522;
 }
-.popup-tm td.description .edit-desc {
+.popup-tm td.description .edit-desc,
+.popup-tm td.engine-name .edit-desc
+{
     height: 18px;
     width: 350px;
     height: 18px;
@@ -1433,7 +1431,9 @@ text-align: center;}
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.popup-tm tr.mine td.description .edit-desc[contenteditable='true'] {
+.popup-tm tr.mine td.description .edit-desc[contenteditable='true'],
+.popup-tm td.engine-name .edit-desc[contenteditable='true']
+{
     border: 1px solid #999;
     background: #fff;
     height: auto;
@@ -1447,7 +1447,9 @@ text-align: center;}
 
 
 
-.popup-tm tr.mine td.description .edit-desc:hover {
+.popup-tm tr.mine td.description .edit-desc:hover,
+.popup-tm td.engine-name .edit-desc:hover
+{
     box-shadow: 0px 0px 0px 1px #ccc;
     cursor: text;
 }
@@ -1887,27 +1889,43 @@ header .searchbox {
     /*box-shadow: 0 1px 1px #666;*/
 }
 
+.header-menu .dropdown form span {
+  color: #666;
+  padding: 5px 0px 5px 5px;
+  margin-right: 3px;
+}
+
 .wrapper-dropdown-5:active {
     -moz-box-shadow: inset 0 0 1px 1px #888;
     -webkit-box-shadow: inset 0 0 1px 1px #888;
     box-shadow: inset 0 0 1px 1px #888;
 }
 
-.wrapper-dropdown-5 .dropdown li {
+.wrapper-dropdown-5 .dropdown li,
+.dropdown input {
     width: 100%;
+    background: #fff!important;
 }
 
-.wrapper-dropdown-5 .dropdown li a {
-    display: block;
-    text-decoration: none;
-    background: #fff;
-    color: #666;
-    text-align: left;
-    padding: 5px 0px 5px 5px;
-    transition: all 0.3s ease-out;
-    border-bottom: 1px solid #e6e8ea;
-    font-weight: normal;
-    font-size: 16px;
+.header-menu .wrapper-dropdown-5 .dropdown li {
+    padding:0!important;
+    height: auto!important;
+      border-bottom: 1px solid #e6e8ea;
+}
+
+.wrapper-dropdown-5 .dropdown li a,
+.dropdown input
+ {
+  display: block;
+  text-decoration: none;
+  background: #fff!important;
+  color: #666;
+  text-align: left;
+  padding: 6px 0px 6px 5px;
+  transition: all 0.3s ease-out;
+  border-bottom: 1px solid #e6e8ea;
+  font-weight: normal;
+  font-size: 16px;
 }
 
 .wrapper-dropdown-5 .dropdown li a:hover {
@@ -1926,7 +1944,9 @@ header .searchbox {
 
 /* Hover state */
 
-.wrapper-dropdown-5 .dropdown li:hover a {
+.wrapper-dropdown-5 .dropdown li:hover a,
+.wrapper-dropdown-5 .dropdown li:hover input
+ {
     color: black;
 }
 
@@ -2043,6 +2063,18 @@ border-radius: 4px;
 margin-top: -4%;
 margin-left: 3%;
 padding: 1% 2% 0;
+}
+
+td.action .btn {
+  cursor: pointer;
+  height: 22px;
+  color: #333!important;
+  width: 75px!important;
+  background: #dcdedf!important;
+  border-radius: 2px 0 0 2px;
+  -moz-box-shadow: 0 1px 2px #ccc;
+  -webkit-box-shadow: 0 1px 2px #ccc;
+  box-shadow: 0 1px 2px #ccc;
 }
 
 
@@ -2374,7 +2406,7 @@ font-weight: normal !important;
 .translate-box select {
 width: 210px;
 }
-.translate-box input {
+.translate-box input[type="text"] {
     width:200px;
 }
 }
@@ -2382,8 +2414,8 @@ width: 210px;
 .translate-box select {
 width: 190px;
 }
-.translate-box input {
-    width:180px;
+.translate-box input[type="text"] {
+    width:180px!important;
 }
 #private-tm-key {
 width: 169px;
@@ -2576,6 +2608,7 @@ a.unarchive-project:after,
 a.resume-project:after,
 .splitpoint:before,
 .splitpoint-delete:after,
+input.downloadtr-button:before,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
@@ -2618,10 +2651,10 @@ body.manage header .filter:before {
 }
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag:before,
+body.tagModes .splitArea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag:before,
+body.tagModes .splitArea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
@@ -2639,7 +2672,7 @@ left: 10000px;
 
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag:before,
+body.tagModes .splitArea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
 {
@@ -2694,6 +2727,8 @@ content: "...";
 margin-top: -5px;
 float: left;
 }
+
+
 
 .canceladdtmx.btn-grey .text:before {
 	content: "\f00d";
@@ -2839,8 +2874,13 @@ background: rgba(187, 187, 187, 0.14);
 
 .error-type th {
 text-align: center;
-padding: 0px 4px;
+padding: 10px 4px;
 font-size: 80%;
+}
+
+.error-type th:nth-child(2) {
+    padding: 10px 0;
+      width: 80px;
 }
 
 td.align-left {

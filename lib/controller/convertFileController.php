@@ -25,7 +25,7 @@ class convertFileController extends ajaxController {
 		$filterArgs = array(
 				'file_name'         => array(
 					'filter' => FILTER_SANITIZE_STRING,
-					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
+					'flags' => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH 
 					),
 				'source_lang'       => array(
 					'filter' => FILTER_SANITIZE_STRING,
@@ -258,17 +258,20 @@ class convertFileController extends ajaxController {
 
 				switch ( $file[ 'extension' ] ) {
 					case 'docx':
-						$defaultError = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
+						$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
 						break;
 					case 'doc':
 					case 'rtf':
-						$defaultError = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
+						$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
 						break;
 					case 'inx':
-						$defaultError = "Conversion Error. Try to commit changes in InDesign before importing.";
+						$defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
+						break;
+                    case 'idml':
+						$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to an previous one.";
 						break;
 					default:
-						$defaultError = "Conversion error. Try opening and saving the document with a new name.";
+						$defaultError = "Importing error. Try opening and saving the document with a new name.";
 						break;
 				}
 
@@ -304,7 +307,11 @@ class convertFileController extends ajaxController {
 				} elseif ( stripos( $convertResult[ 'errorMessage' ], "DocumentFormat.OpenXml.dll") !==false ) {
 					//this error is triggered on DOCX when converter's parser can't decode some regions of the file
 					$convertResult[ 'errorMessage' ] = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-				}
+				} elseif ( $file[ 'extension' ] == 'idml' ) {
+                    $convertResult[ 'errorMessage' ] = $defaultError;
+                } else {
+                    $convertResult[ 'errorMessage' ] = "Import error. Try converting it to a compatible file format (e.g. doc > docx, xlsx > xls)";
+                }
 
 				//custom error message passed directly to javascript client and displayed as is
 				$this->result[ 'code' ]      = -100;

@@ -853,9 +853,12 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
+        }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
+//            console.log('MOUSEDOWN');
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
+//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
@@ -1512,6 +1515,7 @@ $.extend(UI, {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
+
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
@@ -1569,10 +1573,11 @@ $.extend(UI, {
 			}
 
 //			UI.markTags();
-//            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
-//            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-//            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
-
+/*
+            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
+            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
+            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+*/
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
 //            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);

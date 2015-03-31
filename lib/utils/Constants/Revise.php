@@ -31,7 +31,7 @@ class Constants_Revise {
     );
 
     const SERV_VALUE_NONE  = 0;
-    const SERV_VALUE_MINOR = 0.05;
+    const SERV_VALUE_MINOR = 0.03;
     const SERV_VALUE_MAJOR = 1;
 
     const CLIENT_VALUE_NONE  = 0;

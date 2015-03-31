@@ -185,9 +185,27 @@ class engineController extends ajaxController {
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
             $config[ 'target' ]  = "fr-FR";
-            $config[ 'id_user' ] = "demo@matecat.com";
 
             $mt_result = $engine_test->get( $config );
+
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $mt_result['error'];
+                $engineDAO->delete( $result );
+                return;
+            }
+
+        } elseif ( $newEngine instanceof EnginesModel_IPTranslatorStruct ){
+
+            $engine_test = Engine::getInstance( $result->id );
+
+            /**
+             * @var $engine_test Engines_IPTranslator
+             */
+            $config = $engine_test->getConfigStruct();
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+
+            $mt_result = $engine_test->ping( $config );
 
             if ( isset( $mt_result['error']['code'] ) ) {
                 $this->result[ 'errors' ][ ] = $mt_result['error'];

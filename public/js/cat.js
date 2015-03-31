@@ -61,10 +61,13 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
-//        console.log('byStatus: ', byStatus);
+        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = this.getSegmentId(segment);
-		$('.percentuage', segment).removeClass('visible');
+        console.log('segment: ', segment);
+        console.log('segment_id: ', segment_id);
+
+        $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
 		this.setTranslation(this.getSegmentId(segment), status, false);
 		segment.removeClass('saved');
@@ -83,8 +86,10 @@ UI = {
 		});
 	},
     getSegmentId: function (segment) {
-//        return $(segment).attr('id').split('-')[1];
+        if(typeof segment == 'undefined') return false;
+//        console.log('segment qui: ', segment);
         return $(segment).attr('id').replace('segment-', '');
+//        return $(segment).attr('id').split('-')[1];
     },
 
     checkHeaviness: function() {
@@ -156,8 +161,10 @@ UI = {
             this.removeGlossaryMarksFormSource();
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
+
             this.body.removeClass('editing');
-            $(segment).removeClass("editor");
+            $(segment).removeClass("editor waiting_for_check_result opened");
+
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);
@@ -239,8 +246,10 @@ UI = {
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+		if ($('.footer', segment).text() !== '') {
+            return false;
+        }
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
@@ -282,17 +291,19 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
-					'</div>'+
-					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
-					'	<div class="overflow"></div>' +
 					'</div>';
         UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+                               '	<div class="overflow"></div>' +
+                               '</div>';
+        $('.footer .tab.glossary').after(alternativesTabHtml);
+//        console.log('footer html: ', $('.footer', segment).html());
         UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -615,6 +626,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+        $(window).trigger('segmentsAdded');
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
@@ -885,6 +897,7 @@ UI = {
             id = id.toString().split('-')[0];
         }
         var el = $("#segment-" + id + "-target").find(".editarea");
+//        console.log('el: ', el);
         $(el).click();
     },
 	initSegmentNavBar: function() {
@@ -1022,6 +1035,19 @@ UI = {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
 			if (lastOpened != 'segment-' + this.currentSegmentId)
 				this.closeSegment(this.lastOpenedSegment, 0, operation);
+            if(this.lastOpenedSegment) {
+ //               this.lastOpenedSegment.find('.editarea').html('ss');
+ /*
+                setTimeout(function() {
+                    UI.lastOpenedSegment.attr('data-hash', UI.lastOpenedSegment.attr('data-hash'));
+                }, 1000);
+                this.lastOpenedSegment.attr('data-hash', this.lastOpenedSegment.attr('data-hash'));
+                */
+            }
+
+                //console.log("this.lastOpenedSegment: ", this.lastOpenedSegment.attr('data-hash'));
+//            console.log("this.lastOpenedSegment.attr('data-tagmode): ", this.lastOpenedSegment.attr('data-tagmode'));
+//                this.lastOpenedSegment.attr('data-autopropagated', this.lastOpenedSegment.attr('data-autopropagated'));
 		}
 		this.opening = false;
 		this.body.addClass('editing');
@@ -1186,7 +1212,7 @@ UI = {
 						'	</ul>';
 			}
 
-            newSegments = UI.renderSegments(this.segments);
+            newSegments = UI.renderSegments(this.segments, false);
             newFile += newSegments;
 			if (articleToAdd) {
 				newFile += '</article>';
@@ -1217,86 +1243,143 @@ UI = {
 			this.init();
 		}
 	},
-    renderSegments: function (segments) {
+    getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
+//        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
+//        console.log('VEDIAMO: ', segment);
+//        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
+        splitGroup = segment.split_group || splitGroup || '';
+        splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
+        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
+            '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
+//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
+            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
+            ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+            ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
+            '	<div class="body">' +
+            '		<div class="header toggle" id="segment-' + segment.sid + '-header">' +
+//						'			<h2 title="" class="percentuage"><span></span></h2>' +
+//						'			<a href="#" id="segment-' + segment.sid + '-close" class="close" title="Close this segment"></a>' +
+//						'			<a href="#" id="segment-' + segment.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
+            '		</div>' +
+            '		<div class="text">' +
+            '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
+//            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
+            '				<div class="copy" title="Copy source to target">' +
+            '                   <a href="#"></a>' +
+            '                   <p>ALT+CTRL+I</p>' +
+//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
+            '				</div>' +
+            '				<div class="target item" id="segment-' + segment.sid + '-target">' +
+            '					<span class="hide toggle"> ' +
+            '						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
+            '					</span>' +
+            '					<div class="textarea-container">' +
+            '						<span class="loader"></span>' +
+//                        tagModes +
+            '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + segment.sid + '-editarea" data-sid="' + segment.sid + '">' + ((!segment.translation) ? '' : UI.decodePlaceholdersToText(segment.translation, true, segment.sid, 'translation')) + '</div>' +
+            '                       <div class="toolbar">' +
+            ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
+            '                           <ul class="editToolbar">' +
+            '                               <li class="uppercase" title="Uppercase"></li>' +
+            '                               <li class="lowercase" title="Lowercase"></li>' +
+            '                               <li class="capitalize" title="Capitalized"></li>' +
+            '                           </ul>' +
+            '                       </div>' +
+            '						<p class="save-warning" title="Segment modified but not saved"></p>' +
+            '					</div> <!-- .textarea-container -->' +
+            '				</div> <!-- .target -->' +
+            '			</div></div> <!-- .wrap -->' +
+            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
+            '			<div class="status-container">' +
+            '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
+            '			</div> <!-- .status-container -->' +
+            '		</div> <!-- .text -->' +
+            '		<div class="timetoedit" data-raw_time_to_edit="' + segment.time_to_edit + '">' +
+            ((t) ? '			<span class=edit-min>' + segment.parsed_time_to_edit[1] + '</span>m:' : '') +
+            ((t) ? '			<span class=edit-sec>' + segment.parsed_time_to_edit[2] + '</span>s' : '') +
+            '		</div>' +
+            '		<div class="footer toggle"></div> <!-- .footer -->     ' +
+            '	</div> <!-- .body -->' +
+            '	<ul class="statusmenu"></ul>' +
+            '</section> ';
+        return newSegmentMarkup;
+    },
+    stripSpans: function (str) {
+        return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
+    },
+    normalizeSplittedSegments: function (segments) {
+        newSegments = [];
+        $.each(segments, function (index) {
+            if(this.split_points_source.length) {
+//                console.log('a');
+                segment = this;
+                splitGroup = [];
+                $.each(this.split_points_source, function (i) {
+                    splitGroup.push(segment.sid + '-' + (i + 1));
+                });
+
+                $.each(this.split_points_source, function (i) {
+//                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
+                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+                    segData = {
+                        autopropagated_from: "0",
+                        has_reference: "false",
+                        parsed_time_to_edit: ["00", "00", "00", "00"],
+                        readonly: "false",
+                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
+                        segment_hash: segment.segment_hash,
+                        sid: segment.sid + '-' + (i + 1),
+                        split_group: splitGroup,
+                        split_points_source: [],
+                        status: "DRAFT",
+                        time_to_edit: "0",
+                        translation: translation,
+                        warning: "0"
+                    }
+                    newSegments.push(segData);
+                    segData = null;
+                });
+            } else {
+//                console.log('b');
+                newSegments.push(this);
+            }
+
+        });
+// console.log('newsegments 1: ', newSegments);
+        return newSegments;
+    },
+
+    renderSegments: function (segments, justCreated, splitAr, splitGroup) {
+        segments = this.normalizeSplittedSegments(segments);
+//        console.log('segments: ', segments);
+        splitAr = splitAr || [];
+        splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
         newSegments = '';
         $.each(segments, function() {
 //                this.readonly = true;
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
+//            console.log('this.segment: ', this.segment);
+            if($.parseHTML(this.segment).length) {
+                this.segment = UI.stripSpans(this.segment);
+            };
+//            console.log('corrected: ', this.segment.replace(/<span(.*?)>/gi, ''));
             var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
+//            console.log('escapedSegment: ', escapedSegment);
 
             /* this is to show line feed in source too, because server side we replace \n with placeholders */
             escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
             escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
             escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+            originalId = this.sid.split('-')[0];
+            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
+            } else {
 
-            /* tab placeholders replacement */
-            //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
+            }
 
-            /* see also replacement made in source content below */
-            /* this is to show line feed in source too, because server side we replace \n with placeholders */
-            /*
-             tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-             '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
-             '</li>' +
-             //                    '						   <li class="crunched">&lt;&gt;</li>' +
-             //                    '						   <li class="extended">&lt;...&gt;</li>' +
-             '						</ul>' : '';
-             */
-            newSegments += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
-                '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-                '	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
-                ((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
-                ((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
-                '	<div class="body">' +
-                '		<div class="header toggle" id="segment-' + this.sid + '-header">' +
-//						'			<h2 title="" class="percentuage"><span></span></h2>' +
-//						'			<a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
-//						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
-                '		</div>' +
-                '		<div class="text">' +
-                '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
-                '				<div class="copy" title="Copy source to target">' +
-                '                   <a href="#"></a>' +
-                '                   <p>ALT+CTRL+I</p>' +
-//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
-                '				</div>' +
-                '				<div class="target item" id="segment-' + this.sid + '-target">' +
-                '					<span class="hide toggle"> ' +
-                '						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
-                '					</span>' +
-                '					<div class="textarea-container">' +
-                '						<span class="loader"></span>' +
-//                        tagModes +
-                '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-                '                       <div class="toolbar">' +
-                ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
-                '                           <ul class="editToolbar">' +
-                '                               <li class="uppercase" title="Uppercase"></li>' +
-                '                               <li class="lowercase" title="Lowercase"></li>' +
-                '                               <li class="capitalize" title="Capitalized"></li>' +
-                '                           </ul>' +
-                '                       </div>' +
-                '						<p class="save-warning" title="Segment modified but not saved"></p>' +
-                '					</div> <!-- .textarea-container -->' +
-                '				</div> <!-- .target -->' +
-                '			</div></div> <!-- .wrap -->' +
-                '						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>' +
-                '			<div class="status-container">' +
-                '				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
-                '			</div> <!-- .status-container -->' +
-                '		</div> <!-- .text -->' +
-                '		<div class="timetoedit" data-raw_time_to_edit="' + this.time_to_edit + '">' +
-                ((t) ? '			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:' : '') +
-                ((t) ? '			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s' : '') +
-                '		</div>' +
-                '		<div class="footer toggle"></div> <!-- .footer -->     ' +
-                '	</div> <!-- .body -->' +
-                '	<ul class="statusmenu"></ul>' +
-                '</section> ';
         });
         return newSegments;
     },
@@ -1337,13 +1420,13 @@ UI = {
 		var spread = 23;
 		var current = this.currentSegment;
 		var previousSegment = $(segment).prev('section');
-//		console.log(previousSegment);
 
 		if (!previousSegment.length) {
 			previousSegment = $(segment);
 			spread = 103;
 		}
-		var destination = "#" + previousSegment.attr('id');
+        if(!previousSegment.length) return false;
+        var destination = "#" + previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;
 		if (this.firstScroll) {
 			destinationTop = destinationTop + 100;
@@ -1787,7 +1870,7 @@ UI = {
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
             //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
@@ -2068,87 +2151,13 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller) {
-        console.log('setTranslation');
-//        console.log('id_segment: ', id_segment);
+        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
-//        console.log('caller: ', caller);
-        // add to setTranslation tail
-        alreadySet = this.alreadyInSetTranslationTail(id_segment);
-        console.log('prova: ', '"' + $('#segment-' + id_segment + ' .editarea').text().trim().length + '"');
-        emptyTranslation = ($('#segment-' + id_segment + ' .editarea').text().trim().length)? false : true;
-        toSave = ((!alreadySet)&&(!emptyTranslation));
-        console.log('alreadySet: ', alreadySet);
-        console.log('emptyTranslation: ', emptyTranslation);
-        console.log('toSave: ', toSave);
+//        console.log('setTranslation sul segmento ', UI.currentSegmentId);
+		reqArguments = arguments;
+		segment = $('#segment-' + id_segment);
 
-        if(toSave) this.addToSetTranslationTail(id_segment, status, caller);
-//        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
-//        this.addToSetTranslationTail(id_segment, status, caller);
-//        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
-//        console.log(UI.offline);
-//        console.log(config.offlineModeEnabled);
-
-        if((this.offline)&&(config.offlineModeEnabled)) {
-            if(toSave) this.decrementOfflineCacheRemaining();
-            this.changeStatusOffline(id_segment);
-            this.checkConnection();
-        } else {
-//            console.log('this.executingSetTranslation: ', this.executingSetTranslation);
-            if(!this.executingSetTranslation) this.execSetTranslationTail();
-        }
-    },
-    alreadyInSetTranslationTail: function (sid) {
-        console.log('qqqq');
-        console.log('UI.setTranslationTail.length: ', UI.setTranslationTail.length);
-        alreadySet = false;
-        $.each(UI.setTranslationTail, function (index) {
-            if(this.id_segment == sid) alreadySet = true;
-        });
-        return alreadySet;
-    },
-
-    changeStatusOffline: function (sid) {
-        if($('#segment-' + sid + ' .editarea').text() != '') {
-            $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
-        }
-    },
-    decrementOfflineCacheRemaining: function () {
-        this.offlineCacheRemaining--;
-        this.pendingOfflineCacheRemaining = this.pendingOfflineCacheRemaining || 0;
-        if($('#messageBar .remainingSegments').text == '') {
-            this.pendingOfflineCacheRemaining++;
-        } else {
-            this.offlineCacheRemaining = this.offlineCacheRemaining - this.pendingOfflineCacheRemaining;
-            this.pendingOfflineCacheRemaining = null;
-        }
-
-        $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
-        $(window).trigger('offlineSegmentSave');
-    },
-    addToSetTranslationTail: function (id_segment, status, caller) {
-//        console.log('addToSetTranslationTail');
-        var item = {
-            id_segment: id_segment,
-            status: status,
-            caller: caller
-        }
-        this.setTranslationTail.push(item);
-    },
-    execSetTranslationTail: function () {
-//        console.log('execSetTranslationTail');
-        if(this.setTranslationTail.length) {
-            item = this.setTranslationTail[0];
-            this.setTranslationTail.shift();
-            this.execSetTranslation(item.id_segment, item.status, item.caller);
-        }
-    },
-
-    execSetTranslation: function(id_segment, status, caller) {
-//        console.log('execSetTranslation');
-        this.executingSetTranslation = true;
-        reqArguments = arguments;
-		segment = $('#segment-' + id_segment); 
-		this.lastTranslatedSegmentId = id_segment;
+        this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
@@ -2156,9 +2165,8 @@ UI = {
 		if( config.brPlaceholdEnabled ) {
 			translation = this.postProcessEditarea(segment);
 		} else {
-			translation = $('.editarea', segment ).text();
+            translation = $('.editarea', segment ).text();
 		}
-//        console.log('translation: ', translation);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -2218,15 +2226,9 @@ UI = {
 */
 			context: [reqArguments, segment, status],
 			error: function() {
-                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
-                UI.changeStatusOffline(this[0][0]);
-                UI.failedConnection(this[0], 'setTranslation');
-                UI.decrementOfflineCacheRemaining();
-            },
+				UI.failedConnection(this[0], 'setTranslation');
+			},
 			success: function(d) {
-//                console.log('execSetTranslation success');
-                UI.executingSetTranslation = false;
-                UI.execSetTranslationTail();
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
@@ -3057,10 +3059,8 @@ UI = {
 			if ((tt.length) && (!ss))
 				return;
 		}
-        console.log('currentItem: ', currentItem);
-        console.log('this.editarea.html(): ', this.editarea.html());
 
-		var diff = (typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main(currentItem, this.editarea.html())[1][1];
+		var diff = (typeof currentItem != 'undefined') ? this.dmp.diff_main(currentItem, this.editarea.html())[1][1] : 'null';
 		if (diff == ' selected')
 			return;
 
@@ -3108,6 +3108,8 @@ UI = {
 //        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
     },
     shortenId: function(id) {
+//        console.log('id: ', id);
+//        console.log('shortenId: ', id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>'));
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
     },
     isCJK: function () {
@@ -3226,13 +3228,7 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
-        this.setTranslationTail = [];
-        this.setContributionTail = [];
-        this.executingSetTranslation = false;
-        this.executingSetContribution = false;
-        this.executingSetContributionMT = false;
         if(config.isAnonymousUser) this.body.addClass('isAnonymous');
-
 
 		/**
 		 * Global Warnings array definition.
@@ -4092,7 +4088,7 @@ $.extend(UI, {
                 }
             }, 600);
         }).on('offlineON', function(d) {
-//            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
+            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
@@ -4308,9 +4304,12 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
+        }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
+//            console.log('MOUSEDOWN');
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
+//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
@@ -4963,10 +4962,10 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
-            console.log('clicking on translated button');
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
+
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
@@ -4991,11 +4990,11 @@ $.extend(UI, {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
-                }
-
+				}
 			}
 			UI.checkHeaviness();
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+ //               console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {
@@ -5008,34 +5007,30 @@ $.extend(UI, {
  //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
-			if(!UI.offline) UI.blockButtons = true;
+			UI.blockButtons = true;
 
 			UI.unlockTags();
 			UI.setStatusButtons(this);
-
-            if (!skipChange) {
+            if (!skipChange)
                 UI.changeStatus(this, 'translated', 0);
-            }
 
 			if (w == 'translated') {
-                UI.gotoNextSegment();
+				UI.gotoNextSegment();
 			} else {
-                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
+				$(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
 //			UI.markTags();
-//            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
-//            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-//            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
+            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
+            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-//            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-//            console.log('l');
-
-        }).on('click', 'a.approved', function() {
+		}).on('click', 'a.approved', function() {
 /*
 			UI.setStatusButtons(this);
 			$(".editarea", UI.nextUntranslatedSegment).click();
@@ -5605,15 +5600,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
+                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.errors.length)
 					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
+                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});
@@ -5623,7 +5621,8 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
+		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+//		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
@@ -5631,8 +5630,9 @@ $.extend(UI, {
 		this.processContributions(d, segment);
 	},
 	processContributions: function(d, segment) {
+        if(!d) return true;
 		this.renderContributions(d, segment);
-		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
+		if (this.getSegmentId(segment) == UI.currentSegmentId)
 			this.currentSegmentQA();
 		this.lockTags(this.editarea);
 		this.spellCheck();
@@ -5644,15 +5644,16 @@ $.extend(UI, {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
-		}		
-	},
+		}
+
+    },
 	renderContributions: function(d, segment) {
+        if(!d) return true;
 		var isActiveSegment = $(segment).hasClass('editor');
 		var editarea = $('.editarea', segment);
-//        console.log(d.data.matches.length);
 
 
-		if (d.data.matches.length) {
+		if(d.data.matches.length) {
 			var editareaLength = editarea.text().trim().length;
 			if (isActiveSegment) {
 				editarea.removeClass("indent");
@@ -5772,38 +5773,6 @@ $.extend(UI, {
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
-        console.log('setContribution');
-        this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
-        if(!this.offline) {
-            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
-        }
-    },
-    addToSetContributionTail: function (operation, segment_id, status, byStatus) {
-        console.log('addToSetContributionTail');
-        var item = {
-            operation: operation,
-            segment_id: segment_id,
-            status: status,
-            byStatus: byStatus
-        }
-        this.setContributionTail.push(item);
-    },
-    execSetContributionTail: function () {
-        console.log('execSetContributionTail');
-        if(this.setContributionTail.length) {
-            item = this.setContributionTail[0];
-            this.setContributionTail.shift();
-            if(item.operation == 'setContribution') {
-                this.execSetContribution(item.segment_id, item.status, item.byStatus);
-            } else {
-                this.execSetContributionMT(item.segment_id, item.status, item.byStatus);
-            }
-        }
-    },
-
-    execSetContribution: function(segment_id, status, byStatus) {
-        console.log('execSetContribution');
-        this.executingSetContribution = true;
         logData = {
             segment_id: segment_id,
             status: status,
@@ -5834,9 +5803,9 @@ $.extend(UI, {
             this.log('setContribution6', {});
 			return false;
 		}
-		this.updateContribution(source, target, segment_id, status, byStatus);
+		this.updateContribution(source, target);
 	},
-	updateContribution: function(source, target, segment_id, status, byStatus) {
+	updateContribution: function(source, target) {
 		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
@@ -5922,15 +5891,11 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
-                UI.addToSetContributionTail('setContributionMT', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
-                console.log('execSetContributionMT success');
-                UI.executingSetContributionMT = false;
-                UI.execSetContributionTail();
 				if (d.errors.length)
-					UI.processErrors(d.error, 'setContributionMT');
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -8745,12 +8710,13 @@ if(config.enableReview && config.isReview) {
         var div = $('<div>' + UI.footerHTML + '</div>');
         div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
- /*
-        setTimeout(function() {// fixes a bug in setting defaults in radio buttons
-            UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
-            UI.trackChanges(UI.editarea);
-        }, 100);
- */
+
+        /*
+               setTimeout(function() {// fixes a bug in setting defaults in radio buttons
+                   UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
+                   UI.trackChanges(UI.editarea);
+               }, 100);
+        */
         UI.footerHTML = div.html();
         UI.currentSegment.find('.tab-switcher-review').click();
 
@@ -9317,6 +9283,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 //            console.log('.edit-desc');
 //            $(this).addClass('current');
+            $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
@@ -9340,9 +9307,25 @@ $.extend(UI, {
 //            if(APP.isCattool) UI.saveTMdescription($(this));
             UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
-//            e.preventDefault();
-//            $(this).trigger('blur');
-         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+            console.log('return');
+            e.preventDefault();
+            $(this).trigger('blur');
+        }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
+//            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
+            $(this).attr('contenteditable', true);
+        }).on('blur', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+//            UI.saveTMdata(false);
+//        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+//            $(this).removeAttr('contenteditable');
+//            if(APP.isCattool) UI.saveTMdescription($(this));
+//            UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-mt td.engine-name .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
@@ -9813,10 +9796,9 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '       <a class="btn pull-left"><span class="text">Import TMX</span></a>'+
-                '          <div id="dd" class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
+                '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
                 '              <ul class="dropdown pull-left">' +
-                '                   <li><a class="addtmx"><span class="icon-upload"></span>Import TMX</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
                 '              </ul>'+
@@ -10588,51 +10570,63 @@ $.extend(UI, {
  Component: ui.offline
  */
 if(config.offlineModeEnabled) {
-    UI.offlineCacheSize = 10;
-    UI.offlineCacheRemaining = UI.offlineCacheSize
 
     $(window).on('offlineON', function(d) {
         UI.offline = true;
-        UI.body.attr('data-offline-mode', 'light-off');
 //        numUntranslated = $('section.status-new, section.status-draft');
         UI.showMessage({
-            msg: 'No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
-        })
+            msg: 'No connection available. You can still translate in offline mode until you reach the maximum storage size.'})
     }).on('offlineOFF', function(d) {
         console.log('offlineOFF');
         UI.offline = false;
-        UI.body.removeAttr('data-offline-mode');
-
         UI.showMessage({
-            msg: "Connection is back. We are saving translated segments in the database."
-        })
-//        UI.checkConnection();
+            msg: "Connection is back. We are saving translated segments in the database."})
+        UI.checkConnection();
     }).on('stillNoConnection', function(d) {
         setTimeout(function() {
             UI.checkConnection();
         }, 30000);
-    }).on('offlineSegmentSave', function(d) {
-        UI.checkOfflineCacheSize();
-    }).on('offlineCacheIsFull', function(d) {
-        UI.closeOfflineMode('total');
-        UI.blockUIForNoConnection();
     })
 
     $.extend(UI, {
-        closeOfflineMode: function (from) {
-            if(this.offline) {
-                UI.showMessage({
-                    msg: "Connection is back. We are saving translated segments in the database."
-                })
-                setTimeout(function() {
-                    $('#messageBar .close').click();
-                }, 10000);
-                UI.offline = false;
-                UI.body.removeAttr('data-offline-mode');
-            }
-        },
         failover: function(reqArguments, operation) {
-//            console.log('failover on ' + operation);
+            console.log('test offline failover on ' + operation);
+            /*
+            if(operation != 'getWarning') {
+                var pendingConnection = {
+                    operation: operation,
+                    args: reqArguments
+                };
+//			console.log('pendingConnection: ', pendingConnection);
+                var dd = new Date();
+                if(pendingConnection.args) {
+                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+                }
+                if(!UI.checkConnectionTimeout) {
+                    UI.checkConnectionTimeout = setTimeout(function() {
+                        UI.checkConnection();
+                        UI.checkConnectionTimeout = false;
+                    }, 5000);
+                }
+            }
+            */
+        }
+    });
+
+}
+/**
+ Component: ui.noconnection
+ */
+
+if(!config.offlineModeEnabled) {
+
+    $(window).on('offlineON', function(d) {
+
+    })
+
+    $.extend(UI, {
+        failover: function(reqArguments, operation) {
+            console.log('failover on ' + operation);
             if(operation != 'getWarning') {
                 var pendingConnection = {
                     operation: operation,
@@ -10651,9 +10645,11 @@ if(config.offlineModeEnabled) {
                 }
             }
         },
+
         failedConnection: function(reqArguments, operation) {
-//            console.log('failed connection');
-            if(this.offline) {
+            console.log('failed connection');
+            console.log('UI.offline: ', UI.offline);
+            if(UI.offline) {
                 $(window).trigger('stillNoConnection');
             } else {
                 $(window).trigger({
@@ -10675,20 +10671,17 @@ if(config.offlineModeEnabled) {
                 };
                 UI.abortedOperations.push(pendingConnection);
             }
-            if(!$('.noConnection').length) {
-                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+            if(!config.offlineModeEnabled) {
+                if(!$('.noConnection').length) {
+                    UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+                    $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                }
             }
-        },
-        goOffline: function () {
-            $(window).trigger('offlineON');
-        },
-        goOnline: function () {
-            $(window).trigger('offlineOFF');
-        },
-        checkConnection: function() {
-//            console.log('check connection');
 
+        },
+
+        checkConnection: function() {
+            console.log('check connection');
             APP.doRequest({
                 data: {
                     action: 'ajaxUtils',
@@ -10701,34 +10694,30 @@ if(config.offlineModeEnabled) {
                             UI.checkConnection();
                         }, 5000);
                     } else {
-                        if(UI.offline) {
+                        if(config.offlineModeEnabled) {
                             $(window).trigger('stillNoConnection');
                         } else {
                             $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
                             $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
                         }
+
+
                     }
                 },
                 success: function() {
-                    console.log('check connection success');
-                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
-
-                    /*
+                    console.log('connection is back');
                     if(config.offlineModeEnabled) {
                         $(window).trigger('offlineOFF');
                     } else {
                         if(!UI.restoringAbortedOperations) UI.connectionIsBack();
                     }
-                    */
                 }
             });
         },
         connectionIsBack: function() {
-//            console.log('connection is back');
-            if(this.offline) this.closeOfflineMode('light');
-            this.restoringAbortedOperations = true;
+            UI.restoringAbortedOperations = true;
             this.execAbortedOperations();
-            if(!this.autoFailoverEnabled) {
+            if(!UI.autoFailoverEnabled) {
                 $('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
                 setTimeout(function() {
                     $('.noConnection').addClass('reConnection');
@@ -10737,10 +10726,7 @@ if(config.offlineModeEnabled) {
                     }, 500);
                 }, 3000);
             }
-            this.restoringAbortedOperations = false;
-            this.executingSetTranslation = false;
-            this.execSetTranslationTail();
-            this.execSetContributionTail();
+            UI.restoringAbortedOperations = false;
 
         },
         execAbortedOperations: function() {
@@ -10774,38 +10760,8 @@ if(config.offlineModeEnabled) {
             });
             UI.abortedOperations = [];
             UI.clearStorage('pending');
-        },
-        checkOfflineCacheSize: function () {
-            if(!UI.offlineCacheRemaining) {
-                console.log('la cache è finita, andate in pace');
-                $(window).trigger('offlineCacheIsFull');
-            }
         }
 
-        /*
-        failover: function(reqArguments, operation) {
-            console.log('test offline failover on ' + operation);
-
-            if(operation != 'getWarning') {
-                var pendingConnection = {
-                    operation: operation,
-                    args: reqArguments
-                };
-//			console.log('pendingConnection: ', pendingConnection);
-                var dd = new Date();
-                if(pendingConnection.args) {
-                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-                }
-                if(!UI.checkConnectionTimeout) {
-                    UI.checkConnectionTimeout = setTimeout(function() {
-                        UI.checkConnection();
-                        UI.checkConnectionTimeout = false;
-                    }, 5000);
-                }
-            }
-
-        }
-        */
     });
 
 }
@@ -10814,21 +10770,55 @@ if(config.offlineModeEnabled) {
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
-    $('html').on('mouseover', '.sid', function() {
+    $('html').on('mouseover', '.editor .source, .editor .sid', function() {
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.show();
+    }).on('mouseout', '.sid, .editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.hide();
+    }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
+        e.preventDefault();
+        segment = $(this).parents('section');
+//        $('.editor .outersource .actions .split').addClass('cancel');
+        $('.editor .split-shortcut').html('CTRL + W');
+        console.log('split');
+        UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
-    }).on('mouseout', '.sid', function() {
-        actions = $(this).parent().find('.actions');
-        actions.hide();
+        UI.createSplitArea(segment);
+    }).on('click', '.outersource .actions .split.cancel', function(e) {
+        e.preventDefault();
+        console.log('cancel');
+        $('.editor .outersource .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.editor .split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+//        segment.find('.sid .actions').hide();
+
     }).on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
-        console.log('split');
+        $('.sid .actions .split').addClass('cancel');
+        $('.split-shortcut').html('CTRL + W');
+//        console.log('split');
+        UI.currentSegment.addClass('split-action');
+        actions = $(this).parent().find('.actions');
+        actions.show();
         UI.createSplitArea($(this).parents('section'));
+
+    }).on('click', '.sid .actions .split.cancel', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
         if($(this).hasClass('splitpoint')) return false;
-        pasteHtmlAtCaret('<span class="splitpoint"></span>');
+        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.updateSplitNumber($(this));
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
@@ -10836,6 +10826,7 @@ if(config.splitSegmentEnabled) {
         segment = $(this).parents('section');
         $(this).remove();
         UI.updateSplitNumber($(segment).find('.splitArea'));
+    
 
         /*
                 console.log('cliccato');
@@ -10852,66 +10843,87 @@ if(config.splitSegmentEnabled) {
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
+    }).on('click', 'segment:not(.editor)', function(e) {
+        $('.splitBar .buttons .cancel').click();
     }).on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
+
+        /*
+                alreadySplitted = segment.attr('data-split-group') != '';
+                if(alreadySplitted) {
+
+                } else {
+                    UI.splitSegment(segment);
+                }
+        */
+    })
+
+    $("html").bind('keydown', 'ctrl+s', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    }).bind('keydown', 'ctrl+w', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
     })
 
     $.extend(UI, {
         splitSegment: function (segment) {
-            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"></span>');
+            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
-            newSegments = [];
+//            segment.find('.source').removeAttr('style');
             oldSid = segment.attr('id').split('-')[1];
-            $.each(splittedSource, function (index) {
-                segData = {
-                    autopropagated_from: "0",
-                    has_reference: "false",
-                    parsed_time_to_edit: ["00", "00", "00", "00"],
-                    readonly: "false",
-                    segment: this.toString(),
-                    segment_hash: segment.attr('data-hash'),
-                    sid: oldSid + '-' + (index + 1),
-                    status: "DRAFT",
-                    time_to_edit: "0",
-                    translation: "",
-                    warning: "0"
-                }
-                newSegments.push(segData);
-            });
-            console.log('newSegments: ', newSegments);
-            this.currentSegment.after(UI.renderSegments(newSegments));
-            this.currentSegment.hide();
-            this.gotoSegment(oldSid + '-1');
             this.setSegmentSplit(oldSid, splittedSource);
         },
         setSegmentSplit: function (sid, splittedSource) {
-            splitAr = [];
+            splitAr = [0];
             splitIndex = 0;
-            console.log('splittedSource: ', splittedSource);
+//            console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
-                console.log('prima: ', splittedSource[index]);
-                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2").replace(/"/gi, '&quot;');
-                console.log('dopo: ', cc);
-                ll = cc.length;
+//                console.log('prima: ', splittedSource[index]);
+                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
+
+                //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
+                //and perform the count
+                ll = $('<div>').html(cc).text().length;
+
+                //WARNING for the length count, must be done BEFORE encoding of quotes '"' to &quot;
+                cc = cc.replace(/"/gi, '&quot;');
+
+//                console.log('dopo: ', cc);
                 splitIndex += ll;
-                splitAr.push(splitIndex);
-            })
+                splitAr.push( splitIndex );
+            });
             splitAr.pop();
+            onlyOne = (splittedSource.length == 1)? true : false;
+            splitArString = (splitAr.toString() == '0')? '' : splitAr.toString();
+
             APP.doRequest({
                 data: {
-                    action:         "setSegmentSplit",
-                    split_points:     splitAr.toString(),
-                    id:             sid
+                    action:              "setSegmentSplit",
+                    split_points_source: '[' + splitArString + ']',
+                    id_segment:          sid,
+                    id_job:              config.job_id,
+                    password:            config.password
+                },
+                context: {
+                    splittedSource: splittedSource,
+                    sid: sid,
+                    splitAr: splitAr
                 },
                 error: function(d){
+                    // temp
+                    UI.setSegmentSplitSuccess(this);
                     console.log('error');
                 },
                 success: function(d){
+                    UI.setSegmentSplitSuccess(this);
                     console.log('success');
                     if(d.data == 'OK') {
 
@@ -10919,12 +10931,116 @@ if(config.splitSegmentEnabled) {
                 }
             });
         },
+        setSegmentSplitSuccess: function (data) {
+            oldSid = data.sid;
+//            console.log('oldSid: ', oldSid);
+            splittedSource = data.splittedSource;
+            splitAr = data.splitAr;
+            newSegments = [];
+            splitGroup = [];
+            onlyOne = (splittedSource.length == 1)? true : false;
+            console.log('segmentxx: ', UI.editarea.html());
+            $.each(splittedSource, function (index) {
+                translation = (index == 0)? UI.editarea.html() : '';
+                segData = {
+                    autopropagated_from: "0",
+                    has_reference: "false",
+                    parsed_time_to_edit: ["00", "00", "00", "00"],
+                    readonly: "false",
+                    segment: this.toString(),
+                    segment_hash: segment.attr('data-hash'),
+                    sid: (onlyOne)? oldSid : oldSid + '-' + (index + 1),
+                    split_points_source: [],
+                    status: "DRAFT",
+                    time_to_edit: "0",
+                    translation: translation,
+                    warning: "0"
+                }
+                newSegments.push(segData);
+                splitGroup.push(oldSid + '-' + (index + 1));
+            });
+            oldSegment = $('#segment-' + oldSid);
+            alreadySplitted = (oldSegment.length)? false : true;
+            if(onlyOne) splitGroup = [];
+            if(alreadySplitted) {
+                prevSeg = $('#segment-' + oldSid + '-1').prev('section');
+                if(prevSeg.length) {
+                    $('section[data-split-original-id=' + oldSid + ']').remove();
+                    /*
+                    $.each(splitGroup, function (index) {
+                        $('#segment-' + this).remove();
+                    });
+                    */
+                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                    if(splitGroup.length) {
+                        console.log('dovrebbe esser qui');
+                        console.log('oldSid: ', oldSid);
+                        $.each(splitGroup, function (index) {
+                            UI.lockTags($('#segment-' + this + ' .source'));
+                        });
+                        this.gotoSegment(oldSid + '-1');
+                    } else {
+                        console.log('o qui');
+                        console.log('oldSid: ', oldSid);
+                        UI.lockTags($('#segment-' + oldSid + ' .source'));
+                        this.gotoSegment(oldSid);
+
+                    }
+
+                } else {
+
+                }
+            } else {
+                $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                $.each(splitGroup, function (index) {
+                    UI.lockTags($('#segment-' + this + ' .source'));
+                });
+                $(oldSegment).remove();
+                this.gotoSegment(oldSid + '-1');
+            }
+
+//            console.log('or ID: ', UI.currentSegment.attr('data-split-original-id'));
+//            console.log('oldSegment: ', oldSegment);
+//            $("section[data-split-original-id=" + UI.currentSegment.attr('data-split-original-id') + "]").remove();
+        },
 
         createSplitArea: function (segment) {
+            isSplitted = segment.attr('data-split-group') != '';
             source = $(segment).find('.source');
-            source.after('<div class="splitBar"><div class="splitNum"><span class="num">1</span> segment<span class="plural"></span></div><div class="buttons"><a class="cancel" href="#">Cancel</a><a href="#" class="done">Done</a></div></div><div class="splitArea" contenteditable="true"></div>');
+            source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
             splitArea = segment.find('.splitArea');
-            splitArea.html(source.attr('data-original'));
+
+            setTimeout(function() {
+                sourceHeight = $(source).height();
+                splitAreaHeight = $(splitArea).height();
+                console.log(sourceHeight + ' - ' + splitAreaHeight);
+                console.log('css height del source: ', $(source).css('height'));
+                if(sourceHeight > splitAreaHeight) {
+                    $(splitArea).css('height', sourceHeight + 'px');
+                } else if(sourceHeight < splitAreaHeight){
+                    $(source).css('height', (splitAreaHeight + 0)+ 'px');
+
+                }
+            }, 100);
+
+            if(isSplitted) splitArea.removeAttr('style');
+            if(isSplitted) {
+                console.log('ecco: ', '');
+                segments = segment.attr('data-split-group').split(',');
+                totalMarkup = '';
+                $.each(segments, function (index) {
+                    console.log(this + ' - ' + UI.currentSegmentId);
+                    newMarkup = $('#segment-' + this + ' .source').attr('data-original');
+                    if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
+                    totalMarkup += newMarkup;
+
+                    if(index != segments.length - 1) totalMarkup += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
+                });
+                splitAreaMarkup = totalMarkup;
+            } else {
+                splitAreaMarkup = source.attr('data-original');
+            }
+            splitArea.html(splitAreaMarkup);
             this.lockTags(splitArea);
             splitArea.find('.rangySelectionBoundary').remove();
         },

@@ -323,7 +323,7 @@ class FileFormatConverter {
             }
 
         } else {
-            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "port closed" ) );
+            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "Internal connection issue. Try converting it again." ) );
         }
 
         return $output;
