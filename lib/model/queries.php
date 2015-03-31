@@ -733,6 +733,70 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
 
 }
 
+function getMTForTMXExport($jid, $jPassword){
+    //TODO: delete this function and put it in a DAO
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
+        IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
+            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+        FROM segment_translations st
+        JOIN segments ON id = id_segment
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE st.id_job = " . (int)$jid . "
+            AND show_in_cattool = 1
+            AND suggestion_source in ('MT','MT-')
+";
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
+}
+
+function getTMForTMXExport($jid, $jPassword){
+    //TODO: delete this function and put it in a DAO
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
+        IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
+            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+        FROM segment_translations st
+        JOIN segments ON id = id_segment
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE st.id_job = " . (int)$jid . "
+            AND show_in_cattool = 1
+            AND suggestion_source is not null
+            AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
+";
+
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
+}
+
 function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
     if ( !$no_status_new ) {
         $select_translation = " st.translation ";
