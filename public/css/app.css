@@ -2608,7 +2608,6 @@ a.unarchive-project:after,
 a.resume-project:after,
 .splitpoint:before,
 .splitpoint-delete:after,
-input.downloadtr-button:before,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
@@ -4858,12 +4857,6 @@ z-index: 10000;
     outline: none;
     word-wrap: break-word;
     word-break: normal;
-}
-
-/*
-.track-changes,
-.text .item,
-.white li {
     max-width: 520px;
 }
 */
@@ -6299,23 +6292,22 @@ float: left;
   border-radius: 4px;
   width: 31px;
   font-size: 20px;
-  margin: 0 auto;
+  margin-top: 15px;
   display: block;
+  margin-left: 7px;
   transform: rotate(-90deg);
 }
 
-.editor.split-action .actions .split {
-    display: block !important;
+.split-action .split {
 	background: #09beec;
-    -moz-box-shadow: inset 0 0 1px 1px #888;
-    -webkit-box-shadow: inset 0 0 1px 1px #888;
-    box-shadow: inset 0 0 1px 1px #888;
+  -moz-box-shadow: inset 0 0 1px 1px #888;
+  -webkit-box-shadow: inset 0 0 1px 1px #888;
+  box-shadow: inset 0 0 1px 1px #888;
 }
 
 .splitBar .buttons a {
 
 }
-
 
 /*
 
@@ -6913,7 +6905,7 @@ color:red !important;
 .track-changes p {
 	width: 100%;
 	line-height: 30px;
-	margin: 36px auto 17px auto;
+	margin: 17px auto 17px auto;
 	min-height: 70px;
 	text-align: left;
 	height: 96% !important;
@@ -6963,13 +6955,13 @@ body.isAnonymous .add-mt-engine {
 }
 
 .splitArea {
-  width: 45.5%;
+  width: 44.5%;
   z-index: 9999999;
   position: absolute;
   min-height: 20px;
   border: 2px solid #F00;
   padding: 3px 0px 5px 3px;
-  margin: 0 0.7%;
+  margin: 3px 1.4%;
   background: #efefef; 
   border-bottom: 1px solid #ccc;  
   font-size: 18px;
@@ -6990,7 +6982,7 @@ body.isAnonymous .add-mt-engine {
 
 .splitBar
 {
-    width: 46.6%;
+    width: 46.3%;
     position: absolute;
     bottom: 55px;
 }
@@ -7020,13 +7012,13 @@ body.isAnonymous .add-mt-engine {
 
 .splitpoint
 {
-  display: inline-block;
-  width: 8px;
-  height: 26px;
-  color: #767676;
-  cursor: pointer;
-  width: 19px;
-  margin: 0px 5px;
+    display: inline-block;
+    width: 8px;
+    height: 26px;
+    color: #767676;
+    cursor: pointer;
+    width: 19px;
+    margin: 0px 5px;
 }
 
 .splitArea .currentSplittedSegment
