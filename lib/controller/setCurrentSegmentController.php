@@ -6,6 +6,7 @@ class setCurrentSegmentController extends ajaxController {
 
     private $id_segment;
     private $id_job;
+    private $split_num;
 
 
     public function __construct() {
@@ -26,7 +27,7 @@ class setCurrentSegmentController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->id_segment = (int)$__postInput[ 'id_segment' ];
+        $this->id_segment = $__postInput[ 'id_segment' ];
         $this->id_job     = (int)$__postInput[ 'id_job' ];
         $this->password   = $__postInput[ 'password' ];
 
@@ -38,7 +39,10 @@ class setCurrentSegmentController extends ajaxController {
         $job_data = getJobData( (int)$this->id_job );
 
         $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness
+        //check for Password correctness ( remove segment split )
+        if( stripos( '-', $this->id_segment ) ) {
+            list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
+        }
         if ( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
         }
@@ -58,38 +62,35 @@ class setCurrentSegmentController extends ajaxController {
 
         $insertRes = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
 
-        $segmentStruct             = Translations_TranslationStruct::getStruct();
+        $segmentStruct             = TranslationsSplit_SplitStruct::getStruct();
         $segmentStruct->id_segment = $this->id_segment;
         $segmentStruct->id_job     = $this->id_job;
 
-        $translationDao  = new Translations_TranslationsDAO( Database::obtain() );
+        $translationDao  = new TranslationsSplit_SplitDAO( Database::obtain() );
         $currSegmentInfo = $translationDao->read( $segmentStruct );
 
+        /**
+         * Split check control
+         */
         $isASplittedSegment = false;
         $isLastSegmentChunk = true;
-
         if ( count( $currSegmentInfo ) > 0 ) {
-            $currSegmentInfo = $currSegmentInfo[ 0 ];
 
-            if ( count( $currSegmentInfo->split_points_source ) > 1 ) {
-                $isASplittedSegment = true;
+            $isASplittedSegment = true;
+            $currSegmentInfo = array_shift( $currSegmentInfo );
 
-                //get the chunk number and check whether it is the last one or not
-                $chunkNr   = explode( "-", $segmentStruct->id_segment );
-                $segmentNr = $chunkNr[ 0 ];
-                $chunkNr   = $chunkNr[ 1 ];
+            //get the chunk number and check whether it is the last one or not
+            list( $segmentNr, $chunkNr ) = explode( "-", $segmentStruct->id_segment );
+            $isLastSegmentChunk = ( $chunkNr == count( $currSegmentInfo->split_points_source ) - 1 );
 
-                $isLastSegmentChunk = ( $chunkNr == count( $currSegmentInfo->split_points_source ) - 1 );
-
-                if ( !$isLastSegmentChunk ) {
-                    $nextSegmentId = $segmentNr . "-" . ( $chunkNr + 1 );
-                }
+            if ( !$isLastSegmentChunk ) {
+                $nextSegmentId = $segmentNr . "-" . ( $chunkNr + 1 );
             }
-        }
-        else {
-            $nextSegmentId = null;
-        }
 
+        }
+        /**
+         * End Split check control
+         */
         if ( !$isASplittedSegment || $isLastSegmentChunk ) {
 
             $segmentList = getNextSegment( $this->id_segment, $this->id_job, $this->password, ( !self::isRevision() ? false : true ) );
@@ -100,7 +101,7 @@ class setCurrentSegmentController extends ajaxController {
             else {
                 $nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
                 if ( !$nextSegmentId ) {
-                    $nextSegmentId = fetchStatus( $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+                    $nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
                 }
             }
         }

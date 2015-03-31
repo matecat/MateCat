@@ -3810,3 +3810,10 @@ body.isAnonymous .add-mt-engine {
   width: 19px;
   margin: 0px 5px;
 }
+
+.splitArea .currentSplittedSegment
+{
+    background: yellow;
+    border: 1px solid yellow;
+    border-radius: 3px;
+}
