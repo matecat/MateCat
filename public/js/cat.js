@@ -4305,7 +4305,7 @@ $.extend(UI, {
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
         }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
-            console.log('MOUSEDOWN');
+//            console.log('MOUSEDOWN');
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -10862,6 +10862,14 @@ if(config.splitSegmentEnabled) {
                     UI.splitSegment(segment);
                 }
         */
+    })
+
+    $("html").bind('keydown', 'ctrl+s', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    }).bind('keydown', 'ctrl+w', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
     })
 
     $.extend(UI, {
