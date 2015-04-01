@@ -4,10 +4,7 @@ include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setCurrentSegmentController extends ajaxController {
 
-    private $id_segment;
     private $id_job;
-    private $split_num;
-
 
     public function __construct() {
 
