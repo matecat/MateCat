@@ -1288,9 +1288,9 @@ UI = {
             '                       </div>' +
             '						<p class="save-warning" title="Segment modified but not saved"></p>' +
             '					</div> <!-- .textarea-container -->' +
+            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
             '				</div> <!-- .target -->' +
             '			</div></div> <!-- .wrap -->' +
-            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
             '			<div class="status-container">' +
             '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
             '			</div> <!-- .status-container -->' +
@@ -2766,6 +2766,7 @@ UI = {
 			}
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
+				console.log('operation: ', operation);
 				UI.failedConnection(0, 'no');
 			}
 		});
