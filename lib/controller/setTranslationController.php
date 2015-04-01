@@ -50,7 +50,7 @@ class setTranslationController extends ajaxController {
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
-        $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'statuses' ] ) );
+        $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'statuses' ] ) ); //strtoupper transforms null to ""
 
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
@@ -66,7 +66,9 @@ class setTranslationController extends ajaxController {
         if ( empty( $this->id_segment ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
         }
-        if( !empty( $this->split_statuses ) && !empty( $this->split_num ) ){
+
+        //strtoupper transforms null to "" so check for the first element to be an empty string
+        if( !empty( $this->split_statuses[0] ) && !empty( $this->split_num ) ){
 
             if( count( array_unique( $this->split_statuses ) ) == 1 ) {
                 //IF ALL translation chunks are in the same status, we take the status for the entire segment
@@ -383,14 +385,19 @@ class setTranslationController extends ajaxController {
             $this->result[ 'warning' ][ 'id' ] = 0;
         }
 
-        /* put the split inside the transaction if they are present */
-        $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
-        $translationStruct->id_segment = $this->id_segment;
-        $translationStruct->id_job     = $this->id_job;
+        //strtoupper transforms null to "" so check for the first element to be an empty string
+        if( !empty( $this->split_statuses[0] ) && !empty( $this->split_num ) ){
 
-        $translationStruct->target_chunk_lengths = array( 'len' => $this->split_chunk_lengths, 'statuses' => $this->split_statuses );
-        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
-        $result = $translationDao->update($translationStruct);
+            /* put the split inside the transaction if they are present */
+            $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
+            $translationStruct->id_segment = $this->id_segment;
+            $translationStruct->id_job     = $this->id_job;
+
+            $translationStruct->target_chunk_lengths = array( 'len' => $this->split_chunk_lengths, 'statuses' => $this->split_statuses );
+            $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+            $result = $translationDao->update($translationStruct);
+
+        }
 
         $db->commit();
 
