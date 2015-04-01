@@ -425,7 +425,7 @@ class CatUtils {
      *
      * @return array
      */
-    public static function parseSplit( $segment ){
+    public static function parseSegmentSplit( $segment ){
         $split_chunks = explode( '##$_SPLIT$##', $segment );
         $chunk_positions = array();
         $last = 0;
@@ -447,7 +447,7 @@ class CatUtils {
      *
      * @return string
      */
-    public static function reApplySplit( $segment, Array $chunk_positions ){
+    public static function reApplySegmentSplit( $segment, Array $chunk_positions ){
 
         $string_chunks = array();
         $last_sum = 0;

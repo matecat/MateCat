@@ -101,7 +101,7 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
 
-        $split_points_source = CatUtils::parseSplit( CatUtils::view2rawxliff( $this->segment ) );
+        $split_points_source = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
         $translationStruct->split_points_source = $split_points_source;
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
@@ -126,7 +126,7 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
 
-        $split_points_source = CatUtils::parseSplit( CatUtils::view2rawxliff( $this->segment ) );
+        $split_points_source = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
         $translationStruct->split_points_source = $split_points_source;
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
