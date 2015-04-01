@@ -74,12 +74,12 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
 
         if ( $obj->source_chunk_lengths !== null ) {
             $inserting_keys_array[ ] = 'source_chunk_lengths';
-            $values_array[ ]         = $this->con->escape( $obj->source_chunk_lengths );
+            $values_array[ ]         = $obj->source_chunk_lengths;
         }
 
         if ( $obj->target_chunk_lengths !== null ) {
             $inserting_keys_array[ ] = 'target_chunk_lengths';
-            $values_array[ ]         = $this->con->escape( $obj->target_chunk_lengths );
+            $values_array[ ]         = $obj->target_chunk_lengths;
         }
 
         $values_string = null;

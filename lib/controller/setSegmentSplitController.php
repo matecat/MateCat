@@ -103,7 +103,7 @@ class setSegmentSplitController extends ajaxController {
         list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
-        $translationStruct->target_chunk_lengths = array( 'len' => array( 0 ), 'statuses' => array_fill( 0, count( $translationStruct->source_chunk_lengths ), Constants_TranslationStatus::STATUS_DRAFT ) );
+        $translationStruct->target_chunk_lengths = array( 'len' => array( 0 ), 'statuses' => array_fill( 0, count( $translationStruct->source_chunk_lengths ) -1, Constants_TranslationStatus::STATUS_DRAFT ) );
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
         $result = $translationDao->update($translationStruct);
