@@ -246,8 +246,10 @@ UI = {
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+		if ($('.footer', segment).text() !== '') {
+            return false;
+        }
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +

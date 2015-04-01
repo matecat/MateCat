@@ -97,6 +97,14 @@ if(config.splitSegmentEnabled) {
         */
     })
 
+    $("html").bind('keydown', 'ctrl+s', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    }).bind('keydown', 'ctrl+w', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    })
+
     $.extend(UI, {
         splitSegment: function (segment) {
             splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
@@ -164,7 +172,9 @@ if(config.splitSegmentEnabled) {
             newSegments = [];
             splitGroup = [];
             onlyOne = (splittedSource.length == 1)? true : false;
+            console.log('segmentxx: ', UI.editarea.html());
             $.each(splittedSource, function (index) {
+                translation = (index == 0)? UI.editarea.html() : '';
                 segData = {
                     autopropagated_from: "0",
                     has_reference: "false",
@@ -176,7 +186,7 @@ if(config.splitSegmentEnabled) {
                     split_points_source: [],
                     status: "DRAFT",
                     time_to_edit: "0",
-                    translation: "",
+                    translation: translation,
                     warning: "0"
                 }
                 newSegments.push(segData);

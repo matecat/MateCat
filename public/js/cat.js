@@ -246,8 +246,10 @@ UI = {
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+		if ($('.footer', segment).text() !== '') {
+            return false;
+        }
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
@@ -4303,11 +4305,11 @@ $.extend(UI, {
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
         }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
-            console.log('MOUSEDOWN');
+//            console.log('MOUSEDOWN');
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
-            console.log('CLICK');
+//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
@@ -5598,15 +5600,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
+                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.errors.length)
 					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
+                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});
@@ -5616,7 +5621,8 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
+		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+//		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
@@ -5624,8 +5630,9 @@ $.extend(UI, {
 		this.processContributions(d, segment);
 	},
 	processContributions: function(d, segment) {
+        if(!d) return true;
 		this.renderContributions(d, segment);
-		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
+		if (this.getSegmentId(segment) == UI.currentSegmentId)
 			this.currentSegmentQA();
 		this.lockTags(this.editarea);
 		this.spellCheck();
@@ -5637,15 +5644,16 @@ $.extend(UI, {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
-		}		
-	},
+		}
+
+    },
 	renderContributions: function(d, segment) {
+        if(!d) return true;
 		var isActiveSegment = $(segment).hasClass('editor');
 		var editarea = $('.editarea', segment);
-//        console.log(d.data.matches.length);
 
 
-		if (d.data.matches.length) {
+		if(d.data.matches.length) {
 			var editareaLength = editarea.text().trim().length;
 			if (isActiveSegment) {
 				editarea.removeClass("indent");
@@ -10856,6 +10864,14 @@ if(config.splitSegmentEnabled) {
         */
     })
 
+    $("html").bind('keydown', 'ctrl+s', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    }).bind('keydown', 'ctrl+w', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    })
+
     $.extend(UI, {
         splitSegment: function (segment) {
             splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
@@ -10923,7 +10939,9 @@ if(config.splitSegmentEnabled) {
             newSegments = [];
             splitGroup = [];
             onlyOne = (splittedSource.length == 1)? true : false;
+            console.log('segmentxx: ', UI.editarea.html());
             $.each(splittedSource, function (index) {
+                translation = (index == 0)? UI.editarea.html() : '';
                 segData = {
                     autopropagated_from: "0",
                     has_reference: "false",
@@ -10935,7 +10953,7 @@ if(config.splitSegmentEnabled) {
                     split_points_source: [],
                     status: "DRAFT",
                     time_to_edit: "0",
-                    translation: "",
+                    translation: translation,
                     warning: "0"
                 }
                 newSegments.push(segData);
