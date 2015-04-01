@@ -306,7 +306,7 @@ class downloadFileController extends downloadController {
 
         //qui prodest to check download type?
         if ( $this->download_type == 'omegat' ) {
-            //what if I have a job with more than \1 file?
+            $this->filename .= ".zip";
 
             $tmsService = new TMSService();
             $tmsService->setOutputType( 'tm' );
