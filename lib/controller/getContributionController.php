@@ -4,7 +4,6 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class getContributionController extends ajaxController {
 
-    private $id_segment;
     private $id_job;
     private $num_results;
     private $text;
