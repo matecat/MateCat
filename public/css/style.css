@@ -927,10 +927,10 @@ section:not(.editor) .text:first-child {
 }
 
 
-body.cattool .text:hover {
+/*body.cattool .text:hover {
 		background: rgba(246, 246, 246, 0.77);
 }
-
+*/
 body.cattool.editing section:not(.editor) .text:hover
 {
 	background: #bdbebc!important;

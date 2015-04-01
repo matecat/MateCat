@@ -42,16 +42,15 @@ if(config.splitSegmentEnabled) {
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea($(this).parents('section'));
-
     }).on('click', '.sid .actions .split.cancel', function(e) {
         e.preventDefault();
         $('.sid .actions .split').removeClass('cancel');
-        segment = $(this).parents('section');
         source = $(segment).find('.source');
         $(source).removeAttr('style');
         UI.currentSegment.removeClass('split-action');
         $('.split-shortcut').html('CTRL + S');
         console.log('cancel');
+        segment = $(this).parents('section');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
@@ -67,7 +66,6 @@ if(config.splitSegmentEnabled) {
         segment = $(this).parents('section');
         $(this).remove();
         UI.updateSplitNumber($(segment).find('.splitArea'));
-    
 
         /*
                 console.log('cliccato');
@@ -80,7 +78,7 @@ if(config.splitSegmentEnabled) {
                 console.log('b');
                 UI.updateSplitNumber($(segment).find('.splitArea'));
                 console.log('c');
-        */
+        
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
@@ -88,9 +86,7 @@ if(config.splitSegmentEnabled) {
         $('.split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
-    }).on('click', 'segment:not(.editor)', function(e) {
-        $('.splitBar .buttons .cancel').click();
-    }).on('click', '.splitBar .buttons .done', function(e) {
+   */}).on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
@@ -270,7 +266,7 @@ if(config.splitSegmentEnabled) {
         createSplitArea: function (segment) {
             isSplitted = segment.attr('data-split-group') != '';
             source = $(segment).find('.source');
-            $(source).addClass('initial').css('height','100 px');
+            $(source).removeAttr('style');
             targetHeight = $('.targetarea').height();
             segment.find('.splitContainer').remove();
             source.after('<div class="splitContainer"><div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div></div>');
@@ -282,14 +278,14 @@ if(config.splitSegmentEnabled) {
                 console.log('css height del source: ', $(source).css('height'));
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
-                    $(source).css('height', (sourceHeight + 120)+ 'px');
+                    $(source).css('height', (sourceHeight)+ 'px');
                     console.log('caso 1');
             } else if(sourceHeight < splitAreaHeight) {
                     $(source).css('height', (splitAreaHeight + 100)+ 'px');
                     $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
                       console.log('caso 2');
                 }
-            },10);
+            },100);
 
            /* setTimeout(function() {
                 sourceHeight = $(source).height();
