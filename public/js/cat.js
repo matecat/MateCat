@@ -1536,7 +1536,8 @@ UI = {
 			data: {
 				action: 'setCurrentSegment',
 				password: config.password,
-				id_segment: id_segment.toString().split('-')[0],
+				id_segment: id_segment.toString(),
+//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
 			context: reqArguments,
@@ -2189,8 +2190,11 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        isSplitted = (id_segment.split('-').length > 1) ? true : false;
+        if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
+        console.log('isSplitted: ', isSplitted);
         this.tempReqArguments = {
-            id_segment: id_segment,
+            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
@@ -2202,6 +2206,9 @@ UI = {
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave
         };
+        if(isSplitted) {
+            this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+        }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         this.log('setTranslation', reqData);
@@ -2233,6 +2240,29 @@ UI = {
 			}
 		});
 	},
+    collectSplittedStatuses: function (sid) {
+        statuses = [];
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            status = UI.getStatus(segment);
+            statuses.push(status);
+        });
+        return statuses;
+    },
+    collectSplittedTranslations: function (sid) {
+        totalTranslation = '';
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            translation = UI.postProcessEditarea(segment);
+            totalTranslation += translation;
+//            totalTranslation += $(segment).find('.editarea').html();
+            if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
+        });
+        return totalTranslation;
+    },
+
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -5021,12 +5051,13 @@ $.extend(UI, {
 			}
 
 //			UI.markTags();
+/*
             console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
             console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
             console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
-
+*/
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+//            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
@@ -10770,6 +10801,7 @@ if(!config.offlineModeEnabled) {
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
+    UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     $('html').on('mouseover', '.editor .source, .editor .sid', function() {
         actions = $('.editor .sid').parent().find('.actions');
         actions.show();
@@ -10819,6 +10851,7 @@ if(config.splitSegmentEnabled) {
     }).on('click', '.splitArea', function(e) {
         if($(this).hasClass('splitpoint')) return false;
         pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
+        UI.cleanSplitPoints($(this));
         UI.updateSplitNumber($(this));
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
@@ -10883,7 +10916,7 @@ if(config.splitSegmentEnabled) {
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
             splitIndex = 0;
-//            console.log('splittedSource: ', splittedSource);
+            console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
 //                console.log('prima: ', splittedSource[index]);
@@ -10904,10 +10937,18 @@ if(config.splitSegmentEnabled) {
             onlyOne = (splittedSource.length == 1)? true : false;
             splitArString = (splitAr.toString() == '0')? '' : splitAr.toString();
 
+            // new version
+            totalSource = '';
+            $.each(splittedSource, function (index) {
+                totalSource += this;
+                if(index < (splittedSource.length - 1)) totalSource += UI.splittedTranslationPlaceholder;
+            });
+
             APP.doRequest({
                 data: {
                     action:              "setSegmentSplit",
-                    split_points_source: '[' + splitArString + ']',
+//                    split_points_source: '[' + splitArString + ']',
+                    segment:            totalSource,
                     id_segment:          sid,
                     id_job:              config.job_id,
                     password:            config.password
@@ -11056,6 +11097,10 @@ if(config.splitSegmentEnabled) {
                 $(splitnum).find('.plural').text('');
                 splitnum.hide();
             }
+        },
+        cleanSplitPoints: function (splitArea) {
+            splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
+            splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
         },
 
     })

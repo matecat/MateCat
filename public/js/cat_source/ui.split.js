@@ -3,6 +3,7 @@
  * Created by andreamartines on 11/03/15.
  */
 if(config.splitSegmentEnabled) {
+    UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     $('html').on('mouseover', '.editor .source, .editor .sid', function() {
         actions = $('.editor .sid').parent().find('.actions');
         actions.show();
@@ -52,6 +53,7 @@ if(config.splitSegmentEnabled) {
     }).on('click', '.splitArea', function(e) {
         if($(this).hasClass('splitpoint')) return false;
         pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
+        UI.cleanSplitPoints($(this));
         UI.updateSplitNumber($(this));
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
@@ -116,7 +118,7 @@ if(config.splitSegmentEnabled) {
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
             splitIndex = 0;
-//            console.log('splittedSource: ', splittedSource);
+            console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
 //                console.log('prima: ', splittedSource[index]);
@@ -137,10 +139,18 @@ if(config.splitSegmentEnabled) {
             onlyOne = (splittedSource.length == 1)? true : false;
             splitArString = (splitAr.toString() == '0')? '' : splitAr.toString();
 
+            // new version
+            totalSource = '';
+            $.each(splittedSource, function (index) {
+                totalSource += this;
+                if(index < (splittedSource.length - 1)) totalSource += UI.splittedTranslationPlaceholder;
+            });
+
             APP.doRequest({
                 data: {
                     action:              "setSegmentSplit",
-                    split_points_source: '[' + splitArString + ']',
+//                    split_points_source: '[' + splitArString + ']',
+                    segment:            totalSource,
                     id_segment:          sid,
                     id_job:              config.job_id,
                     password:            config.password
@@ -289,6 +299,10 @@ if(config.splitSegmentEnabled) {
                 $(splitnum).find('.plural').text('');
                 splitnum.hide();
             }
+        },
+        cleanSplitPoints: function (splitArea) {
+            splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
+            splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
         },
 
     })
