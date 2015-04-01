@@ -143,7 +143,6 @@ class getWarningController extends ajaxController {
         if ( $QA->thereAreNotices() ) {
 //        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                 = array();
-            $this->result[ 'details' ]                 = array();
             $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
 //            $this->result[ 'details' ][ 'warnings' ]   = $QA->getErrorsJSON();
 //            $this->result[ 'total' ]                                             = count( $QA->getErrors() );

@@ -12,6 +12,8 @@ define("AMPPLACEHOLDER", "##AMPPLACEHOLDER##");
 
 class CatUtils {
 
+    const splitPlaceHolder     = '##$_SPLIT$##';
+
     const lfPlaceholderClass   = '_0A';
     const crPlaceholderClass   = '_0D';
     const crlfPlaceholderClass = '_0D0A';
@@ -426,7 +428,7 @@ class CatUtils {
      * @return array
      */
     public static function parseSegmentSplit( $segment ){
-        $split_chunks = explode( '##$_SPLIT$##', $segment );
+        $split_chunks = explode( self::splitPlaceHolder, $segment );
         $chunk_positions = array();
         $last = 0;
         if( count( $split_chunks ) > 1){
@@ -436,7 +438,8 @@ class CatUtils {
                 $last += $chunk_positions[ $pos ];
             }
         }
-        return $chunk_positions;
+        $segment = str_replace( self::splitPlaceHolder, '', $segment );
+        return array( $segment, $chunk_positions );
     }
 
     /**
@@ -460,17 +463,17 @@ class CatUtils {
         }
 
         if( empty( $string_chunks ) ) return $segment;
-        else return implode( '##$_SPLIT$##', $string_chunks );
+        else return implode( self::splitPlaceHolder, $string_chunks );
 
     }
 
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders
-        $segment = str_replace( '##$_0D0A$##',"\r\n", $segment );
-        $segment = str_replace( '##$_0A$##',"\n", $segment );
-        $segment = str_replace( '##$_0D$##',"\r", $segment );
-        $segment = str_replace( '##$_09$##',"\t", $segment );
+        $segment = str_replace( self::crlfPlaceholder, "\r\n", $segment );
+        $segment = str_replace( self::lfPlaceholder,"\n", $segment );
+        $segment = str_replace( self::crPlaceholder,"\r", $segment );
+        $segment = str_replace( self::tabPlaceholder,"\t", $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -488,7 +491,7 @@ class CatUtils {
         $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
 
         // now convert the real &nbsp;
-        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
+        $segment = str_replace( self::nbspPlaceholder, Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
@@ -515,11 +518,11 @@ class CatUtils {
 
         $segment = self::restore_xliff_tags_for_wiew($segment);
 
-        $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
-        $segment = str_replace("\n", '##$_0A$##', $segment );
-        $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
-        $segment = str_replace("\t", '##$_09$##', $segment ); //x09 character
-        $segment = preg_replace( '/\x{a0}/u', '##$_A0$##', $segment ); //xA0 character ( NBSP )
+        $segment = str_replace("\r\n", self::crlfPlaceholder, $segment );
+        $segment = str_replace("\n", self::lfPlaceholder, $segment );
+        $segment = str_replace("\r", self::crPlaceholder, $segment ); //x0D character
+        $segment = str_replace("\t", self::tabPlaceholder, $segment ); //x09 character
+        $segment = preg_replace( '/\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
         return $segment;
     }
 
