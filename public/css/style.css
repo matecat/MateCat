@@ -135,9 +135,11 @@ body.searchActive #filterSwitch
 	background: url(../img/sprite.png) -13px -1360px no-repeat;
 	float:left;
 	position:relative;
-	left:52%;
+/*	left:52%;
 	top:-12px;
 	margin-top:-12px;
+*/	
+  margin-left: -10px;
 	padding:2px  0 2px 18px;
 	font-size:14px;
 	max-width:200px;
@@ -165,13 +167,13 @@ body.searchActive #filterSwitch
 .cattool #quality-report
 {
   margin: 3px -10px 0px 10px !important;
-  padding: 6px 20px;
+  padding: 5px 20px;
   margin-right: 10px !important;
   cursor: pointer;
   border-radius: 2px;
   text-decoration: none;
   border: 1px solid #848689;
-  font-size: 16px;
+  font-size: 17px;
   color: #333;
     display: block;
 }
@@ -584,7 +586,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 article .translated, article .draft, article .approved{margin:0 -1px 5px 5px}
 
 
-.buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;margin: -15px 2% 0 0;position:absolute;right:0;}
+.buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin:20px 0 0 0;position:absolute;right:0;}
 .buttons li{float:left;text-align:center;margin:0px 0 20px 0px;height:35px;width:auto !important;padding:0 !Important}
 .buttons p {margin:2px 0 0 5px;font-size:11px;font-weight:normal;color:#666;display:none;text-align:center;}
 
@@ -1630,7 +1632,7 @@ z-index: 10000;
 }
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
-.editor .textarea-container{position:relative;width:100%;float:right !important;padding-bottom:5px;}
+.editor .textarea-container{position:relative;width:100%;float:right !important;/*padding-bottom:5px;*/}
 
 
 .text .item,
@@ -1889,7 +1891,7 @@ textarea, input, .editarea, .search-editarea, select  {
 	padding-top:15px;
 
 }
-.editor .wrap{padding-bottom:25px; height:87% !important;}
+.editor .wrap{/*padding-bottom:25px; */height:87% !important;}
 
 
 
@@ -2481,6 +2483,7 @@ footer nav
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {display: block;}
     .review .breadcrumbs a {width: 100%;}
+    p.split-shortcut,.editing .sid .txt {font-size:10px;}
 
 }
 @media screen and (max-width: 1280px){
@@ -3090,7 +3093,8 @@ float: left;
   font-size: 20px;
   margin: 0 auto;
   display: block;
-  transform: rotate(-90deg);
+  cursor: pointer!important;
+    transform: rotate(-90deg);
 }
 
 .editor.split-action .actions .split {
@@ -3781,7 +3785,7 @@ body.isAnonymous .add-mt-engine {
 {
     width: 46.6%;
     position: absolute;
-    bottom: 55px;
+      z-index: 10000;
 }
 .splitBar p,
 .splitBar .splitNum
@@ -3802,6 +3806,7 @@ body.isAnonymous .add-mt-engine {
 .splitBar .buttons a
 {
     margin-left: 20px;
+     margin-top: 2px;
     color:#fff;
 }
 
