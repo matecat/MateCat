@@ -81,7 +81,7 @@ class setCurrentSegmentController extends ajaxController {
 
             //get the chunk number and check whether it is the last one or not
             list( $segmentNr, $chunkNr ) = explode( "-", $segmentStruct->id_segment );
-            $isLastSegmentChunk = ( $chunkNr == count( $currSegmentInfo->split_points_source ) - 1 );
+            $isLastSegmentChunk = ( $chunkNr == count( $currSegmentInfo->source_chunk_lengths ) - 1 );
 
             if ( !$isLastSegmentChunk ) {
                 $nextSegmentId = $segmentNr . "-" . ( $chunkNr + 1 );

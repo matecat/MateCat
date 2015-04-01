@@ -628,7 +628,7 @@ UI = {
 		this.setWaypoints();
         $(window).trigger('segmentsAdded');
 	},
-	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
+	getNextSegment: function(segment, status) {console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
 
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
@@ -1309,25 +1309,36 @@ UI = {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
     normalizeSplittedSegments: function (segments) {
+//        console.log('segments: ', segments);
+
         newSegments = [];
         $.each(segments, function (index) {
-            if(this.split_points_source.length) {
+//            console.log('seg: ', this.segment.split(UI.splittedTranslationPlaceholder));
+//            console.log('aaa: ', this.segment);
+            splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+//            console.log('splittedSourceAr: ', splittedSourceAr);
+            if(splittedSourceAr.length > 1) {
+//            if(this.split_points_source.length) {
 //                console.log('a');
                 segment = this;
                 splitGroup = [];
-                $.each(this.split_points_source, function (i) {
+                $.each(splittedSourceAr, function (i) {
                     splitGroup.push(segment.sid + '-' + (i + 1));
                 });
 
-                $.each(this.split_points_source, function (i) {
+                $.each(splittedSourceAr, function (i) {
+//                    console.log('bbb: ', this);
 //                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
-                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+                    translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+//                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+//                    console.log('ddd: ', this);
                     segData = {
                         autopropagated_from: "0",
                         has_reference: "false",
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
-                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
+                        segment: splittedSourceAr[i],
+//                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
                         segment_hash: segment.segment_hash,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
@@ -1352,7 +1363,7 @@ UI = {
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
         segments = this.normalizeSplittedSegments(segments);
-//        console.log('segments: ', segments);
+//        console.log('segments 1: ', segments);
         splitAr = splitAr || [];
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
@@ -1361,7 +1372,9 @@ UI = {
 //                this.readonly = true;
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
-//            console.log('this.segment: ', this.segment);
+//            console.log('this: ', this);
+            if(typeof this.segment == 'object') console.log(this);
+//            console.log('this.segment: ', this);
             if($.parseHTML(this.segment).length) {
                 this.segment = UI.stripSpans(this.segment);
             };
@@ -2194,7 +2207,8 @@ UI = {
         if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
         console.log('isSplitted: ', isSplitted);
         this.tempReqArguments = {
-            id_segment: id_segment.split('-')[0],
+            id_segment: id_segment,
+//            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
@@ -5631,18 +5645,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
-                console.log('getContribution error');
+//                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-                console.log('getContribution success');
+//                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.errors.length)
 					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
-                console.log('getContribution complete');
+//                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});
@@ -10907,12 +10921,20 @@ if(config.splitSegmentEnabled) {
 
     $.extend(UI, {
         splitSegment: function (segment) {
-            splittedSource = segment.find('.splitArea').html().split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
+            ss = this.cleanSplittedSource(segment.find('.splitArea').html());
+            splittedSource = ss.split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
 //            segment.find('.source').removeAttr('style');
             oldSid = segment.attr('id').split('-')[1];
             this.setSegmentSplit(oldSid, splittedSource);
         },
+        cleanSplittedSource: function (str) {
+            str = str.replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
+//            console.log('aaaaa: ', str.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1'));
+            str = str.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
+            return str;
+        },
+
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
             splitIndex = 0;
@@ -10920,7 +10942,9 @@ if(config.splitSegmentEnabled) {
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
 //                console.log('prima: ', splittedSource[index]);
-                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
+                cc = UI.cleanSplittedSource(splittedSource[index]);
+                console.log('cc: ', cc);
+//                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
 
                 //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
                 //and perform the count
@@ -10940,7 +10964,7 @@ if(config.splitSegmentEnabled) {
             // new version
             totalSource = '';
             $.each(splittedSource, function (index) {
-                totalSource += this;
+                totalSource += splittedSource[index];
                 if(index < (splittedSource.length - 1)) totalSource += UI.splittedTranslationPlaceholder;
             });
 
@@ -10976,6 +11000,7 @@ if(config.splitSegmentEnabled) {
             oldSid = data.sid;
 //            console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
+            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
@@ -11000,11 +11025,14 @@ if(config.splitSegmentEnabled) {
                 newSegments.push(segData);
                 splitGroup.push(oldSid + '-' + (index + 1));
             });
+            console.log('newSegments: ', newSegments);
             oldSegment = $('#segment-' + oldSid);
             alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
+            console.log('alreadySplitted: ', alreadySplitted);
             if(alreadySplitted) {
                 prevSeg = $('#segment-' + oldSid + '-1').prev('section');
+                console.log('prevSeg: ', prevSeg);
                 if(prevSeg.length) {
                     $('section[data-split-original-id=' + oldSid + ']').remove();
                     /*
