@@ -418,6 +418,52 @@ class CatUtils {
 
     }
 
+    /**
+     * Perform a computation on the string to find the length of the strings separated by the placeholder
+     *
+     * @param $segment
+     *
+     * @return array
+     */
+    public static function parseSplit( $segment ){
+        $split_chunks = explode( '##$_SPLIT$##', $segment );
+        $chunk_positions = array();
+        $last = 0;
+        if( count( $split_chunks ) > 1){
+            $chunk_positions[] = 0;
+            foreach( $split_chunks as $pos => $chunk ){
+                $chunk_positions[] = strlen( $chunk ) + $last; //WARNING We count length in NO MULTIBYTE mode
+                $last += $chunk_positions[ $pos ];
+            }
+        }
+        return $chunk_positions;
+    }
+
+    /**
+     * Create a string with placeholders in the right position based on the struct
+     *
+     * @param       $segment
+     * @param array $chunk_positions
+     *
+     * @return string
+     */
+    public static function reApplySplit( $segment, Array $chunk_positions ){
+
+        $string_chunks = array();
+        $last_sum = 0;
+        foreach ( $chunk_positions as $pos => $value ){
+            if( isset( $chunk_positions[ $pos + 1 ] ) ){
+                $string_chunks[] = substr( $segment, $chunk_positions[ $pos ] + $last_sum, $chunk_positions[ $pos + 1 ] );
+                $last_sum += $chunk_positions[ $pos ];
+            }
+
+        }
+
+        if( empty( $string_chunks ) ) return $segment;
+        else return implode( '##$_SPLIT$##', $string_chunks );
+
+    }
+
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders

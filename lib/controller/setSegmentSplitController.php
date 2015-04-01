@@ -6,8 +6,8 @@ class setSegmentSplitController extends ajaxController {
     private $id_segment;
     private $id_job;
     private $job_pass;
-    private $split_points_source;
-    private $split_points_target;
+    private $segment;
+    private $target;
     private $exec;
 
     public function __construct() {
@@ -22,11 +22,11 @@ class setSegmentSplitController extends ajaxController {
                 'password'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
-                'split_points_source' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'segment' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW
                 ),
-                'split_points_target' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'target' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW
                 ),
                 'exec'                => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
@@ -38,8 +38,8 @@ class setSegmentSplitController extends ajaxController {
         $this->id_job              = $postInput[ 'id_job' ];
         $this->id_segment          = $postInput[ 'id_segment' ];
         $this->job_pass            = $postInput[ 'password' ];
-        $this->split_points_source = json_decode( $postInput[ 'split_points_source' ], true );
-        $this->split_points_target = json_decode( $postInput[ 'split_points_target' ], true );
+        $this->segment             = $postInput[ 'segment' ];
+        $this->target              = $postInput[ 'target' ];
         $this->exec                = $postInput[ 'exec' ];
 
         if ( !$this->userIsLogged ) {
@@ -71,7 +71,7 @@ class setSegmentSplitController extends ajaxController {
         }
 
         //this checks that the json is valid, but not its content
-        if ( is_null( $this->split_points_source ) ) {
+        if ( is_null( $this->segment ) ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -6,
                     'message' => 'Invalid split_points_source json'
@@ -100,8 +100,9 @@ class setSegmentSplitController extends ajaxController {
 
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
-        $translationStruct->split_points_source = $this->split_points_source;
-        $translationStruct->split_points_target = $this->split_points_target;
+
+        $split_points_source = CatUtils::parseSplit( CatUtils::view2rawxliff( $this->segment ) );
+        $translationStruct->split_points_source = $split_points_source;
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
         $result = $translationDao->update($translationStruct);
@@ -124,8 +125,9 @@ class setSegmentSplitController extends ajaxController {
 
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
-        $translationStruct->split_points_source = $this->split_points_source;
-        $translationStruct->split_points_target = $this->split_points_target;
+
+        $split_points_source = CatUtils::parseSplit( CatUtils::view2rawxliff( $this->segment ) );
+        $translationStruct->split_points_source = $split_points_source;
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
         $result = $translationDao->update($translationStruct);

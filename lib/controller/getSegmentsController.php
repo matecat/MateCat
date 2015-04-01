@@ -192,6 +192,8 @@ class getSegmentsController extends ajaxController {
             ( $seg['split_points_source'] === null ? $seg['split_points_source'] = array() : null );
             ( $seg['split_points_source'] === null ? $seg['split_points_target'] = array() : null );
 
+            $seg['segment'] = CatUtils::reApplySplit( CatUtils::rawxliff2view( $seg['segment'] ), $seg['split_points_source'] ) ;
+
             $this->data["$id_file"]['segments'][] = $seg;
         }
 
