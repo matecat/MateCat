@@ -1,10 +1,6 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-include_once INIT::$UTILS_ROOT . '/QA.php';
-include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
-include_once INIT::$UTILS_ROOT . '/Log.php';
 
 class setTranslationController extends ajaxController {
 
@@ -14,13 +10,13 @@ class setTranslationController extends ajaxController {
     protected $id_job = false;
     protected $password = false;
 
-    protected $id_segment;
-    protected $split_num = null;
     protected $id_translator;
     protected $time_to_edit;
     protected $translation;
+    protected $split_chunk_lengths;
     protected $chosen_suggestion_index;
     protected $status;
+    protected $split_statuses;
 
     protected $jobData = array();
 
@@ -43,18 +39,21 @@ class setTranslationController extends ajaxController {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job                  = $this->__postInput[ 'id_job' ];
-        $this->password                = $this->__postInput[ 'password' ];
-        $this->propagateAll            = $this->__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
-        $this->id_segment              = $this->__postInput[ 'id_segment' ];
-        $this->time_to_edit            = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
-        $this->id_translator           = $this->__postInput[ 'id_translator' ];
-        $this->translation             = CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] );
+        $this->id_job        = $this->__postInput[ 'id_job' ];
+        $this->password      = $this->__postInput[ 'password' ];
+        $this->propagateAll  = $this->__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
+        $this->id_segment    = $this->__postInput[ 'id_segment' ];
+        $this->time_to_edit  = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
+        $this->id_translator = $this->__postInput[ 'id_translator' ];
+
+        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ) );
+
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
+        $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'statuses' ] ) );
 
-	//PATCH TO FIX BOM INSERTIONS
-	$this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
+        //PATCH TO FIX BOM INSERTIONS
+        $this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
 
     }
 
@@ -63,24 +62,26 @@ class setTranslationController extends ajaxController {
         //change Log file
         Log::$fileName = $logName;
 
-        switch ( $this->status ) {
-            case Constants_TranslationStatus::STATUS_TRANSLATED:
-            case Constants_TranslationStatus::STATUS_APPROVED:
-            case Constants_TranslationStatus::STATUS_REJECTED:
-            case Constants_TranslationStatus::STATUS_DRAFT:
-                break;
-            default:
-                //NO debug and NO-actions for un-mapped status
-                $this->result[ 'code' ] = 1;
-                $this->result[ 'data' ] = "OK";
-
-                $msg = "Error Hack Status \n\n " . var_export( $_POST, true );
-                throw new Exception( $msg, -1 );
-                break;
-        }
-
+        $this->parseIDSegment();
         if ( empty( $this->id_segment ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
+        }
+        if( !empty( $this->split_statuses ) && !empty( $this->split_num ) ){
+
+            if( count( array_unique( $this->split_statuses ) ) == 1 ) {
+                //IF ALL translation chunks are in the same status, we take the status for the entire segment
+                $this->status = $this->split_statuses[0];
+            }
+            else $this->status = Constants_TranslationStatus::STATUS_DRAFT;
+
+            foreach( $this->split_statuses as $pos => $value ){
+                $this->checkForStatus( $value );
+            }
+
+        } else {
+
+            $this->checkForStatus( $this->status );
+
         }
 
         if ( empty( $this->id_job ) ) {
@@ -111,11 +112,8 @@ class setTranslationController extends ajaxController {
                 $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 
-            $pCheck = new AjaxPasswordCheck();
             //check for Password correctness ( remove segment split )
-            if( stripos( '-', $this->id_segment ) ) {
-                list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
-            }
+            $pCheck = new AjaxPasswordCheck();
             if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
                 $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
             }
@@ -137,6 +135,26 @@ class setTranslationController extends ajaxController {
 
     }
 
+    protected function checkForStatus( $status ){
+
+        switch ( $status ) {
+            case Constants_TranslationStatus::STATUS_TRANSLATED:
+            case Constants_TranslationStatus::STATUS_APPROVED:
+            case Constants_TranslationStatus::STATUS_REJECTED:
+            case Constants_TranslationStatus::STATUS_DRAFT:
+            case Constants_TranslationStatus::STATUS_NEW:
+                break;
+            default:
+                //NO debug and NO-actions for un-mapped status
+                $this->result[ 'code' ] = 1;
+                $this->result[ 'data' ] = "OK";
+
+                $msg = "Error Hack Status \n\n " . var_export( $_POST, true );
+                throw new Exception( $msg, -1 );
+                break;
+        }
+
+    }
 
     public function doAction() {
 
@@ -184,12 +202,7 @@ class setTranslationController extends ajaxController {
         $db = Database::obtain();
         $db->begin();
 
-//        $x = uniqid('',true);
-//        Log::doLog("$x Acquiring Lock");
-//        $x2 = explode( "\n" , var_export( $this->__postInput, true) );
-//        Log::doLog("$x Lock: Trying to set " . implode( " ", $x2 ) );
         $old_translation = getCurrentTranslationAndLock( $this->id_job, $this->id_segment );
-//        Log::doLog("$x Lock Acquired");
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
@@ -349,7 +362,6 @@ class setTranslationController extends ajaxController {
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
 
         $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
-
                 ? true : false );
 
         $file_stats = array();
@@ -370,6 +382,15 @@ class setTranslationController extends ajaxController {
         } else {
             $this->result[ 'warning' ][ 'id' ] = 0;
         }
+
+        /* put the split inside the transaction if they are present */
+        $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
+        $translationStruct->id_segment = $this->id_segment;
+        $translationStruct->id_job     = $this->id_job;
+
+        $translationStruct->target_chunk_lengths = array( 'len' => $this->split_chunk_lengths, 'statuses' => $this->split_statuses );
+        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+        $result = $translationDao->update($translationStruct);
 
         $db->commit();
 
