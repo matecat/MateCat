@@ -12,9 +12,9 @@ class TranslationsSplit_SplitStruct extends DataAccess_AbstractDaoObjectStruct i
 
     public $id_job;
 
-    public $split_points_source;
+    public $source_chunk_lengths;
 
-    public $split_points_target;
+    public $target_chunk_lengths;
 
 //    public segment_hash               varchar(45) NOT NULL,
 //    public autopropagated_from        bigint(20) DEFAULT NULL,

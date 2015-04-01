@@ -72,14 +72,14 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
         $values_array[ ] = (int)$obj->id_segment;
         $values_array[ ] = (int)$obj->id_job;
 
-        if ( $obj->split_points_source !== null ) {
+        if ( $obj->source_chunk_lengths !== null ) {
             $inserting_keys_array[ ] = 'source_chunk_lengths';
-            $values_array[ ]         = $this->con->escape( $obj->split_points_source );
+            $values_array[ ]         = $this->con->escape( $obj->source_chunk_lengths );
         }
 
-        if ( $obj->split_points_target !== null ) {
+        if ( $obj->target_chunk_lengths !== null ) {
             $inserting_keys_array[ ] = 'target_chunk_lengths';
-            $values_array[ ]         = $this->con->escape( $obj->split_points_target );
+            $values_array[ ]         = $this->con->escape( $obj->target_chunk_lengths );
         }
 
         $values_string = null;
@@ -124,8 +124,8 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
 
         $input->id_segment          = ( $input->id_segment !== null ) ? $input->id_segment : null;
         $input->id_job              = ( $input->id_job !== null ) ? $input->id_job : null;
-        $input->split_points_source = ( $input->split_points_source !== null ) ? $con->escape( json_encode( $input->split_points_source ) ) : null;
-        $input->split_points_target = ( $input->split_points_target !== null ) ? $con->escape( json_encode( $input->split_points_target ) ) : null;
+        $input->source_chunk_lengths = ( $input->source_chunk_lengths !== null ) ? $con->escape( json_encode( $input->source_chunk_lengths ) ) : null;
+        $input->target_chunk_lengths = ( $input->target_chunk_lengths !== null ) ? $con->escape( json_encode( $input->target_chunk_lengths ) ) : null;
 
         return $input;
     }
