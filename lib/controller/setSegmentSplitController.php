@@ -3,7 +3,6 @@
 
 class setSegmentSplitController extends ajaxController {
 
-    private $id_segment;
     private $id_job;
     private $job_pass;
     private $segment;
