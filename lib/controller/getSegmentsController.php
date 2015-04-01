@@ -175,22 +175,20 @@ class getSegmentsController extends ajaxController {
             unset($seg['id_segment_start']);
             unset($seg['serialized_errors_list']);
 
-            //DOH!! this replace C2A0 with whitespaces!!!   WHY?????
-            //$seg['segment'] = $this->filetype_handler->parse($seg['segment']);
-
-            $seg['segment'] = CatUtils::rawxliff2view( $seg['segment'] );
-
-            //log::doLog( "1 - ".$seg['translation']);
-            $seg['translation'] = CatUtils::rawxliff2view($seg['translation']);
-            //log::doLog( "2 - ".$seg['translation']);
-            //exit;
-
             $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
 
-            $seg['split_points_source'] = json_decode( $seg['split_points_source'], true );
-            $seg['split_points_target'] = json_decode( $seg['split_points_target'], true );
-            ( $seg['split_points_source'] === null ? $seg['split_points_source'] = array() : null );
-            ( $seg['split_points_source'] === null ? $seg['split_points_target'] = array() : null );
+            ( $seg['source_chunk_lengths'] === null ? $seg['source_chunk_lengths'] = '[]' : null );
+            ( $seg['target_chunk_lengths'] === null ? $seg['target_chunk_lengths'] = '[]' : null );
+            $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
+
+            //TODO HARDCODED
+//            $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
+            $seg['target_chunk_lengths'] = array(
+                array( 'pos' => 0, 'status' => 'NEW' )
+            );
+
+            $seg['segment'] = CatUtils::reApplySegmentSplit( CatUtils::rawxliff2view( $seg['segment'] ), $seg['source_chunk_lengths'] ) ;
+            $seg['translation'] = CatUtils::reApplySegmentSplit( CatUtils::rawxliff2view( $seg['translation'] ), $seg['target_chunk_lengths'] ) ;
 
             $this->data["$id_file"]['segments'][] = $seg;
         }

@@ -1,6 +1,6 @@
--- MySQL dump 10.13  Distrib 5.5.40, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.35, for debian-linux-gnu (x86_64)
 --
--- Host: 10.30.1.250    Database: matecat
+-- Host: localhost    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.5.35-0+wheezy1-log
 
@@ -33,6 +33,7 @@ DROP TABLE IF EXISTS `converters`;
 CREATE TABLE `converters` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_converter` varchar(45) NOT NULL,
+  `cpu_weight` int(11) NOT NULL DEFAULT '1',
   `ip_storage` varchar(45) NOT NULL,
   `ip_machine_host` varchar(45) NOT NULL,
   `machine_host_user` varchar(45) NOT NULL,
@@ -47,10 +48,11 @@ CREATE TABLE `converters` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
   UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
+  UNIQUE KEY `id_UNIQUE` (`id`) USING BTREE,
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +71,7 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -88,25 +90,27 @@ CREATE TABLE `engines` (
   `translate_relative_url` varchar(100) DEFAULT 'get',
   `contribute_relative_url` varchar(100) DEFAULT NULL,
   `delete_relative_url` varchar(100) DEFAULT NULL,
-  `gloss_get_relative_url` varchar(100) DEFAULT NULL,
-  `gloss_set_relative_url` varchar(100) DEFAULT NULL,
-  `gloss_update_relative_url` varchar(100) DEFAULT NULL,
-  `gloss_delete_relative_url` varchar(100) DEFAULT NULL,
-  `tmx_import_relative_url` varchar(100) DEFAULT NULL,
-  `tmx_status_relative_url` varchar(100) DEFAULT NULL,
   `others` varchar(2048) NOT NULL DEFAULT '{}' COMMENT 'json key_value for api end points',
-  `extra_parameters` text,
+  `class_load` varchar(255) DEFAULT NULL,
+  `extra_parameters` varchar(2048) NOT NULL DEFAULT '{}',
   `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
-  `penalty` int(11) DEFAULT '0',
+  `penalty` int(11) NOT NULL DEFAULT '14',
   `active` tinyint(4) NOT NULL DEFAULT '1',
+  `uid` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
-  KEY `active_idx` (`active`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+  KEY `active_idx` (`active`) USING BTREE,
+  KEY `uid_idx` (`uid`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`others`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (0,'NONE','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'{}',NULL,NULL,100,0);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`others`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete','tmx/import','tmx/status','{\"gloss_get_relative_url\":\"glossary\\/get\",\"gloss_set_relative_url\":\"glossary\\/set\",\"gloss_update_relative_url\":\"glossary\\/update\",\"gloss_delete_relative_url\":\"glossary\\/delete\",\"tmx_import_relative_url\":\"tmx\\/import\",\"tmx_status_relative_url\":\"tmx\\/status\",\"tmx_export_create_url\":\"tmx\\/export\\/create\",\"tmx_export_check_url\":\"tmx\\/export\\/check\",\"tmx_export_download_url\":\"tmx\\/export\\/download\",\"tmx_export_list_url\":\"tmx\\/export\\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}',NULL,'1',0,1);
+LOCK TABLES `engines` WRITE;
+/*!40000 ALTER TABLE `engines` DISABLE KEYS */;
+INSERT INTO `matecat_sandbox`.`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('0', 'NONE', 'NONE', 'No MT', '', '', NULL, NULL, '{}', 'NONE', '', NULL, '100', '0', NULL);
+INSERT INTO `matecat_sandbox`.`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('1', 'MyMemory (All Pairs)', 'TM', 'Machine translation from Google Translate and Microsoft Translator.', 'http://api.mymemory.translated.net', 'get', 'set', 'delete', '{\"gloss_get_relative_url\":\"glossary\\/get\",\"gloss_set_relative_url\":\"glossary\\/set\",\"gloss_update_relative_url\":\"glossary\\/update\",\"gloss_delete_relative_url\":\"glossary\\/delete\",\"tmx_import_relative_url\":\"tmx\\/import\",\"tmx_status_relative_url\":\"tmx\\/status\",\"tmx_export_create_url\":\"tmx\\/export\\/create\",\"tmx_export_check_url\":\"tmx\\/export\\/check\",\"tmx_export_download_url\":\"tmx\\/export\\/download\",\"tmx_export_list_url\":\"tmx\\/export\\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}', 'MyMemory', '', '1', '0', '1', NULL);
+/*!40000 ALTER TABLE `engines` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `file_references`
@@ -124,7 +128,7 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,11 +147,12 @@ CREATE TABLE `files` (
   `xliff_file` longblob,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   `original_file` longblob,
+  `segmentation_rule` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -210,6 +215,16 @@ CREATE TABLE `jobs` (
   `rejected_words` float(10,2) NOT NULL DEFAULT '0.00',
   `subject` varchar(100) DEFAULT 'general',
   `payable_rates` varchar(500) DEFAULT '{"NO_MATCH":100,"50%-74%":100,"75%-99%":60,"100%":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}',
+  `revision_stats_typing_min` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_translations_min` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_terminology_min` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_language_quality_min` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_style_min` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_typing_maj` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_translations_maj` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_terminology_maj` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_language_quality_maj` int(11) NOT NULL DEFAULT '0',
+  `revision_stats_style_maj` int(11) NOT NULL DEFAULT '0',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
@@ -219,8 +234,11 @@ CREATE TABLE `jobs` (
   KEY `id` (`id`) USING BTREE,
   KEY `password` (`password`),
   KEY `source` (`source`),
-  KEY `target` (`target`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+  KEY `target` (`target`),
+  KEY `status_owner_idx` (`status_owner`) USING BTREE,
+  KEY `status_idx` (`status`) USING BTREE,
+  KEY `create_date_idx` (`create_date`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -238,6 +256,7 @@ CREATE TABLE `memory_keys` (
   `key_glos` tinyint(1) DEFAULT '1',
   `creation_date` timestamp NULL DEFAULT NULL,
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` int(11) DEFAULT '0',
   PRIMARY KEY (`uid`,`key_value`),
   KEY `uid_idx` (`uid`) USING BTREE,
   KEY `key_value_idx` (`key_value`) USING BTREE
@@ -276,10 +295,7 @@ CREATE TABLE `original_files_map` (
   `deflated_xliff` longblob,
   `creation_date` date DEFAULT NULL,
   `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`sha1`,`source`,`target`),
-  KEY `creation_date` (`creation_date`),
-  KEY `source` (`source`),
-  KEY `target` (`target`)
+  PRIMARY KEY (`sha1`,`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -310,7 +326,28 @@ CREATE TABLE `projects` (
   KEY `for_debug` (`for_debug`),
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `segment_revisions`
+--
+
+DROP TABLE IF EXISTS `segment_revisions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `segment_revisions` (
+  `id_job` bigint(20) NOT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `original_translation` text COMMENT 'The original translation before revisions.',
+  `err_typing` varchar(512) NOT NULL,
+  `err_translation` varchar(512) NOT NULL,
+  `err_terminology` varchar(512) NOT NULL,
+  `err_language` varchar(512) NOT NULL,
+  `err_style` varchar(512) NOT NULL,
+  PRIMARY KEY (`id_job`,`id_segment`),
+  KEY `segm_key` (`id_segment`,`id_job`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -385,7 +422,7 @@ CREATE TABLE `segments` (
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -444,12 +481,8 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`) USING BTREE,
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping routines for database 'matecat'
---
 
 --
 -- Current Database: `matecat_analysis`
@@ -477,10 +510,6 @@ CREATE TABLE `segment_translations_analysis_queue` (
   KEY `pid` (`pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping routines for database 'matecat_analysis'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -491,4 +520,7 @@ CREATE TABLE `segment_translations_analysis_queue` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-12-12 13:37:39
+-- Dump completed on 2015-03-31 20:37:52
+CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
+GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
+FLUSH PRIVILEGES;

@@ -1018,7 +1018,9 @@ body.review .submenu
 
 section.loaded .submenu {display: block;}
 
-.loaded{overflow:visible !important}
+.loaded{
+    overflow:visible !important
+}
 
 
 .submenu li
@@ -3619,11 +3621,13 @@ color:red !important;
 }
 
 .track-changes {
-	float: right;
-	width: 45%;
-    margin-right: 3%;
-    margin-top: 2px;
+  float: right;
+  width: 45%;
+  margin-right: 3%;
+  margin-top: 2px;
+  max-width: 520px;
 }
+
 
 .error-type h3, .track-changes h3 {
 	margin: 20px 0 0 1px;
@@ -3704,30 +3708,28 @@ color:red !important;
 
 
 .track-changes p {
-	width: 100%;
-	line-height: 30px;
-	margin: 36px auto 17px auto;
-	min-height: 70px;
-	text-align: left;
-	height: 96% !important;
-	padding: 5px;
-	font-size: 18px;
-	cursor: default!important;
-	background: #efefef;
-	border-radius: 2px;
-	border: 1px solid #727272;
-	box-shadow: 0 1px 2px #DFDFDF;
-	-webkit-box-shadow: 0 1px 2px #DFDFDF;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-
-    word-wrap: break-word;
-    word-break: normal;
-
+  width: 100%;
+  line-height: 30px;
+  margin: 36px auto 17px auto;
+  min-height: 70px;
+  text-align: left;
+  height: 96% !important;
+  padding: 5px;
+  font-size: 18px;
+  cursor: default!important;
+  background: #efefef;
+  border-radius: 2px;
+  border: 1px solid #727272;
+  box-shadow: 0 1px 2px #DFDFDF;
+  -webkit-box-shadow: 0 1px 2px #DFDFDF;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  word-wrap: break-word;
+  word-break: normal;
 }
 
 .sub-editor.review .track-changes .deleted,

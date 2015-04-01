@@ -25,8 +25,8 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
         $where_conditions = array();
         $query            = "SELECT id_segment,
                                     id_job,
-                                    split_points_source,
-                                    split_points_target
+                                    source_chunk_lengths,
+                                    target_chunk_lengths
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->id_segment !== null ) {
@@ -73,12 +73,12 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
         $values_array[ ] = (int)$obj->id_job;
 
         if ( $obj->split_points_source !== null ) {
-            $inserting_keys_array[ ] = 'split_points_source';
+            $inserting_keys_array[ ] = 'source_chunk_lengths';
             $values_array[ ]         = $this->con->escape( $obj->split_points_source );
         }
 
         if ( $obj->split_points_target !== null ) {
-            $inserting_keys_array[ ] = 'split_points_source';
+            $inserting_keys_array[ ] = 'target_chunk_lengths';
             $values_array[ ]         = $this->con->escape( $obj->split_points_target );
         }
 
@@ -161,8 +161,8 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
             $build_arr = array(
                     'id_segment'          => (int)$item[ 'id_segment' ],
                     'id_job'              => $item[ 'id_job' ],
-                    'split_points_source' => json_decode( $item[ 'split_points_source' ], true ),
-                    'split_points_target' => json_decode( $item[ 'split_points_target' ], true ),
+                    'source_chunk_lengths' => json_decode( $item[ 'source_chunk_lengths' ], true ),
+                    'target_chunk_lengths' => json_decode( $item[ 'target_chunk_lengths' ], true ),
             );
 
             $obj = new TranslationsSplit_SplitStruct( $build_arr );
