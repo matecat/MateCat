@@ -1332,6 +1332,11 @@ UI = {
                     translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
 //                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
 //                    console.log('ddd: ', this);
+                    //temp
+                    //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
+                    //end temp
+                    status = segment.target_chunk_lengths.statuses[i];
+                    console.log('vediamo status: ', status);
                     segData = {
                         autopropagated_from: "0",
                         has_reference: "false",
@@ -1343,7 +1348,7 @@ UI = {
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
                         split_points_source: [],
-                        status: "DRAFT",
+                        status: status,
                         time_to_edit: "0",
                         translation: translation,
                         warning: "0"
