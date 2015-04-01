@@ -906,8 +906,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF (st.status='NEW',NULL,st.translation) AS translation,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
-	    sts.split_points_source,
-	    sts.split_points_target,
+	    sts.source_chunk_lengths,
+	    sts.target_chunk_lengths,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
