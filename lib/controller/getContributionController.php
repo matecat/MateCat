@@ -15,6 +15,8 @@ class getContributionController extends ajaxController {
     private $password;
     private $tm_keys;
 
+    private $jobData;
+
     private $__postInput = array();
 
     public function __construct() {
@@ -80,11 +82,11 @@ class getContributionController extends ajaxController {
         }
 
         //get Job Infos, we need only a row of jobs ( split )
-        $jobData = getJobData( $this->id_job, $this->password );
+        $this->jobData = getJobData( $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
+        if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->password ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
 
             return -1;
@@ -97,8 +99,8 @@ class getContributionController extends ajaxController {
         if ( !$this->concordance_search ) {
             //
             $this->text   = CatUtils::view2rawxliff( $this->text );
-            $this->source = $jobData[ 'source' ];
-            $this->target = $jobData[ 'target' ];
+            $this->source = $this->jobData[ 'source' ];
+            $this->target = $this->jobData[ 'target' ];
         } else {
 
             $regularExpressions = $this->tokenizeSourceSearch();
@@ -116,18 +118,18 @@ class getContributionController extends ajaxController {
                  * we want result in italian from german source
                  *
                  */
-                $this->source = $jobData[ 'target' ];
-                $this->target = $jobData[ 'source' ];
+                $this->source = $this->jobData[ 'target' ];
+                $this->target = $this->jobData[ 'source' ];
             } else {
-                $this->source = $jobData[ 'source' ];
-                $this->target = $jobData[ 'target' ];
+                $this->source = $this->jobData[ 'source' ];
+                $this->target = $this->jobData[ 'target' ];
             }
         }
 
-        $this->id_mt_engine = $jobData[ 'id_mt_engine' ];
-        $this->id_tms       = $jobData[ 'id_tms' ];
+        $this->id_mt_engine = $this->jobData[ 'id_mt_engine' ];
+        $this->id_tms       = $this->jobData[ 'id_tms' ];
 
-        $this->tm_keys      = $jobData[ 'tm_keys' ];
+        $this->tm_keys      = $this->jobData[ 'tm_keys' ];
 
         $config = array();
         if ( $this->id_tms == 1 ) {
@@ -312,6 +314,8 @@ class getContributionController extends ajaxController {
             }
             if ( $match[ 'created_by' ] == 'MT!' ) {
                 $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+            } else {
+                $match[ 'created_by' ] = $this->changeSuggestionSource( $match );
             }
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
@@ -338,6 +342,13 @@ class getContributionController extends ajaxController {
 
             foreach ( $matches as $k => $m ) {
                 $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+
+                if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
+                    $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                } else {
+                    $matches[ $k ][ 'created_by' ] = $this->changeSuggestionSource( $m );
+                }
+
             }
 
             $suggestions_json_array = json_encode( $matches );
@@ -345,14 +356,9 @@ class getContributionController extends ajaxController {
 
             ( !empty( $match[ 'sentence_confidence' ] ) ? $mt_qe = floatval( $match[ 'sentence_confidence' ] ) : $mt_qe = null );
 
-            if ( $match[ 'created_by' ] == 'MT!' ) {
-                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
-            }
-
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
-            $data[ 'suggestion_source' ] = $match[ 'created_by' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
@@ -462,7 +468,96 @@ class getContributionController extends ajaxController {
 
         return $regularExpressions;
     }
+
+    private function changeSuggestionSource( $match ) {
+
+        $sug_source = $match[ 'created_by' ];
+        $key        = $match[ 'memory_key' ];
+
+        $description = '';
+        $email       = null;
+
+        //suggestion is coming from a public TM
+        if ( $sug_source == 'Matecat' ) {
+            $description = "Public TM";
+        } //MyMemory returns the key of the match
+        else {
+
+            if ( preg_match( "/[a-z0-9]{8,}/", $key ) ) {
+                //Session Enabled
+                $this->checkLogin();
+                //Session Disabled
+
+                //check if the current user owns the key
+                $getDefaultDescription = true;
+                if ( $this->userIsLogged ) {
+                    //check if the user can see the key.
+                    $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+                    $memoryKey->uid         = $this->uid;
+                    $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+                    $memoryKey->tm_key->key = $key;
+
+                    $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                    $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
+
+                    if ( count( $currentUserMemoryKey ) > 0 ) {
+
+                        //the current user owns the key: show its description
+                        $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
+                        $description          = $currentUserMemoryKey->tm_key->name;
+
+                        $userStruct      = Users_UserStruct::getStruct();
+                        $userStruct->uid = $this->uid;
+
+                        $userDao = new Users_UserDao( Database::obtain() );
+                        $user    = $userDao->setCacheTTL( 3600 )->read( $userStruct );
+
+                        if ( count( $user ) == 0 ) {
+                            $description = 'unknown user';
+                        }
+                        $user  = $user[ 0 ];
+                        $email = $user->email;
+
+                        $getDefaultDescription = false;
+                    }
+                }
+
+                if ( $getDefaultDescription ) {
+                    $job_keys  = json_decode( $this->jobData[ 'tm_keys' ] );
+                    $ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( $job_keys );
+
+                    //search the current key
+                    $currentKey = null;
+                    for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
+                        if ( $ownerKeys[ $i ]->key == $sug_source ) {
+                            $currentKey = $ownerKeys[ $i ];
+                            break;
+                        }
+                    }
+
+                    if ( $currentKey !== null ) {
+                        $description = $currentKey->name;
+                    }
+                }
+
+                if ( strlen( trim( $description ) ) == 0 ) {
+                    $description = $email;
+                }
+
+            } //key is empty but the 'created by' field is not: exception
+            else {
+                Log::doLog( "Unexpected case: key is empty but the 'created by' field is not." );
+                Log::doLog( $match );
+                Utils::sendErrMailReport(
+                        var_export( $match ),
+                        "Unexpected case: key is empty but the 'created by' field is not."
+                );
+                $description = $sug_source;
+            }
+        }
+
+        return $description;
+
+    }
 }
 
-
-?>
