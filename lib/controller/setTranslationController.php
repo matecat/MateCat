@@ -35,6 +35,7 @@ class setTranslationController extends ajaxController {
                 'translation'             => array( 'filter' => FILTER_UNSAFE_RAW ),
                 'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'status'                  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'splitStatuses'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -50,7 +51,7 @@ class setTranslationController extends ajaxController {
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
-        $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'statuses' ] ) ); //strtoupper transforms null to ""
+        $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
 
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
