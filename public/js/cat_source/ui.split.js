@@ -222,16 +222,13 @@ if(config.splitSegmentEnabled) {
             alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
 //            console.log('alreadySplitted: ', alreadySplitted);
+            $('.test-invisible').remove();
+
             if(alreadySplitted) {
                 prevSeg = $('#segment-' + oldSid + '-1').prev('section');
-//                console.log('prevSeg: ', prevSeg);
+
                 if(prevSeg.length) {
                     $('section[data-split-original-id=' + oldSid + ']').remove();
-                    /*
-                    $.each(splitGroup, function (index) {
-                        $('#segment-' + this).remove();
-                    });
-                    */
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
                     if(splitGroup.length) {
 //                        console.log('dovrebbe esser qui');
@@ -249,6 +246,30 @@ if(config.splitSegmentEnabled) {
                     }
 
                 } else {
+
+// TEST
+/*
+                    $('section[data-split-original-id=' + oldSid + ']').remove();
+                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                    if(splitGroup.length) {
+                        console.log('H');
+//                        console.log('dovrebbe esser qui');
+//                        console.log('oldSid: ', oldSid);
+                        $.each(splitGroup, function (index) {
+                            UI.lockTags($('#segment-' + this + ' .source'));
+                        });
+                        this.gotoSegment(oldSid + '-1');
+                    } else {
+                        console.log('I');
+//                        console.log('o qui');
+//                        console.log('oldSid: ', oldSid);
+                        UI.lockTags($('#segment-' + oldSid + ' .source'));
+                        this.gotoSegment(oldSid);
+
+                    }
+
+*/
+// END TEST
 
                 }
             } else {

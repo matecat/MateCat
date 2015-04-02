@@ -628,7 +628,7 @@ UI = {
 		this.setWaypoints();
         $(window).trigger('segmentsAdded');
 	},
-	getNextSegment: function(segment, status) {console.log('getNextSegment: ', segment.length);
+	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment.length);
 		var seg = this.currentSegment;
 
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
@@ -655,9 +655,7 @@ UI = {
 //		}
 //		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
 
-		console.log('seg: ' , seg);
         var i = $(seg).next();
-        console.log('i: ', i);
 
         if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
@@ -951,7 +949,6 @@ UI = {
 
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
-        console.log('openSegment - segment: ', segment);
         UI.openableSegment = true;
         segment.trigger('just-open');
 //        console.log('UI.openableSegment: ', UI.openableSegment);
@@ -991,7 +988,7 @@ UI = {
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
         segment.trigger('open');
-
+        $('section').first().nextAll('.undoCursorPlaceholder').remove();
         this.getNextSegment(this.currentSegment, 'untranslated');
 
 		if ((!this.readonly)&&(!getNormally)) {
@@ -1371,7 +1368,6 @@ UI = {
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
         segments = this.normalizeSplittedSegments(segments);
-//        console.log('segments 1: ', segments);
         splitAr = splitAr || [];
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
@@ -3134,8 +3130,13 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
+/*
         console.log('rangySelectionBoundary: ', $('.rangySelectionBoundary'));
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        console.log('rangySelectionBoundary.next(): ', $('.rangySelectionBoundary').next());
+        console.log('rangySelectionBoundary.next() non è una section: ', !$('.rangySelectionBoundary').next().is('.section'));
+        if(!$('.rangySelectionBoundary').next().is('.section')) $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+*/
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
@@ -5567,7 +5568,7 @@ $.extend(UI, {
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 // console.log('translation 1: ', translation);
-        console.log('copySuggestionInEditarea - editarea: ', editarea);
+//        console.log('copySuggestionInEditarea - editarea: ', editarea);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -11057,16 +11058,13 @@ if(config.splitSegmentEnabled) {
             alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
 //            console.log('alreadySplitted: ', alreadySplitted);
+            $('.test-invisible').remove();
+
             if(alreadySplitted) {
                 prevSeg = $('#segment-' + oldSid + '-1').prev('section');
-//                console.log('prevSeg: ', prevSeg);
+
                 if(prevSeg.length) {
                     $('section[data-split-original-id=' + oldSid + ']').remove();
-                    /*
-                    $.each(splitGroup, function (index) {
-                        $('#segment-' + this).remove();
-                    });
-                    */
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
                     if(splitGroup.length) {
 //                        console.log('dovrebbe esser qui');
@@ -11084,6 +11082,30 @@ if(config.splitSegmentEnabled) {
                     }
 
                 } else {
+
+// TEST
+/*
+                    $('section[data-split-original-id=' + oldSid + ']').remove();
+                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                    if(splitGroup.length) {
+                        console.log('H');
+//                        console.log('dovrebbe esser qui');
+//                        console.log('oldSid: ', oldSid);
+                        $.each(splitGroup, function (index) {
+                            UI.lockTags($('#segment-' + this + ' .source'));
+                        });
+                        this.gotoSegment(oldSid + '-1');
+                    } else {
+                        console.log('I');
+//                        console.log('o qui');
+//                        console.log('oldSid: ', oldSid);
+                        UI.lockTags($('#segment-' + oldSid + ' .source'));
+                        this.gotoSegment(oldSid);
+
+                    }
+
+*/
+// END TEST
 
                 }
             } else {
