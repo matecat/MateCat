@@ -628,7 +628,7 @@ UI = {
 		this.setWaypoints();
         $(window).trigger('segmentsAdded');
 	},
-	getNextSegment: function(segment, status) {console.log('getNextSegment: ', segment);
+	getNextSegment: function(segment, status) {console.log('getNextSegment: ', segment.length);
 		var seg = this.currentSegment;
 
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
@@ -642,7 +642,6 @@ UI = {
 //		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
 //		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
-//			console.log('1');
 			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
@@ -656,8 +655,11 @@ UI = {
 //		}
 //		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
 
-		var i = $(seg).next();
-		if (!i.length) {
+		console.log('seg: ' , seg);
+        var i = $(seg).next();
+        console.log('i: ', i);
+
+        if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
 		}
 		if (i.length) {
@@ -949,6 +951,7 @@ UI = {
 
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
+        console.log('openSegment - segment: ', segment);
         UI.openableSegment = true;
         segment.trigger('just-open');
 //        console.log('UI.openableSegment: ', UI.openableSegment);
@@ -3131,6 +3134,7 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
+        console.log('rangySelectionBoundary: ', $('.rangySelectionBoundary'));
 		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
