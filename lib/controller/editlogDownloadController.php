@@ -21,7 +21,7 @@ class editlogDownloadController extends downloadController {
                 'password' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
-        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
         $this->jid      = $__postInput[ "jid" ];
         $this->password = $__postInput[ "password" ];
@@ -43,12 +43,13 @@ class editlogDownloadController extends downloadController {
                 "Suggestion1-source", "Suggestion1-translation", "Suggestion1-match", "Suggestion1-origin",
                 "Suggestion2-source", "Suggestion2-translation", "Suggestion2-match", "Suggestion2-origin",
                 "Suggestion3-source", "Suggestion3-translation", "Suggestion3-match", "Suggestion3-origin",
-                "Choosen-Suggestion"
+                "Choosen-Suggestion","Statistically relevant"
         );
 
         $csvHandler->fputcsv( $csv_fields );
 
         foreach ( $data as $d ){
+            $statistical_relevant=($d['stats-valid']=='No'?0:1);
             $sid            = $d[ 'sid' ];
             $sugg_source    = $d[ 'ss' ];
             $rwc            = $d[ 'rwc' ];
@@ -105,7 +106,7 @@ class editlogDownloadController extends downloadController {
                     $this->jid, $sid, $sugg_source, $rwc, $sugg_match, $sugg_tte, $pe_effort_perc, $hter, $segment,
                     $suggestion, $translation, $mt_qe, $id_translator, $s1_source, $s1_translation, $s1_match,
                     $s1_origin, $s2_source, $s2_translation, $s2_match, $s2_origin, $s3_source, $s3_translation,
-                    $s3_match, $s3_origin, $d[ 'sp' ]
+                    $s3_match, $s3_origin, $d[ 'sp' ],$statistical_relevant
             );
 
             $csvHandler->fputcsv( $row_array );
