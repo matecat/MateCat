@@ -21,7 +21,7 @@ class editlogDownloadController extends downloadController {
                 'password' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
-        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         $this->jid      = $__postInput[ "jid" ];
         $this->password = $__postInput[ "password" ];
