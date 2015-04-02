@@ -6,7 +6,7 @@
  * Time: 12.54
  */
 
-class User_UserStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     public $uid;
     public $email;
@@ -15,6 +15,6 @@ class User_UserStruct extends DataAccess_AbstractDaoObjectStruct implements Data
     public $last_name;
 
     public static function getStruct() {
-        return new User_UserStruct();
+        return new Users_UserStruct();
     }
 } 

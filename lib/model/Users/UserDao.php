@@ -6,13 +6,13 @@
  * Date: 01/04/15
  * Time: 12.54
  */
-class User_UserDao extends DataAccess_AbstractDao {
+class Users_UserDao extends DataAccess_AbstractDao {
 
     const TABLE = "users";
 
-    const STRUCT_TYPE = "User_UserStruct";
+    const STRUCT_TYPE = "Users_UserStruct";
 
-    public function read( User_UserStruct $obj ) {
+    public function read( Users_UserStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
@@ -48,9 +48,9 @@ class User_UserDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param User_UserStruct $input
+     * @param Users_UserStruct $input
      *
-     * @return User_UserStruct
+     * @return Users_UserStruct
      * @throws Exception
      */
     public function sanitize( $input ) {
@@ -70,7 +70,7 @@ class User_UserDao extends DataAccess_AbstractDao {
     /**
      * @param $array_result array
      *
-     * @return User_UserStruct|User_UserStruct[]
+     * @return Users_UserStruct|Users_UserStruct[]
      */
     protected function _buildResult( $array_result ) {
         $result = array();
@@ -85,7 +85,7 @@ class User_UserDao extends DataAccess_AbstractDao {
                     'last_name'   => $item[ 'last_name' ],
             );
 
-            $obj = new User_UserStruct( $build_arr );
+            $obj = new Users_UserStruct( $build_arr );
 
             $result[ ] = $obj;
         }

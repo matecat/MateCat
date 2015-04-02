@@ -81,6 +81,7 @@ class Engines_Results_MyMemory_Matches {
         $this->last_updated_by  = array_key_exists( 'last-updated-by', $match ) ? $match[ 'last-updated-by' ] : '';
         $this->last_update_date = array_key_exists( 'last-update-date', $match ) ? $match[ 'last-update-date' ] : '0000-00-00';
         $this->match            = array_key_exists( 'match', $match ) ? $match[ 'match' ] : 0;
+        $this->memory_key       = array_key_exists( 'key', $match ) ? $match[ 'key' ] : '';
 
         $this->prop             = $match[ 'prop' ];
 

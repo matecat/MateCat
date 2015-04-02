@@ -314,6 +314,8 @@ class getContributionController extends ajaxController {
             }
             if ( $match[ 'created_by' ] == 'MT!' ) {
                 $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+            } else {
+                $match[ 'created_by' ] = $this->changeSuggestionSource( $match );
             }
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
@@ -340,6 +342,13 @@ class getContributionController extends ajaxController {
 
             foreach ( $matches as $k => $m ) {
                 $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+
+                if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
+                    $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                } else {
+                    $matches[ $k ][ 'created_by' ] = $this->changeSuggestionSource( $m );
+                }
+
             }
 
             $suggestions_json_array = json_encode( $matches );
@@ -347,14 +356,9 @@ class getContributionController extends ajaxController {
 
             ( !empty( $match[ 'sentence_confidence' ] ) ? $mt_qe = floatval( $match[ 'sentence_confidence' ] ) : $mt_qe = null );
 
-            if ( $match[ 'created_by' ] == 'MT!' ) {
-                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
-            }
-
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
-            $data[ 'suggestion_source' ] = $this->changeSuggestionSource($match);
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
@@ -465,96 +469,91 @@ class getContributionController extends ajaxController {
         return $regularExpressions;
     }
 
-    private function changeSuggestionSource($match){
-        //TODO:remove this line
-        $match['key'] = "13e969daff344ac7313b";
+    private function changeSuggestionSource( $match ) {
 
-        $sug_source = $match['created_by'];
-        $key = $match['key'];
+        $sug_source = $match[ 'created_by' ];
+        $key        = $match[ 'memory_key' ];
 
         $description = '';
-        $email = null;
+        $email       = null;
 
         //suggestion is coming from a public TM
-        if($sug_source == 'Matecat') {
-            $description =  "Public TM";
-        }
-        //MyMemory returns the key of the match
-        else if( preg_match("/[a-z0-9]{20}/", $key) ){
-            //Session Enabled
-            $this->checkLogin();
-            //Session Disabled
+        if ( $sug_source == 'Matecat' ) {
+            $description = "Public TM";
+        } //MyMemory returns the key of the match
+        else {
 
-            //check if the current user owns the key
-            $getDefaultDescription = true;
-            if($this->userIsLogged){
-                //check if the user can see the key.
-                $memoryKey = new TmKeyManagement_MemoryKeyStruct();
-                $memoryKey->uid = $this->uid;
-                $memoryKey->tm_key = new TmKeyManagement_TmKeyStruct();
-                $memoryKey->tm_key->key = $key;
+            if ( preg_match( "/[a-z0-9]{8,}/", $key ) ) {
+                //Session Enabled
+                $this->checkLogin();
+                //Session Disabled
 
-                $memoryKeyDao = new TmKeyManagement_MemoryKeyDao(Database::obtain());
-                $currentUserMemoryKey = $memoryKeyDao->read($memoryKey);
+                //check if the current user owns the key
+                $getDefaultDescription = true;
+                if ( $this->userIsLogged ) {
+                    //check if the user can see the key.
+                    $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+                    $memoryKey->uid         = $this->uid;
+                    $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+                    $memoryKey->tm_key->key = $key;
 
-                Log::doLog(class_exists("User_UserDao"));
-                var_dump(class_exists("User_UserDao")); exit;
+                    $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                    $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
 
-                if(count($currentUserMemoryKey) > 0){
-                    //the current user owns the key: show its description
-                    $currentUserMemoryKey = $currentUserMemoryKey[0];
-                    $description =  $currentUserMemoryKey->tm_key->name;
+                    if ( count( $currentUserMemoryKey ) > 0 ) {
 
-                    $userStruct = User_UserStruct::getStruct();
-                    $userStruct->uid = $this->uid;
+                        //the current user owns the key: show its description
+                        $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
+                        $description          = $currentUserMemoryKey->tm_key->name;
 
+                        $userStruct      = Users_UserStruct::getStruct();
+                        $userStruct->uid = $this->uid;
 
+                        $userDao = new Users_UserDao( Database::obtain() );
+                        $user    = $userDao->setCacheTTL( 3600 )->read( $userStruct );
 
-                    $userDao = new User_UserDao(Database::obtain());
-                    $user = $userDao->read($userStruct);
+                        if ( count( $user ) == 0 ) {
+                            $description = 'unknown user';
+                        }
+                        $user  = $user[ 0 ];
+                        $email = $user->email;
 
-                    if(count($user) == 0){
-                        $description = 'unknown user';
-                    }
-                    $user = $user[0];
-                    $email = $user->email;
-
-                    $getDefaultDescription = false;
-                }
-            }
-
-            if($getDefaultDescription){
-                $job_keys = json_decode($this->jobData['tm_keys']);
-                $ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys($job_keys);
-
-                //search the current key
-                $currentKey = null;
-                for($i = 0; $i < count($ownerKeys); $i++){
-                    if($ownerKeys[$i]->key == $sug_source){
-                        $currentKey = $ownerKeys[$i];
-                        break;
+                        $getDefaultDescription = false;
                     }
                 }
 
-                if($currentKey !== null){
-                    $description = $currentKey->name;
+                if ( $getDefaultDescription ) {
+                    $job_keys  = json_decode( $this->jobData[ 'tm_keys' ] );
+                    $ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( $job_keys );
+
+                    //search the current key
+                    $currentKey = null;
+                    for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
+                        if ( $ownerKeys[ $i ]->key == $sug_source ) {
+                            $currentKey = $ownerKeys[ $i ];
+                            break;
+                        }
+                    }
+
+                    if ( $currentKey !== null ) {
+                        $description = $currentKey->name;
+                    }
                 }
-            }
 
-            if(strlen(trim($description)) == 0){
-                $description = $email;
-            }
+                if ( strlen( trim( $description ) ) == 0 ) {
+                    $description = $email;
+                }
 
-        }
-        //key is empty but the 'created by' field is not: exception
-        else{
-            Log::doLog("Unexpected case: key is empty but the 'created by' field is not.");
-            Log::doLog($match);
-            Utils::sendErrMailReport(
-                    var_export($match),
-                    "Unexpected case: key is empty but the 'created by' field is not."
-                    );
-            $description = $sug_source;
+            } //key is empty but the 'created by' field is not: exception
+            else {
+                Log::doLog( "Unexpected case: key is empty but the 'created by' field is not." );
+                Log::doLog( $match );
+                Utils::sendErrMailReport(
+                        var_export( $match ),
+                        "Unexpected case: key is empty but the 'created by' field is not."
+                );
+                $description = $sug_source;
+            }
         }
 
         return $description;
@@ -562,5 +561,3 @@ class getContributionController extends ajaxController {
     }
 }
 
-
-?>
