@@ -424,21 +424,39 @@ class CatUtils {
      * Perform a computation on the string to find the length of the strings separated by the placeholder
      *
      * @param $segment
+     * @param $separateWithChar
      *
      * @return array
      */
-    public static function parseSegmentSplit( $segment ){
+    public static function parseSegmentSplit( $segment, $separateWithChar = '' ){
         $split_chunks = explode( self::splitPlaceHolder, $segment );
         $chunk_positions = array();
         $last = 0;
+        $segment = "";
+
         if( count( $split_chunks ) > 1){
             $chunk_positions[] = 0;
             foreach( $split_chunks as $pos => $chunk ){
-                $chunk_positions[] = strlen( $chunk ) + $last; //WARNING We count length in NO MULTIBYTE mode
+                if ( strlen( $chunk ) == 0 ) break; //remove eventually present null string
+
+                //WARNING We count length in NO MULTIBYTE mode
+                $separator_len = strlen( $separateWithChar );
+                $separator     = $separateWithChar;
+
+                //if the last char of the last chunk AND the first of the next are spaces, don't add another one
+                if( substr( $chunk, -1 ) == " " || @substr( $split_chunks[ $pos + 1 ], 0, 1 ) == " " ){
+                    $separator_len = 0;
+                    $separator = '';
+                }
+
+                $chunk_positions[] = strlen( $chunk ) + $last + $separator_len;
                 $last += $chunk_positions[ $pos ];
+
+                $segment .= $chunk . $separator;
+
             }
         }
-        $segment = str_replace( self::splitPlaceHolder, '', $segment );
+
         return array( $segment, $chunk_positions );
     }
 

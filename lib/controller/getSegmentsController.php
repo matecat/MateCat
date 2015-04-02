@@ -182,8 +182,8 @@ class getSegmentsController extends ajaxController {
             $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
             $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
 
-            $seg['segment'] = CatUtils::reApplySegmentSplit( CatUtils::rawxliff2view( $seg['segment'] ), $seg['source_chunk_lengths'] ) ;
-            $seg['translation'] = CatUtils::reApplySegmentSplit( CatUtils::rawxliff2view( $seg['translation'] ), $seg['target_chunk_lengths'][ 'len' ] ) ;
+            $seg['segment'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit( $seg['segment'] , $seg['source_chunk_lengths'] ) );
+            $seg['translation'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit( $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] ) );
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
