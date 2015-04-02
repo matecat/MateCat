@@ -10,9 +10,6 @@
 
 	@INIT::obtain();
 	include_once INIT::$MODEL_ROOT . '/queries.php';
-	include_once INIT::$UTILS_ROOT . '/Engines/engine.class.php';
-	include_once INIT::$UTILS_ROOT . '/Engines/tms.class.php';
-	include_once INIT::$UTILS_ROOT . '/Engines/mt.class.php';
 	$db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 	$db->debug = INIT::$DEBUG;
 	$db->connect ();
@@ -271,7 +268,7 @@
 
 				if ( $uploadGlossaryResult[ "result" ] == 1 )
 				{
-					parseGlossary( $input, false, true );
+					parseGlossary( $input, false );
 				}
 			}
 
@@ -288,7 +285,6 @@
 				{
 					return array( "result" => 0, "message" => "Error: Source lang is equal to one of targets" );
 				}
-
 
 				try
 				{
@@ -307,63 +303,80 @@
 			}
 
 
-			function parseGlossary( $input, $test, $skip )
+			function parseGlossary( $input, $test )
 			{
-				$config = TMS::getConfigStruct();
-				$config[ 'source_lang' ] = $input['source'];
-				$config[ 'email' ]       = "demo@matecat.com";
-				$config[ 'get_mt' ]      = false;
-				$config[ 'num_result' ]  = null;
-				$config[ 'isGlossary' ]  = true;
+				$TMS = Engine::getInstance(1);
 
-
-				$config[ 'id_user' ] = $input[ "myMemoryKey" ] ;//$result[ 'username' ];
-
-
-				echo "Begin importing the glossary into MyMemory. It might take a loooooong time. Please wait...<br/><br/><pre>";
-
-				foreach( $input[ "targets" ] as $target )
+				try
 				{
-					$config[ 'target_lang' ] = $target;
+					$config = $TMS->getConfigStruct();
 
-					$fObject = new SplFileObject( $input[ "glossaryURI" ] );
-					$fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
-					$fObject->setCsvControl( ",", '"' );
+					$config['source'] = $input['source'];
+					$config['email'] = "demo@matecat.com";
+					$config['get_mt'] = false;
+					$config['num_result'] = null; // 100 ??
+					$config['isGlossary'] = true;
+					$config['id_user'] = $input["myMemoryKey"];
 
+					flushMessage("Begin importing the glossary into MyMemory. It might take a loooooong time. Please wait...<br/><br/><pre>");
 
-					$tms = new TMS( 1 );
+					foreach ($input["targets"] as $target)
+					{
+						$config['target'] = $target;
 
-					foreach ( $fObject as $k => $row ) {
+						$fObject = new SplFileObject($input["glossaryURI"]);
+						$fObject->setFlags(SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);
+						$fObject->setCsvControl(",", '"');
 
-						if ( $test || $skip ) {
-						    if ( !isset( $row[ 1 ] ) || empty( $row[ 1 ] ) ) {
-						        echo "<br/>*********************";
-						        echo "***** Failed at Row: ";
-						        print_r( ( $fObject->key() + 1 ) . "<br/>" );
-						        echo $row[ 0 ] . "<br/>";
-						        echo "*********************<br/>";
-							flush();
-						        sleep(1);
-                                                        continue;
-						    }
+						foreach ($fObject as $k => $row)
+						{
+							if (!isset($row[1]) || empty($row[1]))
+							{
+								printError($fObject->key() + 1);
+								continue;
+							}
+
+							$config['segment'] = $row[0];
+							$config['translation'] = $row[1];
+							$config['tnote'] = $row[2];
+
+							if (!$test)
+							{
+								$TMS->set($config);
+								flushMessage("!! SET !! -> ");
+							}
+
+							flushMessage("[ " . $config['source'] . "|" . $config['target'] . " ]: " . $config['segment'] . " --> " . $config['translation'] . "<br/>");
 						}
-
-						$config[ 'segment' ]     = $row[ 0 ];
-						$config[ 'translation' ] = $row[ 1 ];
-						$config[ 'tnote' ]       = ( isset( $row[ 2 ] ) ? $row[ 2 ] : null );
-
-						if ( !$test ) {
-							$tms->set( $config );
-						    echo "SET<br/>";
-						}
-
-						echo  "[ " . $config['source_lang'] . "|" . $config['target_lang'] . " ]: " . $config['segment'] . " --> " . $config['translation'] . "<br/>";
-						flush();
 					}
-				}			
-				
-				echo "</pre>";
+
+					flushMessage("</pre>");
+				}
+
+				catch ( Exception $e ) {
+					var_dump($e);
+				}
+
 			}
+
+
+		function printError($rowIndex)
+		{
+			$errorMsg = "<br/>*********************<br/>" .
+						"Failed at Row: $rowIndex" .
+						"<br/>*********************<br/>";
+
+			flushMessage( $errorMsg );
+		}
+
+
+		function flushMessage($message)
+		{
+			echo $message;
+			flush();
+		}
+
+
 		?>
 
         </div>
