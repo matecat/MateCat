@@ -4505,7 +4505,7 @@ $.extend(UI, {
                 }
             }
 		}).on('keydown', '.editor .editarea', function(e) {
-			console.log('keydown: ', UI.editarea.html());
+//			console.log('keydown: ', UI.editarea.html());
 /*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -10878,15 +10878,13 @@ if(config.splitSegmentEnabled) {
         segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
         e.preventDefault();
-    }).on('mouseup', '.splitArea', function(e) {
+    }).on('click', '.splitArea', function(e) {
         e.preventDefault();
-        console.log(window.getSelection());
+        if(window.getSelection().type == 'Range') return false;
         if($(this).hasClass('splitpoint')) return false;
         pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.cleanSplitPoints($(this));
         UI.updateSplitNumber($(this));
-//        console.log('mouseup');
-//        console.log(window.getSelection());
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
         e.stopPropagation();
