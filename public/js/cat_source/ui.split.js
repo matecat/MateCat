@@ -130,12 +130,12 @@ if(config.splitSegmentEnabled) {
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
             splitIndex = 0;
-            console.log('splittedSource: ', splittedSource);
+//            console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
 //                console.log(UI.removeLockTagsFromString(this));
 //                console.log('prima: ', splittedSource[index]);
                 cc = UI.cleanSplittedSource(splittedSource[index]);
-                console.log('cc: ', cc);
+//                console.log('cc: ', cc);
 //                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
 
                 //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
@@ -192,12 +192,12 @@ if(config.splitSegmentEnabled) {
             oldSid = data.sid;
 //            console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
-            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
+//            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
             onlyOne = (splittedSource.length == 1)? true : false;
-            console.log('segmentxx: ', UI.editarea.html());
+//            console.log('segmentxx: ', UI.editarea.html());
             $.each(splittedSource, function (index) {
                 translation = (index == 0)? UI.editarea.html() : '';
                 segData = {
@@ -217,14 +217,14 @@ if(config.splitSegmentEnabled) {
                 newSegments.push(segData);
                 splitGroup.push(oldSid + '-' + (index + 1));
             });
-            console.log('newSegments: ', newSegments);
+//            console.log('newSegments: ', newSegments);
             oldSegment = $('#segment-' + oldSid);
             alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
-            console.log('alreadySplitted: ', alreadySplitted);
+//            console.log('alreadySplitted: ', alreadySplitted);
             if(alreadySplitted) {
                 prevSeg = $('#segment-' + oldSid + '-1').prev('section');
-                console.log('prevSeg: ', prevSeg);
+//                console.log('prevSeg: ', prevSeg);
                 if(prevSeg.length) {
                     $('section[data-split-original-id=' + oldSid + ']').remove();
                     /*
@@ -234,15 +234,15 @@ if(config.splitSegmentEnabled) {
                     */
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
                     if(splitGroup.length) {
-                        console.log('dovrebbe esser qui');
-                        console.log('oldSid: ', oldSid);
+//                        console.log('dovrebbe esser qui');
+//                        console.log('oldSid: ', oldSid);
                         $.each(splitGroup, function (index) {
                             UI.lockTags($('#segment-' + this + ' .source'));
                         });
                         this.gotoSegment(oldSid + '-1');
                     } else {
-                        console.log('o qui');
-                        console.log('oldSid: ', oldSid);
+//                        console.log('o qui');
+//                        console.log('oldSid: ', oldSid);
                         UI.lockTags($('#segment-' + oldSid + ' .source'));
                         this.gotoSegment(oldSid);
 
@@ -276,16 +276,16 @@ if(config.splitSegmentEnabled) {
             setTimeout(function() {
                 sourceHeight = $(source).height();
                 splitAreaHeight = $(splitArea).height();
-                console.log(sourceHeight + ' - ' + splitAreaHeight);
-                console.log('css height del source: ', $(source).css('height'));
+//                console.log(sourceHeight + ' - ' + splitAreaHeight);
+//                console.log('css height del source: ', $(source).css('height'));
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
                     $(source).css('height', (sourceHeight)+ 'px');
-                    console.log('caso 1');
+//                    console.log('caso 1');
             } else if(sourceHeight < splitAreaHeight) {
                     $(source).css('height', (splitAreaHeight + 100)+ 'px');
                     $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
-                      console.log('caso 2');
+//                      console.log('caso 2');
                 }
             },100);
 
@@ -307,11 +307,11 @@ if(config.splitSegmentEnabled) {
 
             if(isSplitted) splitArea.removeAttr('style');
             if(isSplitted) {
-                console.log('ecco: ', '');
+//                console.log('ecco: ', '');
                 segments = segment.attr('data-split-group').split(',');
                 totalMarkup = '';
                 $.each(segments, function (index) {
-                    console.log(this + ' - ' + UI.currentSegmentId);
+//                    console.log(this + ' - ' + UI.currentSegmentId);
                     newMarkup = $('#segment-' + this + ' .source').attr('data-original');
                     if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
                     totalMarkup += newMarkup;
