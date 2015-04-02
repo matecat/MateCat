@@ -71,6 +71,9 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             case 'analyze_url':
                 $result_object = new Engines_Results_MyMemory_AnalyzeResponse( $decoded );
                 break;
+            case 'contribute_relative_url':
+                $result_object = new Engines_Results_MyMemory_SetContributionResponse( $decoded );
+                break;
             default:
 
                 foreach( $decoded['matches'] as $pos => $match ){

@@ -47,7 +47,7 @@ class setTranslationController extends ajaxController {
         $this->time_to_edit  = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
         $this->id_translator = $this->__postInput[ 'id_translator' ];
 
-        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ) );
+        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
@@ -78,12 +78,12 @@ class setTranslationController extends ajaxController {
             else $this->status = Constants_TranslationStatus::STATUS_DRAFT;
 
             foreach( $this->split_statuses as $pos => $value ){
-                $this->checkForStatus( $value );
+                $this->_checkForStatus( $value );
             }
 
         } else {
 
-            $this->checkForStatus( $this->status );
+            $this->_checkForStatus( $this->status );
 
         }
 
@@ -138,7 +138,7 @@ class setTranslationController extends ajaxController {
 
     }
 
-    protected function checkForStatus( $status ){
+    protected function _checkForStatus( $status ){
 
         switch ( $status ) {
             case Constants_TranslationStatus::STATUS_TRANSLATED:

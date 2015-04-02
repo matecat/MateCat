@@ -104,7 +104,7 @@ abstract class ajaxController extends controller {
     }
 
     public function parseIDSegment(){
-        list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
+        @list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
     }
 
 }
