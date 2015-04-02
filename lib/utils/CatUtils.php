@@ -432,9 +432,9 @@ class CatUtils {
         $split_chunks = explode( self::splitPlaceHolder, $segment );
         $chunk_positions = array();
         $last = 0;
-        $segment = "";
 
         if( count( $split_chunks ) > 1){
+            $segment = "";
             $chunk_positions[] = 0;
             foreach( $split_chunks as $pos => $chunk ){
                 if ( strlen( $chunk ) == 0 ) break; //remove eventually present null string

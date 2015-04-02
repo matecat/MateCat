@@ -1841,6 +1841,8 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
+        console.log('setStatus - segment: ', segment);
+        console.log('setStatus - status: ', status);
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
@@ -2229,11 +2231,14 @@ UI = {
         };
         if(isSplitted) {
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
-            this.setStatus(segment, 'translated');
+//            console.log('aaa: ' + id_segment);
+//            console.log('bbb: ' , segment);
+            this.setStatus($('#segment-' + id_segment), 'translated');
         }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         this.log('setTranslation', reqData);
+        segment = $('#segment-' + id_segment);
 
 		APP.doRequest({
             data: reqData,
@@ -2258,6 +2263,7 @@ UI = {
 				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
+                console.log('this: ', this);
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
@@ -2793,6 +2799,7 @@ UI = {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
+            console.log('setTranslation_success - segment: ', segment);
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
@@ -2832,7 +2839,7 @@ UI = {
 
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
-
+        if($(segment).attr('id').split('-').length > 2) return false;
         UI.propagateTranslation(segment, status, false);
 /*
         return false;
