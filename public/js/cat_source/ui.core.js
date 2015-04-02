@@ -2211,7 +2211,9 @@ UI = {
         isSplitted = (id_segment.split('-').length > 1) ? true : false;
         if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
         console.log('isSplitted: ', isSplitted);
+//        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
+//            id_segment: sidToSend,
             id_segment: id_segment,
 //            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
@@ -2227,6 +2229,7 @@ UI = {
         };
         if(isSplitted) {
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+            this.setStatus(segment, 'translated');
         }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
@@ -2264,7 +2267,7 @@ UI = {
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            status = UI.getStatus(segment);
+            status = (this == sid)? 'translated' : UI.getStatus(segment);
             statuses.push(status);
         });
         return statuses;

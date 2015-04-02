@@ -1288,9 +1288,9 @@ UI = {
             '                       </div>' +
             '						<p class="save-warning" title="Segment modified but not saved"></p>' +
             '					</div> <!-- .textarea-container -->' +
+            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
             '				</div> <!-- .target -->' +
             '			</div></div> <!-- .wrap -->' +
-            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
             '			<div class="status-container">' +
             '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
             '			</div> <!-- .status-container -->' +
@@ -2211,7 +2211,9 @@ UI = {
         isSplitted = (id_segment.split('-').length > 1) ? true : false;
         if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
         console.log('isSplitted: ', isSplitted);
+//        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
+//            id_segment: sidToSend,
             id_segment: id_segment,
 //            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
@@ -2227,6 +2229,7 @@ UI = {
         };
         if(isSplitted) {
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+            this.setStatus(segment, 'translated');
         }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
@@ -2264,7 +2267,7 @@ UI = {
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            status = UI.getStatus(segment);
+            status = (this == sid)? 'translated' : UI.getStatus(segment);
             statuses.push(status);
         });
         return statuses;
@@ -2766,6 +2769,7 @@ UI = {
 			}
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
+				console.log('operation: ', operation);
 				UI.failedConnection(0, 'no');
 			}
 		});
@@ -10410,7 +10414,9 @@ $.extend(UI, {
     },
     deleteTM: function (button) {
         tr = $(button).parents('tr').first();
-        $(tr).remove();
+        $(tr).fadeOut("normal", function() {
+        $(this).remove();
+    });
         APP.doRequest({
             data: {
                 action: 'userKeys',
@@ -10837,9 +10843,11 @@ if(config.splitSegmentEnabled) {
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea(segment);
-    }).on('click', '.outersource .actions .split.cancel', function(e) {
+    })
+    /*.on('click', '.outersource .actions .split.cancel', function(e) {
         e.preventDefault();
         console.log('cancel');
+        $('.source .item').removeAttr('style');
         $('.editor .outersource .actions .split').removeClass('cancel');
         segment = $(this).parents('section');
         UI.currentSegment.removeClass('split-action');
@@ -10847,7 +10855,8 @@ if(config.splitSegmentEnabled) {
         segment.find('.splitBar, .splitArea').remove();
 //        segment.find('.sid .actions').hide();
 
-    }).on('click', '.sid .actions .split', function(e) {
+    })*/
+    .on('click', '.sid .actions .split', function(e) {
         e.preventDefault();
         $('.sid .actions .split').addClass('cancel');
         $('.split-shortcut').html('CTRL + W');
@@ -10856,13 +10865,15 @@ if(config.splitSegmentEnabled) {
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea($(this).parents('section'));
-
     }).on('click', '.sid .actions .split.cancel', function(e) {
         e.preventDefault();
         $('.sid .actions .split').removeClass('cancel');
-        segment = $(this).parents('section');
+        source = $(segment).find('.source');
+        $(source).removeAttr('style');
         UI.currentSegment.removeClass('split-action');
         $('.split-shortcut').html('CTRL + S');
+        console.log('cancel');
+        segment = $(this).parents('section');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
@@ -10878,7 +10889,6 @@ if(config.splitSegmentEnabled) {
         segment = $(this).parents('section');
         $(this).remove();
         UI.updateSplitNumber($(segment).find('.splitArea'));
-    
 
         /*
                 console.log('cliccato');
@@ -10891,7 +10901,7 @@ if(config.splitSegmentEnabled) {
                 console.log('b');
                 UI.updateSplitNumber($(segment).find('.splitArea'));
                 console.log('c');
-        */
+        
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
@@ -10899,9 +10909,7 @@ if(config.splitSegmentEnabled) {
         $('.split-shortcut').html('CTRL + S');
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
-    }).on('click', 'segment:not(.editor)', function(e) {
-        $('.splitBar .buttons .cancel').click();
-    }).on('click', '.splitBar .buttons .done', function(e) {
+   */}).on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
@@ -11081,21 +11089,42 @@ if(config.splitSegmentEnabled) {
         createSplitArea: function (segment) {
             isSplitted = segment.attr('data-split-group') != '';
             source = $(segment).find('.source');
-            source.after('<div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div>');
+            $(source).removeAttr('style');
+            targetHeight = $('.targetarea').height();
+            segment.find('.splitContainer').remove();
+            source.after('<div class="splitContainer"><div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div></div>');
             splitArea = segment.find('.splitArea');
-
             setTimeout(function() {
                 sourceHeight = $(source).height();
                 splitAreaHeight = $(splitArea).height();
                 console.log(sourceHeight + ' - ' + splitAreaHeight);
                 console.log('css height del source: ', $(source).css('height'));
-                if(sourceHeight > splitAreaHeight) {
-                    $(splitArea).css('height', sourceHeight + 'px');
-                } else if(sourceHeight < splitAreaHeight){
-                    $(source).css('height', (splitAreaHeight + 0)+ 'px');
-
+            if(sourceHeight >= splitAreaHeight) {
+                    $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
+                    $(source).css('height', (sourceHeight)+ 'px');
+                    console.log('caso 1');
+            } else if(sourceHeight < splitAreaHeight) {
+                    $(source).css('height', (splitAreaHeight + 100)+ 'px');
+                    $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
+                      console.log('caso 2');
                 }
-            }, 100);
+            },100);
+
+           /* setTimeout(function() {
+                sourceHeight = $(source).height();
+                splitAreaHeight = $(splitArea).height();
+                console.log(sourceHeight + ' - ' + splitAreaHeight);
+                console.log('css height del source: ', $(source).css('height'));
+                if(sourceHeight > splitAreaHeight) {
+                    $(splitArea).css('height', (splitAreaHeight + 100) +'px');
+                    $('.splitBar').css('top', (splitAreaHeight + 50)+ 'px');
+                    console.log('caso 1');
+                } else if(sourceHeight <= splitAreaHeight){
+                    $(source).css('height', (sourceHeight + 50)+ 'px');
+                    $('.splitBar').css('top', (sourceHeight + 50)+ 'px');
+                      console.log('caso 2');
+                }
+            },100);*/
 
             if(isSplitted) splitArea.removeAttr('style');
             if(isSplitted) {
