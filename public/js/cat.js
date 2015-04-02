@@ -61,11 +61,11 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
-        console.log('byStatus: ', byStatus);
+//        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = this.getSegmentId(segment);
-        console.log('segment: ', segment);
-        console.log('segment_id: ', segment_id);
+//        console.log('segment: ', segment);
+//        console.log('segment_id: ', segment_id);
 
         $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
@@ -628,7 +628,7 @@ UI = {
 		this.setWaypoints();
         $(window).trigger('segmentsAdded');
 	},
-	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment.length);
+	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
 
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
@@ -654,9 +654,9 @@ UI = {
 //			this.nextUntranslatedSegmentId = 0;
 //		}
 //		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
-
+//console.log('seg: ', seg);
         var i = $(seg).next();
-
+//console.log('i: ', i);
         if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
 		}
@@ -2171,7 +2171,7 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller) {
-        console.log('id_segment: ', id_segment);
+//        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
 //        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
@@ -2211,7 +2211,7 @@ UI = {
 		autosave = (caller == 'autosave') ? true : false;
         isSplitted = (id_segment.split('-').length > 1) ? true : false;
         if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
-        console.log('isSplitted: ', isSplitted);
+//        console.log('isSplitted: ', isSplitted);
 //        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
 //            id_segment: sidToSend,
@@ -5027,9 +5027,12 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
+ //           console.log('TRANSLATED');
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
+            $('.test-invisible').remove();
+
 
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
