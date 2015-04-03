@@ -4311,7 +4311,18 @@ $.extend(UI, {
             } else {
                 UI.continueDownload();
             }
-		}).on('click', '.alert .close', function(e) {
+		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
+            if( e.which == 1 ){ // left click
+                e.preventDefault();
+                var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                    id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
+                    src: $( e.currentTarget ).attr( 'href' )
+                } );
+                $( "body" ).append( iFrameDownload );
+
+                //console.log( $( e.currentTarget ).attr( 'href' ) );
+            }
+        }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
 		}).on('click', '.downloadtr-button .draft', function() {
@@ -9478,7 +9489,7 @@ $.extend(UI, {
             UI.deleteTM($('table.mgmt-tm tr[data-key="' + $(this).attr('data-key') + '"] .deleteTM'));
             $('.mgmt-container .tm-warning-message').empty().hide();
 */
-        })
+        });
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
@@ -10620,8 +10631,6 @@ $.extend(UI, {
         });
 
     },
-
-
 
     DropDown: function(el){
         this.initEvents = function () {

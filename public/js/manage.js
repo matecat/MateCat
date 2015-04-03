@@ -769,7 +769,7 @@ UI = {
         			'					<li><a class="unarchive" href="#" title="Unarchive Job"><span class="noticon icon-drawer"></span>Unarchive</a></li>'+
 		            '            		<li><a class="sdlxliff" target="_blank" href="/SDLXLIFF/' + this.id + '/' + this.password + '/' + project.name + '.zip" title="Export SDLXLIFF"><span class="icon-download"></span>Export SDLXLIFF</a></li>'+
 		            '					<li><a target="_blank" href="/TMX/' + this.id + '/' + this.password + '" class="download-manage"><span class="icon-download"></span>Export TMX</a></li>'+
-		            '					<li><a target="_blank" href="/?action=downloadFile&id_job=' + this.id + '&password=' + this.password + '&id_file=&filename='+project.name+'.zip&download_type=omegat" class="download-manage"><span class="icon-download"></span>Export OmegaT</a></li>'+
+		            '					<li><a target="_blank" href="/?action=downloadFile&id_job=' + this.id + '&password=' + this.password + '&id_file=&filename='+project.name+'.zip&download_type=omegat&forceXliff=1" class="download-manage"><span class="icon-download"></span>Export OmegaT</a></li>'+
         			'				</ul>'+
         			'			</div><input type="button" class="btn pull-right revise" value="Revise">'+
 		            '        </td>'+

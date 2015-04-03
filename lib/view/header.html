@@ -19,7 +19,8 @@
             <li>
                 <a id="quality-report" class="draft" tal:attributes="data-vote overall_quality_class;" href="${basepath}revise-summary/${jid}-${password}" target="_self">QUALITY REPORT</a>
             </li>
-            <a class="btn pull-left topmenu-drop"><span class="text">
+            <a class="btn pull-left topmenu-drop">
+                <span class="text">
                    <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
                        <input type="hidden" name="action" value="downloadFile" />
                        <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -33,17 +34,11 @@
             </a>
             <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                 <ul class="dropdown pull-left">
+
                     <li>
-                        <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
-                            <input type="hidden" name="action" value="downloadOriginal" />
-                            <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                            <input type="hidden" name="id_file" value="" />
-                            <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                            <input type="hidden" name="password" tal:attributes="value password" />
-                            <input type="hidden" name="download_type" value="all" />
-                            <span class="icon-download"></span>
-                            <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                        </form>
+                        <a class="originalDownload" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&filename=${downloadFileName}.zip" target="_blank" >
+                            <span class="icon-download"></span>ORIGINAL
+                        </a>
                     </li>
 
                     <li>
@@ -52,41 +47,14 @@
                         </a>
                     </li>
                     <li>
-                        <a class="sdlxliff" title="Export OMEGAT" alt="Export OMEGAT">
+                        <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&filename=${downloadFileName}.zip&download_type=omegat&forceXliff=1">
                             <span class="icon-download"></span>EXPORT OMEGAT
                         </a>
                     </li>
 
                 </ul>
             </div>
-            <!--
-            <li>
 
-
-
-                        <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
-                  <input type="hidden" name="action" value="downloadOriginal" />
-                  <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                  <input type="hidden" name="id_file" value="" />
-                  <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                  <input type="hidden" name="password" tal:attributes="value password" />
-                  <input type="hidden" name="download_type" value="all" />
-                   <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-              </form>
-        </li>
-        <li>
-
-              <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
-                  <input type="hidden" name="action" value="downloadFile" />
-                  <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                  <input type="hidden" name="id_file" value="" />
-                  <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                  <input type="hidden" name="password" tal:attributes="value password" />
-                  <input type="hidden" name="download_type" value="all" />
-                  <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
-              </form>
-        </li>
-      -->
             <li id="notifbox" class="notific" title="Well done, no errors found!">
                 <a id="point2seg" href="#"><span class="numbererror"></span></a>
             </li>
