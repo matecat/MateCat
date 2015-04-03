@@ -1,167 +1,179 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    </head>
-    <body>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
 
-        <header metal:define-macro="main_header">
+<header metal:define-macro="main_header">
 
-            <p class="warning" tal:condition="php:supportedBrowser EQ -1" >
-                MateCAT was not tested with this browser.<br/>
-                Please, use Google Chrome or Mozilla Firefox
-            </p>
-            <div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>
-            <div class="wrapper">   
+    <p class="warning" tal:condition="php:supportedBrowser EQ -1" >
+        MateCAT was not tested with this browser.<br/>
+        Please, use Google Chrome or Mozilla Firefox
+    </p>
+    <div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>
+    <div class="wrapper">
 
-          <ul class="header-menu" tal:condition="php: !job_archived ">
-              <li>
-                  <a id="quality-report" class="draft" tal:attributes="data-vote overall_quality_class;" href="${basepath}revise-summary/${jid}-${password}" target="_self">QUALITY REPORT</a>
-              </li>
-               <a class="btn pull-left topmenu-drop"><span class="text"><form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
-                                                <input type="hidden" name="action" value="downloadFile" />
-                                                <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                                                <input type="hidden" name="id_file" value="" />
-                                                <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                                                <input type="hidden" name="password" tal:attributes="value password" />
-                                                <input type="hidden" name="download_type" value="all" />
-                                                <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'Download Translation' : 'PREVIEW'" />
-                                            </form></span></a>
-                        <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
-                            <ul class="dropdown pull-left">
-                                <li>
+        <ul class="header-menu" tal:condition="php: !job_archived ">
+            <li>
+                <a id="quality-report" class="draft" tal:attributes="data-vote overall_quality_class;" href="${basepath}revise-summary/${jid}-${password}" target="_self">QUALITY REPORT</a>
+            </li>
+            <a class="btn pull-left topmenu-drop"><span class="text">
+                   <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
+                       <input type="hidden" name="action" value="downloadFile" />
+                       <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                       <input type="hidden" name="id_file" value="" />
+                       <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
+                       <input type="hidden" name="password" tal:attributes="value password" />
+                       <input type="hidden" name="download_type" value="all" />
+                       <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'Download Translation' : 'PREVIEW'" />
+                   </form>
+               </span>
+            </a>
+            <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
+                <ul class="dropdown pull-left">
+                    <li>
+                        <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
+                            <input type="hidden" name="action" value="downloadOriginal" />
+                            <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                            <input type="hidden" name="id_file" value="" />
+                            <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
+                            <input type="hidden" name="password" tal:attributes="value password" />
+                            <input type="hidden" name="download_type" value="all" />
+                            <span class="icon-download"></span>
+                            <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                        </form>
+                    </li>
 
-                                      <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
-                                            <input type="hidden" name="action" value="downloadOriginal" />
-                                            <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                                            <input type="hidden" name="id_file" value="" />
-                                            <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                                            <input type="hidden" name="password" tal:attributes="value password" />
-                                            <input type="hidden" name="download_type" value="all" />
-                                            <span class="icon-download"></span>
-                                             <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                                        </form>
-                                </li>
-                                 
-                                <li><a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF"><span class="icon-download"></span>EXPORT SDLXLIFF</a></li>
-                            </ul>
-                        </div>
-              <!-- 
-              <li>
+                    <li>
+                        <a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank" >
+                            <span class="icon-download"></span>EXPORT SDLXLIFF
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sdlxliff" title="Export OMEGAT" alt="Export OMEGAT">
+                            <span class="icon-download"></span>EXPORT OMEGAT
+                        </a>
+                    </li>
 
-              
-                       
-                          <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="downloadOriginal" />
-                    <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                    <input type="hidden" name="id_file" value="" />
-                    <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                    <input type="hidden" name="password" tal:attributes="value password" />
-                    <input type="hidden" name="download_type" value="all" />
-                     <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                </form>
-          </li>
-          <li>
-               
-                <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="downloadFile" />
-                    <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                    <input type="hidden" name="id_file" value="" />
-                    <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                    <input type="hidden" name="password" tal:attributes="value password" />
-                    <input type="hidden" name="download_type" value="all" />
-                    <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
-                </form>
-          </li>
-        -->
-          <li id="notifbox" class="notific" title="Well done, no errors found!">
-			<a id="point2seg" href="#"><span class="numbererror"></span></a>
-          </li>
-          <li id='filterSwitch' title="Search or Filter results">
-			<span class="numbererror"></span>
-          </li>
-          </ul>
+                </ul>
+            </div>
+            <!--
+            <li>
 
-                <a href="${basepath}" class="logo">                 
-                </a>
-                <div class="breadcrumbs">    
-                    <a href="#" onClick="return false" id="pname" tal:content="pname">Project</a>
-                    <span>&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
+
+
+                        <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
+                  <input type="hidden" name="action" value="downloadOriginal" />
+                  <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                  <input type="hidden" name="id_file" value="" />
+                  <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
+                  <input type="hidden" name="password" tal:attributes="value password" />
+                  <input type="hidden" name="download_type" value="all" />
+                   <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+              </form>
+        </li>
+        <li>
+
+              <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
+                  <input type="hidden" name="action" value="downloadFile" />
+                  <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                  <input type="hidden" name="id_file" value="" />
+                  <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
+                  <input type="hidden" name="password" tal:attributes="value password" />
+                  <input type="hidden" name="download_type" value="all" />
+                  <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
+              </form>
+        </li>
+      -->
+            <li id="notifbox" class="notific" title="Well done, no errors found!">
+                <a id="point2seg" href="#"><span class="numbererror"></span></a>
+            </li>
+            <li id='filterSwitch' title="Search or Filter results">
+                <span class="numbererror"></span>
+            </li>
+        </ul>
+
+        <a href="${basepath}" class="logo">
+        </a>
+        <div class="breadcrumbs">
+            <a href="#" onClick="return false" id="pname" tal:content="pname">Project</a>
+            <span>&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
+        </div>
+
+    </div>   <!-- .wrapper -->
+    <div tal:attributes="class string:searchbox${filtered_class}">
+        <form>
+
+            <div class="search-inputs">
+
+                <div class="block">
+                    <label for="search-source">Find in source</label>
+                    <input id="search-source" class="search-input" type="text" value=""/>
                 </div>
-
-            </div>   <!-- .wrapper -->
-             <div tal:attributes="class string:searchbox${filtered_class}">
-            <form>
-
-                <div class="search-inputs">
-
-                    <div class="block">
-                        <label for="search-source">Find in source</label>
-                        <input id="search-source" class="search-input" type="text" value=""/>               
+                <div class="block">
+                    <div class="field">
+                        <label for="search-target">Find in target</label>
+                        <input id="search-target" class="search-input" type="text" value=""/>
                     </div>
-                    <div class="block">
-                        <div class="field">
-                            <label for="search-target">Find in target</label>
-                            <input id="search-target" class="search-input" type="text" value=""/>
-                        </div>
 
-                        <div class="field">
+                    <div class="field">
                         <input id="enable-replace" type="checkbox" />
                         <label for="enable-replace">Replace with</label>
                         <input id="replace-target" disabled="disabled" class="search-input" type="text" value=""/>
-                        </div>
-
-                        <!--div class="field">
-                            <label for="replace-target">Replace with</label>
-                            <input id="replace-target" class="search-input" type="text" value=""/>
-                        </div-->
-
-
-                    </div>                    
-                    <div class="block">
-                        <label for="select-status">Status</label>
-                        <select id="select-status" class="search-select" >
-                            <option value="all" selected="selected">All</option>
-                            <option value="new">New</option>
-                            <option value="draft">Draft</option>
-                            <option value="translated">Translated</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>   
                     </div>
-                    <div class="block right buttons">
-                        <div class="field">
-                            <input id="exec-cancel" type="button" class="btn" value="Cancel" />         
-                            <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />            
-                        </div>
 
-                        <div class="field">
-                            <input id="exec-replaceall" type="button" class="btn" disabled="disabled" value="Replace all" />
-                            <input id="exec-replace" type="button" class="btn" disabled="disabled" value="Replace" />   
-                        </div>
+                    <!--div class="field">
+                        <label for="replace-target">Replace with</label>
+                        <input id="replace-target" class="search-input" type="text" value=""/>
+                    </div-->
 
-                    </div>          
+
                 </div>
-
-                <div class="search-options">
-                    <div class="block">
-                        <input id="match-case" type="checkbox" />
-                        <label for="match-case">Match case</label>
+                <div class="block">
+                    <label for="select-status">Status</label>
+                    <select id="select-status" class="search-select" >
+                        <option value="all" selected="selected">All</option>
+                        <option value="new">New</option>
+                        <option value="draft">Draft</option>
+                        <option value="translated">Translated</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="block right buttons">
+                    <div class="field">
+                        <input id="exec-cancel" type="button" class="btn" value="Cancel" />
+                        <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />
                     </div>
-                    <div class="block">
-                        <input id="exact-match" type="checkbox" />
-                        <label for="exact-match">Exact match</label>
-                    </div>                    
-                </div>
 
-            </form>
-            <div class="search-display">
-                <p class="searching">Searching ...</p>
-                <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
+                    <div class="field">
+                        <input id="exec-replaceall" type="button" class="btn" disabled="disabled" value="Replace all" />
+                        <input id="exec-replace" type="button" class="btn" disabled="disabled" value="Replace" />
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        </header>
-    </body>
+            <div class="search-options">
+                <div class="block">
+                    <input id="match-case" type="checkbox" />
+                    <label for="match-case">Match case</label>
+                </div>
+                <div class="block">
+                    <input id="exact-match" type="checkbox" />
+                    <label for="exact-match">Exact match</label>
+                </div>
+            </div>
+
+        </form>
+        <div class="search-display">
+            <p class="searching">Searching ...</p>
+            <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
+        </div>
+    </div>
+
+</header>
+</body>
 </html>
