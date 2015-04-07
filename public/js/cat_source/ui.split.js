@@ -200,6 +200,7 @@ if(config.splitSegmentEnabled) {
 //            console.log('segmentxx: ', UI.editarea.html());
 
             //get all chunk translations, if this is a merge we want all concatenated targets
+            //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
             translation = '';
             if( onlyOne ) {
                 $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
