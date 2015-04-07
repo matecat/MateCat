@@ -496,15 +496,7 @@ class getContributionController extends ajaxController {
         //return if something was found, avoid other computations
         if ( !empty( $description ) ) return $description;
 
-        $userStruct        = Users_UserStruct::getStruct();
-        $userStruct->email = $this->jobData[ 'owner' ];
-
-        $userDao = new Users_UserDao( Database::obtain() );
-        $user    = $userDao->setCacheTTL( 3600 )->read( $userStruct );
-        $user    = $user[ 0 ];
-        $user    = $user[ 0 ];
-
-        return $user->email;
+        return $this->jobData[ 'owner' ];
 
     }
 
