@@ -12,7 +12,6 @@ class setRevisionController extends ajaxController {
 
     private $id_job;
     private $password_job;
-    private $id_segment;
     private $err_typing;
     private $err_translation;
     private $err_terminology;
@@ -117,6 +116,7 @@ class setRevisionController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "job archived" );
         }
 
+        $this->parseIDSegment();
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password_job, $this->id_segment ) ) {

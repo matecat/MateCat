@@ -87,9 +87,26 @@ UI = {
 	},
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
-//        console.log('segment qui: ', segment);
-        return $(segment).attr('id').replace('segment-', '');
+
+        /*
+         sometimes:
+         typeof $(segment).attr('id') == 'undefined'
+
+         The preeceding if doesn't works because segment is a list ==
+         '[<span class="undoCursorPlaceholder monad" contenteditable="false"></span>]'
+
+         so for now i put a try-catch block here
+
+         TODO FIX
+         */
+        try {
+            return $(segment).attr('id').replace('segment-', '');
+        } catch( e ){
+            return false;
+        }
+
 //        return $(segment).attr('id').split('-')[1];
+
     },
 
     checkHeaviness: function() {
@@ -3231,7 +3248,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.1";
+		this.version = "0.5.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -11046,8 +11063,25 @@ if(config.splitSegmentEnabled) {
             splitGroup = [];
             onlyOne = (splittedSource.length == 1)? true : false;
 //            console.log('segmentxx: ', UI.editarea.html());
-            $.each(splittedSource, function (index) {
-                translation = (index == 0)? UI.editarea.html() : '';
+
+            //get all chunk translations, if this is a merge we want all concatenated targets
+            translation = '';
+            if( onlyOne ) {
+                $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
+                    return this.id.match(/-editarea/);
+                } ).each( function( index, value ){
+                    translation += $( value ).html();
+                    //console.log( $( value ).html() );
+                } );
+            }
+
+            $.each( splittedSource, function ( index ) {
+
+                if( !onlyOne ) {
+                    //there is a split, there are more than one source
+                    translation = ( index == 0 ) ? UI.editarea.html() : '';
+                }
+
                 segData = {
                     autopropagated_from: "0",
                     has_reference: "false",

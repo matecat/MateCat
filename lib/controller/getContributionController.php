@@ -497,7 +497,6 @@ class getContributionController extends ajaxController {
         if ( !empty( $description ) ) return $description;
 
         return $this->jobData[ 'owner' ];
-
     }
 
     /**
