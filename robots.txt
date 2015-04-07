@@ -1,6 +1,7 @@
 # robots.txt generated at http://www.mcanerin.com
 User-agent: *
 Disallow: /translate/
+Disallow: /revise/
 Disallow: /manage/
 Disallow: /analyze/
 Disallow: /jobanalysis/
