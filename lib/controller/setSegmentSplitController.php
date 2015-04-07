@@ -121,15 +121,18 @@ class setSegmentSplitController extends ajaxController {
 
     private function split() {
 
-//        //save the 2 arrays in the DB
-//
+        //save the 2 arrays in the DB
+
 //        $translationStruct = TranslationsSplit_SplitStruct::getStruct();
 //
 //        $translationStruct->id_segment          = $this->id_segment;
 //        $translationStruct->id_job              = $this->id_job;
 //
-//        $source_chunk_lengths = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
-//        $translationStruct->source_chunk_lengths = $source_chunk_lengths;
+//        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
+//
+//        /* Fill the statuses with DEFAULT DRAFT VALUES */
+//        $pieces = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths )  -1 : 1 );
+//        $translationStruct->target_chunk_lengths = array( 'len' => array( 0 ), 'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT ) );
 //
 //        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
 //        $result = $translationDao->update($translationStruct);
@@ -137,8 +140,9 @@ class setSegmentSplitController extends ajaxController {
 //        if($result instanceof TranslationsSplit_SplitStruct){
 //            //return success
 //            $this->result['data'] = 'OK';
-//        } else {
-//            Log::doLog("Failed split segment.");
+//        }
+//        else{
+//            Log::doLog("Failed while splitting/merging segment.");
 //            Log::doLog($translationStruct);
 //        }
 
