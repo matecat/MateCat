@@ -196,10 +196,27 @@ if(config.splitSegmentEnabled) {
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
-            onlyOne = (splittedSource.length == 1)? true : false;
+            onlyOne = ( splittedSource.length == 1 ) ? true : false;
 //            console.log('segmentxx: ', UI.editarea.html());
-            $.each(splittedSource, function (index) {
-                translation = (index == 0)? UI.editarea.html() : '';
+
+            //get all chunk translations, if this is a merge we want all concatenated targets
+            translation = '';
+            if( onlyOne ) {
+                $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
+                    return this.id.match(/-editarea/);
+                } ).each( function( index, value ){
+                    translation += $( value ).html();
+                    //console.log( $( value ).html() );
+                } );
+            }
+
+            $.each( splittedSource, function ( index ) {
+
+                if( !onlyOne ) {
+                    //there is a split, there are more than one source
+                    translation = ( index == 0 ) ? UI.editarea.html() : '';
+                }
+
                 segData = {
                     autopropagated_from: "0",
                     has_reference: "false",
