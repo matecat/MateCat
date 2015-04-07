@@ -464,20 +464,25 @@ float: left;
   margin-left: 3px;
 }
 
-
 @media (max-width: 1300px) {
-.translate-box a {
+	.wrapper-upload {
+		width:96%!important;
+	}
+	.translate-box select, .mgmt-table-mt select {
+		width: 230px!important;
+	}
+
+	.translate-box a {
   display: block;
   width: 195px;
   margin-top: 0;
 }
+}
 
-.translate-box select, .mgmt-table-mt select {
-  width: 230px!important;
-}
-.wrapper-upload {
-  width: 96%!important;
-}
+@media (max-width: 1150px) {
+	.translate-box select, .mgmt-table-mt select {
+		width: 200px!important;
+	}
 }
 
 
@@ -581,7 +586,7 @@ h2.payoff
 
 
 .delete .ui-button-text, .cancel .ui-button-text{color:#fff;text-align:left;margin:0px 0 0 10px !important}
-.delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;width:65px!important;}
+.delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;}
 .cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
 
 .delete button{background: url(../img/sprite.png) 12px -1074px no-repeat !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px;}
@@ -592,6 +597,9 @@ h2.payoff
 a{text-decoration:underline}
 a:hover{text-decoration:none}
 .translate-box a{display:block;}
+.translate-box label {
+  margin-left: 5px;
+}
 body{font-family:Calibri, Arial, Helvetica, sans-serif}
 .popup-languages .close
 	{
@@ -1096,11 +1104,11 @@ background: #d1581c url(../img/sprite2x.png) -4px -1157px no-repeat !Important;
 }
 
 .delete button {
-background: url(../img/sprite2x.png) 12px -1074px no-repeat !important;
+background: url(../img/sprite2x.png) -8px -1074px no-repeat !important;
 }
 
 .delete button:hover, .cancel button:hover {
-background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
+background: #ca2a2e url(../img/sprite2x.png) -8px -1115px no-repeat !important;
 }
 
 #swaplang, .fileinput-button, .cancel-btn, .cancel-btn:hover, .delete button, .delete button:hover, .cancel button:hover  {

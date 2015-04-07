@@ -255,7 +255,8 @@ $.extend(UI, {
         }).on('blur', '#activetm td.description .edit-desc', function() {
 //            console.log('blur');
             $(this).removeAttr('contenteditable');
-            if(APP.isCattool) UI.saveTMdata(false);
+            UI.saveTMdata(false);
+//            if(APP.isCattool) UI.saveTMdata(false);
 
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
 /*
@@ -268,11 +269,28 @@ $.extend(UI, {
 */
         }).on('blur', '#inactivetm td.description .edit-desc', function() {
             $(this).removeAttr('contenteditable');
-            if(APP.isCattool) UI.saveTMdescription($(this));
+//            if(APP.isCattool) UI.saveTMdescription($(this));
+            UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
+            console.log('return');
             e.preventDefault();
             $(this).trigger('blur');
-         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+        }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
+//            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
+            $(this).attr('contenteditable', true);
+        }).on('blur', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+//            UI.saveTMdata(false);
+//        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+//            $(this).removeAttr('contenteditable');
+//            if(APP.isCattool) UI.saveTMdescription($(this));
+//            UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-mt td.engine-name .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
@@ -1091,7 +1109,8 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error saving TM data!!');
-                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+//                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+                $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
                 $('.popup-tm').removeClass('saving');
 
 //                $('.mgmt-panel-tm .warning-message').text('').hide();
@@ -1306,7 +1325,9 @@ $.extend(UI, {
     },
     deleteTM: function (button) {
         tr = $(button).parents('tr').first();
-        $(tr).remove();
+        $(tr).fadeOut("normal", function() {
+        $(this).remove();
+    });
         APP.doRequest({
             data: {
                 action: 'userKeys',

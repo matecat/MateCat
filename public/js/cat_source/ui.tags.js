@@ -134,11 +134,10 @@ $.extend(UI, {
             }
         }
 
-
         $(editarea).first().each(function() {
-                   saveSelection();
-                   var tx = $(this).html();
-                   brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+            saveSelection();
+            var tx = $(this).html();
+            brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
                    brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
@@ -213,11 +212,15 @@ $.extend(UI, {
     unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
-		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
+        this.editarea.html(this.removeLockTagsFromString(this.editarea.html()));
+//		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 //		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"true\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 	},
-	
-	// TAG CLEANING
+    removeLockTagsFromString: function (str) {
+        return str.replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1");
+    },
+
+    // TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {
  //       if (area == this.editarea) {
 			this.droppingInEditarea = false;
@@ -413,6 +416,8 @@ $.extend(UI, {
     },
     checkTagProximity: function () {
 //        return false;
+        if(UI.editarea.html() == '') return false;
+
         selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
         range = selection.getRangeAt(0);
@@ -453,6 +458,7 @@ $.extend(UI, {
                 return false;
             };
         });
+
     },
     highlightCorrespondingTags: function (el) {
 //        console.log('highlighting: ', $(el));

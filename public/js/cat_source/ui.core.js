@@ -63,10 +63,13 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
 //        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-		segment_id = $(segment).attr('id').split('-')[1];
-		$('.percentuage', segment).removeClass('visible');
+		segment_id = this.getSegmentId(segment);
+//        console.log('segment: ', segment);
+//        console.log('segment_id: ', segment_id);
+
+        $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
-		this.setTranslation($(segment).attr('id').split('-')[1], status, false);
+		this.setTranslation(this.getSegmentId(segment), status, false);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -82,7 +85,14 @@ UI = {
 			status: status
 		});
 	},
-	checkHeaviness: function() {
+    getSegmentId: function (segment) {
+        if(typeof segment == 'undefined') return false;
+//        console.log('segment qui: ', segment);
+        return $(segment).attr('id').replace('segment-', '');
+//        return $(segment).attr('id').split('-')[1];
+    },
+
+    checkHeaviness: function() {
 //		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
 //		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
 //		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
@@ -151,8 +161,10 @@ UI = {
             this.removeGlossaryMarksFormSource();
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
+
             this.body.removeClass('editing');
-            $(segment).removeClass("editor");
+            $(segment).removeClass("editor waiting_for_check_result opened");
+
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);
@@ -234,8 +246,10 @@ UI = {
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+		if ($('.footer', segment).text() !== '') {
+            return false;
+        }
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
@@ -289,7 +303,7 @@ UI = {
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -478,7 +492,7 @@ UI = {
 //		var step = this.moreSegNum;
 		var section = $('section');
         var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
-		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
+		var segId = (seg.length) ? this.getSegmentId(seg) : 0;
 		return segId;
 	},
 	detectStartSegment: function() {
@@ -501,7 +515,8 @@ UI = {
 
     nextUnloadedResultSegment: function() {
 		var found = '';
-		var last = $('section').last().attr('id').split('-')[1];
+		var last = this.getSegmentId($('section').last());
+//		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
 //            var start = new Date().getTime();
 //            for (var i = 0; i < 1e7; i++) {
@@ -542,7 +557,7 @@ UI = {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
 //				if ($(this).offset().top > $(window).scrollTop()) {
-					UI.segMoving = $(this).attr('id').split('-')[1];
+					UI.segMoving = UI.getSegmentId($(this));
 					return false;
 				}
 			});
@@ -583,7 +598,7 @@ UI = {
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
 			});
-			this.renderSegments(d.data.files, where, false);
+			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event 
 			if ((where == 'before') && (numsegToAdd)) {
@@ -611,6 +626,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+        $(window).trigger('segmentsAdded');
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
@@ -626,8 +642,7 @@ UI = {
 //		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
 //		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
-//			console.log('1');
-			this.nextUntranslatedSegmentId = $(n).attr('id').split('-')[1];
+			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
 		}
@@ -639,13 +654,14 @@ UI = {
 //			this.nextUntranslatedSegmentId = 0;
 //		}
 //		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
-
-		var i = $(seg).next();
-		if (!i.length) {
+//console.log('seg: ', seg);
+        var i = $(seg).next();
+//console.log('i: ', i);
+        if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
 		}
 		if (i.length) {
-			this.nextSegmentId = $(i).attr('id').split('-')[1];
+			this.nextSegmentId = this.getSegmentId($(i));
 		} else {
 			this.nextSegmentId = 0;
 		}
@@ -711,7 +727,7 @@ UI = {
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
 		if (typeof d.data.files != 'undefined') {
-			this.renderSegments(d.data.files, where, this.firstLoad);
+			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
 				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
@@ -782,8 +798,10 @@ UI = {
 				data: {
 					action: 'getUpdatedTranslations',
 					last_timestamp: lastUpdateRequested.getTime(),
-					first_segment: $('section').first().attr('id').split('-')[1],
-					last_segment: $('section').last().attr('id').split('-')[1]
+					first_segment: UI.getSegmentId($('section').first()),
+//					first_segment: $('section').first().attr('id').split('-')[1],
+					last_segment: UI.getSegmentId($('section').last())
+//					last_segment: $('section').last().attr('id').split('-')[1]
 				},
 				error: function() {
 					UI.failedConnection(0, 'getUpdatedTranslations');
@@ -875,10 +893,13 @@ UI = {
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
-//        console.log('gotoSegment: ', id);
-		var el = $("#segment-" + id + "-target").find(".editarea");
+        if((!this.segmentIsLoaded(id))&&(id.toString().split('-').length > 1)) {
+            id = id.toString().split('-')[0];
+        }
+        var el = $("#segment-" + id + "-target").find(".editarea");
+//        console.log('el: ', el);
         $(el).click();
-	},
+    },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
 			$('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
@@ -967,7 +988,7 @@ UI = {
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
         segment.trigger('open');
-
+        $('section').first().nextAll('.undoCursorPlaceholder').remove();
         this.getNextSegment(this.currentSegment, 'untranslated');
 
 		if ((!this.readonly)&&(!getNormally)) {
@@ -1014,6 +1035,19 @@ UI = {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
 			if (lastOpened != 'segment-' + this.currentSegmentId)
 				this.closeSegment(this.lastOpenedSegment, 0, operation);
+            if(this.lastOpenedSegment) {
+ //               this.lastOpenedSegment.find('.editarea').html('ss');
+ /*
+                setTimeout(function() {
+                    UI.lastOpenedSegment.attr('data-hash', UI.lastOpenedSegment.attr('data-hash'));
+                }, 1000);
+                this.lastOpenedSegment.attr('data-hash', this.lastOpenedSegment.attr('data-hash'));
+                */
+            }
+
+                //console.log("this.lastOpenedSegment: ", this.lastOpenedSegment.attr('data-hash'));
+//            console.log("this.lastOpenedSegment.attr('data-tagmode): ", this.lastOpenedSegment.attr('data-tagmode'));
+//                this.lastOpenedSegment.attr('data-autopropagated', this.lastOpenedSegment.attr('data-autopropagated'));
 		}
 		this.opening = false;
 		this.body.addClass('editing');
@@ -1145,7 +1179,7 @@ UI = {
 	removeStatusMenu: function(statusMenu) {
 		statusMenu.empty().hide();
 	},
-	renderSegments: function(files, where, starting) {
+	renderFiles: function(files, where, starting) {
 		$.each(files, function(k) {
 			var newFile = '';
 //            var fid = fs['ID_FILE'];
@@ -1178,85 +1212,8 @@ UI = {
 						'	</ul>';
 			}
 
-			var t = config.time_to_edit_enabled;
-			$.each(this.segments, function() {
-//                this.readonly = true;
-				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
-                var autoPropagated = this.autopropagated_from != 0;
-				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
-
-                /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
-                escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-                escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-
-				/* tab placeholders replacement */
- //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
-				
-                /* see also replacement made in source content below */
-                /* this is to show line feed in source too, because server side we replace \n with placeholders */
-/*
-                tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
-                    '</li>' +
-//                    '						   <li class="crunched">&lt;&gt;</li>' +
-//                    '						   <li class="extended">&lt;...&gt;</li>' +
-                    '						</ul>' : '';
-*/
-                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
-						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<div class="sid" title="' + this.sid + '"><div class="txt">' + UI.shortenId(this.sid) + '</div><div class="actions"><a class="split" href="#">Split</a></div></div>' +
-((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
-((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
-						'	<div class="body">' +
-						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
-//						'			<h2 title="" class="percentuage"><span></span></h2>' + 
-//						'			<a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
-//						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
-						'		</div>' +
-						'		<div class="text">' +
-						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
-						'				<div class="copy" title="Copy source to target">' +
-						'                   <a href="#"></a>' +
-						'                   <p>ALT+CTRL+I</p>' +
-//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
-						'				</div>' +
-						'				<div class="target item" id="segment-' + this.sid + '-target">' +
-						'					<span class="hide toggle"> ' +
-						'						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
-						'					</span>' +
-						'					<div class="textarea-container">' +
-						'						<span class="loader"></span>' +
-//                        tagModes +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-                        '                       <div class="toolbar">' +
-((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
-						'                           <ul class="editToolbar">' +
-						'                               <li class="uppercase" title="Uppercase"></li>' +
-						'                               <li class="lowercase" title="Lowercase"></li>' +
-						'                               <li class="capitalize" title="Capitalized"></li>' +
-						'                           </ul>' +
-                        '                       </div>' +
-						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
-						'					</div> <!-- .textarea-container -->' +
-						'				</div> <!-- .target -->' +
-						'			</div></div> <!-- .wrap -->' +
-						'						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>' +
-						'			<div class="status-container">' +
-						'				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
-						'			</div> <!-- .status-container -->' +
-						'		</div> <!-- .text -->' +
-						'		<div class="timetoedit" data-raw_time_to_edit="' + this.time_to_edit + '">' +
-						((t) ? '			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:' : '') +
-						((t) ? '			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s' : '') +
-						'		</div>' +
-						'		<div class="footer toggle"></div> <!-- .footer -->     ' +
-						'	</div> <!-- .body -->' +
-						'	<ul class="statusmenu"></ul>' +
-						'</section> ';
-			});
+            newSegments = UI.renderSegments(this.segments, false);
+            newFile += newSegments;
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -1286,13 +1243,171 @@ UI = {
 			this.init();
 		}
 	},
-	saveSegment: function(segment) {
+    getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
+//        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
+//        console.log('VEDIAMO: ', segment);
+//        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
+        splitGroup = segment.split_group || splitGroup || '';
+        splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
+        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
+            '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
+//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
+            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
+            ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+            ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
+            '	<div class="body">' +
+            '		<div class="header toggle" id="segment-' + segment.sid + '-header">' +
+//						'			<h2 title="" class="percentuage"><span></span></h2>' +
+//						'			<a href="#" id="segment-' + segment.sid + '-close" class="close" title="Close this segment"></a>' +
+//						'			<a href="#" id="segment-' + segment.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
+            '		</div>' +
+            '		<div class="text">' +
+            '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
+//            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
+            '				<div class="copy" title="Copy source to target">' +
+            '                   <a href="#"></a>' +
+            '                   <p>ALT+CTRL+I</p>' +
+//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
+            '				</div>' +
+            '				<div class="target item" id="segment-' + segment.sid + '-target">' +
+            '					<span class="hide toggle"> ' +
+            '						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
+            '					</span>' +
+            '					<div class="textarea-container">' +
+            '						<span class="loader"></span>' +
+//                        tagModes +
+            '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + segment.sid + '-editarea" data-sid="' + segment.sid + '">' + ((!segment.translation) ? '' : UI.decodePlaceholdersToText(segment.translation, true, segment.sid, 'translation')) + '</div>' +
+            '                       <div class="toolbar">' +
+            ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
+            '                           <ul class="editToolbar">' +
+            '                               <li class="uppercase" title="Uppercase"></li>' +
+            '                               <li class="lowercase" title="Lowercase"></li>' +
+            '                               <li class="capitalize" title="Capitalized"></li>' +
+            '                           </ul>' +
+            '                       </div>' +
+            '						<p class="save-warning" title="Segment modified but not saved"></p>' +
+            '					</div> <!-- .textarea-container -->' +
+            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
+            '				</div> <!-- .target -->' +
+            '			</div></div> <!-- .wrap -->' +
+            '			<div class="status-container">' +
+            '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
+            '			</div> <!-- .status-container -->' +
+            '		</div> <!-- .text -->' +
+            '		<div class="timetoedit" data-raw_time_to_edit="' + segment.time_to_edit + '">' +
+            ((t) ? '			<span class=edit-min>' + segment.parsed_time_to_edit[1] + '</span>m:' : '') +
+            ((t) ? '			<span class=edit-sec>' + segment.parsed_time_to_edit[2] + '</span>s' : '') +
+            '		</div>' +
+            '		<div class="footer toggle"></div> <!-- .footer -->     ' +
+            '	</div> <!-- .body -->' +
+            '	<ul class="statusmenu"></ul>' +
+            '</section> ';
+        return newSegmentMarkup;
+    },
+    stripSpans: function (str) {
+        return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
+    },
+    normalizeSplittedSegments: function (segments) {
+//        console.log('segments: ', segments);
+
+        newSegments = [];
+        $.each(segments, function (index) {
+//            console.log('seg: ', this.segment.split(UI.splittedTranslationPlaceholder));
+//            console.log('aaa: ', this.segment);
+            splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+//            console.log('splittedSourceAr: ', splittedSourceAr);
+            if(splittedSourceAr.length > 1) {
+//            if(this.split_points_source.length) {
+//                console.log('a');
+                segment = this;
+                splitGroup = [];
+                $.each(splittedSourceAr, function (i) {
+                    splitGroup.push(segment.sid + '-' + (i + 1));
+                });
+
+                $.each(splittedSourceAr, function (i) {
+//                    console.log('bbb: ', this);
+//                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
+                    translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+//                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+//                    console.log('ddd: ', this);
+                    //temp
+                    //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
+                    //end temp
+                    status = segment.target_chunk_lengths.statuses[i];
+                    console.log('vediamo status: ', status);
+                    segData = {
+                        autopropagated_from: "0",
+                        has_reference: "false",
+                        parsed_time_to_edit: ["00", "00", "00", "00"],
+                        readonly: "false",
+                        segment: splittedSourceAr[i],
+//                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
+                        segment_hash: segment.segment_hash,
+                        sid: segment.sid + '-' + (i + 1),
+                        split_group: splitGroup,
+                        split_points_source: [],
+                        status: status,
+                        time_to_edit: "0",
+                        translation: translation,
+                        warning: "0"
+                    }
+                    newSegments.push(segData);
+                    segData = null;
+                });
+            } else {
+//                console.log('b');
+                newSegments.push(this);
+            }
+
+        });
+// console.log('newsegments 1: ', newSegments);
+        return newSegments;
+    },
+
+    renderSegments: function (segments, justCreated, splitAr, splitGroup) {
+        segments = this.normalizeSplittedSegments(segments);
+        splitAr = splitAr || [];
+        splitGroup = splitGroup || [];
+        var t = config.time_to_edit_enabled;
+        newSegments = '';
+        $.each(segments, function() {
+//                this.readonly = true;
+            var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
+            var autoPropagated = this.autopropagated_from != 0;
+//            console.log('this: ', this);
+            if(typeof this.segment == 'object') console.log(this);
+//            console.log('this.segment: ', this);
+            if($.parseHTML(this.segment).length) {
+                this.segment = UI.stripSpans(this.segment);
+            };
+//            console.log('corrected: ', this.segment.replace(/<span(.*?)>/gi, ''));
+            var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//            console.log('escapedSegment: ', escapedSegment);
+
+            /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+            escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+            escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+            originalId = this.sid.split('-')[0];
+            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
+            } else {
+
+            }
+
+        });
+        return newSegments;
+    },
+
+    saveSegment: function(segment) {
 		var status = (segment.hasClass('status-translated')) ? 'translated' : (segment.hasClass('status-approved')) ? 'approved' : (segment.hasClass('status-rejected')) ? 'rejected' : (segment.hasClass('status-new')) ? 'new' : 'draft';
 		if (status == 'new') {
 			status = 'draft';
 		}
 		console.log('SAVE SEGMENT');
-		this.setTranslation($(segment).attr('id').split('-')[1], status, 'autosave');
+		this.setTranslation(this.getSegmentId(segment), status, 'autosave');
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {
@@ -1322,13 +1437,13 @@ UI = {
 		var spread = 23;
 		var current = this.currentSegment;
 		var previousSegment = $(segment).prev('section');
-//		console.log(previousSegment);
 
 		if (!previousSegment.length) {
 			previousSegment = $(segment);
 			spread = 103;
 		}
-		var destination = "#" + previousSegment.attr('id');
+        if(!previousSegment.length) return false;
+        var destination = "#" + previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;
 		if (this.firstScroll) {
 			destinationTop = destinationTop + 100;
@@ -1360,6 +1475,7 @@ UI = {
 		}, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
+//        segmentId = segmentId.toString().split('-')[0];
 		if ($('#segment-' + segmentId).length) {
 			return true;
 		} else {
@@ -1429,6 +1545,7 @@ UI = {
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
+//        if(id_segment.toString().split('-').length > 1) id_segment = id_segment.toString().split('-');
 //		var file = this.currentFile;
 		if (this.readonly)
 			return;
@@ -1436,7 +1553,8 @@ UI = {
 			data: {
 				action: 'setCurrentSegment',
 				password: config.password,
-				id_segment: id_segment,
+				id_segment: id_segment.toString(),
+//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
 			context: reqArguments,
@@ -1464,13 +1582,13 @@ UI = {
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
          * is sent as response in getMoreSegments and added as data in the "section" Tag and
-         * rendered/prepared in renderSegments/createHeader
+         * rendered/prepared in renderFiles/createHeader
          * and managed in propagateTranslation
          *
          * TODO
          * I leave them here but they should be removed
          *
-         * @see renderSegments
+         * @see renderFiles
          * @see createHeader
          * @see propagateTranslation
          *
@@ -1722,7 +1840,9 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
-        segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
+        console.log('setStatus - segment: ', segment);
+        console.log('setStatus - status: ', status);
+		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
@@ -1770,7 +1890,7 @@ UI = {
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
             //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
@@ -2054,26 +2174,19 @@ UI = {
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
 //        console.log('setTranslation sul segmento ', UI.currentSegmentId);
-
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment);
-        //       this.setStatus(segment, status);
-
-//        UI.testSetTranslation_success(segment, status, reqArguments[3]);
 
         this.lastTranslatedSegmentId = id_segment;
-//        $('#segment-' + this.lastOpenedSegmentId).removeClass('loaded');
-
-        caller = (typeof caller == 'undefined') ? false : caller;
+		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
 			translation = this.postProcessEditarea(segment);
 		} else {
-			translation = $('.editarea', segment ).text();
+            translation = $('.editarea', segment ).text();
 		}
-//        console.log('translation: ', translation);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -2096,8 +2209,14 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        isSplitted = (id_segment.split('-').length > 1) ? true : false;
+        if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
+//        console.log('isSplitted: ', isSplitted);
+//        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
+//            id_segment: sidToSend,
             id_segment: id_segment,
+//            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
@@ -2109,9 +2228,16 @@ UI = {
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave
         };
+        if(isSplitted) {
+            this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+//            console.log('aaa: ' + id_segment);
+//            console.log('bbb: ' , segment);
+            this.setStatus($('#segment-' + id_segment), 'translated');
+        }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         this.log('setTranslation', reqData);
+        segment = $('#segment-' + id_segment);
 
 		APP.doRequest({
             data: reqData,
@@ -2136,10 +2262,34 @@ UI = {
 				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
+                console.log('this: ', this);
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
 	},
+    collectSplittedStatuses: function (sid) {
+        statuses = [];
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            statuses.push(status);
+        });
+        return statuses;
+    },
+    collectSplittedTranslations: function (sid) {
+        totalTranslation = '';
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            translation = UI.postProcessEditarea(segment);
+            totalTranslation += translation;
+//            totalTranslation += $(segment).find('.editarea').html();
+            if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
+        });
+        return totalTranslation;
+    },
+
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -2624,6 +2774,7 @@ UI = {
 			}
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
+				console.log('operation: ', operation);
 				UI.failedConnection(0, 'no');
 			}
 		});
@@ -2643,23 +2794,13 @@ UI = {
 		$('#contextMenu .shortcut .alt').html(alt);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
-    testSetTranslation_success: function (segment, status, byStatus) {
-        this.setStatus(segment, status);
-//        this.setDownloadStatus(d.stats);
-//        this.setProgress(d.stats);
-        //check status of global warnings
-        this.checkWarnings(false);
-        if(!byStatus) {
-            this.beforePropagateTranslation(segment, status);
-        }
-    },
-
-    setTranslation_success: function(d, segment, status, byStatus) {
+	setTranslation_success: function(d, segment, status, byStatus) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
+            console.log('setTranslation_success - segment: ', segment);
 			this.setStatus(segment, status);
-            this.setDownloadStatus(d.stats);
+			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
@@ -2697,7 +2838,7 @@ UI = {
 
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
-
+        if($(segment).attr('id').split('-').length > 2) return false;
         UI.propagateTranslation(segment, status, false);
 /*
         return false;
@@ -2989,7 +3130,13 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+/*
+        console.log('rangySelectionBoundary: ', $('.rangySelectionBoundary'));
+        console.log('rangySelectionBoundary.next(): ', $('.rangySelectionBoundary').next());
+        console.log('rangySelectionBoundary.next() non è una section: ', !$('.rangySelectionBoundary').next().is('.section'));
+        if(!$('.rangySelectionBoundary').next().is('.section')) $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+*/
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
@@ -3026,6 +3173,8 @@ UI = {
 //        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
     },
     shortenId: function(id) {
+//        console.log('id: ', id);
+//        console.log('shortenId: ', id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>'));
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
     },
     isCJK: function () {
