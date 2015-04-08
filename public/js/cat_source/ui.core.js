@@ -181,7 +181,7 @@ UI = {
 
             this.body.removeClass('editing');
             $(segment).removeClass("editor waiting_for_check_result opened");
-
+            $('.sid .actions .split.cancel').click();
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);

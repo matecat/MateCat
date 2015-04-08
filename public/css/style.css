@@ -564,7 +564,9 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 .editor-click{display:block;border:1px solid transparent;padding:4px 10px;min-height:50px;cursor:pointer;}
 
-
+.buttons a.translated {
+  padding: 8px 18px;
+}
 
 /*done & draft*/
 .translated, .approved
