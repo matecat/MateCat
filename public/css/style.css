@@ -623,11 +623,11 @@ article .translated:active, article .draft:active, article .btn:active, article 
 {
     background: #12b4df;
 }
-.draft:hover{background:#eee}
+.draft:hover{background:#eee;}
 
 
 
-.approved:hover{background:#76bb70}
+
 
 .translated:active, .draft:active, .btn:active, .copysource:active{
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
@@ -707,7 +707,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-  padding: 4px 10px!important;
+  padding: 5px 10px!important;
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
@@ -716,9 +716,21 @@ box-shadow: 0 1px 2px #ccc;
 
 .topmenu-drop input.translated {
   background: #09beec;
-  width: 235px!important;
   color: #fff!important;
  }
+
+.topmenu-drop input.translated, .topmenu-drop input.approved {
+	  width: auto!important;
+	  border-radius: 2px 0 0 2px;
+  text-transform: uppercase;
+}
+
+
+.topmenu-drop input.approved:hover{background:#76bb70;}
+.topmenu-drop input.translated:hover {background: #12b4df;}
+
+
+.topmenu-drop .text {margin:0;}
 
 .wrapper-dropdown-5 input {
 	width: auto!important;
@@ -3810,9 +3822,12 @@ body.isAnonymous .add-mt-engine {
     margin-left: 20px;
      margin-top: 2px;
     color:#fff;
+    
 }
 
-
+.splitBar .btn-ok:hover {
+  background: #12b4df;
+}
 
 .splitpoint
 {
