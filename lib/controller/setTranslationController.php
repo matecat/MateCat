@@ -68,6 +68,9 @@ class setTranslationController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
+//        $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "prova" );
+//        throw new Exception( "prova", -1 );
+
         //strtoupper transforms null to "" so check for the first element to be an empty string
         if( !empty( $this->split_statuses[0] ) && !empty( $this->split_num ) ){
 

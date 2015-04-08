@@ -174,6 +174,8 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
+//            segment.find('.actions .split.cancel').click();
+//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 
@@ -9506,7 +9508,7 @@ $.extend(UI, {
             UI.deleteTM($('table.mgmt-tm tr[data-key="' + $(this).attr('data-key') + '"] .deleteTM'));
             $('.mgmt-container .tm-warning-message').empty().hide();
 */
-        });
+        })
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
@@ -10649,6 +10651,8 @@ $.extend(UI, {
 
     },
 
+
+
     DropDown: function(el){
         this.initEvents = function () {
             var obj = this;
@@ -11061,10 +11065,11 @@ if(config.splitSegmentEnabled) {
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
-            onlyOne = (splittedSource.length == 1)? true : false;
+            onlyOne = ( splittedSource.length == 1 ) ? true : false;
 //            console.log('segmentxx: ', UI.editarea.html());
 
             //get all chunk translations, if this is a merge we want all concatenated targets
+            //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
             translation = '';
             if( onlyOne ) {
                 $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
