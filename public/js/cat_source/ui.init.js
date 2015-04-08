@@ -4,7 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5";
+		this.version = "0.5.1";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -72,6 +72,7 @@ $.extend(UI, {
         this.executingSetContribution = false;
         this.executingSetContributionMT = false;
 
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.

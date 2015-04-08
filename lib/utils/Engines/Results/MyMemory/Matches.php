@@ -1,5 +1,6 @@
 <?
-class TMS_GET_MATCHES {
+
+class Engines_Results_MyMemory_Matches {
 
     public $id;
     public $raw_segment;
@@ -55,8 +56,9 @@ class TMS_GET_MATCHES {
         }
 
         if ( count( $args ) == 5 and !is_array( $args[ 0 ] ) ) {
-            $match[ 'segment' ]          = $args[ 0 ];
-            $match[ 'translation' ]      = $args[ 1 ];
+            $match[ 'segment' ]          = CatUtils::rawxliff2view( $args[ 0 ] );
+            $match[ 'raw_segment' ]      = $args[ 0 ];
+            $match[ 'translation' ]      = CatUtils::rawxliff2view( $args[ 1 ] );
             $match[ 'raw_translation' ]  = $args[ 1 ];
             $match[ 'match' ]            = $args[ 2 ];
             $match[ 'created-by' ]       = $args[ 3 ];
@@ -79,6 +81,7 @@ class TMS_GET_MATCHES {
         $this->last_updated_by  = array_key_exists( 'last-updated-by', $match ) ? $match[ 'last-updated-by' ] : '';
         $this->last_update_date = array_key_exists( 'last-update-date', $match ) ? $match[ 'last-update-date' ] : '0000-00-00';
         $this->match            = array_key_exists( 'match', $match ) ? $match[ 'match' ] : 0;
+        $this->memory_key       = array_key_exists( 'key', $match ) ? $match[ 'key' ] : '';
 
         $this->prop             = $match[ 'prop' ];
 
@@ -89,4 +92,3 @@ class TMS_GET_MATCHES {
     }
 
 }
-?>

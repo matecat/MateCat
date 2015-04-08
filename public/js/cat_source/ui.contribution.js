@@ -16,6 +16,7 @@ $.extend(UI, {
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 // console.log('translation 1: ', translation);
+//        console.log('copySuggestionInEditarea - editarea: ', editarea);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -114,15 +115,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
+//                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+//                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
+//                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});
@@ -132,7 +136,8 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
+		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+//		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
@@ -140,8 +145,9 @@ $.extend(UI, {
 		this.processContributions(d, segment);
 	},
 	processContributions: function(d, segment) {
+        if(!d) return true;
 		this.renderContributions(d, segment);
-		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
+		if (this.getSegmentId(segment) == UI.currentSegmentId)
 			this.currentSegmentQA();
 		this.lockTags(this.editarea);
 		this.spellCheck();
@@ -153,15 +159,16 @@ $.extend(UI, {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
-		}		
-	},
+		}
+
+    },
 	renderContributions: function(d, segment) {
+        if(!d) return true;
 		var isActiveSegment = $(segment).hasClass('editor');
 		var editarea = $('.editarea', segment);
-//        console.log(d.data.matches.length);
 
 
-		if (d.data.matches.length) {
+		if(d.data.matches.length) {
 			var editareaLength = editarea.text().trim().length;
 			if (isActiveSegment) {
 				editarea.removeClass("indent");
@@ -272,7 +279,12 @@ $.extend(UI, {
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+			if((config.mt_enabled)&&(!config.id_translator)) {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+            } else {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
+
+            }
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
@@ -373,7 +385,7 @@ $.extend(UI, {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
+				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
 			}
 		});
@@ -450,7 +462,7 @@ $.extend(UI, {
                 console.log('execSetContributionMT success');
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
+				if (d.errors.length)
 					UI.processErrors(d.error, 'setContributionMT');
 			}
 		});
@@ -493,8 +505,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 

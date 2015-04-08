@@ -7,9 +7,6 @@
  * Time: 15.55
  *
  */
-include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class glossaryController extends ajaxController {
@@ -21,6 +18,9 @@ class glossaryController extends ajaxController {
     private $translation;
     private $comment;
     private $automatic;
+    /**
+     * @var Engines_MyMemory
+     */
     private $_TMS;
     private $job_info;
 
@@ -59,22 +59,22 @@ class glossaryController extends ajaxController {
         /**
          * For future reminder
          *
-         * MyMemory should not be the only Glossary provider
+         * MyMemory (id=1) should not be the only Glossary provider
          *
          */
-        $this->_TMS = new TMS( 1 /* MyMemory */ );
+        $this->_TMS = Engine::getInstance( 1 );
 
         $this->checkLogin();
 
         try {
 
-            $config = TMS::getConfigStruct();
+            $config = $this->_TMS->getConfigStruct();
 
             $config[ 'segment' ]     = $this->segment;
             $config[ 'translation' ] = $this->translation;
             $config[ 'tnote' ]       = $this->comment;
-            $config[ 'source_lang' ] = $this->job_info[ 'source' ];
-            $config[ 'target_lang' ] = $this->job_info[ 'target' ];
+            $config[ 'source' ]      = $this->job_info[ 'source' ];
+            $config[ 'target' ]      = $this->job_info[ 'target' ];
             $config[ 'email' ]       = "demo@matecat.com";
             $config[ 'id_user' ]     = $this->job_info[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;

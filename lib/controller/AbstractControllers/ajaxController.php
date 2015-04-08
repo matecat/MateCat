@@ -18,11 +18,14 @@ abstract class ajaxController extends controller {
      *
      * @var array
      */
-    protected $result = array("error" => array(), "data" => array());
+    protected $result = array("errors" => array(), "data" => array());
 
     protected $uid;
     protected $userIsLogged = false;
     protected $userMail;
+
+    protected $id_segment;
+    protected $split_num = null;
 
     /**
      * Class constructor, initialize the header content type.
@@ -98,6 +101,10 @@ abstract class ajaxController extends controller {
         $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
         $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
         return $is_revision_url;
+    }
+
+    public function parseIDSegment(){
+        @list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
     }
 
 }

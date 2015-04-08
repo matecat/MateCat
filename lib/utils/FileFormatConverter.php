@@ -75,20 +75,39 @@ class FileFormatConverter {
             self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
         }
 
-//        self::$converters = array('10.11.0.106' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.11.0.106' => '10.11.0.107');//for debugging purposes
+//        self::$converters = array('10.11.0.98' => 1);//for debugging purposes
+//        self::$Storage_Lookup_IP_Map = array('10.11.0.98' => '10.11.0.99');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
     }
 
     //add UTF-8 BOM
-    private function addBOM( $string ) {
+    public function addBOM( $string ) {
         return BOM . $string;
     }
 
+    //remove UTF-8 BOM
+    public function stripBOM( $string, $utf = 8 ) {
+        //depending on encoding, different slices are to be cut
+        switch ( $utf ) {
+            case 16:
+                $string = substr( $string, 2 );
+                break;
+            case 32:
+                $string = substr( $string, 4 );
+                break;
+            case 8:
+            default:
+                $string = substr( $string, 3 );
+                break;
+        }
+
+        return $string;
+    }
+
     //check if it has BOM
-    private function hasBOM( $string ) {
+    public function hasBOM( $string ) {
         return ( substr( $string, 0, 3 ) == BOM );
     }
 
@@ -199,7 +218,7 @@ class FileFormatConverter {
         return is_array( $array ) AND (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
     }
 
-    private function __parseOutput( $res , $conversionObject = array() ) {
+    private function __parseOutput( $res, $conversionObject = array() ) {
 
         if ( empty( $conversionObject ) ) {
             $conversionObject = $this->conversionObject;
@@ -304,7 +323,7 @@ class FileFormatConverter {
             }
 
         } else {
-            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "port closed" ) );
+            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "Internal connection issue. Try converting it again." ) );
         }
 
         return $output;
@@ -317,10 +336,20 @@ class FileFormatConverter {
         $fileContent = file_get_contents( $file_path );
         $extension   = pathinfo( $file_path, PATHINFO_EXTENSION );
         $filename    = pathinfo( $file_path, PATHINFO_FILENAME );
-        if ( strtoupper( $extension ) == 'TXT' ) {
+        if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
             $encoding = mb_detect_encoding( $fileContent );
-            if ( $encoding != 'UTF-8' ) {
-                $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+
+            //in case of .strings, they may be in UTF-16
+            if ( strtoupper( $extension ) == 'STRINGS' ) {
+                //use this function to convert stuff
+                $convertedFile = CatUtils::convertEncoding( 'UTF-8', $fileContent );
+
+                //retrieve new content
+                $fileContent = $convertedFile[ 1 ];
+            } else {
+                if ( $encoding != 'UTF-8' ) {
+                    $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+                }
             }
 
             if ( !$this->hasBOM( $fileContent ) ) {
@@ -356,11 +385,11 @@ class FileFormatConverter {
 
         log::doLog( $this->ip . " start conversion to xliff of $file_path" );
 
-        $start_time = microtime(true);
+        $start_time  = microtime( true );
         $curl_result = $this->curl_post( $url, $data, $this->opt );
-        $end_time    = microtime(true);
+        $end_time    = microtime( true );
 
-        $time_diff   = $end_time - $start_time;
+        $time_diff = $end_time - $start_time;
         log::doLog( $this->ip . " took $time_diff secs for $file_path" );
 
         $this->conversionObject->ip_machine      = $this->ip;
@@ -379,7 +408,6 @@ class FileFormatConverter {
 
         //remove temporary file
         unlink( $tmp_name );
-
 
         return $res;
     }
@@ -408,7 +436,7 @@ class FileFormatConverter {
         $xliffContent = $xliffVector[ 'content' ];
         $xliffName    = $xliffVector[ 'out_xliff_name' ];
 
-//        Log::dolog( $xliffName );
+        //        Log::dolog( $xliffName );
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
@@ -438,12 +466,12 @@ class FileFormatConverter {
         $data[ 'xliffContent' ] = "@$tmp_name";
 
         log::doLog( $this->ip . " start conversion back to original" );
-        $start_time = microtime(true);
+        $start_time = microtime( true );
 
         //TODO: this helper doesn't help!
         //How TODO: create a resource handler e return it, so it can be added to a MultiCurl Handler instance
         $curl_result = $this->curl_post( $url, $data, $this->opt );
-        $end_time    = microtime(true);
+        $end_time    = microtime( true );
         $time_diff   = $end_time - $start_time;
         log::doLog( $this->ip . " took $time_diff secs" );
 
@@ -462,6 +490,8 @@ class FileFormatConverter {
         $res = $this->__parseOutput( $decode );
         unset( $decode );
 
+	//remove temporary file
+	unlink($tmp_name);
 
         return $res;
     }
@@ -471,6 +501,8 @@ class FileFormatConverter {
         $multiCurlObj = new MultiCurlHandler();
 
         $conversionObjects = array();
+
+	$temporary_files=array();
 
         //iterate files.
         //For each file prepare a curl resource
@@ -497,6 +529,7 @@ class FileFormatConverter {
 
             //get random name for temporary location
             $tmp_name = tempnam( "/tmp", "MAT_BW" );
+	    $temporary_files[]=$tmp_name;
 
             //write encoded file to temporary location
             $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
@@ -539,10 +572,15 @@ class FileFormatConverter {
 
         //decode response and return the result
         foreach ( $multiResponses as $hash => $json ) {
-            $multiResponses[ $hash ] = json_decode( $json, true );
-            $conversionObjects[ $hash ]->conversion_time = $multiInfo[ $hash ]['curlinfo_total_time'];
-            $multiResponses[ $hash ] = $this->__parseOutput( $multiResponses[ $hash ], $conversionObjects[ $hash ] );
+            $multiResponses[ $hash ]                     = json_decode( $json, true );
+            $conversionObjects[ $hash ]->conversion_time = $multiInfo[ $hash ][ 'curlinfo_total_time' ];
+            $multiResponses[ $hash ]                     = $this->__parseOutput( $multiResponses[ $hash ], $conversionObjects[ $hash ] );
         }
+
+	//remove temporary files
+	foreach($temporary_files as $temp_name){
+		unlink($tmp_name);
+	}
 
         return $multiResponses;
     }
@@ -565,15 +603,15 @@ class FileFormatConverter {
         $remote_user = ( isset( $_SERVER[ 'REMOTE_USER' ] ) ) ? $_SERVER[ 'REMOTE_USER' ] : "N/A";
         $link_file   = "http://" . $_SERVER[ 'SERVER_NAME' ] . "/" . INIT::$CONVERSIONERRORS_REPOSITORY_WEB . "/" . $_COOKIE[ 'upload_session' ] . "/" . rawurlencode( $conversionObject->file_name );
         $message     = "MATECAT : conversion error notifier\n\nDetails:
-    - machine_ip : " . $conversionObject->ip_machine . "
-    - client ip :  " . $conversionObject->ip_client . "
-    - source :     " . $conversionObject->src_lang . "
-    - target :     " . $conversionObject->trg_lang . "
-    - client user (if any used) : $remote_user
-    - direction : " . $conversionObject->direction . "
-    - error : " . $conversionObject->error_message . "
-    Download file clicking to $link_file
-	";
+			- machine_ip : " . $conversionObject->ip_machine . "
+			- client ip :  " . $conversionObject->ip_client . "
+			- source :     " . $conversionObject->src_lang . "
+			- target :     " . $conversionObject->trg_lang . "
+			- client user (if any used) : $remote_user
+										   - direction : " . $conversionObject->direction . "
+																- error : " . $conversionObject->error_message . "
+																				  Download file clicking to $link_file
+																							  ";
 
         Utils::sendErrMailReport( $message );
 

@@ -1,8 +1,6 @@
 <?php
 set_time_limit( 0 );
 include "main.php";
-include INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
 include INIT::$UTILS_ROOT . "/PostProcess.php";
 include INIT::$UTILS_ROOT . "/MemcacheHandler.php";
@@ -84,8 +82,6 @@ while ( 1 ) {
         continue;
     }
 
-//    $pid = $segment['pid'];
-
     //get the number of segments in job
     $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
     if ( $_existingLock !== false ) {
@@ -98,7 +94,8 @@ while ( 1 ) {
         $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
         $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
         echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
-    } else {
+    }
+    else {
         $_existingPid = $memcacheHandler->get( 'project:' . $pid );
         $_analyzed    = $memcacheHandler->get( 'num_analyzed:' . $pid );
         echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
@@ -111,12 +108,13 @@ while ( 1 ) {
     //lock segment
     echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
 
-    $source          = $segment[ 'source' ];
-    $target          = $segment[ 'target' ];
-    $id_translator   = $segment[ 'id_translator' ];
-    $raw_wc          = $segment[ 'raw_word_count' ];
-    $fast_match_type = $segment[ 'match_type' ];
-    $payable_rates   = $segment[ 'payable_rates' ];
+    $source           = $segment[ 'source' ];
+    $target           = $segment[ 'target' ];
+    $id_translator    = $segment[ 'id_translator' ];
+    $raw_wc           = $segment[ 'raw_word_count' ];
+    $fast_match_type  = $segment[ 'match_type' ];
+    $payable_rates    = $segment[ 'payable_rates' ];
+    $pretranslate_100 = $segment[ 'pretranslate_100' ];
 
     $text = $segment[ 'segment' ];
 
@@ -131,23 +129,22 @@ while ( 1 ) {
     //reset vectors
     $matches   = array();
     $tms_match = array();
-    $mt_res    = array();
+    $mt_result = array();
 
-    $config                  = TMS::getConfigStruct();
-    $config[ 'segment' ]     = $text;
-    $config[ 'source_lang' ] = $source;
-    $config[ 'target_lang' ] = $target;
-    $config[ 'email' ]       = "tmanalysis@matecat.com";
+    $_config              = array();
+    $_config[ 'segment' ] = $text;
+    $_config[ 'source' ]  = $source;
+    $_config[ 'target' ]  = $target;
+    $_config[ 'email' ]   = "tmanalysis@matecat.com";
 
-//    $config[ 'id_user' ]       = $id_translator;
     $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $segment[ 'tm_keys' ], 'r', 'tm' );
     if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
         foreach ( $tm_keys as $tm_key ) {
-            $config[ 'id_user' ][ ] = $tm_key->key;
+            $_config[ 'id_user' ][ ] = $tm_key->key;
         }
     }
 
-    $config[ 'num_result' ] = 3;
+    $_config[ 'num_result' ] = 3;
 
     $id_mt_engine = $segment[ 'id_mt_engine' ];
     $id_tms       = $segment[ 'id_tms' ];
@@ -158,30 +155,29 @@ while ( 1 ) {
      * Call Memory Server for matches if it's enabled
      */
     $tms_enabled = false;
-    if ( $id_tms == 1 ) {
+    if ( $_TMS == 1 ) {
         /**
          * MyMemory Enabled
          */
-        $config[ 'get_mt' ]  = true;
-        $config[ 'mt_only' ] = false;
+        $_config[ 'get_mt' ]  = true;
+        $_config[ 'mt_only' ] = false;
         if ( $id_mt_engine != 1 ) {
             /**
              * Don't get MT contribution from MyMemory ( Custom MT )
              */
-            $config[ 'get_mt' ] = false;
+            $_config[ 'get_mt' ] = false;
         }
-
-        $_TMS = $id_tms;
 
         $tms_enabled = true;
 
-    } elseif ( $id_tms == 0 && $id_mt_engine == 1 ) {
+    }
+    elseif ( $_TMS == 0 && $id_mt_engine == 1 ) {
         /**
          * MyMemory disabled but MT Enabled and it is NOT a Custom one
          * So tell to MyMemory to get MT only
          */
-        $config[ 'get_mt' ]  = true;
-        $config[ 'mt_only' ] = true;
+        $_config[ 'get_mt' ]  = true;
+        $_config[ 'mt_only' ] = true;
 
         $_TMS = 1; /* MyMemory */
 
@@ -198,41 +194,42 @@ while ( 1 ) {
      *
      */
     if ( $tms_enabled ) {
-        $tms       = new TMS( $_TMS );
+        /**
+         * @var $tms Engines_MyMemory
+         */
+        $tms = Engine::getInstance( $_TMS );
+
+        $config = $tms->getConfigStruct();
+        $config = array_merge( $config, $_config );
+
         $tms_match = $tms->get( $config );
+
         $tms_match = $tms_match->get_matches_as_array();
+
     }
 
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
      */
-    $mt_match = "";
     if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
-        $mt        = new MT( $id_mt_engine );
-        $mt_result = $mt->get( $text, $source, $target );
+        $mt     = Engine::getInstance( $id_mt_engine );
+        $config = $mt->getConfigStruct();
+        $config = array_merge( $config, $_config );
 
-        if ( $mt_result->error->code < 0 ) {
-            $mt_match = '';
-        } else {
-            $mt_match = $mt_result->translatedText;
-            $penalty  = $mt->getPenalty();
-            $mt_score = 100 - $penalty;
-            $mt_score .= "%";
+        $mt_result = $mt->get( $config );
 
-            $mt_match_res = new TMS_GET_MATCHES( $text, $mt_match, $mt_score, "MT-" . $mt->getName(), date( "Y-m-d" ) );
-
-            $mt_res                          = $mt_match_res->get_as_array();
-            $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
-
+        if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+            $mt_result = false;
         }
+
     }
 
     if ( !empty( $tms_match ) ) {
         $matches = $tms_match;
     }
 
-    if ( !empty( $mt_match ) ) {
-        $matches[ ] = $mt_res;
+    if ( !empty( $mt_result ) ) {
+        $matches[ ] = $mt_result;
         usort( $matches, "compareScore" );
     }
 
@@ -284,7 +281,8 @@ while ( 1 ) {
                 $matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
                 //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
 
-            } else {
+            }
+            else {
                 Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment[ 'sid' ] );
             }
 
@@ -302,7 +300,7 @@ while ( 1 ) {
     $suggestion_json   = json_encode( $matches );
     $suggestion_source = $matches[ 0 ][ 'created_by' ];
 
-    $equivalentWordMapping = json_decode($payable_rates, true);
+    $equivalentWordMapping = json_decode( $payable_rates, true );
 
     $new_match_type = getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping );
     //echo "sid is $sid ";
@@ -322,11 +320,13 @@ while ( 1 ) {
         if ( !$check->thereAreErrors() ) {
             $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
             $err_json   = '';
-        } else {
+        }
+        else {
             $err_json = $check->getErrorsJSON();
         }
 
-    } else {
+    }
+    else {
 
         //try to perform only the tagCheck
         $check = new PostProcess( $text, $suggestion );
@@ -336,7 +336,8 @@ while ( 1 ) {
 
         if ( $check->thereAreErrors() ) {
             $err_json = $check->getErrorsJSON();
-        } else {
+        }
+        else {
             $err_json = '';
         }
 
@@ -346,7 +347,7 @@ while ( 1 ) {
 
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
-    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
+    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
     //set memcache
 
     incrementCount( $pid, $eq_words, $standard_words );
@@ -450,9 +451,10 @@ function getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMappi
         }
     }
     //this is because 50%-74% is never returned because it's rate equals NO_MATCH
-    if ($tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
+    if ( $tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
         return $tm_match_cat;
     }
+
     return $fast_match_type;
 }
 

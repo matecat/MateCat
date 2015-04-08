@@ -2,8 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class getSearchController extends ajaxController {
@@ -86,7 +84,7 @@ class getSearchController extends ajaxController {
     public function doAction() {
         $this->result['token'] = $this->token;
         if (empty($this->job)) {
-            $this->result['error'][] = array("code" => -2, "message" => "missing id job");
+            $this->result['errors'][] = array("code" => -2, "message" => "missing id job");
             return;
         }
         //get Job Info
@@ -95,7 +93,7 @@ class getSearchController extends ajaxController {
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
         if (!$pCheck->grantJobAccessByJobData($this->job_data, $this->password)) {
-            $this->result['error'][] = array("code" => -10, "message" => "wrong password");
+            $this->result['errors'][] = array("code" => -10, "message" => "wrong password");
             return;
         }
 
@@ -107,7 +105,7 @@ class getSearchController extends ajaxController {
                 $this->doReplaceAll();
                 break;
             default :
-                $this->result['error'][] = array("code" => -11, "message" => "unknown  function. Use find or replace");
+                $this->result['errors'][] = array("code" => -11, "message" => "unknown  function. Use find or replace");
                 return;
         }
     }
@@ -131,7 +129,7 @@ class getSearchController extends ajaxController {
         $res = doSearchQuery( $this->queryParams );
 
         if (is_numeric($res) and $res < 0) {
-            $this->result['error'][] = array("code" => -1000, "message" => "internal error: see the log");
+            $this->result['errors'][] = array("code" => -1000, "message" => "internal error: see the log");
             return;
         }
         $this->result['total']    = $res['count'];

@@ -13,7 +13,7 @@ error_reporting(E_ALL | E_STRICT);
 
 ini_set('max_input_time',3600);
 
-require $_SERVER["DOCUMENT_ROOT"] . '/inc/config.inc.php';
+require realpath(dirname(__FILE__) . '/../../../') . '/inc/config.inc.php';
 @INIT::obtain();
 require INIT::$UTILS_ROOT . '/Utils.php';
 require INIT::$UTILS_ROOT . '/Log.php';

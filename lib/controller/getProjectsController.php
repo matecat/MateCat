@@ -79,13 +79,17 @@ class getProjectsController extends ajaxController {
                 'filter'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
                                           'options' => array( FILTER_NULL_ON_FAILURE ) ),
                 'pn'            => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ),
                 'source'        => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ),
                 'target'        => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ),
                 'status'        => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ),
                 'onlycompleted' => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
                                           'options' => array( FILTER_NULL_ON_FAILURE )
                 )

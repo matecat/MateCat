@@ -60,7 +60,7 @@ class analyzeController extends viewController {
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 )
         );
 
@@ -331,6 +331,7 @@ class analyzeController extends viewController {
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
         $this->template->outsource_service_login    = $this->_outsource_login_API;
+        $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
         $langDomains = langs_LanguageDomains::getInstance();
         $this->subject = $langDomains::getDisplayDomain($this->subject);

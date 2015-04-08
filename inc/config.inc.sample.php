@@ -60,6 +60,7 @@ class INIT {
 
     public static $OAUTH_CONFIG;
 	public static $CONFIG_VERSION_ERR_MESSAGE;
+	public static $SUPPORT_MAIL;
 
     /**
      * Default Matecat user agent string
@@ -123,7 +124,7 @@ class INIT {
         if( !empty($custom_paths) ){
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path ( get_include_path() . PATH_SEPARATOR . implode( PATH_SEPARATOR, $def_path ) );
+        set_include_path ( implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path() );
     }
 
     public static function loadClass( $className ) {
@@ -249,8 +250,9 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.5';
+        self::$BUILD_NUMBER = '0.5.2';
         self::$VOLUME_ANALYSIS_ENABLED = true;
+        self::$SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
         self::$AUTHCOOKIENAME='matecat_login_v2';
         self::$AUTHCOOKIEDURATION=86400*60;
@@ -336,6 +338,7 @@ class INIT {
                         'dita'        => array( '', '', 'extdit' ),
                         'sgml'        => array( '', '', 'extsgm' ),
                         'Android xml' => array( '', '', 'extxml' ),
+                        'strings' 	  => array( '', '', 'extstr' ),
                         'sgm'         => array( '', '', 'extsgm' )
                 )
         );
@@ -380,7 +383,7 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.inc.php file is not up-to-date.";
 
 	}
 

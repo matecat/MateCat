@@ -1,7 +1,5 @@
 <?php
 
-include_once 'Database.class.php';
-
 function doSearchQuery( ArrayObject $queryParams ) {
     $db = Database::obtain();
 
@@ -716,7 +714,7 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
         JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) ."'
 
             WHERE segment_translations.id_job = " . (int)$jid . "
-            AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+            AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '".Constants_TranslationStatus::STATUS_APPROVED."')
             AND show_in_cattool = 1
 ";
 
@@ -733,6 +731,70 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
 
     return $results;
 
+}
+
+function getMTForTMXExport($jid, $jPassword){
+    //TODO: delete this function and put it in a DAO
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
+        IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
+            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+        FROM segment_translations st
+        JOIN segments ON id = id_segment
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE st.id_job = " . (int)$jid . "
+            AND show_in_cattool = 1
+            AND suggestion_source in ('MT','MT-')
+";
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
+}
+
+function getTMForTMXExport($jid, $jPassword){
+    //TODO: delete this function and put it in a DAO
+    $db = Database::obtain();
+    $jPassword = $db->escape( $jPassword );
+
+    $sql = "
+        SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
+        IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
+            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+        FROM segment_translations st
+        JOIN segments ON id = id_segment
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+
+            WHERE st.id_job = " . (int)$jid . "
+            AND show_in_cattool = 1
+            AND suggestion_source is not null
+            AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
+";
+
+
+    $results = $db->fetch_array( $sql );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return $results;
 }
 
 function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
@@ -844,6 +906,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF (st.status='NEW',NULL,st.translation) AS translation,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
+	    sts.source_chunk_lengths,
+	    sts.target_chunk_lengths,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
@@ -856,6 +920,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 			INNER JOIN files f ON f.id=fj.id_file
 			INNER JOIN segments s ON s.id_file=f.id
 			LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+			LEFT JOIN segment_translations_splits sts  ON sts.id_segment = s.id AND sts.id_job = j.id
 			LEFT JOIN file_references fr ON s.id_file_part = fr.id
 			WHERE j.id = $jid
 			AND j.password = '$password'
@@ -864,6 +929,12 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
+
+    $err = $db->get_error();
+
+    if ( $err[ 'error_code' ] != 0 ) {
+        throw new Exception( __METHOD__ . " -> " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ] );
+    }
 
     return $results;
 }
@@ -1209,7 +1280,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 }
 */
 
-function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
+function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = null) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'suggestions_array' ]   = $suggestions_json_array;
@@ -1220,6 +1291,8 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'eq_word_count' ]       = $eq_words;
     $data[ 'standard_word_count' ] = $standard_words;
     $data[ 'mt_qe' ]               = $mt_qe;
+
+    ($segment_status !== null ) ? $data[ 'status' ] = $segment_status : null;
 
     ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
     ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
@@ -1247,7 +1320,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     return $db->affected_rows;
 }
 
-function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
+function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = 'NEW' ) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'id_segment' ]          = $id_segment;
@@ -1260,6 +1333,7 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'standard_word_count' ] = $standard_words;
     $data[ 'translation' ]         = $translation;
     $data[ 'tm_analysis_status' ]  = $tm_status_analysis;
+    $data[ 'status' ]  = $segment_status;
 
     $data[ 'warning' ]                = $warning;
     $data[ 'serialized_errors_list' ] = $err_json_list;
@@ -1657,6 +1731,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
+    $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
     $query                       = "SELECT LAST_INSERT_ID() FROM projects";
 
@@ -1667,7 +1742,7 @@ function insertProject( ArrayObject $projectStructure ) {
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function updateTranslatorJob( $id_job, stdClass $newUser ) {
+function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
 
     $data                       = array();
     $data[ 'username' ]         = $newUser->id;
@@ -2946,7 +3021,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
 function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
 		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
-		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid
+		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid, p.pretranslate_100
 			from segments s
 			inner join segment_translations st on st.id_segment=s.id
 			inner join jobs j on j.id=st.id_job

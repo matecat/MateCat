@@ -12,6 +12,8 @@ define("AMPPLACEHOLDER", "##AMPPLACEHOLDER##");
 
 class CatUtils {
 
+    const splitPlaceHolder     = '##$_SPLIT$##';
+
     const lfPlaceholderClass   = '_0A';
     const crPlaceholderClass   = '_0D';
     const crlfPlaceholderClass = '_0D0A';
@@ -401,7 +403,7 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
         $segment = htmlspecialchars(
                 html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
-                ENT_NOQUOTES, 'UTF-8', false
+                ENT_NOQUOTES | 16, 'UTF-8', false
         );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
@@ -418,13 +420,78 @@ class CatUtils {
 
     }
 
+    /**
+     * Perform a computation on the string to find the length of the strings separated by the placeholder
+     *
+     * @param $segment
+     * @param $separateWithChar
+     *
+     * @return array
+     */
+    public static function parseSegmentSplit( $segment, $separateWithChar = '' ){
+        $split_chunks = explode( self::splitPlaceHolder, $segment );
+        $chunk_positions = array();
+        $last = 0;
+
+        if( count( $split_chunks ) > 1){
+            $segment = "";
+            $chunk_positions[] = 0;
+            foreach( $split_chunks as $pos => $chunk ){
+                if ( strlen( $chunk ) == 0 ) break; //remove eventually present null string
+
+                //WARNING We count length in NO MULTIBYTE mode
+                $separator_len = strlen( $separateWithChar );
+                $separator     = $separateWithChar;
+
+                //if the last char of the last chunk AND the first of the next are spaces, don't add another one
+                if( substr( $chunk, -1 ) == $separateWithChar || @substr( $split_chunks[ $pos + 1 ], 0, 1 ) == $separateWithChar ){
+                    $separator_len = 0;
+                    $separator = '';
+                }
+
+                $chunk_positions[] = strlen( $chunk ) + $last + $separator_len;
+                $last += $chunk_positions[ $pos ];
+
+                $segment .= $chunk . $separator;
+
+            }
+        }
+
+        return array( $segment, $chunk_positions );
+    }
+
+    /**
+     * Create a string with placeholders in the right position based on the struct
+     *
+     * @param       $segment
+     * @param array $chunk_positions
+     *
+     * @return string
+     */
+    public static function reApplySegmentSplit( $segment, Array $chunk_positions ){
+
+        $string_chunks = array();
+        $last_sum = 0;
+        foreach ( $chunk_positions as $pos => $value ){
+            if( isset( $chunk_positions[ $pos + 1 ] ) ){
+                $string_chunks[] = substr( $segment, $chunk_positions[ $pos ] + $last_sum, $chunk_positions[ $pos + 1 ] );
+                $last_sum += $chunk_positions[ $pos ];
+            }
+
+        }
+
+        if( empty( $string_chunks ) ) return $segment;
+        else return implode( self::splitPlaceHolder, $string_chunks );
+
+    }
+
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders
-        $segment = str_replace( '##$_0D0A$##',"\r\n", $segment );
-        $segment = str_replace( '##$_0A$##',"\n", $segment );
-        $segment = str_replace( '##$_0D$##',"\r", $segment );
-        $segment = str_replace( '##$_09$##',"\t", $segment );
+        $segment = str_replace( self::crlfPlaceholder, "\r\n", $segment );
+        $segment = str_replace( self::lfPlaceholder,"\n", $segment );
+        $segment = str_replace( self::crPlaceholder,"\r", $segment );
+        $segment = str_replace( self::tabPlaceholder,"\t", $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -442,7 +509,7 @@ class CatUtils {
         $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
 
         // now convert the real &nbsp;
-        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
+        $segment = str_replace( self::nbspPlaceholder, Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/', '&amp;' , $segment );
@@ -469,11 +536,11 @@ class CatUtils {
 
         $segment = self::restore_xliff_tags_for_wiew($segment);
 
-        $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
-        $segment = str_replace("\n", '##$_0A$##', $segment );
-        $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
-        $segment = str_replace("\t", '##$_09$##', $segment ); //x09 character
-        $segment = preg_replace( '/\x{a0}/u', '##$_A0$##', $segment ); //xA0 character ( NBSP )
+        $segment = str_replace("\r\n", self::crlfPlaceholder, $segment );
+        $segment = str_replace("\n", self::lfPlaceholder, $segment );
+        $segment = str_replace("\r", self::crPlaceholder, $segment ); //x0D character
+        $segment = str_replace("\t", self::tabPlaceholder, $segment ); //x09 character
+        $segment = preg_replace( '/\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
         return $segment;
     }
 
@@ -701,7 +768,7 @@ class CatUtils {
         $updateRes = addTranslation( $_Translation );
 
         if ($updateRes < 0) {
-            $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment {$_Translation['id_segment']} - Error: $updateRes");
+            $result['errors'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment {$_Translation['id_segment']} - Error: $updateRes");
             return $result;
         }
 
@@ -709,7 +776,7 @@ class CatUtils {
 
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0 ) {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0, $pretranslate_100 = 0) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
                 $suggestion_source = 'TM';
@@ -728,16 +795,25 @@ class CatUtils {
          *          suggestions_array = IF( tm_analysis_status = 'DONE' , VALUES(suggestions_array) , suggestions_array );
          *
          */
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe);
+
+        $segment_status = 'NEW';
+        //controllare il valore di suggestion_match
+        if($suggestion_match == "100%" && $pretranslate_100){
+            $segment_status = 'TRANSLATED';
+        }
+
+        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe, $segment_status);
         if ($insertRes < 0 and $insertRes != -1062) {
-            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
+            $result['errors'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe);
+            if($segment_status !== 'TRANSLATED') $segment_status = null;
+
+            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe, $segment_status);
             if ($updateRes < 0) {
-                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
+                $result['errors'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
                 return $result;
             }
         }

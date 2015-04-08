@@ -1,16 +1,9 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
-include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getContributionController extends ajaxController {
 
-    private $id_segment;
     private $id_job;
     private $num_results;
     private $text;
@@ -21,6 +14,8 @@ class getContributionController extends ajaxController {
     private $id_translator;
     private $password;
     private $tm_keys;
+
+    private $jobData;
 
     private $__postInput = array();
 
@@ -87,12 +82,12 @@ class getContributionController extends ajaxController {
         }
 
         //get Job Infos, we need only a row of jobs ( split )
-        $jobData = getJobData( $this->id_job, $this->password );
+        $this->jobData = getJobData( $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
-            $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+        if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->password ) ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
 
             return -1;
         }
@@ -104,8 +99,8 @@ class getContributionController extends ajaxController {
         if ( !$this->concordance_search ) {
             //
             $this->text   = CatUtils::view2rawxliff( $this->text );
-            $this->source = $jobData[ 'source' ];
-            $this->target = $jobData[ 'target' ];
+            $this->source = $this->jobData[ 'source' ];
+            $this->target = $this->jobData[ 'target' ];
         } else {
 
             $regularExpressions = $this->tokenizeSourceSearch();
@@ -123,22 +118,22 @@ class getContributionController extends ajaxController {
                  * we want result in italian from german source
                  *
                  */
-                $this->source = $jobData[ 'target' ];
-                $this->target = $jobData[ 'source' ];
+                $this->source = $this->jobData[ 'target' ];
+                $this->target = $this->jobData[ 'source' ];
             } else {
-                $this->source = $jobData[ 'source' ];
-                $this->target = $jobData[ 'target' ];
+                $this->source = $this->jobData[ 'source' ];
+                $this->target = $this->jobData[ 'target' ];
             }
         }
 
-        $this->id_mt_engine = $jobData[ 'id_mt_engine' ];
-        $this->id_tms       = $jobData[ 'id_tms' ];
+        $this->id_mt_engine = $this->jobData[ 'id_mt_engine' ];
+        $this->id_tms       = $this->jobData[ 'id_tms' ];
 
-        $this->tm_keys      = $jobData[ 'tm_keys' ];
+        $this->tm_keys      = $this->jobData[ 'tm_keys' ];
 
-        $config = TMS::getConfigStruct();
-
+        $config = array();
         if ( $this->id_tms == 1 ) {
+
             /**
              * MyMemory Enabled
              */
@@ -172,15 +167,20 @@ class getContributionController extends ajaxController {
          */
         if ( isset( $_TMS ) ) {
 
+            /**
+             * @var $tms Engines_MyMemory
+             */
+            $tms = Engine::getInstance( $_TMS );
+
+            $config = array_merge( $tms->getConfigStruct(), $config );
             $config[ 'segment' ]       = $this->text;
-            $config[ 'source_lang' ]   = $this->source;
-            $config[ 'target_lang' ]   = $this->target;
+            $config[ 'source' ]        = $this->source;
+            $config[ 'target' ]        = $this->target;
             $config[ 'email' ]         = "demo@matecat.com";
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
 
-            $tms = new TMS( $_TMS );
 
             //get job's TM keys
             $this->checkLogin();
@@ -201,7 +201,7 @@ class getContributionController extends ajaxController {
 
             }
             catch(Exception $e){
-                $this->result[ 'error' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+                $this->result[ 'errors' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
                 return;
             }
 
@@ -209,27 +209,26 @@ class getContributionController extends ajaxController {
             $tms_match = $tms_match->get_matches_as_array();
         }
 
-        $mt_res   = array();
-        $mt_match = "";
         if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 
-            $mt        = new MT( $this->id_mt_engine );
-            $mt_result = $mt->get( $this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
+            /**
+             * @var $mt Engines_Moses
+             */
+            $mt        = Engine::getInstance( $this->id_mt_engine );
 
-            if ( $mt_result->error->code < 0 ) {
-                $mt_match = '';
-            } else {
-                $mt_match = $mt_result->translatedText;
-                $penalty  = $mt->getPenalty();
-                $mt_score = 100 - $penalty;
-                $mt_score .= "%";
+            $config = $mt->getConfigStruct();
+            $config[ 'segment' ] = $this->text;
+            $config[ 'source' ]  = $this->source;
+            $config[ 'target' ]  = $this->target;
+            $config[ 'id_user' ] = "demo@matecat.com";
+            $config[ 'segid' ]   = $this->id_segment;
 
-                $mt_match_res = new TMS_GET_MATCHES( $this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date( "Y-m-d" ) );
+            $mt_result = $mt->get( $config );
 
-                $mt_res                          = $mt_match_res->get_as_array();
-                $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
-
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $mt_result = false;
             }
+
         }
         $matches = array();
 
@@ -237,8 +236,8 @@ class getContributionController extends ajaxController {
             $matches = $tms_match;
         }
 
-        if ( !empty( $mt_match ) ) {
-            $matches[ ] = $mt_res;
+        if ( !empty( $mt_result ) ) {
+            $matches[ ] = $mt_result;
             usort( $matches, array( "getContributionController", "__compareScore" ) );
             //this is necessary since usort sorts is ascending order, thus inverting the ranking
             $matches = array_reverse( $matches );
@@ -315,6 +314,8 @@ class getContributionController extends ajaxController {
             }
             if ( $match[ 'created_by' ] == 'MT!' ) {
                 $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+            } else {
+                $match[ 'created_by' ] = $this->__changeSuggestionSource( $match );
             }
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
@@ -341,6 +342,13 @@ class getContributionController extends ajaxController {
 
             foreach ( $matches as $k => $m ) {
                 $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+
+                if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
+                    $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                } else {
+                    $matches[ $k ][ 'created_by' ] = $this->__changeSuggestionSource( $m );
+                }
+
             }
 
             $suggestions_json_array = json_encode( $matches );
@@ -348,14 +356,9 @@ class getContributionController extends ajaxController {
 
             ( !empty( $match[ 'sentence_confidence' ] ) ? $mt_qe = floatval( $match[ 'sentence_confidence' ] ) : $mt_qe = null );
 
-            if ( $match[ 'created_by' ] == 'MT!' ) {
-                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
-            }
-
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
             $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
-            $data[ 'suggestion_source' ] = $match[ 'created_by' ];
             $data[ 'mt_qe' ]             = $mt_qe;
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
@@ -417,7 +420,8 @@ class getContributionController extends ajaxController {
          * \x{AB} => «
          * \x{BB} => »
          */
-        $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\-\*]+#u', chr( 0x20 ), $this->text );
+        $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\*]+#u', chr( 0x20 ), $this->text );
+        $tmp_text = str_replace( ' - ', chr( 0x20 ), $tmp_text );
         $tmp_text = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $tmp_text );
 
         $tokenizedBySpaces  = explode( " ", $tmp_text );
@@ -464,7 +468,105 @@ class getContributionController extends ajaxController {
 
         return $regularExpressions;
     }
+
+    /**
+     * if the description is empty, get cascading default descriptions
+     *
+     * First get the job key description, if empty, get the job owner email
+     *
+     * @param $key
+     *
+     * @return null|string
+     * @throws Exception
+     */
+    private function __getDefaultDescription( $key ){
+
+        $description = null;
+
+        $ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $this->jobData[ 'tm_keys' ] ) );
+
+        //search the current key
+        $currentKey = null;
+        for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
+            if ( $ownerKeys[ $i ]->key == $key ) {
+                $description = $ownerKeys[ $i ]->name;
+            }
+        }
+
+        //return if something was found, avoid other computations
+        if ( !empty( $description ) ) return $description;
+
+        return $this->jobData[ 'owner' ];
+    }
+
+    /**
+     *
+     * Get the right su
+     *
+     * @param $match
+     *
+     * @return null|string
+     * @throws Exception
+     */
+    private function __changeSuggestionSource( $match ) {
+
+        $sug_source = $match[ 'created_by' ];
+        $key        = $match[ 'memory_key' ];
+
+        //suggestion is coming from a public TM
+        if ( $sug_source == 'Matecat' ) {
+
+            $description = "Public TM";
+
+        } elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
+
+             $description = $sug_source;
+
+        } elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
+
+            //MyMemory returns the key of the match
+
+            //Session Enabled
+            $this->checkLogin();
+            //Session Disabled
+
+            if ( $this->userIsLogged ) {
+
+                //check if the user can see the key.
+                $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+                $memoryKey->uid         = $this->uid;
+                $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+                $memoryKey->tm_key->key = $key;
+
+                $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
+
+                if ( count( $currentUserMemoryKey ) > 0 ) {
+
+                    //the current user owns the key: show its description
+                    $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
+                    $description          = $currentUserMemoryKey->tm_key->name;
+
+                }
+
+            }
+
+        }
+
+        /**
+         * if the description is empty, get cascading default descriptions
+         */
+        if ( empty( $description ) ) {
+            $description = $this->__getDefaultDescription( $key );
+        }
+
+        if ( empty( $description ) ) {
+            $description = "No description available"; //this should never be
+        }
+
+        return $description;
+
+    }
+
 }
 
-
-?>

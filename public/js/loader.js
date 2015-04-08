@@ -22,7 +22,8 @@ Loader = {
 		'functions',
 		'ui.customization',
         'ui.review',
-        'ui.offline'
+        'ui.offline',
+        'ui.split'
 	),
     other_components: new Array (
         'tm'

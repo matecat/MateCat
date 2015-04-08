@@ -3,7 +3,6 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class getNextReviseSegmentController extends ajaxController {
 
-	private $id_segment;
 	private $id_job;
 	private $password;
 
@@ -40,15 +39,15 @@ class getNextReviseSegmentController extends ajaxController {
 	public function doAction() {
 
 		if ( empty( $this->id_segment ) ) {
-			$this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing segment id" );
+			$this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing segment id" );
 		}
 
 		if ( empty( $this->id_job ) ) {
-			$this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing job id" );
+			$this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing job id" );
 		}
 
 		if ( empty( $this->password ) ) {
-			$this->result[ 'error' ][ ] = array( "code" => -1, "message" => "missing job password" );
+			$this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing job password" );
 		}
 
 		//get all segments with translated and approved status different from this segment

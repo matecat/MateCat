@@ -12,14 +12,13 @@ class engineController extends ajaxController {
     private $provider;
     private $id;
     private $name;
-    private $clientID;
-    private $clientSecret;
+    private $engineData;
     private static $allowed_actions = array(
             'add', 'delete'
     );
 
     public function __construct() {
-
+//throw new Exception();
         //Session Enabled
         $this->checkLogin();
         //Session Disabled
@@ -27,26 +26,22 @@ class engineController extends ajaxController {
         $filterArgs = array(
                 'exec'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
                 'id' => array(
                         'filter'  => FILTER_SANITIZE_NUMBER_INT
                 ),
                 'name'      => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
-                'client_id' => array(
+                'data'    => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
-                ),
-                'secret'    => array(
-                        'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES
                 ),
                 'provider'  => array(
                         'filter'  => FILTER_SANITIZE_STRING,
-                        'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW )
+                        'flags'   => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 )
         );
 
@@ -54,12 +49,11 @@ class engineController extends ajaxController {
 
         $this->exec         = $postInput[ 'exec' ];
         $this->id           = $postInput[ 'id' ];
-        $this->clientID     = $postInput[ 'client_id' ];
-        $this->clientSecret = $postInput[ 'secret' ];
         $this->name         = $postInput[ 'name' ];
         $this->provider     = $postInput[ 'provider' ];
+        $this->engineData   = json_decode( $postInput[ 'data' ], true );
 
-        if ( is_null( $this->exec ) || empty( $this->clientID ) ) {
+        if ( is_null( $this->exec ) ) {
             $this->result[ 'errors' ][ ] = array( 'code' => -1, 'message' => "Exec field required" );
 
         }
@@ -92,7 +86,7 @@ class engineController extends ajaxController {
                 $this->add();
                 break;
             case 'delete':
-                $this->delete();
+                $this->disable();
                 break;
             default:
                 break;
@@ -104,21 +98,69 @@ class engineController extends ajaxController {
      * This method adds an engine in a user's keyring
      */
     private function add() {
-        $newEngine = Engine_EngineStruct::getStruct();
 
-        $newEngine->type = "MT";
-        $newEngine->name = $this->provider;
-
+        $newEngine = null;
         $validEngine = true;
 
-        switch ( $this->provider ) {
-            case 'microsofthub':
-                $newEngine->description = $this->name;
-                $newEngine->others = array(
-                        'client_id'     => $this->clientID,
-                        'client_secret' => $this->clientSecret
-                );
+        switch ( strtolower( $this->provider ) ) {
+            case strtolower( Constants_Engines::MICROSOFT_HUB ):
+
+                /**
+                 * Create a record of type MicrosoftHub
+                 */
+                $newEngine = EnginesModel_MicrosoftHubStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData['secret'];
+
                 break;
+            case strtolower( Constants_Engines::MOSES ):
+
+                /**
+                 * Create a record of type Moses
+                 */
+                $newEngine = EnginesModel_MosesStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->base_url                            = $this->engineData[ 'url' ];
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::IP_TRANSLATOR ):
+
+                /**
+                 * Create a record of type IPTranslator
+                 */
+                $newEngine = EnginesModel_IPTranslatorStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::DEEPLINGO ):
+
+                /**
+                 * Create a record of type IPTranslator
+                 */
+                $newEngine = EnginesModel_DeepLingoStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->base_url                            = $this->engineData[ 'url' ];
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
             default:
                 $validEngine = false;
         }
@@ -128,39 +170,79 @@ class engineController extends ajaxController {
             return;
         }
 
-        //TODO: retrieve base_url from an internal source
-        $newEngine->base_url = "http://www.example.com";
-        $newEngine->active = 1;
-        $newEngine->uid = $this->uid;
-
-        $engineDAO = new Engine_EngineDAO( Database::obtain() );
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
         $result = $engineDAO->create( $newEngine );
 
-        if(! $result instanceof Engine_EngineStruct){
+        if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Creation failed. Generic error" );
+            return;
         }
+
+        if( $newEngine instanceof EnginesModel_MicrosoftHubStruct ){
+
+            $engine_test = Engine::getInstance( $result->id );
+            $config = $engine_test->getConfigStruct();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+
+            $mt_result = $engine_test->get( $config );
+
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $mt_result['error'];
+                $engineDAO->delete( $result );
+                return;
+            }
+
+        } elseif ( $newEngine instanceof EnginesModel_IPTranslatorStruct ){
+
+            $engine_test = Engine::getInstance( $result->id );
+
+            /**
+             * @var $engine_test Engines_IPTranslator
+             */
+            $config = $engine_test->getConfigStruct();
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+
+            $mt_result = $engine_test->ping( $config );
+
+            if ( isset( $mt_result['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $mt_result['error'];
+                $engineDAO->delete( $result );
+                return;
+            }
+
+        }
+
+        $this->result['data']['id'] = $result->id;
 
     }
 
     /**
      * This method deletes an engine from a user's keyring
      */
-    private function delete(){
-        if(empty($this->id)){
-            $this->result['errors'][] = array( 'code' => -5, 'message' => "Engine id required" );
+    private function disable(){
+
+        if ( empty( $this->id ) ) {
+            $this->result[ 'errors' ][ ] = array( 'code' => -5, 'message' => "Engine id required" );
             return;
         }
 
-        $engineToBeDeleted = Engine_EngineStruct::getStruct();
+        $engineToBeDeleted = EnginesModel_EngineStruct::getStruct();
         $engineToBeDeleted->id = $this->id;
         $engineToBeDeleted->uid = $this->uid;
 
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $result = $engineDAO->disable( $engineToBeDeleted );
 
-        $engineDAO = new Engine_EngineDAO( Database::obtain() );
-        $result = $engineDAO->delete( $engineToBeDeleted );
-
-        if(! $result instanceof Engine_EngineStruct){
+        if(! $result instanceof EnginesModel_EngineStruct){
             $this->result[ 'errors' ][ ] = array( 'code' => -9, 'message' => "Deletion failed. Generic error" );
+            return;
         }
+
+        $this->result['data']['id'] = $result->id;
+
     }
+
 } 
