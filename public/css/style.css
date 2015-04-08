@@ -37,7 +37,6 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
 .header-menu li{
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
-.header-menu li a{padding:2px 15px;}
 #notifbox
 {
     /*border-right:1px solid #000;*/
@@ -575,7 +574,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     color: #333;
     font-weight: bold;
     text-decoration: none;
-    padding: 8px 18px;
+    padding: 0px 18px;
     border-radius: 2px;
     border-radius: 2px;
     font-size: 18px;
@@ -694,7 +693,7 @@ box-shadow: 0 1px 2px #ccc;
 
 .topmenu-drop {
 	  height: 31px!important;
-	    margin: 8px 0;
+	    margin: 3px 0;
 	    box-shadow: none;
 }
 
@@ -714,11 +713,10 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-  padding: 5px 10px!important;
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
-
+  height: 31px!important;
 }
 
 .topmenu-drop input.translated {
@@ -746,7 +744,7 @@ box-shadow: 0 1px 2px #ccc;
 }
 
 .header-menu .wrapper-dropdown-5 {
-	margin: 8px 0!important;
+	margin: 3px 0!important;
 	box-shadow: none;
 	width: 13px;
 	padding: 6px 10px !Important;
