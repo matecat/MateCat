@@ -72,7 +72,7 @@ class ProjectManager {
                             'userIsLogged'         => false,
                             'uid'                  => null,
                             'skip_lang_validation' => false,
-                            'pretranslate_100'     => false
+                            'pretranslate_100'     => 0
                     ) );
         }
 

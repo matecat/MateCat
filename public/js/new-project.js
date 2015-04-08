@@ -109,24 +109,6 @@ $(document).ready(function() {
 			beforeSend: function (){
 				$('.error-message').hide();
 				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-
-                console.log({
-                    action				: "createProject",
-                    file_name			: files.substr(7),
-                    project_name		: $('#project-name').val(),
-                    source_language		: $('#source-lang').val(),
-                    target_language		: $('#target-lang').val(),
-                    job_subject         : $('#subject').val(),
-                    disable_tms_engine	: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
-                    mt_engine			: $('#mt_engine').val(),
-                    private_tm_key		: $('#private-tm-key').val(),
-                    private_keys_list	: tm_data,
-                    private_tm_user		: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
-                    private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
-                    lang_detect_files  	: UI.skipLangDetectArr,
-                    pretranslate_100    : ($(".translate-box input[type='checkbox']" ).is(':checked')) ? 1 : 0
-
-                });
 			},
 			success: function(d){
 				console.log('d: ', d);
