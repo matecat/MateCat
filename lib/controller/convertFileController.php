@@ -268,7 +268,7 @@ class convertFileController extends ajaxController {
 						$defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
 						break;
                     case 'idml':
-						$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to an previous one.";
+						$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to a previous one.";
 						break;
 					default:
 						$defaultError = "Importing error. Try opening and saving the document with a new name.";
