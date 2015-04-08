@@ -23,6 +23,7 @@ class createProjectController extends ajaxController {
     private $lang_detect_files;
 
     private $disable_tms_engine_flag;
+    private $pretranslate_100;
 
     public function __construct() {
 
@@ -46,18 +47,19 @@ class createProjectController extends ajaxController {
                         'options' => "Utils::filterLangDetectArray"
                 ),
                 'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'pretranslate_100'   => array( 'filter' => FILTER_VALIDATE_INT ),
 
-//            This will be sanitized inside the TmKeyManagement class
-//            SKIP
-//            'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ),
+                //            This will be sanitized inside the TmKeyManagement class
+                //            SKIP
+                //            'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ),
 
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //first we check the presence of a list from tm management panel
-        $array_keys = json_decode( $_POST['private_keys_list'], true );
-        $array_keys = array_merge( $array_keys['ownergroup'], $array_keys['mine'],$array_keys['anonymous'] );
+        $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
+        $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
         //if a string is sent by the client, transform it into a valid array
         if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
@@ -69,17 +71,18 @@ class createProjectController extends ajaxController {
                             'w'    => true
                     )
             );
-        } else {
+        }
+        else {
             $__postInput[ 'private_tm_key' ] = array();
         }
 
         if ( $array_keys ) { // some keys are selected from panel
 
             //remove duplicates
-            foreach ( $array_keys as $pos => $value ){
-                if( isset( $__postInput[ 'private_tm_key' ][0]['key'] )
-                        && $__postInput[ 'private_tm_key' ][0]['key']  == $value['key']
-                ){
+            foreach ( $array_keys as $pos => $value ) {
+                if ( isset( $__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
+                        && $__postInput[ 'private_tm_key' ][ 0 ][ 'key' ] == $value[ 'key' ]
+                ) {
                     //same key was get from keyring, remove
                     $__postInput[ 'private_tm_key' ] = array();
                 }
@@ -89,7 +92,8 @@ class createProjectController extends ajaxController {
             $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );
 
 
-        } else {
+        }
+        else {
             $private_keyList = $__postInput[ 'private_tm_key' ];
         }
 
@@ -110,6 +114,7 @@ class createProjectController extends ajaxController {
         $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
+        $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -129,6 +134,10 @@ class createProjectController extends ajaxController {
 
         if ( empty( $this->job_subject ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Missing job subject." );
+        }
+
+        if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0) {
+            $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
         }
     }
 
@@ -219,21 +228,23 @@ class createProjectController extends ajaxController {
 
         $projectStructure = $projectManager->getProjectStructure();
 
-        $projectStructure[ 'project_name' ]      = $this->project_name;
-        $projectStructure[ 'result' ]            = $this->result;
-        $projectStructure[ 'private_tm_key' ]    = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]   = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]   = $this->private_tm_pass;
-        $projectStructure[ 'uploadToken' ]       = $_COOKIE[ 'upload_session' ];
-        $projectStructure[ 'array_files' ]       = $arFiles; //list of file name
-        $projectStructure[ 'source_language' ]   = $this->source_language;
-        $projectStructure[ 'target_language' ]   = explode( ',', $this->target_language );
-        $projectStructure[ 'job_subject' ]       = $this->job_subject;
-        $projectStructure[ 'mt_engine' ]         = $this->mt_engine;
-        $projectStructure[ 'tms_engine' ]        = $this->tms_engine;
-        $projectStructure[ 'status' ]            = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'lang_detect_files' ] = $this->lang_detect_files;
+        $projectStructure[ 'project_name' ]         = $this->project_name;
+        $projectStructure[ 'result' ]               = $this->result;
+        $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
+        $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
+        $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
+        $projectStructure[ 'uploadToken' ]          = $_COOKIE[ 'upload_session' ];
+        $projectStructure[ 'array_files' ]          = $arFiles; //list of file name
+        $projectStructure[ 'source_language' ]      = $this->source_language;
+        $projectStructure[ 'target_language' ]      = explode( ',', $this->target_language );
+        $projectStructure[ 'job_subject' ]          = $this->job_subject;
+        $projectStructure[ 'mt_engine' ]            = $this->mt_engine;
+        $projectStructure[ 'tms_engine' ]           = $this->tms_engine;
+        $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ] = true;
+        $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
+
 
         //if user is logged in, set the uid and the userIsLogged flag
         $this->checkLogin( false );
@@ -253,23 +264,24 @@ class createProjectController extends ajaxController {
 
             //FIXME THIS IS A WORKAROUND, AN WARNING LEVEL MESSAGE SHOULD BE RAISED INSTEAD OF ERROR
             $delete_session = true;
-            foreach( $this->result[ 'errors' ] as $err ){
+            foreach ( $this->result[ 'errors' ] as $err ) {
                 //these are error for tmx load error because of languages, skip these
-                if( $err['code'] == -17 || $err['code'] == -16 ){
+                if ( $err[ 'code' ] == -17 || $err[ 'code' ] == -16 ) {
                     $delete_session = false;
                 }
             }
 
-            if( $delete_session ){
+            if ( $delete_session ) {
                 setcookie( "upload_session", "", time() - 10000 );
             }
         }
 
     }
 
-    private static function sanitizeTmKeyArr( $elem ){
+    private static function sanitizeTmKeyArr( $elem ) {
 
         $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+
         return $elem->toArray();
 
     }
