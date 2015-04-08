@@ -564,9 +564,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 .editor-click{display:block;border:1px solid transparent;padding:4px 10px;min-height:50px;cursor:pointer;}
 
-.buttons a.translated {
-  padding: 8px 18px;
-}
+
 
 /*done & draft*/
 .translated, .approved
@@ -576,7 +574,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     color: #333;
     font-weight: bold;
     text-decoration: none;
-    padding: 0px 18px;
+    padding: 8px 18px;
     border-radius: 2px;
     border-radius: 2px;
     font-size: 18px;
@@ -729,6 +727,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input.translated, .topmenu-drop input.approved {
 	  width: auto!important;
 	  border-radius: 2px 0 0 2px;
+	    padding: 0 18px!important;
   text-transform: uppercase;
   margin: 0!important
 }
@@ -1036,7 +1035,7 @@ body.review .submenu
 				clear: both;
 				visibility: hidden;}
 
-section.loaded .submenu {display: block;}
+section.loaded .submenu {display: block;  margin-top: 10px;}
 
 .loaded{
     overflow:visible !important
@@ -1649,6 +1648,7 @@ z-index: 10000;
 {
     padding-top: 4px !important;
     font-size: 18px;
+
     /*word-wrap: break-word;*/
     /*word-break: normal;*/
 }
@@ -1672,6 +1672,8 @@ z-index: 10000;
     word-wrap: break-word;
     word-break: normal;
 }
+
+
 
 /*
 .track-changes,
