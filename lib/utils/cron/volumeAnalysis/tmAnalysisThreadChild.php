@@ -94,7 +94,8 @@ while ( 1 ) {
         $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
         $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
         echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
-    } else {
+    }
+    else {
         $_existingPid = $memcacheHandler->get( 'project:' . $pid );
         $_analyzed    = $memcacheHandler->get( 'num_analyzed:' . $pid );
         echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
@@ -107,12 +108,13 @@ while ( 1 ) {
     //lock segment
     echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
 
-    $source          = $segment[ 'source' ];
-    $target          = $segment[ 'target' ];
-    $id_translator   = $segment[ 'id_translator' ];
-    $raw_wc          = $segment[ 'raw_word_count' ];
-    $fast_match_type = $segment[ 'match_type' ];
-    $payable_rates   = $segment[ 'payable_rates' ];
+    $source           = $segment[ 'source' ];
+    $target           = $segment[ 'target' ];
+    $id_translator    = $segment[ 'id_translator' ];
+    $raw_wc           = $segment[ 'raw_word_count' ];
+    $fast_match_type  = $segment[ 'match_type' ];
+    $payable_rates    = $segment[ 'payable_rates' ];
+    $pretranslate_100 = $segment[ 'pretranslate_100' ];
 
     $text = $segment[ 'segment' ];
 
@@ -129,11 +131,11 @@ while ( 1 ) {
     $tms_match = array();
     $mt_result = array();
 
-    $_config                  = array();
-    $_config[ 'segment' ]     = $text;
-    $_config[ 'source' ]      = $source;
-    $_config[ 'target' ]      = $target;
-    $_config[ 'email' ]       = "tmanalysis@matecat.com";
+    $_config              = array();
+    $_config[ 'segment' ] = $text;
+    $_config[ 'source' ]  = $source;
+    $_config[ 'target' ]  = $target;
+    $_config[ 'email' ]   = "tmanalysis@matecat.com";
 
     $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $segment[ 'tm_keys' ], 'r', 'tm' );
     if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
@@ -168,7 +170,8 @@ while ( 1 ) {
 
         $tms_enabled = true;
 
-    } elseif ( $_TMS == 0 && $id_mt_engine == 1 ) {
+    }
+    elseif ( $_TMS == 0 && $id_mt_engine == 1 ) {
         /**
          * MyMemory disabled but MT Enabled and it is NOT a Custom one
          * So tell to MyMemory to get MT only
@@ -215,7 +218,7 @@ while ( 1 ) {
 
         $mt_result = $mt->get( $config );
 
-        if ( isset( $mt_result['error']['code'] ) ) {
+        if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
             $mt_result = false;
         }
 
@@ -278,7 +281,8 @@ while ( 1 ) {
                 $matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
                 //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
 
-            } else {
+            }
+            else {
                 Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment[ 'sid' ] );
             }
 
@@ -316,11 +320,13 @@ while ( 1 ) {
         if ( !$check->thereAreErrors() ) {
             $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
             $err_json   = '';
-        } else {
+        }
+        else {
             $err_json = $check->getErrorsJSON();
         }
 
-    } else {
+    }
+    else {
 
         //try to perform only the tagCheck
         $check = new PostProcess( $text, $suggestion );
@@ -330,7 +336,8 @@ while ( 1 ) {
 
         if ( $check->thereAreErrors() ) {
             $err_json = $check->getErrorsJSON();
-        } else {
+        }
+        else {
             $err_json = '';
         }
 
@@ -340,7 +347,7 @@ while ( 1 ) {
 
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
-    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
+    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
     //set memcache
 
     incrementCount( $pid, $eq_words, $standard_words );
