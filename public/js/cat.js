@@ -87,9 +87,26 @@ UI = {
 	},
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
-//        console.log('segment qui: ', segment);
-        return $(segment).attr('id').replace('segment-', '');
+
+        /*
+         sometimes:
+         typeof $(segment).attr('id') == 'undefined'
+
+         The preeceding if doesn't works because segment is a list ==
+         '[<span class="undoCursorPlaceholder monad" contenteditable="false"></span>]'
+
+         so for now i put a try-catch block here
+
+         TODO FIX
+         */
+        try {
+            return $(segment).attr('id').replace('segment-', '');
+        } catch( e ){
+            return false;
+        }
+
 //        return $(segment).attr('id').split('-')[1];
+
     },
 
     checkHeaviness: function() {
@@ -3231,7 +3248,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.1";
+		this.version = "0.5.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
