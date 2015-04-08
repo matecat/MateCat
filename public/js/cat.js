@@ -2119,7 +2119,7 @@ UI = {
 //        console.log('execSetTranslationTail');
         if(this.setTranslationTail.length) {
             item = this.setTranslationTail[0];
-            this.setTranslationTail.shift();
+            this.setTranslationTail.shift(); // to move on ajax callback
             this.execSetTranslation(item.id_segment, item.status, item.caller);
         }
     },

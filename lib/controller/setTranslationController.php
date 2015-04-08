@@ -86,6 +86,9 @@ class setTranslationController extends ajaxController {
             $this->result[ 'error' ][ ] = array( "code" => -2, "message" => "missing id_job" );
         } else {
 
+//            $this->result[ 'error' ][ ] = array( "code" => -1000, "message" => "test 1" );
+//            throw new Exception( 'prova', -1 );
+
             //get Job Info, we need only a row of jobs ( split )
             $this->jobData = $job_data = getJobData( (int)$this->id_job, $this->password );
             if ( empty( $job_data ) ) {
