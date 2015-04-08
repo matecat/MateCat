@@ -2844,7 +2844,7 @@ cursor: pointer;
 
 .error-type table {
 	border-collapse: collapse;
-	width: 98%;
+	width: 102%;
 }
 
 .error-type th.tleft {
@@ -3842,11 +3842,18 @@ article .translated:active, article .draft:active, article .btn:active, article 
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
 
+
 .approved
     {
     background:#7cc576;
     color:#fff !important;
 }
+
+.downloadtr-button.approved {
+	width:auto!important; 
+	text-transform: uppercase;
+}
+
 .draft, .header-menu .wrapper-dropdown-5 {
 	background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d3d4d5));
 	background: -moz-linear-gradient(top,  #f5f5f5,  #d3d4d5);
@@ -3916,7 +3923,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-  padding: 4px 10px!important;
+  padding: 5px 10px!important;
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
@@ -3925,9 +3932,22 @@ box-shadow: 0 1px 2px #ccc;
 
 .topmenu-drop input.translated {
   background: #09beec;
-  width: 235px!important;
   color: #fff!important;
  }
+
+.topmenu-drop input.translated, .topmenu-drop input.approved {
+	  width: auto!important;
+	  border-radius: 2px 0 0 2px;
+  text-transform: uppercase;
+  margin: 0!important
+}
+
+
+.topmenu-drop input.approved:hover{background:#76bb70;}
+.topmenu-drop input.translated:hover {background: #12b4df;}
+
+
+.topmenu-drop .text {margin:0;}
 
 .wrapper-dropdown-5 input {
 	width: auto!important;
@@ -6319,6 +6339,7 @@ float: left;
 .splitBar .buttons a {
 
 }
+
 
 /*
 

@@ -1,7 +1,7 @@
 /*
  Component: ui.offline
  */
-if(config.offlineModeEnabled) {
+//if(config.offlineModeEnabled) {
     UI.offlineCacheSize = 10;
     UI.offlineCacheRemaining = UI.offlineCacheSize
 
@@ -157,6 +157,17 @@ if(config.offlineModeEnabled) {
             this.execSetContributionTail();
 
         },
+        extractLocalStoredItems: function (operation) {
+            items = [];
+            $.each(localStorage, function(k,v) {
+                if(k.substring(0, operation.length) === operation) {
+                    items.push();
+//                    items.push(JSON.parse(v));
+                }
+            });
+            return items;
+
+        },
         execAbortedOperations: function() {
             if(UI.autoFailoverEnabled) {
 //			console.log(localStorage);
@@ -222,4 +233,4 @@ if(config.offlineModeEnabled) {
         */
     });
 
-}
+//}
