@@ -795,7 +795,18 @@ $.extend(UI, {
             } else {
                 UI.continueDownload();
             }
-		}).on('click', '.alert .close', function(e) {
+		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
+            if( e.which == 1 ){ // left click
+                e.preventDefault();
+                var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                    id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
+                    src: $( e.currentTarget ).attr( 'href' )
+                } );
+                $( "body" ).append( iFrameDownload );
+
+                //console.log( $( e.currentTarget ).attr( 'href' ) );
+            }
+        }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
 		}).on('click', '.downloadtr-button .draft', function() {
@@ -1001,7 +1012,7 @@ $.extend(UI, {
                 }
             }
 		}).on('keydown', '.editor .editarea', function(e) {
-			console.log('keydown: ', UI.editarea.html());
+//			console.log('keydown: ', UI.editarea.html());
 /*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -1515,6 +1526,8 @@ $.extend(UI, {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
+            $('.test-invisible').remove();
+
 
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;

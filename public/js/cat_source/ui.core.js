@@ -61,11 +61,11 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
-        console.log('byStatus: ', byStatus);
+//        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = this.getSegmentId(segment);
-        console.log('segment: ', segment);
-        console.log('segment_id: ', segment_id);
+//        console.log('segment: ', segment);
+//        console.log('segment_id: ', segment_id);
 
         $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
@@ -87,9 +87,26 @@ UI = {
 	},
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
-//        console.log('segment qui: ', segment);
-        return $(segment).attr('id').replace('segment-', '');
+
+        /*
+         sometimes:
+         typeof $(segment).attr('id') == 'undefined'
+
+         The preeceding if doesn't works because segment is a list ==
+         '[<span class="undoCursorPlaceholder monad" contenteditable="false"></span>]'
+
+         so for now i put a try-catch block here
+
+         TODO FIX
+         */
+        try {
+            return $(segment).attr('id').replace('segment-', '');
+        } catch( e ){
+            return false;
+        }
+
 //        return $(segment).attr('id').split('-')[1];
+
     },
 
     checkHeaviness: function() {
@@ -642,7 +659,6 @@ UI = {
 //		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
 //		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
-//			console.log('1');
 			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
@@ -655,9 +671,10 @@ UI = {
 //			this.nextUntranslatedSegmentId = 0;
 //		}
 //		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
-
-		var i = $(seg).next();
-		if (!i.length) {
+//console.log('seg: ', seg);
+        var i = $(seg).next();
+//console.log('i: ', i);
+        if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
 		}
 		if (i.length) {
@@ -988,7 +1005,7 @@ UI = {
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
         segment.trigger('open');
-
+        $('section').first().nextAll('.undoCursorPlaceholder').remove();
         this.getNextSegment(this.currentSegment, 'untranslated');
 
 		if ((!this.readonly)&&(!getNormally)) {
@@ -1288,9 +1305,9 @@ UI = {
             '                       </div>' +
             '						<p class="save-warning" title="Segment modified but not saved"></p>' +
             '					</div> <!-- .textarea-container -->' +
+            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
             '				</div> <!-- .target -->' +
             '			</div></div> <!-- .wrap -->' +
-            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
             '			<div class="status-container">' +
             '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
             '			</div> <!-- .status-container -->' +
@@ -1309,30 +1326,46 @@ UI = {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
     normalizeSplittedSegments: function (segments) {
+//        console.log('segments: ', segments);
+
         newSegments = [];
         $.each(segments, function (index) {
-            if(this.split_points_source.length) {
+//            console.log('seg: ', this.segment.split(UI.splittedTranslationPlaceholder));
+//            console.log('aaa: ', this.segment);
+            splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+//            console.log('splittedSourceAr: ', splittedSourceAr);
+            if(splittedSourceAr.length > 1) {
+//            if(this.split_points_source.length) {
 //                console.log('a');
                 segment = this;
                 splitGroup = [];
-                $.each(this.split_points_source, function (i) {
+                $.each(splittedSourceAr, function (i) {
                     splitGroup.push(segment.sid + '-' + (i + 1));
                 });
 
-                $.each(this.split_points_source, function (i) {
+                $.each(splittedSourceAr, function (i) {
+//                    console.log('bbb: ', this);
 //                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
-                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+                    translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+//                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+//                    console.log('ddd: ', this);
+                    //temp
+                    //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
+                    //end temp
+                    status = segment.target_chunk_lengths.statuses[i];
+                    console.log('vediamo status: ', status);
                     segData = {
                         autopropagated_from: "0",
                         has_reference: "false",
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
-                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
+                        segment: splittedSourceAr[i],
+//                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
                         segment_hash: segment.segment_hash,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
                         split_points_source: [],
-                        status: "DRAFT",
+                        status: status,
                         time_to_edit: "0",
                         translation: translation,
                         warning: "0"
@@ -1352,7 +1385,6 @@ UI = {
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
         segments = this.normalizeSplittedSegments(segments);
-//        console.log('segments: ', segments);
         splitAr = splitAr || [];
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
@@ -1361,7 +1393,9 @@ UI = {
 //                this.readonly = true;
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
-//            console.log('this.segment: ', this.segment);
+//            console.log('this: ', this);
+            if(typeof this.segment == 'object') console.log(this);
+//            console.log('this.segment: ', this);
             if($.parseHTML(this.segment).length) {
                 this.segment = UI.stripSpans(this.segment);
             };
@@ -1536,7 +1570,8 @@ UI = {
 			data: {
 				action: 'setCurrentSegment',
 				password: config.password,
-				id_segment: id_segment.toString().split('-')[0],
+				id_segment: id_segment.toString(),
+//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
 			context: reqArguments,
@@ -1822,6 +1857,8 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
+        console.log('setStatus - segment: ', segment);
+        console.log('setStatus - status: ', status);
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
@@ -2263,8 +2300,14 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        isSplitted = (id_segment.split('-').length > 1) ? true : false;
+        if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
+//        console.log('isSplitted: ', isSplitted);
+//        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
+//            id_segment: sidToSend,
             id_segment: id_segment,
+//            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
@@ -2276,9 +2319,16 @@ UI = {
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave
         };
+        if(isSplitted) {
+            this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+//            console.log('aaa: ' + id_segment);
+//            console.log('bbb: ' , segment);
+            this.setStatus($('#segment-' + id_segment), 'translated');
+        }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         this.log('setTranslation', reqData);
+        segment = $('#segment-' + id_segment);
 
 		APP.doRequest({
             data: reqData,
@@ -2306,6 +2356,7 @@ UI = {
                 UI.decrementOfflineCacheRemaining();
             },
 			success: function(d) {
+                console.log('this: ', this);
 //                console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
@@ -2313,6 +2364,29 @@ UI = {
 			}
 		});
 	},
+    collectSplittedStatuses: function (sid) {
+        statuses = [];
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            statuses.push(status);
+        });
+        return statuses;
+    },
+    collectSplittedTranslations: function (sid) {
+        totalTranslation = '';
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            translation = UI.postProcessEditarea(segment);
+            totalTranslation += translation;
+//            totalTranslation += $(segment).find('.editarea').html();
+            if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
+        });
+        return totalTranslation;
+    },
+
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -2797,6 +2871,7 @@ UI = {
 			}
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
+				console.log('operation: ', operation);
 				UI.failedConnection(0, 'no');
 			}
 		});
@@ -2820,6 +2895,7 @@ UI = {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
+            console.log('setTranslation_success - segment: ', segment);
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
@@ -2859,7 +2935,7 @@ UI = {
 
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
-
+        if($(segment).attr('id').split('-').length > 2) return false;
         UI.propagateTranslation(segment, status, false);
 /*
         return false;
@@ -3153,7 +3229,13 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+/*
+        console.log('rangySelectionBoundary: ', $('.rangySelectionBoundary'));
+        console.log('rangySelectionBoundary.next(): ', $('.rangySelectionBoundary').next());
+        console.log('rangySelectionBoundary.next() non è una section: ', !$('.rangySelectionBoundary').next().is('.section'));
+        if(!$('.rangySelectionBoundary').next().is('.section')) $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+*/
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},

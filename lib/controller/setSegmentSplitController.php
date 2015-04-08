@@ -3,11 +3,10 @@
 
 class setSegmentSplitController extends ajaxController {
 
-    private $id_segment;
     private $id_job;
     private $job_pass;
-    private $split_points_source;
-    private $split_points_target;
+    private $segment;
+    private $target;
     private $exec;
 
     public function __construct() {
@@ -22,11 +21,11 @@ class setSegmentSplitController extends ajaxController {
                 'password'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
-                'split_points_source' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'segment' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW
                 ),
-                'split_points_target' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                'target' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW
                 ),
                 'exec'                => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
@@ -38,8 +37,8 @@ class setSegmentSplitController extends ajaxController {
         $this->id_job              = $postInput[ 'id_job' ];
         $this->id_segment          = $postInput[ 'id_segment' ];
         $this->job_pass            = $postInput[ 'password' ];
-        $this->split_points_source = json_decode( $postInput[ 'split_points_source' ], true );
-        $this->split_points_target = json_decode( $postInput[ 'split_points_target' ], true );
+        $this->segment             = $postInput[ 'segment' ];
+        $this->target              = $postInput[ 'target' ];
         $this->exec                = $postInput[ 'exec' ];
 
         if ( !$this->userIsLogged ) {
@@ -71,17 +70,17 @@ class setSegmentSplitController extends ajaxController {
         }
 
         //this checks that the json is valid, but not its content
-        if ( is_null( $this->split_points_source ) ) {
+        if ( is_null( $this->segment ) ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -6,
-                    'message' => 'Invalid split_points_source json'
+                    'message' => 'Invalid source_chunk_lengths json'
             );
         }
         /*
-        else if ( empty( $this->split_points_source ) ) {
+        else if ( empty( $this->source_chunk_lengths ) ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -6,
-                    'message' => 'split_points_source cannot be empty'
+                    'message' => 'source_chunk_lengths cannot be empty'
             );
         }
         */
@@ -100,8 +99,12 @@ class setSegmentSplitController extends ajaxController {
 
         $translationStruct->id_segment          = $this->id_segment;
         $translationStruct->id_job              = $this->id_job;
-        $translationStruct->split_points_source = $this->split_points_source;
-        $translationStruct->split_points_target = $this->split_points_target;
+
+        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
+
+        /* Fill the statuses with DEFAULT DRAFT VALUES */
+        $pieces = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths )  -1 : 1 );
+        $translationStruct->target_chunk_lengths = array( 'len' => array( 0 ), 'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT ) );
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
         $result = $translationDao->update($translationStruct);
@@ -120,23 +123,28 @@ class setSegmentSplitController extends ajaxController {
 
         //save the 2 arrays in the DB
 
-        $translationStruct = TranslationsSplit_SplitStruct::getStruct();
-
-        $translationStruct->id_segment          = $this->id_segment;
-        $translationStruct->id_job              = $this->id_job;
-        $translationStruct->split_points_source = $this->split_points_source;
-        $translationStruct->split_points_target = $this->split_points_target;
-
-        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
-        $result = $translationDao->update($translationStruct);
-
-        if($result instanceof TranslationsSplit_SplitStruct){
-            //return success
-            $this->result['data'] = 'OK';
-        } else {
-            Log::doLog("Failed split segment.");
-            Log::doLog($translationStruct);
-        }
+//        $translationStruct = TranslationsSplit_SplitStruct::getStruct();
+//
+//        $translationStruct->id_segment          = $this->id_segment;
+//        $translationStruct->id_job              = $this->id_job;
+//
+//        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->segment ) );
+//
+//        /* Fill the statuses with DEFAULT DRAFT VALUES */
+//        $pieces = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths )  -1 : 1 );
+//        $translationStruct->target_chunk_lengths = array( 'len' => array( 0 ), 'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT ) );
+//
+//        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+//        $result = $translationDao->update($translationStruct);
+//
+//        if($result instanceof TranslationsSplit_SplitStruct){
+//            //return success
+//            $this->result['data'] = 'OK';
+//        }
+//        else{
+//            Log::doLog("Failed while splitting/merging segment.");
+//            Log::doLog($translationStruct);
+//        }
 
     }
 }

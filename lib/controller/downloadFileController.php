@@ -306,7 +306,7 @@ class downloadFileController extends downloadController {
 
         //qui prodest to check download type?
         if ( $this->download_type == 'omegat' ) {
-            //what if I have a job with more than \1 file?
+            $this->filename .= ".zip";
 
             $tmsService = new TMSService();
             $tmsService->setOutputType( 'tm' );
@@ -437,10 +437,9 @@ class downloadFileController extends downloadController {
         $zip = new ZipArchive();
         $zip->open( $file, ZipArchive::OVERWRITE );
 
-        $zip_baseDir = $this->jobInfo[ 'id' ] . "/";
-        $zip_fileDir = $zip_baseDir . "inbox/";
-        $zip_tmDir   = $zip_baseDir . "tm/";
-        $zip_mtDir   = $zip_tmDir . "mt/penalty-29/";
+        $zip_baseDir   = $this->jobInfo[ 'id' ] . "/";
+        $zip_fileDir   = $zip_baseDir . "inbox/";
+        $zip_tm_mt_Dir = $zip_baseDir . "tm/";
 
         $a[ ] = $zip->addEmptyDir( $zip_baseDir );
         $a[ ] = $zip->addEmptyDir( $zip_baseDir . "glossary" );
@@ -450,8 +449,6 @@ class downloadFileController extends downloadController {
         $a[ ] = $zip->addEmptyDir( $zip_baseDir . "terminology" );
         $a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm" );
         $a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
-        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm/mt" );
-        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm/mt/penalty-29" );
 
         $rev_index_name = array();
 
@@ -479,11 +476,8 @@ class downloadFileController extends downloadController {
 
             $rev_index_name[ $fName ] = $fName;
 
-            if ( substr( $key, 0, 2 ) == 'tm' ) {
-                $path = $zip_tmDir;
-            }
-            else if ( substr( $key, 0, 2 ) == 'mt' ) {
-                $path = $zip_mtDir;
+            if ( substr( $key, 0, 2 ) == 'tm' || substr( $key, 0, 2 ) == 'mt' ) {
+                $path = $zip_tm_mt_Dir;
             }
             else {
                 $path = $zip_fileDir;

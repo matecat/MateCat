@@ -219,12 +219,12 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $cacheTTL
+     * @param int $cacheSecondsTTL
      *
      * @return $this
      */
-    public function setCacheTTL( $cacheTTL ) {
-        $this->cacheTTL = $cacheTTL;
+    public function setCacheTTL( $cacheSecondsTTL ) {
+        $this->cacheTTL = $cacheSecondsTTL;
         return $this;
     }
 

@@ -16,6 +16,7 @@ $.extend(UI, {
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 // console.log('translation 1: ', translation);
+//        console.log('copySuggestionInEditarea - editarea: ', editarea);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -114,18 +115,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
-                console.log('getContribution error');
+//                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-                console.log('getContribution success');
+//                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
 				if (d.errors.length)
 					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
-                console.log('getContribution complete');
+//                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});

@@ -8,7 +8,6 @@ class setContributionMTController extends ajaxController {
 	private $translation;
 	private $source_lang;
 	private $target_lang;
-	private $id_segment;
 	private $id_job;
 	private $suggestion_json_array;
 	private $chosen_suggestion_index;

@@ -4,10 +4,7 @@ include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setCurrentSegmentController extends ajaxController {
 
-    private $id_segment;
     private $id_job;
-    private $split_num;
-
 
     public function __construct() {
 
@@ -35,14 +32,13 @@ class setCurrentSegmentController extends ajaxController {
 
     public function doAction() {
 
+        $this->parseIDSegment();
+
         //get Job Infos
         $job_data = getJobData( (int)$this->id_job );
 
         $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness ( remove segment split )
-        if( stripos( '-', $this->id_segment ) ) {
-            list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
-        }
+
         if ( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
         }
@@ -59,8 +55,6 @@ class setCurrentSegmentController extends ajaxController {
             //no action on errors
             return;
         }
-
-        $insertRes = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
 
         $segmentStruct             = TranslationsSplit_SplitStruct::getStruct();
         $segmentStruct->id_segment = $this->id_segment;
@@ -80,11 +74,10 @@ class setCurrentSegmentController extends ajaxController {
             $currSegmentInfo = array_shift( $currSegmentInfo );
 
             //get the chunk number and check whether it is the last one or not
-            list( $segmentNr, $chunkNr ) = explode( "-", $segmentStruct->id_segment );
-            $isLastSegmentChunk = ( $chunkNr == count( $currSegmentInfo->split_points_source ) - 1 );
+            $isLastSegmentChunk = ( $this->split_num == count( $currSegmentInfo->source_chunk_lengths ) - 1 );
 
             if ( !$isLastSegmentChunk ) {
-                $nextSegmentId = $segmentNr . "-" . ( $chunkNr + 1 );
+                $nextSegmentId = $this->id_segment . "-" . ( $this->split_num + 1 );
             }
 
         }
@@ -105,6 +98,8 @@ class setCurrentSegmentController extends ajaxController {
                 }
             }
         }
+
+        $insertRes = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
 
         $_thereArePossiblePropagations = countThisTranslatedHashInJob( $this->id_job, $this->password, $this->id_segment );
         $thereArePossiblePropagations  = intval( $_thereArePossiblePropagations[ 'available' ] );
