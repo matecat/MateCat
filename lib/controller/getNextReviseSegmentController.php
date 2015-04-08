@@ -3,7 +3,6 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class getNextReviseSegmentController extends ajaxController {
 
-	private $id_segment;
 	private $id_job;
 	private $password;
 
