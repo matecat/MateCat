@@ -20,7 +20,6 @@
                 <a id="quality-report" class="draft" tal:attributes="data-vote overall_quality_class;" href="${basepath}revise-summary/${jid}-${password}" target="_self">QUALITY REPORT</a>
             </li>
             <a class="btn pull-left topmenu-drop">
-                <span class="text">
                    <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
                        <input type="hidden" name="action" value="downloadFile" />
                        <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -30,7 +29,6 @@
                        <input type="hidden" name="download_type" value="all" />
                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'Download Translation' : 'PREVIEW'" />
                    </form>
-               </span>
             </a>
             <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                 <ul class="dropdown pull-left">
