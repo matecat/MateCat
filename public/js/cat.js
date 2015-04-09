@@ -181,12 +181,21 @@ UI = {
 
             this.body.removeClass('editing');
             $(segment).removeClass("editor waiting_for_check_result opened");
-
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);
             }
-            return true;
+
+// close split segment 
+        	$('.sid .actions .split').removeClass('cancel');
+        	source = $(segment).find('.source');
+        	$(source).removeAttr('style');
+        	$('section').removeClass('split-action');
+        	$('.split-shortcut').html('CTRL + S');
+        	$('.splitBar, .splitArea').remove();
+        	$('.sid .actions').hide();
+// end split segment             
+		return true;
         }
 	},
     copySource: function() {
@@ -9506,7 +9515,7 @@ $.extend(UI, {
             UI.deleteTM($('table.mgmt-tm tr[data-key="' + $(this).attr('data-key') + '"] .deleteTM'));
             $('.mgmt-container .tm-warning-message').empty().hide();
 */
-        });
+        })
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
@@ -10649,6 +10658,8 @@ $.extend(UI, {
 
     },
 
+
+
     DropDown: function(el){
         this.initEvents = function () {
             var obj = this;
@@ -11061,10 +11072,11 @@ if(config.splitSegmentEnabled) {
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
-            onlyOne = (splittedSource.length == 1)? true : false;
+            onlyOne = ( splittedSource.length == 1 ) ? true : false;
 //            console.log('segmentxx: ', UI.editarea.html());
 
             //get all chunk translations, if this is a merge we want all concatenated targets
+            //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
             translation = '';
             if( onlyOne ) {
                 $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
@@ -11184,11 +11196,12 @@ if(config.splitSegmentEnabled) {
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
                     $(source).css('height', (sourceHeight)+ 'px');
+                    $('.editor .wrap').css('padding-bottom', (splitAreaHeight - targetHeight)+ 'px');
 //                    console.log('caso 1');
             } else if(sourceHeight < splitAreaHeight) {
                     $(source).css('height', (splitAreaHeight + 100)+ 'px');
                     $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
-//                      console.log('caso 2');
+//                    console.log('caso 2');
                 }
             },100);
 
