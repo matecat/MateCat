@@ -1264,9 +1264,12 @@ UI = {
 //        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
 //        console.log('VEDIAMO: ', segment);
 //        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
+        // TEMP
+        segment.version = '12345678';
+        // END TEMP
         splitGroup = segment.split_group || splitGroup || '';
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
-        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
+        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
 //            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
             '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
@@ -2205,8 +2208,8 @@ UI = {
 //        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
 //        this.addToSetTranslationTail(id_segment, status, caller);
 //        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
-//        console.log(UI.offline);
-//        console.log(config.offlineModeEnabled);
+        console.log('UI.offline: ', UI.offline);
+        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
             if(toSave) this.decrementOfflineCacheRemaining();
@@ -2246,7 +2249,7 @@ UI = {
         $(window).trigger('offlineSegmentSave');
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
-//        console.log('addToSetTranslationTail');
+        console.log('addToSetTranslationTail ' + id_segment);
         var item = {
             id_segment: id_segment,
             status: status,
@@ -2317,7 +2320,8 @@ UI = {
             id_translator: id_translator,
             errors: errors,
             chosen_suggestion_index: chosen_suggestion,
-            autosave: autosave
+            autosave: autosave,
+            version: segment.attr('data-version')
         };
         if(isSplitted) {
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
