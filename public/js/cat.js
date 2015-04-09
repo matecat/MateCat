@@ -63,10 +63,13 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
 //        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-		segment_id = $(segment).attr('id').split('-')[1];
-		$('.percentuage', segment).removeClass('visible');
+		segment_id = this.getSegmentId(segment);
+//        console.log('segment: ', segment);
+//        console.log('segment_id: ', segment_id);
+
+        $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
-		this.setTranslation($(segment).attr('id').split('-')[1], status, false);
+		this.setTranslation(this.getSegmentId(segment), status, false);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -82,7 +85,31 @@ UI = {
 			status: status
 		});
 	},
-	checkHeaviness: function() {
+    getSegmentId: function (segment) {
+        if(typeof segment == 'undefined') return false;
+
+        /*
+         sometimes:
+         typeof $(segment).attr('id') == 'undefined'
+
+         The preeceding if doesn't works because segment is a list ==
+         '[<span class="undoCursorPlaceholder monad" contenteditable="false"></span>]'
+
+         so for now i put a try-catch block here
+
+         TODO FIX
+         */
+        try {
+            return $(segment).attr('id').replace('segment-', '');
+        } catch( e ){
+            return false;
+        }
+
+//        return $(segment).attr('id').split('-')[1];
+
+    },
+
+    checkHeaviness: function() {
 //		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
 //		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
 //		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
@@ -151,13 +178,24 @@ UI = {
             this.removeGlossaryMarksFormSource();
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
+
             this.body.removeClass('editing');
-            $(segment).removeClass("editor");
+            $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);
             }
-            return true;
+
+// close split segment 
+        	$('.sid .actions .split').removeClass('cancel');
+        	source = $(segment).find('.source');
+        	$(source).removeAttr('style');
+        	$('section').removeClass('split-action');
+        	$('.split-shortcut').html('CTRL + S');
+        	$('.splitBar, .splitArea').remove();
+        	$('.sid .actions').hide();
+// end split segment             
+		return true;
         }
 	},
     copySource: function() {
@@ -234,8 +272,10 @@ UI = {
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '')
-			return false; 
+		if ($('.footer', segment).text() !== '') {
+            return false;
+        }
+
 
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
@@ -277,17 +317,19 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
-					'</div>'+
-					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
-					'	<div class="overflow"></div>' +
 					'</div>';
         UI.currentSegment.trigger('footerCreation');
         $('.footer', segment).html(UI.footerHTML);
+        alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+                               '	<div class="overflow"></div>' +
+                               '</div>';
+        $('.footer .tab.glossary').after(alternativesTabHtml);
+//        console.log('footer html: ', $('.footer', segment).html());
         UI.currentSegment.trigger('afterFooterCreation');
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -476,7 +518,7 @@ UI = {
 //		var step = this.moreSegNum;
 		var section = $('section');
         var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
-		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
+		var segId = (seg.length) ? this.getSegmentId(seg) : 0;
 		return segId;
 	},
 	detectStartSegment: function() {
@@ -499,7 +541,8 @@ UI = {
 
     nextUnloadedResultSegment: function() {
 		var found = '';
-		var last = $('section').last().attr('id').split('-')[1];
+		var last = this.getSegmentId($('section').last());
+//		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
 //            var start = new Date().getTime();
 //            for (var i = 0; i < 1e7; i++) {
@@ -540,7 +583,7 @@ UI = {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
 //				if ($(this).offset().top > $(window).scrollTop()) {
-					UI.segMoving = $(this).attr('id').split('-')[1];
+					UI.segMoving = UI.getSegmentId($(this));
 					return false;
 				}
 			});
@@ -570,8 +613,8 @@ UI = {
 		});
 	},
 	getMoreSegments_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getMoreSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getMoreSegments');
 		where = d.data.where;
         section = $('section');
 		if (typeof d.data.files != 'undefined') {
@@ -581,7 +624,7 @@ UI = {
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
 			});
-			this.renderSegments(d.data.files, where, false);
+			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event 
 			if ((where == 'before') && (numsegToAdd)) {
@@ -609,6 +652,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+        $(window).trigger('segmentsAdded');
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
@@ -624,8 +668,7 @@ UI = {
 //		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
 //		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
-//			console.log('1');
-			this.nextUntranslatedSegmentId = $(n).attr('id').split('-')[1];
+			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
 		}
@@ -637,13 +680,14 @@ UI = {
 //			this.nextUntranslatedSegmentId = 0;
 //		}
 //		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
-
-		var i = $(seg).next();
-		if (!i.length) {
+//console.log('seg: ', seg);
+        var i = $(seg).next();
+//console.log('i: ', i);
+        if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
 		}
 		if (i.length) {
-			this.nextSegmentId = $(i).attr('id').split('-')[1];
+			this.nextSegmentId = this.getSegmentId($(i));
 		} else {
 			this.nextSegmentId = 0;
 		}
@@ -699,8 +743,8 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.error.length)
-			this.processErrors(d.error, 'getSegments');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
@@ -709,7 +753,7 @@ UI = {
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
 		if (typeof d.data.files != 'undefined') {
-			this.renderSegments(d.data.files, where, this.firstLoad);
+			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
 				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
@@ -780,8 +824,10 @@ UI = {
 				data: {
 					action: 'getUpdatedTranslations',
 					last_timestamp: lastUpdateRequested.getTime(),
-					first_segment: $('section').first().attr('id').split('-')[1],
-					last_segment: $('section').last().attr('id').split('-')[1]
+					first_segment: UI.getSegmentId($('section').first()),
+//					first_segment: $('section').first().attr('id').split('-')[1],
+					last_segment: UI.getSegmentId($('section').last())
+//					last_segment: $('section').last().attr('id').split('-')[1]
 				},
 				error: function() {
 					UI.failedConnection(0, 'getUpdatedTranslations');
@@ -873,10 +919,13 @@ UI = {
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
-//        console.log('gotoSegment: ', id);
-		var el = $("#segment-" + id + "-target").find(".editarea");
+        if((!this.segmentIsLoaded(id))&&(id.toString().split('-').length > 1)) {
+            id = id.toString().split('-')[0];
+        }
+        var el = $("#segment-" + id + "-target").find(".editarea");
+//        console.log('el: ', el);
         $(el).click();
-	},
+    },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
 			$('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
@@ -965,7 +1014,7 @@ UI = {
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
         segment.trigger('open');
-
+        $('section').first().nextAll('.undoCursorPlaceholder').remove();
         this.getNextSegment(this.currentSegment, 'untranslated');
 
 		if ((!this.readonly)&&(!getNormally)) {
@@ -1012,6 +1061,19 @@ UI = {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
 			if (lastOpened != 'segment-' + this.currentSegmentId)
 				this.closeSegment(this.lastOpenedSegment, 0, operation);
+            if(this.lastOpenedSegment) {
+ //               this.lastOpenedSegment.find('.editarea').html('ss');
+ /*
+                setTimeout(function() {
+                    UI.lastOpenedSegment.attr('data-hash', UI.lastOpenedSegment.attr('data-hash'));
+                }, 1000);
+                this.lastOpenedSegment.attr('data-hash', this.lastOpenedSegment.attr('data-hash'));
+                */
+            }
+
+                //console.log("this.lastOpenedSegment: ", this.lastOpenedSegment.attr('data-hash'));
+//            console.log("this.lastOpenedSegment.attr('data-tagmode): ", this.lastOpenedSegment.attr('data-tagmode'));
+//                this.lastOpenedSegment.attr('data-autopropagated', this.lastOpenedSegment.attr('data-autopropagated'));
 		}
 		this.opening = false;
 		this.body.addClass('editing');
@@ -1143,7 +1205,7 @@ UI = {
 	removeStatusMenu: function(statusMenu) {
 		statusMenu.empty().hide();
 	},
-	renderSegments: function(files, where, starting) {
+	renderFiles: function(files, where, starting) {
 		$.each(files, function(k) {
 			var newFile = '';
 //            var fid = fs['ID_FILE'];
@@ -1176,85 +1238,8 @@ UI = {
 						'	</ul>';
 			}
 
-			var t = config.time_to_edit_enabled;
-			$.each(this.segments, function() {
-//                this.readonly = true;
-				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
-                var autoPropagated = this.autopropagated_from != 0;
-				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
-
-                /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
-                escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-                escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-
-				/* tab placeholders replacement */
- //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
-				
-                /* see also replacement made in source content below */
-                /* this is to show line feed in source too, because server side we replace \n with placeholders */
-/*
-                tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
-                    '</li>' +
-//                    '						   <li class="crunched">&lt;&gt;</li>' +
-//                    '						   <li class="extended">&lt;...&gt;</li>' +
-                    '						</ul>' : '';
-*/
-                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
-						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
-((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
-((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
-						'	<div class="body">' +
-						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
-//						'			<h2 title="" class="percentuage"><span></span></h2>' + 
-//						'			<a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
-//						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
-						'		</div>' +
-						'		<div class="text">' +
-						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
-						'				<div class="copy" title="Copy source to target">' +
-						'                   <a href="#"></a>' +
-						'                   <p>ALT+CTRL+I</p>' +
-//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
-						'				</div>' +
-						'				<div class="target item" id="segment-' + this.sid + '-target">' +
-						'					<span class="hide toggle"> ' +
-						'						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
-						'					</span>' +
-						'					<div class="textarea-container">' +
-						'						<span class="loader"></span>' +
-//                        tagModes +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-                        '                       <div class="toolbar">' +
-((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
-						'                           <ul class="editToolbar">' +
-						'                               <li class="uppercase" title="Uppercase"></li>' +
-						'                               <li class="lowercase" title="Lowercase"></li>' +
-						'                               <li class="capitalize" title="Capitalized"></li>' +
-						'                           </ul>' +
-                        '                       </div>' +
-						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
-						'					</div> <!-- .textarea-container -->' +
-						'				</div> <!-- .target -->' +
-						'			</div></div> <!-- .wrap -->' +
-						'						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>' +
-						'			<div class="status-container">' +
-						'				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
-						'			</div> <!-- .status-container -->' +
-						'		</div> <!-- .text -->' +
-						'		<div class="timetoedit" data-raw_time_to_edit="' + this.time_to_edit + '">' +
-						((t) ? '			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:' : '') +
-						((t) ? '			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s' : '') +
-						'		</div>' +
-						'		<div class="footer toggle"></div> <!-- .footer -->     ' +
-						'	</div> <!-- .body -->' +
-						'	<ul class="statusmenu"></ul>' +
-						'</section> ';
-			});
+            newSegments = UI.renderSegments(this.segments, false);
+            newFile += newSegments;
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -1284,13 +1269,171 @@ UI = {
 			this.init();
 		}
 	},
-	saveSegment: function(segment) {
+    getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
+//        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
+//        console.log('VEDIAMO: ', segment);
+//        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
+        splitGroup = segment.split_group || splitGroup || '';
+        splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
+        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
+            '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
+//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
+            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
+            ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+            ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
+            '	<div class="body">' +
+            '		<div class="header toggle" id="segment-' + segment.sid + '-header">' +
+//						'			<h2 title="" class="percentuage"><span></span></h2>' +
+//						'			<a href="#" id="segment-' + segment.sid + '-close" class="close" title="Close this segment"></a>' +
+//						'			<a href="#" id="segment-' + segment.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
+            '		</div>' +
+            '		<div class="text">' +
+            '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
+//            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
+            '				<div class="copy" title="Copy source to target">' +
+            '                   <a href="#"></a>' +
+            '                   <p>ALT+CTRL+I</p>' +
+//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
+            '				</div>' +
+            '				<div class="target item" id="segment-' + segment.sid + '-target">' +
+            '					<span class="hide toggle"> ' +
+            '						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
+            '					</span>' +
+            '					<div class="textarea-container">' +
+            '						<span class="loader"></span>' +
+//                        tagModes +
+            '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + segment.sid + '-editarea" data-sid="' + segment.sid + '">' + ((!segment.translation) ? '' : UI.decodePlaceholdersToText(segment.translation, true, segment.sid, 'translation')) + '</div>' +
+            '                       <div class="toolbar">' +
+            ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
+            '                           <ul class="editToolbar">' +
+            '                               <li class="uppercase" title="Uppercase"></li>' +
+            '                               <li class="lowercase" title="Lowercase"></li>' +
+            '                               <li class="capitalize" title="Capitalized"></li>' +
+            '                           </ul>' +
+            '                       </div>' +
+            '						<p class="save-warning" title="Segment modified but not saved"></p>' +
+            '					</div> <!-- .textarea-container -->' +
+            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
+            '				</div> <!-- .target -->' +
+            '			</div></div> <!-- .wrap -->' +
+            '			<div class="status-container">' +
+            '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
+            '			</div> <!-- .status-container -->' +
+            '		</div> <!-- .text -->' +
+            '		<div class="timetoedit" data-raw_time_to_edit="' + segment.time_to_edit + '">' +
+            ((t) ? '			<span class=edit-min>' + segment.parsed_time_to_edit[1] + '</span>m:' : '') +
+            ((t) ? '			<span class=edit-sec>' + segment.parsed_time_to_edit[2] + '</span>s' : '') +
+            '		</div>' +
+            '		<div class="footer toggle"></div> <!-- .footer -->     ' +
+            '	</div> <!-- .body -->' +
+            '	<ul class="statusmenu"></ul>' +
+            '</section> ';
+        return newSegmentMarkup;
+    },
+    stripSpans: function (str) {
+        return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
+    },
+    normalizeSplittedSegments: function (segments) {
+//        console.log('segments: ', segments);
+
+        newSegments = [];
+        $.each(segments, function (index) {
+//            console.log('seg: ', this.segment.split(UI.splittedTranslationPlaceholder));
+//            console.log('aaa: ', this.segment);
+            splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+//            console.log('splittedSourceAr: ', splittedSourceAr);
+            if(splittedSourceAr.length > 1) {
+//            if(this.split_points_source.length) {
+//                console.log('a');
+                segment = this;
+                splitGroup = [];
+                $.each(splittedSourceAr, function (i) {
+                    splitGroup.push(segment.sid + '-' + (i + 1));
+                });
+
+                $.each(splittedSourceAr, function (i) {
+//                    console.log('bbb: ', this);
+//                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
+                    translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+//                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
+//                    console.log('ddd: ', this);
+                    //temp
+                    //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
+                    //end temp
+                    status = segment.target_chunk_lengths.statuses[i];
+                    console.log('vediamo status: ', status);
+                    segData = {
+                        autopropagated_from: "0",
+                        has_reference: "false",
+                        parsed_time_to_edit: ["00", "00", "00", "00"],
+                        readonly: "false",
+                        segment: splittedSourceAr[i],
+//                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
+                        segment_hash: segment.segment_hash,
+                        sid: segment.sid + '-' + (i + 1),
+                        split_group: splitGroup,
+                        split_points_source: [],
+                        status: status,
+                        time_to_edit: "0",
+                        translation: translation,
+                        warning: "0"
+                    }
+                    newSegments.push(segData);
+                    segData = null;
+                });
+            } else {
+//                console.log('b');
+                newSegments.push(this);
+            }
+
+        });
+// console.log('newsegments 1: ', newSegments);
+        return newSegments;
+    },
+
+    renderSegments: function (segments, justCreated, splitAr, splitGroup) {
+        segments = this.normalizeSplittedSegments(segments);
+        splitAr = splitAr || [];
+        splitGroup = splitGroup || [];
+        var t = config.time_to_edit_enabled;
+        newSegments = '';
+        $.each(segments, function() {
+//                this.readonly = true;
+            var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
+            var autoPropagated = this.autopropagated_from != 0;
+//            console.log('this: ', this);
+            if(typeof this.segment == 'object') console.log(this);
+//            console.log('this.segment: ', this);
+            if($.parseHTML(this.segment).length) {
+                this.segment = UI.stripSpans(this.segment);
+            };
+//            console.log('corrected: ', this.segment.replace(/<span(.*?)>/gi, ''));
+            var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//            console.log('escapedSegment: ', escapedSegment);
+
+            /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+            escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+            escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+            originalId = this.sid.split('-')[0];
+            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
+            } else {
+
+            }
+
+        });
+        return newSegments;
+    },
+
+    saveSegment: function(segment) {
 		var status = (segment.hasClass('status-translated')) ? 'translated' : (segment.hasClass('status-approved')) ? 'approved' : (segment.hasClass('status-rejected')) ? 'rejected' : (segment.hasClass('status-new')) ? 'new' : 'draft';
 		if (status == 'new') {
 			status = 'draft';
 		}
 		console.log('SAVE SEGMENT');
-		this.setTranslation($(segment).attr('id').split('-')[1], status, 'autosave');
+		this.setTranslation(this.getSegmentId(segment), status, 'autosave');
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {
@@ -1320,13 +1463,13 @@ UI = {
 		var spread = 23;
 		var current = this.currentSegment;
 		var previousSegment = $(segment).prev('section');
-//		console.log(previousSegment);
 
 		if (!previousSegment.length) {
 			previousSegment = $(segment);
 			spread = 103;
 		}
-		var destination = "#" + previousSegment.attr('id');
+        if(!previousSegment.length) return false;
+        var destination = "#" + previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;
 		if (this.firstScroll) {
 			destinationTop = destinationTop + 100;
@@ -1358,6 +1501,7 @@ UI = {
 		}, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
+//        segmentId = segmentId.toString().split('-')[0];
 		if ($('#segment-' + segmentId).length) {
 			return true;
 		} else {
@@ -1427,6 +1571,7 @@ UI = {
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
+//        if(id_segment.toString().split('-').length > 1) id_segment = id_segment.toString().split('-');
 //		var file = this.currentFile;
 		if (this.readonly)
 			return;
@@ -1434,7 +1579,8 @@ UI = {
 			data: {
 				action: 'setCurrentSegment',
 				password: config.password,
-				id_segment: id_segment,
+				id_segment: id_segment.toString(),
+//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
 			context: reqArguments,
@@ -1447,8 +1593,8 @@ UI = {
 		});
 	},
 	setCurrentSegment_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setCurrentSegment');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
@@ -1462,13 +1608,13 @@ UI = {
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
          * is sent as response in getMoreSegments and added as data in the "section" Tag and
-         * rendered/prepared in renderSegments/createHeader
+         * rendered/prepared in renderFiles/createHeader
          * and managed in propagateTranslation
          *
          * TODO
          * I leave them here but they should be removed
          *
-         * @see renderSegments
+         * @see renderFiles
          * @see createHeader
          * @see propagateTranslation
          *
@@ -1720,6 +1866,8 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
+        console.log('setStatus - segment: ', segment);
+        console.log('setStatus - status: ', status);
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
@@ -1768,7 +1916,7 @@ UI = {
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
             //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
@@ -2137,9 +2285,8 @@ UI = {
 		if( config.brPlaceholdEnabled ) {
 			translation = this.postProcessEditarea(segment);
 		} else {
-			translation = $('.editarea', segment ).text();
+            translation = $('.editarea', segment ).text();
 		}
-//        console.log('translation: ', translation);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -2162,8 +2309,14 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        isSplitted = (id_segment.split('-').length > 1) ? true : false;
+        if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
+//        console.log('isSplitted: ', isSplitted);
+//        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
+//            id_segment: sidToSend,
             id_segment: id_segment,
+//            id_segment: id_segment.split('-')[0],
             id_job: config.job_id,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
@@ -2175,9 +2328,16 @@ UI = {
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave
         };
+        if(isSplitted) {
+            this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+//            console.log('aaa: ' + id_segment);
+//            console.log('bbb: ' , segment);
+            this.setStatus($('#segment-' + id_segment), 'translated');
+        }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         this.log('setTranslation', reqData);
+        segment = $('#segment-' + id_segment);
 
 		APP.doRequest({
             data: reqData,
@@ -2205,6 +2365,7 @@ UI = {
                 UI.decrementOfflineCacheRemaining();
             },
 			success: function(d) {
+                console.log('this: ', this);
 //                console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
@@ -2212,6 +2373,29 @@ UI = {
 			}
 		});
 	},
+    collectSplittedStatuses: function (sid) {
+        statuses = [];
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            statuses.push(status);
+        });
+        return statuses;
+    },
+    collectSplittedTranslations: function (sid) {
+        totalTranslation = '';
+        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
+        $.each(segmentsIds, function (index) {
+            segment = $('#segment-' + this);
+            translation = UI.postProcessEditarea(segment);
+            totalTranslation += translation;
+//            totalTranslation += $(segment).find('.editarea').html();
+            if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
+        });
+        return totalTranslation;
+    },
+
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -2696,6 +2880,7 @@ UI = {
 			}
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
+				console.log('operation: ', operation);
 				UI.failedConnection(0, 'no');
 			}
 		});
@@ -2716,9 +2901,10 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status, byStatus) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setTranslation');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
+            console.log('setTranslation_success - segment: ', segment);
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
@@ -2758,7 +2944,7 @@ UI = {
 
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
-
+        if($(segment).attr('id').split('-').length > 2) return false;
         UI.propagateTranslation(segment, status, false);
 /*
         return false;
@@ -3052,7 +3238,13 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+/*
+        console.log('rangySelectionBoundary: ', $('.rangySelectionBoundary'));
+        console.log('rangySelectionBoundary.next(): ', $('.rangySelectionBoundary').next());
+        console.log('rangySelectionBoundary.next() non è una section: ', !$('.rangySelectionBoundary').next().is('.section'));
+        if(!$('.rangySelectionBoundary').next().is('.section')) $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+*/
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
@@ -3145,7 +3337,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5";
+		this.version = "0.5.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3213,6 +3405,7 @@ $.extend(UI, {
         this.executingSetContribution = false;
         this.executingSetContributionMT = false;
 
+        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.
@@ -4230,7 +4423,18 @@ $.extend(UI, {
             } else {
                 UI.continueDownload();
             }
-		}).on('click', '.alert .close', function(e) {
+		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
+            if( e.which == 1 ){ // left click
+                e.preventDefault();
+                var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                    id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
+                    src: $( e.currentTarget ).attr( 'href' )
+                } );
+                $( "body" ).append( iFrameDownload );
+
+                //console.log( $( e.currentTarget ).attr( 'href' ) );
+            }
+        }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
 		}).on('click', '.downloadtr-button .draft', function() {
@@ -4288,9 +4492,12 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
+        }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
+//            console.log('MOUSEDOWN');
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
+//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
@@ -4433,7 +4640,7 @@ $.extend(UI, {
                 }
             }
 		}).on('keydown', '.editor .editarea', function(e) {
-			console.log('keydown: ', UI.editarea.html());
+//			console.log('keydown: ', UI.editarea.html());
 /*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -4947,6 +5154,9 @@ $.extend(UI, {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
+            $('.test-invisible').remove();
+
+
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
@@ -5004,10 +5214,11 @@ $.extend(UI, {
 			}
 
 //			UI.markTags();
-//            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
-//            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-//            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
-
+/*
+            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
+            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
+            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
+*/
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
 //            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
@@ -5487,6 +5698,7 @@ $.extend(UI, {
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 // console.log('translation 1: ', translation);
+//        console.log('copySuggestionInEditarea - editarea: ', editarea);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -5585,15 +5797,18 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
+//                console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+//                console.log('getContribution success');
 //				console.log('getContribution from ' + this + ': ', d.data.matches);
-				if (d.error.length)
-					UI.processErrors(d.error, 'getContribution');
+				if (d.errors.length)
+					UI.processErrors(d.errors, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
+//                console.log('getContribution complete');
 				UI.getContribution_complete(n);
 			}
 		});
@@ -5603,7 +5818,8 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
+		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+//		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
@@ -5611,8 +5827,9 @@ $.extend(UI, {
 		this.processContributions(d, segment);
 	},
 	processContributions: function(d, segment) {
+        if(!d) return true;
 		this.renderContributions(d, segment);
-		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
+		if (this.getSegmentId(segment) == UI.currentSegmentId)
 			this.currentSegmentQA();
 		this.lockTags(this.editarea);
 		this.spellCheck();
@@ -5624,15 +5841,16 @@ $.extend(UI, {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
-		}		
-	},
+		}
+
+    },
 	renderContributions: function(d, segment) {
+        if(!d) return true;
 		var isActiveSegment = $(segment).hasClass('editor');
 		var editarea = $('.editarea', segment);
-//        console.log(d.data.matches.length);
 
 
-		if (d.data.matches.length) {
+		if(d.data.matches.length) {
 			var editareaLength = editarea.text().trim().length;
 			if (isActiveSegment) {
 				editarea.removeClass("indent");
@@ -5743,7 +5961,12 @@ $.extend(UI, {
 				console.log('no matches');
 //            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+			if((config.mt_enabled)&&(!config.id_translator)) {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
+            } else {
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
+
+            }
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
@@ -5844,7 +6067,7 @@ $.extend(UI, {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
+				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
 			}
 		});
@@ -5921,7 +6144,7 @@ $.extend(UI, {
                 console.log('execSetContributionMT success');
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
-				if (d.error.length)
+				if (d.errors.length)
 					UI.processErrors(d.error, 'setContributionMT');
 			}
 		});
@@ -5964,8 +6187,8 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion_success: function(d) {
-		if (d.error.length)
-			this.processErrors(d.error, 'setDeleteSuggestion');
+		if (d.errors.length)
+			this.processErrors(d.errors, 'setDeleteSuggestion');
 		if (this.debug)
 			console.log('match deleted');
 
@@ -6195,11 +6418,10 @@ $.extend(UI, {
             }
         }
 
-
         $(editarea).first().each(function() {
-                   saveSelection();
-                   var tx = $(this).html();
-                   brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+            saveSelection();
+            var tx = $(this).html();
+            brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
                    brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
@@ -6274,11 +6496,15 @@ $.extend(UI, {
     unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
-		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
+        this.editarea.html(this.removeLockTagsFromString(this.editarea.html()));
+//		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 //		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"true\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 	},
-	
-	// TAG CLEANING
+    removeLockTagsFromString: function (str) {
+        return str.replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1");
+    },
+
+    // TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {
  //       if (area == this.editarea) {
 			this.droppingInEditarea = false;
@@ -6474,6 +6700,8 @@ $.extend(UI, {
     },
     checkTagProximity: function () {
 //        return false;
+        if(UI.editarea.html() == '') return false;
+
         selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
         range = selection.getRangeAt(0);
@@ -6514,6 +6742,7 @@ $.extend(UI, {
                 return false;
             };
         });
+
     },
     highlightCorrespondingTags: function (el) {
 //        console.log('highlighting: ', $(el));
@@ -6816,22 +7045,27 @@ $.extend(UI, {
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
-			$.each(d.data.matches, function(index) {
-				if ((this.segment === '') || (this.translation === ''))
-					return;
-				prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
+            $.each(d.data.matches, function(index) {
+                if ((this.segment === '') || (this.translation === ''))
+                    return;
+                prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
 
-				var disabled = (this.id == '0') ? true : false;
-				cb = this.created_by;
-				cl_suggestion = UI.getPercentuageClass(this.match);
-				var leftTxt = (in_target) ? this.translation : this.segment;
-				leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
-				leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
-				var rightTxt = (in_target) ? this.segment : this.translation;
-				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
-				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-			});
+                var disabled = (this.id == '0') ? true : false;
+                cb = this.created_by;
+                cl_suggestion = UI.getPercentuageClass(this.match);
+
+                var leftTxt = (in_target) ? this.translation : this.segment;
+                leftTxt = UI.decodePlaceholdersToText( leftTxt );
+                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+
+                var rightTxt = (in_target) ? this.segment : this.translation;
+                rightTxt = UI.decodePlaceholdersToText( rightTxt );
+                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+
+                $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
 			if(UI.custom.extended_concordance) {
 				UI.setExtendedConcordances(true);			
 			} else {
@@ -6938,7 +7172,7 @@ $.extend(UI, {
                 //temp
 //                d = {"error":[],"data":{"matches":{"is":[{"id":"459372897","raw_segment":"is","segment":"is","translation":"\u00e8","target_note":"","raw_translation":"\u00e8","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:33:42","last_update_date":"2014-12-23","match":"62%","prop":[]}],"this":[{"id":"459372893","raw_segment":"this","segment":"this","translation":"questo","target_note":"","raw_translation":"questo","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:32:49","last_update_date":"2014-12-23","match":"62%","prop":[]}]}}};
 
-				if(typeof d.errors != 'undefined') {
+				if(typeof d.errors != 'undefined' && d.errors.length) {
 					if(d.errors[0].code == -1) {
 						UI.noGlossary = true;
 //						UI.body.addClass('noGlossary');
@@ -7356,8 +7590,8 @@ $.extend(UI, {
 				replace: replace
 			},
 			success: function(d) {				
-				if(d.error.length) {
-					APP.alert({msg: d.error[0].message});
+				if(d.errors.length) {
+					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
 				$('#outer').empty();
@@ -8726,12 +8960,13 @@ if(config.enableReview && config.isReview) {
         var div = $('<div>' + UI.footerHTML + '</div>');
         div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
- /*
-        setTimeout(function() {// fixes a bug in setting defaults in radio buttons
-            UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
-            UI.trackChanges(UI.editarea);
-        }, 100);
- */
+
+        /*
+               setTimeout(function() {// fixes a bug in setting defaults in radio buttons
+                   UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
+                   UI.trackChanges(UI.editarea);
+               }, 100);
+        */
         UI.footerHTML = div.html();
         UI.currentSegment.find('.tab-switcher-review').click();
 
@@ -9060,8 +9295,9 @@ $.extend(UI, {
 //        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
-
-
+        
+        UI.setDropDown();
+        
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
             UI.closeTMPanel();
@@ -9071,16 +9307,15 @@ $.extend(UI, {
             UI.saveTMdata(true);
         });
 
-// codice inserito da Daniele per aprire la tm e settare l'active nel tab
-
-        $(".mgmt-tm").click(function(e) {
+        $(".popup-tm li.mgmt-tm").click(function(e) {
             e.preventDefault();
+            console.log('questo');
             $(this).addClass("active");
             $(".mgmt-mt").removeClass("active");
             $(".mgmt-table-mt").hide();
             $(".mgmt-table-tm").show();
         });
-        $(".tm-mgmt").click(function(e) {
+        $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
             $(".mgmt-tm").removeClass("active");
@@ -9097,38 +9332,63 @@ $.extend(UI, {
             $(".mgmt-table-tm").hide();
             $(".mgmt-table-mt").show();
         });
-
+        $("#mt_engine").change(function() {
+            if($(this).val() == 0) {
+                $('table.mgmt-mt tr.activemt').removeClass('activemt');
+            } else {
+                checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
+                UI.activateMT(checkbox);
+            };
+        });
         $("#mt_engine_int").change(function() {
-            $(".step2").show();
+            $('#add-mt-provider-cancel').hide();
+            $('#mt-provider-details .error').empty();
+
+            $(".insert-tm").show();
             provider = $(this).val();
             if(provider == 'none') {
                 $('.step2 .fields').html('');
                 $(".step2").hide();
                 $(".step3").hide();
+                $('#add-mt-provider-cancel').show();
             } else {
-                $('.step2 .fields').html($('#mt-provider-' + provider).html());
+                $('.step2 .fields').html($('#mt-provider-' + provider + '-fields').html());
+                $('.step3 .text-left').html($('#mt-provider-' + provider + '-msg').html());
+                $(".step2").show();
                 $(".step3").show();
+                $("#add-mt-provider-confirm").removeClass('hide');
             }
         });
-// fine codice di Daniele
+        $(".add-mt-engine").click(function() {
+            $(this).hide();
+//            $('.add-mt-provider-cancel-int').click();
+            $('#add-mt-provider-cancel').show();
+            $("#add-mt-provider-confirm").addClass('hide');
+            $(".insert-tm").removeClass('hide');
+        });
 
         $('#add-mt-provider-confirm').click(function(e) {
             e.preventDefault();
             if($(this).hasClass('disabled')) return false;
             provider = $("#mt_engine_int").val();
             providerName = $("#mt_engine_int option:selected").text();
-            $('#mt_engine').append('<option value="' + provider + '">' + providerName + '</option>');
-            $('#mt_engine option:selected').removeAttr('selected');
-            $('#mt_engine option[value="' + provider + '"]').attr('selected', 'selected');
-            $('.popup-tm h1 .btn-ok').click();
+            UI.addMTEngine(provider, providerName);
         });
         $('#add-mt-provider-cancel').click(function(e) {
-            $('.popup-tm h1 .btn-ok').click();
+            console.log('clicked add-mt-provider-cancel');
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
         });
-
+        $('#add-mt-provider-cancel-int').click(function(e) {
+            $(".add-mt-engine").show();
+            $(".insert-tm").addClass('hide');
+            $('#mt_engine_int').val('none').trigger('change');
+            $(".insert-tm").addClass('hide').removeAttr('style');
+            $('#add-mt-provider-cancel').show();
+        });
         $('html').on('input', '#mt-provider-details input', function() {
             num = 0;
-            $('#mt-provider-details input').each(function () {
+            $('#mt-provider-details input.required').each(function () {
                 if($(this).val() == '') num++;
             })
             if(num) {
@@ -9180,7 +9440,7 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
+        $('body').on('click', 'tr.mine a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
             $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
@@ -9189,13 +9449,13 @@ $.extend(UI, {
                         $(".addtmx").show();
                         UI.clearAddTMRow();
                         */
-        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
-            $('#activetm tr.uploadpanel').addClass('hide');
-            $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
-        }).on('click', '.addtmx:not(.disabled)', function() {
-            $(this).addClass('disabled');
+        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx, #inactivetm tr.uploadpanel a.canceladdtmx', function() {
+            $('#activetm tr.uploadpanel, #inactivetm tr.uploadpanel').addClass('hide');
+            $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
+        }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
+            e.preventDefault();
+            $(this).parents('.action').find('.addtmx').each( function(el) { $(this).addClass('disabled'); } );
             var nr = '<td class="uploadfile">' +
-//                     '  <div class="standard">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
@@ -9211,7 +9471,6 @@ $.extend(UI, {
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
                     '   <span class="error"></span>' +
-//                    '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
                     '           <span class="inner"></span>' +
@@ -9264,7 +9523,7 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
-        }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
+        }).on('click', 'tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             $(this).parents('.uploadfile').find('.error').text('').hide();
 
@@ -9274,13 +9533,15 @@ $.extend(UI, {
         }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 //            console.log('.edit-desc');
 //            $(this).addClass('current');
+            $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
         }).on('blur', '#activetm td.description .edit-desc', function() {
 //            console.log('blur');
             $(this).removeAttr('contenteditable');
-            if(APP.isCattool) UI.saveTMdata(false);
+            UI.saveTMdata(false);
+//            if(APP.isCattool) UI.saveTMdata(false);
 
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
 /*
@@ -9293,11 +9554,28 @@ $.extend(UI, {
 */
         }).on('blur', '#inactivetm td.description .edit-desc', function() {
             $(this).removeAttr('contenteditable');
-            if(APP.isCattool) UI.saveTMdescription($(this));
+//            if(APP.isCattool) UI.saveTMdescription($(this));
+            UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
+            console.log('return');
             e.preventDefault();
             $(this).trigger('blur');
-         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+        }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
+//            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
+            $(this).attr('contenteditable', true);
+        }).on('blur', '.mgmt-mt td.engine-name .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+//            UI.saveTMdata(false);
+//        }).on('blur', '#inactivetm td.description .edit-desc', function() {
+//            $(this).removeAttr('contenteditable');
+//            if(APP.isCattool) UI.saveTMdescription($(this));
+//            UI.saveTMdescription($(this));
+        }).on('keydown', '.mgmt-mt td.engine-name .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).trigger('blur');
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
@@ -9312,14 +9590,31 @@ $.extend(UI, {
             $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
-        }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+        }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
+//            UI.toggleTM(this);
+        }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
+//            console.log($(this).prop('checked'));
+//            $(this).prop('checked', true);
+            if($(this).is(':checked')) {
+                UI.activateMT(this);
+            } else {
+                UI.deactivateMT(this);
+            }
+
+        }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
+//            UI.deleteMT($(this));
+            $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? <a href="#" class="continueDeletingMT" data-id="' + $(this).parents('tr').attr('data-id') + '">Continue</a>').show();
+        }).on('click', '.continueDeletingMT', function(e){
+            e.preventDefault();
+            UI.deleteMT($('.mgmt-table-mt table.mgmt-mt tr[data-id="' + $(this).attr('data-id') + '"] .deleteMT'));
+            $('.mgmt-table-mt .tm-warning-message').empty().hide();
         }).on('click', 'a.usetm', function() {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
-        }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+        }).on('change', 'tr.mine td.uploadfile input[type="file"]', function() {
             if(this.files[0].size > config.maxTMXFileSize) {
                 numMb = config.maxTMXFileSize/(1024*1024);
                 APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
@@ -9344,16 +9639,26 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
-        }).on('click', '.mgmt-tm .downloadtmx', function(){
-            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
-            $(this).addClass('disabled' ).addClass('downloading');
+        }).on('mousedown', '.mgmt-tm .downloadtmx', function(){
+            if($(this).hasClass('downloading')) return false;
+           UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' );
             $(this).prepend('<span class="uploadloader"></span>');
-            var msg = '<td class="notify">Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</td>';
-            $(this).parents('tr').first().append(msg);
-        }).on('click', '.mgmt-tm .deleteTM', function(){
+            var msg = '<span class="notify"><span class="uploadloader"></span> Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
+            $(this).parents('td').first().append(msg);
+        }).on('mousedown', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
-        });
-
+/*
+            $('.mgmt-container .tm-warning-message').html('Do you really want to delete this TM? <a href="#" class="continueDeletingTM" data-key="' + $(this).parents('tr').attr('data-key') + '">Continue</a>').show();
+//            UI.deleteTM($(this));
+        }).on('click', '.continueDeletingTM', function(e){
+            e.preventDefault();
+            console.log('continue');
+            console.log($('table.mgmt-tm tr[data-key=' + $(this).attr('data-key') + ']'));
+            UI.deleteTM($('table.mgmt-tm tr[data-key="' + $(this).attr('data-key') + '"] .deleteTM'));
+            $('.mgmt-container .tm-warning-message').empty().hide();
+*/
+        })
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
@@ -9391,22 +9696,28 @@ $.extend(UI, {
                         });
             */
         });
-
+/*
         $('tr').click(function() {
             $('tr').not(this).removeClass('clicked');
             $(this).toggleClass('clicked');
         });
-
-        $(".add-tm").click(function() {
+*/
+        $(".add-mt-engine").click(function() {
             $(this).hide();
-            $(".mgmt-tm tr.new").removeClass('hide').show();
+            console.log('ADD MT ENGINE');
+            UI.resetMTProviderPanel();
+//            $('#add-mt-provider-cancel-int').click();
+            $(".mgmt-table-mt tr.new").removeClass('hide').show();
         });
-
+        $(".mgmt-table-tm .add-tm").click(function() {
+            $(this).hide();
+            $(".mgmt-table-tm tr.new").removeClass('hide').show();
+        });
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
             $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
-            $(".add-tm").show();
+            $(".mgmt-table-tm .add-tm").show();
             UI.clearAddTMRow();
         });
 
@@ -9423,6 +9734,8 @@ $.extend(UI, {
         $("#sign-in").click(function() {
             $(".loginpopup").show();
         });
+
+       
 
 //    	$('#sort td:first').addClass('index');
 
@@ -9458,11 +9771,15 @@ $.extend(UI, {
 
 
     },
-    openLanguageResourcesPanel: function() {
+    openLanguageResourcesPanel: function(tab, elToClick) {
+        tab = tab || 'tm';
+        elToClick = elToClick || null;
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
+        $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+        if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {
@@ -9607,7 +9924,7 @@ $.extend(UI, {
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
-                if(APP.isAnonymousUser()) {
+                if(config.isAnonymousUser) {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
@@ -9702,14 +10019,15 @@ $.extend(UI, {
         },
     */
     execAddTM: function(el) {
+        table = $(el).parents('table');
         existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
             $(el).parents('.uploadfile').addClass('uploading');
         } else {
-            $('#activetm tr.uploadpanel .uploadfile').addClass('uploading');
+            $(table).find('tr.uploadpanel .uploadfile').addClass('uploading');
         }
         var trClass = (existing)? 'mine' : 'uploadpanel';
-        form = $('#activetm tr.' + trClass + ' .add-TM-Form')[0];
+        form = $(table).find('tr.' + trClass + ' .add-TM-Form')[0];
         path = $(el).parents('.uploadfile').find('input[type="file"]').val();
         file = path.split('\\')[path.split('\\').length-1];
         this.TMFileUpload(form, '/?action=loadTMX','uploadCallback', file);
@@ -9728,14 +10046,14 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-//                '        <a class="btn-grey pull-left disabletm">' +
-//                '            <span class="text stopuse">Stop Use</span>' +
-//                '        </a>' +
-                '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Import TMX</span>' +
-                '        </a>' +
-                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Export TMX</span></a>' +
-                '    </td>' +
+                '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
+                '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+                '              <ul class="dropdown pull-left">' +
+                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
+                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
+                '              </ul>'+
+                '          </div>'+
+                '</td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
         if(uploading) {
@@ -9763,11 +10081,10 @@ $.extend(UI, {
         $('#new-tm-key, #new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
-
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
-        $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
         $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
@@ -9786,8 +10103,6 @@ $.extend(UI, {
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
-        console.log('div_id: ', div_id);
-        console.log('form: ', form);
         // Create the iframe...
         ts = new Date().getTime();
         ifId = "upload_iframe-" + ts;
@@ -9959,7 +10274,7 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
-                                if(APP.isAnonymousUser()) {
+                                if(config.isAnonymousUser) {
                                     console.log('anonimo');
                                 } else {
                                     console.log('loggato');
@@ -10027,14 +10342,19 @@ $.extend(UI, {
         tt = $('#activetm tbody tr.' + cat);
         dataOb = [];
         $(tt).each(function () {
+            r = (($(this).find('.lookup input').is(':checked'))? 1 : 0);
+            w = (($(this).find('.update input').is(':checked'))? 1 : 0);
+            if(!r && !w) {
+                return true;
+            }
             dd = {
                 tm: $(this).attr('data-tm'),
                 glos: $(this).attr('data-glos'),
                 owner: $(this).attr('data-owner'),
                 key: $(this).find('.privatekey').text(),
                 name: $(this).find('.description').text(),
-                r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
-                w: (($(this).find('.update input').is(':checked'))? 1 : 0)
+                r: r,
+                w: w
             }
             dataOb.push(dd);
         })
@@ -10074,7 +10394,8 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error saving TM data!!');
-                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+//                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+                $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
                 $('.popup-tm').removeClass('saving');
 
 //                $('.mgmt-panel-tm .warning-message').text('').hide();
@@ -10237,7 +10558,7 @@ $.extend(UI, {
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
-                        $(tm).find('td.notify').remove();
+                        $(tm).find('span.notify').remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $('#' + iFrameID).contents().find('body').text();
@@ -10289,7 +10610,9 @@ $.extend(UI, {
     },
     deleteTM: function (button) {
         tr = $(button).parents('tr').first();
-        $(tr).remove();
+        $(tr).fadeOut("normal", function() {
+        $(this).remove();
+    });
         APP.doRequest({
             data: {
                 action: 'userKeys',
@@ -10304,10 +10627,197 @@ $.extend(UI, {
             }
         });
     },
+    deleteMT: function (button) {
+        id = $(button).parents('tr').first().attr('data-id');
+        APP.doRequest({
+            data: {
+                action: 'engine',
+                exec: 'delete',
+                id: id
+            },
+            context: id,
+            error: function() {
+                console.log('error');
+            },
+            success: function(d) {
+                console.log('success');
+                $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
+                $('#mt_engine option[value=' + this + ']').remove();
+                if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
+            }
+        });
+    },
+
+    addMTEngine: function (provider, providerName) {
+        providerData = {};
+        $('.insert-tm .provider-data .provider-field').each(function () {
+            field = $(this).find('input').first();
+            providerData[field.attr('data-field-name')] = field.val();
+        })
+//        console.log(providerData);
+        name = $('#new-engine-name').val();
+        data = {
+            action: 'engine',
+            exec: 'add',
+            name: name,
+            provider: provider,
+            data: JSON.stringify(providerData)
+        }
+        context = data;
+        context.providerName = providerName;
+//        return false;
+
+        APP.doRequest({
+            data: data,
+            context: context,
+            error: function() {
+                console.log('error');
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    console.log('error');
+                    $('#mt-provider-details .error').text(d.errors[0].message);
+                } else {
+                    console.log('success');
+                    UI.renderNewMT(this, d.data.id);
+                    if(!APP.isCattool) {
+                        UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
+                        $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                        $('#mt_engine option:selected').removeAttr('selected');
+                        $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                    }
+                    $('#mt_engine_int').val('none').trigger('change');
+                }
+
+            }
+        });
+    },
+    renderNewMT: function (data, id) {
+        newTR =    '<tr data-id="' + id + '">' +
+                    '    <td class="mt-provider">' + data.providerName + '</td>' +
+                    '    <td class="engine-name">' + data.name + '</td>' +
+                    '    <td class="enable-mt text-center">' +
+                    '        <input type="checkbox" checked />' +
+                    '    </td>' +
+                    '    <td class="action">' +
+                    '        <a class="deleteMT btn pull-left"><span class="text">Delete</span></a>' +
+                    '    </td>' +
+                    '</tr>';
+        if(APP.isCattool) {
+            $('table.mgmt-mt tbody tr:not(.activemt)').first().before(newTR);
+
+/*
+            if(config.ownerIsMe) {
+
+            } else {
+                $('table.mgmt-mt tbody').prepend(newTR);
+            }
+*/
+        } else {
+            $('table.mgmt-mt tbody tr.activetm').removeClass('activetm').find('.enable-mt input').removeAttr('checked');
+            $('table.mgmt-mt tbody').prepend(newTR);
+        }
 
 
+    },
+
+/* codice inserito da Daniele */
+    pulseMTadded: function (row) {
+        setTimeout(function() {
+            $('.activemt').animate({scrollTop: 5000}, 0);
+            row.fadeOut();
+            row.fadeIn();
+        }, 10);
+        setTimeout(function() {
+            $('.activemt').animate({scrollTop: 5000}, 0);
+        }, 1000);
+//        $('.mgmt-tm tr.new .message').text('The key ' + this + ' has been added!');
+    },
+    resetMTProviderPanel: function () {
+        if($('.insert-tm .step2').css('display') == 'block') {
+            $('#add-mt-provider-cancel-int').click();
+            $('.add-mt-engine').click();
+//            $('.insert-tm .step2').css('display', 'none');
+        };
+        /*
+        $(".add-mt-engine").show();
+        $(".insert-tm").addClass('hide');
+        $('#mt_engine_int').val('none').trigger('change');
+        $(".insert-tm").addClass('hide').removeAttr('style');
+        $('#add-mt-provider-cancel').show();
+        */
+    },
+    activateMT: function (el) {
+        tr = $(el).parents('tr');
+        $(el).replaceWith('<input type="checkbox" checked class="temp" />');
+        cbox = tr.find('input[type=checkbox]');
+        tbody = tr.parents('tbody');
+        $(tbody).prepend(tr);
+        tbody.find('.activemt input[type=checkbox]').replaceWith('<input type="checkbox" />');
+        tbody.find('.activemt').removeClass('activemt');
+        tr.addClass('activemt').removeClass('temp');
+        $('#mt_engine option').removeAttr('selected');
+        $('#mt_engine option[value=' + tr.attr('data-id') + ']').attr('selected', 'selected');
+        UI.pulseMTadded($('.activemt').last()); /* codice inserito da Daniele */
+
+    },
+    deactivateMT: function (el) {
+        tr = $(el).parents('tr');
+        $(el).replaceWith('<input type="checkbox" />');
+        tr.removeClass('activemt');
+        $('#mt_engine option').removeAttr('selected');
+        $('#mt_engine option[value=0]').attr('selected', 'selected');
+    },
+    openTMActionDropdown: function (switcher) {
+        $(switcher).parents('td').find('.dropdown').toggle();
+    },
+    closeTMActionDropdown: function (el) {
+        $(el).parents('td').find('.wrapper-dropdown-5').click();
+    },
+
+    /*
+        toggleTM: function (el) {
+            setTimeout(function() {
+                newChecked = ($(el).attr('checked') == 'checked')? '' : ' checked';
+                $(el).replaceWith('<input type="checkbox"' + newChecked + ' />');
+            }, 200);
+        },
+    */
+    /* codice inserito da Daniele */
+    setDropDown: function(){
+
+        //init dropdown events on every class
+        new UI.DropDown( $( '.wrapper-dropdown-5' ) );
+
+        //set control events
+        $( '.action' ).mouseleave( function(){
+            $( '.wrapper-dropdown-5' ).removeClass( 'activeMenu' );
+        } );
+
+        $(document).click(function() {
+            // all dropdowns
+            $('.wrapper-dropdown-5').removeClass('activeMenu');
+        });
+
+    },
+
+
+
+    DropDown: function(el){
+        this.initEvents = function () {
+            var obj = this;
+            obj.dd.on( 'click', function ( event ) {
+                $( this ).toggleClass( 'activeMenu' );
+                event.preventDefault();
+                if($( this ).hasClass( 'activeMenu' )) {
+                    event.stopPropagation();
+                }
+            } );
+        };
+        this.dd = el;
+        this.initEvents();
+    }
 });
-
 /*
  Component: ui.offline
  */
@@ -10532,4 +11042,392 @@ if(config.offlineModeEnabled) {
         */
     });
 
+}
+/**
+ * Component ui.split
+ * Created by andreamartines on 11/03/15.
+ */
+if(config.splitSegmentEnabled) {
+    UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
+    $('html').on('mouseover', '.editor .source, .editor .sid', function() {
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.show();
+    }).on('mouseout', '.sid, .editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
+        actions = $('.editor .sid').parent().find('.actions');
+        actions.hide();
+    }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
+        e.preventDefault();
+        segment = $(this).parents('section');
+//        $('.editor .outersource .actions .split').addClass('cancel');
+        $('.editor .split-shortcut').html('CTRL + W');
+        console.log('split');
+        UI.currentSegment.addClass('split-action');
+        actions = $(this).parent().find('.actions');
+        actions.show();
+        UI.createSplitArea(segment);
+    })
+    /*.on('click', '.outersource .actions .split.cancel', function(e) {
+        e.preventDefault();
+        console.log('cancel');
+        $('.source .item').removeAttr('style');
+        $('.editor .outersource .actions .split').removeClass('cancel');
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.editor .split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+//        segment.find('.sid .actions').hide();
+
+    })*/
+    .on('click', '.sid .actions .split', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').addClass('cancel');
+        $('.split-shortcut').html('CTRL + W');
+//        console.log('split');
+        UI.currentSegment.addClass('split-action');
+        actions = $(this).parent().find('.actions');
+        actions.show();
+        UI.createSplitArea($(this).parents('section'));
+    }).on('click', '.sid .actions .split.cancel', function(e) {
+        e.preventDefault();
+        $('.sid .actions .split').removeClass('cancel');
+        source = $(segment).find('.source');
+        $(source).removeAttr('style');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        console.log('cancel');
+        segment = $(this).parents('section');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
+    }).on('keydown', '.splitArea', function(e) {
+        e.preventDefault();
+    }).on('click', '.splitArea', function(e) {
+        e.preventDefault();
+        if(window.getSelection().type == 'Range') return false;
+        if($(this).hasClass('splitpoint')) return false;
+        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
+        UI.cleanSplitPoints($(this));
+        UI.updateSplitNumber($(this));
+    }).on('mousedown', '.splitArea .splitpoint', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        segment = $(this).parents('section');
+        $(this).remove();
+        UI.updateSplitNumber($(segment).find('.splitArea'));
+
+        /*
+                console.log('cliccato');
+                segment = $(this).parents('section');
+                console.log('a');
+                console.log('prima: ', $('.splitArea').html());
+                $(this).addClass('vediamo');
+                $(this).remove();
+                console.log('dopo: ', $('.splitArea').html());
+                console.log('b');
+                UI.updateSplitNumber($(segment).find('.splitArea'));
+                console.log('c');
+        
+    }).on('click', '.splitBar .buttons .cancel', function(e) {
+        e.preventDefault();
+        segment = $(this).parents('section');
+        UI.currentSegment.removeClass('split-action');
+        $('.split-shortcut').html('CTRL + S');
+        segment.find('.splitBar, .splitArea').remove();
+        segment.find('.sid .actions').hide();
+   */}).on('click', '.splitBar .buttons .done', function(e) {
+        segment = $(this).parents('section');
+        e.preventDefault();
+        UI.splitSegment(segment);
+
+        /*
+                alreadySplitted = segment.attr('data-split-group') != '';
+                if(alreadySplitted) {
+
+                } else {
+                    UI.splitSegment(segment);
+                }
+        */
+    })
+
+    $("html").bind('keydown', 'ctrl+s', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    }).bind('keydown', 'ctrl+w', function(e) {
+        e.preventDefault();
+        UI.currentSegment.find('.sid .actions .split').click();
+    })
+
+    $.extend(UI, {
+        splitSegment: function (segment) {
+            ss = this.cleanSplittedSource(segment.find('.splitArea').html());
+            splittedSource = ss.split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
+            segment.find('.splitBar .buttons .cancel').click();
+//            segment.find('.source').removeAttr('style');
+            oldSid = segment.attr('id').split('-')[1];
+            this.setSegmentSplit(oldSid, splittedSource);
+        },
+        cleanSplittedSource: function (str) {
+            str = str.replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
+//            console.log('aaaaa: ', str.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1'));
+            str = str.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
+            return str;
+        },
+
+        setSegmentSplit: function (sid, splittedSource) {
+            splitAr = [0];
+            splitIndex = 0;
+//            console.log('splittedSource: ', splittedSource);
+            $.each(splittedSource, function (index) {
+//                console.log(UI.removeLockTagsFromString(this));
+//                console.log('prima: ', splittedSource[index]);
+                cc = UI.cleanSplittedSource(splittedSource[index]);
+//                console.log('cc: ', cc);
+//                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
+
+                //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
+                //and perform the count
+                ll = $('<div>').html(cc).text().length;
+
+                //WARNING for the length count, must be done BEFORE encoding of quotes '"' to &quot;
+                cc = cc.replace(/"/gi, '&quot;');
+
+//                console.log('dopo: ', cc);
+                splitIndex += ll;
+                splitAr.push( splitIndex );
+            });
+            splitAr.pop();
+            onlyOne = (splittedSource.length == 1)? true : false;
+            splitArString = (splitAr.toString() == '0')? '' : splitAr.toString();
+
+            // new version
+            totalSource = '';
+            $.each(splittedSource, function (index) {
+                totalSource += splittedSource[index];
+                if(index < (splittedSource.length - 1)) totalSource += UI.splittedTranslationPlaceholder;
+            });
+
+            APP.doRequest({
+                data: {
+                    action:              "setSegmentSplit",
+//                    split_points_source: '[' + splitArString + ']',
+                    segment:            totalSource,
+                    id_segment:          sid,
+                    id_job:              config.job_id,
+                    password:            config.password
+                },
+                context: {
+                    splittedSource: splittedSource,
+                    sid: sid,
+                    splitAr: splitAr
+                },
+                error: function(d){
+                    // temp
+                    UI.setSegmentSplitSuccess(this);
+                    console.log('error');
+                },
+                success: function(d){
+                    UI.setSegmentSplitSuccess(this);
+                    console.log('success');
+                    if(d.data == 'OK') {
+
+                    }
+                }
+            });
+        },
+        setSegmentSplitSuccess: function (data) {
+            oldSid = data.sid;
+//            console.log('oldSid: ', oldSid);
+            splittedSource = data.splittedSource;
+//            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
+            splitAr = data.splitAr;
+            newSegments = [];
+            splitGroup = [];
+            onlyOne = ( splittedSource.length == 1 ) ? true : false;
+//            console.log('segmentxx: ', UI.editarea.html());
+
+            //get all chunk translations, if this is a merge we want all concatenated targets
+            //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
+            translation = '';
+            if( onlyOne ) {
+                $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
+                    return this.id.match(/-editarea/);
+                } ).each( function( index, value ){
+                    translation += $( value ).html();
+                    //console.log( $( value ).html() );
+                } );
+            }
+
+            $.each( splittedSource, function ( index ) {
+
+                if( !onlyOne ) {
+                    //there is a split, there are more than one source
+                    translation = ( index == 0 ) ? UI.editarea.html() : '';
+                }
+
+                segData = {
+                    autopropagated_from: "0",
+                    has_reference: "false",
+                    parsed_time_to_edit: ["00", "00", "00", "00"],
+                    readonly: "false",
+                    segment: this.toString(),
+                    segment_hash: segment.attr('data-hash'),
+                    sid: (onlyOne)? oldSid : oldSid + '-' + (index + 1),
+                    split_points_source: [],
+                    status: "DRAFT",
+                    time_to_edit: "0",
+                    translation: translation,
+                    warning: "0"
+                }
+                newSegments.push(segData);
+                splitGroup.push(oldSid + '-' + (index + 1));
+            });
+//            console.log('newSegments: ', newSegments);
+            oldSegment = $('#segment-' + oldSid);
+            alreadySplitted = (oldSegment.length)? false : true;
+            if(onlyOne) splitGroup = [];
+//            console.log('alreadySplitted: ', alreadySplitted);
+            $('.test-invisible').remove();
+
+            if(alreadySplitted) {
+                prevSeg = $('#segment-' + oldSid + '-1').prev('section');
+
+                if(prevSeg.length) {
+                    $('section[data-split-original-id=' + oldSid + ']').remove();
+                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                    if(splitGroup.length) {
+//                        console.log('dovrebbe esser qui');
+//                        console.log('oldSid: ', oldSid);
+                        $.each(splitGroup, function (index) {
+                            UI.lockTags($('#segment-' + this + ' .source'));
+                        });
+                        this.gotoSegment(oldSid + '-1');
+                    } else {
+//                        console.log('o qui');
+//                        console.log('oldSid: ', oldSid);
+                        UI.lockTags($('#segment-' + oldSid + ' .source'));
+                        this.gotoSegment(oldSid);
+
+                    }
+
+                } else {
+
+// TEST
+/*
+                    $('section[data-split-original-id=' + oldSid + ']').remove();
+                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                    if(splitGroup.length) {
+                        console.log('H');
+//                        console.log('dovrebbe esser qui');
+//                        console.log('oldSid: ', oldSid);
+                        $.each(splitGroup, function (index) {
+                            UI.lockTags($('#segment-' + this + ' .source'));
+                        });
+                        this.gotoSegment(oldSid + '-1');
+                    } else {
+                        console.log('I');
+//                        console.log('o qui');
+//                        console.log('oldSid: ', oldSid);
+                        UI.lockTags($('#segment-' + oldSid + ' .source'));
+                        this.gotoSegment(oldSid);
+
+                    }
+
+*/
+// END TEST
+
+                }
+            } else {
+                $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                $.each(splitGroup, function (index) {
+                    UI.lockTags($('#segment-' + this + ' .source'));
+                });
+                $(oldSegment).remove();
+                this.gotoSegment(oldSid + '-1');
+            }
+
+//            console.log('or ID: ', UI.currentSegment.attr('data-split-original-id'));
+//            console.log('oldSegment: ', oldSegment);
+//            $("section[data-split-original-id=" + UI.currentSegment.attr('data-split-original-id') + "]").remove();
+        },
+
+        createSplitArea: function (segment) {
+            isSplitted = segment.attr('data-split-group') != '';
+            source = $(segment).find('.source');
+            $(source).removeAttr('style');
+            targetHeight = $('.targetarea').height();
+            segment.find('.splitContainer').remove();
+            source.after('<div class="splitContainer"><div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div></div>');
+            splitArea = segment.find('.splitArea');
+            setTimeout(function() {
+                sourceHeight = $(source).height();
+                splitAreaHeight = $(splitArea).height();
+//                console.log(sourceHeight + ' - ' + splitAreaHeight);
+//                console.log('css height del source: ', $(source).css('height'));
+            if(sourceHeight >= splitAreaHeight) {
+                    $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
+                    $(source).css('height', (sourceHeight)+ 'px');
+                    $('.editor .wrap').css('padding-bottom', (splitAreaHeight - targetHeight)+ 'px');
+//                    console.log('caso 1');
+            } else if(sourceHeight < splitAreaHeight) {
+                    $(source).css('height', (splitAreaHeight + 100)+ 'px');
+                    $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
+//                    console.log('caso 2');
+                }
+            },100);
+
+           /* setTimeout(function() {
+                sourceHeight = $(source).height();
+                splitAreaHeight = $(splitArea).height();
+                console.log(sourceHeight + ' - ' + splitAreaHeight);
+                console.log('css height del source: ', $(source).css('height'));
+                if(sourceHeight > splitAreaHeight) {
+                    $(splitArea).css('height', (splitAreaHeight + 100) +'px');
+                    $('.splitBar').css('top', (splitAreaHeight + 50)+ 'px');
+                    console.log('caso 1');
+                } else if(sourceHeight <= splitAreaHeight){
+                    $(source).css('height', (sourceHeight + 50)+ 'px');
+                    $('.splitBar').css('top', (sourceHeight + 50)+ 'px');
+                      console.log('caso 2');
+                }
+            },100);*/
+
+            if(isSplitted) splitArea.removeAttr('style');
+            if(isSplitted) {
+//                console.log('ecco: ', '');
+                segments = segment.attr('data-split-group').split(',');
+                totalMarkup = '';
+                $.each(segments, function (index) {
+//                    console.log(this + ' - ' + UI.currentSegmentId);
+                    newMarkup = $('#segment-' + this + ' .source').attr('data-original');
+                    if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
+                    totalMarkup += newMarkup;
+
+                    if(index != segments.length - 1) totalMarkup += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
+                });
+                splitAreaMarkup = totalMarkup;
+            } else {
+                splitAreaMarkup = source.attr('data-original');
+            }
+            splitArea.html(splitAreaMarkup);
+            this.lockTags(splitArea);
+            splitArea.find('.rangySelectionBoundary').remove();
+        },
+        updateSplitNumber: function (area) {
+            segment = $(area).parents('section');
+            numSplits = $(area).find('.splitpoint').length + 1;
+            splitnum = $(segment).find('.splitNum');
+            $(splitnum).find('.num').text(numSplits);
+            if (numSplits > 1) {
+                $(splitnum).find('.plural').text('s');
+                splitnum.show();
+            } else {
+                $(splitnum).find('.plural').text('');
+                splitnum.hide();
+            }
+        },
+        cleanSplitPoints: function (splitArea) {
+            splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
+            splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
+        },
+
+    })
 }
