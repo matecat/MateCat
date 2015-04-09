@@ -904,6 +904,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		p.name AS pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
 		IF (st.status='NEW',NULL,st.translation) AS translation,
+		IF (st.status='NEW','0', UNIX_TIMESTAMP( st.translation_date ) ) AS version,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 	    sts.source_chunk_lengths,
@@ -1408,7 +1409,7 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
     return $results;
 }
 
-function getCurrentTranslationAndLock( $id_job, $id_segment ) {
+function getCurrentTranslation( $id_job, $id_segment ) {
 
     $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
     $query = sprintf( $query, $id_segment, $id_job );
