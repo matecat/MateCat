@@ -157,11 +157,25 @@
             this.execSetContributionTail();
 
         },
-        extractLocalStoredItems: function (operation) {
+        extractLocalStoredItems: function (operation, job) {
+            job = job || false;
             items = [];
             $.each(localStorage, function(k,v) {
-                if(k.substring(0, operation.length) === operation) {
-                    items.push();
+                op = k.substring(0, operation.length);
+                if(op === operation) {
+                    kAr = k.split('-');
+                    if(job) {
+                        if(kAr[1] === job) {
+                            console.log(kAr[1]);
+                            return true;
+                        }
+                    }
+                    items.push({
+                        'operation': op,
+                        'job': kAr[1],
+                        'sid': kAr[2],
+                        'value': JSON.parse(v)
+                    });
 //                    items.push(JSON.parse(v));
                 }
             });
