@@ -181,12 +181,21 @@ UI = {
 
             this.body.removeClass('editing');
             $(segment).removeClass("editor waiting_for_check_result opened");
-
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
                 this.checkIfFinished(1);
             }
-            return true;
+
+// close split segment 
+        	$('.sid .actions .split').removeClass('cancel');
+        	source = $(segment).find('.source');
+        	$(source).removeAttr('style');
+        	$('section').removeClass('split-action');
+        	$('.split-shortcut').html('CTRL + S');
+        	$('.splitBar, .splitArea').remove();
+        	$('.sid .actions').hide();
+// end split segment             
+		return true;
         }
 	},
     copySource: function() {

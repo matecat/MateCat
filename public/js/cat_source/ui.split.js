@@ -320,11 +320,12 @@ if(config.splitSegmentEnabled) {
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
                     $(source).css('height', (sourceHeight)+ 'px');
+                    $('.editor .wrap').css('padding-bottom', (splitAreaHeight - targetHeight)+ 'px');
 //                    console.log('caso 1');
             } else if(sourceHeight < splitAreaHeight) {
                     $(source).css('height', (splitAreaHeight + 100)+ 'px');
                     $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
-//                      console.log('caso 2');
+//                    console.log('caso 2');
                 }
             },100);
 
