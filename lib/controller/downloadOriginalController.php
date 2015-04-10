@@ -46,7 +46,7 @@ class downloadOriginalController extends downloadController {
     }
 
     public function doAction() {
-        
+
         $files_job = getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
 
 

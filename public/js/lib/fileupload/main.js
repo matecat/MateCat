@@ -22,6 +22,10 @@ UI = {
 
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
+
+        base = Math.log( config.maxTMXFileSize ) / Math.log( 1024 );
+        config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
+
         this.initTM();
         console.log($.cookie('tmpanel-open'));
         if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
@@ -52,35 +56,49 @@ UI = {
     confirmRestartConversions: function() {
         UI.restartConversions();
     },
-    errorsBeforeUpload: function(file) {console.log('errorsBeforeUpload');
-        console.log(file);
-        ext = file.name.split('.')[file.name.split('.').length - 1];
-//        console.log(ext);
-        msg = 'Format not supported. Convert to DOCX and upload the file again.';
-//        msg = 'Format not supported. Convert to DOCX and upload the file again...';
-        if(file.type.match(/^image/)) {
-            msg = 'Images not allowed in MateCat';
-        } else if(
-                (file.type == 'application/zip'||
-                        file.type == 'application/x-gzip' ||
-                        file.type == 'application/x-tar' ||
-                        file.type == 'application/x-gtar' ||
-                        file.type == 'application/x-7z-compressed') ||
-                        ( ext == 'tgz' )
-        ) {
-                msg = 'ZIP archives not yet supported. Coming soon.';
-        }else if (ext=='tmx'){
-                msg = 'TMX importing disabled';
+    errorsFileSize: function ( file ) {
 
-	}
+        var ext = file.name.split('.').pop();
 
-        console.log(file.size);
-        if((file.size) > config.maxFileSize) {
-            msg = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
+        if ( ext == 'tmx' && file.size > config.maxTMXFileSize ) {
+            file.error = 'Error during upload. The uploaded TMX file exceed the file size limit of ' + config.maxTMXSizePrint;
+        } else if ( ext != 'tmx' && file.size > config.maxFileSize ) {
+            file.error = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
+        } else {
+            file.error = null;
         }
-		UI.checkFailedConversionsNumber();
-		console.log('msg: ', msg);
+
+    },
+    errorsBeforeUpload: function ( file ) {
+        console.log( 'errorsBeforeUpload' );
+
+        var ext = file.name.split('.').pop();
+
+        console.log( file );
+
+        var msg = '';
+
+        if ( file.type.match( /^image/ ) ) {
+            msg = 'Images not allowed in MateCat';
+        } else if (
+            (file.type == 'application/zip' ||
+            file.type == 'application/x-gzip' ||
+            file.type == 'application/x-tar' ||
+            file.type == 'application/x-gtar' ||
+            file.type == 'application/x-7z-compressed') ||
+            ( ext == 'tgz' )
+        ) {
+            msg = 'ZIP archives not yet supported. Coming soon.';
+        } else {
+            msg = 'Format not supported. Convert to DOCX and upload the file again.';
+        }
+
+        UI.checkFailedConversionsNumber();
+
+        console.log( 'msg: ', msg );
+
         return msg;
+
     },
     restartConversions: function() {
     	console.log('restart conversions');
@@ -140,7 +158,14 @@ UI = {
 	},
 
     checkFailedConversionsNumber: function() {
-    	return checkFailedConversionsNumber();
+
+        var n = $('.template-download.failed, .template-upload.failed, .template-download.has-errors, .template-upload.has-errors').length;
+        if(n>1) {
+            $('#delete-failed-conversions').show();
+        } else {
+            $('#delete-failed-conversions').hide();
+        }
+
     },
 
     addInlineMessage: function (fileName, message){
@@ -171,10 +196,9 @@ UI = {
     },
     uploadingTMX: function () {
         return $('.mgmt-tm td.uploadfile').length;
-    },
+    }
 
-
-}
+};
 
 $(function () {
     'use strict';
@@ -218,80 +242,49 @@ $(function () {
 		$('.upload-files').addClass('dragging');
         dropzone.show();
 	}).bind('fileuploadadd', function (e, data) {
-		console.log('FIRE fileuploadadd');
+
+        console.log( 'FIRE fileuploadadd' );
 //        console.log($('.upload-table tr'));
-		console.log(data);
-        console.log(data.files[0].size);
-        console.log(config.maxFileSize);
-        console.log(data.files[0].type);
-         console.log(data.files[0].name.split('.')[data.files[0].name.split('.').length - 1]);
-		 var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length - 1];
-		 if( extension == 'tmx' && config.conversionEnabled ) {
-			 var tmDisabled = (typeof $('#disable_tms_engine').attr("checked") == 'undefined')? false : true;
-			 if(tmDisabled)  {
-				APP.alert({
-					msg: 'The TM was disabled. It will now be enabled.', 
-					callback: 'TMXloaded'
-				});						 
-			 } else {
-				 UI.createKeyByTMX();
-			 };
+        console.log( data );
+        console.log( data.files[0].size );
+        console.log( config.maxFileSize );
+        console.log( data.files[0].type );
+        console.log( data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1] );
+        var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
+        if ( extension == 'tmx' && config.conversionEnabled ) {
+            var tmDisabled = (typeof $( '#disable_tms_engine' ).attr( "checked" ) == 'undefined') ? false : true;
+            if ( tmDisabled ) {
+                APP.alert( {
+                    msg: 'The TM was disabled. It will now be enabled.',
+                    callback: 'TMXloaded'
+                } );
+            } else {
+                UI.createKeyByTMX();
+            }
 
 //			 return false;
-		 }
-       
+        }
+
 //        if(!isValidFileExtension(data.files[0].name)) {
 //            alert($('.upload-table tr').length);
 //			jqXHR = data.submit();
 //			jqXHR.abort();
 //        }
-        if(data.files[0].size > config.maxFileSize) {
+        if ( data.files[0].size > config.maxFileSize ) {
 //            jqXHR = data.submit();
 //            jqXHR.abort();            
         }
-         $('body').addClass('initialized');
+        $( 'body' ).addClass( 'initialized' );
 
+        if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
+            console.log( 'adding more than config.maxNumberFiles' );
+            jqXHR = data.submit();
+            jqXHR.abort();
+        }
 
-		if($('.upload-table tr').length >= (config.maxNumberFiles)) {
-			console.log('adding more than 10');
-//			$('.error-message').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
-			jqXHR = data.submit();
-			jqXHR.abort();
-		}
-/*
-		var maxnum = config.maxNumberFiles;
-		if($('.upload-table tr').length > (maxnum-1)) {
-			console.log('more than 10');
-			$('.error-message').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
-			jqXHR = data.submit();
-			jqXHR.abort();
-		} else {
-			$('.error-message').empty().hide();
-			
-		}
-*/
+        disableAnalyze();
+        $( '#fileupload table.upload-table tr' ).addClass( 'current' );
 
-/*
-		if($('.upload-table tr').length > (maxnum-1)) {
-			
-			alert(maxnum + ' files already loaded. Limix exceeded');
-			jqXHR = data.submit();
-			jqXHR.abort();
-		}
-*/
-		disableAnalyze();
-		$('#fileupload table.upload-table tr').addClass('current');
-
-/*
-		if(data.files.length > 1) {
-			$('#fileupload').bind('fileuploadsend.preventMore', function (e) {
-				$('table.upload-table tbody').empty();
-				alert('Actually only one file for each project can be uploaded. Please retry.');
-				$('#fileupload').unbind('fileuploadsend.preventMore');
-				return false;
-			});
-		};
-*/
 	}).bind('fileuploadsend', function (e,data) {
         console.log('FIRE fileuploadsend');
         console.log(data.files);
@@ -320,10 +313,10 @@ $(function () {
 		}
 	}).bind('fileuploadfail', function (e) {
 		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
-        checkFailedConversionsNumber();
+        UI.checkFailedConversionsNumber();
 	}).bind('fileuploadchange', function (e) {
         console.log('FIRE fileuploadchange');
-        checkFailedConversionsNumber();
+        UI.checkFailedConversionsNumber();
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file deleted');
@@ -348,7 +341,7 @@ $(function () {
 			}
         	
         }
-        checkFailedConversionsNumber();
+        UI.checkFailedConversionsNumber();
 //		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
 //		console.log('checkAnalyzability(): ' + checkAnalyzability());
 		if($('.upload-table tr:not(.failed)').length) {
@@ -731,49 +724,19 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				});
 
            	} else if( d.code <= 0 ){
+
                 console.log(d.errors[0].message);
-                $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
+
+                $('td.size',filerow).next().addClass('file_upload_error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
                 $(filerow).addClass('failed');
                 setTimeout(function(){
                     $('.progress',filerow).remove();
                     $('.operation',filerow).remove();
                 },50);
-                checkFailedConversionsNumber();
+                UI.checkFailedConversionsNumber();
                 return false;
             } else {
-//       			console.log('conversion failed');
-//           		var filename = $('.name',filerow).text();
-//           		var extension = filename.split('.')[filename.split('.').length-1];
-////           		console.log(extension);
-////           		console.log(d.errors[0].message);
-////           		if(!d.errors[0].message) console.log('msg is null');
-//           		var msg = (!d.errors[0].message)? "Converter rebooting. Try again in two minutes" : d.errors[0].message;
-//
-//                var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'Error: no translatable content found: maybe a scanned file?' : msg;
-//				if(extension == 'docx') {
-//					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-//				}
-//				if((extension == 'doc')||(extension == 'rtf')) {
-//					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
-//				}
-//				if(extension == 'inx') {
-//					message = "Conversion Error. Try to commit changes in InDesign before importing.";
-//				}
-//                // temp
-//                //message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
-////                console.log(d.errors[0].code);
-////                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of ' + config.maxFileSizePrint;
-////                console.log(enforceConversion);
-////                console.log(typeof enforceConversion);
-//           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
-//           		$(filerow).addClass('failed');
-//           		console.log('after message compiling');
-//				setTimeout(function(){
-//	       			$('.progress',filerow).remove();
-//	       			$('.operation',filerow).remove();
-//				},50);
-//           		checkFailedConversionsNumber();
-//           		return false;
+
            	}
 
         }
@@ -841,16 +804,7 @@ checkInit = function() {
         	checkInit();
         };
     },100);	
-}
-
-checkFailedConversionsNumber = function() {
-    var n = $('.template-download.failed, .template-upload.failed, .template-download.has-errors, .template-upload.has-errors').length;
-    if(n>1) {
-    	$('#delete-failed-conversions').show();	
-    } else {
-    	$('#delete-failed-conversions').hide();
-    }
-}
+};
 
 checkAnalyzability = function(who) {
 //	console.log(who);
