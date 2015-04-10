@@ -449,9 +449,7 @@ class CatUtils {
                     $separator = '';
                 }
 
-                $chunk_positions[] = strlen( $chunk ) + $last + $separator_len;
-                $last += $chunk_positions[ $pos ];
-
+                $chunk_positions[] = strlen( $chunk ) + $separator_len;
                 $segment .= $chunk . $separator;
 
             }

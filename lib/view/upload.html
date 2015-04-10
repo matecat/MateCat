@@ -550,12 +550,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 			{% if (/properties/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extpro"></span>
             {% mimeok=1} %}
-			
-			
-				
-			
-		
-			
+
 			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
 			
             <span class="extpdf"></span>
@@ -564,14 +559,12 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 			{% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
 			 <span class="extxif"></span>
             {% } %}
-			
-			
-		   
+
         </td>
         <td class="name"><span>{%=file.name%}</span></td>
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
         {% if (file.error) { %}
-        <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
+        <td class="file_upload_error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
             {%=locale.fileupload.errors[file.error] || file.error%}
         </td>
         {% } else if (!i) { %}
@@ -613,7 +606,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         <td></td>
         <td class="name"><span></span></td>
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
-        <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
+        <td class="file_upload_error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
             {%=locale.fileupload.errors[file.error] || file.error%}
         </td>
         {% } else { %}
@@ -707,11 +700,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 			 {% if (/tmx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="exttmx"></span>
             {% mimeok=1} %}
-			
-				
-			
-		
-			
+
 			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
 			
             <span class="extpdf"></span>
@@ -728,12 +717,12 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         <td colspan="2"></td>
         {% } %}
         <td class="delete">
-            <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
-                <i class="icon-trash icon-white"></i>
+            <button class="btn btn-dange ui-button" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
+                <i class="icon-ban-circle icon-white"></i>
                 <span>{%=locale.fileupload.destroy%}</span>
             </button>
-
         </td>
+
     </tr>
 
 

@@ -1409,9 +1409,18 @@ UI = {
 //            console.log('this: ', this);
             if(typeof this.segment == 'object') console.log(this);
 //            console.log('this.segment: ', this);
-            if($.parseHTML(this.segment).length) {
-                this.segment = UI.stripSpans(this.segment);
-            };
+
+            try {
+                if($.parseHTML(this.segment).length) {
+                    this.segment = UI.stripSpans(this.segment);
+                };
+            } catch ( e ){
+                //if we split a segment in more than 3 parts and reload the cattool
+                //this exception is raised:
+                // Uncaught TypeError: Cannot read property 'length' of null
+                //so SKIP in a catched exception
+            }
+
 //            console.log('corrected: ', this.segment.replace(/<span(.*?)>/gi, ''));
             var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
 //            console.log('escapedSegment: ', escapedSegment);
