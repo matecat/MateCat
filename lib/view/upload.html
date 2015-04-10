@@ -716,16 +716,13 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
         <td colspan="2"></td>
         {% } %}
-        <td class="cancel">
-            <button class="btn btn-warning ui-button" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
-                <span class="ui-button-icon-primary ui-icon ui-icon-cancel"></span>
-                <span class="ui-button-text">
-                    <i class="icon-ban-circle icon-white"></i>
-                    <span>{%=locale.fileupload.destroy%}</span>
-                </span>
+        <td class="delete">
+            <button class="btn btn-dange ui-button" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>{%=locale.fileupload.destroy%}</span>
             </button>
-
         </td>
+
     </tr>
 
 

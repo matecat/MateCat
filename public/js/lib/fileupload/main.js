@@ -376,7 +376,7 @@ $(function () {
         	
         }
 		setTimeout(function(){
-        	checkFailedConversionsNumber();
+        	UI.checkFailedConversionsNumber();
         },500);
 //		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
 //		console.log('checkAnalyzability(): ' + checkAnalyzability());
