@@ -155,10 +155,10 @@ if(config.splitSegmentEnabled) {
 
             // new version
             totalSource = '';
-            $.each(splittedSource, function (index) {
-                totalSource += splittedSource[index];
-                if(index < (splittedSource.length - 1)) totalSource += UI.splittedTranslationPlaceholder;
-            });
+            $.each( splittedSource, function ( index ) {
+                totalSource += $( document.createElement( 'div' ) ).html( splittedSource[index] ).text();
+                if ( index < (splittedSource.length - 1) ) totalSource += UI.splittedTranslationPlaceholder;
+            } );
 
             APP.doRequest({
                 data: {
