@@ -471,6 +471,14 @@ div.sid .implicit {
 .sid .actions {
     display: none;
 }
+
+.sid .actions.disabled {
+  background: none;
+  border: none;
+}
+
+
+
 .outersource .actions {
     display: none;
     position: absolute;
@@ -3119,6 +3127,10 @@ float: left;
   display: block;
   cursor: pointer!important;
     transform: rotate(-90deg);
+}
+
+.sid .actions.disabled .split {
+	  cursor: no-drop!important;
 }
 
 .editor.split-action .actions .split {
