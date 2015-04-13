@@ -31,6 +31,10 @@
         UI.closeOfflineMode('total');
         UI.blockUIForNoConnection();
     })
+    $('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {
+        e.preventDefault();
+        APP.alert('Split is disabled in Offline Mode');
+    })
 
     $.extend(UI, {
         closeOfflineMode: function (from) {

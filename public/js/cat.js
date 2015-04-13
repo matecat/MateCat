@@ -10866,6 +10866,10 @@ $.extend(UI, {
         UI.closeOfflineMode('total');
         UI.blockUIForNoConnection();
     })
+    $('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {
+        e.preventDefault();
+        APP.alert('Split is disabled in Offline Mode');
+    })
 
     $.extend(UI, {
         closeOfflineMode: function (from) {
@@ -11095,7 +11099,7 @@ if(config.splitSegmentEnabled) {
     }).on('mouseout', '.sid, .editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
         actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
-    }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
+    }).on('click', 'body:not([data-offline-mode]) .outersource .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
 //        $('.editor .outersource .actions .split').addClass('cancel');
@@ -11118,7 +11122,7 @@ if(config.splitSegmentEnabled) {
 //        segment.find('.sid .actions').hide();
 
     })*/
-    .on('click', '.sid .actions .split', function(e) {
+    .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
         e.preventDefault();
         $('.sid .actions .split').addClass('cancel');
         $('.split-shortcut').html('CTRL + W');
@@ -11127,6 +11131,9 @@ if(config.splitSegmentEnabled) {
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea($(this).parents('section'));
+
+    }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
+        e.preventDefault();
     }).on('click', '.sid .actions .split.cancel', function(e) {
         e.preventDefault();
         $('.sid .actions .split').removeClass('cancel');
