@@ -10837,7 +10837,7 @@ $.extend(UI, {
  Component: ui.offline
  */
 //if(config.offlineModeEnabled) {
-    UI.offlineCacheSize = 10;
+    UI.offlineCacheSize = 30;
     UI.offlineCacheRemaining = UI.offlineCacheSize
 
     $(window).on('offlineON', function(d) {
@@ -11275,8 +11275,9 @@ if(config.splitSegmentEnabled) {
         },
         setSegmentSplitSuccess: function (data) {
             oldSid = data.sid;
-//            console.log('oldSid: ', oldSid);
+            console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
+            console.log('splittedSource: ', splittedSource);
 //            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
             splitAr = data.splitAr;
             newSegments = [];
@@ -11315,6 +11316,7 @@ if(config.splitSegmentEnabled) {
                     status: "DRAFT",
                     time_to_edit: "0",
                     translation: translation,
+                    version: segment.attr('data-version'),
                     warning: "0"
                 }
                 newSegments.push(segData);
@@ -11333,46 +11335,19 @@ if(config.splitSegmentEnabled) {
                 if(prevSeg.length) {
                     $('section[data-split-original-id=' + oldSid + ']').remove();
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                    if(splitGroup.length) {
-//                        console.log('dovrebbe esser qui');
-//                        console.log('oldSid: ', oldSid);
-                        $.each(splitGroup, function (index) {
-                            UI.lockTags($('#segment-' + this + ' .source'));
-                        });
-                        this.gotoSegment(oldSid + '-1');
-                    } else {
-//                        console.log('o qui');
-//                        console.log('oldSid: ', oldSid);
-                        UI.lockTags($('#segment-' + oldSid + ' .source'));
-                        this.gotoSegment(oldSid);
-
-                    }
-
                 } else {
-
-// TEST
-/*
+                    file = $('#segment-' + oldSid + '-1').parents('article');
                     $('section[data-split-original-id=' + oldSid + ']').remove();
-                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                    if(splitGroup.length) {
-                        console.log('H');
-//                        console.log('dovrebbe esser qui');
-//                        console.log('oldSid: ', oldSid);
-                        $.each(splitGroup, function (index) {
-                            UI.lockTags($('#segment-' + this + ' .source'));
-                        });
-                        this.gotoSegment(oldSid + '-1');
-                    } else {
-                        console.log('I');
-//                        console.log('o qui');
-//                        console.log('oldSid: ', oldSid);
-                        UI.lockTags($('#segment-' + oldSid + ' .source'));
-                        this.gotoSegment(oldSid);
-
-                    }
-
-*/
-// END TEST
+                    $(file).prepend(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                }
+                if(splitGroup.length) {
+                    $.each(splitGroup, function (index) {
+                        UI.lockTags($('#segment-' + this + ' .source'));
+                    });
+                    this.gotoSegment(oldSid + '-1');
+                } else {
+                    UI.lockTags($('#segment-' + oldSid + ' .source'));
+                    this.gotoSegment(oldSid);
 
                 }
             } else {

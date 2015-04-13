@@ -2,7 +2,7 @@
  Component: ui.offline
  */
 //if(config.offlineModeEnabled) {
-    UI.offlineCacheSize = 10;
+    UI.offlineCacheSize = 30;
     UI.offlineCacheRemaining = UI.offlineCacheSize
 
     $(window).on('offlineON', function(d) {
