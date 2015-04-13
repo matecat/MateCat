@@ -2210,25 +2210,25 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller) {
-        console.log('setTranslation');
+//        console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
 //        console.log('caller: ', caller);
         // add to setTranslation tail
         alreadySet = this.alreadyInSetTranslationTail(id_segment);
-        console.log('prova: ', '"' + $('#segment-' + id_segment + ' .editarea').text().trim().length + '"');
+//        console.log('prova: ', '"' + $('#segment-' + id_segment + ' .editarea').text().trim().length + '"');
         emptyTranslation = ($('#segment-' + id_segment + ' .editarea').text().trim().length)? false : true;
         toSave = ((!alreadySet)&&(!emptyTranslation));
-        console.log('alreadySet: ', alreadySet);
-        console.log('emptyTranslation: ', emptyTranslation);
-        console.log('toSave: ', toSave);
+//        console.log('alreadySet: ', alreadySet);
+//        console.log('emptyTranslation: ', emptyTranslation);
+//        console.log('toSave: ', toSave);
 
         if(toSave) this.addToSetTranslationTail(id_segment, status, caller);
 //        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
 //        this.addToSetTranslationTail(id_segment, status, caller);
 //        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
-        console.log('UI.offline: ', UI.offline);
-        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
+//        console.log('UI.offline: ', UI.offline);
+//        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
 
         if((this.offline)&&(config.offlineModeEnabled)) {
             if(toSave) this.decrementOfflineCacheRemaining();
@@ -2240,8 +2240,8 @@ UI = {
         }
     },
     alreadyInSetTranslationTail: function (sid) {
-        console.log('qqqq');
-        console.log('UI.setTranslationTail.length: ', UI.setTranslationTail.length);
+//        console.log('qqqq');
+//        console.log('UI.setTranslationTail.length: ', UI.setTranslationTail.length);
         alreadySet = false;
         $.each(UI.setTranslationTail, function (index) {
             if(this.id_segment == sid) alreadySet = true;
@@ -2268,7 +2268,7 @@ UI = {
         $(window).trigger('offlineSegmentSave');
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
-        console.log('addToSetTranslationTail ' + id_segment);
+//        console.log('addToSetTranslationTail ' + id_segment);
         var item = {
             id_segment: id_segment,
             status: status,
@@ -2379,7 +2379,7 @@ UI = {
                 UI.decrementOfflineCacheRemaining();
             },
 			success: function(d) {
-                console.log('this: ', this);
+//                console.log('this: ', this);
 //                console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
@@ -2924,6 +2924,7 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
+            $(segment).attr('data-version', d.version);
             if(!byStatus) {
                 this.beforePropagateTranslation(segment, status);
             }
@@ -3238,8 +3239,8 @@ UI = {
 			if ((tt.length) && (!ss))
 				return;
 		}
-        console.log('currentItem: ', currentItem);
-        console.log('this.editarea.html(): ', this.editarea.html());
+//        console.log('currentItem: ', currentItem);
+//        console.log('this.editarea.html(): ', this.editarea.html());
 
 		var diff = (typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main(currentItem, this.editarea.html())[1][1];
 		if (diff == ' selected')
@@ -5164,7 +5165,7 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
-            console.log('clicking on translated button');
+//            console.log('clicking on translated button');
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
@@ -5984,14 +5985,14 @@ $.extend(UI, {
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
-        console.log('setContribution');
+//        console.log('setContribution');
         this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
         if(!this.offline) {
             if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
         }
     },
     addToSetContributionTail: function (operation, segment_id, status, byStatus) {
-        console.log('addToSetContributionTail');
+//        console.log('addToSetContributionTail');
         var item = {
             operation: operation,
             segment_id: segment_id,
@@ -6001,7 +6002,7 @@ $.extend(UI, {
         this.setContributionTail.push(item);
     },
     execSetContributionTail: function () {
-        console.log('execSetContributionTail');
+//        console.log('execSetContributionTail');
         if(this.setContributionTail.length) {
             item = this.setContributionTail[0];
             this.setContributionTail.shift();
@@ -6014,7 +6015,7 @@ $.extend(UI, {
     },
 
     execSetContribution: function(segment_id, status, byStatus) {
-        console.log('execSetContribution');
+//        console.log('execSetContribution');
         this.executingSetContribution = true;
         logData = {
             segment_id: segment_id,
