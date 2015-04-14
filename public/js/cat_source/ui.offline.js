@@ -220,7 +220,7 @@
         },
         checkOfflineCacheSize: function () {
             if(!UI.offlineCacheRemaining) {
-                console.log('la cache è finita, andate in pace');
+//                console.log('la cache è finita, andate in pace');
                 $(window).trigger('offlineCacheIsFull');
             }
         }
