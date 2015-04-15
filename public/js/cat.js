@@ -3233,23 +3233,26 @@ UI = {
 		if (typeof currentItem != 'undefined') {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
-		}
+		} else {
+            return;
+        }
+
         if(this.editarea === '') return;
 
 		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
-		if (tt) {
-			if ((tt.length) && (!ss))
-				return;
-		}
+        if ( tt ) {
+            if ( (tt.length) && (!ss) )
+                return;
+        }
 //        console.log('currentItem: ', currentItem);
 //        console.log('this.editarea.html(): ', this.editarea.html());
 
-		var diff = (typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main(currentItem, this.editarea.html())[1][1];
-		if (diff == ' selected')
-			return;
+        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        if ( diff == ' selected' )
+            return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
