@@ -462,7 +462,7 @@ class downloadFileController extends downloadController {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
             $fName = str_replace( '._', ".", $fName );
-            $fName = str_replace(".out.sdlxliff", ".xlf", $fName);
+            $fName = str_replace(".out.sdlxliff", ".sdlxliff", $fName);
 
             $nFinfo = pathinfo( $fName );
             $_name  = $nFinfo[ 'filename' ];
