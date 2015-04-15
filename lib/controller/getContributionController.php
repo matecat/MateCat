@@ -202,6 +202,7 @@ class getContributionController extends ajaxController {
             }
             catch(Exception $e){
                 $this->result[ 'errors' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+                Log::doLog( $e->getMessage() );
                 return;
             }
 

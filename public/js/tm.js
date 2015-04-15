@@ -1066,8 +1066,8 @@ $.extend(UI, {
                 tm: $(this).attr('data-tm'),
                 glos: $(this).attr('data-glos'),
                 owner: $(this).attr('data-owner'),
-                key: $(this).find('.privatekey').text(),
-                name: $(this).find('.description').text(),
+                key: $(this).find('.privatekey').text().trim(), //remove spaces and unwanted chars from string
+                name: $(this).find('.description').text().trim(),
                 r: r,
                 w: w
             }
