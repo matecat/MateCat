@@ -577,6 +577,7 @@ $.fn.countdown = function (callback, duration, message) {
         } else {
             // Clear the countdown interval
             clearInterval(countdown);
+            console.log('container: ', container);
             // And fire the callback passing our container as `this`
             callback.call(container);   
         }
