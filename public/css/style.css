@@ -2116,6 +2116,8 @@ body.archived section .status-container a.status:hover
 .editor .status img{display:block;margin:-6px 0px 0 0 !Important;position:absolute;top:0;right:0px}
 .status-container{width:10px !important;float:right;margin:0 0px 0 0 !important;}
 
+
+section.status-translated .status{background-color:#0798bc !important}
 section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
