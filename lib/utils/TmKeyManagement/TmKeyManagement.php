@@ -64,10 +64,7 @@ class TmKeyManagement_TmKeyManagement {
     public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw', $type = "tm", $uid = null, $user_role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
 
         $tmKeys = json_decode( $jsonTmKeys, true );
-
-        if ( is_null( $tmKeys ) ) {
-            throw new Exception ( __METHOD__ . " -> Invalid JSON " );
-        }
+        Utils::raiseJsonExceptionError();
 
         $filter = new TmKeyManagement_Filter( $uid );
         $filter->setGrants( $grant_level )

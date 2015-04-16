@@ -2895,8 +2895,13 @@ UI = {
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
 				console.log('operation: ', operation);
-				UI.failedConnection(0, 'no');
+                UI.blockUIForNoConnection();
+//				UI.failedConnection(0, 'no');
 			}
+            if (this.code == '-101') {
+                console.log('ERROR -101');
+                UI.blockUIForNoConnection();
+            }
 		});
 	},
 	reloadPage: function() {
@@ -3228,23 +3233,26 @@ UI = {
 		if (typeof currentItem != 'undefined') {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
-		}
+		} else {
+            return;
+        }
+
         if(this.editarea === '') return;
 
 		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
-		if (tt) {
-			if ((tt.length) && (!ss))
-				return;
-		}
+        if ( tt ) {
+            if ( (tt.length) && (!ss) )
+                return;
+        }
 //        console.log('currentItem: ', currentItem);
 //        console.log('this.editarea.html(): ', this.editarea.html());
 
-		var diff = (typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main(currentItem, this.editarea.html())[1][1];
-		if (diff == ' selected')
-			return;
+        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        if ( diff == ' selected' )
+            return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
@@ -10366,8 +10374,8 @@ $.extend(UI, {
                 tm: $(this).attr('data-tm'),
                 glos: $(this).attr('data-glos'),
                 owner: $(this).attr('data-owner'),
-                key: $(this).find('.privatekey').text(),
-                name: $(this).find('.description').text(),
+                key: $(this).find('.privatekey').text().trim(), // remove spaces and unwanted chars from string
+                name: $(this).find('.description').text().trim(),
                 r: r,
                 w: w
             }
@@ -11055,7 +11063,7 @@ $.extend(UI, {
         },
         checkOfflineCacheSize: function () {
             if(!UI.offlineCacheRemaining) {
-                console.log('la cache è finita, andate in pace');
+//                console.log('la cache è finita, andate in pace');
                 $(window).trigger('offlineCacheIsFull');
             }
         }

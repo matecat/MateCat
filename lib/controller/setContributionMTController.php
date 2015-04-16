@@ -37,7 +37,7 @@ class setContributionMTController extends ajaxController {
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->segment                 = $this->__postInput[ 'source' ];
-        $this->target                  = $this->__postInput[ 'target' ];
+        $this->translation             = $this->__postInput[ 'target' ];
         $this->source_lang             = $this->__postInput[ 'source_lang' ];
         $this->target_lang             = $this->__postInput[ 'target_lang' ];
         $this->id_segment              = (int)$this->__postInput[ 'id_segment' ];
