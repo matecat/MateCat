@@ -2107,7 +2107,7 @@ body.archived section .status-container a.status:hover
     cursor: default !important;
 }
 
-.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:16px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
+.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:15px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
 
 
 
@@ -2121,6 +2121,31 @@ section.status-translated .status{background-color:#0798bc !important}
 section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
+
+
+.lightoff section.status-translated .status,
+.lightoff section.status-approved .status,
+.lightoff section.status-rejected .status
+ {	
+	background-image: url(../img/offline-bg.png) !important;
+	background-repeat: no-repeat !important;
+	background-position: center center;
+	background-size: 20px 40px;
+}
+
+.lightoff section.status-translated.editor .status,
+.lightoff section.status-approved.editor .status,
+.lightoff section.status-rejected.editor .status
+ {	
+	background-size: 20px 50px;
+}
+
+.lightoff .msg span {
+  vertical-align: middle;
+  margin-top: -3px;
+  font-size: 18px;
+  display: inline-block;
+}
 
 /*.status-translated .text {
 -webkit-animation:myfirst 0.7s; /* Chrome, Safari, Opera 
@@ -2842,7 +2867,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
     /*margin: 2px auto 0 auto;*/
     margin: 0px auto 0 auto;
 
-    padding-top:2px;
+    padding-top:5px;
     padding-bottom:2px;
     
     width: 100%;
