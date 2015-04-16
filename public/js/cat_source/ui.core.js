@@ -2269,6 +2269,7 @@ UI = {
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
 //        console.log('addToSetTranslationTail ' + id_segment);
+        $('#segment-' + id_segment).addClass('setTranslationPending');
         var item = {
             id_segment: id_segment,
             status: status,
@@ -2930,6 +2931,8 @@ UI = {
 			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
+        //    $(segment).removeClass('setTranslationPending');
+
             if(!byStatus) {
                 this.beforePropagateTranslation(segment, status);
             }

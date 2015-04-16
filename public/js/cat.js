@@ -2269,6 +2269,7 @@ UI = {
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
 //        console.log('addToSetTranslationTail ' + id_segment);
+        $('#segment-' + id_segment).addClass('setTranslationPending');
         var item = {
             id_segment: id_segment,
             status: status,
@@ -2930,6 +2931,8 @@ UI = {
 			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
+        //    $(segment).removeClass('setTranslationPending');
+
             if(!byStatus) {
                 this.beforePropagateTranslation(segment, status);
             }
@@ -10853,7 +10856,7 @@ $.extend(UI, {
         UI.body.attr('data-offline-mode', 'light-off');
 //        numUntranslated = $('section.status-new, section.status-draft');
         UI.showMessage({
-            msg: 'No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+            msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
         })
     }).on('offlineOFF', function(d) {
         console.log('offlineOFF');

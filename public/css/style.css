@@ -2124,24 +2124,21 @@ section.status-approved .status{background-color:#639d5e !important;}
 section.status-rejected .status{background-color:#b02429 !important;}
 
 
-.lightoff section.status-translated .status,
-.lightoff section.status-approved .status,
-.lightoff section.status-rejected .status
+body[data-offline-mode="light-off"] section.setTranslationPending .status
  {	
 	background-image: url(../img/offline-bg.png) !important;
 	background-repeat: no-repeat !important;
 	background-position: center center;
 	background-size: 20px 40px;
 }
-
-.lightoff section.status-translated.editor .status,
-.lightoff section.status-approved.editor .status,
-.lightoff section.status-rejected.editor .status
- {	
+body[data-offline-mode="light-off"] editor.setTranslationPending .status
+{
 	background-size: 20px 50px;
 }
 
-.lightoff .msg span {
+body[data-offline-mode="light-off"] .msg span,
+.lightoff .msg span
+{
   vertical-align: middle;
   margin-top: -3px;
   font-size: 18px;

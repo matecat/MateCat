@@ -1812,6 +1812,11 @@ header .searchbox {
 	margin-top:28px;
 }
 
+
+.offline span.msg span {
+  vertical-align: middle;
+}
+
 .slide-panel table th, .mgmt-gl th
 {
     background: #6d6e71;
@@ -2571,11 +2576,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-qu6ecd');
-	src:url('fonts/icomoon.eot?#iefix-qu6ecd') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-qu6ecd') format('woff'),
-		url('fonts/icomoon.ttf?-qu6ecd') format('truetype'),
-		url('fonts/icomoon.svg?-qu6ecd#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-vfjr9u');
+	src:url('fonts/icomoon.eot?#iefix-vfjr9u') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-vfjr9u') format('woff'),
+		url('fonts/icomoon.ttf?-vfjr9u') format('truetype'),
+		url('fonts/icomoon.svg?-vfjr9u#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2887,6 +2892,15 @@ font-size: 80%;
 
 td.align-left {
 text-align: left;
+}
+
+
+.icon-power-cord:before {
+    content: "\e291";
+}
+
+.icon-power-cord2:before {
+    content: "\e292";
 }
 
 .icon-info:before {
@@ -5334,6 +5348,28 @@ section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
 
+
+body[data-offline-mode="light-off"] section.setTranslationPending .status
+ {	
+	background-image: url(../img/offline-bg.png) !important;
+	background-repeat: no-repeat !important;
+	background-position: center center;
+	background-size: 20px 40px;
+}
+body[data-offline-mode="light-off"] editor.setTranslationPending .status
+{
+	background-size: 20px 50px;
+}
+
+body[data-offline-mode="light-off"] .msg span,
+.lightoff .msg span
+{
+  vertical-align: middle;
+  margin-top: -3px;
+  font-size: 18px;
+  display: inline-block;
+}
+
 /*.status-translated .text {
 -webkit-animation:myfirst 0.7s; /* Chrome, Safari, Opera 
 animation:myfirst 0.7s;
@@ -6054,7 +6090,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
     /*margin: 2px auto 0 auto;*/
     margin: 0px auto 0 auto;
 
-    padding-top:2px;
+    padding-top:5px;
     padding-bottom:2px;
     
     width: 100%;

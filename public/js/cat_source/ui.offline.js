@@ -10,7 +10,7 @@
         UI.body.attr('data-offline-mode', 'light-off');
 //        numUntranslated = $('section.status-new, section.status-draft');
         UI.showMessage({
-            msg: 'No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+            msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
         })
     }).on('offlineOFF', function(d) {
         console.log('offlineOFF');
