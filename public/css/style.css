@@ -2116,9 +2116,6 @@ body.archived section .status-container a.status:hover
 .editor .status img{display:block;margin:-6px 0px 0 0 !Important;position:absolute;top:0;right:0px}
 .status-container{width:10px !important;float:right;margin:0 0px 0 0 !important;}
 
-
-section.status-translated .status{background-color:#0798bc !important}
-
 section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
@@ -2127,6 +2124,7 @@ section.status-rejected .status{background-color:#b02429 !important;}
 body[data-offline-mode="light-off"] section.setTranslationPending .status
  {	
 	background-image: url(../img/offline-bg.png) !important;
+    background-color: #0798bc !important;
 	background-repeat: no-repeat !important;
 	background-position: center center;
 	background-size: 20px 40px;
@@ -2143,6 +2141,12 @@ body[data-offline-mode="light-off"] .msg span,
   margin-top: -3px;
   font-size: 18px;
   display: inline-block;
+}
+/* Always load this rule even if it is not used, it loads images for the offline mode */
+.offline_stuffs {
+    display: none;
+    visibility: hidden;
+    background-image: url(../img/offline-bg.png) !important;
 }
 
 /*.status-translated .text {
