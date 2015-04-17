@@ -48,7 +48,7 @@ class FilesStorage{
 		$path=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig";
 
 		//return file
-		return $this->getFileFromPath($path);
+		return $this->getSingleFileInPath($path);
 	}
 
 	public function getOriginalFromFileDir($id){
@@ -56,7 +56,7 @@ class FilesStorage{
 		$path=$this->filesDir.DIRECTORY_SEPARATOR.$id.DIRECTORY_SEPARATOR."orig";
 
 		//return file
-		return $this->getFileFromPath($path);
+		return $this->getSingleFileInPath($path);
 	}
 
 	public function getXliffFromCache($hash,$lang){
@@ -64,7 +64,7 @@ class FilesStorage{
 		$path=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work";
 
 		//return file
-		return $this->getFileFromPath($path);
+		return $this->getSingleFileInPath($path);
 	}
 
 	public function getXliffFromFileDir($id){
@@ -72,10 +72,10 @@ class FilesStorage{
 		$path=$this->filesDir.DIRECTORY_SEPARATOR.$id.DIRECTORY_SEPARATOR."xliff";
 
 		//return file
-		return $this->getFileFromPath($path);
+		return $this->getSingleFileInPath($path);
 	}
 
-	public function makeCachePackage($hash, $lang, $originalPath, $xliffPath){
+	public function makeCachePackage($hash, $lang, $originalPath=false, $xliffPath){
 		//ensure old stuff is overwritten
 		if(is_dir($this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang)){
 			shell_exec("rm -fr ".$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang);
@@ -87,60 +87,85 @@ class FilesStorage{
 		mkdir($cacheDir.DIRECTORY_SEPARATOR."orig");
 		mkdir($cacheDir.DIRECTORY_SEPARATOR."work");
 
-		//move original
-		$outcome1=rename($originalPath,$cacheDir.DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($originalPath));
+		//if it's not an xliff as original
+		if(!$originalPath){
+			//set original moval as successful
+			$outcome1=true;
+
+			//use original xliff
+			$xliffDestination=$cacheDir.DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($xliffPath);
+		}else{
+			//move original
+			$outcome1=rename($originalPath,$cacheDir.DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($originalPath));
+
+			//set naming for converted xliff
+			$xliffDestination=$cacheDir.DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($originalPath).'.xlf';
+		}
 
 		//move converted xliff
-		$outcome2=rename($xliffPath,$cacheDir.DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($originalPath).'.xlf');
+		$outcome2=rename($xliffPath, $xliffDestination);
 
 		return $outcome1 and $outcome2;
 	}
 
 	public function linkSessionToCache($hash, $lang, $uid){
-			//get upload dir
-			$dir=INIT::$UPLOAD_REPOSITORY.DIRECTORY_SEPARATOR.$uid;
+		//get upload dir
+		$dir=INIT::$UPLOAD_REPOSITORY.DIRECTORY_SEPARATOR.$uid;
 
-			//create a file in it, named after cache position on storage
-			return touch($dir.DIRECTORY_SEPARATOR.$hash."|".$lang);
+		//create a file in it, named after cache position on storage
+		return touch($dir.DIRECTORY_SEPARATOR.$hash."|".$lang);
 	}
 
 	public function moveFromCacheToFileDir($hash,$lang,$idFile){
 
-		log::doLog("$hash,$lang,$idFile");
 		//destination dir
 		$fileDir=$this->filesDir.DIRECTORY_SEPARATOR.$idFile;
 		$cacheDir=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package";
 
+		log::doLog($fileDir);
+		log::doLog($cacheDir);
+
 		//check if doesn't exist
 		if(!is_dir($fileDir)){
 			//make files' directory structure
-			mkdir($destPath);
-			mkdir($destPath.DIRECTORY_SEPARATOR."package");
-			mkdir($destPath.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig");
-			mkdir($destPath.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work");
-			mkdir($destPath.DIRECTORY_SEPARATOR."orig");
-			mkdir($destPath.DIRECTORY_SEPARATOR."xliff");
+			mkdir($fileDir);
+			mkdir($fileDir.DIRECTORY_SEPARATOR."package");
+			mkdir($fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig");
+			mkdir($fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work");
+			mkdir($fileDir.DIRECTORY_SEPARATOR."orig");
+			mkdir($fileDir.DIRECTORY_SEPARATOR."xliff");
 		}
 
 		//make links from cache to files
 		//BUG: this stuff may not work if FILES and CACHES are on different filesystems
 		//FIX: we could check in advance and, in case, use copy instead of links
 
+		//check if manifest from a LongHorn conversion exists
+		$manifestFile=$cacheDir.DIRECTORY_SEPARATOR."manifest.rkm";
+		if(file_exists($manifestFile)) $longhorn=true;
+
+		if($longhorn){
+			link($manifestFile, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR.basename($manifestFile));
+		}
+
 		//orig
-		$filePath=$this->getFileFromPath($cacheDir.DIRECTORY_SEPARATOR."orig");
-		link($filePath, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($filePath));
+		$filePath=$this->getSingleFileInPath($cacheDir.DIRECTORY_SEPARATOR."orig");
 		link($filePath, $fileDir.DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($filePath));
 
+		if($longhorn){
+			link($filePath, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($filePath));
+		}
+
 		//work
-		$filePath=$this->getFileFromPath($cacheDir.DIRECTORY_SEPARATOR."work");
+		$filePath=$this->getSingleFileInPath($cacheDir.DIRECTORY_SEPARATOR."work");
 		link($filePath, $fileDir.DIRECTORY_SEPARATOR."xliff".DIRECTORY_SEPARATOR.basename($filePath));
 
-		//manifest
-		$manifestFile=$cacheDir.DIRECTORY_SEPARATOR."manifest.rkm";
-		link($manifestFile, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR.basename($manifestFile));
+		if($longhorn){
+			link($filePath, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($filePath));
+		}
 	}
 
-	private function getFileFromPath($path){
+	public function getSingleFileInPath($path){
 		//check if it actually exist
 		if(is_dir($path)){
 			//get filename
