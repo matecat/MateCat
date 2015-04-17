@@ -269,7 +269,8 @@ class Utils {
             } else {
                 $fileName = $fileInfo->getFilename();
                 if( $fileName{0} == '.' ) continue;
-                unlink( $fileInfo->getPathname() );
+                $outcome=unlink( $fileInfo->getPathname() );
+				if(!$outcome) log::doLog("fail deleting ".$fileInfo->getPathname());
             }
         }
         rmdir( $iterator->getPath() );
