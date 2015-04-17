@@ -1812,6 +1812,11 @@ header .searchbox {
 	margin-top:28px;
 }
 
+
+.offline span.msg span {
+  vertical-align: middle;
+}
+
 .slide-panel table th, .mgmt-gl th
 {
     background: #6d6e71;
@@ -2571,11 +2576,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-qu6ecd');
-	src:url('fonts/icomoon.eot?#iefix-qu6ecd') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-qu6ecd') format('woff'),
-		url('fonts/icomoon.ttf?-qu6ecd') format('truetype'),
-		url('fonts/icomoon.svg?-qu6ecd#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-vfjr9u');
+	src:url('fonts/icomoon.eot?#iefix-vfjr9u') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-vfjr9u') format('woff'),
+		url('fonts/icomoon.ttf?-vfjr9u') format('truetype'),
+		url('fonts/icomoon.svg?-vfjr9u#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2887,6 +2892,15 @@ font-size: 80%;
 
 td.align-left {
 text-align: left;
+}
+
+
+.icon-power-cord:before {
+    content: "\e291";
+}
+
+.icon-power-cord2:before {
+    content: "\e292";
 }
 
 .icon-info:before {
@@ -4194,6 +4208,7 @@ body.cattool:not(.editing) article {
 */
 .editor .text{overflow:visible;-webkit-box-shadow:none;box-shadow: none;padding:5px 0 0px 0;
 			  /*background: url(../img/freccia.png) 49% 10px  no-repeat !important;*/
+			 margin-bottom: 9px;
 			  color:#000}
 
 
@@ -4254,7 +4269,7 @@ body.review .submenu
 				clear: both;
 				visibility: hidden;}
 
-section.loaded .submenu {display: block;  margin-top: 10px;}
+section.loaded .submenu {display: block; }
 
 .loaded{
     overflow:visible !important
@@ -5318,7 +5333,7 @@ body.archived section .status-container a.status:hover
     cursor: default !important;
 }
 
-.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:6px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
+.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:15px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
 
 
 
@@ -5332,6 +5347,28 @@ section.status-translated .status{background-color:#0798bc !important}
 section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
+
+
+body[data-offline-mode="light-off"] section.setTranslationPending .status
+ {	
+	background-image: url(../img/offline-bg.png) !important;
+	background-repeat: no-repeat !important;
+	background-position: center center;
+	background-size: 20px 40px;
+}
+body[data-offline-mode="light-off"] editor.setTranslationPending .status
+{
+	background-size: 20px 50px;
+}
+
+body[data-offline-mode="light-off"] .msg span,
+.lightoff .msg span
+{
+  vertical-align: middle;
+  margin-top: -3px;
+  font-size: 18px;
+  display: inline-block;
+}
 
 /*.status-translated .text {
 -webkit-animation:myfirst 0.7s; /* Chrome, Safari, Opera 
@@ -6053,7 +6090,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
     /*margin: 2px auto 0 auto;*/
     margin: 0px auto 0 auto;
 
-    padding-top:2px;
+    padding-top:5px;
     padding-bottom:2px;
     
     width: 100%;

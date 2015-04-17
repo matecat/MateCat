@@ -2269,6 +2269,7 @@ UI = {
     },
     addToSetTranslationTail: function (id_segment, status, caller) {
 //        console.log('addToSetTranslationTail ' + id_segment);
+        $('#segment-' + id_segment).addClass('setTranslationPending');
         var item = {
             id_segment: id_segment,
             status: status,
@@ -2930,6 +2931,8 @@ UI = {
 			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
+        //    $(segment).removeClass('setTranslationPending');
+
             if(!byStatus) {
                 this.beforePropagateTranslation(segment, status);
             }
@@ -3233,23 +3236,26 @@ UI = {
 		if (typeof currentItem != 'undefined') {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
-		}
+		} else {
+            return;
+        }
+
         if(this.editarea === '') return;
 
 		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
-		if (tt) {
-			if ((tt.length) && (!ss))
-				return;
-		}
+        if ( tt ) {
+            if ( (tt.length) && (!ss) )
+                return;
+        }
 //        console.log('currentItem: ', currentItem);
 //        console.log('this.editarea.html(): ', this.editarea.html());
 
-		var diff = (typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main(currentItem, this.editarea.html())[1][1];
-		if (diff == ' selected')
-			return;
+        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        if ( diff == ' selected' )
+            return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
@@ -8705,6 +8711,7 @@ $.fn.countdown = function (callback, duration, message) {
         } else {
             // Clear the countdown interval
             clearInterval(countdown);
+            console.log('container: ', container);
             // And fire the callback passing our container as `this`
             callback.call(container);   
         }
@@ -10371,8 +10378,8 @@ $.extend(UI, {
                 tm: $(this).attr('data-tm'),
                 glos: $(this).attr('data-glos'),
                 owner: $(this).attr('data-owner'),
-                key: $(this).find('.privatekey').text(),
-                name: $(this).find('.description').text(),
+                key: $(this).find('.privatekey').text().trim(), // remove spaces and unwanted chars from string
+                name: $(this).find('.description').text().trim(),
                 r: r,
                 w: w
             }
@@ -10842,15 +10849,16 @@ $.extend(UI, {
  Component: ui.offline
  */
 //if(config.offlineModeEnabled) {
-    UI.offlineCacheSize = 30;
-    UI.offlineCacheRemaining = UI.offlineCacheSize
+    UI.offlineCacheSize = 2;
+    UI.offlineCacheRemaining = UI.offlineCacheSize;
+    UI.offlineCountdownOn = false;
 
     $(window).on('offlineON', function(d) {
         UI.offline = true;
         UI.body.attr('data-offline-mode', 'light-off');
 //        numUntranslated = $('section.status-new, section.status-draft');
         UI.showMessage({
-            msg: 'No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+            msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
         })
     }).on('offlineOFF', function(d) {
         console.log('offlineOFF');
@@ -10922,6 +10930,7 @@ $.extend(UI, {
             }
         },
         blockUIForNoConnection: function (reqArguments, operation) {
+            console.log('blockUIForNoConnection');
             if(this.autoFailoverEnabled) {
                 this.failover(reqArguments, operation);
                 return false;
@@ -10935,17 +10944,33 @@ $.extend(UI, {
             }
             if(!$('.noConnection').length) {
                 UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-                $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                //                $(".noConnectionMsg .countdown").countdown(UI.simpleTest, 30, " seconds");
+                console.log('before first countdown');
+                this.offlineCountdownStart();
+
+//                $(".noConnectionMsg .countdown").countdown(UI.checkConnection('first countdown'), 30, " seconds");
             }
         },
+        offlineCountdownStart: function () {
+            this.offlineCountdownOn = true;
+            $(".noConnectionMsg .countdown").countdown(UI.offlineCountdownEnd(), 30, " seconds");
+        },
+
+        offlineCountdownEnd: function () {
+            console.log('offlineCountdownEnd');
+            this.offlineCountdownOn = false;
+//            this.checkConnection('first countdown');
+        },
+
         goOffline: function () {
             $(window).trigger('offlineON');
         },
         goOnline: function () {
             $(window).trigger('offlineOFF');
         },
-        checkConnection: function() {
-//            console.log('check connection');
+        checkConnection: function(messaggio) {
+            console.log(messaggio);
+            console.log('check connection');
 
             APP.doRequest({
                 data: {
@@ -10959,12 +10984,23 @@ $.extend(UI, {
                             UI.checkConnection();
                         }, 5000);
                     } else {
-                        if(UI.offline) {
-                            $(window).trigger('stillNoConnection');
-                        } else {
-                            $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+                        if(!this.offlineCountdownOn) {
+                            UI.offlineCountdownStart();
                         }
+/*
+                        if(UI.offline) {
+                            console.log('UI.offline');
+//                            $(window).trigger('stillNoConnection');
+//                            $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">10 seconds</span>.');
+//                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection('new countdown'), 10, " seconds");
+                        } else {
+                            console.log('NOT UI.offline');
+//                            $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">10 seconds</span>.');
+//                            console.log('a');
+//                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection('new countdown'), 10, " seconds");
+//                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection('new countdown'), 10, " seconds");
+                        }
+*/
                     }
                 },
                 success: function() {
