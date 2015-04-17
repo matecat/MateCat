@@ -122,9 +122,6 @@ class FilesStorage{
 		$fileDir=$this->filesDir.DIRECTORY_SEPARATOR.$idFile;
 		$cacheDir=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package";
 
-		log::doLog($fileDir);
-		log::doLog($cacheDir);
-
 		//check if doesn't exist
 		if(!is_dir($fileDir)){
 			//make files' directory structure

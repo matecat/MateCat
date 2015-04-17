@@ -239,6 +239,16 @@ class ProjectManager {
 
 
         $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
+
+
+		//fetch cache links, created by converter, from upload directory
+		$linkFiles=scandir($uploadDir);
+
+		//remove dots, as uninteresting
+		foreach($linkFiles as $k=>$linkFile){
+			if('.'==$linkFile or '..'==$linkFile) unset($linkFiles[$k]);
+		}
+		
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             //if TMX,
@@ -342,7 +352,7 @@ class ProjectManager {
 				   we have to make a cache package from it to avoid altering the original path
 				 */
 				//get file
-				$filePathName =$fs->getSingleFileInPath($uploadDir);
+				$filePathName ="$uploadDir/$fileName";
 	
 				//calculate hash
 				$sha1=sha1(file_get_contents($filePathName));
@@ -353,12 +363,15 @@ class ProjectManager {
 				//put reference to cache in upload dir to link cache to session
 				$fs->linkSessionToCache($sha1, $this->source_lang, $this->projectStructure[ 'uploadToken' ]);
 
+				//add newly created link to list
+				$linkFiles[]=$sha1."|".$this->source_lang;
+
 				unset($sha1);
 			}
 
 			//converted file is inside cache directory
 			//get hash from file name inside UUID dir
-			$hashFile=basename($fs->getSingleFileInPath($uploadDir));
+			$hashFile=basename(array_pop($linkFiles));
 			$hashFile=explode('|',$hashFile);
 
 			//use hash and lang to fetch file from package
