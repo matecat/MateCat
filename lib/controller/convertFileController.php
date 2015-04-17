@@ -67,7 +67,7 @@ class convertFileController extends ajaxController {
 			return false;
 		}
 
-        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
+		$this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
 		$file_path = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
 
 		if ( !file_exists( $file_path ) ) {
@@ -76,17 +76,6 @@ class convertFileController extends ajaxController {
 
 			return -1;
 		}
-
-		//get uploaded file from disk
-		$original_content = file_get_contents( $file_path );
-		$sha1             = sha1( $original_content );
-
-
-		//if already present in database cache get the converted without convert it again
-		if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
-			$xliffContent = getXliffBySHA1( $sha1, $this->source_lang, $this->target_lang, $this->cache_days, $this->segmentation_rule );
-		}
-
 
 		//XLIFF Conversion management
 		//cyclomatic complexity 9999999 ..... but it works, for now.
@@ -155,30 +144,26 @@ class convertFileController extends ajaxController {
 			return -1;
 		}
 
+		//compute hash to locate the file in the cache
+		$sha1=sha1(file_get_contents($file_path));
 
-		//there is a cached copy of conversion? inflate
-		if ( isset( $xliffContent ) && !empty( $xliffContent ) ) {
+		//get storage object
+		$fs= new FilesStorage();
 
-			$xliffContent = gzinflate( $xliffContent );
-			$res          = $this->put_xliff_on_file( $xliffContent, $this->intDir );
+		//if already present in database cache get the converted without convert it again
+		if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
-			if ( !$res ) {
+			//move the file in the right directory from the packages to the file dir
+			$xliffPath=$fs->getXliffFromCache($sha1, $this->source_lang);
 
-				//custom error message passed directly to javascript client and displayed as is
-				$convertResult[ 'errorMessage' ] = "Error: failed to save converted file from cache to disk";
-				$this->result[ 'code' ]          = -101;
-				$this->result[ 'errors' ][ ]     = array(
-						"code" => -101, "message" => $convertResult[ 'errorMessage' ],
-						'debug' => basename( $this->file_name )
-						);
-
+			if (!$xliffPath) {
+				Log::doLog("Failed to fetch xliff for $sha1 from disk cache (is file there?)");
 			}
+		}
 
-			//else whe have to convert it
-		} else {
-
-			$original_content_zipped = gzdeflate( $original_content, 5 );
-			unset( $original_content );
+		//if invalid or no cached version
+		if (!isset($xliffPath) or empty($xliffPath)){
+			//we have to convert it
 
 			$converter = new FileFormatConverter( $this->segmentation_rule );
 
@@ -189,7 +174,7 @@ class convertFileController extends ajaxController {
 				$single_language = $this->target_lang;
 			}
 
-			$convertResult = $converter->convertToSdlxliff( $file_path, $this->source_lang, $single_language, false, $this->segmentation_rule );
+			$convertResult=$converter->convertToSdlxliff($file_path, $this->source_lang, $single_language, false, $this->segmentation_rule);
 
 			if ( $convertResult[ 'isSuccess' ] == 1 ) {
 
@@ -215,42 +200,12 @@ class convertFileController extends ajaxController {
 					return false;
 				}
 
-				//$uid = $convertResult['uid']; // va inserito nel database
-				$xliffContent       = $convertResult[ 'xliffContent' ];
-				$xliffContentZipped = gzdeflate( $xliffContent, 5 );
+				//store converted content on a temporary path on disk (and off RAM)
+				$xliffPath = tempnam( "/tmp", "MAT_XLF" );
+				file_put_contents($xliffPath,$convertResult[ 'xliffContent' ]);
+				unset($convertResult[ 'xliffContent' ]);
 
-				//cache the converted file
-				if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
-					$res_insert = insertFileIntoMap( $sha1, $this->source_lang, $this->target_lang, $original_content_zipped, $xliffContentZipped,$this->segmentation_rule );
-					if ( $res_insert < 0 ) {
-						//custom error message passed directly to javascript client and displayed as is
-						$convertResult[ 'errorMessage' ] = "Error: File too large";
-						$this->result[ 'code' ]          = -102;
-						$this->result[ 'errors' ][ ]     = array(
-								"code" => -102, "message" => $convertResult[ 'errorMessage' ],
-								'debug' => basename( $this->file_name )
-								);
 
-						return;
-					}
-				}
-
-				unset ( $xliffContentZipped );
-
-				$res = $this->put_xliff_on_file( $xliffContent, $this->intDir );
-				if ( !$res ) {
-
-					//custom error message passed directly to javascript client and displayed as is
-					$convertResult[ 'errorMessage' ] = "Error: failed to save file on disk";
-					$this->result[ 'code' ]          = -103;
-					$this->result[ 'errors' ][ ]     = array(
-							"code" => -103, "message" => $convertResult[ 'errorMessage' ],
-							'debug' => basename( $this->file_name )
-							);
-
-					return false;
-
-				}
 
 			} else {
 
@@ -267,7 +222,7 @@ class convertFileController extends ajaxController {
 					case 'inx':
 						$defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
 						break;
-                    case 'idml':
+					case 'idml':
 						$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to a previous one.";
 						break;
 					default:
@@ -308,10 +263,10 @@ class convertFileController extends ajaxController {
 					//this error is triggered on DOCX when converter's parser can't decode some regions of the file
 					$convertResult[ 'errorMessage' ] = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
 				} elseif ( $file[ 'extension' ] == 'idml' ) {
-                    $convertResult[ 'errorMessage' ] = $defaultError;
-                } else {
-                    $convertResult[ 'errorMessage' ] = "Import error. Try converting it to a compatible file format (e.g. doc > docx, xlsx > xls)";
-                }
+					$convertResult[ 'errorMessage' ] = $defaultError;
+				} else {
+					$convertResult[ 'errorMessage' ] = "Import error. Try converting it to a compatible file format (e.g. doc > docx, xlsx > xls)";
+				}
 
 				//custom error message passed directly to javascript client and displayed as is
 				$this->result[ 'code' ]      = -100;
@@ -321,28 +276,42 @@ class convertFileController extends ajaxController {
 
 			}
 
+			/*
+			   store the converted file in the cache
+			   put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
+			   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
+			 */
+
+			//save in cache
+			$res_insert=$fs->makeCachePackage($sha1, $this->source_lang, $file_path, $xliffPath);
+
+
+			if (!$res_insert) {
+				//custom error message passed directly to javascript client and displayed as is
+				$convertResult[ 'errorMessage' ] = "Error: failed to save file on storage intermediate cache";
+				$this->result[ 'code' ]          = -103;
+				$this->result[ 'errors' ][ ]     = array(
+						"code" => -103, "message" => $convertResult[ 'errorMessage' ],
+						'debug' => basename( $this->file_name )
+						);
+
+				unset($xliffPath);
+				return false;
+			}
 		}
-	}
 
-	private function put_xliff_on_file( $xliffContent ) {
+		//if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
+		if (isset($xliffPath) and !empty($xliffPath)){
+			//put reference to cache in upload dir to link cache to session
+			$fs->linkSessionToCache($sha1, $this->source_lang, $_COOKIE[ 'upload_session' ]);
 
-		if ( !is_dir( $this->intDir . "_converted" ) ) {
-			mkdir( $this->intDir . "_converted" );
-		};
+			//temporary stuff is useless, so clean it
+			unlink($file_path);
 
-		$result = file_put_contents( "$this->intDir" . "_converted" . DIRECTORY_SEPARATOR . $this->file_name . ".sdlxliff", $xliffContent );
-
-		//$result = number of bytes written
-		if ( $result ) {
+			//a usable package is available, give positive feedback
 			$this->result[ 'code' ] = 1;
-
-			return true;
-		} else {
-			return false;
 		}
-
 	}
-
 }
 
 ?>

@@ -17,6 +17,8 @@ class INIT {
 	public static $LOG_REPOSITORY;
 	public static $STORAGE_DIR;
 	public static $UPLOAD_REPOSITORY;
+	public static $FILES_REPOSITORY;
+	public static $CACHE_REPOSITORY;
 	public static $CONVERSIONERRORS_REPOSITORY;
 	public static $CONVERSIONERRORS_REPOSITORY_WEB;
 	public static $TMP_DOWNLOAD;
@@ -180,6 +182,8 @@ class INIT {
 		self::$STORAGE_DIR                     = self::$ROOT . "/storage";
 		self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
 		self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
+		self::$FILES_REPOSITORY               = self::$STORAGE_DIR . "/files";
+		self::$CACHE_REPOSITORY               = self::$STORAGE_DIR . "/cache";
 		self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
 		self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
 		self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
@@ -200,6 +204,12 @@ class INIT {
 		}
 		if (!is_dir(self::$UPLOAD_REPOSITORY)){
 			mkdir (self::$UPLOAD_REPOSITORY,0755,true);
+		}
+		if (!is_dir(self::$FILES_REPOSITORY)){
+			mkdir (self::$FILES_REPOSITORY,0755,true);
+		}
+		if (!is_dir(self::$CACHE_REPOSITORY)){
+			mkdir (self::$CACHE_REPOSITORY,0755,true);
 		}
 		if (!is_dir(self::$CONVERSIONERRORS_REPOSITORY)){
 			mkdir (self::$CONVERSIONERRORS_REPOSITORY,0755,true);
