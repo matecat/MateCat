@@ -10988,8 +10988,8 @@ $.extend(UI, {
                     UI.execAbortedOperations( UI.endOfflineMode );
                     UI.restoringAbortedOperations = false;
                     UI.executingSetTranslation = false;
-                    this.execSetTranslationTail();
-                    this.execSetContributionTail();
+                    UI.execSetTranslationTail();
+                    UI.execSetContributionTail(); 
 
                 }
 
