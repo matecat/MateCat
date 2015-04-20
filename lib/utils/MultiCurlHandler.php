@@ -129,7 +129,7 @@ class MultiCurlHandler {
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
             $this->multi_curl_info[ $tokenHash ][ 'errno' ]                                = $_info[ (int)$curl_resource ][ 'result' ];
 
-            Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
+            //Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
 
         }
 

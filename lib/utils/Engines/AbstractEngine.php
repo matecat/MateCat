@@ -146,7 +146,7 @@ abstract class Engines_AbstractEngine {
 
         $mh->multiCurlCloseAll();
 
-        Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
+        //Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
 
         return $rawValue;
 
