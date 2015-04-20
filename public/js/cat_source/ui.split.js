@@ -360,7 +360,7 @@ if(config.splitSegmentEnabled) {
         cleanSplitPoints: function (splitArea) {
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
-        },
+        }
 
     })
 }

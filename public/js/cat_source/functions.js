@@ -577,12 +577,15 @@ $.fn.countdown = function (callback, duration, message) {
         } else {
             // Clear the countdown interval
             clearInterval(countdown);
+            console.log('container: ', container);
             // And fire the callback passing our container as `this`
-            callback.call(container);   
+            callback.call(container);
         }
     // Run interval every 1000ms (1 second)
     }, 1000);
-    
+
+    return countdown;
+
 };
 
 Object.size = function(obj) {
