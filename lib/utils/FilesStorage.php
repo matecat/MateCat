@@ -208,6 +208,27 @@ class FilesStorage{
 		return $results;
 	}
 
+	public function getFilesForJob( $id_job, $id_file ) {
+		$where_id_file = "";
+
+		if ( !empty( $id_file ) ) {
+			$where_id_file = " and id_file=$id_file";
+		}
+
+		$query = "select id_file, filename, mime_type from files_job fj
+			inner join files f on f.id=fj.id_file
+			where id_job = $id_job $where_id_file";
+
+		$db      = Database::obtain();
+		$results = $db->fetch_array( $query );
+
+		foreach($results as $k=>$result){
+			$results[$k]['originalFilePath']=$this->getOriginalFromFileDir($result['id_file']);
+			$results[$k]['xliffFilePath']=$this->getXliffFromFileDir($result['id_file']);
+		}
+
+		return $results;
+	}
 }
 
 ?>

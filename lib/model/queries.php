@@ -1376,22 +1376,6 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     return $db->affected_rows;
 }
 
-function getFilesForJob( $id_job, $id_file ) {
-    $where_id_file = "";
-
-    if ( !empty( $id_file ) ) {
-        $where_id_file = " and id_file=$id_file";
-    }
-
-    $query = "select id_file, xliff_file, original_file, filename,mime_type from files_job fj
-		inner join files f on f.id=fj.id_file
-		where id_job = $id_job $where_id_file";
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
 
 
 function getCurrentTranslation( $id_job, $id_segment ) {
