@@ -37,10 +37,8 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.autoFailoverEnabled = false;
 //        this.offlineModeEnabled = false;
         this.offline = false;
-//        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );

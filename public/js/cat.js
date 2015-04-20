@@ -2210,7 +2210,7 @@ UI = {
 		}, 'local');
 	},
 
-    setTranslation: function(id_segment, status, caller) {
+    setTranslation: function(id_segment, status, caller, callback) {
 //        console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
@@ -2224,22 +2224,29 @@ UI = {
 //        console.log('emptyTranslation: ', emptyTranslation);
 //        console.log('toSave: ', toSave);
 
-        if(toSave) this.addToSetTranslationTail(id_segment, status, caller);
+        //REMOVED Check for to save
+        //Send ALL to the queue
+        if( toSave ) {
+            this.addToSetTranslationTail( id_segment, status, caller, callback = callback || {} );
+        } else {
+            this.updateToSetTranslationTail( id_segment, status, caller, callback = callback || {} )
+        }
+
 //        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
 //        this.addToSetTranslationTail(id_segment, status, caller);
 //        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
 //        console.log('UI.offline: ', UI.offline);
 //        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
 
-        if ( (this.offline) && (config.offlineModeEnabled) ) {
+        if ( this.offline && config.offlineModeEnabled ) {
 
             if ( toSave ) {
                 this.decrementOfflineCacheRemaining();
-                UI.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
+                this.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
             }
 
             this.changeStatusOffline( id_segment );
-            this.checkConnection( 'Set Translation check Authorized', true );
+            this.checkConnection( 'Set Translation check Authorized' );
 
         } else {
 //            console.log('this.executingSetTranslation: ', this.executingSetTranslation);
@@ -2261,35 +2268,44 @@ UI = {
             $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
         }
     },
-    decrementOfflineCacheRemaining: function () {
-        $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
-        UI.checkOfflineCacheSize();
-    },
-    incrementOfflineCacheRemaining: function(){
-        // reset counter by 1
-        this.offlineCacheRemaining += 1;
-        //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
-    },
-    addToSetTranslationTail: function (id_segment, status, caller) {
+    addToSetTranslationTail: function (id_segment, status, caller, callback) {
 //        console.log('addToSetTranslationTail ' + id_segment);
         $('#segment-' + id_segment).addClass('setTranslationPending');
         var item = {
             id_segment: id_segment,
             status: status,
-            caller: caller
+            caller: caller,
+            callback: callback
         }
         this.setTranslationTail.push(item);
+    },
+    updateToSetTranslationTail: function (id_segment, status, caller, callback) {
+//        console.log('addToSetTranslationTail ' + id_segment);
+        $('#segment-' + id_segment).addClass('setTranslationPending');
+        var item = {
+            id_segment: id_segment,
+            status: status,
+            caller: caller,
+            callback: callback
+        }
+        $.each( UI.setTranslationTail, function (index) {
+            if( this.id_segment == id_segment ) {
+                this.status   = status;
+                this.caller   = caller;
+                this.callback = callback;
+            }
+        });
     },
     execSetTranslationTail: function () {
 //        console.log('execSetTranslationTail');
         if(this.setTranslationTail.length) {
             item = this.setTranslationTail[0];
             this.setTranslationTail.shift(); // to move on ajax callback
-            this.execSetTranslation(item.id_segment, item.status, item.caller);
+            this.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
         }
     },
 
-    execSetTranslation: function(id_segment, status, caller) {
+    execSetTranslation: function( id_segment, status, caller, callback ) {
 //        console.log('execSetTranslation');
         this.executingSetTranslation = true;
         reqArguments = arguments;
@@ -2390,6 +2406,11 @@ UI = {
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
+
+        if( typeof( callback ) === "function" ) {
+            callback.call();
+        }
+
 	},
     collectSplittedStatuses: function (sid) {
         statuses = [];
@@ -2414,6 +2435,9 @@ UI = {
         return totalTranslation;
     },
 
+    /**
+     * @deprecated
+     */
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -2931,6 +2955,10 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
+
+            //if this was in pending state remove
+            $( segment ).removeClass( 'setTranslationPending' );
+
 			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
@@ -3366,7 +3394,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.2";
+		this.version = "0.5.3";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3399,10 +3427,8 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.autoFailoverEnabled = false;
 //        this.offlineModeEnabled = false;
         this.offline = false;
-//        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
@@ -4481,7 +4507,7 @@ $.extend(UI, {
 			}
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
-			UI.checkConnection( 'Click from Human Authorized', true );
+			UI.checkConnection( 'Click from Human Authorized' );
 		}).on('click', '#statistics .meter a', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
@@ -5214,7 +5240,7 @@ $.extend(UI, {
 
 			}
 			UI.checkHeaviness();
-			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+			if ( UI.blockButtons ) {
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {
@@ -8716,11 +8742,13 @@ $.fn.countdown = function (callback, duration, message) {
             clearInterval(countdown);
             console.log('container: ', container);
             // And fire the callback passing our container as `this`
-            callback.call(container);   
+            callback.call(container);
         }
     // Run interval every 1000ms (1 second)
     }, 1000);
-    
+
+    return countdown;
+
 };
 
 Object.size = function(obj) {
@@ -10854,49 +10882,54 @@ $.extend(UI, {
 
 UI.offlineCacheSize = 2;
 UI.offlineCacheRemaining = UI.offlineCacheSize;
-UI.offlineCountdownOn = false;
 UI.checkingConnection = false;
+
+UI.currentConnectionCountdown = null;
 
 $.extend(UI, {
     startOfflineMode: function(){
-        if( !this.offline ){
+
+        if( !UI.offline ){
+
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
             UI.showMessage({
                 msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
             });
+
+            UI.checkingConnection = setInterval( function() {
+                UI.checkConnection( 'Recursive Check authorized' );
+            }, 5000 );
+
         }
     },
-    endOfflineMode: function (from) {
-        if ( this.offline ) {
+    endOfflineMode: function () {
+        if ( UI.offline ) {
+
             UI.showMessage( {
                 msg: "Connection is back. We are saving translated segments in the database."
             } );
+
             setTimeout( function () {
                 $( '#messageBar .close' ).click();
             }, 10000 );
+
             UI.offline = false;
+            clearInterval( UI.currentConnectionCountdown );
+            clearInterval( UI.checkingConnection );
+            UI.currentConnectionCountdown = null;
+            UI.checkingConnection = false;
             UI.body.removeAttr( 'data-offline-mode' );
-        }
-    },
-    failover: function(reqArguments, operation) {
-//            console.log('failover on ' + operation);
-        if(operation != 'getWarning') {
-            var pendingConnection = {
-                operation: operation,
-                args: reqArguments
-            };
-//			console.log('pendingConnection: ', pendingConnection);
-            var dd = new Date();
-            if(pendingConnection.args) {
-                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-            }
-            if(!UI.checkConnectionTimeout) {
-                UI.checkConnectionTimeout = setTimeout(function() {
-                    UI.checkConnection();
-                    UI.checkConnectionTimeout = false;
-                }, 5000);
-            }
+
+            $('.noConnectionMsg').text( 'The connection is back. Your last, interrupted operation has now been done.' );
+
+            setTimeout(function() {
+                $('.noConnection').addClass('reConnection');
+                setTimeout(function() {
+                    $('.noConnection, .noConnectionMsg').remove();
+                }, 500);
+            }, 3000);
+
         }
     },
     failedConnection: function(reqArguments, operation) {
@@ -10912,20 +10945,7 @@ $.extend(UI, {
         }
 
     },
-    blockUIForNoConnection: function (reqArguments, operation) {
-        console.log('blockUIForNoConnection');
-        if(this.autoFailoverEnabled) {
-            this.failover(reqArguments, operation);
-            return false;
-        }
-        this.offlineCountdown( 'No connection available.' );
-    },
-    offlineCountdown: function ( message ) {
-
-        if ( this.offlineCountdownOn ) {
-            // this is a semaphore, only one thread at a time must act
-            return false;
-        }
+    activateOfflineCountdown: function ( message ) {
 
         if ( !$( '.noConnection' ).length ) {
             UI.body.append( '<div class="noConnection"></div><div class="noConnectionMsg"></div>' );
@@ -10933,79 +10953,53 @@ $.extend(UI, {
 
         $( '.noConnectionMsg' ).html( '<div class="noConnectionMsg">' + message + '<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>' );
 
-        this.offlineCountdownOn = true;
-        $( ".noConnectionMsg .countdown" ).countdown( function () {
+        //clear previous Interval and set a new one
+        UI.currentConnectionCountdown = $( ".noConnectionMsg .countdown" ).countdown( function () {
             console.log( 'offlineCountdownEnd' );
-            UI.offlineCountdownOn = false;
-            UI.checkConnection( 'Clear countdown authorized', true );
+            UI.checkConnection( 'Clear countdown authorized' );
+            UI.activateOfflineCountdown( 'Still no connection.' );
         }, 30, " seconds" );
 
     },
-    goOnline: function () {
-        $(window).trigger('offlineOFF');
-    },
-    checkConnection: function(message, authorizedCheck) {
-
-        //we does not want to flood server with connection checks
-        // one connection check at a time is enough
-        // BUT when an human clicks the event MUST pass, so set authorizedCheck to true for human events
-        authorizedCheck = typeof authorizedCheck !== 'undefined' ? authorizedCheck : false;
-        if( this.checkingConnection && !authorizedCheck ){
-            console.log( 'Connection already in check status' );
-            return false;
-        }
+    checkConnection: function( message ) {
 
         console.log(message);
         console.log('check connection');
 
-        this.checkingConnection = true;
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',
                 exec: 'ping'
             },
             error: function() {
-                console.log('error on checking connection');
-                if(UI.autoFailoverEnabled) {
-                    setTimeout(function() {
-                        UI.checkConnection( 'Recursive Check authorized', true );
-                    }, 5000);
-                } else {
-                    UI.offlineCountdown( 'Still no connection.' );
-                }
+                /**
+                 * do Nothing there are already a thread running
+                 * @see UI.startOfflineMode
+                 * @see UI.endOfflineMode
+                 */
             },
             success: function() {
-                console.log('check connection success');
 
+                console.log('check connection success');
                 //check status completed
-                UI.checkingConnection = false;
-                if(!UI.restoringAbortedOperations) UI.connectionIsBack();
+                if( !UI.restoringAbortedOperations ) {
+
+                    UI.restoringAbortedOperations = true;
+                    UI.execAbortedOperations( UI.endOfflineMode );
+                    UI.restoringAbortedOperations = false;
+                    UI.executingSetTranslation = false;
+                    this.execSetTranslationTail();
+                    this.execSetContributionTail();
+
+                }
 
             }
         });
     },
-    connectionIsBack: function() {
-//            console.log('connection is back');
-        if(this.offline) this.endOfflineMode('light');
-        this.restoringAbortedOperations = true;
-        this.execAbortedOperations();
-        if(!this.autoFailoverEnabled) {
-            $('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
-            setTimeout(function() {
-                $('.noConnection').addClass('reConnection');
-                setTimeout(function() {
-                    $('.noConnection, .noConnectionMsg').remove();
-                }, 500);
-            }, 3000);
-        }
-        this.restoringAbortedOperations = false;
-        this.executingSetTranslation = false;
-        this.execSetTranslationTail();
-        this.execSetContributionTail();
-    },
 
     /**
      * NOT USED
+     * @deprecated
      * @param operation
      * @param job
      * @returns {Array|*}
@@ -11035,26 +11029,44 @@ $.extend(UI, {
         return items;
 
     },
-    execAbortedOperations: function() {
-        if(UI.autoFailoverEnabled) {
-//			console.log(localStorage);
-            var pendingArray = [];
-            inp = 'pending';
-            $.each(localStorage, function(k,v) {
-                if(k.substring(0, inp.length) === inp) {
-                    pendingArray.push(JSON.parse(v));
-                }
-            });
-//			console.log(pendingArray);
-            UI.abortedOperations = pendingArray;
+    /**
+     * NOT USED
+     * @deprecated
+     *
+     * @param reqArguments
+     * @param operation
+     */
+    failover: function(reqArguments, operation) {
+//            console.log('failover on ' + operation);
+        if(operation != 'getWarning') {
+            var pendingConnection = {
+                operation: operation,
+                args: reqArguments
+            };
+//			console.log('pendingConnection: ', pendingConnection);
+            var dd = new Date();
+            if(pendingConnection.args) {
+                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+            }
+            if(!UI.checkConnectionTimeout) {
+                UI.checkConnectionTimeout = setTimeout(function() {
+                    UI.checkConnection();
+                    UI.checkConnectionTimeout = false;
+                }, 5000);
+            }
         }
+    },
+
+    execAbortedOperations: function( callback ) {
+
+        callback = callback || {};
+
 		//console.log(UI.abortedOperations);
         $.each(UI.abortedOperations, function() {
             args = this.args;
             operation = this.operation;
             if(operation == 'setTranslation') {
-                UI[operation](args[0], args[1], args[2]);
-                UI.incrementOfflineCacheRemaining(); // re-add 1 to Cache max size
+                UI[operation](args[0], args[1], args[2], UI.incrementOfflineCacheRemaining );
             } else if(operation == 'updateContribution') {
                 UI[operation](args[0], args[1]);
             } else if(operation == 'setContributionMT') {
@@ -11066,36 +11078,33 @@ $.extend(UI, {
             }
         });
         UI.abortedOperations = [];
-        UI.clearStorage('pending');
+
+        callback.call();
+
+        //UI.clearStorage('pending'); // no more used
+
     },
     checkOfflineCacheSize: function () {
         if ( !UI.offlineCacheRemaining ) {
-            UI.blockUIForNoConnection();
+            UI.activateOfflineCountdown( 'No connection available.' );
             //console.log( 'la cache è piena, andate in pace' );
         }
+    },
+    decrementOfflineCacheRemaining: function () {
+        $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
+        UI.checkOfflineCacheSize();
+    },
+    incrementOfflineCacheRemaining: function(){
+        // reset counter by 1
+        UI.offlineCacheRemaining += 1;
+        //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
     }
-
-});
-
-
-$(window).on('offlineOFF', function(d) {
-
-    console.log('offlineOFF');
-    UI.offline = false;
-    UI.body.removeAttr('data-offline-mode');
-
-    UI.showMessage({
-        msg: "Connection is back. We are saving translated segments in the database."
-    });
-
 });
 
 $('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {
     e.preventDefault();
     APP.alert('Split is disabled in Offline Mode');
 });
-
-//            UI.offlineCacheRemaining = UI.offlineCacheSize; // reset counter with 1 second of delay
 
 /**
  * Component ui.split

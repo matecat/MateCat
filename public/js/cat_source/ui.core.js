@@ -2210,7 +2210,7 @@ UI = {
 		}, 'local');
 	},
 
-    setTranslation: function(id_segment, status, caller) {
+    setTranslation: function(id_segment, status, caller, callback) {
 //        console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
@@ -2224,22 +2224,29 @@ UI = {
 //        console.log('emptyTranslation: ', emptyTranslation);
 //        console.log('toSave: ', toSave);
 
-        if(toSave) this.addToSetTranslationTail(id_segment, status, caller);
+        //REMOVED Check for to save
+        //Send ALL to the queue
+        if( toSave ) {
+            this.addToSetTranslationTail( id_segment, status, caller, callback = callback || {} );
+        } else {
+            this.updateToSetTranslationTail( id_segment, status, caller, callback = callback || {} )
+        }
+
 //        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
 //        this.addToSetTranslationTail(id_segment, status, caller);
 //        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
 //        console.log('UI.offline: ', UI.offline);
 //        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
 
-        if ( (this.offline) && (config.offlineModeEnabled) ) {
+        if ( this.offline && config.offlineModeEnabled ) {
 
             if ( toSave ) {
                 this.decrementOfflineCacheRemaining();
-                UI.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
+                this.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
             }
 
             this.changeStatusOffline( id_segment );
-            this.checkConnection( 'Set Translation check Authorized', true );
+            this.checkConnection( 'Set Translation check Authorized' );
 
         } else {
 //            console.log('this.executingSetTranslation: ', this.executingSetTranslation);
@@ -2261,35 +2268,44 @@ UI = {
             $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
         }
     },
-    decrementOfflineCacheRemaining: function () {
-        $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
-        UI.checkOfflineCacheSize();
-    },
-    incrementOfflineCacheRemaining: function(){
-        // reset counter by 1
-        this.offlineCacheRemaining += 1;
-        //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
-    },
-    addToSetTranslationTail: function (id_segment, status, caller) {
+    addToSetTranslationTail: function (id_segment, status, caller, callback) {
 //        console.log('addToSetTranslationTail ' + id_segment);
         $('#segment-' + id_segment).addClass('setTranslationPending');
         var item = {
             id_segment: id_segment,
             status: status,
-            caller: caller
+            caller: caller,
+            callback: callback
         }
         this.setTranslationTail.push(item);
+    },
+    updateToSetTranslationTail: function (id_segment, status, caller, callback) {
+//        console.log('addToSetTranslationTail ' + id_segment);
+        $('#segment-' + id_segment).addClass('setTranslationPending');
+        var item = {
+            id_segment: id_segment,
+            status: status,
+            caller: caller,
+            callback: callback
+        }
+        $.each( UI.setTranslationTail, function (index) {
+            if( this.id_segment == id_segment ) {
+                this.status   = status;
+                this.caller   = caller;
+                this.callback = callback;
+            }
+        });
     },
     execSetTranslationTail: function () {
 //        console.log('execSetTranslationTail');
         if(this.setTranslationTail.length) {
             item = this.setTranslationTail[0];
             this.setTranslationTail.shift(); // to move on ajax callback
-            this.execSetTranslation(item.id_segment, item.status, item.caller);
+            this.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
         }
     },
 
-    execSetTranslation: function(id_segment, status, caller) {
+    execSetTranslation: function( id_segment, status, caller, callback ) {
 //        console.log('execSetTranslation');
         this.executingSetTranslation = true;
         reqArguments = arguments;
@@ -2390,6 +2406,11 @@ UI = {
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
+
+        if( typeof( callback ) === "function" ) {
+            callback.call();
+        }
+
 	},
     collectSplittedStatuses: function (sid) {
         statuses = [];
@@ -2414,6 +2435,9 @@ UI = {
         return totalTranslation;
     },
 
+    /**
+     * @deprecated
+     */
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -2931,6 +2955,10 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
+
+            //if this was in pending state remove
+            $( segment ).removeClass( 'setTranslationPending' );
+
 			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);

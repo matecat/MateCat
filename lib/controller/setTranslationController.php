@@ -59,6 +59,8 @@ class setTranslationController extends ajaxController {
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
 
+        Log::doLog( $this->__postInput );
+
     }
 
     protected function _checkData( $logName = 'log.txt' ) {
