@@ -213,13 +213,12 @@ class setTranslationController extends ajaxController {
 
         $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
 
-        $old_version = ( empty( $old_translation['translation_date'] ) ? '0' : date_create( $old_translation['translation_date'] )->getTimestamp() );
-
-        if( $this->client_target_version != $old_version ){
-            $this->result[ 'errors' ][ ] = array( "code" => -102, "message" => "Translation version mismatch" );
-            $db->rollback();
-            return false;
-        }
+//        $old_version = ( empty( $old_translation['translation_date'] ) ? '0' : date_create( $old_translation['translation_date'] )->getTimestamp() );
+//        if( $this->client_target_version != $old_version ){
+//            $this->result[ 'errors' ][ ] = array( "code" => -102, "message" => "Translation version mismatch" );
+//            $db->rollback();
+//            return false;
+//        }
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
