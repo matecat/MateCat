@@ -666,6 +666,22 @@ class ProjectManager {
 
         $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
 
+        /**
+         * TODO: remove after queue implementation
+         */
+        if( $project_summary[0]['project_segments'] > 50000 ) {
+            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+
+            $msg = "
+        WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
+        var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
+                    "  " .
+        var_export( $project_summary[0] , true ) . "\n";
+
+            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " . php_uname('n') );
+
+        }
+
         $update_project_count = "
             UPDATE projects
               SET
