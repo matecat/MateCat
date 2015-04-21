@@ -519,25 +519,39 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length || $('.popup-tm td.uploadfile.uploading').length ) {
-		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending operation. Are you sure you want to quit?';
-		if(dont_confirm_leave!==1) {
-			if(!e) e = window.event;
-			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-			e.cancelBubble = true;
-			e.returnValue = leave_message;
-			//e.stopPropagation works in Firefox.
-			if (e.stopPropagation) 
-			{
-				e.stopPropagation();
-				e.preventDefault();
-			}
 
-			//return works for Chrome and Safari
-			return leave_message;
-		}
-	}
+    var leave_message = '';
+    var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
+
+    if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
+        leave_message = 'You have a pending operation. Are you sure you want to quit?';
+        say_goodbye();
+    }
+
+    if ( UI.offline ) {
+        leave_message = 'You are offline. Some translations could not be sent. Are you sure you want to quit?';
+        say_goodbye();
+    }
+
+    function say_goodbye(  ){
+
+        if ( dont_confirm_leave !== 1 ) {
+            if ( !e ) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = leave_message;
+            //e.stopPropagation works in Firefox.
+            if ( e.stopPropagation ) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            //return works for Chrome and Safari
+            return leave_message;
+        }
+
+    }
+
 }   
 
 $.fn.isOnScreen = function() {
