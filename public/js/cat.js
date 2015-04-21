@@ -10886,7 +10886,7 @@ $.extend(UI, {
  Component: ui.offline
  */
 
-UI.offlineCacheSize = 2;
+UI.offlineCacheSize = 30;
 UI.offlineCacheRemaining = UI.offlineCacheSize;
 UI.checkingConnection = false;
 
