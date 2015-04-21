@@ -306,15 +306,17 @@ $.extend(UI, {
     },
     execSetContributionTail: function () {
 //        console.log('execSetContributionTail');
-        if(this.setContributionTail.length) {
-            item = this.setContributionTail[0];
-            this.setContributionTail.shift();
-            if(item.operation == 'setContribution') {
-                this.execSetContribution(item.segment_id, item.status, item.byStatus);
+
+        if ( UI.setContributionTail.length ) {
+            item = UI.setContributionTail[0];
+            UI.setContributionTail.shift();
+            if ( item.operation == 'setContribution' ) {
+                UI.execSetContribution( item.segment_id, item.status, item.byStatus );
             } else {
-                this.execSetContributionMT(item.segment_id, item.status, item.byStatus);
+                UI.execSetContributionMT( item.segment_id, item.status, item.byStatus );
             }
         }
+
     },
 
     execSetContribution: function(segment_id, status, byStatus) {

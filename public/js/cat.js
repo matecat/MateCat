@@ -2296,12 +2296,12 @@ UI = {
             }
         });
     },
-    execSetTranslationTail: function () {
+    execSetTranslationTail: function ( callback_to_execute ) {
 //        console.log('execSetTranslationTail');
-        if(this.setTranslationTail.length) {
-            item = this.setTranslationTail[0];
-            this.setTranslationTail.shift(); // to move on ajax callback
-            this.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
+        if(UI.setTranslationTail.length) {
+            item = UI.setTranslationTail[0];
+            UI.setTranslationTail.shift(); // to move on ajax callback
+            UI.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
         }
     },
 
@@ -4319,16 +4319,11 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
-        }).on('offlineON', function(d) {
-//            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
 			goodbye(e);
-			UI.clearStorage('contribution');
-			
-//			localStorage.clear();
 		};
 
 	
@@ -6043,15 +6038,17 @@ $.extend(UI, {
     },
     execSetContributionTail: function () {
 //        console.log('execSetContributionTail');
-        if(this.setContributionTail.length) {
-            item = this.setContributionTail[0];
-            this.setContributionTail.shift();
-            if(item.operation == 'setContribution') {
-                this.execSetContribution(item.segment_id, item.status, item.byStatus);
+
+        if ( UI.setContributionTail.length ) {
+            item = UI.setContributionTail[0];
+            UI.setContributionTail.shift();
+            if ( item.operation == 'setContribution' ) {
+                UI.execSetContribution( item.segment_id, item.status, item.byStatus );
             } else {
-                this.execSetContributionMT(item.segment_id, item.status, item.byStatus);
+                UI.execSetContributionMT( item.segment_id, item.status, item.byStatus );
             }
         }
+
     },
 
     execSetContribution: function(segment_id, status, byStatus) {
@@ -8682,25 +8679,34 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length || $('.popup-tm td.uploadfile.uploading').length ) {
-		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending operation. Are you sure you want to quit?';
-		if(dont_confirm_leave!==1) {
-			if(!e) e = window.event;
-			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-			e.cancelBubble = true;
-			e.returnValue = leave_message;
-			//e.stopPropagation works in Firefox.
-			if (e.stopPropagation) 
-			{
-				e.stopPropagation();
-				e.preventDefault();
-			}
 
-			//return works for Chrome and Safari
-			return leave_message;
-		}
-	}
+    if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
+        return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
+    }
+
+    if ( UI.offline ) {
+        return say_goodbye( 'You are offline. Some translations could not be sent. Are you sure you want to quit?' );
+    }
+
+    //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
+    function say_goodbye( leave_message ){
+
+        if ( typeof leave_message !== 'undefined' ) {
+            if ( !e ) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = leave_message;
+            //e.stopPropagation works in Firefox.
+            if ( e.stopPropagation ) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            //return works for Chrome and Safari
+            return leave_message;
+        }
+
+    }
+
 }   
 
 $.fn.isOnScreen = function() {
@@ -10906,6 +10912,8 @@ $.extend(UI, {
     endOfflineMode: function () {
         if ( UI.offline ) {
 
+            UI.offline = false;
+
             UI.showMessage( {
                 msg: "Connection is back. We are saving translated segments in the database."
             } );
@@ -10914,7 +10922,6 @@ $.extend(UI, {
                 $( '#messageBar .close' ).click();
             }, 10000 );
 
-            UI.offline = false;
             clearInterval( UI.currentConnectionCountdown );
             clearInterval( UI.checkingConnection );
             UI.currentConnectionCountdown = null;
@@ -10989,7 +10996,7 @@ $.extend(UI, {
                     UI.restoringAbortedOperations = false;
                     UI.executingSetTranslation = false;
                     UI.execSetTranslationTail();
-                    UI.execSetContributionTail(); 
+                    UI.execSetContributionTail();
 
                 }
 
@@ -11056,10 +11063,24 @@ $.extend(UI, {
             }
         }
     },
+    /**
+     * If there are some callback to be executed after the function call pass it as callback
+     *
+     * Note: the function stack is executed when the interpreter exit from the local scope
+     * so, UI[operation] will be executed after the call of callback_to_execute.
+     *
+     * If we put the callback_to_execute out of this scope
+     *      ( calling after the return of this function and not from inside it )
+     *
+     * UI[operation] will be executed before callback_to_execute.
+     * Not working as expected because this behaviour affects "UI.offline = false;"
+     *
+     *
+     * @param callback_to_execute
+     */
+    execAbortedOperations: function( callback_to_execute ) {
 
-    execAbortedOperations: function( callback ) {
-
-        callback = callback || {};
+        callback_to_execute = callback_to_execute || {};
 
 		//console.log(UI.abortedOperations);
         $.each(UI.abortedOperations, function() {
@@ -11079,9 +11100,7 @@ $.extend(UI, {
         });
         UI.abortedOperations = [];
 
-        callback.call();
-
-        //UI.clearStorage('pending'); // no more used
+        callback_to_execute.call();
 
     },
     checkOfflineCacheSize: function () {

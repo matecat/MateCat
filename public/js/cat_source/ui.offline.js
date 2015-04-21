@@ -28,6 +28,8 @@ $.extend(UI, {
     endOfflineMode: function () {
         if ( UI.offline ) {
 
+            UI.offline = false;
+
             UI.showMessage( {
                 msg: "Connection is back. We are saving translated segments in the database."
             } );
@@ -36,7 +38,6 @@ $.extend(UI, {
                 $( '#messageBar .close' ).click();
             }, 10000 );
 
-            UI.offline = false;
             clearInterval( UI.currentConnectionCountdown );
             clearInterval( UI.checkingConnection );
             UI.currentConnectionCountdown = null;
@@ -178,10 +179,24 @@ $.extend(UI, {
             }
         }
     },
+    /**
+     * If there are some callback to be executed after the function call pass it as callback
+     *
+     * Note: the function stack is executed when the interpreter exit from the local scope
+     * so, UI[operation] will be executed after the call of callback_to_execute.
+     *
+     * If we put the callback_to_execute out of this scope
+     *      ( calling after the return of this function and not from inside it )
+     *
+     * UI[operation] will be executed before callback_to_execute.
+     * Not working as expected because this behaviour affects "UI.offline = false;"
+     *
+     *
+     * @param callback_to_execute
+     */
+    execAbortedOperations: function( callback_to_execute ) {
 
-    execAbortedOperations: function( callback ) {
-
-        callback = callback || {};
+        callback_to_execute = callback_to_execute || {};
 
 		//console.log(UI.abortedOperations);
         $.each(UI.abortedOperations, function() {
@@ -201,9 +216,7 @@ $.extend(UI, {
         });
         UI.abortedOperations = [];
 
-        callback.call();
-
-        //UI.clearStorage('pending'); // no more used
+        callback_to_execute.call();
 
     },
     checkOfflineCacheSize: function () {

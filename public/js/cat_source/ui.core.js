@@ -2296,12 +2296,12 @@ UI = {
             }
         });
     },
-    execSetTranslationTail: function () {
+    execSetTranslationTail: function ( callback_to_execute ) {
 //        console.log('execSetTranslationTail');
-        if(this.setTranslationTail.length) {
-            item = this.setTranslationTail[0];
-            this.setTranslationTail.shift(); // to move on ajax callback
-            this.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
+        if(UI.setTranslationTail.length) {
+            item = UI.setTranslationTail[0];
+            UI.setTranslationTail.shift(); // to move on ajax callback
+            UI.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
         }
     },
 

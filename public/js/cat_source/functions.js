@@ -520,22 +520,18 @@ function setBrowserHistoryBehavior() {
 
 function goodbye(e) {
 
-    var leave_message = '';
-    var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
-
     if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
-        leave_message = 'You have a pending operation. Are you sure you want to quit?';
-        say_goodbye();
+        return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
     }
 
     if ( UI.offline ) {
-        leave_message = 'You are offline. Some translations could not be sent. Are you sure you want to quit?';
-        say_goodbye();
+        return say_goodbye( 'You are offline. Some translations could not be sent. Are you sure you want to quit?' );
     }
 
-    function say_goodbye(  ){
+    //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
+    function say_goodbye( leave_message ){
 
-        if ( dont_confirm_leave !== 1 ) {
+        if ( typeof leave_message !== 'undefined' ) {
             if ( !e ) e = window.event;
             //e.cancelBubble is supported by IE - this will kill the bubbling process.
             e.cancelBubble = true;
@@ -545,7 +541,6 @@ function goodbye(e) {
                 e.stopPropagation();
                 e.preventDefault();
             }
-
             //return works for Chrome and Safari
             return leave_message;
         }
