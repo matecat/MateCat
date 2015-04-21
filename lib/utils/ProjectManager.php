@@ -678,7 +678,7 @@ class ProjectManager {
                     "  " .
         var_export( $project_summary[0] , true ) . "\n";
 
-            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " . php_uname('n') );
+            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
 
         }
 
