@@ -68,7 +68,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                     key_tm AS tm,
                                     key_glos AS glos
                              FROM " . self::TABLE . " WHERE %s and deleted = 0
-			     ORDER BY creation_date desc"";
+			     ORDER BY creation_date desc";
 
         if ( $obj->uid !== null ) {
             $where_conditions[ ] = "uid = " . $obj->uid;
