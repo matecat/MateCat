@@ -25,6 +25,7 @@ abstract class Engines_AbstractEngine {
     const IOS_STRINGS_REGEXP = '#%[\']*[\+]*(([0-9]+)?\.[0-9]+|[0-9]+\$|[0-9]+)*(h{1,2}|l{1,2}|[qLztj])?[@%dDuUxXoOfFeEgGcCsSpaAi]{1}#';
     protected $_patterns_found = array();
 
+    public $doLog = true;
 
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
@@ -146,7 +147,9 @@ abstract class Engines_AbstractEngine {
 
         $mh->multiCurlCloseAll();
 
-        Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
+        if( $this->doLog ){
+            Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
+        }
 
         return $rawValue;
 

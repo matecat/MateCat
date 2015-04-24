@@ -449,7 +449,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     /******************************************/
 
-    public function fastAnalysis( $segs_array ) {
+    public function fastAnalysis( &$segs_array ) {
         if ( !is_array( $segs_array ) ) {
 
             return null;

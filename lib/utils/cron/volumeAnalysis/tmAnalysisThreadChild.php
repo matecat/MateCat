@@ -9,6 +9,17 @@ define( "PID_FOLDER", ".pidlist" );
 define( "NUM_PROCESSES", 1 );
 define( "NUM_PROCESSES_FILE", ".num_processes" );
 
+$amqHandlerSubscriber = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
+$amqHandlerSubscriber->connect();
+
+$amqHandlerSubscriber->subscribe( INIT::$QUEUE_NAME );
+$amqHandlerSubscriber->setReadTimeout( 1, 1 );
+
+$amqHandlerPublisher = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
+$amqHandlerPublisher->connect();
+
+Log::$fileName = "tm_analysis.log";
+
 // PROCESS CONTROL FUNCTIONS
 function isRunningProcess( $pid ) {
     if ( file_exists( "/proc/$pid" ) ) {
@@ -40,323 +51,357 @@ echo "--- (child $my_pid) : parent pid is $parent_pid\n";
 $memcacheHandler = MemcacheHandler::getInstance();
 
 while ( 1 ) {
-    if ( !processFileExists( $my_pid ) ) {
+    if ( 0 && !processFileExists( $my_pid ) ) {
         die( "(child $my_pid) :  EXITING!  my file does not exists anymore\n" );
     }
 
     // control if parent is still running
-    if ( !isRunningProcess( $parent_pid ) ) {
+    if ( 0 && !isRunningProcess( $parent_pid ) ) {
         echo "--- (child $my_pid) : EXITING : parent seems to be died.\n";
         exit ( -1 );
     }
 
-    $res = getNextSegmentAndLock();
-    $pid = $res[ 'pid' ];
 
-    if ( empty( $res ) ) {
-        echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
-        sleep( 5 );
-        continue;
-    }
-    $sid = $res[ 'id_segment' ];
-    $jid = $res[ 'id_job' ];
-    echo "--- (child $my_pid) : segment $sid-$jid found \n";
-    $segment = getSegmentForTMVolumeAnalysys( $sid, $jid );
+    $msg      = null;
+    $objQueue = array();
+    try {
 
-    echo "segment found is: ";
-    print_r( $segment );
-    echo "\n";
-
-    if ( empty( $segment ) ) {
-        echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
-        setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
-        incrementCount( $res[ 'pid' ], 0, 0 );
-        sleep( 5 );
-        continue;
-    }
-
-    if ( is_numeric( $segment ) and $segment < 0 ) {
-        setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
-        incrementCount( $res[ 'pid' ], 0, 0 );
-        echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
-        continue;
-    }
-
-    //get the number of segments in job
-    $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
-    if ( $_existingLock !== false ) {
-
-        $total_segs = getProjectSegmentsTranslationSummary( $pid );
-
-        $total_segs = array_pop( $total_segs ); // get the Rollup Value
-        var_export( $total_segs );
-
-        $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
-        $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
-        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
-    }
-    else {
-        $_existingPid = $memcacheHandler->get( 'project:' . $pid );
-        $_analyzed    = $memcacheHandler->get( 'num_analyzed:' . $pid );
-        echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
-        echo "--- (child $my_pid) : analyzed $_analyzed segments for PID $pid in Memcache\n";
-    }
-
-
-    echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
-
-    //lock segment
-    echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
-
-    $source           = $segment[ 'source' ];
-    $target           = $segment[ 'target' ];
-    $id_translator    = $segment[ 'id_translator' ];
-    $raw_wc           = $segment[ 'raw_word_count' ];
-    $fast_match_type  = $segment[ 'match_type' ];
-    $payable_rates    = $segment[ 'payable_rates' ];
-    $pretranslate_100 = $segment[ 'pretranslate_100' ];
-
-    $text = $segment[ 'segment' ];
-
-    if ( $raw_wc == 0 ) {
-        echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
-        incrementCount( $pid, 0, 0 );
-        setSegmentTranslationError( $sid, $jid ); // SET as DONE
-        tryToCloseProject( $pid, $my_pid );
-        continue;
-    }
-
-    //reset vectors
-    $matches   = array();
-    $tms_match = array();
-    $mt_result = array();
-
-    $_config              = array();
-    $_config[ 'segment' ] = $text;
-    $_config[ 'source' ]  = $source;
-    $_config[ 'target' ]  = $target;
-    $_config[ 'email' ]   = "tmanalysis@matecat.com";
-
-    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $segment[ 'tm_keys' ], 'r', 'tm' );
-    if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
-        foreach ( $tm_keys as $tm_key ) {
-            $_config[ 'id_user' ][ ] = $tm_key->key;
+        if ( $amqHandlerSubscriber->hasFrameToRead() ) {
+            $msg = $amqHandlerSubscriber->readFrame();
         }
+
+        if ( $msg instanceof StompFrame && ( $msg->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msg->headers /* Stomp Client bug... hack */ ) ) ) {
+
+            $objQueue = json_decode( $msg->body, true );
+            //empty message what to do?? it should not be there, acknowledge and process the next one
+            if ( empty( $objQueue ) ) {
+
+                Utils::raiseJsonExceptionError();
+
+                echo( $msg );
+                $amqHandlerSubscriber->ack( $msg );
+                continue;
+
+            }
+        }
+
+    } catch ( Exception $e ) {
+        echo( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
+        echo( $e->getMessage() );
+        var_export( $e->getTraceAsString() );
+        continue; /* jump the ack */
     }
 
-    $_config[ 'num_result' ] = 3;
+    if ( !empty( $objQueue ) ) {
 
-    $id_mt_engine = $segment[ 'id_mt_engine' ];
-    $id_tms       = $segment[ 'id_tms' ];
+        $failed_segment = null;
 
-    $_TMS = $id_tms; //request
+        $pid = $objQueue[ 'pid' ];
 
-    /**
-     * Call Memory Server for matches if it's enabled
-     */
-    $tms_enabled = false;
-    if ( $_TMS == 1 ) {
+        if ( empty( $objQueue ) ) {
+            echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
+            sleep( 5 );
+            continue;
+        }
+        $sid = $objQueue[ 'id_segment' ];
+        $jid = $objQueue[ 'id_job' ];
+        echo "--- (child $my_pid) : segment $sid-$jid found \n";
+//        $objQueue = getSegmentForTMVolumeAnalysys( $sid, $jid );
+
+        echo "segment found is: ";
+        print_r( $objQueue );
+        echo "\n";
+
+        if ( empty( $objQueue ) ) {
+            echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
+            setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
+            incrementCount( $objQueue[ 'pid' ], 0, 0 );
+            sleep( 5 );
+            continue;
+        }
+
+        //get the number of segments in job
+        $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
+        if ( $_existingLock !== false ) {
+
+            $total_segs = getProjectSegmentsTranslationSummary( $pid );
+
+            $total_segs = array_pop( $total_segs ); // get the Rollup Value
+            var_export( $total_segs );
+
+            $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
+            $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
+            echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
+        } else {
+            $_existingPid = $memcacheHandler->get( 'project:' . $pid );
+            $_analyzed    = $memcacheHandler->get( 'num_analyzed:' . $pid );
+            echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
+            echo "--- (child $my_pid) : analyzed $_analyzed segments for PID $pid in Memcache\n";
+        }
+
+
+        echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
+
+        //lock segment
+        echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
+
+        $source           = $objQueue[ 'source' ];
+        $target           = $objQueue[ 'target' ];
+        $raw_wc           = $objQueue[ 'raw_word_count' ];
+        $fast_match_type  = $objQueue[ 'match_type' ];
+        $payable_rates    = $objQueue[ 'payable_rates' ];
+        $pretranslate_100 = $objQueue[ 'pretranslate_100' ];
+
+        $text = $objQueue[ 'segment' ];
+
+        if ( $raw_wc == 0 ) {
+            echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
+            incrementCount( $pid, 0, 0 );
+            setSegmentTranslationError( $sid, $jid ); // SET as DONE
+            tryToCloseProject( $pid, $my_pid );
+            continue;
+        }
+
+        //reset vectors
+        $matches   = array();
+        $tms_match = array();
+        $mt_result = array();
+
+        $_config              = array();
+        $_config[ 'segment' ] = $text;
+        $_config[ 'source' ]  = $source;
+        $_config[ 'target' ]  = $target;
+        $_config[ 'email' ]   = "tmanalysis@matecat.com";
+
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $objQueue[ 'tm_keys' ], 'r', 'tm' );
+        if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
+            foreach ( $tm_keys as $tm_key ) {
+                $_config[ 'id_user' ][ ] = $tm_key->key;
+            }
+        }
+
+        $_config[ 'num_result' ] = 3;
+
+        $id_mt_engine = $objQueue[ 'id_mt_engine' ];
+        $id_tms       = $objQueue[ 'id_tms' ];
+
+        $_TMS = $id_tms; //request
+
         /**
-         * MyMemory Enabled
+         * Call Memory Server for matches if it's enabled
          */
-        $_config[ 'get_mt' ]  = true;
-        $_config[ 'mt_only' ] = false;
-        if ( $id_mt_engine != 1 ) {
+        $tms_enabled = false;
+        if ( $_TMS == 1 ) {
             /**
-             * Don't get MT contribution from MyMemory ( Custom MT )
+             * MyMemory Enabled
              */
-            $_config[ 'get_mt' ] = false;
+            $_config[ 'get_mt' ]  = true;
+            $_config[ 'mt_only' ] = false;
+            if ( $id_mt_engine != 1 ) {
+                /**
+                 * Don't get MT contribution from MyMemory ( Custom MT )
+                 */
+                $_config[ 'get_mt' ] = false;
+            }
+
+            $tms_enabled = true;
+
+        } elseif ( $_TMS == 0 && $id_mt_engine == 1 ) {
+            /**
+             * MyMemory disabled but MT Enabled and it is NOT a Custom one
+             * So tell to MyMemory to get MT only
+             */
+            $_config[ 'get_mt' ]  = true;
+            $_config[ 'mt_only' ] = true;
+
+            $_TMS = 1; /* MyMemory */
+
+            $tms_enabled = true;
+
         }
 
-        $tms_enabled = true;
-
-    }
-    elseif ( $_TMS == 0 && $id_mt_engine == 1 ) {
-        /**
-         * MyMemory disabled but MT Enabled and it is NOT a Custom one
-         * So tell to MyMemory to get MT only
+        /*
+         * This will be ever executed without damages because
+         * fastAnalysis set Project as DONE when
+         * MyMemory is disabled and MT is Disabled Too
+         *
+         * So don't worry, perform TMS Analysis
+         *
          */
-        $_config[ 'get_mt' ]  = true;
-        $_config[ 'mt_only' ] = true;
+        if ( $tms_enabled ) {
+            /**
+             * @var $tms Engines_MyMemory
+             */
+            $tms = Engine::getInstance( $_TMS );
 
-        $_TMS = 1; /* MyMemory */
+            $config = $tms->getConfigStruct();
+            $config = array_merge( $config, $_config );
 
-        $tms_enabled = true;
+            $tms_match = $tms->get( $config );
 
-    }
+            $tms_match = $tms_match->get_matches_as_array();
 
-    /*
-     * This will be ever executed without damages because
-     * fastAnalysis set Project as DONE when
-     * MyMemory is disabled and MT is Disabled Too
-     *
-     * So don't worry, perform TMS Analysis
-     *
-     */
-    if ( $tms_enabled ) {
-        /**
-         * @var $tms Engines_MyMemory
-         */
-        $tms = Engine::getInstance( $_TMS );
-
-        $config = $tms->getConfigStruct();
-        $config = array_merge( $config, $_config );
-
-        $tms_match = $tms->get( $config );
-
-        $tms_match = $tms_match->get_matches_as_array();
-
-    }
-
-    /**
-     * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
-     */
-    if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
-        $mt     = Engine::getInstance( $id_mt_engine );
-        $config = $mt->getConfigStruct();
-        $config = array_merge( $config, $_config );
-
-        $mt_result = $mt->get( $config );
-
-        if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-            $mt_result = false;
         }
 
-    }
+        /**
+         * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
+         */
+        if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
+            $mt     = Engine::getInstance( $id_mt_engine );
+            $config = $mt->getConfigStruct();
+            $config = array_merge( $config, $_config );
 
-    if ( !empty( $tms_match ) ) {
-        $matches = $tms_match;
-    }
+            $mt_result = $mt->get( $config );
 
-    if ( !empty( $mt_result ) ) {
-        $matches[ ] = $mt_result;
-        usort( $matches, "compareScore" );
-    }
+            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+                $mt_result = false;
+            }
 
-    /**
-     * Only if No results found
-     */
-    if ( !$matches || !is_array( $matches ) ) {
-        echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
-        setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
-        incrementCount( $pid, 0, 0 );
+        }
+
+        if ( !empty( $tms_match ) ) {
+            $matches = $tms_match;
+        }
+
+        if ( !empty( $mt_result ) ) {
+            $matches[ ] = $mt_result;
+            usort( $matches, "compareScore" );
+        }
+
+        /**
+         * Only if No results found
+         */
+        if ( !$matches || !is_array( $matches ) ) {
+            echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
+            setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
+            incrementCount( $pid, 0, 0 );
+            tryToCloseProject( $pid, $my_pid );
+            $failed_segment = $objQueue;
+            continue;
+        }
+
+        $tm_match_type = $matches[ 0 ][ 'match' ];
+        if ( stripos( $matches[ 0 ][ 'created_by' ], "MT" ) !== false ) {
+            $tm_match_type = "MT";
+        }
+
+        /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
+        ( isset( $matches[ 0 ][ 'match' ] ) ? $firstMatchVal = floatval( $matches[ 0 ][ 'match' ] ) : null );
+        if ( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ) {
+
+            $srcSearch    = strip_tags( $text );
+            $segmentFound = strip_tags( $matches[ 0 ][ 'raw_segment' ] );
+            $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
+            $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
+
+            $fuzzy = @levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
+
+            //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
+            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
+
+                $qaRealign = new QA( $text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
+                $qaRealign->tryRealignTagID();
+
+                $log_prepend = $UNIQUID . " - SERVER REALIGN IDS PROCEDURE | ";
+                if ( !$qaRealign->thereAreErrors() ) {
+
+                    /*
+                    Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $objQueue, true ) );
+                    Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
+                    Log::doLog( $log_prepend . "TMS RAW RESULT:" );
+                    Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
+
+                    Log::doLog( $log_prepend . "Realignment Success:" );
+                    */
+                    $matches[ 0 ][ 'raw_translation' ] = $qaRealign->getTrgNormalized();
+                    $matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
+                    //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
+
+                } else {
+                    Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $objQueue[ 'id_segment' ] );
+                }
+
+            }
+
+        }
+        /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
+
+        $suggestion = CatUtils::view2rawxliff( $matches[ 0 ][ 'raw_translation' ] );
+
+        //preg_replace all x tags <x not closed > inside suggestions with correctly closed
+        $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
+
+        $suggestion_match  = $matches[ 0 ][ 'match' ];
+        $suggestion_json   = json_encode( $matches );
+        $suggestion_source = $matches[ 0 ][ 'created_by' ];
+
+        $equivalentWordMapping = json_decode( $payable_rates, true );
+
+        $new_match_type = getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping );
+        //echo "sid is $sid ";
+        $eq_words       = $equivalentWordMapping[ $new_match_type ] * $raw_wc / 100;
+        $standard_words = $eq_words;
+
+        //if the first match is MT perform QA realignment
+        if ( $new_match_type == 'MT' ) {
+
+            $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $raw_wc / 100;
+
+            $check = new PostProcess( $matches[ 0 ][ 'raw_segment' ], $suggestion );
+            $check->realignMTSpaces();
+
+            //this should every time be ok because MT preserve tags, but we use the check on the errors
+            //for logic correctness
+            if ( !$check->thereAreErrors() ) {
+                $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
+                $err_json   = '';
+            } else {
+                $err_json = $check->getErrorsJSON();
+            }
+
+        } else {
+
+            //try to perform only the tagCheck
+            $check = new PostProcess( $text, $suggestion );
+            $check->performTagCheckOnly();
+
+            //log::doLog( $check->getErrors() );
+
+            if ( $check->thereAreErrors() ) {
+                $err_json = $check->getErrorsJSON();
+            } else {
+                $err_json = '';
+            }
+
+        }
+
+        ( !empty( $matches[ 0 ][ 'sentence_confidence' ] ) ? $mt_qe = floatval( $matches[ 0 ][ 'sentence_confidence' ] ) : $mt_qe = null );
+
+        echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
+
+        $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
+        //set memcache
+
+        incrementCount( $pid, $eq_words, $standard_words );
+
+        //unlock segment
+
+        echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
+
+
+        $amqHandlerSubscriber->ack( $msg );
+
+        if ( !empty( $failed_segment ) ) {
+            Log::doLog( "Failed " . count( $failed_segment ) );
+            $amqHandlerPublisher->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => 'true' ) );
+        }
+
         tryToCloseProject( $pid, $my_pid );
-        continue;
+
+    } else {
+//        Log::doLog( 'Empty Frame found. No messages. Skip' );
+        sleep( 1 );
     }
-
-    $tm_match_type = $matches[ 0 ][ 'match' ];
-    if ( stripos( $matches[ 0 ][ 'created_by' ], "MT" ) !== false ) {
-        $tm_match_type = "MT";
-    }
-
-    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
-    ( isset( $matches[ 0 ][ 'match' ] ) ? $firstMatchVal = floatval( $matches[ 0 ][ 'match' ] ) : null );
-    if ( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ) {
-
-        $srcSearch    = strip_tags( $text );
-        $segmentFound = strip_tags( $matches[ 0 ][ 'raw_segment' ] );
-        $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
-        $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
-
-        $fuzzy = levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
-
-        //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
-        if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
-
-            $qaRealign = new QA( $text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
-            $qaRealign->tryRealignTagID();
-
-            $log_prepend = $UNIQUID . " - SERVER REALIGN IDS PROCEDURE | ";
-            if ( !$qaRealign->thereAreErrors() ) {
-
-                /*
-                Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $segment, true ) );
-                Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
-                Log::doLog( $log_prepend . "TMS RAW RESULT:" );
-                Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
-
-                Log::doLog( $log_prepend . "Realignment Success:" );
-                */
-                $matches[ 0 ][ 'raw_translation' ] = $qaRealign->getTrgNormalized();
-                $matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
-                //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
-
-            }
-            else {
-                Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment[ 'sid' ] );
-            }
-
-        }
-
-    }
-    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
-
-    $suggestion = CatUtils::view2rawxliff( $matches[ 0 ][ 'raw_translation' ] );
-
-    //preg_replace all x tags <x not closed > inside suggestions with correctly closed
-    $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
-
-    $suggestion_match  = $matches[ 0 ][ 'match' ];
-    $suggestion_json   = json_encode( $matches );
-    $suggestion_source = $matches[ 0 ][ 'created_by' ];
-
-    $equivalentWordMapping = json_decode( $payable_rates, true );
-
-    $new_match_type = getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping );
-    //echo "sid is $sid ";
-    $eq_words       = $equivalentWordMapping[ $new_match_type ] * $raw_wc / 100;
-    $standard_words = $eq_words;
-
-    //if the first match is MT perform QA realignment
-    if ( $new_match_type == 'MT' ) {
-
-        $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $raw_wc / 100;
-
-        $check = new PostProcess( $matches[ 0 ][ 'raw_segment' ], $suggestion );
-        $check->realignMTSpaces();
-
-        //this should every time be ok because MT preserve tags, but we use the check on the errors
-        //for logic correctness
-        if ( !$check->thereAreErrors() ) {
-            $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
-            $err_json   = '';
-        }
-        else {
-            $err_json = $check->getErrorsJSON();
-        }
-
-    }
-    else {
-
-        //try to perform only the tagCheck
-        $check = new PostProcess( $text, $suggestion );
-        $check->performTagCheckOnly();
-
-        //log::doLog( $check->getErrors() );
-
-        if ( $check->thereAreErrors() ) {
-            $err_json = $check->getErrorsJSON();
-        }
-        else {
-            $err_json = '';
-        }
-
-    }
-
-    ( !empty( $matches[ 0 ][ 'sentence_confidence' ] ) ? $mt_qe = floatval( $matches[ 0 ][ 'sentence_confidence' ] ) : $mt_qe = null );
-
-    echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
-
-    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
-    //set memcache
-
-    incrementCount( $pid, $eq_words, $standard_words );
-
-    //unlock segment
-
-    echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
-
-    tryToCloseProject( $pid, $my_pid );
 
 }
 

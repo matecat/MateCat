@@ -669,18 +669,18 @@ class ProjectManager {
         /**
          * TODO: remove after queue implementation
          */
-        if( $project_summary[0]['project_segments'] > 50000 ) {
-            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
-
-            $msg = "
-        WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
-        var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
-                    "  " .
-        var_export( $project_summary[0] , true ) . "\n";
-
-            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
-
-        }
+//        if( 0 && $project_summary[0]['project_segments'] > 50000 ) {
+//            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+//
+//            $msg = "
+//        WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
+//        var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
+//                    "  " .
+//        var_export( $project_summary[0] , true ) . "\n";
+//
+//            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
+//
+//        }
 
         $update_project_count = "
             UPDATE projects
@@ -1406,7 +1406,7 @@ class ProjectManager {
 
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         //split the query in to chunks if there are too much segments
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 1000 ) );
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 200 ) );
 
         Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 
@@ -1470,7 +1470,7 @@ class ProjectManager {
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
             //split the query in to chunks if there are too much segments
-            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 1000 ) );
+            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 200 ) );
 
             Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
 

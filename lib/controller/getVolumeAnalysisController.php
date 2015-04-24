@@ -230,6 +230,7 @@ class getVolumeAnalysisController extends ajaxController {
             $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
         }
+        $this->_resultSet = array(); //free memory
 
         //sum all totals for each job
         //N^3 but there are a little number of rows max 30

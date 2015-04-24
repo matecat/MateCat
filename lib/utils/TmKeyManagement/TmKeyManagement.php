@@ -120,7 +120,7 @@ class TmKeyManagement_TmKeyManagement {
             if ( is_null( $tmKey ) ) {
                 Log::doLog( __METHOD__ . " -> Invalid JSON." );
                 Log::doLog( var_export( $tmKey, true ) );
-                throw new Exception ( "Invalid JSON", -2 );
+                throw new Exception ( "Invalid JSON: " . var_export( $jsonTmKeys_array, true ), -2 );
             }
 
             $filter = new TmKeyManagement_Filter();

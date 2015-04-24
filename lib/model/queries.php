@@ -2380,7 +2380,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     } else {
         $status_search = Constants_ProjectStatus::STATUS_FAST_OK;
     }
-    $query = "select p.id, id_tms, id_mt_engine, group_concat( distinct j.id ) as jid_list
+    $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
 		from projects p
 		inner join jobs j on j.id_project=p.id
 		where status_analysis = '$status_search'
@@ -2403,8 +2403,13 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id
-		from segments as s 
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
+
+		s.raw_word_count,
+		j.target,
+		j.payable_rates
+
+		from segments as s
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id
 		left join segment_translations as st on st.id_segment = s.id
@@ -2541,197 +2546,6 @@ function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
 
         return $errno * -1;
     }
-
-    return $db->affected_rows;
-}
-
-function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform_Tms_Analysis = true ) {
-
-    $db   = Database::obtain();
-    $data = array();
-
-    $total_eq_wc       = 0;
-    $total_standard_wc = 0;
-
-    $data[ 'id_segment' ]          = null;
-    $data[ 'id_job' ]              = null;
-    $data[ 'segment_hash' ]        = null;
-    $data[ 'match_type' ]          = null;
-    $data[ 'eq_word_count' ]       = null;
-    $data[ 'standard_word_count' ] = null;
-
-    $data_queue[ 'id_job' ]      = null;
-    $data_queue[ 'id_segment' ]  = null;
-    $data_queue[ 'pid' ]         = null;
-    $data_queue[ 'date_insert' ] = null;
-
-    $segment_translations = "INSERT INTO `segment_translations` ( " . implode( ", ", array_keys( $data ) ) . " ) VALUES ";
-    $st_values            = array();
-
-    $segment_translations_queue = "INSERT IGNORE INTO matecat_analysis.segment_translations_analysis_queue ( " . implode( ", ", array_keys( $data_queue ) ) . " ) VALUES ";
-    $st_queue_values            = array();
-
-    foreach ( $fastReport as $k => $v ) {
-        $jid_fid    = explode( "-", $k );
-        $id_segment = $jid_fid[ 0 ];
-        $id_jobs    = $jid_fid[ 1 ];
-
-        $type = strtoupper( $v[ 'type' ] );
-
-        if ( array_key_exists( $type, $equivalentWordMapping ) ) {
-            $eq_word = ( $v[ 'wc' ] * $equivalentWordMapping[ $type ] / 100 );
-            if ( $type == "INTERNAL" ) {
-            }
-        } else {
-            $eq_word = $v[ 'wc' ];
-        }
-
-        $total_eq_wc += $eq_word;
-        $standard_words = $eq_word;
-
-        if ( $type == "INTERNAL" or $type == "MT" ) {
-            $standard_words = $v[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
-        }
-
-        $total_standard_wc += $standard_words;
-
-        $id_jobs = explode( ',', $id_jobs );
-        foreach ( $id_jobs as $id_job ) {
-
-            list( $id_job, $job_pass ) = explode( ":", $id_job );
-
-            $data[ 'id_segment' ]          = (int)$id_segment;
-            $data[ 'id_job' ]              = (int)$id_job;
-            $data[ 'segment_hash' ]        = $db->escape( $v[ 'segment_hash' ] );
-            $data[ 'match_type' ]          = $db->escape( $type );
-            $data[ 'eq_word_count' ]       = (float)$eq_word;
-            $data[ 'standard_word_count' ] = (float)$standard_words;
-
-            $st_values[ ] = " ( '" . implode( "', '", array_values( $data ) ) . "' )";
-
-            if ( $data[ 'eq_word_count' ] > 0 && $perform_Tms_Analysis ) {
-
-                $data_queue[ 'id_job' ] = (int)$id_job;;
-                $data_queue[ 'id_segment' ]  = (int)$id_segment;
-                $data_queue[ 'pid' ]         = (int)$pid;
-                $data_queue[ 'date_insert' ] = date_create()->format( 'Y-m-d H:i:s' );
-
-                $st_queue_values[ ] = " ( '" . implode( "', '", array_values( $data_queue ) ) . "' )";
-            } else {
-                Log::doLog( 'Skipped Fast Segment: ' . var_export( $data, true ) );
-            }
-        }
-    }
-
-    $chunks_st = array_chunk( $st_values, 200 );
-
-//	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
-    Log::doLog( 'Insert Segment Translations: ' . count( $st_values ) );
-
-//	echo 'Queries: ' . count($chunks_st) . "\n";
-    Log::doLog( 'Queries: ' . count( $chunks_st ) );
-
-    //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
-    $db->query( 'SET autocommit=0' );
-    $db->query( 'START TRANSACTION' );
-
-    foreach ( $chunks_st as $k => $chunk ) {
-
-        $query_st = $segment_translations . implode( ", ", $chunk ) .
-                " ON DUPLICATE KEY UPDATE
-            match_type = VALUES( match_type ),
-                       eq_word_count = VALUES( eq_word_count ),
-                       standard_word_count = VALUES( standard_word_count )
-                           ";
-
-        $db->query( $query_st );
-
-        //echo "Executed " . ( $k + 1 ) ."\n";
-        //Log::doLog(  "Executed " . ( $k + 1 ) );
-
-        $err = $db->get_error();
-        if ( $err[ 'error_code' ] != 0 ) {
-            Log::doLog( $err );
-
-            return $err[ 'error_code' ] * -1;
-        }
-    }
-
-    /*
-     * IF NO TM ANALYSIS, upload the jobs global word count
-     */
-    if ( !$perform_Tms_Analysis ) {
-        $_details = getProjectSegmentsTranslationSummary( $pid );
-
-        echo "--- trying to initialize job total word count.\n";
-        Log::doLog( "--- trying to initialize job total word count." );
-
-        $project_details = array_pop( $_details ); //remove rollup
-
-        foreach ( $_details as $job_info ) {
-            $counter = new WordCount_Counter();
-            $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
-        }
-    }
-    /* IF NO TM ANALYSIS, upload the jobs global word count */
-
-    //echo "Done.\n";
-    //Log::doLog( 'Done.' );
-
-    if ( count( $st_queue_values ) ) {
-
-        $chunks_st_queue = array_chunk( $st_queue_values, 200 );
-
-//		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
-        Log::doLog( 'Insert Segment Translations Queue: ' . count( $st_queue_values ) );
-
-//		echo 'Queries: ' . count($chunks_st_queue) . "\n";
-        Log::doLog( 'Queries: ' . count( $chunks_st_queue ) );
-
-        foreach ( $chunks_st_queue as $k => $queue_chunk ) {
-
-            $query_st_queue = $segment_translations_queue . implode( ", ", $queue_chunk );
-
-            $db->useDb( 'matecat_analysis' );
-            $db->query( $query_st_queue );
-            $db->useDb( INIT::$DB_DATABASE );
-
-            //echo "Executed " . ( $k + 1 ) ."\n";
-            //Log::doLog(  "Executed " . ( $k + 1 ) );
-
-            $err = $db->get_error();
-            if ( $err[ 'error_code' ] != 0 ) {
-                $db->query( 'ROLLBACK' );
-                $db->query( 'SET autocommit=1' );
-                Log::doLog( $err );
-
-                return $err[ 'error_code' ] * -1;
-            }
-        }
-
-        //echo "Done.\n";
-        //Log::doLog( 'Done.' );
-
-    }
-
-    $data2[ 'fast_analysis_wc' ]     = $total_eq_wc;
-//    $data2[ 'standard_analysis_wc' ] = $total_standard_wc;
-
-    $where = " id = $pid";
-    $db->update( 'projects', $data2, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-
-        $db->query( 'ROLLBACK' );
-        $db->query( 'SET autocommit=1' );
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    $db->query( 'COMMIT' );
-    $db->query( 'SET autocommit=1' );
 
     return $db->affected_rows;
 }
