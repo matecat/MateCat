@@ -2242,7 +2242,7 @@ UI = {
 
             if ( toSave ) {
                 this.decrementOfflineCacheRemaining();
-                this.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
+                this.failedConnection( [ id_segment, status, false ], 'setTranslation' );
             }
 
             this.changeStatusOffline( id_segment );
