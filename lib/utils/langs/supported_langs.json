@@ -1037,16 +1037,7 @@
 			"rfc3066code":"ny-NY"
 		}
 	,
-		{
-			"localized":[{
-				"en":"Pakistani"
-			}],
-			"isocode":"ur",
-			"enabled":true,
-			"rtl":true,
-			"rfc3066code":"ur-PK"
-		}
-	,
+
 		{
 			"localized":[{
 				"en":"Palauan" 
@@ -1569,7 +1560,18 @@
 			"rtl":false,
 			"rfc3066code":"ppk-ID"
 		}
-	,
+	, 
+		{
+                        "localized":[{
+                                "en":"Urdu"
+                        }],
+                        "isocode":"ur",
+                        "enabled":true,
+                        "rtl":true,
+                        "rfc3066code":"ur-PK"
+                }
+        ,
+
 		{
 			"localized":[{
 				"en":"Uzbek" 
