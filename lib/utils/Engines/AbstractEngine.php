@@ -34,7 +34,7 @@ abstract class Engines_AbstractEngine {
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         );

@@ -636,16 +636,11 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
-        }).on('offlineON', function(d) {
-//            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
 			goodbye(e);
-			UI.clearStorage('contribution');
-			
-//			localStorage.clear();
 		};
 
 	
@@ -824,7 +819,7 @@ $.extend(UI, {
 			}
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
-			UI.checkConnection();
+			UI.checkConnection( 'Click from Human Authorized' );
 		}).on('click', '#statistics .meter a', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
@@ -1557,7 +1552,7 @@ $.extend(UI, {
 
 			}
 			UI.checkHeaviness();
-			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+			if ( UI.blockButtons ) {
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {

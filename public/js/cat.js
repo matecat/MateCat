@@ -117,7 +117,7 @@ UI = {
 		if (($('section').length > 500)||((this.initSegNum/this.numOpenedSegments) < 2)||(this.hasToBeRerendered)) {
 			UI.reloadToSegment(UI.currentSegmentId);
 		}
-*/		
+*/
 	},
 	checkIfFinished: function(closing) {
 		if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
@@ -186,7 +186,7 @@ UI = {
                 this.checkIfFinished(1);
             }
 
-// close split segment 
+// close split segment
         	$('.sid .actions .split').removeClass('cancel');
         	source = $(segment).find('.source');
         	$(source).removeAttr('style');
@@ -194,7 +194,7 @@ UI = {
         	$('.split-shortcut').html('CTRL + S');
         	$('.splitBar, .splitArea').remove();
         	$('.sid .actions').hide();
-// end split segment             
+// end split segment
 		return true;
         }
 	},
@@ -229,7 +229,7 @@ UI = {
 		}, 300);
 		setTimeout(function() {
 			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
-		}, 2000);		
+		}, 2000);
 	},
 
 	confirmDownload: function(res) {
@@ -295,13 +295,13 @@ UI = {
 					'	<div class="overflow"></div>' +
 					'</div>' +
 					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
-					'	<div class="overflow">' + 
-						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
+					'	<div class="overflow">' +
+						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
 					'		<div class="results"></div>' +
 					'	</div>' +
 					'</div>' +
 					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
-					'	<div class="overflow">' + 
+					'	<div class="overflow">' +
 
 					((config.tms_enabled)?
 					'		<div class="gl-search">' +
@@ -365,7 +365,7 @@ UI = {
 				'		<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>' +
 				'    </ul>' +
 				'</nav>';
-		this.body.append(menu); 
+		this.body.append(menu);
 /*
 		$('#jobMenu li').each(function() {
 			APP.fitText($(this), $('a', $(this)), 20);
@@ -471,9 +471,9 @@ UI = {
 				(ext == 'resx')?		'extres' :
 				(ext == 'sgml')?	'extsgl' :
 				(ext == 'sgm')?		'extsgm' :
-				(ext == 'properties')? 'extpro' :				
+				(ext == 'properties')? 'extpro' :
 								'extxif';
-		return c;		
+		return c;
 	},
 	createStatusMenu: function(statusMenu) {
 		$("ul.statusmenu").empty().hide();
@@ -565,7 +565,7 @@ UI = {
 	footerMessage: function(msg, segment) {
 		$('.footer-message', segment).remove();
 		$('.submenu', segment).append('<li class="footer-message">' + msg + '</div>');
-		$('.footer-message', segment).fadeOut(6000);	
+		$('.footer-message', segment).fadeOut(6000);
 	},
 	getMoreSegments: function(where) {
 		if ((where == 'after') && (this.noMoreSegmentsAfter))
@@ -626,7 +626,7 @@ UI = {
 			});
 			this.renderFiles(d.data.files, where, false);
 
-			// if getting segments before, UI points to the segment triggering the event 
+			// if getting segments before, UI points to the segment triggering the event
 			if ((where == 'before') && (numsegToAdd)) {
 				this.scrollSegment($('#segment-' + this.segMoving));
 			}
@@ -670,7 +670,7 @@ UI = {
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
 			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
-			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
+			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
 		}
 //		} else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
 //			console.log('2');
@@ -885,7 +885,7 @@ UI = {
 			$("#segment-" + UI.nextUntranslatedSegmentId + " .editarea").trigger("click");
 		}
 	},
-	
+
 	gotoOpenSegment: function(quick) {
         quick = quick || false;
 
@@ -1009,7 +1009,7 @@ UI = {
 		var s2 = $('.source', segment).text();
 		var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
 		var isEqual = (s1 == s2);
-		
+
 		getNormally = isNotSimilar || isEqual;
 //		console.log('getNormally: ', getNormally);
 		this.activateSegment(getNormally);
@@ -1021,7 +1021,7 @@ UI = {
 			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
 		}
 		this.setCurrentSegment();
-		
+
 		if (!this.readonly) {
  //           console.log('getNormally: ', getNormally);
 			if(getNormally) {
@@ -1033,11 +1033,11 @@ UI = {
 				setTimeout(function() {
 					$('.alternatives .overflow', segment).show();
 					UI.getContribution(segment, 0);
-				}, 3000);				
+				}, 3000);
 			}
-		}		
-		
-		
+		}
+
+
 //		if(!isNotSimilar) $('.editor .alternatives .overflow').hide();
 		this.currentSegment.addClass('opened');
 
@@ -1123,7 +1123,7 @@ UI = {
 //		sel.removeAllRanges();
 //		sel.addRange(range);
 //		el.focus();
-		
+
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
 			var range = document.createRange();
@@ -1138,7 +1138,7 @@ UI = {
 			textRange.collapse(false);
 			textRange.select();
 		 }
-		
+
 	},
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
@@ -1195,7 +1195,7 @@ UI = {
 //		$('p.alternatives', segment).remove();
 	},
 	removeFooter: function(byButton) {
-		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
+		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + ' .footer').empty();
 	},
 	removeHeader: function(byButton) {
@@ -1381,6 +1381,7 @@ UI = {
                         status: status,
                         time_to_edit: "0",
                         translation: translation,
+                        version: segment.version,
                         warning: "0"
                     }
                     newSegments.push(segData);
@@ -1860,8 +1861,8 @@ UI = {
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			} else {
-				newStr += this.outerHTML;					
-//				newStr += this.innerText;					
+				newStr += this.outerHTML;
+//				newStr += this.innerText;
 			}
 		});
         console.log('x');
@@ -1985,7 +1986,7 @@ UI = {
     },
 	/**
 	 * fill segments with relative errors from polling
-	 * 
+	 *
 	 * @param {type} segment
 	 * @param {type} warnings
 	 * @returns {undefined}
@@ -2023,7 +2024,7 @@ UI = {
 	},
 	/**
 	 * Walk Warnings to fill right segment
-	 * 
+	 *
 	 * @returns {undefined}
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails, global) {
@@ -2033,7 +2034,7 @@ UI = {
 //				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
 //					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
 //				}
-//			});			
+//			});
 		} else {
 			UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
 		}
@@ -2050,7 +2051,7 @@ UI = {
 					UI.compareArrays(i1, i2);
 					return false;
 				}
-			});						
+			});
 		});
 		return i1;
 	},
@@ -2058,7 +2059,7 @@ UI = {
 		clearTimeout(UI.startWarningTimeout);
 		UI.startWarningTimeout = setTimeout(function() {
 			UI.checkWarnings(false);
-		}, config.warningPollingInterval);		
+		}, config.warningPollingInterval);
 	},
 
 	checkWarnings: function(openingSegment) {
@@ -2093,7 +2094,7 @@ UI = {
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
-			
+
 					//switch to css for warning
 					$('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(UI.globalWarnings.length);
 
@@ -2103,7 +2104,7 @@ UI = {
 					//reset the pointer to offending segment
 					$('#point2seg').attr('href', '#');
 				}
-				
+
 				// check for messages
 				if(typeof data.messages != 'undefined') {
 					var msgArray = $.parseJSON(data.messages);
@@ -2209,7 +2210,7 @@ UI = {
 		}, 'local');
 	},
 
-    setTranslation: function(id_segment, status, caller) {
+    setTranslation: function(id_segment, status, caller, callback) {
 //        console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
@@ -2223,20 +2224,33 @@ UI = {
 //        console.log('emptyTranslation: ', emptyTranslation);
 //        console.log('toSave: ', toSave);
 
-        if(toSave) this.addToSetTranslationTail(id_segment, status, caller);
+        //REMOVED Check for to save
+        //Send ALL to the queue
+        if( toSave ) {
+            this.addToSetTranslationTail( id_segment, status, caller, callback = callback || {} );
+        } else {
+            this.updateToSetTranslationTail( id_segment, status, caller, callback = callback || {} )
+        }
+
 //        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
 //        this.addToSetTranslationTail(id_segment, status, caller);
 //        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
 //        console.log('UI.offline: ', UI.offline);
 //        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
 
-        if((this.offline)&&(config.offlineModeEnabled)) {
-            if(toSave) this.decrementOfflineCacheRemaining();
-            this.changeStatusOffline(id_segment);
-            this.checkConnection();
+        if ( this.offline && config.offlineModeEnabled ) {
+
+            if ( toSave ) {
+                this.decrementOfflineCacheRemaining();
+                this.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
+            }
+
+            this.changeStatusOffline( id_segment );
+            this.checkConnection( 'Set Translation check Authorized' );
+
         } else {
 //            console.log('this.executingSetTranslation: ', this.executingSetTranslation);
-            if(!this.executingSetTranslation) this.execSetTranslationTail();
+            if ( !this.executingSetTranslation ) this.execSetTranslationTail();
         }
     },
     alreadyInSetTranslationTail: function (sid) {
@@ -2254,43 +2268,48 @@ UI = {
             $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
         }
     },
-    decrementOfflineCacheRemaining: function () {
-        this.offlineCacheRemaining--;
-        this.pendingOfflineCacheRemaining = this.pendingOfflineCacheRemaining || 0;
-        if($('#messageBar .remainingSegments').text == '') {
-            this.pendingOfflineCacheRemaining++;
-        } else {
-            this.offlineCacheRemaining = this.offlineCacheRemaining - this.pendingOfflineCacheRemaining;
-            this.pendingOfflineCacheRemaining = null;
-        }
-
-        $('#messageBar .remainingSegments').text(this.offlineCacheRemaining);
-        $(window).trigger('offlineSegmentSave');
-    },
-    addToSetTranslationTail: function (id_segment, status, caller) {
+    addToSetTranslationTail: function (id_segment, status, caller, callback) {
 //        console.log('addToSetTranslationTail ' + id_segment);
         $('#segment-' + id_segment).addClass('setTranslationPending');
         var item = {
             id_segment: id_segment,
             status: status,
-            caller: caller
+            caller: caller,
+            callback: callback
         }
         this.setTranslationTail.push(item);
     },
-    execSetTranslationTail: function () {
+    updateToSetTranslationTail: function (id_segment, status, caller, callback) {
+//        console.log('addToSetTranslationTail ' + id_segment);
+        $('#segment-' + id_segment).addClass('setTranslationPending');
+        var item = {
+            id_segment: id_segment,
+            status: status,
+            caller: caller,
+            callback: callback
+        }
+        $.each( UI.setTranslationTail, function (index) {
+            if( this.id_segment == id_segment ) {
+                this.status   = status;
+                this.caller   = caller;
+                this.callback = callback;
+            }
+        });
+    },
+    execSetTranslationTail: function ( callback_to_execute ) {
 //        console.log('execSetTranslationTail');
-        if(this.setTranslationTail.length) {
-            item = this.setTranslationTail[0];
-            this.setTranslationTail.shift(); // to move on ajax callback
-            this.execSetTranslation(item.id_segment, item.status, item.caller);
+        if(UI.setTranslationTail.length) {
+            item = UI.setTranslationTail[0];
+            UI.setTranslationTail.shift(); // to move on ajax callback
+            UI.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
         }
     },
 
-    execSetTranslation: function(id_segment, status, caller) {
+    execSetTranslation: function( id_segment, status, caller, callback ) {
 //        console.log('execSetTranslation');
         this.executingSetTranslation = true;
         reqArguments = arguments;
-		segment = $('#segment-' + id_segment); 
+		segment = $('#segment-' + id_segment);
 		this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
@@ -2310,7 +2329,7 @@ UI = {
 		var id_translator = config.id_translator;
 		var errors = '';
 		errors = this.collectSegmentErrors(segment);
-		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion'); 
+		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 //		if(caller != 'replace') {
 //			if(this.body.hasClass('searchActive')) {
 //				console.log('aaa');
@@ -2387,6 +2406,11 @@ UI = {
 				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
+
+        if( typeof( callback ) === "function" ) {
+            callback.call();
+        }
+
 	},
     collectSplittedStatuses: function (sid) {
         statuses = [];
@@ -2411,6 +2435,9 @@ UI = {
         return totalTranslation;
     },
 
+    /**
+     * @deprecated
+     */
     checkPendingOperations: function() {
         if(this.checkInStorage('pending')) {
             UI.execAbortedOperations();
@@ -2808,20 +2835,20 @@ UI = {
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
-					
+
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
 					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
 
 					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
-					
+
 //					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
-					
-//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
 				}
-				
-				
+
+
 				// se sono più di due, ci sono tag innestati
 			}
 		});
@@ -2840,7 +2867,7 @@ UI = {
 				match = this.outerHTML.match(/<.*?>/gi);
 				console.log('match: ', match);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
-					
+
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
 					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
@@ -2848,13 +2875,13 @@ UI = {
 					console.log('vediamo: ', $.parseHTML(this.outerHTML));
 
 					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML) + htmlEncode(match[1], false);
-					
+
 //					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
-					
-//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
 				}
-				
-				
+
+
 				// se sono più di due, ci sono tag innestati
 			}
 		});
@@ -2886,9 +2913,9 @@ UI = {
 			if (this.code == '-10' && operation != 'getSegments' ) {
 //				APP.alert("Job canceled or assigned to another translator");
 				APP.alert({
-					msg: 'Job canceled or assigned to another translator', 
-					callback: 'reloadPage' 
-				});		
+					msg: 'Job canceled or assigned to another translator',
+					callback: 'reloadPage'
+				});
 				//FIXME
 				// This Alert, will be NEVER displayed because are no-blocking
 				// Transform location.reload(); to a callable function passed as callback to alert
@@ -2928,6 +2955,10 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
+
+            //if this was in pending state remove
+            $( segment ).removeClass( 'setTranslationPending' );
+
 			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
@@ -3133,7 +3164,7 @@ UI = {
 
 	/*
 	 // for future implementation
-	 
+
 	 getSegmentComments: function(segment) {
 	 var id_segment = $(segment).attr('id').split('-')[1];
 	 var id_translator = config.id_translator;
@@ -3155,7 +3186,7 @@ UI = {
 	 }
 	 });
 	 },
-	 
+
 	 addSegmentComment: function(segment) {
 	 var id_segment = $(segment).attr('id').split('-')[1];
 	 var id_translator = config.id_translator;
@@ -3192,10 +3223,10 @@ UI = {
 //        }, 200);
 	},
 	browserScrollPositionRestoreCorrection: function() {
-		// detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment 
-		if (this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI  
-			if (!$('.editor').isOnScreen()) { // if the current segment is out of the current viewport 
-				if (this.autoscrollCorrectionEnabled) { // if this is the first correction and we are in the initial 2 seconds since page init 
+		// detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment
+		if (this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI
+			if (!$('.editor').isOnScreen()) { // if the current segment is out of the current viewport
+				if (this.autoscrollCorrectionEnabled) { // if this is the first correction and we are in the initial 2 seconds since page init
 					this.scrollSegment(this.currentSegment);
 					this.autoscrollCorrectionEnabled = false;
 				}
@@ -3363,7 +3394,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.2";
+		this.version = "0.5.3";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3396,10 +3427,8 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.autoFailoverEnabled = false;
 //        this.offlineModeEnabled = false;
         this.offline = false;
-//        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
@@ -4290,16 +4319,11 @@ $.extend(UI, {
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
             }, 600);
-        }).on('offlineON', function(d) {
-//            if(!config.offlineModeEnabled) UI.blockUIForNoConnection(d.reqArguments, d.operation);
         });
 //		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
 			goodbye(e);
-			UI.clearStorage('contribution');
-			
-//			localStorage.clear();
 		};
 
 	
@@ -4478,7 +4502,7 @@ $.extend(UI, {
 			}
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
-			UI.checkConnection();
+			UI.checkConnection( 'Click from Human Authorized' );
 		}).on('click', '#statistics .meter a', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
@@ -5211,7 +5235,7 @@ $.extend(UI, {
 
 			}
 			UI.checkHeaviness();
-			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+			if ( UI.blockButtons ) {
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 //					console.log('segment is already loaded');
 				} else {
@@ -6014,15 +6038,17 @@ $.extend(UI, {
     },
     execSetContributionTail: function () {
 //        console.log('execSetContributionTail');
-        if(this.setContributionTail.length) {
-            item = this.setContributionTail[0];
-            this.setContributionTail.shift();
-            if(item.operation == 'setContribution') {
-                this.execSetContribution(item.segment_id, item.status, item.byStatus);
+
+        if ( UI.setContributionTail.length ) {
+            item = UI.setContributionTail[0];
+            UI.setContributionTail.shift();
+            if ( item.operation == 'setContribution' ) {
+                UI.execSetContribution( item.segment_id, item.status, item.byStatus );
             } else {
-                this.execSetContributionMT(item.segment_id, item.status, item.byStatus);
+                UI.execSetContributionMT( item.segment_id, item.status, item.byStatus );
             }
         }
+
     },
 
     execSetContribution: function(segment_id, status, byStatus) {
@@ -8653,25 +8679,34 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length || $('.popup-tm td.uploadfile.uploading').length ) {
-		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending operation. Are you sure you want to quit?';
-		if(dont_confirm_leave!==1) {
-			if(!e) e = window.event;
-			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-			e.cancelBubble = true;
-			e.returnValue = leave_message;
-			//e.stopPropagation works in Firefox.
-			if (e.stopPropagation) 
-			{
-				e.stopPropagation();
-				e.preventDefault();
-			}
 
-			//return works for Chrome and Safari
-			return leave_message;
-		}
-	}
+    if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
+        return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
+    }
+
+    if ( UI.offline ) {
+        return say_goodbye( 'You are offline. Some translations could not be sent. Are you sure you want to quit?' );
+    }
+
+    //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
+    function say_goodbye( leave_message ){
+
+        if ( typeof leave_message !== 'undefined' ) {
+            if ( !e ) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = leave_message;
+            //e.stopPropagation works in Firefox.
+            if ( e.stopPropagation ) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            //return works for Chrome and Safari
+            return leave_message;
+        }
+
+    }
+
 }   
 
 $.fn.isOnScreen = function() {
@@ -8713,11 +8748,13 @@ $.fn.countdown = function (callback, duration, message) {
             clearInterval(countdown);
             console.log('container: ', container);
             // And fire the callback passing our container as `this`
-            callback.call(container);   
+            callback.call(container);
         }
     // Run interval every 1000ms (1 second)
     }, 1000);
-    
+
+    return countdown;
+
 };
 
 Object.size = function(obj) {
@@ -10848,286 +10885,246 @@ $.extend(UI, {
 /*
  Component: ui.offline
  */
-//if(config.offlineModeEnabled) {
-    UI.offlineCacheSize = 2;
-    UI.offlineCacheRemaining = UI.offlineCacheSize;
-    UI.offlineCountdownOn = false;
 
-    $(window).on('offlineON', function(d) {
-        UI.offline = true;
-        UI.body.attr('data-offline-mode', 'light-off');
-//        numUntranslated = $('section.status-new, section.status-draft');
-        UI.showMessage({
-            msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
-        })
-    }).on('offlineOFF', function(d) {
-        console.log('offlineOFF');
-        UI.offline = false;
-        UI.body.removeAttr('data-offline-mode');
+UI.offlineCacheSize = 30;
+UI.offlineCacheRemaining = UI.offlineCacheSize;
+UI.checkingConnection = false;
 
-        UI.showMessage({
-            msg: "Connection is back. We are saving translated segments in the database."
-        })
-//        UI.checkConnection();
-    }).on('stillNoConnection', function(d) {
-        setTimeout(function() {
-            UI.checkConnection();
-        }, 30000);
-    }).on('offlineSegmentSave', function(d) {
-        UI.checkOfflineCacheSize();
-    }).on('offlineCacheIsFull', function(d) {
-        UI.closeOfflineMode('total');
-        UI.blockUIForNoConnection();
-    })
-    $('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {
-        e.preventDefault();
-        APP.alert('Split is disabled in Offline Mode');
-    })
+UI.currentConnectionCountdown = null;
 
-    $.extend(UI, {
-        closeOfflineMode: function (from) {
-            if(this.offline) {
-                UI.showMessage({
-                    msg: "Connection is back. We are saving translated segments in the database."
-                })
-                setTimeout(function() {
-                    $('#messageBar .close').click();
-                }, 10000);
-                UI.offline = false;
-                UI.body.removeAttr('data-offline-mode');
-            }
-        },
-        failover: function(reqArguments, operation) {
-//            console.log('failover on ' + operation);
-            if(operation != 'getWarning') {
-                var pendingConnection = {
-                    operation: operation,
-                    args: reqArguments
-                };
-//			console.log('pendingConnection: ', pendingConnection);
-                var dd = new Date();
-                if(pendingConnection.args) {
-                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-                }
-                if(!UI.checkConnectionTimeout) {
-                    UI.checkConnectionTimeout = setTimeout(function() {
-                        UI.checkConnection();
-                        UI.checkConnectionTimeout = false;
-                    }, 5000);
-                }
-            }
-        },
-        failedConnection: function(reqArguments, operation) {
-//            console.log('failed connection');
-            if(this.offline) {
-                $(window).trigger('stillNoConnection');
-            } else {
-                $(window).trigger({
-                    type: "offlineON",
-                    reqArguments: reqArguments,
-                    operation: operation
-                });
-            }
-        },
-        blockUIForNoConnection: function (reqArguments, operation) {
-            console.log('blockUIForNoConnection');
-            if(this.autoFailoverEnabled) {
-                this.failover(reqArguments, operation);
-                return false;
-            }
-            if(operation != 'getWarning') {
-                var pendingConnection = {
-                    operation: operation,
-                    args: reqArguments
-                };
-                UI.abortedOperations.push(pendingConnection);
-            }
-            if(!$('.noConnection').length) {
-                UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
-                //                $(".noConnectionMsg .countdown").countdown(UI.simpleTest, 30, " seconds");
-                console.log('before first countdown');
-                this.offlineCountdownStart();
+$.extend(UI, {
+    startOfflineMode: function(){
 
-//                $(".noConnectionMsg .countdown").countdown(UI.checkConnection('first countdown'), 30, " seconds");
-            }
-        },
-        offlineCountdownStart: function () {
-            this.offlineCountdownOn = true;
-            $(".noConnectionMsg .countdown").countdown(UI.offlineCountdownEnd(), 30, " seconds");
-        },
+        if( !UI.offline ){
 
-        offlineCountdownEnd: function () {
-            console.log('offlineCountdownEnd');
-            this.offlineCountdownOn = false;
-//            this.checkConnection('first countdown');
-        },
-
-        goOffline: function () {
-            $(window).trigger('offlineON');
-        },
-        goOnline: function () {
-            $(window).trigger('offlineOFF');
-        },
-        checkConnection: function(messaggio) {
-            console.log(messaggio);
-            console.log('check connection');
-
-            APP.doRequest({
-                data: {
-                    action: 'ajaxUtils',
-                    exec: 'ping'
-                },
-                error: function() {
-                    console.log('error on checking connection');
-                    if(UI.autoFailoverEnabled) {
-                        setTimeout(function() {
-                            UI.checkConnection();
-                        }, 5000);
-                    } else {
-                        if(!this.offlineCountdownOn) {
-                            UI.offlineCountdownStart();
-                        }
-/*
-                        if(UI.offline) {
-                            console.log('UI.offline');
-//                            $(window).trigger('stillNoConnection');
-//                            $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">10 seconds</span>.');
-//                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection('new countdown'), 10, " seconds");
-                        } else {
-                            console.log('NOT UI.offline');
-//                            $(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">10 seconds</span>.');
-//                            console.log('a');
-//                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection('new countdown'), 10, " seconds");
-//                            $(".noConnectionMsg .countdown").countdown(UI.checkConnection('new countdown'), 10, " seconds");
-                        }
-*/
-                    }
-                },
-                success: function() {
-                    console.log('check connection success');
-                    if(!UI.restoringAbortedOperations) UI.connectionIsBack();
-
-                    /*
-                    if(config.offlineModeEnabled) {
-                        $(window).trigger('offlineOFF');
-                    } else {
-                        if(!UI.restoringAbortedOperations) UI.connectionIsBack();
-                    }
-                    */
-                }
+            UI.offline = true;
+            UI.body.attr('data-offline-mode', 'light-off');
+            UI.showMessage({
+                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
             });
-        },
-        connectionIsBack: function() {
-//            console.log('connection is back');
-            if(this.offline) this.closeOfflineMode('light');
-            this.restoringAbortedOperations = true;
-            this.execAbortedOperations();
-            if(!this.autoFailoverEnabled) {
-                $('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
-                setTimeout(function() {
-                    $('.noConnection').addClass('reConnection');
-                    setTimeout(function() {
-                        $('.noConnection, .noConnectionMsg').remove();
-                    }, 500);
-                }, 3000);
-            }
-            this.restoringAbortedOperations = false;
-            this.executingSetTranslation = false;
-            this.execSetTranslationTail();
-            this.execSetContributionTail();
 
-        },
-        extractLocalStoredItems: function (operation, job) {
-            job = job || false;
-            items = [];
-            $.each(localStorage, function(k,v) {
-                op = k.substring(0, operation.length);
-                if(op === operation) {
-                    kAr = k.split('-');
-                    if(job) {
-                        if(kAr[1] === job) {
-                            console.log(kAr[1]);
-                            return true;
-                        }
+            UI.checkingConnection = setInterval( function() {
+                UI.checkConnection( 'Recursive Check authorized' );
+            }, 5000 );
+
+        }
+    },
+    endOfflineMode: function () {
+        if ( UI.offline ) {
+
+            UI.offline = false;
+
+            UI.showMessage( {
+                msg: "Connection is back. We are saving translated segments in the database."
+            } );
+
+            setTimeout( function () {
+                $( '#messageBar .close' ).click();
+            }, 10000 );
+
+            clearInterval( UI.currentConnectionCountdown );
+            clearInterval( UI.checkingConnection );
+            UI.currentConnectionCountdown = null;
+            UI.checkingConnection = false;
+            UI.body.removeAttr( 'data-offline-mode' );
+
+            $('.noConnectionMsg').text( 'The connection is back. Your last, interrupted operation has now been done.' );
+
+            setTimeout(function() {
+                $('.noConnection').addClass('reConnection');
+                setTimeout(function() {
+                    $('.noConnection, .noConnectionMsg').remove();
+                }, 500);
+            }, 3000);
+
+        }
+    },
+    failedConnection: function(reqArguments, operation) {
+
+        UI.startOfflineMode();
+
+        if ( operation != 'getWarning' ) {
+            var pendingConnection = {
+                operation: operation,
+                args: reqArguments
+            };
+            UI.abortedOperations.push( pendingConnection );
+        }
+
+    },
+    activateOfflineCountdown: function ( message ) {
+
+        if ( !$( '.noConnection' ).length ) {
+            UI.body.append( '<div class="noConnection"></div><div class="noConnectionMsg"></div>' );
+        }
+
+        $( '.noConnectionMsg' ).html( '<div class="noConnectionMsg">' + message + '<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>' );
+
+        //clear previous Interval and set a new one
+        UI.currentConnectionCountdown = $( ".noConnectionMsg .countdown" ).countdown( function () {
+            console.log( 'offlineCountdownEnd' );
+            UI.checkConnection( 'Clear countdown authorized' );
+            UI.activateOfflineCountdown( 'Still no connection.' );
+        }, 30, " seconds" );
+
+    },
+    checkConnection: function( message ) {
+
+        console.log(message);
+        console.log('check connection');
+
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'ping'
+            },
+            error: function() {
+                /**
+                 * do Nothing there are already a thread running
+                 * @see UI.startOfflineMode
+                 * @see UI.endOfflineMode
+                 */
+            },
+            success: function() {
+
+                console.log('check connection success');
+                //check status completed
+                if( !UI.restoringAbortedOperations ) {
+
+                    UI.restoringAbortedOperations = true;
+                    UI.execAbortedOperations( UI.endOfflineMode );
+                    UI.restoringAbortedOperations = false;
+                    UI.executingSetTranslation = false;
+                    UI.execSetTranslationTail();
+                    UI.execSetContributionTail();
+
+                }
+
+            }
+        });
+    },
+
+    /**
+     * NOT USED
+     * @deprecated
+     * @param operation
+     * @param job
+     * @returns {Array|*}
+     */
+    extractLocalStoredItems: function (operation, job) {
+        job = job || false;
+        items = [];
+        $.each(localStorage, function(k,v) {
+            op = k.substring(0, operation.length);
+            if(op === operation) {
+                kAr = k.split('-');
+                if(job) {
+                    if(kAr[1] === job) {
+                        console.log(kAr[1]);
+                        return true;
                     }
-                    items.push({
-                        'operation': op,
-                        'job': kAr[1],
-                        'sid': kAr[2],
-                        'value': JSON.parse(v)
-                    });
+                }
+                items.push({
+                    'operation': op,
+                    'job': kAr[1],
+                    'sid': kAr[2],
+                    'value': JSON.parse(v)
+                });
 //                    items.push(JSON.parse(v));
-                }
-            });
-            return items;
-
-        },
-        execAbortedOperations: function() {
-            if(UI.autoFailoverEnabled) {
-//			console.log(localStorage);
-                var pendingArray = [];
-                inp = 'pending';
-                $.each(localStorage, function(k,v) {
-                    if(k.substring(0, inp.length) === inp) {
-                        pendingArray.push(JSON.parse(v));
-                    }
-                });
-//			console.log(pendingArray);
-                UI.abortedOperations = pendingArray;
             }
-//		console.log(UI.abortedOperations);
-            $.each(UI.abortedOperations, function() {
-                args = this.args;
-                operation = this.operation;
-                if(operation == 'setTranslation') {
-                    UI[operation](args[0], args[1], args[2]);
-                } else if(operation == 'updateContribution') {
-                    UI[operation](args[0], args[1]);
-                } else if(operation == 'setContributionMT') {
-                    UI[operation](args[0], args[1], args[2]);
-                } else if(operation == 'setCurrentSegment') {
-                    UI[operation](args[0]);
-                } else if(operation == 'getSegments') {
-                    UI.reloadWarning();
-                }
-            });
-            UI.abortedOperations = [];
-            UI.clearStorage('pending');
-        },
-        checkOfflineCacheSize: function () {
-            if(!UI.offlineCacheRemaining) {
-//                console.log('la cache è finita, andate in pace');
-                $(window).trigger('offlineCacheIsFull');
-            }
-        }
+        });
+        return items;
 
-        /*
-        failover: function(reqArguments, operation) {
-            console.log('test offline failover on ' + operation);
-
-            if(operation != 'getWarning') {
-                var pendingConnection = {
-                    operation: operation,
-                    args: reqArguments
-                };
+    },
+    /**
+     * NOT USED
+     * @deprecated
+     *
+     * @param reqArguments
+     * @param operation
+     */
+    failover: function(reqArguments, operation) {
+//            console.log('failover on ' + operation);
+        if(operation != 'getWarning') {
+            var pendingConnection = {
+                operation: operation,
+                args: reqArguments
+            };
 //			console.log('pendingConnection: ', pendingConnection);
-                var dd = new Date();
-                if(pendingConnection.args) {
-                    localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
-                }
-                if(!UI.checkConnectionTimeout) {
-                    UI.checkConnectionTimeout = setTimeout(function() {
-                        UI.checkConnection();
-                        UI.checkConnectionTimeout = false;
-                    }, 5000);
-                }
+            var dd = new Date();
+            if(pendingConnection.args) {
+                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
             }
-
+            if(!UI.checkConnectionTimeout) {
+                UI.checkConnectionTimeout = setTimeout(function() {
+                    UI.checkConnection();
+                    UI.checkConnectionTimeout = false;
+                }, 5000);
+            }
         }
-        */
-    });
+    },
+    /**
+     * If there are some callback to be executed after the function call pass it as callback
+     *
+     * Note: the function stack is executed when the interpreter exit from the local scope
+     * so, UI[operation] will be executed after the call of callback_to_execute.
+     *
+     * If we put the callback_to_execute out of this scope
+     *      ( calling after the return of this function and not from inside it )
+     *
+     * UI[operation] will be executed before callback_to_execute.
+     * Not working as expected because this behaviour affects "UI.offline = false;"
+     *
+     *
+     * @param callback_to_execute
+     */
+    execAbortedOperations: function( callback_to_execute ) {
 
-//}
+        callback_to_execute = callback_to_execute || {};
+
+		//console.log(UI.abortedOperations);
+        $.each(UI.abortedOperations, function() {
+            args = this.args;
+            operation = this.operation;
+            if(operation == 'setTranslation') {
+                UI[operation](args[0], args[1], args[2], UI.incrementOfflineCacheRemaining );
+            } else if(operation == 'updateContribution') {
+                UI[operation](args[0], args[1]);
+            } else if(operation == 'setContributionMT') {
+                UI[operation](args[0], args[1], args[2]);
+            } else if(operation == 'setCurrentSegment') {
+                UI[operation](args[0]);
+            } else if(operation == 'getSegments') {
+                UI.reloadWarning();
+            }
+        });
+        UI.abortedOperations = [];
+
+        callback_to_execute.call();
+
+    },
+    checkOfflineCacheSize: function () {
+        if ( !UI.offlineCacheRemaining ) {
+            UI.activateOfflineCountdown( 'No connection available.' );
+            //console.log( 'la cache è piena, andate in pace' );
+        }
+    },
+    decrementOfflineCacheRemaining: function () {
+        $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
+        UI.checkOfflineCacheSize();
+    },
+    incrementOfflineCacheRemaining: function(){
+        // reset counter by 1
+        UI.offlineCacheRemaining += 1;
+        //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
+    }
+});
+
+$('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {
+    e.preventDefault();
+    APP.alert('Split is disabled in Offline Mode');
+});
+
 /**
  * Component ui.split
  * Created by andreamartines on 11/03/15.
@@ -11490,7 +11487,7 @@ if(config.splitSegmentEnabled) {
         cleanSplitPoints: function (splitArea) {
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
-        },
+        }
 
     })
 }
