@@ -174,6 +174,8 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
+//            segment.find('.actions .split.cancel').click();
+//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 

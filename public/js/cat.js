@@ -174,6 +174,8 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
+//            segment.find('.actions .split.cancel').click();
+//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 
@@ -8685,8 +8687,11 @@ function goodbye(e) {
     }
 
     if ( UI.offline ) {
-        return say_goodbye( 'You are offline. Some translations could not be sent. Are you sure you want to quit?' );
+        if(UI.setTranslationTail.length) {
+            return say_goodbye( 'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. Do you want to proceed with the refresh ?' );
+        }
     }
+
 
     //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
     function say_goodbye( leave_message ){
@@ -10907,7 +10912,7 @@ $.extend(UI, {
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
             UI.showMessage({
-                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!'
             });
 
             UI.checkingConnection = setInterval( function() {
