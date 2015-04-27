@@ -1095,69 +1095,69 @@ class ProjectManager {
 			}
 		}
 
-	}
-	$this->projectStructure[ 'result' ][ 'code' ]            = 1;
-	$this->projectStructure[ 'result' ][ 'data' ]            = "OK";
-	$this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
-	$this->projectStructure[ 'result' ][ 'password' ]        = $this->projectStructure[ 'array_jobs' ][ 'job_pass' ];
-	$this->projectStructure[ 'result' ][ 'id_job' ]          = $this->projectStructure[ 'array_jobs' ][ 'job_list' ];
-	$this->projectStructure[ 'result' ][ 'job_segments' ]    = $this->projectStructure[ 'array_jobs' ][ 'job_segments' ];
-	$this->projectStructure[ 'result' ][ 'id_project' ]      = $this->projectStructure[ 'id_project' ];
-	$this->projectStructure[ 'result' ][ 'project_name' ]    = $this->projectStructure[ 'project_name' ];
-	$this->projectStructure[ 'result' ][ 'source_language' ] = $this->projectStructure[ 'source_language' ];
-	$this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
-	$this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
-	$this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
+
+		$this->projectStructure[ 'result' ][ 'code' ]            = 1;
+		$this->projectStructure[ 'result' ][ 'data' ]            = "OK";
+		$this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
+		$this->projectStructure[ 'result' ][ 'password' ]        = $this->projectStructure[ 'array_jobs' ][ 'job_pass' ];
+		$this->projectStructure[ 'result' ][ 'id_job' ]          = $this->projectStructure[ 'array_jobs' ][ 'job_list' ];
+		$this->projectStructure[ 'result' ][ 'job_segments' ]    = $this->projectStructure[ 'array_jobs' ][ 'job_segments' ];
+		$this->projectStructure[ 'result' ][ 'id_project' ]      = $this->projectStructure[ 'id_project' ];
+		$this->projectStructure[ 'result' ][ 'project_name' ]    = $this->projectStructure[ 'project_name' ];
+		$this->projectStructure[ 'result' ][ 'source_language' ] = $this->projectStructure[ 'source_language' ];
+		$this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
+		$this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
+		$this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
 
-	$query_project_summary = "
-		SELECT
-		COUNT( s.id ) AS project_segments,
-			SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
-			FROM segments s
-			INNER JOIN files_job fj ON fj.id_file = s.id_file
-			INNER JOIN jobs j ON j.id= fj.id_job
-			LEFT JOIN segment_translations st ON s.id = st.id_segment
-			WHERE j.id_project = %u
+		$query_project_summary = "
+			SELECT
+			COUNT( s.id ) AS project_segments,
+				SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
+				FROM segments s
+				INNER JOIN files_job fj ON fj.id_file = s.id_file
+				INNER JOIN jobs j ON j.id= fj.id_job
+				LEFT JOIN segment_translations st ON s.id = st.id_segment
+				WHERE j.id_project = %u
+				";
+
+		$query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
+
+		$project_summary = $this->dbHandler->fetch_array( $query_project_summary );
+
+		/**
+		 * TODO: remove after queue implementation
+		 */
+		if( $project_summary[0]['project_segments'] > 50000 ) {
+			$this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+
+			$msg = "
+				WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
+				var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
+				"  " .
+				var_export( $project_summary[0] , true ) . "\n";
+
+			Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
+
+		}
+
+		$update_project_count = "
+			UPDATE projects
+			SET
+			standard_analysis_wc = %.2F,
+			status_analysis = '%s'
+			WHERE id = %u
 			";
 
-	$query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
+		$update_project_count = sprintf(
+			$update_project_count,
+			$project_summary[ 0 ][ 'project_raw_wordcount' ],
+			$this->projectStructure[ 'status' ],
+			$this->projectStructure[ 'id_project' ]
+		);
 
-	$project_summary = $this->dbHandler->fetch_array( $query_project_summary );
-
-	/**
-	 * TODO: remove after queue implementation
-	 */
-	if( $project_summary[0]['project_segments'] > 50000 ) {
-		$this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
-
-		$msg = "
-			WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
-			var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
-			"  " .
-			var_export( $project_summary[0] , true ) . "\n";
-
-		Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
-
+		$this->dbHandler->query( $update_project_count );
 	}
-
-	$update_project_count = "
-		UPDATE projects
-		SET
-		standard_analysis_wc = %.2F,
-		status_analysis = '%s'
-		WHERE id = %u
-		";
-
-	$update_project_count = sprintf(
-		$update_project_count,
-		$project_summary[ 0 ][ 'project_raw_wordcount' ],
-		$this->projectStructure[ 'status' ],
-		$this->projectStructure[ 'id_project' ]
-	);
-
-	$this->dbHandler->query( $update_project_count );
-
 	//    var_dump($this->projectStructure);
 	//        exit;
 
