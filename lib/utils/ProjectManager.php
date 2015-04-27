@@ -249,7 +249,7 @@ class ProjectManager {
 			if('.'==$linkFile or '..'==$linkFile) unset($linkFiles[$k]);
 		}
 		
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {  //here we need hashes -> files lookup
 
             //if TMX,
             if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
@@ -280,7 +280,7 @@ class ProjectManager {
 			 */
 			$isAConvertedFile = true;
 			try {
-
+//TODO BUG
 				$fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName );
 
 				if ( DetectProprietaryXliff::isXliffExtension() ) {
@@ -368,7 +368,7 @@ class ProjectManager {
 
 				unset($sha1);
 			}
-
+//TODO BUG
 			//converted file is inside cache directory
 			//get hash from file name inside UUID dir
 			$hashFile=basename(array_pop($linkFiles));
