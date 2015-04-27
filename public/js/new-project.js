@@ -102,7 +102,9 @@ $(document).ready(function() {
                 private_keys_list	: tm_data,
 				private_tm_user		: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
 				private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
-				lang_detect_files  	: UI.skipLangDetectArr
+				lang_detect_files  	: UI.skipLangDetectArr,
+                pretranslate_100    : ($(".translate-box input[type='checkbox']" ).is(':checked')) ? 1 : 0
+
 			},
 			beforeSend: function (){
 				$('.error-message').hide();

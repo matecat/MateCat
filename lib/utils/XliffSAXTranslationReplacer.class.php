@@ -271,13 +271,13 @@ class XliffSAXTranslationReplacer {
                     foreach ( $id_list as $id ) {
                         $seg = $this->segments[ $id ];
 
-                        if(!$this->sourceInTarget) {
-                            //add xliff markup, appending multiple MRKs
-                            $translation = $this->prepareSegment( $seg, $translation );
+                        //delete translations so the prepareSegment
+                        // will put source content in target tag
+                        if( $this->sourceInTarget ){
+                            $seg['translation'] = '';
                         }
-                        else{
-                            $translation = $seg['segment'];
-                        }
+
+                        $translation = $this->prepareSegment( $seg, $translation );
                     }
 
                     //append translation

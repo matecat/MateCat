@@ -904,6 +904,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		p.name AS pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
 		IF (st.status='NEW',NULL,st.translation) AS translation,
+		UNIX_TIMESTAMP( st.translation_date ) AS version,
 		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 	    sts.source_chunk_lengths,
@@ -1280,7 +1281,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 }
 */
 
-function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
+function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = null) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'suggestions_array' ]   = $suggestions_json_array;
@@ -1291,6 +1292,8 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'eq_word_count' ]       = $eq_words;
     $data[ 'standard_word_count' ] = $standard_words;
     $data[ 'mt_qe' ]               = $mt_qe;
+
+    ($segment_status !== null ) ? $data[ 'status' ] = $segment_status : null;
 
     ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
     ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
@@ -1318,7 +1321,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     return $db->affected_rows;
 }
 
-function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
+function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = 'NEW' ) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'id_segment' ]          = $id_segment;
@@ -1331,6 +1334,7 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'standard_word_count' ] = $standard_words;
     $data[ 'translation' ]         = $translation;
     $data[ 'tm_analysis_status' ]  = $tm_status_analysis;
+    $data[ 'status' ]  = $segment_status;
 
     $data[ 'warning' ]                = $warning;
     $data[ 'serialized_errors_list' ] = $err_json_list;
@@ -1405,7 +1409,7 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
     return $results;
 }
 
-function getCurrentTranslationAndLock( $id_job, $id_segment ) {
+function getCurrentTranslation( $id_job, $id_segment ) {
 
     $query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
     $query = sprintf( $query, $id_segment, $id_job );
@@ -1728,6 +1732,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
+    $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
     $query                       = "SELECT LAST_INSERT_ID() FROM projects";
 
@@ -3017,7 +3022,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
 function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
 		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
-		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid
+		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid, p.pretranslate_100
 			from segments s
 			inner join segment_translations st on st.id_segment=s.id
 			inner join jobs j on j.id=st.id_job

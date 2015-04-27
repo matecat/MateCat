@@ -67,7 +67,9 @@ class setRevisionController extends ajaxController {
         $this->err_terminology      = $postInput[ 'err_terminology' ];
         $this->err_language         = $postInput[ 'err_language' ];
         $this->err_style            = $postInput[ 'err_style' ];
-        $this->original_translation = $postInput[ 'original' ];
+
+        list( $this->original_translation, $none ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $postInput[ 'original' ] ), ' ' );
+
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][ ] = array( 'code' => -1, 'message' => 'Job ID missing' );

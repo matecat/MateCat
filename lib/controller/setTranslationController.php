@@ -20,6 +20,7 @@ class setTranslationController extends ajaxController {
 
     protected $jobData = array();
 
+    protected $client_target_version;
 
     public function __construct() {
 
@@ -33,6 +34,7 @@ class setTranslationController extends ajaxController {
                 'time_to_edit'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'id_translator'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
                 'translation'             => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'version'                 => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'status'                  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
                 'splitStatuses'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
@@ -40,12 +42,13 @@ class setTranslationController extends ajaxController {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job        = $this->__postInput[ 'id_job' ];
-        $this->password      = $this->__postInput[ 'password' ];
-        $this->propagateAll  = $this->__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
-        $this->id_segment    = $this->__postInput[ 'id_segment' ];
-        $this->time_to_edit  = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
-        $this->id_translator = $this->__postInput[ 'id_translator' ];
+        $this->id_job                = $this->__postInput[ 'id_job' ];
+        $this->password              = $this->__postInput[ 'password' ];
+        $this->propagateAll          = $this->__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
+        $this->id_segment            = $this->__postInput[ 'id_segment' ];
+        $this->time_to_edit          = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
+        $this->id_translator         = $this->__postInput[ 'id_translator' ];
+        $this->client_target_version = ( empty( $this->__postInput[ 'version' ] ) ? '0' : $this->__postInput[ 'version' ] );
 
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
 
@@ -55,6 +58,8 @@ class setTranslationController extends ajaxController {
 
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
+
+        Log::doLog( $this->__postInput );
 
     }
 
@@ -93,6 +98,9 @@ class setTranslationController extends ajaxController {
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing id_job" );
         } else {
+
+//            $this->result[ 'error' ][ ] = array( "code" => -1000, "message" => "test 1" );
+//            throw new Exception( 'prova', -1 );
 
             //get Job Info, we need only a row of jobs ( split )
             $this->jobData = $job_data = getJobData( (int)$this->id_job, $this->password );
@@ -208,7 +216,14 @@ class setTranslationController extends ajaxController {
         $db = Database::obtain();
         $db->begin();
 
-        $old_translation = getCurrentTranslationAndLock( $this->id_job, $this->id_segment );
+        $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+
+//        $old_version = ( empty( $old_translation['translation_date'] ) ? '0' : date_create( $old_translation['translation_date'] )->getTimestamp() );
+//        if( $this->client_target_version != $old_version ){
+//            $this->result[ 'errors' ][ ] = array( "code" => -102, "message" => "Translation version mismatch" );
+//            $db->rollback();
+//            return false;
+//        }
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
@@ -285,7 +300,7 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
         $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
-        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
+//        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
         if ( $this->status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
@@ -376,6 +391,7 @@ class setTranslationController extends ajaxController {
         $this->result[ 'file_stats' ] = $file_stats;
         $this->result[ 'code' ]       = 1;
         $this->result[ 'data' ]       = "OK";
+        $this->result[ 'version' ]    = date_create( $_Translation[ 'translation_date' ] )->getTimestamp();
 
         /* FIXME: added for code compatibility with front-end. Remove. */
         $_warn   = $check->getWarnings();

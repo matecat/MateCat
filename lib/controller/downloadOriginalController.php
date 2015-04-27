@@ -16,82 +16,92 @@ class downloadOriginalController extends downloadController {
     public function __construct() {
         parent::__construct();
 
-        $this->fname = $this->get_from_get_post('filename');
-        $this->id_file = $this->get_from_get_post('id_file');
-        $this->id_job = $this->get_from_get_post('id_job');
-        $this->password = $this->get_from_get_post("password");
-        $this->filename = $this->fname;
-        $this->download_type=$this->get_from_get_post("download_type");
+        $filterArgs = array(
+                'filename'      => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ),
+                'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'download_type' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'password'      => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
+        );
 
-        if (empty($this->id_job)) {
-            $this->id_job = "Unknown";
-        }
+        $__postInput = filter_var_array( $_REQUEST, $filterArgs );
+
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->fname         = $__postInput[ 'filename' ];
+        $this->id_file       = $__postInput[ 'id_file' ];
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->download_type = $__postInput[ 'download_type' ];
+        $this->password      = $__postInput[ 'password' ];
+
     }
 
     public function doAction() {
-        $files_job = getOriginalFilesForJob($this->id_job, $this->id_file, $this->password);
+
+        $files_job = getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
 
 
         $output_content = array();
-        foreach ($files_job as $file) {
-            $id_file = $file['id_file'];
-            $output_content[$id_file]['filename'] = $file['filename'];
-			$output_content[$id_file]['content'] = @gzinflate($file['original_file']);
-			if(!$output_content[$id_file]['content']){
-				$output_content[$id_file]['content'] = $file['original_file'];
-			}
+        foreach ( $files_job as $file ) {
+            $id_file                                  = $file[ 'id_file' ];
+            $output_content[ $id_file ][ 'filename' ] = $file[ 'filename' ];
+            $output_content[ $id_file ][ 'content' ]  = @gzinflate( $file[ 'original_file' ] );
+            if ( !$output_content[ $id_file ][ 'content' ] ) {
+                $output_content[ $id_file ][ 'content' ] = $file[ 'original_file' ];
+            }
         }
-        if ($this->download_type == 'all') {
-            if (count($output_content) > 1) {
+        if ( $this->download_type == 'all' ) {
+            if ( count( $output_content ) > 1 ) {
                 $this->filename = $this->fname;
-                $pathinfo = pathinfo($this->fname);
-                if ($pathinfo['extension'] != 'zip') {
-                    $this->filename = $pathinfo['basename'] . ".zip";
+                $pathinfo       = pathinfo( $this->fname );
+                if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                    $this->filename = $pathinfo[ 'basename' ] . ".zip";
                 }
-                $this->content = $this->composeZip($output_content); //add zip archive content here;
-            } elseif (count($output_content) == 1) {
-                $this->setContent($output_content);
+                $this->content = $this->composeZip( $output_content ); //add zip archive content here;
+            } elseif ( count( $output_content ) == 1 ) {
+                $this->setContent( $output_content );
             }
         } else {
-            $this->setContent($output_content);
+            $this->setContent( $output_content );
         }
     }
 
-    private function setContent($output_content) {
-        foreach ($output_content as $oc) {
-            $pathinfo = pathinfo($oc['filename']);
-            $ext = $pathinfo['extension'];
-            $this->filename = $oc['filename'];
-            $this->content = $oc['content'];
+    /**
+     * There is a foreach, but this should be always one element
+     *
+     * @param $output_content
+     */
+    private function setContent( $output_content ) {
+        foreach ( $output_content as $oc ) {
+            $this->filename = $oc[ 'filename' ];
+            $this->content  = $oc[ 'content' ];
         }
     }
 
-    private function composeZip($output_content) {
-        $file = tempnam("/tmp", "zipmatecat");
-        $zip = new ZipArchive();
-        $zip->open($file, ZipArchive::OVERWRITE);
+    private function composeZip( $output_content ) {
+        $file = tempnam( "/tmp", "zipmatecat" );
+        $zip  = new ZipArchive();
+        $zip->open( $file, ZipArchive::OVERWRITE );
 
-        // Staff with content
-        foreach ($output_content as $f) {
-            $pathinfo = pathinfo($f['filename']);
-            $ext = $pathinfo['extension'];
-            if ($ext == 'pdf' or $ext == "PDF") {
-                $f['filename'] = $pathinfo['basename'] . ".docx";
-            }
-            $zip->addFromString($f['filename'], $f['content']);
+        foreach ( $output_content as $f ) {
+            $zip->addFromString( $f[ 'filename' ], $f[ 'content' ] );
         }
 
         // Close and send to users
         $zip->close();
-        $zip_content = file_get_contents("$file");
-        unlink($file);
+        $zip_content = file_get_contents( "$file" );
+        unlink( $file );
+
         return $zip_content;
     }
 
-    private function convertToOriginalFormat() {
-        
-    }
-
 }
-
-?>

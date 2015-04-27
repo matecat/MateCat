@@ -57,21 +57,22 @@ class ProjectManager {
                                     'job_pass'     => array(),
                                     'job_segments' => array()
                             ),
-                            'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
-                            'segments'           => array(), //array of files_id => segmentsArray()
-                            'translations'       => array(),
+                            'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
+                            'segments'             => array(), //array of files_id => segmentsArray()
+                            'translations'         => array(),
                             //one translation for every file because translations are files related
-                            'query_translations' => array(),
-                            'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                            'job_to_split'       => null,
-                            'job_to_split_pass'  => null,
-                            'split_result'       => null,
-                            'job_to_merge'       => null,
-                            'lang_detect_files'  => array(),
-                            'tm_keys'            => array(),
-                            'userIsLogged'       => false,
-                            'uid'                => null,
-                            'skip_lang_validation' => false
+                            'query_translations'   => array(),
+                            'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                            'job_to_split'         => null,
+                            'job_to_split_pass'    => null,
+                            'split_result'         => null,
+                            'job_to_merge'         => null,
+                            'lang_detect_files'    => array(),
+                            'tm_keys'              => array(),
+                            'userIsLogged'         => false,
+                            'uid'                  => null,
+                            'skip_lang_validation' => false,
+                            'pretranslate_100'     => 0
                     ) );
         }
 
@@ -128,7 +129,7 @@ class ProjectManager {
 
                     $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
 
-                    if ( !isset($keyExists) || $keyExists === false ) {
+                    if ( !isset( $keyExists ) || $keyExists === false ) {
                         Log::doLog( __METHOD__ . " -> TM key is not valid." );
                         throw new Exception( "TM key is not valid.", -4 );
                     }
@@ -185,14 +186,15 @@ class ProjectManager {
                         $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
 
                         $memoryKeysToBeInserted[ ] = $newMemoryKey;
-                    } else {
+                    }
+                    else {
                         Log::doLog( 'skip insertion' );
                     }
 
                 }
                 try {
                     $mkDao->createList( $memoryKeysToBeInserted );
-                } catch( Exception $e ){
+                } catch ( Exception $e ) {
                     Log::doLog( $e->getMessage() );
 
                     # Here we handle the error, displaying HTML, logging, ...
@@ -226,7 +228,8 @@ class ProjectManager {
                 //found TMX, enable language checking routines
                 $this->checkTMX = 1;
                 array_unshift( $sortedFiles, $fileName );
-            } else {
+            }
+            else {
                 array_push( $sortedFiles, $fileName );
             }
 
@@ -248,7 +251,7 @@ class ProjectManager {
 
                 try {
                     $this->tmxServiceWrapper->addTmxInMyMemory();
-                } catch ( Exception $e ){
+                } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => $e->getCode(), "message" => $e->getMessage()
                     );
@@ -289,7 +292,8 @@ class ProjectManager {
                                 //ok don't convert a standard sdlxliff
                             }
 
-                        } else {
+                        }
+                        else {
 
                             //if conversion enforce is active
                             //we force all xliff files but not files produced by SDL Studio because we can handle them
@@ -301,7 +305,8 @@ class ProjectManager {
 
                         }
 
-                    } elseif ( $fileType[ 'proprietary' ] ) {
+                    }
+                    elseif ( $fileType[ 'proprietary' ] ) {
 
                         /**
                          * Application misconfiguration.
@@ -316,7 +321,8 @@ class ProjectManager {
                         return -1;
                         //stop execution
 
-                    } elseif ( !$fileType[ 'proprietary' ] ) {
+                    }
+                    elseif ( !$fileType[ 'proprietary' ] ) {
                         $isAConvertedFile = false;
                         //ok don't convert a standard sdlxliff
                     }
@@ -347,7 +353,8 @@ class ProjectManager {
                 //file name is a xliff converted like: 'a_word_document.doc.sdlxliff'
                 $real_fileName = $fileName . '.sdlxliff';
 
-            } else {
+            }
+            else {
 
                 //filename is already an xliff and it is in a canonical normal directory
                 $sha1_original = "";
@@ -369,7 +376,8 @@ class ProjectManager {
 
                 if ( ( $info[ 'extension' ] == 'xliff' ) || ( $info[ 'extension' ] == 'sdlxliff' ) || ( $info[ 'extension' ] == 'xlf' ) ) {
                     $contents = file_get_contents( $filePathName );
-                } else {
+                }
+                else {
                     throw new Exception( "Failed to find Xliff - no segments found", -3 );
                 }
 
@@ -388,27 +396,33 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -1, "message" => "No text to translate in the file $fileName."
                     );
-                } elseif ( $e->getCode() == -2 ) {
+                }
+                elseif ( $e->getCode() == -2 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store segments in database for $fileName"
                     );
-                } elseif ( $e->getCode() == -3 ) {
+                }
+                elseif ( $e->getCode() == -3 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "File $fileName not found. Failed to save XLIFF conversion on disk"
                     );
-                } elseif ( $e->getCode() == -4 ) {
+                }
+                elseif ( $e->getCode() == -4 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $fileName )"
                     );
-                } elseif ( $e->getCode() == -11 ) {
+                }
+                elseif ( $e->getCode() == -11 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
                     );
-                } elseif ( $e->getCode() == -12 ) {
+                }
+                elseif ( $e->getCode() == -12 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store reference files in database"
                     );
-                } else {
+                }
+                else {
                     //mysql insert Blob Error
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "File is Too large. ( $fileName )"
@@ -475,7 +489,7 @@ class ProjectManager {
                 if ( 1 == $this->checkTMX ) {
 
                     //get localized target languages of TM (in case it's a multilingual TM)
-                    $tmTargets = explode( ';', $result['data'][ 'target_lang' ] );
+                    $tmTargets = explode( ';', $result[ 'data' ][ 'target_lang' ] );
 
                     //indicates if something has been found for current memory
                     $found = false;
@@ -493,12 +507,13 @@ class ProjectManager {
                     }
 
                     //if this TM matches the project lagpair and something has been found
-                    if ( $found and $result['data'][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+                    if ( $found and $result[ 'data' ][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
 
                         //the TMX is good to go
                         $this->checkTMX = 0;
 
-                    } elseif( $found and $result['data'][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+                    }
+                    elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
 
                         /*
                          * This means that the TMX has a srclang as specification in the header. Warn the user.
@@ -511,12 +526,13 @@ class ProjectManager {
                          *      srclang="DE-DE" />
                          */
                         $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                "code" => -16, "message" => "The TMX you provided explicitly specifies {$result['data'][ 'source_lang' ]} as source language. Check that the specified language source in the TMX file match the language source of your project or remove that specification in TMX file."
+                                "code"    => -16,
+                                "message" => "The TMX you provided explicitly specifies {$result['data']['source_lang']} as source language. Check that the specified language source in the TMX file match the language source of your project or remove that specification in TMX file."
                         );
 
                         $this->checkTMX = 0;
 
-                        Log::doLog( $this->projectStructure['result'] );
+                        Log::doLog( $this->projectStructure[ 'result' ] );
                     }
 
                 }
@@ -528,10 +544,11 @@ class ProjectManager {
         if ( 1 == $this->checkTMX ) {
             //this means that noone of uploaded TMX were usable for this project. Warn the user.
             $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                    "code" => -16, "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
+                    "code"    => -16,
+                    "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
             );
 
-            Log::doLog( $this->projectStructure['result'] );
+            Log::doLog( $this->projectStructure[ 'result' ] );
 
             return false;
         }
@@ -548,7 +565,8 @@ class ProjectManager {
 
         if ( isset( $_SESSION[ 'cid' ] ) and !empty( $_SESSION[ 'cid' ] ) ) {
             $owner = $_SESSION[ 'cid' ];
-        } else {
+        }
+        else {
             $_SESSION[ '_anonym_pid' ] = $this->projectStructure[ 'id_project' ];
             //default user
             $owner = '';
@@ -596,15 +614,15 @@ class ProjectManager {
                 Utils::deleteDir( $uploadDir . '_converted' );
             }
 
-        } catch( Exception $e ){
+        } catch ( Exception $e ) {
 
             $output = "<pre>\n";
-            $output .=  " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
-            $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
-            $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $output .=  " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
-            $output .=  "\n\t";
-            $output .=  "Aborting...\n";
+            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+            $output .= "\n\t";
+            $output .= "Aborting...\n";
             $output .= "</pre>";
 
             Log::doLog( $output );
@@ -647,6 +665,22 @@ class ProjectManager {
         $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
 
         $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
+
+        /**
+         * TODO: remove after queue implementation
+         */
+        if( $project_summary[0]['project_segments'] > 50000 ) {
+            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+
+            $msg = "
+        WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
+        var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
+                    "  " .
+        var_export( $project_summary[0] , true ) . "\n";
+
+            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
+
+        }
 
         $update_project_count = "
             UPDATE projects
@@ -794,7 +828,8 @@ class ProjectManager {
                     //PHP Strict: Only variables should be passed by reference
                     $_tmp       = explode( "-", $this->projectStructure[ 'source_language' ] );
                     $sourceLang = array_shift( $_tmp );
-                } else {
+                }
+                else {
                     $sourceLang = $this->projectStructure[ 'source_language' ];
                 }
 
@@ -822,7 +857,8 @@ class ProjectManager {
                             "message" => "The source language you selected seems " .
                                     "to be different from the source language in \"$currFileName\". Please check."
                     );
-                } else {
+                }
+                else {
                     $filename2SourceLangCheck[ $currFileName ] = 'ok';
                 }
 
@@ -832,7 +868,8 @@ class ProjectManager {
             if ( in_array( "warning", array_values( $filename2SourceLangCheck ) ) ) {
                 $this->projectStructure[ 'result' ][ 'lang_detect' ] = $filename2SourceLangCheck;
             }
-        } else {
+        }
+        else {
             //There are errors while parsing JSON.
             //Noop
         }
@@ -921,7 +958,8 @@ class ProjectManager {
              * Simple Split with pretty equivalent number of words per chunk
              */
             $words_per_job = array_fill( 0, $num_split, round( $total_words / $num_split, 0 ) );
-        } else {
+        }
+        else {
             /*
              * User defined words per chunk, needs some checks and control structures
              */
@@ -1206,7 +1244,8 @@ class ProjectManager {
                     //No segments to translate
                     //don't increment global counter '$fileCounter_Show_In_Cattool'
                     $show_in_cattool = 0;
-                } else {
+                }
+                else {
 
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
@@ -1222,7 +1261,8 @@ class ProjectManager {
 
                             if ( is_null( $tempSeg ) || $tempSeg === '' ) {
                                 $show_in_cattool = 0;
-                            } else {
+                            }
+                            else {
                                 $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
                                 $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
                                 $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
@@ -1241,7 +1281,7 @@ class ProjectManager {
                                     if ( $src != $trg && !is_numeric( $src ) ) { //treat 0,1,2.. as translated content!
 
                                         $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
-                                        $target = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
+                                        $target                           = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
@@ -1274,7 +1314,8 @@ class ProjectManager {
 
                             if ( $this->projectStructure[ 'file_references' ]->offsetExists( $fid ) ) {
                                 $file_reference = (int)$this->projectStructure[ 'file_references' ][ $fid ];
-                            } else {
+                            }
+                            else {
                                 $file_reference = 'NULL';
                             }
 
@@ -1282,7 +1323,8 @@ class ProjectManager {
 
                         }
 
-                    } else {
+                    }
+                    else {
 
                         $tempSeg = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
                         $tempSeg = trim( $tempSeg );
@@ -1291,7 +1333,8 @@ class ProjectManager {
                         $succ_tags = null;
                         if ( empty( $tempSeg ) ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
                             $show_in_cattool = 0;
-                        } else {
+                        }
+                        else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
                             $prec_tags                                     = empty( $extract_external[ 'prec' ] ) ? null : $extract_external[ 'prec' ];
                             $succ_tags                                     = empty( $extract_external[ 'succ' ] ) ? null : $extract_external[ 'succ' ];
@@ -1336,7 +1379,8 @@ class ProjectManager {
 
                         if ( $this->projectStructure[ 'file_references' ]->offsetExists( $fid ) ) {
                             $file_reference = (int)$this->projectStructure[ 'file_references' ][ $fid ];
-                        } else {
+                        }
+                        else {
                             $file_reference = 'NULL';
                         }
 
@@ -1546,7 +1590,8 @@ class ProjectManager {
 
         if ( $fName != false ) {
             $fName = $this->dbHandler->escape( $fName );
-        } else {
+        }
+        else {
             $fName = '';
         }
 

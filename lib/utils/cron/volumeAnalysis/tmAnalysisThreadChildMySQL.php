@@ -84,6 +84,7 @@ while (1) {
     $raw_wc          = $segment[ 'raw_word_count' ];
     $fast_match_type = $segment[ 'match_type' ];
     $payable_rates   = $segment[ 'payable_rates' ];
+    $pretranslate_100 = $segment[ 'pretranslate_100' ];
 
     $text            = $segment[ 'segment' ];
 
@@ -286,7 +287,9 @@ while (1) {
         $err_json = '';
     }
 
-    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
+    echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
+
+    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
     //unlock segment
 
     echo "--- (child $my_pid) : segment $sid-$jid finished\n";
