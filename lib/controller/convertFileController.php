@@ -23,23 +23,23 @@ class convertFileController extends ajaxController {
 		parent::__construct();
 
 		$filterArgs = array(
-				'file_name'         => array(
-					'filter' => FILTER_SANITIZE_STRING,
-					'flags' => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH 
-					),
-				'source_lang'       => array(
-					'filter' => FILTER_SANITIZE_STRING,
-					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
-					),
-				'target_lang'       => array(
-					'filter' => FILTER_SANITIZE_STRING,
-					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
-					),
-				'segmentation_rule' => array(
-					'filter' => FILTER_SANITIZE_STRING,
-					'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
-					)
-				);
+			'file_name'         => array(
+				'filter' => FILTER_SANITIZE_STRING,
+				'flags' => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH 
+			),
+			'source_lang'       => array(
+				'filter' => FILTER_SANITIZE_STRING,
+				'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
+			),
+			'target_lang'       => array(
+				'filter' => FILTER_SANITIZE_STRING,
+				'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
+			),
+			'segmentation_rule' => array(
+				'filter' => FILTER_SANITIZE_STRING,
+				'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
+			)
+		);
 
 		$postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -118,10 +118,10 @@ class convertFileController extends ajaxController {
 					unlink( $file_path );
 					$this->result[ 'code' ]      = -7; // No Good, Default
 					$this->result[ 'errors' ][ ] = array(
-							"code"    => -7,
-							"message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-							'debug'   => basename( $this->file_name )
-							);
+						"code"    => -7,
+						"message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+						'debug'   => basename( $this->file_name )
+					);
 
 					return -1;
 
@@ -146,6 +146,9 @@ class convertFileController extends ajaxController {
 
 		//compute hash to locate the file in the cache
 		$sha1=sha1(file_get_contents($file_path));
+
+		//initialize path variable
+		$xliffPath=false;
 
 		//get storage object
 		$fs= new FilesStorage();
@@ -193,9 +196,9 @@ class convertFileController extends ajaxController {
 					$convertResult[ 'errorMessage' ] = "Error: there is a problem with this file, it cannot be converted back to the original one.";
 					$this->result[ 'code' ]          = -110;
 					$this->result[ 'errors' ][ ]     = array(
-							"code" => -110, "message" => $convertResult[ 'errorMessage' ],
-							'debug' => basename( $this->file_name )
-							);
+						"code" => -110, "message" => $convertResult[ 'errorMessage' ],
+						'debug' => basename( $this->file_name )
+					);
 
 					return false;
 				}
@@ -205,35 +208,56 @@ class convertFileController extends ajaxController {
 				file_put_contents($xliffPath,$convertResult[ 'xliffContent' ]);
 				unset($convertResult[ 'xliffContent' ]);
 
+			/*
+			   store the converted file in the cache
+			   put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
+			   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
+			 */
 
+				//save in cache
+				$res_insert=$fs->makeCachePackage($sha1, $this->source_lang, $file_path, $xliffPath);
+
+
+				if (!$res_insert) {
+					//custom error message passed directly to javascript client and displayed as is
+					$convertResult[ 'errorMessage' ] = "Error: failed to save file on storage intermediate cache";
+					$this->result[ 'code' ]          = -103;
+					$this->result[ 'errors' ][ ]     = array(
+						"code" => -103, "message" => $convertResult[ 'errorMessage' ],
+						'debug' => basename( $this->file_name )
+					);
+
+					unset($xliffPath);
+					return false;
+				}
 
 			} else {
 
 				$file = pathinfo( $this->file_name );
 
 				switch ( $file[ 'extension' ] ) {
-					case 'docx':
-						$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-						break;
-					case 'doc':
-					case 'rtf':
-						$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
-						break;
-					case 'inx':
-						$defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
-						break;
-					case 'idml':
-						$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to a previous one.";
-						break;
-					default:
-						$defaultError = "Importing error. Try opening and saving the document with a new name.";
-						break;
+				case 'docx':
+					$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
+					break;
+				case 'doc':
+				case 'rtf':
+					$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
+					break;
+				case 'inx':
+					$defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
+					break;
+				case 'idml':
+					$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to a previous one.";
+					break;
+				default:
+					$defaultError = "Importing error. Try opening and saving the document with a new name.";
+					break;
 				}
 
 				if (
-						stripos( $convertResult[ 'errorMessage' ], "failed to create SDLXLIFF." ) !== false ||
-						stripos( $convertResult[ 'errorMessage' ], "COM target does not implement IDispatch" ) !== false
-				   ) {
+					stripos( $convertResult[ 'errorMessage' ], "failed to create SDLXLIFF." ) !== false ||
+					stripos( $convertResult[ 'errorMessage' ], "COM target does not implement IDispatch" ) !== false
+				) {
 					$convertResult[ 'errorMessage' ] = "Error: failed importing file.";
 
 				} elseif ( stripos( $convertResult[ 'errorMessage' ], "Unable to open Excel file - it may be password protected" ) !== false ) {
@@ -243,8 +267,8 @@ class convertFileController extends ajaxController {
 					$convertResult[ 'errorMessage' ] = "The document contains track changes. Accept all changes before uploading it.";
 
 				} elseif ( stripos( $convertResult[ 'errorMessage' ], "Error: Could not find file" ) !== false ||
-						stripos( $convertResult[ 'errorMessage' ], "tw4winMark" ) !== false
-						) {
+					stripos( $convertResult[ 'errorMessage' ], "tw4winMark" ) !== false
+				) {
 					$convertResult[ 'errorMessage' ] = $defaultError;
 
 				} elseif ( stripos( $convertResult[ 'errorMessage' ], "Attempted to read or write protected memory" ) !== false ) {
@@ -271,33 +295,10 @@ class convertFileController extends ajaxController {
 				//custom error message passed directly to javascript client and displayed as is
 				$this->result[ 'code' ]      = -100;
 				$this->result[ 'errors' ][ ] = array(
-						"code" => -100, "message" => $convertResult[ 'errorMessage' ], "debug" => $file[ 'basename' ]
-						);
-
+					"code" => -100, "message" => $convertResult[ 'errorMessage' ], "debug" => $file[ 'basename' ]
+				);
 			}
 
-			/*
-			   store the converted file in the cache
-			   put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
-			   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
-			 */
-
-			//save in cache
-			$res_insert=$fs->makeCachePackage($sha1, $this->source_lang, $file_path, $xliffPath);
-
-
-			if (!$res_insert) {
-				//custom error message passed directly to javascript client and displayed as is
-				$convertResult[ 'errorMessage' ] = "Error: failed to save file on storage intermediate cache";
-				$this->result[ 'code' ]          = -103;
-				$this->result[ 'errors' ][ ]     = array(
-						"code" => -103, "message" => $convertResult[ 'errorMessage' ],
-						'debug' => basename( $this->file_name )
-						);
-
-				unset($xliffPath);
-				return false;
-			}
 		}
 
 		//if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
