@@ -177,7 +177,7 @@ $.extend(UI, {
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" name="tmx_file" />' +
+                    '    <input type="file" multiple name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -272,9 +272,11 @@ $.extend(UI, {
 //            if(APP.isCattool) UI.saveTMdescription($(this));
             UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
-            console.log('return');
-            e.preventDefault();
-            $(this).trigger('blur');
+//            console.log('return');
+            if(e.which == 13) {
+                e.preventDefault();
+                $(this).trigger('blur');
+            }
         }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
             $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
 //            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
