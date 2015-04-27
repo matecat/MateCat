@@ -16,7 +16,7 @@ $.extend(UI, {
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
             UI.showMessage({
-                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!'
             });
 
             UI.checkingConnection = setInterval( function() {
