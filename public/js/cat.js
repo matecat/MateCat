@@ -174,6 +174,8 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
+//            segment.find('.actions .split.cancel').click();
+//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 
@@ -1597,27 +1599,50 @@ UI = {
 //				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
-			context: reqArguments,
+			context: [reqArguments, id_segment],
 			error: function() {
-				UI.failedConnection(this, 'setCurrentSegment');
+				UI.failedConnection(this[0], 'setCurrentSegment');
 			},
 			success: function(d) {
-				UI.setCurrentSegment_success(d);
+				UI.setCurrentSegment_success(this[1], d);
 			}
 		});
 	},
-	setCurrentSegment_success: function(d) {
+	setCurrentSegment_success: function(id_segment, d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
-		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
+        if(config.alternativesEnabled) this.getTranslationMismatches(id_segment);
+//		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
         $('html').trigger('setCurrentSegment_success', d);
     },
-    detectTranslationAlternatives: function(d) {
+    getTranslationMismatches: function (id_segment) {
+        APP.doRequest({
+            data: {
+                action: 'getTranslationMismatches',
+                password: config.password,
+                id_segment: id_segment.toString(),
+                id_job: config.job_id
+            },
+            context: id_segment,
+            error: function(d) {
+                UI.failedConnection(this, 'getTranslationMismatches');
+            },
+            success: function(d) {
+                if (d.errors.length) {
+                    UI.processErrors(d.errors, 'setTranslation');
+                } else {
+                    UI.detectTranslationAlternatives(d);
+                }
+            }
+        });
+    },
 
+    detectTranslationAlternatives: function(d) {
+console.log('ecco');
         /**
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
@@ -1667,7 +1692,7 @@ UI = {
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
             tab.show();
-            tab.trigger('click');
+//            tab.trigger('click');
         }
     },
     renderAlternatives: function(d) {
@@ -4184,14 +4209,19 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-//			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
+
+            UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 
             UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4650,8 +4680,11 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-//				console.log('Q: ', UI.editarea.html());
-			}
+				console.log('Q: ', UI.editarea.html());
+                setTimeout(function() { // wait for creation
+                    console.log('R: ', UI.editarea.html());
+                }, 200);
+            }
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
@@ -8685,8 +8718,11 @@ function goodbye(e) {
     }
 
     if ( UI.offline ) {
-        return say_goodbye( 'You are offline. Some translations could not be sent. Are you sure you want to quit?' );
+        if(UI.setTranslationTail.length) {
+            return say_goodbye( 'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. Do you want to proceed with the refresh ?' );
+        }
     }
+
 
     //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
     function say_goodbye( leave_message ){
@@ -9526,7 +9562,7 @@ $.extend(UI, {
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" name="tmx_file" />' +
+                    '    <input type="file" multiple name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -10900,7 +10936,7 @@ $.extend(UI, {
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
             UI.showMessage({
-                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode.'
+                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!'
             });
 
             UI.checkingConnection = setInterval( function() {
@@ -11184,6 +11220,13 @@ if(config.splitSegmentEnabled) {
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
+        console.log('keydown');
+        e.preventDefault();
+    }).on('keypress', '.splitArea', function(e) {
+        console.log('keypress');
+        e.preventDefault();
+    }).on('keyup', '.splitArea', function(e) {
+        console.log('keyup');
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
         e.preventDefault();
@@ -11192,6 +11235,7 @@ if(config.splitSegmentEnabled) {
         pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.cleanSplitPoints($(this));
         UI.updateSplitNumber($(this));
+        $(this).blur();
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
         e.stopPropagation();

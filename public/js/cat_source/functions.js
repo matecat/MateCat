@@ -525,8 +525,11 @@ function goodbye(e) {
     }
 
     if ( UI.offline ) {
-        return say_goodbye( 'You are offline. Some translations could not be sent. Are you sure you want to quit?' );
+        if(UI.setTranslationTail.length) {
+            return say_goodbye( 'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. Do you want to proceed with the refresh ?' );
+        }
     }
+
 
     //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
     function say_goodbye( leave_message ){
