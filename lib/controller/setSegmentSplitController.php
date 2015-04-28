@@ -22,10 +22,10 @@ class setSegmentSplitController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'segment' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW
+                        'filter' => FILTER_UNSAFE_RAW
                 ),
                 'target' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW
+                        'filter' => FILTER_UNSAFE_RAW
                 ),
                 'exec'                => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH

@@ -409,7 +409,6 @@ class FileFormatConverter {
         //remove temporary file
         unlink( $tmp_name );
 
-
         return $res;
     }
 
@@ -491,6 +490,8 @@ class FileFormatConverter {
         $res = $this->__parseOutput( $decode );
         unset( $decode );
 
+	//remove temporary file
+	unlink($tmp_name);
 
         return $res;
     }
@@ -500,6 +501,8 @@ class FileFormatConverter {
         $multiCurlObj = new MultiCurlHandler();
 
         $conversionObjects = array();
+
+	$temporary_files=array();
 
         //iterate files.
         //For each file prepare a curl resource
@@ -526,6 +529,7 @@ class FileFormatConverter {
 
             //get random name for temporary location
             $tmp_name = tempnam( "/tmp", "MAT_BW" );
+	    $temporary_files[]=$tmp_name;
 
             //write encoded file to temporary location
             $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
@@ -572,6 +576,11 @@ class FileFormatConverter {
             $conversionObjects[ $hash ]->conversion_time = $multiInfo[ $hash ][ 'curlinfo_total_time' ];
             $multiResponses[ $hash ]                     = $this->__parseOutput( $multiResponses[ $hash ], $conversionObjects[ $hash ] );
         }
+
+	//remove temporary files
+	foreach($temporary_files as $temp_name){
+		unlink($tmp_name);
+	}
 
         return $multiResponses;
     }

@@ -428,36 +428,25 @@
             $.each(files, function (index, file) {
                 console.log('FILE: ', file);
                 file.error = that._hasError(file);
-// START Customization by Andrea Martines (Translated) 11/03/2014
-//				if(file.name.split('.')[file.name.split('.').length - 1] == 'tmx') {
-//					file.error = null;
-//					return false;
-//				}
-// END Customization by Andrea Martines (Translated) 11/03/2014
 
                 console.log('file.error: ', file.error);
                 if (file.error) {
                     valid = false;
-// START Customization by Andrea Martines (Translated) 25/03/2013
-/*
-                    var extension = file.name.split('.')[file.name.split('.').length-1];
-                	console.log('extension: ' + extension);
-                	console.log(file.error);
-                	var msg = '';
-	                $.each(config.unsupported, function() {
-	                	console.log(this.format + ' - ' + extension);
-	                    if(this.format == extension) msg = this.message+'.';
-	                });     
-//					file.error = 'Format not supported. ' + msg;
-*/
-                    if( config.conversionEnabled ){
+
+                    //CUSTOMIZED 10/04/2015
+                    if( file.error == 'maxFileSize' ) {
+
+                        UI.errorsFileSize( file );
+                        if( file.error == null ){
+                            valid = true;
+                        }
+
+                    } else if( config.conversionEnabled ){
                         file.error = UI.errorsBeforeUpload(file);
-//					 file.error = 'Format not supported. Convert to DOCX and upload the file again.';
                     } else {
                         file.error = 'Format not supported.';
                     }
-
-// END Customization by Andrea Martines (Translated) 25/03/2013
+                    //CUSTOMIZED 10/04/2015
 
                 } else {
                 	valid = true;

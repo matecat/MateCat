@@ -288,6 +288,40 @@ $.extend(UI, {
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
+//        console.log('setContribution');
+        this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
+        if(!this.offline) {
+            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        }
+    },
+    addToSetContributionTail: function (operation, segment_id, status, byStatus) {
+//        console.log('addToSetContributionTail');
+        var item = {
+            operation: operation,
+            segment_id: segment_id,
+            status: status,
+            byStatus: byStatus
+        }
+        this.setContributionTail.push(item);
+    },
+    execSetContributionTail: function () {
+//        console.log('execSetContributionTail');
+
+        if ( UI.setContributionTail.length ) {
+            item = UI.setContributionTail[0];
+            UI.setContributionTail.shift();
+            if ( item.operation == 'setContribution' ) {
+                UI.execSetContribution( item.segment_id, item.status, item.byStatus );
+            } else {
+                UI.execSetContributionMT( item.segment_id, item.status, item.byStatus );
+            }
+        }
+
+    },
+
+    execSetContribution: function(segment_id, status, byStatus) {
+//        console.log('execSetContribution');
+        this.executingSetContribution = true;
         logData = {
             segment_id: segment_id,
             status: status,
@@ -318,9 +352,9 @@ $.extend(UI, {
             this.log('setContribution6', {});
 			return false;
 		}
-		this.updateContribution(source, target);
+		this.updateContribution(source, target, segment_id, status, byStatus);
 	},
-	updateContribution: function(source, target) {
+	updateContribution: function(source, target, segment_id, status, byStatus) {
 		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
@@ -346,15 +380,28 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
+                UI.addToSetContributionTail('setContribution', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'updateContribution');
 			},
 			success: function(d) {
+                console.log('execSetContribution success');
+                UI.executingSetContribution = false;
+                UI.execSetContributionTail();
 				if (d.errors.length)
-					UI.processErrors(d.errors, 'setContribution');
+					UI.processErrors(d.error, 'setContribution');
 			}
 		});
 	},
-	setContributionMT: function(segment_id, status, byStatus) {
+    setContributionMT: function(segment_id, status, byStatus) {
+        console.log('setContribution');
+        this.addToSetContributionTail('setContributionMT', segment_id, status, byStatus);
+        if(!this.offline) {
+            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
+        }
+    },
+    execSetContributionMT: function(segment_id, status, byStatus) {
+        console.log('execSetContribution');
+        this.executingSetContributionMT = true;
 		segment = $('#segment-' + segment_id);
 		reqArguments = arguments;
 		if ((status == 'draft') || (status == 'rejected'))
@@ -377,7 +424,11 @@ $.extend(UI, {
 		if (target === '') {
 			return false;
 		}
-		target = view2rawxliff(target);
+        this.updateContributionMT(source, target, segment_id, status, byStatus);
+    },
+    updateContributionMT: function (source, target, segment_id, status, byStatus) {
+        reqArguments = arguments;
+        target = view2rawxliff(target);
 //		var languages = $(segment).parents('article').find('.languages');
 //		var source_lang = $('.source-lang', languages).text();
 //		var target_lang = $('.target-lang', languages).text();
@@ -406,11 +457,15 @@ $.extend(UI, {
 			},
 			context: reqArguments,
 			error: function() {
+                UI.addToSetContributionTail('setContributionMT', $(this)[2], $(this)[3], $(this)[4]);
 				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
+                console.log('execSetContributionMT success');
+                UI.executingSetContributionMT = false;
+                UI.execSetContributionTail();
 				if (d.errors.length)
-					UI.processErrors(d.errors, 'setContributionMT');
+					UI.processErrors(d.error, 'setContributionMT');
 			}
 		});
 	},

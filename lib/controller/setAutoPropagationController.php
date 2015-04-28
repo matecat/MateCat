@@ -50,7 +50,7 @@ class setAutoPropagationController extends setTranslationController {
 
             $db->begin();
 
-            $old_translation = getCurrentTranslationAndLock( $this->id_job, $this->id_segment );
+            $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
 
             //check tag mismatch
             //get original source segment, first

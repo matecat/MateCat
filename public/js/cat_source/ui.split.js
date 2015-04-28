@@ -10,7 +10,7 @@ if(config.splitSegmentEnabled) {
     }).on('mouseout', '.sid, .editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
         actions = $('.editor .sid').parent().find('.actions');
         actions.hide();
-    }).on('click', '.outersource .actions .split:not(.cancel)', function(e) {
+    }).on('click', 'body:not([data-offline-mode]) .outersource .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
 //        $('.editor .outersource .actions .split').addClass('cancel');
@@ -33,7 +33,7 @@ if(config.splitSegmentEnabled) {
 //        segment.find('.sid .actions').hide();
 
     })*/
-    .on('click', '.sid .actions .split', function(e) {
+    .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
         e.preventDefault();
         $('.sid .actions .split').addClass('cancel');
         $('.split-shortcut').html('CTRL + W');
@@ -42,6 +42,9 @@ if(config.splitSegmentEnabled) {
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea($(this).parents('section'));
+
+    }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
+        e.preventDefault();
     }).on('click', '.sid .actions .split.cancel', function(e) {
         e.preventDefault();
         $('.sid .actions .split').removeClass('cancel');
@@ -54,6 +57,13 @@ if(config.splitSegmentEnabled) {
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
+        console.log('keydown');
+        e.preventDefault();
+    }).on('keypress', '.splitArea', function(e) {
+        console.log('keypress');
+        e.preventDefault();
+    }).on('keyup', '.splitArea', function(e) {
+        console.log('keyup');
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
         e.preventDefault();
@@ -62,6 +72,7 @@ if(config.splitSegmentEnabled) {
         pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.cleanSplitPoints($(this));
         UI.updateSplitNumber($(this));
+        $(this).blur();
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -155,10 +166,10 @@ if(config.splitSegmentEnabled) {
 
             // new version
             totalSource = '';
-            $.each(splittedSource, function (index) {
-                totalSource += splittedSource[index];
-                if(index < (splittedSource.length - 1)) totalSource += UI.splittedTranslationPlaceholder;
-            });
+            $.each( splittedSource, function ( index ) {
+                totalSource += $( document.createElement( 'div' ) ).html( splittedSource[index] ).text();
+                if ( index < (splittedSource.length - 1) ) totalSource += UI.splittedTranslationPlaceholder;
+            } );
 
             APP.doRequest({
                 data: {
@@ -190,8 +201,9 @@ if(config.splitSegmentEnabled) {
         },
         setSegmentSplitSuccess: function (data) {
             oldSid = data.sid;
-//            console.log('oldSid: ', oldSid);
+            console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
+            console.log('splittedSource: ', splittedSource);
 //            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
             splitAr = data.splitAr;
             newSegments = [];
@@ -230,6 +242,7 @@ if(config.splitSegmentEnabled) {
                     status: "DRAFT",
                     time_to_edit: "0",
                     translation: translation,
+                    version: segment.attr('data-version'),
                     warning: "0"
                 }
                 newSegments.push(segData);
@@ -248,46 +261,19 @@ if(config.splitSegmentEnabled) {
                 if(prevSeg.length) {
                     $('section[data-split-original-id=' + oldSid + ']').remove();
                     $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                    if(splitGroup.length) {
-//                        console.log('dovrebbe esser qui');
-//                        console.log('oldSid: ', oldSid);
-                        $.each(splitGroup, function (index) {
-                            UI.lockTags($('#segment-' + this + ' .source'));
-                        });
-                        this.gotoSegment(oldSid + '-1');
-                    } else {
-//                        console.log('o qui');
-//                        console.log('oldSid: ', oldSid);
-                        UI.lockTags($('#segment-' + oldSid + ' .source'));
-                        this.gotoSegment(oldSid);
-
-                    }
-
                 } else {
-
-// TEST
-/*
+                    file = $('#segment-' + oldSid + '-1').parents('article');
                     $('section[data-split-original-id=' + oldSid + ']').remove();
-                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                    if(splitGroup.length) {
-                        console.log('H');
-//                        console.log('dovrebbe esser qui');
-//                        console.log('oldSid: ', oldSid);
-                        $.each(splitGroup, function (index) {
-                            UI.lockTags($('#segment-' + this + ' .source'));
-                        });
-                        this.gotoSegment(oldSid + '-1');
-                    } else {
-                        console.log('I');
-//                        console.log('o qui');
-//                        console.log('oldSid: ', oldSid);
-                        UI.lockTags($('#segment-' + oldSid + ' .source'));
-                        this.gotoSegment(oldSid);
-
-                    }
-
-*/
-// END TEST
+                    $(file).prepend(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                }
+                if(splitGroup.length) {
+                    $.each(splitGroup, function (index) {
+                        UI.lockTags($('#segment-' + this + ' .source'));
+                    });
+                    this.gotoSegment(oldSid + '-1');
+                } else {
+                    UI.lockTags($('#segment-' + oldSid + ' .source'));
+                    this.gotoSegment(oldSid);
 
                 }
             } else {
@@ -320,11 +306,12 @@ if(config.splitSegmentEnabled) {
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
                     $(source).css('height', (sourceHeight)+ 'px');
+                    $('.editor .wrap').css('padding-bottom', (splitAreaHeight - targetHeight)+ 'px');
 //                    console.log('caso 1');
             } else if(sourceHeight < splitAreaHeight) {
                     $(source).css('height', (splitAreaHeight + 100)+ 'px');
                     $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
-//                      console.log('caso 2');
+//                    console.log('caso 2');
                 }
             },100);
 
@@ -381,7 +368,7 @@ if(config.splitSegmentEnabled) {
         cleanSplitPoints: function (splitArea) {
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
-        },
+        }
 
     })
 }

@@ -587,9 +587,8 @@ h2.payoff
 
 .delete .ui-button-text, .cancel .ui-button-text{color:#fff;text-align:left;margin:0px 0 0 10px !important}
 .delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;}
-.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
+.delete button, .cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
 
-.delete button{background: url(../img/sprite.png) 12px -1074px no-repeat !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px;}
 .delete button:hover, .cancel button:hover{background:#ca2a2e url(../img/sprite.png) 12px -1115px  no-repeat !important;}
 .cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !Important;display:block;float:left;}
 

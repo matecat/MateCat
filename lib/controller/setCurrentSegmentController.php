@@ -101,41 +101,8 @@ class setCurrentSegmentController extends ajaxController {
 
         $insertRes = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
 
-        $_thereArePossiblePropagations = countThisTranslatedHashInJob( $this->id_job, $this->password, $this->id_segment );
-        $thereArePossiblePropagations  = intval( $_thereArePossiblePropagations[ 'available' ] );
-
-        $Translation_mismatches = array();
-        if ( $thereArePossiblePropagations ) {
-            $Translation_mismatches = getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
-        }
-
-        $result = array(
-                'editable'       => array(),
-                'not_editable'   => array(),
-                'prop_available' => $thereArePossiblePropagations
-        );
-
-        foreach ( $Translation_mismatches as $position => $row ) {
-
-            if ( $row[ 'editable' ] ) {
-                $result[ 'editable' ][ ] = array(
-                        'translation' => CatUtils::rawxliff2view( $row[ 'translation' ] ),
-                        'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
-                );
-            }
-            else {
-                $result[ 'not_editable' ][ ] = array(
-                        'translation' => CatUtils::rawxliff2view( $row[ 'translation' ] ),
-                        'TOT'         => $row[ 'TOT' ],
-                        'involved_id' => explode( ",", $row[ 'involved_id' ] )
-                );
-            }
-
-        }
-
         $this->result[ 'code' ] = 1;
-        $this->result[ 'data' ] = $result;
+        $this->result[ 'data' ] = array();
 
         //get segment revision informations
         $reviseDao                      = new Revise_ReviseDAO( Database::obtain() );
@@ -157,6 +124,7 @@ class setCurrentSegmentController extends ajaxController {
         $this->result[ 'nextSegmentId' ] = $nextSegmentId;
         $this->result[ 'error_data' ]    = $dbReviseStruct;
         $this->result[ 'original' ]      = CatUtils::rawxliff2view( $_dbReviseStruct->original_translation );
+
     }
 
     private static function prepareReviseStructReturnValues( $struct ) {

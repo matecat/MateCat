@@ -4,7 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.1";
+		this.version = "0.5.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -37,10 +37,8 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.autoFailoverEnabled = false;
 //        this.offlineModeEnabled = false;
         this.offline = false;
-//        if(this.offlineModeEnabled) this.autoFailoverEnabled
         this.searchEnabled = true;
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
@@ -66,6 +64,12 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
+        this.setTranslationTail = [];
+        this.setContributionTail = [];
+        this.executingSetTranslation = false;
+        this.executingSetContribution = false;
+        this.executingSetContributionMT = false;
+
         if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
 		/**
