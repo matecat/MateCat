@@ -136,7 +136,14 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        try {
+            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        } catch (e) {
+            UI.clearStorage('contribution');
+            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        }
+//        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+
 //		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
@@ -386,6 +393,7 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
+                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
