@@ -1599,27 +1599,50 @@ UI = {
 //				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
-			context: reqArguments,
+			context: [reqArguments, id_segment],
 			error: function() {
-				UI.failedConnection(this, 'setCurrentSegment');
+				UI.failedConnection(this[0], 'setCurrentSegment');
 			},
 			success: function(d) {
-				UI.setCurrentSegment_success(d);
+				UI.setCurrentSegment_success(this[1], d);
 			}
 		});
 	},
-	setCurrentSegment_success: function(d) {
+	setCurrentSegment_success: function(id_segment, d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
-		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
+        if(config.alternativesEnabled) this.getTranslationMismatches(id_segment);
+//		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
         $('html').trigger('setCurrentSegment_success', d);
     },
-    detectTranslationAlternatives: function(d) {
+    getTranslationMismatches: function (id_segment) {
+        APP.doRequest({
+            data: {
+                action: 'getTranslationMismatches',
+                password: config.password,
+                id_segment: id_segment.toString(),
+                id_job: config.job_id
+            },
+            context: id_segment,
+            error: function(d) {
+                UI.failedConnection(this, 'getTranslationMismatches');
+            },
+            success: function(d) {
+                if (d.errors.length) {
+                    UI.processErrors(d.errors, 'setTranslation');
+                } else {
+                    UI.detectTranslationAlternatives(d);
+                }
+            }
+        });
+    },
 
+    detectTranslationAlternatives: function(d) {
+console.log('ecco');
         /**
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
@@ -1669,7 +1692,7 @@ UI = {
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
             tab.show();
-            tab.trigger('click');
+//            tab.trigger('click');
         }
     },
     renderAlternatives: function(d) {
@@ -3396,7 +3419,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.3";
+		this.version = "0.5.3b";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -4186,14 +4209,19 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-//			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
+
+            UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 
             UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4652,8 +4680,11 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-//				console.log('Q: ', UI.editarea.html());
-			}
+				console.log('Q: ', UI.editarea.html());
+                setTimeout(function() { // wait for creation
+                    console.log('R: ', UI.editarea.html());
+                }, 200);
+            }
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
@@ -5870,7 +5901,14 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        try {
+            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        } catch (e) {
+            UI.clearStorage('contribution');
+            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        }
+//        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+
 //		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
@@ -9636,9 +9674,11 @@ $.extend(UI, {
 //            if(APP.isCattool) UI.saveTMdescription($(this));
             UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
-            console.log('return');
-            e.preventDefault();
-            $(this).trigger('blur');
+//            console.log('return');
+            if(e.which == 13) {
+                e.preventDefault();
+                $(this).trigger('blur');
+            }
         }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
             $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
 //            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
@@ -10199,6 +10239,7 @@ $.extend(UI, {
 //        form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
         iframeId = document.getElementById(ifId);
+        UI.TMuploadIframeId = iframeId;
 
         // Add event...
         var eventHandler = function () {
@@ -10378,7 +10419,7 @@ $.extend(UI, {
                                 $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
                             }
 
-
+                            UI.TMuploadIframeId.parentNode.removeChild(UI.TMuploadIframeId);
 //                            APP.showMessage({
 //                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
 //                            });
@@ -11201,6 +11242,13 @@ if(config.splitSegmentEnabled) {
         segment.find('.splitBar, .splitArea').remove();
         segment.find('.sid .actions').hide();
     }).on('keydown', '.splitArea', function(e) {
+        console.log('keydown');
+        e.preventDefault();
+    }).on('keypress', '.splitArea', function(e) {
+        console.log('keypress');
+        e.preventDefault();
+    }).on('keyup', '.splitArea', function(e) {
+        console.log('keyup');
         e.preventDefault();
     }).on('click', '.splitArea', function(e) {
         e.preventDefault();
@@ -11209,6 +11257,7 @@ if(config.splitSegmentEnabled) {
         pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
         UI.cleanSplitPoints($(this));
         UI.updateSplitNumber($(this));
+        $(this).blur();
     }).on('mousedown', '.splitArea .splitpoint', function(e) {
         e.preventDefault();
         e.stopPropagation();
