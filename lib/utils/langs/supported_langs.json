@@ -869,7 +869,7 @@
 				"en":"Malayalam"
 			}],
 			"isocode":"ml",
-			"enabled":false,
+			"enabled":true,
 			"rtl":true,
 			"rfc3066code":"ml-IN"
 		}
