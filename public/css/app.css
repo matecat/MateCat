@@ -4310,7 +4310,7 @@ body.noGlossary .tab-switcher-gl
 
 .submenu li.active a
 {
-    background: #fff;
+    background: #fff !important;
     color: #666;
     text-shadow: none;
     -moz-box-shadow: none;
@@ -4327,7 +4327,7 @@ body.noGlossary .tab-switcher-gl
 .tab-switcher-al a
 {
 	color: #D65959 !important;
-	background: #fff url(../img/sprite.png) -8px -1357px no-repeat !important;
+	background: transparent url(../img/sprite.png) -8px -1357px no-repeat !important;
 	padding-left: 24px;
 }
 
