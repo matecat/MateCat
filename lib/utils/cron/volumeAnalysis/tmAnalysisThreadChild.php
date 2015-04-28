@@ -13,7 +13,7 @@ $amqHandlerSubscriber = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
 $amqHandlerSubscriber->connect();
 
 $amqHandlerSubscriber->subscribe( INIT::$QUEUE_NAME );
-$amqHandlerSubscriber->setReadTimeout( 1, 1 );
+$amqHandlerSubscriber->setReadTimeout( 0, 500 );
 
 $amqHandlerPublisher = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
 $amqHandlerPublisher->connect();
@@ -51,12 +51,12 @@ echo "--- (child $my_pid) : parent pid is $parent_pid\n";
 $memcacheHandler = MemcacheHandler::getInstance();
 
 while ( 1 ) {
-    if ( 0 && !processFileExists( $my_pid ) ) {
+    if (!processFileExists($my_pid)) {
         die( "(child $my_pid) :  EXITING!  my file does not exists anymore\n" );
     }
 
     // control if parent is still running
-    if ( 0 && !isRunningProcess( $parent_pid ) ) {
+    if (!isRunningProcess($parent_pid)) {
         echo "--- (child $my_pid) : EXITING : parent seems to be died.\n";
         exit ( -1 );
     }
@@ -239,8 +239,21 @@ while ( 1 ) {
 
             $tms_match = $tms->get( $config );
 
-            $tms_match = $tms_match->get_matches_as_array();
+            if ( $tms_match !== null ) {
+                $tms_match = $tms_match->get_matches_as_array();
 
+            } else {
+
+                echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
+                setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
+                incrementCount( $pid, 0, 0 );
+                tryToCloseProject( $pid, $my_pid );
+
+                $amqHandlerSubscriber->ack( $msg );
+                reQueue( $amqHandlerPublisher, $objQueue );
+
+                continue;
+            }
         }
 
         /**
@@ -271,12 +284,12 @@ while ( 1 ) {
         /**
          * Only if No results found
          */
-        if ( !$matches || !is_array( $matches ) ) {
-            echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
+        if ( empty( $matches ) || !is_array( $matches ) ) {
+            echo "--- (child $my_pid) : No contribution found : set error and continue\n"; // ERROR FROM MYMEMORY
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
             incrementCount( $pid, 0, 0 );
             tryToCloseProject( $pid, $my_pid );
-            $failed_segment = $objQueue;
+            $amqHandlerSubscriber->ack( $msg );
             continue;
         }
 
@@ -391,10 +404,7 @@ while ( 1 ) {
 
         $amqHandlerSubscriber->ack( $msg );
 
-        if ( !empty( $failed_segment ) ) {
-            Log::doLog( "Failed " . count( $failed_segment ) );
-            $amqHandlerPublisher->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => 'true' ) );
-        }
+        reQueue($amqHandlerPublisher, $failed_segment );
 
         tryToCloseProject( $pid, $my_pid );
 
@@ -406,6 +416,15 @@ while ( 1 ) {
 }
 
 //}
+
+function reQueue($amqHandlerPublisher, $failed_segment){
+
+    if ( !empty( $failed_segment ) ) {
+        Log::doLog( "Failed " . count( $failed_segment ) );
+        $amqHandlerPublisher->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => 'true' ) );
+    }
+
+}
 
 function incrementCount( $pid, $eq_words, $standard_words ) {
     $memcacheHandler = MemcacheHandler::getInstance();
@@ -490,7 +509,27 @@ function getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMappi
             $tm_rate_paid = $equivalentWordMapping[ "50%-74%" ];
         }
 
-        if ( $ind >= 75 and $ind <= 99 ) {
+        /*
+         * @author Roberto Tucci
+         * Jobs before 27th April 2015 had a unique category: 75%-99%
+         * From this date the category has been split into 3 categories.
+         * this condition grants back-compatibility with old jobs and related analysis
+         */
+        if( !isset( $equivalentWordMapping[ "75%-99%" ]) ) {
+            if( $ind >= 75 && $ind <=84 ){
+                $tm_match_cat = "75%-84%";
+                $tm_rate_paid = $equivalentWordMapping[ "75%-84%" ];
+            }
+            elseif( $ind >= 85 && $ind <=94 ){
+                $tm_match_cat = "85%-94%";
+                $tm_rate_paid = $equivalentWordMapping[ "85%-94%" ];
+            }
+            elseif( $ind >= 95 && $ind <=99 ){
+                $tm_match_cat = "95%-99%";
+                $tm_rate_paid = $equivalentWordMapping[ "95%-99%" ];
+            }
+        }
+        elseif ( $ind >= 75 and $ind <= 99 ) {
             $tm_match_cat = "75%-99%";
             $tm_rate_paid = $equivalentWordMapping[ "75%-99%" ];
         }

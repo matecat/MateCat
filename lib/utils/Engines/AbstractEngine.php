@@ -134,11 +134,11 @@ abstract class Engines_AbstractEngine {
 
         if ( $mh->hasError( $resourceHash ) ) {
             $curl_error = $mh->getError( $resourceHash );
-            Log::doLog( 'Curl Error: ' . $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
+            Log::doLog( 'Curl Error: (http status ' . $curl_error['http_code'] .') '. $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
             $rawValue = array(
                     'error' => array(
                             'code'    => -$curl_error[ 'errno' ],
-                            'message' => " {$curl_error['error']}. Server Not Available"
+                            'message' => " {$curl_error['error']}. Server Not Available (http status " . $curl_error['http_code'] .")"
                     )
             ); //return negative number
         } else {
