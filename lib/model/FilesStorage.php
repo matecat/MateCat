@@ -218,7 +218,7 @@ class FilesStorage{
 		if ( !empty( $id_file ) ) {
 			$where_id_file = " and id_file=$id_file";
 		}
-		$query = "select id_file, filename from files_job fj
+		$query = "select fj.id_file, f.filename, j.source from files_job fj
 			inner join files f on f.id=fj.id_file
 			inner join jobs j on j.id=fj.id_job
 			where id_job=$id_job $where_id_file and j.password='$password'";
@@ -227,7 +227,48 @@ class FilesStorage{
 		$results = $db->fetch_array( $query );
 
 		foreach($results as $k=>$result){
-			$results[$k]['originalFilePath']=$this->getOriginalFromFileDir($result['id_file']);
+			//try fetching from files dir
+			$filePath=$this->getOriginalFromFileDir($result['id_file']);
+
+			if(!$filePath){
+				//file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
+				//fetch it from the files database
+				$fileContent=$this->getOriginalFromDB($result['id_file']);
+				$xliffContent=$this->getXliffFromDB($result['id_file']);
+
+				//create temporary files with original name
+				$tempdir="/tmp".DIRECTORY_SEPARATOR.str_shuffle(sha1(time()));
+				mkdir($tempdir,0755);
+				$tempOriginal = $tempdir.DIRECTORY_SEPARATOR.$result['filename'];
+				$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$result['filename'].".xlf";
+
+				//flush file content
+				file_put_contents($tempOriginal, $fileContent);
+				file_put_contents($tempXliff, $xliffContent);
+
+				//get hash
+				$sha1=sha1($fileContent);
+
+				//free memory
+				unset($fileContent,$xliffContent);
+
+				//get source language for this job
+				$source_lang=$result['source'];
+
+				//build a cache package
+				$this->makeCachePackage($sha1, $source_lang, $tempOriginal, $tempXliff);
+
+				//build a file package
+				$this->moveFromCacheToFileDir($sha1, $source_lang, $result['id_file']);
+
+				//now, try again fetching from disk :)
+				$filePath=$this->getOriginalFromFileDir($result['id_file']);
+
+				//clean temporary stuff
+				Utils::deleteDir($tempdir);
+			}
+
+			$results[$k]['originalFilePath']=$filePath;
 		}
 
 		return $results;
@@ -253,6 +294,25 @@ class FilesStorage{
 		}
 
 		return $results;
+	}
+
+	public function getOriginalFromDB($id_file){
+		$query = "select original_file from files where id= $id_file";
+
+		$db      = Database::obtain();
+		$results = $db->fetch_array( $query );
+
+		return gzinflate($results[0]['original_file']);
+
+	}
+
+	public function getXliffFromDB($id_file){
+		$query = "select xliff_file from files where id= $id_file";
+
+		$db      = Database::obtain();
+		$results = $db->fetch_array( $query );
+
+		return $results[0]['xliff_file'];
 	}
 }
 
