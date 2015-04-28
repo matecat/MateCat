@@ -143,7 +143,6 @@ class downloadFileController extends downloadController {
 				$fileID           = $file[ 'id_file' ];
 				$current_filename = $file[ 'filename' ];
 
-
 				//get path for the output file
 				$outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.out.xlf';
 
@@ -224,13 +223,11 @@ class downloadFileController extends downloadController {
 				$convertBackToOriginal = true;
 				try {
 
-					//if it is a not converted file ( sdlxliff ) we have an empty field original_file
-					//so we can simplify all the logic with:
-					// is empty original_file? if it is, we don't need conversion back because
-					// we already have an sdlxliff or an accepted file
+					
+					//if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
 					$file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-					if ( !INIT::$CONVERSION_ENABLED || ( empty( $file[ 'originalFilePath' ] ) && $mime_type == 'sdlxliff' ) || $this->forceXliff ) {
+					if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file['xliffFilePath'] and $mime_type == 'sdlxliff' ) or $this->forceXliff ) {
 						$convertBackToOriginal = false;
 						Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
 					}
@@ -318,18 +315,18 @@ class downloadFileController extends downloadController {
 			$tm_id                    = uniqid( 'tm' );
 			$mt_id                    = uniqid( 'mt' );
 			$output_content[ $tm_id ] = array(
-					'documentContent' => '',
-					'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_TM . tmx"
-					);
+				'documentContent' => '',
+				'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_TM . tmx"
+			);
 
 			foreach ( $tmFile as $lineNumber => $content ) {
 				$output_content[ $tm_id ][ 'documentContent' ] .= $content;
 			}
 
 			$output_content[ $mt_id ] = array(
-					'documentContent' => '',
-					'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_MT . tmx"
-					);
+				'documentContent' => '',
+				'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_MT . tmx"
+			);
 
 			foreach ( $mtFile as $lineNumber => $content ) {
 				$output_content[ $mt_id ][ 'documentContent' ] .= $content;
@@ -501,9 +498,9 @@ class downloadFileController extends downloadController {
 			<source_dir>inbox</source_dir>
 			<source_dir_excludes>
 			<mask>**/.svn/**</mask>
-						   <mask>**/CSV/**</mask>
-										 <mask>**/.cvs/**</mask>
-														<mask>**/desktop.ini</mask>
+			<mask>**/CSV/**</mask>
+			<mask>**/.cvs/**</mask>
+			<mask>**/desktop.ini</mask>
 			<mask>**/Thumbs.db</mask>
 			</source_dir_excludes>
 			<target_dir>__DEFAULT__</target_dir>
@@ -522,40 +519,40 @@ class downloadFileController extends downloadController {
 			</omegat>';
 
 		$omegatTokenizerMap = array(
-				"AR"           => "LuceneArabicTokenizer",
-				"HY"           => "LuceneArmenianTokenizer",
-				"EU"           => "LuceneBasqueTokenizer",
-				"BG"           => "LuceneBulgarianTokenizer",
-				"CA"           => "LuceneCatalanTokenizer",
-				"ZH"           => "LuceneSmartChineseTokenizer",
-				"CZ"           => "LuceneCzechTokenizer",
-				"DK"           => "LuceneDanishTokenizer",
-				"NL"           => "LuceneDutchTokenizer",
-				"EN"           => "LuceneEnglishTokenizer",
-				"FI"           => "LuceneFinnishTokenizer",
-				"FR"           => "LuceneFrenchTokenizer",
-				"GL"           => "LuceneGalicianTokenizer",
-				"DE"           => "LuceneGermanTokenizer",
-				"GR"           => "LuceneGreekTokenizer",
-				"IN"           => "LuceneHindiTokenizer",
-				"HU"           => "LuceneHungarianTokenizer",
-				"ID"           => "LuceneIndonesianTokenizer",
-				"IE"           => "LuceneIrishTokenizer",
-				"IT"           => "LuceneItalianTokenizer",
-				"JA"           => "LuceneJapaneseTokenizer",
-				"KO"           => "LuceneKoreanTokenizer",
-				"LV"           => "LuceneLatvianTokenizer",
-				"NO"           => "LuceneNorwegianTokenizer",
-				"FA"           => "LucenePersianTokenizer",
-				"PT"           => "LucenePortugueseTokenizer",
-				"RO"           => "LuceneRomanianTokenizer",
-				"RU"           => "LuceneRussianTokenizer",
-				"ES"           => "LuceneSpanishTokenizer",
-				"SE"           => "LuceneSwedishTokenizer",
-				"TH"           => "LuceneThaiTokenizer",
-				"TR"           => "LuceneTurkishTokenizer"
+			"AR"           => "LuceneArabicTokenizer",
+			"HY"           => "LuceneArmenianTokenizer",
+			"EU"           => "LuceneBasqueTokenizer",
+			"BG"           => "LuceneBulgarianTokenizer",
+			"CA"           => "LuceneCatalanTokenizer",
+			"ZH"           => "LuceneSmartChineseTokenizer",
+			"CZ"           => "LuceneCzechTokenizer",
+			"DK"           => "LuceneDanishTokenizer",
+			"NL"           => "LuceneDutchTokenizer",
+			"EN"           => "LuceneEnglishTokenizer",
+			"FI"           => "LuceneFinnishTokenizer",
+			"FR"           => "LuceneFrenchTokenizer",
+			"GL"           => "LuceneGalicianTokenizer",
+			"DE"           => "LuceneGermanTokenizer",
+			"GR"           => "LuceneGreekTokenizer",
+			"IN"           => "LuceneHindiTokenizer",
+			"HU"           => "LuceneHungarianTokenizer",
+			"ID"           => "LuceneIndonesianTokenizer",
+			"IE"           => "LuceneIrishTokenizer",
+			"IT"           => "LuceneItalianTokenizer",
+			"JA"           => "LuceneJapaneseTokenizer",
+			"KO"           => "LuceneKoreanTokenizer",
+			"LV"           => "LuceneLatvianTokenizer",
+			"NO"           => "LuceneNorwegianTokenizer",
+			"FA"           => "LucenePersianTokenizer",
+			"PT"           => "LucenePortugueseTokenizer",
+			"RO"           => "LuceneRomanianTokenizer",
+			"RU"           => "LuceneRussianTokenizer",
+			"ES"           => "LuceneSpanishTokenizer",
+			"SE"           => "LuceneSwedishTokenizer",
+			"TH"           => "LuceneThaiTokenizer",
+			"TR"           => "LuceneTurkishTokenizer"
 
-					);
+		);
 
 		$source_lang     = substr( $source, 0, 2 );
 		$target_lang     = substr( $target, 0, 2 );
@@ -564,15 +561,15 @@ class downloadFileController extends downloadController {
 
 		if ( $sourceTokenizer == null ) {
 			$sourceTokenizer = $defaultTokenizer;
-		}
-		if ( $targetTokenizer == null ) {
-			$targetTokenizer = $defaultTokenizer;
-		}
+	}
+	if ( $targetTokenizer == null ) {
+		$targetTokenizer = $defaultTokenizer;
+	}
 
-		return str_replace(
-				array( "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ),
-				array( $source, $target, $sourceTokenizer, $targetTokenizer ),
-				$omegatFile );
+	return str_replace(
+		array( "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ),
+					array( $source, $target, $sourceTokenizer, $targetTokenizer ),
+					$omegatFile );
 
 
 	}
@@ -590,74 +587,74 @@ class downloadFileController extends downloadController {
 		//remove system confidential information
 		$documentContent = preg_replace_callback( '|(<file [^>]*?original="([^>]*?)" [^>]*>)|si', '_clean', $documentContent );
 		$documentContent = preg_replace_callback( '|(o-path="([^>]*?))"|si', '_clean', $documentContent );
-				$documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
+		$documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
+
+	}
+
+	/**
+	 * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
+	 *
+	 * Also, check for encoding and transform utf16 to utf8 and back
+	 *
+	 * @param $documentContent
+	 * @param $path
+	 *
+	 * @return string
+	 */
+	public function removeTargetMarks( $documentContent, $path ) {
+
+		$extension = pathinfo( $path );
+		if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
+			return $documentContent;
+		}
+
+		$is_utf8          = true;
+		$original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
+
+		//The file is UTF-16 Encoded
+		if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
+
+			$is_utf8 = false;
+			list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+
+		}
+
+		//avoid in memory copy of very large files if possible
+		$detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+
+		//clean mrk tags for GlobalSight application compatibility
+		//this should be a sax parser instead of in memory copy for every trans-unit
+		if ( $detect_result[ 'proprietary_short_name' ] == 'globalsight' ) {
+
+			// Getting Trans-units
+			$trans_units = explode( '<trans-unit', $documentContent );
+
+			foreach ( $trans_units as $pos => $trans_unit ) {
+
+				// First element in the XLIFF split is the header, not the first file
+				if ( $pos > 0 ) {
+
+					//remove seg-source tags
+					$trans_unit = preg_replace( '|<seg-source.*?</seg-source>|si', '', $trans_unit );
+					//take the target content
+					$trans_unit = preg_replace( '#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
+
+					$trans_units[ $pos ] = $trans_unit;
 
 				}
 
-				/**
-				 * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
-				 *
-				 * Also, check for encoding and transform utf16 to utf8 and back
-				 *
-				 * @param $documentContent
-				 * @param $path
-				 *
-				 * @return string
-				 */
-				public function removeTargetMarks( $documentContent, $path ) {
+			} // End of trans-units
 
-				$extension = pathinfo( $path );
-				if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
-				return $documentContent;
-				}
+			$documentContent = implode( '<trans-unit', $trans_units );
 
-				$is_utf8          = true;
-				$original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
+		}
 
-				//The file is UTF-16 Encoded
-				if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
+		if ( !$is_utf8 ) {
+			list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+		}
 
-					$is_utf8 = false;
-					list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+		return $documentContent;
 
-				}
-
-				//avoid in memory copy of very large files if possible
-				$detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
-
-				//clean mrk tags for GlobalSight application compatibility
-				//this should be a sax parser instead of in memory copy for every trans-unit
-				if ( $detect_result[ 'proprietary_short_name' ] == 'globalsight' ) {
-
-					// Getting Trans-units
-					$trans_units = explode( '<trans-unit', $documentContent );
-
-					foreach ( $trans_units as $pos => $trans_unit ) {
-
-						// First element in the XLIFF split is the header, not the first file
-						if ( $pos > 0 ) {
-
-							//remove seg-source tags
-							$trans_unit = preg_replace( '|<seg-source.*?</seg-source>|si', '', $trans_unit );
-							//take the target content
-							$trans_unit = preg_replace( '#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
-
-							$trans_units[ $pos ] = $trans_unit;
-
-						}
-
-					} // End of trans-units
-
-					$documentContent = implode( '<trans-unit', $trans_units );
-
-				}
-
-				if ( !$is_utf8 ) {
-					list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
-				}
-
-				return $documentContent;
-
-				}
+	}
 
 }
