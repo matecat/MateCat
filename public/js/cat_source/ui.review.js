@@ -150,11 +150,8 @@ if(config.enableReview && config.isReview) {
 
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
 
-            APP.doRequest({
-//                data: reqData,
-
-                data: {
-                    action: 'setRevision',
+            var data = {
+                action: 'setRevision',
                     job: config.job_id,
                     jpassword: config.password,
                     segment: sid,
@@ -164,23 +161,9 @@ if(config.enableReview && config.isReview) {
                     err_terminology: err_terminology,
                     err_language: err_language,
                     err_style: err_style
-                },
+            };
 
-//                context: [reqArguments, segment, status],
-                error: function() {
-//                    UI.failedConnection(this[0], 'setTranslation');
-                },
-                success: function(d) {
-//                    console.log('d: ', d);
-                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
-                    // temp
-//                    d.stat_quality = config.stat_quality;
-//                    d.stat_quality[0].found = 2;
-                    //end temp
-//                    UI.populateStatQualityPanel(d.stat_quality);
-                }
-            });
-
+            UI.setRevision( data );
 
         }
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
@@ -232,6 +215,30 @@ if(config.enableReview && config.isReview) {
     });
 
     $.extend(UI, {
+
+        setRevision: function( data ){
+
+            APP.doRequest({
+//                data: reqData,
+
+                data: data,
+
+//                context: [reqArguments, segment, status],
+                error: function() {
+                    //UI.failedConnection( this[0], 'setRevision' );
+                    UI.failedConnection( data, 'setRevision' );
+                },
+                success: function(d) {
+//                    console.log('d: ', d);
+                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
+                    // temp
+//                    d.stat_quality = config.stat_quality;
+//                    d.stat_quality[0].found = 2;
+                    //end temp
+//                    UI.populateStatQualityPanel(d.stat_quality);
+                }
+            });
+        },
         trackChanges: function (editarea) {
 /*
             console.log('11111: ', $(editarea).text());
