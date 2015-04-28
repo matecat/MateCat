@@ -325,7 +325,7 @@ class ProjectManager {
 
 			//use hash and lang to fetch file from package
 			$xliffFilePathName=$fs->getXliffFromCache($hashFile[0],$hashFile[1]);
-			log::doLog("xliff: $xliffFilePathName");
+
 			//get sha
 			$sha1_original=$hashFile[0];
 
