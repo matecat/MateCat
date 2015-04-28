@@ -293,10 +293,20 @@
                             <th class="tm-partial">TM<br/>
                                 Partial (50%-74%)
                             </th>
-                            <th class="tm-partial">TM<br/>
+                            <th class="tm-partial" tal:condition="exists:id_for_job/rates/75%-99%">TM<br/>
                                 Partial (75%-99%)
                             </th>
+                            <th class="tm-partial" tal:condition="not: exists: id_for_job/rates/75%-99%">TM<br/>
+                                Partial (75%-84%)
+                            </th>
+                            <th class="tm-partial" tal:condition="not: exists: id_for_job/rates/75%-99%">TM<br/>
+                                Partial (85%-94%)
+                            </th>
+                            <th class="tm-partial" tal:condition="not: exists: id_for_job/rates/75%-99%">TM<br/>
+                                Partial (95%-99%)
+                            </th>
                             <th class="tm-100">TM 100%</th>
+                            <th class="tm-100">Public TM 100%</th>
                             <th class="tm-100-context">TM 100% in context</th>
                             <th class="mt">Machine Translation</th>
                             <th class="empty">&nbsp;</th>
@@ -309,8 +319,12 @@
                             <td class="editarea">${id_for_job/rates/REPETITIONS}%</td>
                             <td class="editarea">${id_for_job/rates/INTERNAL}%</td>
                             <td class="editarea">${id_for_job/rates/50%-74%}%</td>
-                            <td class="editarea">${id_for_job/rates/75%-99%}%</td>
-                            <td class="editarea">${id_for_job/rates/100%}%</td>
+                            <td class="editarea" tal:condition="exists:id_for_job/rates/75%-99%">${id_for_job/rates/75%-99%}%</td>
+                            <td class="editarea" tal:condition="not: exists: id_for_job/rates/75%-99%">${id_for_job/rates/75%-84%}%</td>
+                            <td class="editarea" tal:condition="not: exists: id_for_job/rates/75%-99%">${id_for_job/rates/85%-94%}%</td>
+                            <td class="editarea" tal:condition="not: exists: id_for_job/rates/75%-99%">${id_for_job/rates/95%-99%}%</td>
+                            <td class="editarea" >${id_for_job/rates/100%}%</td>
+                            <td class="editarea" >${id_for_job/rates/100%_PUBLIC}%</td>
                             <td class="editarea">0%</td>
                             <td class="editarea">${id_for_job/rates/MT}%</td>
                             <td class="empty">&nbsp;</td>
@@ -337,8 +351,12 @@
                                 <td class="stat_rep">0</td>
                                 <td class="stat_int">0</td>
                                 <td class="stat_tm50">0</td>
-                                <td class="stat_tm75">0</td>
+                                <td class="stat_tm75" tal:condition="exists:id_for_job/rates/75%-99%">0</td>
+                                <td class="stat_tm75_84" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
+                                <td class="stat_tm85_94" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
+                                <td class="stat_tm95_99" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
                                 <td class="stat_tm100">0</td>
+                                <td class="stat_tm100_public">0</td>
                                 <td class="stat_tmic">0</td>
                                 <td class="stat_mt">0</td>
                                 <td class="empty">
@@ -357,8 +375,12 @@
                                     <td class="stat_rep">0</td>
                                     <td class="stat_int">0</td>
                                     <td class="stat_tm50">0</td>
-                                    <td class="stat_tm75">0</td>
+                                    <td class="stat_tm75" tal:condition="exists:id_for_job/rates/75%-99%">0</td>
+                                    <td class="stat_tm75_84" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
+                                    <td class="stat_tm85_94" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
+                                    <td class="stat_tm95_99" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
                                     <td class="stat_tm100">0</td>
+                                    <td class="stat_tm100_public">0</td>
                                     <td class="stat_tmic">0</td>
                                     <td class="stat_mt">0</td>
                                     <td class="empty"></td>

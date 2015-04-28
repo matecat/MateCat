@@ -53,7 +53,9 @@ class getVolumeAnalysisController extends ajaxController {
 
     protected $total_init = array(
             "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
-            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ),
+            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_100_PUBLIC" => array( 0, "0" ),
+            "TM_75_99" => array( 0, "0" ),
+            "TM_75_84"      => array( 0, "0" ), "TM_85_94" => array( 0, "0" ), "TM_95_99" => array( 0, "0" ),
             "TM_50_74"      => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ),
             "NUMBERS_ONLY"  => array( 0, "0" )
     );
@@ -185,21 +187,41 @@ class getVolumeAnalysisController extends ajaxController {
 
             if ( $segInfo[ 'match_type' ] == "INTERNAL" ) {
                 $keyValue = 'INTERNAL_MATCHES';
-            } elseif ( $segInfo[ 'match_type' ] == "MT" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "MT" ) {
                 $keyValue = 'MT';
-            } elseif ( $segInfo[ 'match_type' ] == "100%" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "100%" ) {
                 $keyValue = 'TM_100';
-            } elseif ( $segInfo[ 'match_type' ] == "75%-99%" or $segInfo[ 'match_type' ] == "75%-84%" or $segInfo[ 'match_type' ] == "85%-94%" or $segInfo[ 'match_type' ] == "95%-99%" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "100%_PUBLIC" ) {
+                $keyValue = 'TM_100_PUBLIC';
+            }
+            elseif ( $segInfo[ 'match_type' ] == "75%-99%" ) {
                 $keyValue = 'TM_75_99';
-            } elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "75%-84%" ) {
+                $keyValue = 'TM_75_84';
+            }
+            elseif ( $segInfo[ 'match_type' ] == "85%-94%" ) {
+                $keyValue = 'TM_85_94';
+            }
+            elseif ( $segInfo[ 'match_type' ] == "95%-99%" ) {
+                $keyValue = 'TM_95_99';
+            }
+            elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
                 $keyValue = 'TM_50_74';
-            } elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
                 $keyValue = 'NEW';
-            } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
                 $keyValue = "ICE";
-            } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
+            }
+            elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
                 $keyValue = 'REPETITIONS';
-            } else {
+            }
+            else {
                 $keyValue = 'NUMBERS_ONLY';
             }
 
@@ -250,7 +272,8 @@ class getVolumeAnalysisController extends ajaxController {
 
             $this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;
 
-        } elseif ( $this->segments_analyzed == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
+        }
+        elseif ( $this->segments_analyzed == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
 
             //Outsource Quote issue
             //fast analysis not done, return the number of raw word count
@@ -361,7 +384,8 @@ class getVolumeAnalysisController extends ajaxController {
         if ( $this->status_project == 'FAST_OK' or $this->status_project == "DONE" ) {
             $this->return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $tm_wc_time, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $tm_wc_unit;
-        } else {
+        }
+        else {
             $this->return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $fast_wc_time, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $fast_wc_unit;
         }
@@ -389,7 +413,8 @@ class getVolumeAnalysisController extends ajaxController {
             $this->return_data[ 'summary' ][ 'TOTAL_RAW_WC_PRINT' ]      = number_format( $this->total_raw_wc, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'TOTAL_PAYABLE_PRINT' ]     = number_format( $this->total_wc_tm_analysis + 0.00000001, 0, ".", "," );
 
-        } else {
+        }
+        else {
 
 //            Log::doLog( $this->_project_data );
 

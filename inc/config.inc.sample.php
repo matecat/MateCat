@@ -88,8 +88,12 @@ class INIT {
     public static $DEFAULT_PAYABLE_RATES = array(
             'NO_MATCH'    => 100,
             '50%-74%'     => 100,
-            '75%-99%'     => 60,
+            //            '75%-99%'     => 60,
+            '75%-80%'     => 60,
+            '81%-90%'     => 60,
+            '91%-99%'     => 60,
             '100%'        => 30,
+            '100%_PUBLIC' => 30,
             'REPETITIONS' => 30,
             'INTERNAL'    => 60,
             'MT'          => 85
@@ -386,7 +390,7 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-        self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
+        self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.inc.php file is not up-to-date.";
 
     }
 

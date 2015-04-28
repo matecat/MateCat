@@ -128,9 +128,9 @@ while (1) {
 
         foreach ( $data as $k => $v ) {
 
-            if ( in_array( $v[ 'type' ], array( "75%-84%", "85%-94%", "95%-99%" ) ) ) {
-                $data[ $k ][ 'type' ] = "INTERNAL";
-            }
+//            if ( in_array( $v[ 'type' ], array( "75%-84%", "85%-94%", "95%-99%" ) ) ) {
+//                $data[ $k ][ 'type' ] = "INTERNAL";
+//            }
 
             if ( in_array( $v[ 'type' ], array( "50%-74%" ) ) ) {
                 $data[ $k ][ 'type' ] = "NO_MATCH";
@@ -156,7 +156,7 @@ while (1) {
         unset( $segment_hashes );
         Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
-        insertData( $pid, $data, $equivalentWordMapping, $perform_Tms_Analysis );
+        insertData( $pid, $data, INIT::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
 
         unset( $data );
         Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
