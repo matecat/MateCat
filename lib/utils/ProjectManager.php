@@ -244,16 +244,23 @@ class ProjectManager {
 		//fetch cache links, created by converter, from upload directory
 		$linkFiles=scandir($uploadDir);
 
-		//remove dots, as uninteresting
+		//remove dir hardlinks, as uninteresting, as weel as regular files; only hash-links
 		foreach($linkFiles as $k=>$linkFile){
-			if('.'==$linkFile or '..'==$linkFile) unset($linkFiles[$k]);
+			if(strpos($linkFile,'.')!==FALSE or strpos($linkFile,'|')===FALSE) unset($linkFiles[$k]);
 		}
 
-		foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {  //here we need hashes -> files lookup
+		/*
+			loop through all input files to 
+			1)upload TMX
+			2)convert, in case, non standard XLIFF files to a format that Matecat understands
+
+			Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
+		 */
+		foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
 			//if TMX,
 			if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
-
+				//load it into MyMemory; we'll check later on how it went
 				$file            = new stdClass();
 				$file->file_path = "$uploadDir/$fileName";
 				$this->tmxServiceWrapper->setName( $fileName );
@@ -278,75 +285,13 @@ class ProjectManager {
 			   Checking Extension is no more sufficient, we want check content if this is an idiom xlf file type, conversion are enforced
 			   $enforcedConversion = true; //( if conversion is enabled )
 			 */
-			$isAConvertedFile = true;
-			try {
-				//TODO BUG
-				$fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName );
-
-				if ( DetectProprietaryXliff::isXliffExtension() ) {
-
-					if ( INIT::$CONVERSION_ENABLED ) {
-
-						//conversion enforce
-						if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
-
-							//ONLY IDIOM is forced to be converted
-							//if file is not proprietary like idiom AND Enforce is disabled
-							//we take it as is
-							if ( !$fileType[ 'proprietary' ] ) {
-								$isAConvertedFile = false;
-								//ok don't convert a standard sdlxliff
-							}
-
-						}
-						else {
-
-							//if conversion enforce is active
-							//we force all xliff files but not files produced by SDL Studio because we can handle them
-							if ( $fileType[ 'proprietary_short_name' ] == 'trados' ) {
-								$isAConvertedFile = false;
-								//ok don't convert a standard sdlxliff
-
-							}
-
-						}
-
-					}
-					elseif ( $fileType[ 'proprietary' ] ) {
-
-						/**
-						 * Application misconfiguration.
-						 * upload should not be happened, but if we are here, raise an error.
-						 * @see upload.class.php
-						 * */
-						$this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-							"code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
-						);
-						setcookie( "upload_session", "", time() - 10000 );
-
-						return -1;
-						//stop execution
-
-					}
-					elseif ( !$fileType[ 'proprietary' ] ) {
-						$isAConvertedFile = false;
-						//ok don't convert a standard sdlxliff
-					}
-
-				}
-
-			} catch ( Exception $e ) {
-				Log::doLog( $e->getMessage() );
-			}
-
-
-			$mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
+			$isAConvertedFile = $this->isConversionToEnforce($fileName);
 
 			//we are going to access the storage, get model object to manipulate it
 			$fs=new FilesStorage();
 
 			//if it's one of the listed formats or conversion is not enabled in first place
-			if (!$isAConvertedFile) {
+			if(!$isAConvertedFile){
 				/*
 				   filename is already an xliff and it's in upload directory
 				   we have to make a cache package from it to avoid altering the original path
@@ -361,27 +306,36 @@ class ProjectManager {
 				$fs->makeCachePackage($sha1, $this->projectStructure[ 'source_language' ], false, $filePathName);
 
 				//put reference to cache in upload dir to link cache to session
-				$fs->linkSessionToCache($sha1, $this->source_lang, $this->projectStructure[ 'uploadToken' ]);
+				$fs->linkSessionToCache($sha1, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'uploadToken' ]);
 
 				//add newly created link to list
-				$linkFiles[]=$sha1."|".$this->source_lang;
+				$linkFiles[]=$sha1."|".$this->projectStructure[ 'source_language' ];
 
 				unset($sha1);
 			}
-			//TODO BUG
+		}
+
+		//now, upload dir contains only hash-links
+		//we start copying files to "file" dir, inserting metadata in db and extracting segments
+		foreach($linkFiles as $linkFile){
 			//converted file is inside cache directory
 			//get hash from file name inside UUID dir
 			$hashFile=basename(array_pop($linkFiles));
 			$hashFile=explode('|',$hashFile);
 
 			//use hash and lang to fetch file from package
-			$filePathName=$fs->getXliffFromCache($hashFile[0],$hashFile[1]);
-
+			$xliffFilePathName=$fs->getXliffFromCache($hashFile[0],$hashFile[1]);
+			log::doLog("xliff: $xliffFilePathName");
+			//get sha
 			$sha1_original=$hashFile[0];
+
+			//get original file name
+			$originalFilePathName=$fs->getOriginalFromCache($hashFile[0],$hashFile[1]);
+			$fileName=basename($originalFilePathName);
 
 			unset($hashFile);
 
-			if ( !file_exists( $filePathName ) ) {
+			if ( !file_exists( $xliffFilePathName ) ) {
 				$this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
 					"code" => -6, "message" => "File not found on server after upload."
 				);
@@ -389,19 +343,17 @@ class ProjectManager {
 
 			try {
 
-				$info = pathinfo( $filePathName );
+				$info = pathinfo( $xliffFilePathName );
 
 				if (!in_array($info[ 'extension' ],array('xliff','sdlxliff','xlf'))) {
 					throw new Exception( "Failed to find Xliff - no segments found", -3 );
 				}
+				$mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
 
 				$fid = insertFile( $this->projectStructure, $fileName, $mimeType, $sha1_original);
 				$this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-				$this->_extractSegments( file_get_contents( $filePathName ), $fid );
-
-
-				//Log::doLog( $this->projectStructure['segments'] );
+				$this->_extractSegments( file_get_contents( $xliffFilePathName ), $fid );
 
 			} catch ( Exception $e ) {
 
@@ -445,8 +397,7 @@ class ProjectManager {
 				Log::doLog( $e->getMessage() );
 
 			}
-			//exit;
-		}
+		}//end of hash-link loop
 
 		//check if the files language equals the source language. If not, set an error message.
 		if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
@@ -1447,304 +1398,368 @@ class ProjectManager {
 
 						$this->projectStructure[ 'segments' ][ $fid ]->append( "('$trans_unit_id',$fid, $file_reference,'$source','$source_hash',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)" );
 
+						}
 					}
+
+					//increment the counter for not empty segments
+					$fileCounter_Show_In_Cattool += $show_in_cattool;
+
 				}
-
-				//increment the counter for not empty segments
-				$fileCounter_Show_In_Cattool += $show_in_cattool;
-
-			}
-		}
-
-		// *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
-		//use generic
-		if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $fileCounter_Show_In_Cattool == 0 ) {
-			Log::doLog( "Segment import - no segments found\n" );
-			throw new Exception( "Segment import - no segments found", -1 );
-		}
-
-		$baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
-
-		Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
-		//split the query in to chunks if there are too much segments
-		$this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 1000 ) );
-
-		Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
-
-
-		foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
-
-			$this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
-
-			Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
-			if ( $this->dbHandler->get_error_number() ) {
-				Log::doLog( "Segment import - DB Error: " . mysql_error() . " - \n" );
-				throw new Exception( "Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
 			}
 
-		}
-
-		//Log::doLog( $this->projectStructure );
-
-		if ( !empty( $this->projectStructure[ 'translations' ] ) ) {
-
-			$last_segments_query = "SELECT id, internal_id, segment_hash from segments WHERE id_file = %u";
-			$last_segments_query = sprintf( $last_segments_query, $fid );
-
-			$_last_segments = $this->dbHandler->fetch_array( $last_segments_query );
-			foreach ( $_last_segments as $row ) {
-
-				if ( $this->projectStructure[ 'translations' ]->offsetExists( "" . $row[ 'internal_id' ] ) ) {
-					$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 0, $row[ 'id' ] );
-					$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 1, $row[ 'internal_id' ] );
-					//WARNING offset 2 are the target translations
-					$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 3, $row[ 'segment_hash' ] );
-				}
-
+			// *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
+			//use generic
+			if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $fileCounter_Show_In_Cattool == 0 ) {
+				Log::doLog( "Segment import - no segments found\n" );
+				throw new Exception( "Segment import - no segments found", -1 );
 			}
 
-		}
+			$baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
-	}
-
-	protected function _insertPreTranslations( $jid ) {
-
-		//    Log::doLog( array_shift( array_chunk( $SegmentTranslations, 5, true ) ) );
-
-		foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
-
-			if ( empty( $struct ) ) {
-				//            Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
-				continue;
-			}
-
-			//id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
-			$this->projectStructure[ 'query_translations' ]->append( "( '{$struct[0]}', $jid, '{$struct[3]}', 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1, 'ICE' )" );
-
-		}
-
-		// Executing the Query
-		if ( !empty( $this->projectStructure[ 'query_translations' ] ) ) {
-
-			$baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked, match_type )
-				values ";
-
-			Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
+			Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 			//split the query in to chunks if there are too much segments
-			$this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 1000 ) );
+			$this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 1000 ) );
 
-			Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
+			Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 
-			//            Log::doLog( print_r( $this->projectStructure['translations'],true ) );
 
-			foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
+			foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
 
 				$this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
 
-				Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
+				Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
 				if ( $this->dbHandler->get_error_number() ) {
 					Log::doLog( "Segment import - DB Error: " . mysql_error() . " - \n" );
-					throw new Exception( "Translations Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
+					throw new Exception( "Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
+				}
+
+			}
+
+			//Log::doLog( $this->projectStructure );
+
+			if ( !empty( $this->projectStructure[ 'translations' ] ) ) {
+
+				$last_segments_query = "SELECT id, internal_id, segment_hash from segments WHERE id_file = %u";
+				$last_segments_query = sprintf( $last_segments_query, $fid );
+
+				$_last_segments = $this->dbHandler->fetch_array( $last_segments_query );
+				foreach ( $_last_segments as $row ) {
+
+					if ( $this->projectStructure[ 'translations' ]->offsetExists( "" . $row[ 'internal_id' ] ) ) {
+						$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 0, $row[ 'id' ] );
+						$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 1, $row[ 'internal_id' ] );
+						//WARNING offset 2 are the target translations
+						$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 3, $row[ 'segment_hash' ] );
+					}
+
 				}
 
 			}
 
 		}
 
-		//clean translations and queries
-		$this->projectStructure[ 'query_translations' ]->exchangeArray( array() );
-		$this->projectStructure[ 'translations' ]->exchangeArray( array() );
+		protected function _insertPreTranslations( $jid ) {
 
-	}
+			//    Log::doLog( array_shift( array_chunk( $SegmentTranslations, 5, true ) ) );
 
-	protected function _strip_external( $a ) {
-		$a               = str_replace( "\n", " NL ", $a );
-		$pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
-		$pattern_x_end   = '/(.*)(<x .*?\/>\s*)$/mis';
+			foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
 
-		//TODO:
-		//What happens here? this regexp fails for
-		//<g id="pt1497"><g id="pt1498"><x id="nbsp"/></g></g>
-		//And this
-		/* $pattern_g       = '/^(\s*<g [^>]*?>)(.*?)(<\/g>\s*)$/mis'; */
-		//break document consistency in project Manager
-		//where is the bug? there or in extract segments?
+				if ( empty( $struct ) ) {
+					//            Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
+					continue;
+				}
 
-		$pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
-		$found     = false;
-		$prec      = "";
-		$succ      = "";
+				//id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
+				$this->projectStructure[ 'query_translations' ]->append( "( '{$struct[0]}', $jid, '{$struct[3]}', 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1, 'ICE' )" );
 
-		$c = 0;
+			}
 
-		do {
-			$c += 1;
-			$found = false;
+			// Executing the Query
+			if ( !empty( $this->projectStructure[ 'query_translations' ] ) ) {
+
+				$baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked, match_type )
+					values ";
+
+				Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
+				//split the query in to chunks if there are too much segments
+				$this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 1000 ) );
+
+				Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
+
+				//            Log::doLog( print_r( $this->projectStructure['translations'],true ) );
+
+				foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
+
+					$this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
+
+					Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
+					if ( $this->dbHandler->get_error_number() ) {
+						Log::doLog( "Segment import - DB Error: " . mysql_error() . " - \n" );
+						throw new Exception( "Translations Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
+					}
+
+				}
+
+			}
+
+			//clean translations and queries
+			$this->projectStructure[ 'query_translations' ]->exchangeArray( array() );
+			$this->projectStructure[ 'translations' ]->exchangeArray( array() );
+
+		}
+
+		protected function _strip_external( $a ) {
+			$a               = str_replace( "\n", " NL ", $a );
+			$pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
+			$pattern_x_end   = '/(.*)(<x .*?\/>\s*)$/mis';
+
+			//TODO:
+			//What happens here? this regexp fails for
+			//<g id="pt1497"><g id="pt1498"><x id="nbsp"/></g></g>
+			//And this
+			/* $pattern_g       = '/^(\s*<g [^>]*?>)(.*?)(<\/g>\s*)$/mis'; */
+			//break document consistency in project Manager
+			//where is the bug? there or in extract segments?
+
+			$pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
+			$found     = false;
+			$prec      = "";
+			$succ      = "";
+
+			$c = 0;
 
 			do {
-				$r = preg_match_all( $pattern_x_start, $a, $res );
-				if ( isset( $res[ 1 ][ 0 ] ) ) {
-					$prec .= $res[ 1 ][ 0 ];
-					$a     = $res[ 2 ][ 0 ];
-					$found = true;
-	}
-	} while ( isset( $res[ 1 ][ 0 ] ) );
+				$c += 1;
+				$found = false;
 
-	do {
-		$r = preg_match_all( $pattern_x_end, $a, $res );
-		if ( isset( $res[ 2 ][ 0 ] ) ) {
-			$succ  = $res[ 2 ][ 0 ] . $succ;
-			$a     = $res[ 1 ][ 0 ];
-			$found = true;
-	}
-	} while ( isset( $res[ 2 ][ 0 ] ) );
+				do {
+					$r = preg_match_all( $pattern_x_start, $a, $res );
+					if ( isset( $res[ 1 ][ 0 ] ) ) {
+						$prec .= $res[ 1 ][ 0 ];
+						$a     = $res[ 2 ][ 0 ];
+						$found = true;
+		}
+		} while ( isset( $res[ 1 ][ 0 ] ) );
 
-	do {
-		$r = preg_match_all( $pattern_g, $a, $res );
-		if ( isset( $res[ 1 ][ 0 ] ) ) {
-			$prec .= $res[ 1 ][ 0 ];
-			$succ  = $res[ 3 ][ 0 ] . $succ;
-			$a     = $res[ 2 ][ 0 ];
-			$found = true;
-	}
-	} while ( isset( $res[ 1 ][ 0 ] ) );
+		do {
+			$r = preg_match_all( $pattern_x_end, $a, $res );
+			if ( isset( $res[ 2 ][ 0 ] ) ) {
+				$succ  = $res[ 2 ][ 0 ] . $succ;
+				$a     = $res[ 1 ][ 0 ];
+				$found = true;
+		}
+		} while ( isset( $res[ 2 ][ 0 ] ) );
 
-	} while ( $found );
-	$prec = str_replace( " NL ", "\n", $prec );
-	$succ = str_replace( " NL ", "\n", $succ );
-	$a    = str_replace( " NL ", "\n", $a );
-	$r    = array( 'prec' => $prec, 'seg' => $a, 'succ' => $succ );
+		do {
+			$r = preg_match_all( $pattern_g, $a, $res );
+			if ( isset( $res[ 1 ][ 0 ] ) ) {
+				$prec .= $res[ 1 ][ 0 ];
+				$succ  = $res[ 3 ][ 0 ] . $succ;
+				$a     = $res[ 2 ][ 0 ];
+				$found = true;
+		}
+		} while ( isset( $res[ 1 ][ 0 ] ) );
 
-	return $r;
-	}
+		} while ( $found );
+		$prec = str_replace( " NL ", "\n", $prec );
+		$succ = str_replace( " NL ", "\n", $succ );
+		$a    = str_replace( " NL ", "\n", $a );
+		$r    = array( 'prec' => $prec, 'seg' => $a, 'succ' => $succ );
 
-	public static function getExtensionFromMimeType( $mime_type ) {
+		return $r;
+		}
 
-		$reference = include( 'mime2extension.inc.php' );
-		if ( array_key_exists( $mime_type, $reference ) ) {
-			if ( array_key_exists( 'default', $reference[ $mime_type ] ) ) {
-				return $reference[ $mime_type ][ 'default' ];
+		public static function getExtensionFromMimeType( $mime_type ) {
+
+			$reference = include( 'mime2extension.inc.php' );
+			if ( array_key_exists( $mime_type, $reference ) ) {
+				if ( array_key_exists( 'default', $reference[ $mime_type ] ) ) {
+					return $reference[ $mime_type ][ 'default' ];
+				}
+
+				return $reference[ $mime_type ][ array_rand( $reference[ $mime_type ] ) ]; // rand :D
 			}
 
-			return $reference[ $mime_type ][ array_rand( $reference[ $mime_type ] ) ]; // rand :D
-		}
-
-		return null;
-
-	}
-
-
-	/**
-	 * Extract internal reference base64 files
-	 * and store their index in $this->projectStructure
-	 *
-	 * @param $project_file_id
-	 * @param $xliff_file_array
-	 *
-	 * @return null|int $file_reference_id
-	 *
-	 * @throws Exception
-	 */
-	protected function _extractFileReferences( $project_file_id, $xliff_file_array ) {
-
-		$fName = $this->_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
-
-		if ( $fName != false ) {
-			$fName = $this->dbHandler->escape( $fName );
-		}
-		else {
-			$fName = '';
-		}
-
-		$serialized_reference_meta     = array();
-		$serialized_reference_binaries = array();
-
-		/* Fix: PHP Warning:  Invalid argument supplied for foreach() */
-		if ( !isset( $xliff_file_array[ 'reference' ] ) ) {
 			return null;
+
 		}
 
-		foreach ( $xliff_file_array[ 'reference' ] as $pos => $ref ) {
 
-			$found_ref = true;
+		/**
+		 * Extract internal reference base64 files
+		 * and store their index in $this->projectStructure
+		 *
+		 * @param $project_file_id
+		 * @param $xliff_file_array
+		 *
+		 * @return null|int $file_reference_id
+		 *
+		 * @throws Exception
+		 */
+		protected function _extractFileReferences( $project_file_id, $xliff_file_array ) {
 
-			$_ext = self::getExtensionFromMimeType( $ref[ 'form-type' ] );
-			if ( $_ext !== null ) {
+			$fName = $this->_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
 
-				//insert in database if exists extension
-				//and add the id_file_part to the segments insert statement
+			if ( $fName != false ) {
+				$fName = $this->dbHandler->escape( $fName );
+			}
+			else {
+				$fName = '';
+			}
 
-				$refName = $this->projectStructure[ 'id_project' ] . "-" . $pos . "-" . $fName . "." . $_ext;
+			$serialized_reference_meta     = array();
+			$serialized_reference_binaries = array();
 
-				$serialized_reference_meta[ $pos ][ 'filename' ]   = $refName;
-				$serialized_reference_meta[ $pos ][ 'mime_type' ]  = $this->dbHandler->escape( $ref[ 'form-type' ] );
-				$serialized_reference_binaries[ $pos ][ 'base64' ] = $ref[ 'base64' ];
+			/* Fix: PHP Warning:  Invalid argument supplied for foreach() */
+			if ( !isset( $xliff_file_array[ 'reference' ] ) ) {
+				return null;
+			}
 
-				if ( !is_dir( INIT::$REFERENCE_REPOSITORY ) ) {
-					mkdir( INIT::$REFERENCE_REPOSITORY, 0755 );
-				}
+			foreach ( $xliff_file_array[ 'reference' ] as $pos => $ref ) {
 
-				$wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref[ 'base64' ] ) );
+				$found_ref = true;
 
-				if ( !$wBytes ) {
-					throw new Exception ( "Failed to import references. $wBytes Bytes written.", -11 );
+				$_ext = self::getExtensionFromMimeType( $ref[ 'form-type' ] );
+				if ( $_ext !== null ) {
+
+					//insert in database if exists extension
+					//and add the id_file_part to the segments insert statement
+
+					$refName = $this->projectStructure[ 'id_project' ] . "-" . $pos . "-" . $fName . "." . $_ext;
+
+					$serialized_reference_meta[ $pos ][ 'filename' ]   = $refName;
+					$serialized_reference_meta[ $pos ][ 'mime_type' ]  = $this->dbHandler->escape( $ref[ 'form-type' ] );
+					$serialized_reference_binaries[ $pos ][ 'base64' ] = $ref[ 'base64' ];
+
+					if ( !is_dir( INIT::$REFERENCE_REPOSITORY ) ) {
+						mkdir( INIT::$REFERENCE_REPOSITORY, 0755 );
+					}
+
+					$wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref[ 'base64' ] ) );
+
+					if ( !$wBytes ) {
+						throw new Exception ( "Failed to import references. $wBytes Bytes written.", -11 );
+					}
+
 				}
 
 			}
 
-		}
+			if ( isset( $found_ref ) && !empty( $serialized_reference_meta ) ) {
 
-		if ( isset( $found_ref ) && !empty( $serialized_reference_meta ) ) {
+				$serialized_reference_meta     = serialize( $serialized_reference_meta );
+				$serialized_reference_binaries = serialize( $serialized_reference_binaries );
+				$queries                       = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference_meta, serialized_reference_binaries ) VALUES ( " . $this->projectStructure[ 'id_project' ] . ", $project_file_id, '$fName', '$serialized_reference_meta', '$serialized_reference_binaries' )";
 
-			$serialized_reference_meta     = serialize( $serialized_reference_meta );
-			$serialized_reference_binaries = serialize( $serialized_reference_binaries );
-			$queries                       = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference_meta, serialized_reference_binaries ) VALUES ( " . $this->projectStructure[ 'id_project' ] . ", $project_file_id, '$fName', '$serialized_reference_meta', '$serialized_reference_binaries' )";
+				$this->dbHandler->query( $queries );
 
-			$this->dbHandler->query( $queries );
+				$affected = $this->dbHandler->affected_rows;
+				$last_id  = "SELECT LAST_INSERT_ID() as fpID";
+				$result   = $this->dbHandler->query_first( $last_id );
+				$result   = $result[ 0 ];
 
-			$affected = $this->dbHandler->affected_rows;
-			$last_id  = "SELECT LAST_INSERT_ID() as fpID";
-			$result   = $this->dbHandler->query_first( $last_id );
-			$result   = $result[ 0 ];
+				//last Insert id
+				$file_reference_id = $result[ 'fpID' ];
+				$this->projectStructure[ 'file_references' ]->offsetSet( $project_file_id, $file_reference_id );
 
-			//last Insert id
-			$file_reference_id = $result[ 'fpID' ];
-			$this->projectStructure[ 'file_references' ]->offsetSet( $project_file_id, $file_reference_id );
+				if ( !$affected || !$file_reference_id ) {
+					throw new Exception ( "Failed to import references.", -12 );
+				}
 
-			if ( !$affected || !$file_reference_id ) {
-				throw new Exception ( "Failed to import references.", -12 );
+				return $file_reference_id;
+
 			}
 
-			return $file_reference_id;
 
 		}
 
+		protected function _sanitizeName( $nameString ) {
 
-	}
+			$nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $nameString );
+			$nameString = preg_replace( '/[_]{2,}/', "_", $nameString );
+			$nameString = str_replace( '_.', ".", $nameString );
 
-	protected function _sanitizeName( $nameString ) {
+			// project name validation
+			$pattern = '/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u';
 
-		$nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $nameString );
-		$nameString = preg_replace( '/[_]{2,}/', "_", $nameString );
-		$nameString = str_replace( '_.', ".", $nameString );
+			if ( !preg_match( $pattern, $nameString, $rr ) ) {
+				return false;
+			}
 
-		// project name validation
-		$pattern = '/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u';
+			return $nameString;
 
-		if ( !preg_match( $pattern, $nameString, $rr ) ) {
-			return false;
 		}
 
-		return $nameString;
+		protected function _generatePassword( $length = 12 ) {
+			return CatUtils::generate_password( $length );
+		}
+
+		private function sortByStrLenAsc( $a, $b ) {
+			return strlen( $a ) >= strlen( $b );
+		}
+
+		private function isConversionToEnforce($fileName){
+			$isAConvertedFile = true;
+
+			try {
+				$fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName );
+
+				if ( DetectProprietaryXliff::isXliffExtension() ) {
+
+					if ( INIT::$CONVERSION_ENABLED ) {
+
+						//conversion enforce
+						if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
+
+							//ONLY IDIOM is forced to be converted
+							//if file is not proprietary like idiom AND Enforce is disabled
+							//we take it as is
+							if ( !$fileType[ 'proprietary' ] ) {
+								$isAConvertedFile = false;
+								//ok don't convert a standard sdlxliff
+							}
+
+						}
+						else {
+
+							//if conversion enforce is active
+							//we force all xliff files but not files produced by SDL Studio because we can handle them
+							if ( $fileType[ 'proprietary_short_name' ] == 'trados' ) {
+								$isAConvertedFile = false;
+								//ok don't convert a standard sdlxliff
+
+							}
+
+						}
+
+					}
+					elseif ( $fileType[ 'proprietary' ] ) {
+
+						/**
+						 * Application misconfiguration.
+						 * upload should not be happened, but if we are here, raise an error.
+						 * @see upload.class.php
+						 * */
+						$this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+							"code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
+						);
+						setcookie( "upload_session", "", time() - 10000 );
+
+						return -1;
+						//stop execution
+
+					}
+					elseif ( !$fileType[ 'proprietary' ] ) {
+						$isAConvertedFile = false;
+						//ok don't convert a standard sdlxliff
+					}
+
+				}
+
+			} catch ( Exception $e ) {
+				Log::doLog( $e->getMessage() );
+			}
+			return $isAConvertedFile;
+		}
 
 	}
-
-	protected function _generatePassword( $length = 12 ) {
-		return CatUtils::generate_password( $length );
-	}
-
-	private function sortByStrLenAsc( $a, $b ) {
-		return strlen( $a ) >= strlen( $b );
-	}
-
-}
