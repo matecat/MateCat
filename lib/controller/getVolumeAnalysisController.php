@@ -53,7 +53,8 @@ class getVolumeAnalysisController extends ajaxController {
 
     protected $total_init = array(
             "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
-            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ),
+            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_100_PUBLIC" => array( 0, "0" ),
+            "TM_75_99" => array( 0, "0" ),
             "TM_75_84"      => array( 0, "0" ), "TM_85_94" => array( 0, "0" ), "TM_95_99" => array( 0, "0" ),
             "TM_50_74"      => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ),
             "NUMBERS_ONLY"  => array( 0, "0" )
@@ -192,6 +193,9 @@ class getVolumeAnalysisController extends ajaxController {
             }
             elseif ( $segInfo[ 'match_type' ] == "100%" ) {
                 $keyValue = 'TM_100';
+            }
+            elseif ( $segInfo[ 'match_type' ] == "100%_PUBLIC" ) {
+                $keyValue = 'TM_100_PUBLIC';
             }
             elseif ( $segInfo[ 'match_type' ] == "75%-99%" ) {
                 $keyValue = 'TM_75_99';

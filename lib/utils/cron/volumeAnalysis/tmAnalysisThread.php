@@ -87,7 +87,7 @@ while (1) {
         case $numProcessesDiff < 0:
             //launch abs($numProcessesDiff) processes
             echo "(parent $my_pid) : need to launch additional $numProcessesToLaunchOrDelete processes\n";
-            $res = launchProcesses($numProcessesToLaunchOrDelete, $equivalentWordMapping);
+            $res = launchProcesses($numProcessesToLaunchOrDelete, INIT::$DEFAULT_PAYABLE_RATES);
             if ($res < 0) {
                 die("(parent $my_pid) : ERROR OCCURRED :  PARENT EXITING !!");
             }

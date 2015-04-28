@@ -259,6 +259,7 @@
                                 Partial (95%-99%)
                             </th>
                             <th class="tm-100">TM 100%</th>
+                            <th class="tm-100">Public TM 100%</th>
                             <th class="tm-100-context">TM 100% in context</th>
                             <th class="mt">Machine Translation</th>
                             <th class="empty">&nbsp;</th>
@@ -276,6 +277,7 @@
                             <td class="editarea" tal:condition="not: exists: id_for_job/rates/75%-99%">${id_for_job/rates/85%-94%}%</td>
                             <td class="editarea" tal:condition="not: exists: id_for_job/rates/75%-99%">${id_for_job/rates/95%-99%}%</td>
                             <td class="editarea">${id_for_job/rates/100%}%</td>
+                            <td class="editarea">${id_for_job/rates/100%_PUBLIC}%</td>
                             <td class="editarea">0%</td>
                             <td class="editarea">${id_for_job/rates/MT}%</td>
                             <td class="empty">&nbsp;</td>
@@ -307,6 +309,7 @@
                                 <td class="stat_tm85_94" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
                                 <td class="stat_tm95_99" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
                                 <td class="stat_tm100">0</td>
+                                <td class="stat_tm100_public">0</td>
                                 <td class="stat_tmic">0</td>
                                 <td class="stat_mt">0</td>
                                 <td class="empty">
@@ -330,6 +333,7 @@
                                     <td class="stat_tm85_94" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
                                     <td class="stat_tm95_99" tal:condition="not: exists: id_for_job/rates/75%-99%">0</td>
                                     <td class="stat_tm100">0</td>
+                                    <td class="stat_tm100_public">0</td>
                                     <td class="stat_tmic">0</td>
                                     <td class="stat_mt">0</td>
                                     <td class="empty"></td>

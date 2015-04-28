@@ -600,11 +600,35 @@ UI = {
 									if ( s_tm75_txt != tot.TM_75_99[1] )
 										s_tm75.effect( "highlight", {}, 1000 );
 
+                                    var s_tm75_84 = $( '.stat_tm75_84', context );
+                                    s_tm75_84_txt = s_tm75_84.text();
+                                    s_tm75_84.text( tot.TM_75_84[1] );
+                                    if ( s_tm75_84_txt != tot.TM_75_84[1] )
+                                        s_tm75_84.effect( "highlight", {}, 1000 );
+
+                                    var s_tm85_94 = $( '.stat_tm85_94', context );
+                                    s_tm85_94_txt = s_tm75_84.text();
+                                    s_tm85_94.text( tot.TM_85_94[1] );
+                                    if ( s_tm85_94_txt != tot.TM_85_94[1] )
+                                        s_tm85_94.effect( "highlight", {}, 1000 );
+
+                                    var s_tm95_99 = $( '.stat_tm95_99', context );
+                                    s_tm95_99_txt = s_tm75_84.text();
+                                    s_tm95_99.text( tot.TM_95_99[1] );
+                                    if ( s_tm95_99_txt != tot.TM_95_99[1] )
+                                        s_tm95_99.effect( "highlight", {}, 1000 );
+
 									var s_tm100 = $( '.stat_tm100', context );
 									s_tm100_txt = s_tm100.text();
 									s_tm100.text( tot.TM_100[1] );
 									if ( s_tm100_txt != tot.TM_100[1] )
 										s_tm100.effect( "highlight", {}, 1000 );
+
+                                    var s_tm100_public = $( '.stat_tm100_public', context );
+                                    s_tm100_public_txt = s_tm100.text();
+                                    s_tm100_public.text( tot.TM_100_PUBLIC[1] );
+                                    if ( s_tm100_public_txt != tot.TM_100_PUBLIC[1] )
+                                        s_tm100_public.effect( "highlight", {}, 1000 );
 
 									var s_tmic = $( '.stat_tmic', context );
 									s_tmic_txt = s_tmic.text();
@@ -620,7 +644,6 @@ UI = {
 
 
 								} );
-
 								$.each( files_group, function ( jPassword, files_object ) {
 
 										$.each( files_object, function ( id_file, file_details ) {
@@ -663,11 +686,35 @@ UI = {
 											if ( s_tm75_txt != file_details.TM_75_99[1] )
 												s_tm75.effect( "highlight", {}, 1000 );
 
-											var s_tm100 = $( '.stat_tm100', context );
-											s_tm100_txt = s_tm100.text();
-											s_tm100.text( file_details.TM_100[1] );
-											if ( s_tm100_txt != file_details.TM_100[1] )
-												s_tm100.effect( "highlight", {}, 1000 );
+                                            var s_tm75_84 = $( '.stat_tm75_84', context );
+                                            s_tm75_84_txt = s_tm75_84.text();
+                                            s_tm75_84.text( file_details.TM_75_84[1] );
+                                            if ( s_tm75_84_txt != file_details.TM_75_84[1] )
+                                                s_tm75_84.effect( "highlight", {}, 1000 );
+
+                                            var s_tm85_94 = $( '.stat_tm85_94', context );
+                                            s_tm85_94_txt = s_tm75_84.text();
+                                            s_tm85_94.text( file_details.TM_85_94[1] );
+                                            if ( s_tm85_94_txt != file_details.TM_85_94[1] )
+                                                s_tm85_94.effect( "highlight", {}, 1000 );
+
+                                            var s_tm95_99 = $( '.stat_tm95_99', context );
+                                            s_tm95_99_txt = s_tm75_84.text();
+                                            s_tm95_99.text( file_details.TM_95_99[1] );
+                                            if ( s_tm95_99_txt != file_details.TM_95_99[1] )
+                                                s_tm95_99.effect( "highlight", {}, 1000 );
+
+                                            var s_tm100 = $( '.stat_tm100', context );
+                                            s_tm100_txt = s_tm100.text();
+                                            s_tm100.text( file_details.TM_100[1] );
+                                            if ( s_tm100_txt != file_details.TM_100[1] )
+                                                s_tm100.effect( "highlight", {}, 1000 );
+
+                                            var s_tm100_public = $( '.stat_tm100_public', context );
+                                            s_tm100_public_txt = s_tm100_public.text();
+                                            s_tm100_public.text( file_details.TM_100_PUBLIC[1] );
+                                            if ( s_tm100_public_txt != file_details.TM_100_PUBLIC[1] )
+                                                s_tm100_public.effect( "highlight", {}, 1000 );
 
 											var s_tmic = $( '.stat_tmic', context );
 											s_tmic_txt = s_tmic.text();

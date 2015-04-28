@@ -51,12 +51,12 @@ echo "--- (child $my_pid) : parent pid is $parent_pid\n";
 $memcacheHandler = MemcacheHandler::getInstance();
 
 while ( 1 ) {
-    if (!processFileExists($my_pid)) {
+    if (0 && !processFileExists($my_pid)) {
         die( "(child $my_pid) :  EXITING!  my file does not exists anymore\n" );
     }
 
     // control if parent is still running
-    if (!isRunningProcess($parent_pid)) {
+    if (0 && !isRunningProcess($parent_pid)) {
         echo "--- (child $my_pid) : EXITING : parent seems to be died.\n";
         exit ( -1 );
     }
@@ -239,6 +239,7 @@ while ( 1 ) {
 
             $tms_match = $tms->get( $config );
 
+            //MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
             if ( $tms_match !== null ) {
                 $tms_match = $tms_match->get_matches_as_array();
 
@@ -348,9 +349,11 @@ while ( 1 ) {
         $suggestion_json   = json_encode( $matches );
         $suggestion_source = $matches[ 0 ][ 'created_by' ];
 
+        $publicTM = ($suggestion_source == "Matecat");
+
         $equivalentWordMapping = json_decode( $payable_rates, true );
 
-        $new_match_type = getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping );
+        $new_match_type = getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping, $publicTM );
         //echo "sid is $sid ";
         $eq_words       = $equivalentWordMapping[ $new_match_type ] * $raw_wc / 100;
         $standard_words = $eq_words;
@@ -475,7 +478,15 @@ function tryToCloseProject( $pid, $child_process_id ) {
 
 }
 
-function getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping ) {
+/**
+ * @param string $tm_match_type
+ * @param string $fast_match_type
+ * @param Array  $equivalentWordMapping
+ * @param bool   $publicTM
+ *
+ * @return string
+ */
+function getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping, $publicTM = false ) {
 
 // RATIO : modifico il valore solo se il nuovo match è strettamente migliore (in termini di percentuale pagata per parola) di quello corrente
     $tm_match_cat = "";
@@ -495,8 +506,9 @@ function getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMappi
         $ind = intval( $tm_match_type );
 
         if ( $ind == "100" ) {
-            $tm_match_cat = "100%";
+            $tm_match_cat = ($publicTM) ? "100%_PUBLIC" : "100%";
             $tm_rate_paid = $equivalentWordMapping[ $tm_match_cat ];
+
         }
 
         if ( $ind < 50 ) {
