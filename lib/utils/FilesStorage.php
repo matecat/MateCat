@@ -48,7 +48,14 @@ class FilesStorage{
 		$path=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig";
 
 		//return file
-		return $this->getSingleFileInPath($path);
+		$filePath=$this->getSingleFileInPath($path);
+
+		//an unconverted xliff is never stored in orig dir; look for it in xliff dir
+		if(!$filePath){
+			$filePath=$this->getXliffFromCache($hash,$lang);
+		}
+
+		return $filePath;
 	}
 
 	public function getOriginalFromFileDir($id){
@@ -56,7 +63,14 @@ class FilesStorage{
 		$path=$this->filesDir.DIRECTORY_SEPARATOR.$id.DIRECTORY_SEPARATOR."orig";
 
 		//return file
-		return $this->getSingleFileInPath($path);
+		$filePath=$this->getSingleFileInPath($path);
+
+		//an unconverted xliff is never stored in orig dir; look for it in xliff dir
+		if(!$filePath){
+			$filePath=$this->getXliffFromFileDir($id);
+		}
+
+		return $filePath;
 	}
 
 	public function getXliffFromCache($hash,$lang){
@@ -165,8 +179,13 @@ class FilesStorage{
 	public function getSingleFileInPath($path){
 		//check if it actually exist
 		if(is_dir($path)){
-			//get filename
+			//get files in dir
 			$files=scandir($path);
+
+			//init file name dir
+			$filename=false;
+
+			//scan dir for file
 			foreach($files as $file){
 				//skip dir pointers
 				if('.'==$file or '..'==$file) continue;
@@ -178,9 +197,15 @@ class FilesStorage{
 				break;
 			}
 
-			//compose path
-			$filePath=$path.DIRECTORY_SEPARATOR.$filename;
+			if(!$filename){
+				//file not found (dir was empty)
+				$filePath=false;
+			}else{
+				//compose path
+				$filePath=$path.DIRECTORY_SEPARATOR.$filename;
+			}
 		}else{
+			//non existent dir
 			$filePath=false;
 		}
 
