@@ -3,64 +3,64 @@ date_default_timezone_set("Europe/Rome");
 
 class INIT {
 
-    private static $instance;
-    public static $ROOT;
-    public static $BASEURL;
-    public static $HTTPHOST;
-    public static $PROTOCOL;
-    public static $DEBUG;
-    public static $DB_SERVER;
-    public static $DB_DATABASE;
-    public static $DB_USER;
-    public static $DB_PASS;
+	private static $instance;
+	public static $ROOT;
+	public static $BASEURL;
+	public static $HTTPHOST;
+	public static $PROTOCOL;
+	public static $DEBUG;
+	public static $DB_SERVER;
+	public static $DB_DATABASE;
+	public static $DB_USER;
+	public static $DB_PASS;
     public static $MEMCACHE_SERVERS = array();
-    public static $LOG_REPOSITORY;
-    public static $STORAGE_DIR;
-    public static $UPLOAD_REPOSITORY;
-    public static $CONVERSIONERRORS_REPOSITORY;
-    public static $CONVERSIONERRORS_REPOSITORY_WEB;
-    public static $TMP_DOWNLOAD;
-    public static $TEMPLATE_ROOT;
-    public static $MODEL_ROOT;
-    public static $CONTROLLER_ROOT;
-    public static $UTILS_ROOT;
-    public static $DEFAULT_NUM_RESULTS_FROM_TM;
-    public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
-    public static $TIME_TO_EDIT_ENABLED;
-    public static $ENABLED_BROWSERS;
+	public static $LOG_REPOSITORY;
+	public static $STORAGE_DIR;
+	public static $UPLOAD_REPOSITORY;
+	public static $CONVERSIONERRORS_REPOSITORY;
+	public static $CONVERSIONERRORS_REPOSITORY_WEB;
+	public static $TMP_DOWNLOAD;
+	public static $TEMPLATE_ROOT;
+	public static $MODEL_ROOT;
+	public static $CONTROLLER_ROOT;
+	public static $UTILS_ROOT;
+	public static $DEFAULT_NUM_RESULTS_FROM_TM;
+	public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
+	public static $TIME_TO_EDIT_ENABLED;
+	public static $ENABLED_BROWSERS;
     public static $UNTESTED_BROWSERS;
-    public static $BUILD_NUMBER;
-    public static $DEFAULT_FILE_TYPES;
-    public static $SUPPORTED_FILE_TYPES;
-    public static $UNSUPPORTED_FILE_TYPES;
-    public static $CONVERSION_FILE_TYPES;
-    public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
-    public static $CONVERSION_ENABLED;
-    public static $FORCE_XLIFF_CONVERSION;
-    public static $ANALYSIS_WORDS_PER_DAYS;
-    public static $VOLUME_ANALYSIS_ENABLED;
-    public static $WARNING_POLLING_INTERVAL;
-    public static $SEGMENT_QA_CHECK_INTERVAL;
-    public static $SAVE_SHASUM_FOR_FILES_LOADED;
-    public static $AUTHSECRET;
-    public static $AUTHSECRET_PATH;
-    public static $AUTHCOOKIENAME;
-    public static $AUTHCOOKIEDURATION;
-    public static $SPELL_CHECK_TRANSPORT_TYPE;
-    public static $SPELL_CHECK_ENABLED;
-    public static $MAX_UPLOAD_FILE_SIZE;
-    public static $MAX_UPLOAD_TMX_FILE_SIZE;
-    public static $MAX_NUM_FILES;
+	public static $BUILD_NUMBER;
+	public static $DEFAULT_FILE_TYPES;
+	public static $SUPPORTED_FILE_TYPES;
+	public static $UNSUPPORTED_FILE_TYPES;
+	public static $CONVERSION_FILE_TYPES;
+	public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
+	public static $CONVERSION_ENABLED;
+	public static $FORCE_XLIFF_CONVERSION;
+	public static $ANALYSIS_WORDS_PER_DAYS;
+	public static $VOLUME_ANALYSIS_ENABLED;
+	public static $WARNING_POLLING_INTERVAL;
+	public static $SEGMENT_QA_CHECK_INTERVAL;
+	public static $SAVE_SHASUM_FOR_FILES_LOADED;
+	public static $AUTHSECRET;
+	public static $AUTHSECRET_PATH;
+	public static $AUTHCOOKIENAME;
+	public static $AUTHCOOKIEDURATION;
+	public static $SPELL_CHECK_TRANSPORT_TYPE;
+	public static $SPELL_CHECK_ENABLED;
+	public static $MAX_UPLOAD_FILE_SIZE;
+	public static $MAX_UPLOAD_TMX_FILE_SIZE;
+	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
-    public static $OAUTH_CLIENT_ID;
-    public static $OAUTH_CLIENT_SECRET;
-    public static $OAUTH_REDIRECT_URL;
-    public static $OAUTH_SCOPES;
-    public static $OAUTH_CLIENT_APP_NAME;
+	public static $OAUTH_CLIENT_ID;
+	public static $OAUTH_CLIENT_SECRET;
+	public static $OAUTH_REDIRECT_URL;
+	public static $OAUTH_SCOPES;
+	public static $OAUTH_CLIENT_APP_NAME;
 
     public static $OAUTH_CONFIG;
-    public static $CONFIG_VERSION_ERR_MESSAGE;
-    public static $SUPPORT_MAIL;
+	public static $CONFIG_VERSION_ERR_MESSAGE;
+	public static $SUPPORT_MAIL;
 
     /**
      * Default Matecat user agent string
@@ -69,9 +69,9 @@ class INIT {
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
-     * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
-     */
-    const JOB_ARCHIVABILITY_THRESHOLD = 30;
+	 * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
+	 */
+	const JOB_ARCHIVABILITY_THRESHOLD = 30;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -94,13 +94,13 @@ class INIT {
     );
 
 
-    public static function obtain() {
-        if (!self::$instance) {
-            self::$instance = new INIT();
-        }
+	public static function obtain() {
+		if (!self::$instance) {
+			self::$instance = new INIT();
+		}
 
-        return self::$instance;
-    }
+		return self::$instance;
+	}
 
     public static function sessionClose(){
         @session_write_close();
@@ -170,64 +170,64 @@ class INIT {
         self::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
-        self::$DB_SERVER   = "10.30.1.250"; //database server
-        self::$DB_DATABASE = "matecat_sandbox"; //database name
-        self::$DB_USER     = "matecat"; //database login
-        self::$DB_PASS     = "matecat01"; //database password
+		self::$DB_SERVER   = "localhost"; //database server
+		self::$DB_DATABASE = "matecat"; //database name
+		self::$DB_USER     = "matecat"; //database login
+		self::$DB_PASS     = "matecat01"; //database password
 
         self::$MEMCACHE_SERVERS = array( /* "localhost:11211" => 1 */ );
 
-        self::$STORAGE_DIR                     = self::$ROOT . "/storage";
-        self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
-        self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
-        self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
-        self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
-        self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
-        self::$REFERENCE_REPOSITORY            = self::$STORAGE_DIR . "/reference_files";
-        self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/view";
-        self::$MODEL_ROOT                      = self::$ROOT . '/lib/model';
-        self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';
-        self::$UTILS_ROOT                      = self::$ROOT . '/lib/utils';
+		self::$STORAGE_DIR                     = self::$ROOT . "/storage";
+		self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
+		self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
+		self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
+		self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
+		self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
+		self::$REFERENCE_REPOSITORY            = self::$STORAGE_DIR . "/reference_files";
+		self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/view";
+		self::$MODEL_ROOT                      = self::$ROOT . '/lib/model';
+		self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';
+		self::$UTILS_ROOT                      = self::$ROOT . '/lib/utils';
 
         $this->_setIncludePath();
         spl_autoload_register('INIT::loadClass');
 
-        if (!is_dir(self::$STORAGE_DIR)){
-            mkdir (self::$STORAGE_DIR,0755,true);
-        }
-        if (!is_dir(self::$LOG_REPOSITORY)){
-            mkdir (self::$LOG_REPOSITORY,0755,true);
-        }
-        if (!is_dir(self::$UPLOAD_REPOSITORY)){
-            mkdir (self::$UPLOAD_REPOSITORY,0755,true);
-        }
-        if (!is_dir(self::$CONVERSIONERRORS_REPOSITORY)){
-            mkdir (self::$CONVERSIONERRORS_REPOSITORY,0755,true);
-        }
+		if (!is_dir(self::$STORAGE_DIR)){
+			mkdir (self::$STORAGE_DIR,0755,true);
+		}
+		if (!is_dir(self::$LOG_REPOSITORY)){
+			mkdir (self::$LOG_REPOSITORY,0755,true);
+		}
+		if (!is_dir(self::$UPLOAD_REPOSITORY)){
+			mkdir (self::$UPLOAD_REPOSITORY,0755,true);
+		}
+		if (!is_dir(self::$CONVERSIONERRORS_REPOSITORY)){
+			mkdir (self::$CONVERSIONERRORS_REPOSITORY,0755,true);
+		}
 
-        //auth sections
+		//auth sections
         self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
-        //if secret is set in file
-        if(file_exists(self::$AUTHSECRET_PATH)){
-            //fetch it
-            self::$AUTHSECRET=file_get_contents(self::$AUTHSECRET_PATH);
-        }else{
-            //try creating the file and the fetch it
-            //generate pass
-            $secret=self::generate_password(512);
-            //put file
-            file_put_contents(self::$AUTHSECRET_PATH,$secret);
-            //if put succeed
-            if(file_exists(self::$AUTHSECRET_PATH)){
-                //restrict permissions
-                chmod(self::$AUTHSECRET_PATH,0400);
-            }else{
-                //if couldn't create due to permissions, use default secret
-                self::$AUTHSECRET='ScavengerOfHumanSorrow';
-            }
-        }
+		//if secret is set in file
+		if(file_exists(self::$AUTHSECRET_PATH)){
+			//fetch it
+			self::$AUTHSECRET=file_get_contents(self::$AUTHSECRET_PATH);
+		}else{
+			//try creating the file and the fetch it
+			//generate pass
+			$secret=self::generate_password(512);
+			//put file
+			file_put_contents(self::$AUTHSECRET_PATH,$secret);
+			//if put succeed
+			if(file_exists(self::$AUTHSECRET_PATH)){
+				//restrict permissions
+				chmod(self::$AUTHSECRET_PATH,0400);
+			}else{
+				//if couldn't create due to permissions, use default secret
+				self::$AUTHSECRET='ScavengerOfHumanSorrow';
+			}
+		}
 
-        self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari'); //, 'firefox');
+		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari'); //, 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
         // This occurs especially in mobile environment. As an example, when you try to open a link from within
@@ -247,7 +247,7 @@ class INIT {
          *  b) Set $CONVERSION_ENABLED to true and implement your own converter
          *
          */
-        self::$CONVERSION_ENABLED = true;
+        self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
         self::$BUILD_NUMBER = '0.5.3b';
@@ -258,13 +258,13 @@ class INIT {
         self::$AUTHCOOKIEDURATION=86400*60;
 
         self::$FORCE_XLIFF_CONVERSION = false;
-        self::$WARNING_POLLING_INTERVAL = 20; //seconds
-        self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
+		self::$WARNING_POLLING_INTERVAL = 20; //seconds
+		self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
 
-        self::$SPELL_CHECK_TRANSPORT_TYPE = 'shell';
-        self::$SPELL_CHECK_ENABLED = false;
+		self::$SPELL_CHECK_TRANSPORT_TYPE = 'shell';
+		self::$SPELL_CHECK_ENABLED = false;
 
-        self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
+		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
         self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
         self::$MAX_UPLOAD_TMX_FILE_SIZE = 100 * 1024 * 1024; // bytes
         self::$MAX_NUM_FILES = 100;
@@ -348,20 +348,20 @@ class INIT {
             'indd' => array( '', "Try converting to INX" )
         );
 
-        /**
-         * If you don't have a client id and client secret, please visit
-         * Google Developers Console (https://console.developers.google.com/)
-         * and follow these instructions:
-         * - click "Create Project" button and specify project name
-         * - In the sidebar on the left, select APIs & auth.
-         * - In the displayed list of APIs, make sure "Google+ API" show a status of ON. If it doesn't, enable it.
-         * - In the sidebar on the left, select "Credentials" under "APIs & auth" menu.
-         * - Click "Create new client ID" button
-         * - under APPLICATION TYPE, select "web application" option
-         * - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
-         * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
-         * - click "Create client ID"
-         * Your client ID and client secret are now available.
+	    /**
+	     * If you don't have a client id and client secret, please visit
+	     * Google Developers Console (https://console.developers.google.com/)
+	     * and follow these instructions:
+	     * - click "Create Project" button and specify project name
+	     * - In the sidebar on the left, select APIs & auth.
+	     * - In the displayed list of APIs, make sure "Google+ API" show a status of ON. If it doesn't, enable it.
+	     * - In the sidebar on the left, select "Credentials" under "APIs & auth" menu.
+	     * - Click "Create new client ID" button
+	     * - under APPLICATION TYPE, select "web application" option
+	     * - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
+	     * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
+	     * - click "Create client ID"
+	     * Your client ID and client secret are now available.
          *
          * Edit the file inc/oauth_config.ini.sample with the right parameters obtained in the previous step of this guide.
          * set:
@@ -371,8 +371,8 @@ class INIT {
          *
          * save and rename to oauth_config.ini file.
          *
-         * Done!
-         */
+	     * Done!
+	     */
         self::$OAUTH_CLIENT_ID       = self::$OAUTH_CONFIG['OAUTH_CLIENT_ID'];
         self::$OAUTH_CLIENT_SECRET   = self::$OAUTH_CONFIG['OAUTH_CLIENT_SECRET'];
         self::$OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG['OAUTH_CLIENT_APP_NAME'];
@@ -383,9 +383,9 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-        self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.inc.php file is not up-to-date.";
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.inc.php file is not up-to-date.";
 
-    }
+	}
 
     public static function fatalErrorHandler() {
 
@@ -454,21 +454,21 @@ class INIT {
 
     }
 
-    private static function generate_password( $length = 12 ) {
+	private static function generate_password( $length = 12 ) {
 
-        $_pwd = md5( uniqid('',true) );
-        $pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
+		$_pwd = md5( uniqid('',true) );
+		$pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
 
-        if( $length > 12 ){
-            while( strlen($pwd) < $length ){
-                $pwd .= self::generate_password();
-            }
-            $pwd = substr( $pwd, 0, $length );
-        }
+		if( $length > 12 ){
+			while( strlen($pwd) < $length ){
+				$pwd .= self::generate_password();
+			}
+			$pwd = substr( $pwd, 0, $length );
+		}
 
-        return $pwd;
+		return $pwd;
 
-    }
+	}
 
 }
 
