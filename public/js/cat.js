@@ -1597,27 +1597,50 @@ UI = {
 //				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.job_id
 			},
-			context: reqArguments,
+			context: [reqArguments, id_segment],
 			error: function() {
-				UI.failedConnection(this, 'setCurrentSegment');
+				UI.failedConnection(this[0], 'setCurrentSegment');
 			},
 			success: function(d) {
-				UI.setCurrentSegment_success(d);
+				UI.setCurrentSegment_success(this[1], d);
 			}
 		});
 	},
-	setCurrentSegment_success: function(d) {
+	setCurrentSegment_success: function(id_segment, d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
-		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
+        if(config.alternativesEnabled) this.getTranslationMismatches(id_segment);
+//		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
         $('html').trigger('setCurrentSegment_success', d);
     },
-    detectTranslationAlternatives: function(d) {
+    getTranslationMismatches: function (id_segment) {
+        APP.doRequest({
+            data: {
+                action: 'getTranslationMismatches',
+                password: config.password,
+                id_segment: id_segment.toString(),
+                id_job: config.job_id
+            },
+            context: id_segment,
+            error: function(d) {
+                UI.failedConnection(this, 'getTranslationMismatches');
+            },
+            success: function(d) {
+                if (d.errors.length) {
+                    UI.processErrors(d.errors, 'setTranslation');
+                } else {
+                    UI.detectTranslationAlternatives(d);
+                }
+            }
+        });
+    },
 
+    detectTranslationAlternatives: function(d) {
+console.log('ecco');
         /**
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
@@ -1667,7 +1690,7 @@ UI = {
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
             tab.show();
-            tab.trigger('click');
+//            tab.trigger('click');
         }
     },
     renderAlternatives: function(d) {
@@ -3394,7 +3417,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.3";
+		this.version = "0.5.3b";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -4184,14 +4207,19 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-//			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
+
+            UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 
             UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
             UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 //				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4650,8 +4678,11 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-//				console.log('Q: ', UI.editarea.html());
-			}
+				console.log('Q: ', UI.editarea.html());
+                setTimeout(function() { // wait for creation
+                    console.log('R: ', UI.editarea.html());
+                }, 200);
+            }
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
@@ -5868,7 +5899,14 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        try {
+            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        } catch (e) {
+            UI.clearStorage('contribution');
+            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+        }
+//        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
+
 //		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
@@ -6118,6 +6156,7 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
+                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -8680,6 +8719,8 @@ function setBrowserHistoryBehavior() {
 
 function goodbye(e) {
 
+    UI.clearStorage('contribution');
+
     if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
         return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
     }
@@ -9535,7 +9576,7 @@ $.extend(UI, {
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" multiple name="tmx_file" />' +
+                    '    <input type="file" name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -10195,6 +10236,7 @@ $.extend(UI, {
 //        form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
         iframeId = document.getElementById(ifId);
+        UI.TMuploadIframeId = iframeId;
 
         // Add event...
         var eventHandler = function () {
@@ -10374,7 +10416,7 @@ $.extend(UI, {
                                 $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
                             }
 
-
+                            UI.TMuploadIframeId.parentNode.removeChild(UI.TMuploadIframeId);
 //                            APP.showMessage({
 //                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
 //                            });

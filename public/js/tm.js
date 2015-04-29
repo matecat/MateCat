@@ -177,7 +177,7 @@ $.extend(UI, {
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" multiple name="tmx_file" />' +
+                    '    <input type="file" name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
@@ -837,6 +837,7 @@ $.extend(UI, {
 //        form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
         iframeId = document.getElementById(ifId);
+        UI.TMuploadIframeId = iframeId;
 
         // Add event...
         var eventHandler = function () {
@@ -1016,7 +1017,7 @@ $.extend(UI, {
                                 $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
                             }
 
-
+                            UI.TMuploadIframeId.parentNode.removeChild(UI.TMuploadIframeId);
 //                            APP.showMessage({
 //                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
 //                            });
