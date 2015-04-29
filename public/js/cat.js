@@ -1491,30 +1491,66 @@ UI = {
 			destinationTop = destinationTop + 100;
 			this.firstScroll = false;
 		}
-
 		if ($(current).length) { // if there is an open segment
 			if ($(segment).offset().top > $(current).offset().top) { // if segment to open is below the current segment
 				if (!current.is($(segment).prev())) { // if segment to open is not the immediate follower of the current segment
 					var diff = (this.firstLoad) ? ($(current).height() - 200 + 120) : 20;
+                    console.log('a');
 					destinationTop = destinationTop - diff;
 				} else { // if segment to open is the immediate follower of the current segment
+                    console.log('b');
 					destinationTop = destinationTop - spread;
 				}
 			} else { // if segment to open is above the current segment
+                console.log('c');
+//                if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
 				destinationTop = destinationTop - spread;
+                UI.provaCoso = true;
 			}
 		} else { // if no segment is opened
+            console.log('d');
 			destinationTop = destinationTop - spread;
 		}
 
 		$("html,body").stop();
         pointSpeed = (quick)? 0 : 500;
+/*
+        console.log('segment: ', segment.attr('id'));
+
+        console.log('prev: ', UI.currentSegment.prev().attr('id'));
+
+        if(config.isReview) {
+            setTimeout(function() {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }, 300);
+        } else {
+            $("html,body").animate({
+                scrollTop: segment.prev().offset().top - $('.header-menu').height()
+            }, 500);
+        }
+*/
+/*
 		$("html,body").animate({
 			scrollTop: destinationTop - 20
 		}, pointSpeed);
+*/
+        if(config.isReview) {
+            setTimeout(function() {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }, 300);
+        } else {
+            $("html,body").animate({
+                scrollTop: destinationTop - 20
+            }, pointSpeed);
+        }
+
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, pointSpeed);
+        }, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
 //        segmentId = segmentId.toString().split('-')[0];
