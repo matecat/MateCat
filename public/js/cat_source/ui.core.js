@@ -3267,6 +3267,7 @@ console.log('ecco');
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
 
 		this.editarea.html(this.undoStack[ind]);
+        console.log('vediamo: ', document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		$('.undoCursorPlaceholder').remove();
 
@@ -3293,7 +3294,7 @@ console.log('ecco');
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		} else {
-            return;
+//            return;
         }
 
         if(this.editarea === '') return;
@@ -3306,10 +3307,7 @@ console.log('ecco');
             if ( (tt.length) && (!ss) )
                 return;
         }
-//        console.log('currentItem: ', currentItem);
-//        console.log('this.editarea.html(): ', this.editarea.html());
-
-        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        var diff = ( typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
         if ( diff == ' selected' )
             return;
 
