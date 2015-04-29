@@ -824,7 +824,8 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
             <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
                 <h3 tal:content="repeat/supported/key"></h3>
                 <ul tal:repeat="ext supported">
-                    <li tal:repeat="item ext" tal:content="item/ext" tal:attributes="class item/class">
+                    <li tal:repeat="item ext">
+                        <span tal:content="item/ext" tal:attributes="class item/class"></span>
                     </li>
                 </ul>
             </div>
