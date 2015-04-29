@@ -735,14 +735,7 @@ padding-right: 20px;
             -moz-column-count: 2;}
 			
 
-.fileformat span {
-padding: 10px 15px 10px 40px;
-margin: 5px 0 0 0;
-width: 30px;
-height:15px;
-float: left;
-background-size: 25px!important;
-}
+
 
 .api .tablestats tr:hover {background:none;}
 
