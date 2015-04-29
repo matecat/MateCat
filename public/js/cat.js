@@ -1507,9 +1507,17 @@ UI = {
 
 		$("html,body").stop();
         pointSpeed = (quick)? 0 : 500;
-		$("html,body").animate({
-			scrollTop: destinationTop - 20
-		}, pointSpeed);
+        if(config.isReview) {
+            setTimeout(function() {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }, 300);
+        } else {
+            $("html,body").animate({
+                scrollTop: destinationTop - 20
+            }, pointSpeed);
+        }
 		setTimeout(function() {
 			UI.goingToNext = false;
 		}, pointSpeed);
