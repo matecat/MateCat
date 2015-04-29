@@ -611,6 +611,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 {
 	width:220px;
     height:28px;
+      margin: 0 0 5px 0;
 }
 
 
@@ -835,8 +836,8 @@ margin: 0;
 /*supported formats*/
 .supported-formats .popup
     {
-    top: 41%;
-    left: 38%;
+    top: 35%;
+    left: 35%;
     width: auto;
     }
 .popup-languages .popup
@@ -852,6 +853,28 @@ margin: 0 !important;
 left: 3% !important;
 top: 5%;
 }
+
+.fileformat.popup-box ul li {
+	  margin: 0;
+  padding: 0 5px;
+  float: left;
+    text-align: left;
+}
+
+.fileformat .format-box ul {
+  margin: 0 auto;
+  float: none;
+  overflow: hidden;
+}
+
+.fileformat .format-box:first-child ul {
+	float: left;
+}
+
+.fileformat .format-box:last-child ul {
+	width: 120px;
+}
+
 .popup h3
 	{
 	font-size:16px;
@@ -893,7 +916,7 @@ top: 5%;
 	font-size:14px;
 	}
 	.format-box ul {
-		width: 90px;
+		width: 100px;
 	}
 	.popup-languages ul
 		{
@@ -929,10 +952,7 @@ top: 5%;
     color: #fff;
     }
         
-.supported-formats ul li:nth-child(2n+1)
-	{
-	background:#efefef;
-	}
+
 
 .popup-box
 	{
@@ -1009,8 +1029,11 @@ top: 5%;
 
 
 .grayed{display:none;background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;z-index:9;}
-
-.format-box{float:left;margin:0 10px 0 15px;}
+.format-box{
+	float: left;
+	margin:0;
+	margin-right: 2px;
+}
 
 #delete-failed-conversions{display: none;}
 
@@ -1044,7 +1067,7 @@ footer a:hover{text-decoration:none}
 	{
 		background-image: none;
 width: 70px;
-margin-left: -18px;
+margin-left: -22px;
 padding: 8px 0 1px 0;
 margin-top: 7px;
 	}    
