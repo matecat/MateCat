@@ -823,8 +823,8 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         <div class="popup-box">
             <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
                 <h3 tal:content="repeat/supported/key"></h3>
-                <ul tal:define="ext php:array()" tal:repeat="ext supported">
-                    <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
+                <ul tal:repeat="ext supported">
+                    <li tal:repeat="item ext" tal:content="item/ext" tal:attributes="class item/class">
                     </li>
                 </ul>
             </div>
@@ -835,10 +835,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 <div class="modal popup-languages slide" data-type="view">
     
     <div class="">
-      
-
         <h1>
-            
             Choose Multiple Languages (<span class="number">1</span>)
             <a href="#" id="deselectMultilang">Deselect all</a>
             <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>

@@ -241,7 +241,15 @@ class newProjectController extends viewController {
     private function getCategories( $output = "array" ) {
         $ret = array();
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
-            $val         = array_chunk( array_keys( $value ), 12 );
+            $val         = array();
+            foreach ($value as $ext => $info) {
+                $val[] = array(
+                        'ext'   => $ext,
+                        'class' => $info[2]
+                );
+            }
+            $val = array_chunk($val, 12 );
+
             $ret[ $key ] = $val;
         }
         if ( $output == "json" ) {
