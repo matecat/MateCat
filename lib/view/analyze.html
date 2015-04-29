@@ -294,9 +294,16 @@
                                 Partial (50%-74%)
                             </th>
                             <th class="tm-partial">TM<br/>
-                                Partial (75%-99%)
+                                Partial (75%-84%)
+                            </th>
+                            <th class="tm-partial">TM<br/>
+                                Partial (85%-94%)
+                            </th>
+                            <th class="tm-partial">TM<br/>
+                                Partial (95%-99%)
                             </th>
                             <th class="tm-100">TM 100%</th>
+                            <th class="tm-100">Public TM 100%</th>                            
                             <th class="tm-100-context">TM 100% in context</th>
                             <th class="mt">Machine Translation</th>
                             <th class="empty">&nbsp;</th>
@@ -310,14 +317,17 @@
                             <td class="editarea">${id_for_job/rates/INTERNAL}%</td>
                             <td class="editarea">${id_for_job/rates/50%-74%}%</td>
                             <td class="editarea">${id_for_job/rates/75%-99%}%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">60%</td>                            
                             <td class="editarea">${id_for_job/rates/100%}%</td>
+                            <td class="editarea">30%</td>                            
                             <td class="editarea">0%</td>
                             <td class="editarea">${id_for_job/rates/MT}%</td>
                             <td class="empty">&nbsp;</td>
                         </tr>
 
                         <tr class="tablespace">
-                            <td colspan="11">&nbsp;</td>
+                            <td colspan="14">&nbsp;</td>
                         </tr>
                         </tbody>
 
@@ -338,9 +348,12 @@
                                 <td class="stat_int">0</td>
                                 <td class="stat_tm50">0</td>
                                 <td class="stat_tm75">0</td>
+                                <td class="stat_tm85">0</td>
+                                <td class="stat_tm95">0</td>
                                 <td class="stat_tm100">0</td>
                                 <td class="stat_tmic">0</td>
                                 <td class="stat_mt">0</td>
+                                <td class="stat_public_mt">0</td>
                                 <td class="empty">
                                     <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword}" href="#" target="_blank" class="uploadbtn translate">Translate</a>
                                 </td>
@@ -358,9 +371,12 @@
                                     <td class="stat_int">0</td>
                                     <td class="stat_tm50">0</td>
                                     <td class="stat_tm75">0</td>
+                                    <td class="stat_tm85">0</td>
+                                    <td class="stat_tm95">0</td>
                                     <td class="stat_tm100">0</td>
                                     <td class="stat_tmic">0</td>
                                     <td class="stat_mt">0</td>
+                                    <td class="stat_public_mt">0</td>
                                     <td class="empty"></td>
                                 </tr>
 

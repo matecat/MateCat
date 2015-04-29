@@ -2267,7 +2267,7 @@ console.log('ecco');
 
             if ( toSave ) {
                 this.decrementOfflineCacheRemaining();
-                this.failedConnection( [ id_segment, 'translated', false ], 'setTranslation' );
+                this.failedConnection( [ id_segment, status, false ], 'setTranslation' );
             }
 
             this.changeStatusOffline( id_segment );
@@ -3417,7 +3417,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.3";
+		this.version = "0.5.3b";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -6156,6 +6156,7 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
+                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -8718,6 +8719,8 @@ function setBrowserHistoryBehavior() {
 
 function goodbye(e) {
 
+    UI.clearStorage('contribution'); 
+
     if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
         return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
     }
@@ -9139,11 +9142,8 @@ if(config.enableReview && config.isReview) {
 
 //            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
 
-            APP.doRequest({
-//                data: reqData,
-
-                data: {
-                    action: 'setRevision',
+            var data = {
+                action: 'setRevision',
                     job: config.job_id,
                     jpassword: config.password,
                     segment: sid,
@@ -9153,23 +9153,9 @@ if(config.enableReview && config.isReview) {
                     err_terminology: err_terminology,
                     err_language: err_language,
                     err_style: err_style
-                },
+            };
 
-//                context: [reqArguments, segment, status],
-                error: function() {
-//                    UI.failedConnection(this[0], 'setTranslation');
-                },
-                success: function(d) {
-//                    console.log('d: ', d);
-                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
-                    // temp
-//                    d.stat_quality = config.stat_quality;
-//                    d.stat_quality[0].found = 2;
-                    //end temp
-//                    UI.populateStatQualityPanel(d.stat_quality);
-                }
-            });
-
+            UI.setRevision( data );
 
         }
 //        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
@@ -9221,6 +9207,30 @@ if(config.enableReview && config.isReview) {
     });
 
     $.extend(UI, {
+
+        setRevision: function( data ){
+
+            APP.doRequest({
+//                data: reqData,
+
+                data: data,
+
+//                context: [reqArguments, segment, status],
+                error: function() {
+                    //UI.failedConnection( this[0], 'setRevision' );
+                    UI.failedConnection( data, 'setRevision' );
+                },
+                success: function(d) {
+//                    console.log('d: ', d);
+                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
+                    // temp
+//                    d.stat_quality = config.stat_quality;
+//                    d.stat_quality[0].found = 2;
+                    //end temp
+//                    UI.populateStatQualityPanel(d.stat_quality);
+                }
+            });
+        },
         trackChanges: function (editarea) {
 /*
             console.log('11111: ', $(editarea).text());
@@ -9662,9 +9672,11 @@ $.extend(UI, {
 //            if(APP.isCattool) UI.saveTMdescription($(this));
             UI.saveTMdescription($(this));
         }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
-            console.log('return');
-            e.preventDefault();
-            $(this).trigger('blur');
+//            console.log('return');
+            if(e.which == 13) {
+                e.preventDefault();
+                $(this).trigger('blur');
+            }
         }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
             $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
 //            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
@@ -11138,6 +11150,8 @@ $.extend(UI, {
                 UI[operation](args[0]);
             } else if(operation == 'getSegments') {
                 UI.reloadWarning();
+            } else if( operation == 'setRevision' ){
+                UI[operation](args);
             }
         });
         UI.abortedOperations = [];

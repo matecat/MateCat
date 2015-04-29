@@ -1987,6 +1987,7 @@ header .searchbox {
 body.filterOpen .searchbox
 {
 	display: block;
+    z-index: 0;
 	}
 
 	.searchbox label, .mgmt-panel label
