@@ -212,6 +212,8 @@ $.extend(UI, {
                 UI[operation](args[0]);
             } else if(operation == 'getSegments') {
                 UI.reloadWarning();
+            } else if( operation == 'setRevision' ){
+                UI[operation](args);
             }
         });
         UI.abortedOperations = [];
