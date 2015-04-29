@@ -1491,30 +1491,66 @@ UI = {
 			destinationTop = destinationTop + 100;
 			this.firstScroll = false;
 		}
-
 		if ($(current).length) { // if there is an open segment
 			if ($(segment).offset().top > $(current).offset().top) { // if segment to open is below the current segment
 				if (!current.is($(segment).prev())) { // if segment to open is not the immediate follower of the current segment
 					var diff = (this.firstLoad) ? ($(current).height() - 200 + 120) : 20;
+                    console.log('a');
 					destinationTop = destinationTop - diff;
 				} else { // if segment to open is the immediate follower of the current segment
+                    console.log('b');
 					destinationTop = destinationTop - spread;
 				}
 			} else { // if segment to open is above the current segment
+                console.log('c');
+//                if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
 				destinationTop = destinationTop - spread;
+                UI.provaCoso = true;
 			}
 		} else { // if no segment is opened
+            console.log('d');
 			destinationTop = destinationTop - spread;
 		}
 
 		$("html,body").stop();
         pointSpeed = (quick)? 0 : 500;
+/*
+        console.log('segment: ', segment.attr('id'));
+
+        console.log('prev: ', UI.currentSegment.prev().attr('id'));
+
+        if(config.isReview) {
+            setTimeout(function() {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }, 300);
+        } else {
+            $("html,body").animate({
+                scrollTop: segment.prev().offset().top - $('.header-menu').height()
+            }, 500);
+        }
+*/
+/*
 		$("html,body").animate({
 			scrollTop: destinationTop - 20
 		}, pointSpeed);
+*/
+        if(config.isReview) {
+            setTimeout(function() {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }, 300);
+        } else {
+            $("html,body").animate({
+                scrollTop: destinationTop - 20
+            }, pointSpeed);
+        }
+
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, pointSpeed);
+        }, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
 //        segmentId = segmentId.toString().split('-')[0];
@@ -3267,6 +3303,7 @@ console.log('ecco');
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
 
 		this.editarea.html(this.undoStack[ind]);
+        console.log('vediamo: ', document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		$('.undoCursorPlaceholder').remove();
 
@@ -3293,7 +3330,7 @@ console.log('ecco');
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		} else {
-            return;
+//            return;
         }
 
         if(this.editarea === '') return;
@@ -3306,10 +3343,7 @@ console.log('ecco');
             if ( (tt.length) && (!ss) )
                 return;
         }
-//        console.log('currentItem: ', currentItem);
-//        console.log('this.editarea.html(): ', this.editarea.html());
-
-        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        var diff = ( typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
         if ( diff == ' selected' )
             return;
 
