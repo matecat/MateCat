@@ -847,6 +847,29 @@ class CatUtils {
 
     }
 
+    /**
+     * No More used
+     *
+     * @deprecated
+     *
+     * @param        $id_segment
+     * @param        $id_job
+     * @param string $suggestions_json_array
+     * @param string $suggestion
+     * @param string $suggestion_match
+     * @param string $suggestion_source
+     * @param string $match_type
+     * @param int    $eq_words
+     * @param int    $standard_words
+     * @param string $translation
+     * @param string $tm_status_analysis
+     * @param int    $warning
+     * @param string $err_json
+     * @param int    $mt_qe
+     * @param int    $pretranslate_100
+     *
+     * @return int
+     */
     public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0, $pretranslate_100 = 0) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {

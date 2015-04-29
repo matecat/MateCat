@@ -1281,32 +1281,12 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 }
 */
 
-function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = null) {
-    $data                          = array();
-    $data[ 'id_job' ]              = $id_job;
-    $data[ 'suggestions_array' ]   = $suggestions_json_array;
-    $data[ 'suggestion' ]          = $suggestion;
-    $data[ 'suggestion_match' ]    = $suggestion_match;
-    $data[ 'suggestion_source' ]   = $suggestion_source;
-    $data[ 'match_type' ]          = $match_type;
-    $data[ 'eq_word_count' ]       = $eq_words;
-    $data[ 'standard_word_count' ] = $standard_words;
-    $data[ 'mt_qe' ]               = $mt_qe;
+function setSuggestionUpdate( $data ) {
 
-    ($segment_status !== null ) ? $data[ 'status' ] = $segment_status : null;
+    $id_segment = (int)$data[ 'id_segment' ];
+    $id_job = (int)$data[ 'id_job' ];
 
-    ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
-    ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
-
-    $data[ 'warning' ]                = $warning;
-    $data[ 'serialized_errors_list' ] = $err_json_list;
-
-    $and_sugg = "";
-    if ( $tm_status_analysis != 'DONE' ) {
-        $and_sugg = "and suggestions_array is NULL";
-    }
-
-    $where = " id_segment=$id_segment and id_job=$id_job $and_sugg";
+    $where = " id_segment=$id_segment and id_job=$id_job";
 
     $db = Database::obtain();
     $db->update( 'segment_translations', $data, $where );

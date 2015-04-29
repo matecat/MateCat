@@ -1,9 +1,6 @@
 <?php
 set_time_limit( 0 );
 include "main.php";
-include INIT::$UTILS_ROOT . "/QA.php";
-include INIT::$UTILS_ROOT . "/PostProcess.php";
-include INIT::$UTILS_ROOT . "/MemcacheHandler.php";
 
 define( "PID_FOLDER", ".pidlist" );
 define( "NUM_PROCESSES", 1 );
@@ -13,7 +10,7 @@ $amqHandlerSubscriber = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
 $amqHandlerSubscriber->connect();
 
 $amqHandlerSubscriber->subscribe( INIT::$QUEUE_NAME );
-$amqHandlerSubscriber->setReadTimeout( 0, 500 );
+$amqHandlerSubscriber->setReadTimeout( 0, 0 );
 
 $amqHandlerPublisher = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
 $amqHandlerPublisher->connect();
@@ -31,13 +28,13 @@ function isRunningProcess( $pid ) {
 
 function processFileExists( $pid ) {
     $folder = PID_FOLDER;
-    echo __FUNCTION__ . " : $folder/$pid ....";
+//    Log::doLog( __FUNCTION__ . " : $folder/$pid ...." );
     if ( file_exists( "$folder/$pid" ) ) {
-        echo "true\n\n";
+//        Log::doLog ( "true" );
 
         return true;
     }
-    echo "false\n\n";
+//    Log::doLog ( "false" );
 
     return false;
 }
@@ -46,21 +43,22 @@ $UNIQUID = uniqid( '', true );
 
 $my_pid     = getmypid();
 $parent_pid = posix_getppid();
-echo "--- (child $my_pid) : parent pid is $parent_pid\n";
+//Log::doLog ( "--- (child $my_pid) : parent pid is $parent_pid" );
 
 $memcacheHandler = MemcacheHandler::getInstance();
 
+$i = 1;
+
 while ( 1 ) {
-    if (0 && !processFileExists($my_pid)) {
+    if ( !processFileExists($my_pid)) {
         die( "(child $my_pid) :  EXITING!  my file does not exists anymore\n" );
     }
 
     // control if parent is still running
-    if (0 && !isRunningProcess($parent_pid)) {
-        echo "--- (child $my_pid) : EXITING : parent seems to be died.\n";
+    if ( !isRunningProcess($parent_pid)) {
+        Log::doLog ( "--- (child $my_pid) : EXITING : parent seems to be died." );
         exit ( -1 );
     }
-
 
     $msg      = null;
     $objQueue = array();
@@ -72,13 +70,16 @@ while ( 1 ) {
 
         if ( $msg instanceof StompFrame && ( $msg->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msg->headers /* Stomp Client bug... hack */ ) ) ) {
 
+            $i++;
+            Log::doLog( "--- (child $my_pid) : processing frame $i" );
+
             $objQueue = json_decode( $msg->body, true );
             //empty message what to do?? it should not be there, acknowledge and process the next one
             if ( empty( $objQueue ) ) {
 
                 Utils::raiseJsonExceptionError();
 
-                echo( $msg );
+//                Log::doLog( $msg );
                 $amqHandlerSubscriber->ack( $msg );
                 continue;
 
@@ -86,9 +87,9 @@ while ( 1 ) {
         }
 
     } catch ( Exception $e ) {
-        echo( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
-        echo( $e->getMessage() );
-        var_export( $e->getTraceAsString() );
+        Log::doLog( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
+        Log::doLog( $e->getMessage() );
+        Log::doLog( $e->getTraceAsString() );
         continue; /* jump the ack */
     }
 
@@ -99,21 +100,20 @@ while ( 1 ) {
         $pid = $objQueue[ 'pid' ];
 
         if ( empty( $objQueue ) ) {
-            echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
+            Log::doLog ( "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds" );
             sleep( 5 );
             continue;
         }
         $sid = $objQueue[ 'id_segment' ];
         $jid = $objQueue[ 'id_job' ];
-        echo "--- (child $my_pid) : segment $sid-$jid found \n";
+        Log::doLog ( "--- (child $my_pid) : segment $sid-$jid found " );
 //        $objQueue = getSegmentForTMVolumeAnalysys( $sid, $jid );
 
-        echo "segment found is: ";
-        print_r( $objQueue );
-        echo "\n";
+        Log::doLog( "segment found is: " );
+//        Log::doLog( $objQueue );
 
         if ( empty( $objQueue ) ) {
-            echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
+            Log::doLog ( "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds" );
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
             incrementCount( $objQueue[ 'pid' ], 0, 0 );
             sleep( 5 );
@@ -127,23 +127,23 @@ while ( 1 ) {
             $total_segs = getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
-            var_export( $total_segs );
+            Log::doLog( $total_segs );
 
             $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
             $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
-            echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
+            Log::doLog ( "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
         } else {
             $_existingPid = $memcacheHandler->get( 'project:' . $pid );
             $_analyzed    = $memcacheHandler->get( 'num_analyzed:' . $pid );
-            echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
-            echo "--- (child $my_pid) : analyzed $_analyzed segments for PID $pid in Memcache\n";
+            Log::doLog ( "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache" );
+            Log::doLog ( "--- (child $my_pid) : analyzed $_analyzed segments for PID $pid in Memcache" );
         }
 
 
-        echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
+        Log::doLog ( "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid" );
 
         //lock segment
-        echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
+        Log::doLog ( "--- (child $my_pid) :  segment $sid-$jid locked" );
 
         $source           = $objQueue[ 'source' ];
         $target           = $objQueue[ 'target' ];
@@ -155,9 +155,9 @@ while ( 1 ) {
         $text = $objQueue[ 'segment' ];
 
         if ( $raw_wc == 0 ) {
-            echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
-            incrementCount( $pid, 0, 0 );
+            Log::doLog ( "--- (child $my_pid) : empty segment. deleting lock and continue" );
             setSegmentTranslationError( $sid, $jid ); // SET as DONE
+            incrementCount( $pid, 0, 0 );
             tryToCloseProject( $pid, $my_pid );
             continue;
         }
@@ -233,6 +233,7 @@ while ( 1 ) {
              * @var $tms Engines_MyMemory
              */
             $tms = Engine::getInstance( $_TMS );
+            $tms->doLog = false;
 
             $config = $tms->getConfigStruct();
             $config = array_merge( $config, $_config );
@@ -245,7 +246,7 @@ while ( 1 ) {
 
             } else {
 
-                echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
+                Log::doLog ( "--- (child $my_pid) : error from mymemory : set error and continue" ); // ERROR FROM MYMEMORY
                 setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
                 incrementCount( $pid, 0, 0 );
                 tryToCloseProject( $pid, $my_pid );
@@ -282,11 +283,57 @@ while ( 1 ) {
             usort( $matches, "compareScore" );
         }
 
+//        $matches = array
+//        (
+//                0 => array
+//                (
+//                        'id'               => '465636083',
+//                        'raw_segment'      => '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>',
+//                        'segment'          => '&lt;g id="pt2"&gt;WASHINGTON &lt;/g&gt;&lt;g id="pt3"&gt;— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.&lt;/g&gt;',
+//                        'translation'      => 'WASHINGTON',
+//                        'target_note'      => '',
+//                        'raw_translation'  => 'WASHINGTON',
+//                        'quality'          => '74',
+//                        'reference'        => '',
+//                        'usage_count'      => '1',
+//                        'subject'          => 'All',
+//                        'created_by'       => 'Matecat',
+//                        'last_updated_by'  => 'Matecat',
+//                        'create_date'      => '2015-03-20 17:45:11',
+//                        'last_update_date' => '2015-03-20',
+//                        'match'            => '100%',
+//                        'prop'             => array(),
+//                        'memory_key'       => '',
+//                ),
+//
+//                1 => array
+//                (
+//                        'id'               => '0',
+//                        'raw_segment'      => '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>',
+//                        'segment'          => '&lt;g id="pt2"&gt;WASHINGTON &lt;/g&gt;&lt;g id="pt3"&gt;— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.&lt;/g&gt;',
+//                        'translation'      => '&lt;g id="pt2"&gt; WASHINGTON &lt;/g&gt;&lt;g id="pt3"&gt; Pidió a la Secretaría de Hacienda y el Servicio de Impuestos Internos hoy comentario público sobre cuestiones relacionadas con las disposiciones de responsabilidad compartidas incluidas en la Ley de Asistencia Asequible que se aplicarán a ciertos empleadores a partir de 2014 -. &lt;/g&gt;',
+//                        'target_note'      => '',
+//                        'raw_translation'  => '<g id="pt2"> WASHINGTON </g><g id="pt3"> Pidió a la Secretaría de Hacienda y el Servicio de Impuestos Internos hoy comentario público sobre cuestiones relacionadas con las disposiciones de responsabilidad compartidas incluidas en la Ley de Asistencia Asequible que se aplicarán a ciertos empleadores a partir de 2014 -. </g>',
+//                        'quality'          => '70',
+//                        'reference'        => 'Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.',
+//                        'usage_count'      => '1',
+//                        'subject'          => '',
+//                        'created_by'       => 'MT!',
+//                        'last_updated_by'  => 'MT!',
+//                        'create_date'      => '2015-04-29 16:38:08',
+//                        'last_update_date' => '2015-04-29',
+//                        'match'            => '85%',
+//                        'prop'             => array(),
+//                        'memory_key'       => ''
+//                )
+//
+//        );
+
         /**
          * Only if No results found
          */
         if ( empty( $matches ) || !is_array( $matches ) ) {
-            echo "--- (child $my_pid) : No contribution found : set error and continue\n"; // ERROR FROM MYMEMORY
+            Log::doLog ( "--- (child $my_pid) : No contribution found : set error and continue" ); // ERROR FROM MYMEMORY
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
             incrementCount( $pid, 0, 0 );
             tryToCloseProject( $pid, $my_pid );
@@ -393,22 +440,37 @@ while ( 1 ) {
 
         ( !empty( $matches[ 0 ][ 'sentence_confidence' ] ) ? $mt_qe = floatval( $matches[ 0 ][ 'sentence_confidence' ] ) : $mt_qe = null );
 
-        echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
+//        Log::doLog ( "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words" );
 
-        $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
-        //set memcache
+        $tm_data                             = array();
+        $tm_data[ 'id_job' ]                 = $jid;
+        $tm_data[ 'id_segment' ]             = $sid;
+        $tm_data[ 'suggestions_array' ]      = $suggestion_json;
+        $tm_data[ 'suggestion' ]             = $suggestion;
+        $tm_data[ 'suggestion_match' ]       = $suggestion_match;
+        $tm_data[ 'suggestion_source' ]      = $suggestion_source;
+        $tm_data[ 'match_type' ]             = $new_match_type;
+        $tm_data[ 'eq_word_count' ]          = $eq_words;
+        $tm_data[ 'standard_word_count' ]    = $standard_words;
+        $tm_data[ 'translation' ]            = $suggestion;
+        $tm_data[ 'tm_analysis_status' ]     = "DONE";
+        $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
+        $tm_data[ 'serialized_errors_list' ] = $err_json;
+        $tm_data[ 'mt_qe' ]                  = $mt_qe;
+        $tm_data[ 'pretranslate_100' ]       = $pretranslate_100;
 
-        incrementCount( $pid, $eq_words, $standard_words );
+        updateTMValues( $tm_data );
 
         //unlock segment
 
-        echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
-
-
         $amqHandlerSubscriber->ack( $msg );
+
+        Log::doLog ( "--- (child $my_pid) : segment $sid-$jid acknowledged" );
 
         reQueue($amqHandlerPublisher, $failed_segment );
 
+        //set memcache
+        incrementCount( $pid, $eq_words, $standard_words );
         tryToCloseProject( $pid, $my_pid );
 
     } else {
@@ -447,34 +509,38 @@ function tryToCloseProject( $pid, $child_process_id ) {
     $project_totals[ 'eq_wc' ]            = $memcacheHandler->get( 'eq_wc:' . $pid ) / 100;
     $project_totals[ 'st_wc' ]            = $memcacheHandler->get( 'st_wc:' . $pid ) / 100;
 
-    echo "--- (child $child_process_id) : count segments in project $pid = " . $project_totals[ 'project_segments' ] . "\n";
-    echo "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals[ 'num_analyzed' ] . "\n";
+    Log::doLog ( "--- (child $child_process_id) : count segments in project $pid = " . $project_totals[ 'project_segments' ] . "" );
+    Log::doLog ( "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals[ 'num_analyzed' ] . "" );
 
     if ( empty( $project_totals[ 'project_segments' ] ) ) {
-        echo "--- (child $child_process_id) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
+        Log::doLog ( "--- (child $child_process_id) : WARNING !!! error while counting segments in projects $pid skipping and continue " );
 
         return;
     }
 
-    if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 ) {
+    if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && !$memcacheHandler->get( 'project_done:' . $pid ) ) {
+
+        $_existingLock = $memcacheHandler->add( 'project_done:' . $pid, 1 ); // avoid race conditions, only one instance must pass
+        if( $_existingLock === false ){
+            return;
+        }
 
         $_analyzed_report = getProjectSegmentsTranslationSummary( $pid );
 
         $total_segs = array_pop( $_analyzed_report ); //remove Rollup
 
-        echo "--- (child $child_process_id) : analysis project $pid finished : change status to DONE\n";
+        Log::doLog ( "--- (child $child_process_id) : analysis project $pid finished : change status to DONE" );
 
         changeProjectStatus( $pid, Constants_ProjectStatus::STATUS_DONE );
         changeTmWc( $pid, $project_totals[ 'eq_wc' ], $project_totals[ 'st_wc' ] );
 
-        echo "--- (child $child_process_id) : trying to initialize job total word count.\n";
+        Log::doLog ( "--- (child $child_process_id) : trying to initialize job total word count." );
         foreach ( $_analyzed_report as $job_info ) {
             $counter = new WordCount_Counter();
             $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
         }
 
     }
-    echo "\n\n";
 
 }
 
@@ -561,4 +627,40 @@ function compareScore( $a, $b ) {
 
     return ( floatval( $a[ 'match' ] ) < floatval( $b[ 'match' ] ) ? 1 : -1 ); //SORT DESC !!!!!!! INVERT MINUS SIGN
     //this is necessary since usort sorts is ascending order, thus inverting the ranking
+}
+
+function updateTMValues( $tm_data ){
+
+    if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
+        if ( strpos( $tm_data[ 'suggestion_source' ], "MT" ) === false ) {
+            $tm_data[ 'suggestion_source' ] = 'TM';
+        } else {
+            $tm_data[ 'suggestion_source' ] = 'MT';
+        }
+    }
+
+    //controllare il valore di suggestion_match
+    if( $tm_data[ 'suggestion_match' ] == "100%" && $tm_data[ 'pretranslate_100' ]){
+        $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
+    }
+
+    //there is not a database filed named pretranslate_100 in segment_translations, this is only a flag
+    unset( $tm_data[ 'pretranslate_100' ] );
+
+    $updateRes = setSuggestionUpdate( $tm_data );
+    if ( $updateRes < 0 ) {
+
+        $result['errors'][] = array(
+                "code" => -5,
+                "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}"
+        );
+        Log::doLog( $result );
+
+    } else {
+
+        //There was not a fast Analysis??? Impossible.
+        Log::doLog( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
+
+    }
+
 }

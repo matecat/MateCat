@@ -8,7 +8,7 @@ class INIT {
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
-    public static $DEBUG;
+    public static $DEBUG = true;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
@@ -166,7 +166,8 @@ class INIT {
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
 
         } else {
-            echo "\nPHP Running in CLI mode.\n\n";
+            if( INIT::$DEBUG )
+                echo "\nPHP Running in CLI mode.\n\n";
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
 
@@ -182,7 +183,7 @@ class INIT {
         self::$DB_PASS     = "matecat01"; //database password
 
         self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ );
-        self::$QUEUE_BROKER_ADDRESS = "tcp://10.3.15.96:61613";
+        self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
 
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
