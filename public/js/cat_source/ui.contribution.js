@@ -261,7 +261,9 @@ $.extend(UI, {
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
-//            UI.setContributionSourceDiff();
+            UI.setContributionSourceDiff();
+
+//            UI.setContributionSourceDiff_Old();
 			if (editareaLength === 0) {
 //				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
@@ -558,7 +560,38 @@ $.extend(UI, {
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
-    setContributionSourceDiff: function (segment) {
+    setContributionSourceDiff: function () {
+        sourceText = '';
+        $.each($.parseHTML($('.editor .source').html()), function (index) {
+            if(this.nodeName == '#text') {
+                sourceText += this.data;
+            } else {
+                sourceText += this.innerText;
+            }
+        });
+ //       console.log('sourceText: ', sourceText);
+        UI.currentSegment.find('.sub-editor.matches ul.suggestion-item').each(function () {
+            percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
+            if(percent > 74) {
+                ss = $(this).find('.suggestion_source');
+                suggestionSourceText = '';
+                $.each($.parseHTML($(ss).html()), function (index) {
+                    if(this.nodeName == '#text') {
+                        suggestionSourceText += this.data;
+                    } else {
+                        suggestionSourceText += this.innerText;
+                    }
+                });
+//            console.log('suggestionSourceText: ', suggestionSourceText);
+//            console.log('diff: ', UI.execDiff(sourceText, suggestionSourceText));
+                $(this).find('.suggestion_source').html(UI.dmp.diff_prettyHtml(UI.execDiff(sourceText, suggestionSourceText)));
+            }
+
+
+        });
+    },
+
+    setContributionSourceDiff_Old: function (segment) {
         sourceText = '';
         $.each($.parseHTML($('.editor .source').html()), function (index) {
             if(this.nodeName == '#text') {
@@ -580,7 +613,7 @@ $.extend(UI, {
                 }
             });
             console.log('suggestionSourceText: ', suggestionSourceText);
-
+            console.log('diff: ', UI.execDiff(sourceText, suggestionSourceText));
 
 //            console.log('a: ', $('.editor .source').html());
 //            console.log($.parseHTML($('.editor .source').html()));
