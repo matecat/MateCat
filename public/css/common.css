@@ -1990,7 +1990,7 @@ header .searchbox {
 .fileformat span {
 padding: 10px 15px 10px 40px;
 margin: 5px 0 0 0;
-width: 30px;
+width: 70px;
 height:15px;
 float: left;
 background-size: 25px!important;
@@ -2002,7 +2002,6 @@ background-size: 25px!important;
 
 .fileformat.popup-box span {
   line-height: 15px;
-    width: 70px;
 }
 
 .fileformat.popup-box h3 {
