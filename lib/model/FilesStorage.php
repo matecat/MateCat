@@ -252,7 +252,7 @@ class FilesStorage{
 			$where_id_file = " and id_file=$id_file";
 		}
 
-		$query = "select fj.id_file, f.filename, f.mime_type, j.source from files_job fj
+		$query = "select fj.id_file, f.filename, j.source from files_job fj
 			inner join files f on f.id=fj.id_file
 			join jobs as j on j.id=fj.id_job
 			where fj.id_job = $id_job $where_id_file";
@@ -283,25 +283,49 @@ class FilesStorage{
 	}
 
 	private function migrateFileDB2FS($id_file, $filename, $source_lang){
-		//fetch it from the files database
-		$fileContent=$this->getOriginalFromDB($id_file);
-		$xliffContent=$this->getXliffFromDB($id_file);
-
-		//create temporary files with original name
+		//create temporary storage to place stuff
 		$tempdir="/tmp".DIRECTORY_SEPARATOR.str_shuffle(sha1(time()));
 		mkdir($tempdir,0755);
-		$tempOriginal = $tempdir.DIRECTORY_SEPARATOR.$filename;
-		$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$filename.".xlf";
 
-		//flush file content
-		file_put_contents($tempOriginal, $fileContent);
+		//fetch xliff from the files database
+		$xliffContent=$this->getXliffFromDB($id_file);
+
+		//try pulling the original content too (if it's empty it means that it was an unconverted xliff)
+		$fileContent=$this->getOriginalFromDB($id_file);
+
+		if(!empty($fileContent)){
+			//it's a converted file
+			//create temporary file with appropriately modified name
+			$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$filename.".xlf";
+
+			//create file
+			$tempOriginal = $tempdir.DIRECTORY_SEPARATOR.$filename;
+
+			//flush content
+			file_put_contents($tempOriginal, $fileContent);
+
+			//get hash, based on original
+			$sha1=sha1($fileContent);
+
+			//free memory
+			unset($fileContent);
+		}else{
+			//if it's a unconverted xliff
+			//create temporary file with original name
+			$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$filename;
+
+			// set original to empty
+			$tempOriginal=false;
+
+			//get hash
+			$sha1=sha1($xliffContent);
+		}
+
+		//flush xliff file content
 		file_put_contents($tempXliff, $xliffContent);
 
-		//get hash
-		$sha1=sha1($fileContent);
-
 		//free memory
-		unset($fileContent,$xliffContent);
+		unset($xliffContent);
 
 		//build a cache package
 		$this->makeCachePackage($sha1, $source_lang, $tempOriginal, $tempXliff);
