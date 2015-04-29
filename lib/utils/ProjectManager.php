@@ -1701,7 +1701,7 @@ class ProjectManager {
 		try {
 			$isAConvertedFile=DetectProprietaryXliff::isConversionToEnforce($fullPath);
 
-			if(-1==$isAConvertedFile){
+			if(-1===$isAConvertedFile){
 				$this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
 					"code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
 				);
