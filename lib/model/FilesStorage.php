@@ -216,12 +216,12 @@ class FilesStorage{
 	public function getOriginalFilesForJob($id_job, $id_file, $password){
 		$where_id_file = "";
 		if ( !empty( $id_file ) ) {
-			$where_id_file = " and id_file=$id_file";
+			$where_id_file = " and fj.id_file=$id_file";
 		}
 		$query = "select fj.id_file, f.filename, j.source from files_job fj
 			inner join files f on f.id=fj.id_file
 			inner join jobs j on j.id=fj.id_job
-			where id_job=$id_job $where_id_file and j.password='$password'";
+			where fj.id_job=$id_job $where_id_file and j.password='$password'";
 
 		$db      = Database::obtain();
 		$results = $db->fetch_array( $query );
@@ -232,40 +232,11 @@ class FilesStorage{
 
 			if(!$filePath){
 				//file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
-				//fetch it from the files database
-				$fileContent=$this->getOriginalFromDB($result['id_file']);
-				$xliffContent=$this->getXliffFromDB($result['id_file']);
-
-				//create temporary files with original name
-				$tempdir="/tmp".DIRECTORY_SEPARATOR.str_shuffle(sha1(time()));
-				mkdir($tempdir,0755);
-				$tempOriginal = $tempdir.DIRECTORY_SEPARATOR.$result['filename'];
-				$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$result['filename'].".xlf";
-
-				//flush file content
-				file_put_contents($tempOriginal, $fileContent);
-				file_put_contents($tempXliff, $xliffContent);
-
-				//get hash
-				$sha1=sha1($fileContent);
-
-				//free memory
-				unset($fileContent,$xliffContent);
-
-				//get source language for this job
-				$source_lang=$result['source'];
-
-				//build a cache package
-				$this->makeCachePackage($sha1, $source_lang, $tempOriginal, $tempXliff);
-
-				//build a file package
-				$this->moveFromCacheToFileDir($sha1, $source_lang, $result['id_file']);
+				//this moves both original and xliff
+				$this->migrateFileDB2FS($result['id_file'], $result['filename'], $result['source']);
 
 				//now, try again fetching from disk :)
 				$filePath=$this->getOriginalFromFileDir($result['id_file']);
-
-				//clean temporary stuff
-				Utils::deleteDir($tempdir);
 			}
 
 			$results[$k]['originalFilePath']=$filePath;
@@ -281,19 +252,65 @@ class FilesStorage{
 			$where_id_file = " and id_file=$id_file";
 		}
 
-		$query = "select id_file, filename, mime_type from files_job fj
+		$query = "select fj.id_file, f.filename, f.mime_type, j.source from files_job fj
 			inner join files f on f.id=fj.id_file
-			where id_job = $id_job $where_id_file";
+			join jobs as j on j.id=fj.id_job
+			where fj.id_job = $id_job $where_id_file";
 
 		$db      = Database::obtain();
 		$results = $db->fetch_array( $query );
 
 		foreach($results as $k=>$result){
-			$results[$k]['originalFilePath']=$this->getOriginalFromFileDir($result['id_file']);
+			//try fetching from files dir
+			$originalPath=$this->getOriginalFromFileDir($result['id_file']);
+
+			if(!$originalPath){
+				//file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
+				//this moves both original and xliff
+				$this->migrateFileDB2FS($result['id_file'], $result['filename'], $result['source']);
+
+				//now, try again fetching from disk :)
+				$originalPath=$this->getOriginalFromFileDir($result['id_file']);
+			}
+
+			$results[$k]['originalFilePath']=$originalPath;
+
+			//note that we trust this to succeed on first try since, at this stage, we already built the file package
 			$results[$k]['xliffFilePath']=$this->getXliffFromFileDir($result['id_file']);
 		}
 
 		return $results;
+	}
+
+	private function migrateFileDB2FS($id_file, $filename, $source_lang){
+		//fetch it from the files database
+		$fileContent=$this->getOriginalFromDB($id_file);
+		$xliffContent=$this->getXliffFromDB($id_file);
+
+		//create temporary files with original name
+		$tempdir="/tmp".DIRECTORY_SEPARATOR.str_shuffle(sha1(time()));
+		mkdir($tempdir,0755);
+		$tempOriginal = $tempdir.DIRECTORY_SEPARATOR.$filename;
+		$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$filename.".xlf";
+
+		//flush file content
+		file_put_contents($tempOriginal, $fileContent);
+		file_put_contents($tempXliff, $xliffContent);
+
+		//get hash
+		$sha1=sha1($fileContent);
+
+		//free memory
+		unset($fileContent,$xliffContent);
+
+		//build a cache package
+		$this->makeCachePackage($sha1, $source_lang, $tempOriginal, $tempXliff);
+
+		//build a file package
+		$this->moveFromCacheToFileDir($sha1, $source_lang, $id_file);
+
+		//clean temporary stuff
+		Utils::deleteDir($tempdir);
 	}
 
 	public function getOriginalFromDB($id_file){

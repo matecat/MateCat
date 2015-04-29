@@ -10,39 +10,12 @@ include_once( INIT::$UTILS_ROOT . '/DetectProprietaryXliff.php' );
 
 class downloadFileController extends downloadController {
 
-	/**
-	 * @var string
-	 */
 	protected $id_job;
-
-	/**
-	 * @var
-	 */
 	protected $password;
-
-	/**
-	 * @var
-	 */
 	protected $fname;
-
-	/**
-	 * @var
-	 */
 	protected $download_type;
-
-	/**
-	 * @var
-	 */
 	protected $jobInfo;
-
-	/**
-	 * @var bool
-	 */
 	protected $forceXliff;
-
-	/**
-	 * @var
-	 */
 	protected $downloadToken;
 
 	const FILES_CHUNK_SIZE = 3;
