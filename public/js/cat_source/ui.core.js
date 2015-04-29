@@ -3268,7 +3268,7 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		} else {
-            return;
+//            return;
         }
 
         if(this.editarea === '') return;
@@ -3284,7 +3284,7 @@ UI = {
 //        console.log('currentItem: ', currentItem);
 //        console.log('this.editarea.html(): ', this.editarea.html());
 
-        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        var diff = ( typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
         if ( diff == ' selected' )
             return;
 
