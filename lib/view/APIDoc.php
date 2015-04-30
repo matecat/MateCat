@@ -680,10 +680,19 @@ INIT::obtain();
                                             <li><span class="extdoc">dotx</span></li>
                                             <li><span class="extdoc">docm</span></li>
                                             <li><span class="extdoc">dotm</span></li>
+                                            <li><span class="extdoc">rtf</span></li>
                                             <li><span class="extdoc">odt</span></li>
                                             <li><span class="extdoc">sxw</span></li>
                                             <li><span class="exttxt">txt</span></li>
                                             <li><span class="extpdf">pdf</span></li>
+                                            <li><span class="extxls">xls</span></li>
+                                            <li><span class="extxls">xlt</span></li>
+                                            <li><span class="extxls">xlsm</span></li>
+                                            <li><span class="extxls">xlsx</span></li>
+                                            <li><span class="extxls">xltx</span></li>
+                                            <li><span class="extxls">ods</span></li>
+                                            <li><span class="extxls">sxc</span></li>
+                                            <li><span class="extxls">csv</span></li>                                            
                                             <li><span class="extppt">pot</span></li>
                                             <li><span class="extppt">pps</span></li>
                                             <li><span class="extppt">ppt</span></li>
@@ -694,14 +703,7 @@ INIT::obtain();
                                             <li><span class="extppt">pptm</span></li>
                                             <li><span class="extppt">pptx</span></li>
                                             <li><span class="extppt">odp</span></li>
-                                            <li><span class="extxls">ods</span></li>
-                                            <li><span class="extxls">sxc</span></li>
-                                            <li><span class="extxls">xls</span></li>
-                                            <li><span class="extxls">xlt</span></li>
-                                            <li><span class="extxls">xlsm</span></li>
-                                            <li><span class="extxls">xlsx</span></li>
-                                            <li><span class="extxls">xltx</span></li>
-                                            <li><span class="extxls">csv</span></li>
+                                            <li><span class="extppt">sxi</span></li>
                                             <li><span class="extxml">xml</span></li>
                                         </ul>
                                     </td>
@@ -717,10 +719,10 @@ INIT::obtain();
                                         <ul>
                                             <li><span class="extxif">xliff</span></li>
                                             <li><span class="extxif">sdlxliff</span></li>
+                                            <li><span class="exttmx">tmx</span></li>
                                             <li><span class="extttx">ttx</span></li>
                                             <li><span class="extitd">itd</span></li>
                                             <li><span class="extxlf">xlf</span></li>
-                                            <li><span class="exttmx">tmx</span></li>
                                         </ul>
                                     </td>
                                     <td>
@@ -744,6 +746,8 @@ INIT::obtain();
                                             <li><span class="extdit">dita</span></li>
                                             <li><span class="extsgl">sgml</span></li>
                                             <li><span class="extsgm">sgm</span></li>
+                                            <li><span class="extxml">Android xml</span></li>
+                                            <li><span class="extstr">strings</span></li>
                                         </ul>
                                     </td>
                                 </tr>

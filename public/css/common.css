@@ -1072,7 +1072,7 @@ margin-left: 10px;
 
     .popup .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup
     {
-	    background: url(../img/sprite.png) 10px -303px no-repeat;
+	    background: url(../img/sprite.png) 10px -304px no-repeat;
 	    display: block;
 	    height: 40px;
 	    width: 40px;
@@ -1990,7 +1990,7 @@ header .searchbox {
 .fileformat span {
 padding: 10px 15px 10px 40px;
 margin: 5px 0 0 0;
-width: 30px;
+width: 70px;
 height:15px;
 float: left;
 background-size: 25px!important;
@@ -2002,12 +2002,16 @@ background-size: 25px!important;
 
 .fileformat.popup-box span {
   line-height: 15px;
-    width: 70px;
 }
 
 .fileformat.popup-box h3 {
       padding: 0 30px;
         background-color: #efefef;
+}
+
+.format-box:nth-child(3) h3, 
+.format-box:nth-child(4) h3 {
+  padding: 0 15px;
 }
 
 .wrapper-dropdown-5 .dropdown li a,
@@ -2492,6 +2496,7 @@ font-weight: normal !important;
 .extdit {background: url(../img/matecat_file_icons.png) 6px -652px no-repeat !important;} /* .dita */
 .exttag {background: url(../img/matecat_file_icons.png) 6px -686px no-repeat !important;} /* .tag */
 .exttmx {background: url(../img/matecat_file_icons.png) 6px -722px no-repeat !important;} /* .tmx */
+.extstr {background: url(../img/matecat_file_icons.png) 6px -758px no-repeat !important;} /* .str */
 
 #jobMenu span {height: 25px;
 	padding: 5px;
@@ -2584,6 +2589,7 @@ only screen and (in-resolution: 2dppx) {
 	.extdit {background: url(../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dita */
 	.exttag {background: url(../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
 	.exttmx {background: url(../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
+    .extstr {background: url(../img/matecat_file_icons2x.png) 6px -758px no-repeat !important;} /* .str */
 
 .popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 

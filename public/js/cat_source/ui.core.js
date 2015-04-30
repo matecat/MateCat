@@ -1502,7 +1502,7 @@ UI = {
 					destinationTop = destinationTop - spread;
 				}
 			} else { // if segment to open is above the current segment
-                console.log('c');
+//                console.log('c');
 //                if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
 				destinationTop = destinationTop - spread;
                 UI.provaCoso = true;
@@ -1739,7 +1739,7 @@ console.log('ecco');
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
-
+/*
 		function prepareTranslationDiff( translation ){
 			_str = translation.replace( config.lfPlaceholderRegex, "\n" )
 					.replace( config.crPlaceholderRegex, "\r" )
@@ -1760,18 +1760,42 @@ console.log('ecco');
 			UI.dmp.diff_cleanupEfficiency( diff_obj );
 			return diff_obj;
 		}
-
+*/
+        mainStr = UI.currentSegment.find('.editarea').text();
         $.each(d.data.editable, function(index) {
-            diff_obj = prepareTranslationDiff( this.translation );
+            console.log('this.translation: ', this.translation);
+            diff_obj = UI.execDiff(mainStr, this.translation);
+//            diff_obj = prepareTranslationDiff( this.translation );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
         $.each(d.data.not_editable, function(index1) {
-            diff_obj = prepareTranslationDiff( this.translation );
+            diff_obj = UI.execDiff(mainStr, this.translation);
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
     },
+    execDiff: function (mainStr, cfrStr) {
+        _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+//        _str  = htmlDecode(_str );
+        _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+//        _edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+
+        //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
+        //used to detect initial and final spaces in html diff
+        _str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
+        _edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
+
+        diff_obj = UI.dmp.diff_main( _edit, _str );
+        UI.dmp.diff_cleanupEfficiency( diff_obj );
+        return diff_obj;
+    },
+
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );

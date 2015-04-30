@@ -346,10 +346,10 @@ class INIT {
                         'resx'        => array( '', '', 'extres' ),
                         'xml'         => array( '', '', 'extxml' ),
                         'dita'        => array( '', '', 'extdit' ),
-                        'sgml'        => array( '', '', 'extsgm' ),
+                        'sgm'        => array( '', '', 'extsgm' ),
+                        'sgml'         => array( '', '', 'extsgm' ),
                         'Android xml' => array( '', '', 'extxml' ),
-                        'strings'     => array( '', '', 'extxml' ),
-                        'sgm'         => array( '', '', 'extsgm' )
+                        'strings'     => array( '', '', 'extstr' )
                 )
         );
 
