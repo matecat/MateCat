@@ -329,7 +329,8 @@ UI = {
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+            var d = JSON.parse(UI.getFromStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+//            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -2474,7 +2475,59 @@ console.log('ecco');
             UI.execAbortedOperations();
         }
     },
-	checkInStorage: function(what) {
+    addInStorage: function (key, val, operation) {
+        if(this.isPrivateSafari) {
+            item = {
+                key: key,
+                value: val
+            }
+            this.localStorageArray.push(item);
+        } else {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {
+                UI.clearStorage(operation);
+                localStorage.setItem(key, val);
+            }
+        }
+    },
+    getFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundVal = this.value;
+            });
+            return foundVal || false;
+        } else {
+            return localStorage.getItem(key);
+        }
+    },
+    removeFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundIndex = index;
+            });
+            this.localStorageArray.splice(foundIndex, 1);
+        } else {
+            localStorage.removeItem(key);
+        }
+    },
+
+
+    isLocalStorageNameSupported: function () {
+        var testKey = 'test', storage = window.sessionStorage;
+        try {
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    },
+
+
+    checkInStorage: function(what) {
 		var found = false;
 		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
@@ -2717,7 +2770,8 @@ console.log('ecco');
         };
 //        console.log('prova: ', prova);
 //        console.log('logValue: ', JSON.stringify(logValue));
-        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+        UI.addInStorage('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue), 'log');
+//        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
 /*
         console.log('dopo errore');
@@ -2729,6 +2783,7 @@ console.log('ecco');
 
     },
     extractLogs: function() {
+        if(this.isPrivateSafari) return;
         var pendingLogs = [];
         inp = 'log';
         $.each(localStorage, function(k,v) {
@@ -3490,6 +3545,8 @@ $.extend(UI, {
         this.executingSetTranslation = false;
         this.executingSetContribution = false;
         this.executingSetContributionMT = false;
+        this.localStorageArray = [];
+        this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
 
         if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
@@ -5832,19 +5889,22 @@ $.extend(UI, {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 //			console.log('hasclass loaded');
-			this.spellCheck();
-			if (next) {
-				this.nextIsLoaded = true;
-			} else {
-				this.currentIsLoaded = true;
-			}
-			if (this.currentIsLoaded)
-				this.blockButtons = false;
-			if (this.currentSegmentId == this.nextUntranslatedSegmentId)
-				this.blockButtons = false;
-			if (!next)
-				this.currentSegmentQA();
-			return false;
+			console.log('qualcosa nella tab matches? ', segment.find('.footer .matches .overflow').text().length);
+            if(segment.find('.footer .matches .overflow').text().length) {
+                this.spellCheck();
+                if (next) {
+                    this.nextIsLoaded = true;
+                } else {
+                    this.currentIsLoaded = true;
+                }
+                if (this.currentIsLoaded)
+                    this.blockButtons = false;
+                if (this.currentSegmentId == this.nextUntranslatedSegmentId)
+                    this.blockButtons = false;
+                if (!next)
+                    this.currentSegmentQA();
+                return false;
+            }
 		}
 
 		if ((!n.length) && (next)) {
@@ -5907,12 +5967,15 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
+        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
+/*
         try {
             localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
         } catch (e) {
             UI.clearStorage('contribution');
             localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
         }
+*/
 //        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
 
 //		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
@@ -6164,7 +6227,8 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
-                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
+                UI.removeFromStorage('contribution-' + config.job_id + '-' + segment_id );
+//                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -8744,7 +8808,7 @@ function goodbye(e) {
 
         if ( typeof leave_message !== 'undefined' ) {
             if ( !e ) e = window.event;
-            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            //e.cancelBubble is supported by IE - this will kill the bubbling process. 
             e.cancelBubble = true;
             e.returnValue = leave_message;
             //e.stopPropagation works in Firefox.
@@ -11114,7 +11178,8 @@ $.extend(UI, {
 //			console.log('pendingConnection: ', pendingConnection);
             var dd = new Date();
             if(pendingConnection.args) {
-                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+                UI.addInStorage('pending-' + dd.getTime(), JSON.stringify(pendingConnection), 'contribution');
+//                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
             }
             if(!UI.checkConnectionTimeout) {
                 UI.checkConnectionTimeout = setTimeout(function() {

@@ -329,7 +329,8 @@ UI = {
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+            var d = JSON.parse(UI.getFromStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+//            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -2474,7 +2475,59 @@ console.log('ecco');
             UI.execAbortedOperations();
         }
     },
-	checkInStorage: function(what) {
+    addInStorage: function (key, val, operation) {
+        if(this.isPrivateSafari) {
+            item = {
+                key: key,
+                value: val
+            }
+            this.localStorageArray.push(item);
+        } else {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {
+                UI.clearStorage(operation);
+                localStorage.setItem(key, val);
+            }
+        }
+    },
+    getFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundVal = this.value;
+            });
+            return foundVal || false;
+        } else {
+            return localStorage.getItem(key);
+        }
+    },
+    removeFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundIndex = index;
+            });
+            this.localStorageArray.splice(foundIndex, 1);
+        } else {
+            localStorage.removeItem(key);
+        }
+    },
+
+
+    isLocalStorageNameSupported: function () {
+        var testKey = 'test', storage = window.sessionStorage;
+        try {
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    },
+
+
+    checkInStorage: function(what) {
 		var found = false;
 		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
@@ -2717,7 +2770,8 @@ console.log('ecco');
         };
 //        console.log('prova: ', prova);
 //        console.log('logValue: ', JSON.stringify(logValue));
-        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+        UI.addInStorage('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue), 'log');
+//        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
 /*
         console.log('dopo errore');
@@ -2729,6 +2783,7 @@ console.log('ecco');
 
     },
     extractLogs: function() {
+        if(this.isPrivateSafari) return;
         var pendingLogs = [];
         inp = 'log';
         $.each(localStorage, function(k,v) {

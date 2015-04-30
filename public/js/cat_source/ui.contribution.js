@@ -61,19 +61,22 @@ $.extend(UI, {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 //			console.log('hasclass loaded');
-			this.spellCheck();
-			if (next) {
-				this.nextIsLoaded = true;
-			} else {
-				this.currentIsLoaded = true;
-			}
-			if (this.currentIsLoaded)
-				this.blockButtons = false;
-			if (this.currentSegmentId == this.nextUntranslatedSegmentId)
-				this.blockButtons = false;
-			if (!next)
-				this.currentSegmentQA();
-			return false;
+			console.log('qualcosa nella tab matches? ', segment.find('.footer .matches .overflow').text().length);
+            if(segment.find('.footer .matches .overflow').text().length) {
+                this.spellCheck();
+                if (next) {
+                    this.nextIsLoaded = true;
+                } else {
+                    this.currentIsLoaded = true;
+                }
+                if (this.currentIsLoaded)
+                    this.blockButtons = false;
+                if (this.currentSegmentId == this.nextUntranslatedSegmentId)
+                    this.blockButtons = false;
+                if (!next)
+                    this.currentSegmentQA();
+                return false;
+            }
 		}
 
 		if ((!n.length) && (next)) {
@@ -136,12 +139,15 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
+        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
+/*
         try {
             localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
         } catch (e) {
             UI.clearStorage('contribution');
             localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
         }
+*/
 //        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
 
 //		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
@@ -393,7 +399,8 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
-                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
+                UI.removeFromStorage('contribution-' + config.job_id + '-' + segment_id );
+//                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');

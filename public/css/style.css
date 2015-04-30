@@ -1116,7 +1116,10 @@ body.noGlossary .tab-switcher-gl
 {
 	display: block;
 }
-
+.sub-editor.matches .overflow
+{
+    min-height: 30px;;
+}
 .addtmx-tr .open-popup-addtm-tr {
 height: 17px;
 width: 140px;
