@@ -69,6 +69,8 @@ $.extend(UI, {
         this.executingSetTranslation = false;
         this.executingSetContribution = false;
         this.executingSetContributionMT = false;
+        this.localStorageArray = [];
+        this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
 
         if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
