@@ -169,7 +169,8 @@ $.extend(UI, {
 //			console.log('pendingConnection: ', pendingConnection);
             var dd = new Date();
             if(pendingConnection.args) {
-                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+                UI.addInStorage('pending-' + dd.getTime(), JSON.stringify(pendingConnection), 'contribution');
+//                localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
             }
             if(!UI.checkConnectionTimeout) {
                 UI.checkConnectionTimeout = setTimeout(function() {
