@@ -161,10 +161,15 @@ while (1) {
         unset( $data );
         Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
+        $amqHandler = new FastAnalysisQueueHandler();
+        $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
+
         updateProject( $pid, $status );
 
 	}
+
 }
+
 
 function insertData( $pid, &$data, $equivalentWordMapping, $perform_Tms_Analysis ){
 
@@ -201,8 +206,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     $db   = Database::obtain();
     $data = array();
 
-    $amqHandler = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-    $amqHandler->connect();
+    $amqHandler = new FastAnalysisQueueHandler();
 
     $total_eq_wc       = 0;
     $total_standard_wc = 0;

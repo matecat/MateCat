@@ -14,7 +14,9 @@ class INIT {
     public static $DB_USER;
     public static $DB_PASS;
     public static $MEMCACHE_SERVERS = array();
+    public static $REDIS_SERVERS = array();
     public static $QUEUE_BROKER_ADDRESS;
+    public static $QUEUE_JMX_ADDRESS;
     public static $QUEUE_NAME = "/queue/matecat_analysis_queue";
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
@@ -125,6 +127,7 @@ class INIT {
                 self::$ROOT . "/inc/PHPTAL",
                 self::$ROOT . "/lib/utils/API",
                 self::$ROOT . "/lib/utils",
+                self::$ROOT . "/lib/utils/Predis/src",
                 self::$ROOT . "/lib/model" ,
         );
         if( !empty($custom_paths) ){
@@ -144,9 +147,9 @@ class INIT {
             $fileName  = str_replace( '\\', DIRECTORY_SEPARATOR, $namespace ) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
-        //@include $fileName;
+        @include $fileName;
 
-        @require $fileName;
+//        @require $fileName;
 
     }
 
@@ -183,7 +186,9 @@ class INIT {
         self::$DB_PASS     = "matecat01"; //database password
 
         self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ );
+        self::$REDIS_SERVERS        = "tcp://localhost:6379";
         self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
+        self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
 
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";

@@ -6,14 +6,10 @@ define( "PID_FOLDER", ".pidlist" );
 define( "NUM_PROCESSES", 1 );
 define( "NUM_PROCESSES_FILE", ".num_processes" );
 
-$amqHandlerSubscriber = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-$amqHandlerSubscriber->connect();
+$amqHandlerSubscriber = new FastAnalysisQueueHandler();
+$amqHandlerSubscriber->subscribe();
 
-$amqHandlerSubscriber->subscribe( INIT::$QUEUE_NAME );
-$amqHandlerSubscriber->setReadTimeout( 0, 0 );
-
-$amqHandlerPublisher = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-$amqHandlerPublisher->connect();
+$amqHandlerPublisher = new FastAnalysisQueueHandler();
 
 Log::$fileName = "tm_analysis.log";
 
@@ -116,6 +112,7 @@ while ( 1 ) {
             Log::doLog ( "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds" );
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
             incrementCount( $objQueue[ 'pid' ], 0, 0 );
+            $amqHandlerSubscriber->decrementTotalForQID( $pid );
             sleep( 5 );
             continue;
         }
@@ -158,6 +155,7 @@ while ( 1 ) {
             Log::doLog ( "--- (child $my_pid) : empty segment. deleting lock and continue" );
             setSegmentTranslationError( $sid, $jid ); // SET as DONE
             incrementCount( $pid, 0, 0 );
+            $amqHandlerSubscriber->decrementTotalForQID( $pid );
             tryToCloseProject( $pid, $my_pid );
             continue;
         }
@@ -249,6 +247,7 @@ while ( 1 ) {
                 Log::doLog ( "--- (child $my_pid) : error from mymemory : set error and continue" ); // ERROR FROM MYMEMORY
                 setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
                 incrementCount( $pid, 0, 0 );
+                $amqHandlerSubscriber->decrementTotalForQID( $pid );
                 tryToCloseProject( $pid, $my_pid );
 
                 $amqHandlerSubscriber->ack( $msg );
@@ -283,52 +282,6 @@ while ( 1 ) {
             usort( $matches, "compareScore" );
         }
 
-//        $matches = array
-//        (
-//                0 => array
-//                (
-//                        'id'               => '465636083',
-//                        'raw_segment'      => '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>',
-//                        'segment'          => '&lt;g id="pt2"&gt;WASHINGTON &lt;/g&gt;&lt;g id="pt3"&gt;— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.&lt;/g&gt;',
-//                        'translation'      => 'WASHINGTON',
-//                        'target_note'      => '',
-//                        'raw_translation'  => 'WASHINGTON',
-//                        'quality'          => '74',
-//                        'reference'        => '',
-//                        'usage_count'      => '1',
-//                        'subject'          => 'All',
-//                        'created_by'       => 'Matecat',
-//                        'last_updated_by'  => 'Matecat',
-//                        'create_date'      => '2015-03-20 17:45:11',
-//                        'last_update_date' => '2015-03-20',
-//                        'match'            => '100%',
-//                        'prop'             => array(),
-//                        'memory_key'       => '',
-//                ),
-//
-//                1 => array
-//                (
-//                        'id'               => '0',
-//                        'raw_segment'      => '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>',
-//                        'segment'          => '&lt;g id="pt2"&gt;WASHINGTON &lt;/g&gt;&lt;g id="pt3"&gt;— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.&lt;/g&gt;',
-//                        'translation'      => '&lt;g id="pt2"&gt; WASHINGTON &lt;/g&gt;&lt;g id="pt3"&gt; Pidió a la Secretaría de Hacienda y el Servicio de Impuestos Internos hoy comentario público sobre cuestiones relacionadas con las disposiciones de responsabilidad compartidas incluidas en la Ley de Asistencia Asequible que se aplicarán a ciertos empleadores a partir de 2014 -. &lt;/g&gt;',
-//                        'target_note'      => '',
-//                        'raw_translation'  => '<g id="pt2"> WASHINGTON </g><g id="pt3"> Pidió a la Secretaría de Hacienda y el Servicio de Impuestos Internos hoy comentario público sobre cuestiones relacionadas con las disposiciones de responsabilidad compartidas incluidas en la Ley de Asistencia Asequible que se aplicarán a ciertos empleadores a partir de 2014 -. </g>',
-//                        'quality'          => '70',
-//                        'reference'        => 'Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.',
-//                        'usage_count'      => '1',
-//                        'subject'          => '',
-//                        'created_by'       => 'MT!',
-//                        'last_updated_by'  => 'MT!',
-//                        'create_date'      => '2015-04-29 16:38:08',
-//                        'last_update_date' => '2015-04-29',
-//                        'match'            => '85%',
-//                        'prop'             => array(),
-//                        'memory_key'       => ''
-//                )
-//
-//        );
-
         /**
          * Only if No results found
          */
@@ -336,6 +289,7 @@ while ( 1 ) {
             Log::doLog ( "--- (child $my_pid) : No contribution found : set error and continue" ); // ERROR FROM MYMEMORY
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
             incrementCount( $pid, 0, 0 );
+            $amqHandlerSubscriber->decrementTotalForQID( $pid );
             tryToCloseProject( $pid, $my_pid );
             $amqHandlerSubscriber->ack( $msg );
             continue;
@@ -471,6 +425,7 @@ while ( 1 ) {
 
         //set memcache
         incrementCount( $pid, $eq_words, $standard_words );
+        $amqHandlerSubscriber->decrementTotalForQID( $pid );
         tryToCloseProject( $pid, $my_pid );
 
     } else {

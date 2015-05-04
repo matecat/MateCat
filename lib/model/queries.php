@@ -2841,6 +2841,13 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     return $results;
 }
 
+/**
+ * @deprecated
+ *
+ * @param $currentPid
+ *
+ * @return int
+ */
 function getNumSegmentsInQueue( $currentPid ) {
     $query = "select count(*) as num_segments from matecat_analysis.segment_translations_analysis_queue where pid < $currentPid ";
 
