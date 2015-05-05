@@ -2251,55 +2251,6 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 
     return $results;
 }
-
-function getProjectStatsVolumeAnalysis2( $pid, $groupby = "job" ) {
-
-    $db = Database::obtain();
-
-    switch ( $groupby ) {
-        case 'job':
-            $first_column = "j.id";
-            $groupby      = " GROUP BY j.id";
-            break;
-        case 'file':
-            $first_column = "fj.id_file,fj.id_job,";
-            $groupby      = " GROUP BY fj.id_file,fj.id_job";
-            break;
-        default:
-            $first_column = "j.id";
-            $groupby      = " GROUP BY j.id";
-    }
-
-    $query   = "select $first_column,
-		sum(if(st.match_type='INTERNAL' ,s.raw_word_count,0)) as INTERNAL_MATCHES,
-		sum(if(st.match_type='MT' ,s.raw_word_count,0)) as MT,
-		sum(if(st.match_type='NEW' ,s.raw_word_count,0)) as NEW,
-		sum(if(st.match_type='NO_MATCH' ,s.raw_word_count,0)) as NO_MATCH,
-		sum(if(st.match_type='100%' ,s.raw_word_count,0)) as `100%`,
-		sum(if(st.match_type='75%-99%' ,s.raw_word_count,0)) as `75%-99%`,
-		sum(if(st.match_type='50%-74%' ,s.raw_word_count,0)) as `50%-74%`,
-		sum(if(st.match_type='REPETITIONS' ,s.raw_word_count,0)) as REPETITIONS
-			from jobs j 
-			inner join projects p on p.id=j.id_project
-			inner join files_job fj on fj.id_job=j.id
-			inner join segments s on s.id_file=fj.id_file
-			left outer join segment_translations st on st.id_segment=s.id 
-
-			where id_project=$pid  and p.status_analysis in ('NEW', 'FAST_OK','DONE') and st.match_type<>''
-			group by 1
-			";
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    return $results;
-}
-
 function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
@@ -2334,6 +2285,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			p.id = $pid
 			AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
 			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+			AND eq_word_count != 0
 			";
 
     $db      = Database::obtain();

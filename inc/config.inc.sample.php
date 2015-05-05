@@ -219,24 +219,24 @@ class INIT {
         }
 
         //auth sections
-        self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
+        self::$AUTHSECRET_PATH = self::$ROOT . '/inc/login_secret.dat';
         //if secret is set in file
-        if(file_exists(self::$AUTHSECRET_PATH)){
+        if ( file_exists( self::$AUTHSECRET_PATH ) ) {
             //fetch it
-            self::$AUTHSECRET=file_get_contents(self::$AUTHSECRET_PATH);
-        }else{
+            self::$AUTHSECRET = file_get_contents( self::$AUTHSECRET_PATH );
+        } else {
             //try creating the file and the fetch it
             //generate pass
-            $secret=self::generate_password(512);
+            $secret = self::generate_password( 512 );
             //put file
-            file_put_contents(self::$AUTHSECRET_PATH,$secret);
+            file_put_contents( self::$AUTHSECRET_PATH, $secret );
             //if put succeed
-            if(file_exists(self::$AUTHSECRET_PATH)){
+            if ( file_exists( self::$AUTHSECRET_PATH ) ) {
                 //restrict permissions
-                chmod(self::$AUTHSECRET_PATH,0400);
-            }else{
+                chmod( self::$AUTHSECRET_PATH, 0400 );
+            } else {
                 //if couldn't create due to permissions, use default secret
-                self::$AUTHSECRET='ScavengerOfHumanSorrow';
+                self::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
         }
 

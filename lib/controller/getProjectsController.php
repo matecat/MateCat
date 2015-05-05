@@ -147,7 +147,3 @@ class getProjectsController extends ajaxController {
     }
 
 }
-
-
-
-?>

@@ -431,41 +431,43 @@ UI = {
                 jpassword: jpassword
 			},
 			success: function(d) {
-				if (d.data) {
-					var s = d.data.summary;
-					//temp 
+                if ( d.data ) {
+                    var s = d.data.summary;
+                    //temp
 //					config.daemon_warning = false;
 //					s.IN_QUEUE_BEFORE = 10;
-					//end temp					
-					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
-						$('.loadingbar').addClass('open');
+                    //end temp
+                    if ( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
+                        $( '.loadingbar' ).addClass( 'open' );
 
-						if( config.daemon_warning ){
-						if(-1==config.support_mail.indexOf('@')){
-							analyzerNotRunningErrorString='The analysis seems not to be running. Contact '+config.support_mail+'.';
-						}else{
-							analyzerNotRunningErrorString='The analysis seems not to be running. Contact <a href="mailto:'+config.support_mail+'">'+config.support_mail+'</a>.';
-						}
-						UI.displayError(analyzerNotRunningErrorString);
+                        if ( config.daemon_warning ) {
 
-						$('#standard-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
-						$('#matecat-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
-						return false;
-						} else if (s.IN_QUEUE_BEFORE > 0) {
-							//increasing number of segments ( fast analysis on another project )
-							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
-								$('#shortloading' ).show().html('<p class="label">There are other projects in queue. Please wait...</p>');
-								$('#longloading' ).hide();
-							} else { //decreasing ( TM analysis on another project )
-								if ( !$('#shortloading .queue').length ) {
-									$('#shortloading').html('<p class="label">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
-								} else {
-									$('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);
-								}
-							}
-						}
-						UI.previousQueueSize = s.IN_QUEUE_BEFORE;
-					}
+                            if ( -1 == config.support_mail.indexOf( '@' ) ) {
+                                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+                            } else {
+                                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
+                            }
+                            UI.displayError( analyzerNotRunningErrorString );
+
+                            $( '#standard-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
+                            $( '#matecat-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
+                            return false;
+
+                        } else if ( s.IN_QUEUE_BEFORE > 0 ) {
+                            //increasing number of segments ( fast analysis on another project )
+                            if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
+                                $( '#shortloading' ).show().html( '<p class="label">There are other projects in queue. Please wait...</p>' );
+                                $( '#longloading' ).hide();
+                            } else { //decreasing ( TM analysis on another project )
+                                if ( !$( '#shortloading .queue' ).length ) {
+                                    $( '#shortloading' ).html( '<p class="label">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>' );
+                                } else {
+                                    $( '#shortloading .queue .number' ).text( s.IN_QUEUE_BEFORE_PRINT );
+                                }
+                            }
+                        }
+                        UI.previousQueueSize = s.IN_QUEUE_BEFORE;
+                    }
 
 					//                    this is not used, for now we never get an empty status from controller
 					//                    else if(s.STATUS == 'EMPTY') {
@@ -476,19 +478,23 @@ UI = {
 					else if (s.STATUS == 'FAST_OK' && s.IN_QUEUE_BEFORE == 0) {
 						//                        UI.progressBar(UI.progressPerc)
 						if (UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
+
 							UI.lastProgressSegments = s.SEGMENTS_ANALYZED;
 							UI.noProgressTail = 0;
+
 						} else {
-							UI.noProgressTail++;
-							if (UI.noProgressTail > 9) {
-								if(-1==config.support_mail.indexOf('@')){
-									analyzerNotRunningErrorString='The analysis seems not to be running. Contact '+config.support_mail+'.';
-								}else{
-									analyzerNotRunningErrorString='The analysis seems not to be running. Contact <a href="mailto:'+config.support_mail+'">'+config.support_mail+'</a> or try refreshing the page.';
-								}
-								UI.displayError(analyzerNotRunningErrorString);
-								return false;
-							}
+
+                            UI.noProgressTail++;
+                            if ( UI.noProgressTail > 9 ) {
+                                if ( -1 == config.support_mail.indexOf( '@' ) ) {
+                                    analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+                                } else {
+                                    analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a> or try refreshing the page.';
+                                }
+                                UI.displayError( analyzerNotRunningErrorString );
+                                return false;
+                            }
+
 						}
 						UI.progressBar(s.SEGMENTS_ANALYZED / s.TOTAL_SEGMENTS);
 						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);

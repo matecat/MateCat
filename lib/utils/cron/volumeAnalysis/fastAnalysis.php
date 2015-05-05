@@ -37,8 +37,8 @@ while (1) {
 		continue;
 	}
 
-	echo __FILE__ . ":" . __FUNCTION__ . "  projects found\n";
-	print_r($pid_list);
+    echo( "Projects found: \n" . var_export( $pid_list, true ) );
+    Log::doLog( "Projects found: " . var_export( $pid_list, true ) );
 
 	foreach ($pid_list as $pid_res) {
 		$pid = $pid_res['id'];
@@ -148,7 +148,7 @@ while (1) {
             $data[ $k ][ 'tm_keys' ]          = $pid_res[ 'tm_keys' ];
             $data[ $k ][ 'id_tms' ]           = $pid_res[ 'id_tms' ];
             $data[ $k ][ 'id_mt_engine' ]     = $pid_res[ 'id_mt_engine' ];
-            $data[ $k ][ 'match_type' ]        = mb_strtoupper( $data[ $k ][ 'type' ] );
+            $data[ $k ][ 'match_type' ]       = mb_strtoupper( $data[ $k ][ 'type' ] );
             unset( $data[ $k ][ 'type' ] );
 
         }
@@ -160,9 +160,6 @@ while (1) {
 
         unset( $data );
         Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
-
-        $amqHandler = new FastAnalysisQueueHandler();
-        $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
 
         updateProject( $pid, $status );
 
@@ -206,7 +203,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     $db   = Database::obtain();
     $data = array();
 
-    $amqHandler = new FastAnalysisQueueHandler();
+    $amqHandler = new AnalysisQueueHandler();
 
     $total_eq_wc       = 0;
     $total_standard_wc = 0;
@@ -367,6 +364,8 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 //		echo 'Queries: ' . count($chunks_st_queue) . "\n";
         Log::doLog( 'Queries: ' . count( $chunks_st_queue ) );
 
+        $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
+
         $time_start = microtime(true);
         foreach ( $chunks_st_queue as $k => $queue_chunk ) {
 
@@ -374,7 +373,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
                 $jsonObj = json_encode( $queue_chunk );
                 Utils::raiseJsonExceptionError();
-                $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => 'true' ) );
+                $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => 'false' ) );
 //                Log::doLog( "Executed " . ( $k +1 ) );
 
             } catch ( Exception $e ){
