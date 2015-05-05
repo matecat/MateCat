@@ -174,8 +174,6 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
-//            segment.find('.actions .split.cancel').click();
-//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 
@@ -1515,28 +1513,6 @@ UI = {
 
 		$("html,body").stop();
         pointSpeed = (quick)? 0 : 500;
-/*
-        console.log('segment: ', segment.attr('id'));
-
-        console.log('prev: ', UI.currentSegment.prev().attr('id'));
-
-        if(config.isReview) {
-            setTimeout(function() {
-                $("html,body").animate({
-                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
-                }, 500);
-            }, 300);
-        } else {
-            $("html,body").animate({
-                scrollTop: segment.prev().offset().top - $('.header-menu').height()
-            }, 500);
-        }
-*/
-/*
-		$("html,body").animate({
-			scrollTop: destinationTop - 20
-		}, pointSpeed);
-*/
         if(config.isReview) {
             setTimeout(function() {
                 $("html,body").animate({
@@ -1548,7 +1524,6 @@ UI = {
                 scrollTop: destinationTop - 20
             }, pointSpeed);
         }
-
 		setTimeout(function() {
 			UI.goingToNext = false;
         }, pointSpeed);
