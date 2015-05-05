@@ -174,8 +174,6 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
-//            segment.find('.actions .split.cancel').click();
-//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 
@@ -331,7 +329,8 @@ UI = {
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 //			if(isNotSimilar) return false;
-            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+            var d = JSON.parse(UI.getFromStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
+//            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -1491,30 +1490,43 @@ UI = {
 			destinationTop = destinationTop + 100;
 			this.firstScroll = false;
 		}
-
 		if ($(current).length) { // if there is an open segment
 			if ($(segment).offset().top > $(current).offset().top) { // if segment to open is below the current segment
 				if (!current.is($(segment).prev())) { // if segment to open is not the immediate follower of the current segment
 					var diff = (this.firstLoad) ? ($(current).height() - 200 + 120) : 20;
+                    console.log('a');
 					destinationTop = destinationTop - diff;
 				} else { // if segment to open is the immediate follower of the current segment
+                    console.log('b');
 					destinationTop = destinationTop - spread;
 				}
 			} else { // if segment to open is above the current segment
+//                console.log('c');
+//                if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
 				destinationTop = destinationTop - spread;
+                UI.provaCoso = true;
 			}
 		} else { // if no segment is opened
+            console.log('d');
 			destinationTop = destinationTop - spread;
 		}
 
 		$("html,body").stop();
         pointSpeed = (quick)? 0 : 500;
-		$("html,body").animate({
-			scrollTop: destinationTop - 20
-		}, pointSpeed);
+        if(config.isReview) {
+            setTimeout(function() {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }, 300);
+        } else {
+            $("html,body").animate({
+                scrollTop: destinationTop - 20
+            }, pointSpeed);
+        }
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, pointSpeed);
+        }, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
 //        segmentId = segmentId.toString().split('-')[0];
@@ -1703,7 +1715,7 @@ console.log('ecco');
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
-
+/*
 		function prepareTranslationDiff( translation ){
 			_str = translation.replace( config.lfPlaceholderRegex, "\n" )
 					.replace( config.crPlaceholderRegex, "\r" )
@@ -1724,18 +1736,42 @@ console.log('ecco');
 			UI.dmp.diff_cleanupEfficiency( diff_obj );
 			return diff_obj;
 		}
-
+*/
+        mainStr = UI.currentSegment.find('.editarea').text();
         $.each(d.data.editable, function(index) {
-            diff_obj = prepareTranslationDiff( this.translation );
+            console.log('this.translation: ', this.translation);
+            diff_obj = UI.execDiff(mainStr, this.translation);
+//            diff_obj = prepareTranslationDiff( this.translation );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
         $.each(d.data.not_editable, function(index1) {
-            diff_obj = prepareTranslationDiff( this.translation );
+            diff_obj = UI.execDiff(mainStr, this.translation);
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
     },
+    execDiff: function (mainStr, cfrStr) {
+        _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+//        _str  = htmlDecode(_str );
+        _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+//        _edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+
+        //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
+        //used to detect initial and final spaces in html diff
+        _str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
+        _edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
+
+        diff_obj = UI.dmp.diff_main( _edit, _str );
+        UI.dmp.diff_cleanupEfficiency( diff_obj );
+        return diff_obj;
+    },
+
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
@@ -2468,7 +2504,59 @@ console.log('ecco');
             UI.execAbortedOperations();
         }
     },
-	checkInStorage: function(what) {
+    addInStorage: function (key, val, operation) {
+        if(this.isPrivateSafari) {
+            item = {
+                key: key,
+                value: val
+            }
+            this.localStorageArray.push(item);
+        } else {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {
+                UI.clearStorage(operation);
+                localStorage.setItem(key, val);
+            }
+        }
+    },
+    getFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundVal = this.value;
+            });
+            return foundVal || false;
+        } else {
+            return localStorage.getItem(key);
+        }
+    },
+    removeFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundIndex = index;
+            });
+            this.localStorageArray.splice(foundIndex, 1);
+        } else {
+            localStorage.removeItem(key);
+        }
+    },
+
+
+    isLocalStorageNameSupported: function () {
+        var testKey = 'test', storage = window.sessionStorage;
+        try {
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    },
+
+
+    checkInStorage: function(what) {
 		var found = false;
 		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
@@ -2711,7 +2799,8 @@ console.log('ecco');
         };
 //        console.log('prova: ', prova);
 //        console.log('logValue: ', JSON.stringify(logValue));
-        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+        UI.addInStorage('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue), 'log');
+//        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
 /*
         console.log('dopo errore');
@@ -2723,6 +2812,7 @@ console.log('ecco');
 
     },
     extractLogs: function() {
+        if(this.isPrivateSafari) return;
         var pendingLogs = [];
         inp = 'log';
         $.each(localStorage, function(k,v) {
@@ -3267,6 +3357,7 @@ console.log('ecco');
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
 
 		this.editarea.html(this.undoStack[ind]);
+        console.log('vediamo: ', document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		$('.undoCursorPlaceholder').remove();
 
@@ -3293,7 +3384,7 @@ console.log('ecco');
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		} else {
-            return;
+//            return;
         }
 
         if(this.editarea === '') return;
@@ -3306,10 +3397,7 @@ console.log('ecco');
             if ( (tt.length) && (!ss) )
                 return;
         }
-//        console.log('currentItem: ', currentItem);
-//        console.log('this.editarea.html(): ', this.editarea.html());
-
-        var diff = ( typeof currentItem == 'undefined ') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        var diff = ( typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
         if ( diff == ' selected' )
             return;
 

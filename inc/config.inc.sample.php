@@ -263,7 +263,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.5.3b';
+        self::$BUILD_NUMBER = '0.5.3c';
         self::$VOLUME_ANALYSIS_ENABLED = true;
         self::$SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
@@ -290,12 +290,19 @@ class INIT {
                         'dotx' => array( '', '', 'extdoc' ),
                         'docm' => array( '', '', 'extdoc' ),
                         'dotm' => array( '', '', 'extdoc' ),
+                        'rtf'  => array( '', '', 'extdoc' ),
+                        'odt'  => array( '', '', 'extdoc' ),
+                        'sxw'  => array( '', '', 'extdoc' ),
+                        'txt'  => array( '', '', 'exttxt' ),
                         'pdf'  => array( '', '', 'extpdf' ),
                         'xls'  => array( '', '', 'extxls' ),
                         'xlt'  => array( '', '', 'extxls' ),
                         'xlsm' => array( '', '', 'extxls' ),
                         'xlsx' => array( '', '', 'extxls' ),
                         'xltx' => array( '', '', 'extxls' ),
+                        'ods'  => array( '', '', 'extxls' ),
+                        'sxc'  => array( '', '', 'extxls' ),
+                        'csv'  => array( '', '', 'extxls' ),
                         'pot'  => array( '', '', 'extppt' ),
                         'pps'  => array( '', '', 'extppt' ),
                         'ppt'  => array( '', '', 'extppt' ),
@@ -306,15 +313,8 @@ class INIT {
                         'pptm' => array( '', '', 'extppt' ),
                         'pptx' => array( '', '', 'extppt' ),
                         'odp'  => array( '', '', 'extppt' ),
-                        'ods'  => array( '', '', 'extxls' ),
-                        'odt'  => array( '', '', 'extdoc' ),
-                        'sxw'  => array( '', '', 'extdoc' ),
-                        'sxc'  => array( '', '', 'extxls' ),
                         'sxi'  => array( '', '', 'extppt' ),
-                        'txt'  => array( '', '', 'exttxt' ),
-                        'csv'  => array( '', '', 'extxls' ),
                         'xml'  => array( '', '', 'extxml' ),
-                        'rtf'  => array( '', '', 'extrtf' ),
                     //                'vxd' => array("Try converting to XML")
                 ),
                 'Web'                 => array(
@@ -325,7 +325,7 @@ class INIT {
                 ),
                 "Interchange Formats" => array(
                         'xliff'    => array( 'default', '', 'extxif' ),
-                        'sdlxliff' => array( 'default', '', 'extixif' ),
+                        'sdlxliff' => array( 'default', '', 'extxif' ),
                         'tmx'      => array( '', '', 'exttmx' ),
                         'ttx'      => array( '', '', 'extttx' ),
                         'itd'      => array( '', '', 'extitd' ),
@@ -349,10 +349,10 @@ class INIT {
                         'resx'        => array( '', '', 'extres' ),
                         'xml'         => array( '', '', 'extxml' ),
                         'dita'        => array( '', '', 'extdit' ),
+                        'sgm'         => array( '', '', 'extsgm' ),
                         'sgml'        => array( '', '', 'extsgm' ),
                         'Android xml' => array( '', '', 'extxml' ),
-                        'strings'     => array( '', '', 'extstr' ),
-                        'sgm'         => array( '', '', 'extsgm' )
+                        'strings'     => array( '', '', 'extstr' )
                 )
         );
 

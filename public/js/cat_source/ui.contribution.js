@@ -61,19 +61,22 @@ $.extend(UI, {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 //			console.log('hasclass loaded');
-			this.spellCheck();
-			if (next) {
-				this.nextIsLoaded = true;
-			} else {
-				this.currentIsLoaded = true;
-			}
-			if (this.currentIsLoaded)
-				this.blockButtons = false;
-			if (this.currentSegmentId == this.nextUntranslatedSegmentId)
-				this.blockButtons = false;
-			if (!next)
-				this.currentSegmentQA();
-			return false;
+			console.log('qualcosa nella tab matches? ', segment.find('.footer .matches .overflow').text().length);
+            if(segment.find('.footer .matches .overflow').text().length) {
+                this.spellCheck();
+                if (next) {
+                    this.nextIsLoaded = true;
+                } else {
+                    this.currentIsLoaded = true;
+                }
+                if (this.currentIsLoaded)
+                    this.blockButtons = false;
+                if (this.currentSegmentId == this.nextUntranslatedSegmentId)
+                    this.blockButtons = false;
+                if (!next)
+                    this.currentSegmentQA();
+                return false;
+            }
 		}
 
 		if ((!n.length) && (next)) {
@@ -136,12 +139,15 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
+        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
+/*
         try {
             localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
         } catch (e) {
             UI.clearStorage('contribution');
             localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
         }
+*/
 //        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
 
 //		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
@@ -261,7 +267,9 @@ $.extend(UI, {
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
-//            UI.setContributionSourceDiff();
+            UI.setContributionSourceDiff();
+
+//            UI.setContributionSourceDiff_Old();
 			if (editareaLength === 0) {
 //				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
@@ -393,7 +401,8 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
-                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
+                UI.removeFromStorage('contribution-' + config.job_id + '-' + segment_id );
+//                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -558,7 +567,38 @@ $.extend(UI, {
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
-    setContributionSourceDiff: function (segment) {
+    setContributionSourceDiff: function () {
+        sourceText = '';
+        $.each($.parseHTML($('.editor .source').html()), function (index) {
+            if(this.nodeName == '#text') {
+                sourceText += this.data;
+            } else {
+                sourceText += this.innerText;
+            }
+        });
+ //       console.log('sourceText: ', sourceText);
+        UI.currentSegment.find('.sub-editor.matches ul.suggestion-item').each(function () {
+            percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
+            if(percent > 74) {
+                ss = $(this).find('.suggestion_source');
+                suggestionSourceText = '';
+                $.each($.parseHTML($(ss).html()), function (index) {
+                    if(this.nodeName == '#text') {
+                        suggestionSourceText += this.data;
+                    } else {
+                        suggestionSourceText += this.innerText;
+                    }
+                });
+//            console.log('suggestionSourceText: ', suggestionSourceText);
+//            console.log('diff: ', UI.execDiff(sourceText, suggestionSourceText));
+                $(this).find('.suggestion_source').html(UI.dmp.diff_prettyHtml(UI.execDiff(sourceText, suggestionSourceText)));
+            }
+
+
+        });
+    },
+
+    setContributionSourceDiff_Old: function (segment) {
         sourceText = '';
         $.each($.parseHTML($('.editor .source').html()), function (index) {
             if(this.nodeName == '#text') {
@@ -580,7 +620,7 @@ $.extend(UI, {
                 }
             });
             console.log('suggestionSourceText: ', suggestionSourceText);
-
+            console.log('diff: ', UI.execDiff(sourceText, suggestionSourceText));
 
 //            console.log('a: ', $('.editor .source').html());
 //            console.log($.parseHTML($('.editor .source').html()));
