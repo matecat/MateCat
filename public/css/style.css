@@ -39,16 +39,14 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
     float:left;height:37px;padding:5px 0px;}
 #notifbox
 {
-    /*border-right:1px solid #000;*/
-    opacity:0.9;
-    text-align: center;
-    width: 60px;
+  opacity: 0.9;
+  text-align: center;
+  width: 60px;
+  color: #777;
+  height: 27px;
+  padding-top: 12px;
 }
-.notific
-{
-background: url(../img/sprite.png) 15px -182px no-repeat;
-background-size: 24px;
-}
+
 .warningbox
 {
 background: url(../img/sprite.png) 16px -848px no-repeat!important;
@@ -71,24 +69,25 @@ background-size: 28px!important;
 
 #filterSwitch
 {
-    display: none;
-    text-align: center;
-    width: 60px;
-	background: url(../img/sprite.png) 19px -364px no-repeat;
-	background-size: 22px;
-    cursor: pointer;
-	/*    text-indent: -9999px;*/
-}
-body.searchActive #filterSwitch
-{
-    background: url(../img/sprite.png) 19px -400px no-repeat;
-	background-size: 22px;
+  text-align: center;
+  width: 60px;
+  height: 27px;
+  padding-top: 10px;
+  color: #fff;
+  font-size: 23px;
+  cursor: pointer;
 }
 
-#filterSwitch:hover
+#filterSwitch:hover {
+	color:#ccc;
+}
+
+body.searchActive #filterSwitch
 {
-    opacity: 0.7;
-}    
+    color:yellow;
+}
+
+ 
 
 .numbererror
 {
@@ -111,7 +110,7 @@ body.searchActive #filterSwitch
 
 .notific a{color:#fff;text-decoration:none;height:16px;padding:2px 4px 0 2px !important;display:block;margin:-2px 0px 0 2px;font-size:12px;position:absolute;border-radius:2px;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;display:none;}
 
-.notific.error{background:url(../img/warning.png) center 15px no-repeat;background-size:24px 20px;}
+.notific.error{color:#fff!important;}
 
 .error a{display:block !important;}
 
@@ -160,7 +159,7 @@ body.searchActive #filterSwitch
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}*/
 .breadcrumbs{color:#fff;padding:19px 0 4px 0px;}
 
-.cattool .breadcrumbs{padding:22px 0 4px 15px;}
+.cattool .breadcrumbs{padding:17px 0 4px 15px;}
 
 
 .cattool #quality-report
@@ -209,8 +208,6 @@ body.searchActive #filterSwitch
 
 .breadcrumbs #pname
 {
-	padding-left: 22px;
-	background: url(../img/sprite.png) -15px -434px no-repeat;
 	margin-left:2px;
 	word-break: break-all;
 }
@@ -1001,7 +998,7 @@ body.cattool:not(.editing) article {
 
 .disabled, .disabled:hover, .disabled:active{background: #d6d6d6;opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
 
-
+.sub-editor .set-glossary.disabled {background:none!important;}
 
 
 .text  {width:100%;float:left;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;}
@@ -1234,11 +1231,12 @@ margin: 5px 1.5%;
 }       
 .sub-editor .gl-search .set-glossary
 {
-	float: left;
-	height:20px; width:20px;
-	margin: 20px 0 0 0;
-	background: url(../img/sprite.png) -11px -407px no-repeat;
-background-size: 42px;
+  float: left;
+  height: 20px;
+  font-size: 24px;
+  width: 20px;
+  margin: 15px 0 0 0;
+  color: #777;
 }    
 .sub-editor .gl-search .search-glossary
 {
@@ -1247,10 +1245,7 @@ background-size: 42px;
 	height:20px; width:20px;
 	/*background: url(../img/searchgl-black.png) no-repeat;*/
 }  
-.sub-editor .gl-search .set-glossary:hover, .sub-editor .gl-search .search-glossary:hover
-{
-	opacity: 0.7;
-}
+
 .sub-editor .gl-search .set-glossary.disabled,
 .sub-editor .gl-search .set-glossary.disabled:hover
 {
@@ -1601,8 +1596,28 @@ body.review .loader
 
 
 
-.close{background: url(../img/sprite.png) -11px -156px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
-.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background: url(../img/sprite.png) -11px -187px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
+.close{   width: 14px;
+  height: 14px;
+  padding-top: 0px;
+  padding-left: 0px;
+  vertical-align: middle;
+  margin-right: 7px;
+  display: block;
+  position: absolute;
+  right: 0;
+  padding-top: 0px;
+  top: 0;
+  text-decoration: none;
+  font-size: 15px;
+  margin-top: 3px;
+  border-radius: 20px;
+  background: #fff;
+  color: #AEAEAE;}
+
+.close:hover {  background: red;
+  color: #fff;
+  text-align: center;}
+.x-stats:hover, .x-com:hover, .x-addcom:hover{background: url(../img/sprite.png) -11px -187px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
 
 
 .h-text{width:auto;height:20px;display:block;position:absolute;left:10px;top:2px;color:#fff;font-size:12px;text-decoration:none;text-transform:none;}
@@ -2031,13 +2046,16 @@ textarea, input, .editarea, .search-editarea, select  {
 
 .message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !Important;background-size:12px 12px}
 .graysmall:hover .trash{height:20px;}
-.trash:hover{background: url(../img/sprite.png) -10px -1245px no-repeat;opacity:1;}
 
+.trash:hover {margin-top:-2px;color:#000;}
 
 .trash{transition: width 2s; transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ -webkit-transition: all 0.1s linear;
 	   transition: all 0.1s linear;
+	   color:#999;
+	   text-decoration: none;
 	   -o-transition: all 0.1s linear;
-	   -ms-transition: all 0.1s linear;display:block;height:0;width:20px;background: url(../img/sprite.png) -10px -1243px no-repeat; opacity:0.5;position:absolute;right:5px;top:14px}
+	   -ms-transition: all 0.1s linear;display:block;height:0;width:20px;
+	   position:absolute;right:5px;top:14px}
 .graysmall-message{bottom:-10px;left:25px;position:absolute;font-size:10px;display:none;color:#999999}
 
 
@@ -3481,9 +3499,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 	background: url(../img/sprite2x.png) 5px -1461px no-repeat;    
 	cursor: pointer;
 }
-.sub-editor .gl-search .set-glossary {
-	background: url(../img/sprite2x.png) -11px -407px no-repeat;
-}
+
 .warnings {
 	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
 }
@@ -3512,13 +3528,11 @@ a.showExtendedTags {
 body.tagmode-default-extended a.showExtendedTags {
     display: none;
 }
-.close {
-	background: url(../img/sprite2x.png) -11px -156px no-repeat;
-}
-.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+
+.x-stats:hover, .x-com:hover, .x-addcom:hover {
 	background: url(../img/sprite2x.png) -11px -187px no-repeat;
 }
-.outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover, .outersource .copy:hover {
+.outersource .copy, .warnings, .x-stats:hover, .x-com:hover, .x-addcom:hover, .outersource .copy:hover {
 	background-size: 42px;
 }
 

@@ -177,9 +177,9 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 	overflow: hidden;
 }
 .none {display:none;}
-.splitbtn.done {background:#09beec url(../img/sprite.png)  -2px -453px no-repeat!important;float: right;
-				padding: 2px 15px 2px 35px!important; margin-bottom:0;}
-.splitbtn.done:hover {background:#12b4df url(../img/sprite.png)  -2px -453px no-repeat!important;}
+.splitbtn.done {background:#09beec;float: right;
+				padding: 2px 15px 2px 15px!important; margin-bottom:0;}
+.splitbtn.done:hover {background:#12b4df;}
 .popup-split input[type="text"][disabled] {background:#f0f0f0;}
 .stopsplitbtn{
 	display: block;
@@ -210,6 +210,7 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 					  font-size: 20px !important;
 					  cursor: pointer;
 					  color: #fff;
+					  background: #12b4df;
 					  -moz-box-shadow: 0 1px 2px #ccc;
 					  -webkit-box-shadow: 0 1px 2px #ccc;
 					  box-shadow: 0 1px 2px #ccc;
@@ -218,7 +219,7 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 					  border-radius: 2px;
 					  text-decoration: none;
 					  opacity: 0.9;
-					  padding: 5px 10px 5px 35px !Important;
+					  padding: 5px 10px 5px 10px !Important;
 					  margin-left: 12px;
 					  float: left;
 }
@@ -229,17 +230,15 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 	opacity: 1!important;
 }
 
-.splitbtn {background: #09beec url(../img/sprite.png) -2px -453px no-repeat;}
 
 div.popup-split .uploadbtn {padding:2px 15px!important;}
 
-.splitbtn:hover {background: #09beec url(../img/sprite.png) -2px -453px no-repeat; -moz-box-shadow: 0 1px 2px #666;
+.splitbtn:hover {-moz-box-shadow: 0 1px 2px #666;
 				 -webkit-box-shadow: 0 1px 2px #666;
 				 box-shadow: 0 1px 2px #666;}
 
-.mergebtn {background: #09beec url(../img/sprite.png) -2px -1192px no-repeat;}
 
-.mergebtn:hover {background: #12b4df url(../img/sprite.png) -2px -1192px no-repeat; -moz-box-shadow: 0 1px 2px #666;
+.mergebtn:hover {-moz-box-shadow: 0 1px 2px #666;
 				 -webkit-box-shadow: 0 1px 2px #666;
 				 box-shadow: 0 1px 2px #666;}
 
@@ -295,7 +294,7 @@ div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn {display:
 
 
 .subfile p{margin:0 -35px 0 0px;	word-break: break-word;
-		   padding:0 30px;background: url(../img/sprite.png) 3px -304px no-repeat;background-size:26px;}
+		   padding:0 5px;}
 .totaltable td{font-size:18px;}
 .totaltable td.languages{border-left:1px solid #ccc;}
 table tr.totaltable td.stat-payable {
@@ -828,29 +827,4 @@ top: 25%;
 {
 	max-height: 250px;
 	overflow: auto;
-}
-
-
-
-/* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (in-resolution: 2dppx) { 
-
-.splitbtn, .splitbtn:hover, .splitbtn.done, .splitbtn.done:hover {
-background: #09beec url(../img/sprite2x.png) -2px -453px no-repeat!important;
-}
-
-.mergebtn, .mergebtn:hover {
-background: #09beec url(../img/sprite2x.png) -2px -1192px no-repeat;
-}
-
-.subfile p {background: url(../img/sprite2x.png) 3px -304px no-repeat;
-background-size: 26px;
-}
-
-.splitbtn, .splitbtn:hover ,  .splitbtn.done, .splitbtn.done:hover, .mergebtn, .mergebtn:hover {background-size:42px!important;}
 }

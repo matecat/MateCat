@@ -618,7 +618,7 @@ color:#333;}
 
 	text-decoration: none;
 	color: #333;
-	padding: 13px 10px 10px 52px;
+	padding: 13px 10px 10px 22px;
 	/*background: url(../img/xliff-icon.png) 12px 8px no-repeat;*/
 	display: block;
 	background-size: 24px; -webkit-transition: all 100ms ease-in;
@@ -659,20 +659,13 @@ color:#333;}
     .currSegment a
 
     {
-	    background: #efefef url(../img/sprite.png) 15px -160px no-repeat !important;
-	    background-size: 25px!important;  
+	    background: #efefef;  
 	    border-top: 1px solid #ccc;
 	    box-shadow: inset 0px 1px #fff;
 	    -moz-box-shadow: inset 0px 1px #fff;
 	    -webkit-box-shadow: inset 0px 1px #fff;
 
   }
-
-
-
-
-
-
 
 
   .topMenu ul li a:hover
@@ -1072,13 +1065,19 @@ margin-left: 10px;
 
     .popup .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup
     {
-	    background: url(../img/sprite.png) 10px -304px no-repeat;
-	    display: block;
-	    height: 40px;
-	    width: 40px;
-	    float: right;
+	    color:#fff;
+        text-decoration: none;
+        display: block;
+        height: 30px;
+        font-size: 20px;
+        padding-top: 10px;
+  	    float: right;
 	    margin: 0 10px 0 0;
 	    background-size: 22px;
+    }
+
+    .popup .x-popup:hover, .slide-panel .x-popup:hover {
+        color:red;
     }
 	
 	 .mgmt-panel .x-popup {
@@ -1086,12 +1085,6 @@ margin-left: 10px;
 		margin-top: 10px;
 	 }
 	
-	
-    .popup .x-popup:hover, .slide-panel .x-popup:hover
-    {
-	    background: url(../img/sprite.png) 10px -334px no-repeat;
-	    background-size: 22px;
-    }  
 	
     .uploadtm.disabled {
     	background: #09beec!important;
@@ -2593,16 +2586,9 @@ only screen and (in-resolution: 2dppx) {
 
 .popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 
-	body.cattool #jobMenu li a
-	{
-		background-size: 25px !important;
-}
+	
 
-.sub-editor .gl-search .set-glossary
-{
-	background: url(../img/add-black2x.png) no-repeat;
-	background-size: 20px;
-}    
+   
 .sub-editor .gl-search .search-glossary
 {
 	background: url(../img/searchgl-black2x.png) no-repeat;
@@ -2673,11 +2659,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-vfjr9u');
-	src:url('fonts/icomoon.eot?#iefix-vfjr9u') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-vfjr9u') format('woff'),
-		url('fonts/icomoon.ttf?-vfjr9u') format('truetype'),
-		url('fonts/icomoon.svg?-vfjr9u#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-75v12b');
+	src:url('fonts/icomoon.eot?#iefix-75v12b') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-75v12b') format('woff'),
+		url('fonts/icomoon.ttf?-75v12b') format('truetype'),
+		url('fonts/icomoon.svg?-75v12b#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2702,7 +2688,13 @@ color: #000;
 .canceladdtmx.btn-grey .text:before,
 .deleteTM .text:before,
 .sorting:after,
+.splitbtn:before,
+.x-popup:before,
+.popup .x-popup:before, 
+.mgmt-panel .x-popup:before, 
+.popup-tm .x-popup:before,
 .noticon:after,
+.sub-editor .gl-search .set-glossary:before,
 td.actions a:before,
 a.cancel-project:before,
 a.archive-project:before,
@@ -2711,6 +2703,22 @@ a.unarchive-project:before,
 a.unarchive-project:after, 
 a.resume-project:after,
 .splitpoint:before,
+.mergebtn:before,
+.subfile p:before,
+.notific:before,
+#clear-all-files:before,
+#swaplang:after,
+.more:before,
+.currSegment a:before,
+#filterSwitch:before,
+.more.minus:before,
+.header .close:before,
+.notific.error:before,
+.breadcrumbs #pname:before,
+.delete button:before,
+.graysmall:hover .trash:before,
+.fileupload-buttonbar .fileinput-button:before,
+#add-files:before,
 .splitpoint-delete:after,
 input.downloadtr-button:before,
 body.manage header .filter:before,
@@ -2832,8 +2840,98 @@ margin-top: -5px;
 float: left;
 }
 
+.splitbtn:before {
+    content: "\f065";
+    margin-right: 3px;
+}
 
+.sub-editor .gl-search .set-glossary:before {
+        content: "\f055";
+           transform: rotate(180deg);
+  display: inline-block;
+}
 
+.mergebtn:before {
+    content: "\f066";
+    margin-right: 3px;
+}
+
+.fileupload-buttonbar .fileinput-button:before, #add-files:before {
+    content: "\f067";
+      font-size: 14px;
+  margin-right: 20px;
+}
+
+.header .close:before {
+     content: "\ea0d";
+  text-align: center;
+  margin-top: 0px;
+  margin-left: -1px;
+  display: block;
+  vertical-align: middle;
+}
+
+.notific:before {
+    content: "\f058";
+      font-size: 25px;
+}
+
+.currSegment a:before {
+       content: "\f112";
+       transform: rotate(180deg);
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.notific.error:before {
+        content: "\f071";
+         font-size: 25px;
+ 
+}
+
+#filterSwitch:before {
+    content: "\f002";
+}
+
+#clear-all-files:before {
+    content: "\f00d";
+      font-size: 14px;
+  margin-right: 20px;
+}
+
+#swaplang:after {
+    content: "\f0ec";
+}
+.breadcrumbs #pname:before {
+    content: "\f0dd";
+  font-size: 18px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.more:before,
+.more.minus:before {
+    margin-right: 7px;
+    vertical-align: middle;
+}
+
+.graysmall:hover .trash:before {
+    content: "\f014"; 
+}
+
+.more:before {
+    content: "\f196";
+}
+
+.delete button:before {
+    content: "\f014";
+    font-size: 13px;
+      vertical-align: top;
+}
+
+.more.minus:before {
+    content: "\f147";
+}
 .canceladdtmx.btn-grey .text:before {
 	content: "\f00d";
 	padding-right: 8px;
@@ -2896,6 +2994,15 @@ float: right;
 
 }
 
+.x-popup:before {
+    content: "\f057";
+}
+
+.subfile p:before {
+    content: "\ea58";
+    margin-right:5px;
+    color:#555;
+}
 
 .add-tm:before {
 	content: "\f067";
@@ -3040,6 +3147,10 @@ text-align: left;
     content: "\f013";
 }
 
+.icon-make-group:before {
+    content: "\ea58";
+}
+
 .icon-trash-o:before {
     content: "\f014";
 }
@@ -3099,7 +3210,9 @@ text-align: left;
 .icon-compress:before {
     content: "\f066";
 }
-
+.icon-cancel-circle:before {
+    content: "\ea0d";
+}
 .icon-plus:before {
     content: "\f067";
 }
