@@ -6,48 +6,60 @@ include_once 'main.php';
 /* Write my pid to a file */
 $my_pid = getmypid();
 
-if ( !file_exists( Constants_Daemons::PID_FOLDER ) ) {
-    mkdir( Constants_Daemons::PID_FOLDER );
+try {
+    $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
+    $redisHandler->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
+} catch ( Exception $ex ){
+    $msg = "****** No REDIS instances found. Exiting. ******";
+    _TimeStampMsg( $msg );
+    die();
 }
 
-/**
- * WARNING on 2 frontend web server or in an architecture where the daemons runs in a place different from the web server
- * this should be put in a shared< location ( memcache/redis/ntfs/mysql ) and a service should be
- * queried for know that number
- */
-file_put_contents( Constants_Daemons::PID_FOLDER . "/" . Constants_Daemons::FAST_PID_FILE, $my_pid );
-
-
 Log::$fileName = "fastAnalysis.log";
+$RUNNING = true;
 
-while (1) {
+declare ( ticks = 1 );
+if (! function_exists ( 'pcntl_signal' )) {
+    $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
+    _TimeStampMsg( $msg );
+} else {
+
+    pcntl_signal( SIGTERM, 'sigSwitch' );
+    pcntl_signal( SIGINT, 'sigSwitch' );
+    pcntl_signal( SIGHUP, 'sigSwitch' );
+
+    $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
+    _TimeStampMsg( $msg );
+
+}
+
+//START EVENTS
+
+do {
 
     /**
      * @var $ws Engines_MyMemory
      */
     $ws = Engine::getInstance( 1 /* MyMemory */ );
 
-    Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+    _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
-	$pid_list = getProjectForVolumeAnalysis('fast', 5);
-	if (empty($pid_list)) {
-		echo "no projects ready for fast volume analisys: wait 3 seconds\n";
-		Log::doLog( "no projects: wait 3 seconds" );
+    $pid_list = getProjectForVolumeAnalysis('fast', 5);
+    if (empty($pid_list)) {
+        _TimeStampMsg( "no projects: wait 3 seconds" );
         sleep(3);
-		continue;
-	}
+        continue;
+    }
 
-    echo( "Projects found: \n" . var_export( $pid_list, true ) );
-    Log::doLog( "Projects found: " . var_export( $pid_list, true ) );
+    _TimeStampMsg( "Projects found: " . var_export( $pid_list, true ) );
 
-	foreach ($pid_list as $pid_res) {
-		$pid = $pid_res['id'];
-		echo "analyzing $pid, querying data...";
-		Log::doLog( "analyzing $pid, querying data..." );
+    foreach ($pid_list as $pid_res) {
+        $pid = $pid_res['id'];
+        _TimeStampMsg( "analyzing $pid, querying data..." );
 
-		$segments = getSegmentsForFastVolumeAnalysys($pid);
+        $segments = getSegmentsForFastVolumeAnalysys($pid);
 
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
         $num_segments = count($segments);
         $perform_Tms_Analysis = true;
@@ -61,17 +73,17 @@ while (1) {
 
             $perform_Tms_Analysis = false;
             $status = Constants_ProjectStatus::STATUS_DONE;
-            Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
+            _TimeStampMsg( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
         } elseif( $num_segments == 0 ){
             //there is no analysis on that file, it is ALL Pre-Translated
-            Log::doLog('There is no analysis on that file, it is ALL Pre-Translated');
+            _TimeStampMsg('There is no analysis on that file, it is ALL Pre-Translated');
             $status = Constants_ProjectStatus::STATUS_DONE;
         }
 
         //compose a lookup array
         $segment_hashes = array();
 
-		foreach( $segments as $pos => $segment ){
+        foreach( $segments as $pos => $segment ){
 
             $segment_hashes[ $segment['id'] ] = array(
                     $segment['segment_hash'],
@@ -92,45 +104,35 @@ while (1) {
             unset( $segment['target'] );
             unset( $segment['payable_rates'] );
 
-		}
+        }
 
-		echo "done\n";
-		Log::doLog( "done" );
+        _TimeStampMsg( "done" );
 
-		echo "pid $pid: $num_segments segments\n";
-		Log::doLog( "pid $pid: $num_segments segments" );
-		echo "sending query to MyMemory analysis...";
-		Log::doLog( "sending query to MyMemory analysis..." );
+        _TimeStampMsg( "pid $pid: $num_segments segments" );
+        _TimeStampMsg( "sending query to MyMemory analysis..." );
 
         $ws->doLog = false; //tell to the engine to not log the output
-		$fastReport = $ws->fastAnalysis($segments);
+        $fastReport = $ws->fastAnalysis($segments);
 
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
         unset( $segments );
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
-		echo "done\n";
-		echo "collecting stats...";
-		Log::doLog( "done" );
-		Log::doLog( "collecting stats..." );
-        echo "fast $pid result: " . count($fastReport->responseData)  . " segments\n";
-        Log::doLog( "fast $pid result: " . count($fastReport->responseData)  . " segments" );
+        _TimeStampMsg( "done" );
+        _TimeStampMsg( "collecting stats..." );
+        _TimeStampMsg( "fast $pid result: " . count( $fastReport->responseData )  . " segments" );
 
         if($fastReport->responseStatus == 200){
             $data = $fastReport->responseData;
         } else {
-            Log::doLog( "pid $pid failed fastanalysis\n");
+            _TimeStampMsg( "pid $pid failed fastanalysis");
             $data = array();
         }
 
         unset( $fastReport );
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
         foreach ( $data as $k => $v ) {
-
-//            if ( in_array( $v[ 'type' ], array( "75%-84%", "85%-94%", "95%-99%" ) ) ) {
-//                $data[ $k ][ 'type' ] = "INTERNAL";
-//            }
 
             if ( in_array( $v[ 'type' ], array( "50%-74%" ) ) ) {
                 $data[ $k ][ 'type' ] = "NO_MATCH";
@@ -154,47 +156,86 @@ while (1) {
         }
 
         unset( $segment_hashes );
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
         insertData( $pid, $data, INIT::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
 
         unset( $data );
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
         updateProject( $pid, $status );
 
-	}
+    }
+
+} while( $RUNNING );
+
+cleanShutDown();
+
+die();
+
+function cleanShutDown(  ){
+
+    global $redisHandler, $db;
+
+    //SHUTDOWN
+    $redisHandler->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, getmypid() );
+    $redisHandler->disconnect();
+    $db->close();
+
+    $msg = str_pad( " FAST ANALYSIS " . getmypid() . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
+    _TimeStampMsg( "$msg" );
 
 }
 
+function sigSwitch( $signo ) {
+
+    global $RUNNING;
+
+    switch ($signo) {
+        case SIGTERM :
+        case SIGINT :
+            $RUNNING = false;
+            break;
+        case SIGHUP :
+            $RUNNING = false;
+            cleanShutDown();
+            break;
+        default :
+            break;
+    }
+
+    $msg = str_pad( " Handled Signal $signo ", 50, "-", STR_PAD_BOTH );
+    _TimeStampMsg( $msg );
+
+}
+
+function _TimeStampMsg($msg) {
+    Log::doLog( $msg );
+    echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+}
 
 function insertData( $pid, &$data, $equivalentWordMapping, $perform_Tms_Analysis ){
 
-    echo "inserting segments...\n";
-    Log::doLog( "inserting segments..." );
+    _TimeStampMsg( "inserting segments..." );
 
     $insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
-    if ($insertReportRes < 0) {
-        Log::doLog( "insertFastAnalysis failed...." );
-        echo( "insertFastAnalysis failed...." );
+    if ( $insertReportRes < 0 ) {
+        _TimeStampMsg( "insertFastAnalysis failed...." );
     }
 
-    echo "done\n";
-    Log::doLog( "done" );
+    _TimeStampMsg( "done" );
 
 }
 
 function updateProject( $pid, $status ){
 
-    echo "changing project status...";
-    Log::doLog( "changing project status..." );
+    _TimeStampMsg( "changing project status..." );
 
     $change_res = changeProjectStatus($pid, $status);
     if ($change_res < 0) {
     }
 
-    echo "done\n";
-    Log::doLog( "done" );
+    _TimeStampMsg( "done" );
 
 }
 
@@ -203,7 +244,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     $db   = Database::obtain();
     $data = array();
 
-    $amqHandler = new AnalysisQueueHandler();
+    $amqHandler = new Analysis_QueueHandler();
 
     $total_eq_wc       = 0;
     $total_standard_wc = 0;
@@ -274,11 +315,9 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
     $chunks_st = array_chunk( $st_values, 200 );
 
-//	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
-    Log::doLog( 'Insert Segment Translations: ' . count( $st_values ) );
+    _TimeStampMsg( 'Insert Segment Translations: ' . count( $st_values ) );
 
-//	echo 'Queries: ' . count($chunks_st) . "\n";
-    Log::doLog( 'Queries: ' . count( $chunks_st ) );
+    _TimeStampMsg( 'Queries: ' . count( $chunks_st ) );
 
     //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
     $db->query( 'SET autocommit=0' );
@@ -295,23 +334,22 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
         $db->query( $query_st );
 
-        //echo "Executed " . ( $k + 1 ) ."\n";
-        //Log::doLog(  "Executed " . ( $k + 1 ) );
+        //_TimeStampMsg( "Executed " . ( $k + 1 )  );
 
         $err = $db->get_error();
         if ( $err[ 'error_code' ] != 0 ) {
-            Log::doLog( $err );
+            _TimeStampMsg( $err );
 
             return $err[ 'error_code' ] * -1;
         }
     }
 
-    Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+    _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
     unset( $st_values );
     unset( $chunks_st );
 
-    Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+    _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
     /*
      * IF NO TM ANALYSIS, upload the jobs global word count
@@ -319,8 +357,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     if ( !$perform_Tms_Analysis ) {
         $_details = getProjectSegmentsTranslationSummary( $pid );
 
-        echo "--- trying to initialize job total word count.\n";
-        Log::doLog( "--- trying to initialize job total word count." );
+        _TimeStampMsg( "--- trying to initialize job total word count." );
 
         $project_details = array_pop( $_details ); //remove rollup
 
@@ -331,8 +368,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     }
     /* IF NO TM ANALYSIS, upload the jobs global word count */
 
-    //echo "Done.\n";
-    //Log::doLog( 'Done.' );
+    //_TimeStampMsg( "Done." );
 
     $data2     = array( 'fast_analysis_wc' => $total_eq_wc );
 
@@ -344,7 +380,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
         $db->query( 'ROLLBACK' );
         $db->query( 'SET autocommit=1' );
-        Log::doLog( $err );
+        _TimeStampMsg( $err );
 
         return $errno * -1;
     }
@@ -358,11 +394,8 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 //        $chunks_st_queue = array_chunk( $fastReport, 10 );
         $chunks_st_queue = &$fastReport;
 
-//		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
-        Log::doLog( 'Insert Segment Translations Queue: ' . count( $fastReport ) );
-
-//		echo 'Queries: ' . count($chunks_st_queue) . "\n";
-        Log::doLog( 'Queries: ' . count( $chunks_st_queue ) );
+        _TimeStampMsg( 'Insert Segment Translations Queue: ' . count( $fastReport ) );
+        _TimeStampMsg( 'Queries: ' . count( $chunks_st_queue ) );
 
         $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
 
@@ -373,27 +406,27 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
                 $jsonObj = json_encode( $queue_chunk );
                 Utils::raiseJsonExceptionError();
-                $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => 'false' ) );
-//                Log::doLog( "Executed " . ( $k +1 ) );
+                $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
+//                _TimeStampMsg( "Executed " . ( $k +1 ) );
 
             } catch ( Exception $e ){
-                Utils::sendErrMailReport( $e->getMessage() . "\n" . $e->getTraceAsString() , "Fast Analysis set queue failed." );
-                Log::doLog(  $e->getMessage() . "\n" . $e->getTraceAsString() );
+                Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString() , "Fast Analysis set queue failed." );
+                _TimeStampMsg(  $e->getMessage() . "" . $e->getTraceAsString() );
             }
 
         }
 
-        //echo "Done.\n";
-        Log::doLog( 'Done in ' . ( microtime(true) - $time_start ) . " seconds." );
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( 'Done in ' . ( microtime(true) - $time_start ) . " seconds." );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
         unset( $chunks_st_queue );
         unset( $fastReport );
 
-        Log::doLog( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
+        _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
     }
 
+    $amqHandler->disconnect();
 
     return $db->affected_rows;
 }

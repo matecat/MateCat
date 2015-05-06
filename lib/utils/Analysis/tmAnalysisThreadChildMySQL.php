@@ -263,7 +263,8 @@ while (1) {
 
     $equivalentWordMapping = json_decode($payable_rates, true);
 
-    $new_match_type = getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMapping);
+    $new_match_type = getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping, /* is Public TM */ empty( $matches[ 0 ][ 'memory_key' ] ) );
+
     //echo "sid is $sid ";
     $eq_words = $equivalentWordMapping[$new_match_type] * $raw_wc / 100;
     $standard_words = $eq_words;
@@ -289,7 +290,25 @@ while (1) {
 
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
-    $ret = CatUtils::addTranslationSuggestion( $sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe, $pretranslate_100 );
+    $tm_data                             = array();
+    $tm_data[ 'id_job' ]                 = $jid;
+    $tm_data[ 'id_segment' ]             = $sid;
+    $tm_data[ 'suggestions_array' ]      = $suggestion_json;
+    $tm_data[ 'suggestion' ]             = $suggestion;
+    $tm_data[ 'suggestion_match' ]       = $suggestion_match;
+    $tm_data[ 'suggestion_source' ]      = $suggestion_source;
+    $tm_data[ 'match_type' ]             = $new_match_type;
+    $tm_data[ 'eq_word_count' ]          = $eq_words;
+    $tm_data[ 'standard_word_count' ]    = $standard_words;
+    $tm_data[ 'translation' ]            = $suggestion;
+    $tm_data[ 'tm_analysis_status' ]     = "DONE";
+    $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
+    $tm_data[ 'serialized_errors_list' ] = $err_json;
+    $tm_data[ 'mt_qe' ]                  = $mt_qe;
+    $tm_data[ 'pretranslate_100' ]       = $pretranslate_100;
+
+    updateTMValues( $tm_data );
+
     //unlock segment
 
     echo "--- (child $my_pid) : segment $sid-$jid finished\n";
@@ -323,49 +342,107 @@ function tryToCloseProject( $pid ){
 
 }
 
-function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMapping) {
+function updateTMValues( $tm_data ){
+
+    if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
+        if ( strpos( $tm_data[ 'suggestion_source' ], "MT" ) === false ) {
+            $tm_data[ 'suggestion_source' ] = 'TM';
+        } else {
+            $tm_data[ 'suggestion_source' ] = 'MT';
+        }
+    }
+
+    //controllare il valore di suggestion_match
+    if( $tm_data[ 'suggestion_match' ] == "100%" && $tm_data[ 'pretranslate_100' ]){
+        $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
+    }
+
+    //there is not a database filed named pretranslate_100 in segment_translations, this is only a flag
+    unset( $tm_data[ 'pretranslate_100' ] );
+
+    $updateRes = setSuggestionUpdate( $tm_data );
+    if ( $updateRes < 0 ) {
+
+        $result['errors'][] = array(
+                "code" => -5,
+                "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}"
+        );
+        Log::doLog( $result );
+
+    } else {
+
+        //There was not a fast Analysis??? Impossible.
+        Log::doLog( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
+
+    }
+
+}
+
+function getNewMatchType( $tm_match_type, $fast_match_type, $equivalentWordMapping, $publicTM = false ) {
 
 // RATIO : modifico il valore solo se il nuovo match è strettamente migliore (in termini di percentuale pagata per parola) di quello corrente
     $tm_match_cat = "";
     $tm_rate_paid = 0;
 
-    $fast_match_type = strtoupper($fast_match_type);
-    $fast_rate_paid = $equivalentWordMapping[$fast_match_type];
+    $fast_match_type = strtoupper( $fast_match_type );
+    $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
 
 
-    if ($tm_match_type == "MT") {
+    if ( $tm_match_type == "MT" ) {
         $tm_match_cat = "MT";
-        $tm_rate_paid = $equivalentWordMapping[$tm_match_type];
+        $tm_rate_paid = $equivalentWordMapping[ $tm_match_type ];
     }
 
 
-    if (empty($tm_match_cat)) {
-        $ind = intval($tm_match_type);
+    if ( empty( $tm_match_cat ) ) {
+        $ind = intval( $tm_match_type );
 
-        if ($ind == "100") {
-            $tm_match_cat = "100%";
-            $tm_rate_paid = $equivalentWordMapping[$tm_match_cat];
+        if ( $ind == "100" ) {
+            $tm_match_cat = ($publicTM) ? "100%_PUBLIC" : "100%";
+            $tm_rate_paid = $equivalentWordMapping[ $tm_match_cat ];
+
         }
 
-        elseif ($ind < 50) {
+        if ( $ind < 50 ) {
             $tm_match_cat = "NO_MATCH";
-            $tm_rate_paid = $equivalentWordMapping["NO_MATCH"];
+            $tm_rate_paid = $equivalentWordMapping[ "NO_MATCH" ];
         }
 
-        elseif ($ind >= 50 and $ind < 75) {
+        if ( $ind >= 50 and $ind < 75 ) {
             $tm_match_cat = "50%-74%";
-            $tm_rate_paid = $equivalentWordMapping["50%-74%"];
+            $tm_rate_paid = $equivalentWordMapping[ "50%-74%" ];
         }
 
-        elseif ($ind >= 75 and $ind <= 99) {
+        /*
+         * @author Roberto Tucci
+         * Jobs before 27th April 2015 had a unique category: 75%-99%
+         * From this date the category has been split into 3 categories.
+         * this condition grants back-compatibility with old jobs and related analysis
+         */
+        if( !isset( $equivalentWordMapping[ "75%-99%" ]) ) {
+            if( $ind >= 75 && $ind <=84 ){
+                $tm_match_cat = "75%-84%";
+                $tm_rate_paid = $equivalentWordMapping[ "75%-84%" ];
+            }
+            elseif( $ind >= 85 && $ind <=94 ){
+                $tm_match_cat = "85%-94%";
+                $tm_rate_paid = $equivalentWordMapping[ "85%-94%" ];
+            }
+            elseif( $ind >= 95 && $ind <=99 ){
+                $tm_match_cat = "95%-99%";
+                $tm_rate_paid = $equivalentWordMapping[ "95%-99%" ];
+            }
+        }
+        elseif ( $ind >= 75 and $ind <= 99 ) {
             $tm_match_cat = "75%-99%";
-            $tm_rate_paid = $equivalentWordMapping["75%-99%"];
+            $tm_rate_paid = $equivalentWordMapping[ "75%-99%" ];
         }
     }
     //this is because 50%-74% is never returned because it's rate equals NO_MATCH
-    if ($tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
+    if ( $tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
         return $tm_match_cat;
     }
+
     return $fast_match_type;
 }
 

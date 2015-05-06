@@ -17,7 +17,7 @@ class INIT {
     public static $REDIS_SERVERS = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
-    public static $QUEUE_NAME = "/queue/matecat_analysis_queue";
+    public static $QUEUE_NAME = "matecat_analysis_queue";
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
     public static $UPLOAD_REPOSITORY;
@@ -185,7 +185,7 @@ class INIT {
         self::$DB_USER     = "matecat"; //database login
         self::$DB_PASS     = "matecat01"; //database password
 
-        self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ );
+        self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
         self::$REDIS_SERVERS        = "tcp://localhost:6379";
         self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
         self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
@@ -204,6 +204,7 @@ class INIT {
 
         $this->_setIncludePath();
         spl_autoload_register('INIT::loadClass');
+        require_once 'Predis/autoload.php';
 
         if (!is_dir(self::$STORAGE_DIR)){
             mkdir (self::$STORAGE_DIR,0755,true);

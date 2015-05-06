@@ -40,4 +40,19 @@ class Constants_AnalysisRedisKeys {
      */
     const PROJ_ST_WORD_COUNT = 'st_wc:';
 
+    /**
+     * Key that holds the main process of TM Analysis
+     */
+    const VOLUME_ANALYSIS_PID = 'tm_pid';
+
+    /**
+     * Key that holds the child list of the processes of TM Analysis
+     */
+    const VA_CHILD_PID_LIST = 'ch_pid_list';
+
+    /**
+     * Key that holds the process ids of all fast analyses
+     */
+    const FAST_PID_LIST = 'fast_pid_list';
+
 }

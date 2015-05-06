@@ -7,7 +7,7 @@
  * 
  */
 
-class AnalysisQueueHandler extends Stomp {
+class Analysis_QueueHandler extends Stomp {
 
     protected $amqHandler;
     protected $redisHandler;
@@ -17,6 +17,8 @@ class AnalysisQueueHandler extends Stomp {
 
     const CLIENT_TYPE_PUBLISHER = 'Publisher';
     const CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
+
+    public $persistent = 'true';
 
     /**
      * Handle a string for the queue name
@@ -42,7 +44,6 @@ class AnalysisQueueHandler extends Stomp {
     protected function _getRedisConnection( ){
 
         if( $this->redisHandler === null ){
-            require_once 'Predis/autoload.php';
             $this->redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
         }
 
@@ -198,7 +199,7 @@ class AnalysisQueueHandler extends Stomp {
     public function getActualForQID( $qid = null ){
 
         if( empty( $this->queueTotalID ) && empty( $qid ) ){
-            throw new Exception( 'Can Not get values without a Queue ID. AnalysisQueueHandler::setQueueID ' );
+            throw new Exception( 'Can Not get values without a Queue ID. Analysis_QueueHandler::setQueueID ' );
         }
 
         if( !empty( $qid ) ){
@@ -219,7 +220,7 @@ class AnalysisQueueHandler extends Stomp {
     public function decrementTotalForWaitingProjects( $qid = null ){
 
         if( empty( $this->queueTotalID ) && empty( $qid ) ){
-            throw new Exception( 'Can Not send without a Queue ID. AnalysisQueueHandler::setQueueID ' );
+            throw new Exception( 'Can Not send without a Queue ID. Analysis_QueueHandler::setQueueID ' );
         }
 
         if( !empty( $qid ) ){
@@ -362,7 +363,7 @@ class AnalysisQueueHandler extends Stomp {
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . count( $failed_segment ) );
-            $this->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => 'true' ) );
+            $this->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
         }
 
     }

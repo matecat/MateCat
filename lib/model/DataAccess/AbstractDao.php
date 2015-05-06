@@ -16,7 +16,7 @@ abstract class DataAccess_AbstractDao {
 
     /**
      * The cache connection object
-     * @var MemcacheHandler
+     * @var Predis\Client
      */
     protected $cache_con;
 
@@ -177,12 +177,15 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _cacheSetConnection(){
         if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
+
+            require_once 'Predis/autoload.php';
             try {
-                $this->cache_con = MemcacheHandler::getInstance();
-            } catch ( Exception $e ) {
+                $this->cache_con = new Predis\Client( INIT::$REDIS_SERVERS );
+            } catch ( Exception $e ){
                 Log::doLog( $e->getMessage() );
-                Log::doLog( "No Memcache server(s) configured." );
+                Log::doLog( "No Redis server(s) configured." );
             }
+
         }
     }
 
@@ -198,7 +201,7 @@ abstract class DataAccess_AbstractDao {
 
         $_existingResult = null;
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            $_existingResult = $this->cache_con->get( $query );
+            $_existingResult = unserialize( $this->cache_con->get( md5( $query ) ) );
         }
 
         return $_existingResult;
@@ -214,7 +217,7 @@ abstract class DataAccess_AbstractDao {
         if($this->cacheTTL == 0 ) return null;
 
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            $this->cache_con->set( $query, $value, $this->cacheTTL );
+            $this->cache_con->setex( md5( $query ), $this->cacheTTL, serialize( $value ) );
         }
     }
 

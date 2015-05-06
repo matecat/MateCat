@@ -1350,16 +1350,16 @@ class CatUtils {
     public static function getTMProps( $job_data ){
 
         try {
-            $memcacheHandler = MemcacheHandler::getInstance();
+            $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
         } catch ( Exception $e ) {
             Log::doLog( $e->getMessage() );
             Log::doLog( "No Memcache server(s) configured." );
         }
 
-        if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-            $_existingResult = $memcacheHandler->get( "project_data_for_job_id:" . $job_data['id'] );
+        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
+            $_existingResult = $redisHandler->get( "project_data_for_job_id:" . $job_data['id'] );
             if ( !empty( $_existingResult ) ) {
-                return $_existingResult;
+                return unserialize( $_existingResult );
             }
         }
 
@@ -1371,11 +1371,11 @@ class CatUtils {
                 'job_id'       => $job_data[ 'id' ],
         );
 
-        if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-            $memcacheHandler->set(
+        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
+            $redisHandler->setex(
                     "project_data_for_job_id:" . $job_data['id'],
-                    $result,
-                    60 * 60 * 24 * 15 /* 15 days of lifetime */
+                    60 * 60 * 24 * 15, /* 15 days of lifetime */
+                    serialize( $result )
             );
         }
 

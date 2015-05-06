@@ -508,46 +508,6 @@ function getJobData( $id_job, $password = null ) {
     return $results[ 0 ];
 }
 
-function getEngineData( $id ) {
-
-    if ( is_array( $id ) ) {
-        $id = explode( ",", $id );
-    }
-
-    $query = "select * from engines where  id IN ($id)";
-
-    try {
-        $memcacheHandler = MemcacheHandler::getInstance();
-    } catch ( Exception $e ) {
-        Log::doLog( $e->getMessage() );
-        Log::doLog( "No Memcache server(s) configured." );
-    }
-
-    if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-        $_existingResult = $memcacheHandler->get( $query );
-        if ( !empty( $_existingResult ) ) {
-            return $_existingResult;
-        }
-    }
-
-    $db = Database::obtain();
-
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-        $memcacheHandler->set( $query, @$results[ 0 ], 60 * 5 );
-    }
-
-    return @$results[ 0 ];
-}
-
 /**
  * @param $job_id       int The job ID
  * @param $job_password int The job password

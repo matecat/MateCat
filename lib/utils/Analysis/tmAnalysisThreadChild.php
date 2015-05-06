@@ -2,55 +2,68 @@
 set_time_limit( 0 );
 include "main.php";
 
-define( "PID_FOLDER", ".pidlist" );
-define( "NUM_PROCESSES", 1 );
-define( "NUM_PROCESSES_FILE", ".num_processes" );
-
-$amqHandlerSubscriber = new AnalysisQueueHandler();
-$amqHandlerSubscriber->subscribe();
-
-$amqHandlerPublisher = new AnalysisQueueHandler();
-
-Log::$fileName = "tm_analysis.log";
-
-// PROCESS CONTROL FUNCTIONS
-function isRunningProcess( $pid ) {
-    if ( file_exists( "/proc/$pid" ) ) {
-        return true;
-    }
-
-    return false;
-}
-
-function processFileExists( $pid ) {
-    $folder = PID_FOLDER;
-//    Log::doLog( __FUNCTION__ . " : $folder/$pid ...." );
-    if ( file_exists( "$folder/$pid" ) ) {
-//        Log::doLog ( "true" );
-
-        return true;
-    }
-//    Log::doLog ( "false" );
-
-    return false;
-}
-
 $UNIQUID = uniqid( '', true );
-
 $my_pid     = getmypid();
 $parent_pid = posix_getppid();
-//Log::doLog ( "--- (child $my_pid) : parent pid is $parent_pid" );
+Log::$fileName = "tm_analysis.log";
+
+try {
+
+    $amqHandlerSubscriber = new Analysis_QueueHandler();
+    $amqHandlerSubscriber->subscribe();
+
+    $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
+    $redisHandler->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
+
+} catch ( Exception $ex ){
+
+    $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
+    Log::doLog( $msg );
+    _TimeStampMsg( $msg );
+    die();
+
+}
+
+// PROCESS CONTROL FUNCTIONS
+function isParentRunning($pid) {
+
+    /**
+     * @var $redisHandler Predis\Client
+     */
+    global $redisHandler;
+
+    return (bool)$redisHandler->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
+
+}
+
+function myProcessExists( $pid ) {
+
+    /**
+     * @var $redisHandler Predis\Client
+     */
+    global $redisHandler;
+
+    $pidList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
+
+    if( array_search( $pid, $pidList ) !== false ){
+        return true;
+    }
+
+    return false;
+
+}
 
 $i = 1;
 while ( 1 ) {
 
-    if ( !processFileExists($my_pid)) {
-        die( "(child $my_pid) :  EXITING!  my file does not exists anymore\n" );
+    if ( !myProcessExists( $my_pid ) ) {
+        Log::doLog( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
+        die( 0 );
     }
 
     // control if parent is still running
-    if ( !isRunningProcess($parent_pid)) {
-        Log::doLog ( "--- (child $my_pid) : EXITING : parent seems to be died." );
+    if ( !isParentRunning( $parent_pid ) ) {
+        Log::doLog( "--- (child $my_pid) : EXITING : my parent seems to be died." );
         exit ( -1 );
     }
 
@@ -216,7 +229,9 @@ while ( 1 ) {
             $amqHandlerSubscriber->tryToCloseProject( $pid, $my_pid );
             $amqHandlerSubscriber->ack( $msg );
 
-            $amqHandlerPublisher->reQueue( $amqHandlerPublisher, $objQueue );
+            $amqHandlerPublisher = new Analysis_QueueHandler();
+            $amqHandlerPublisher->reQueue( $objQueue );
+            $amqHandlerPublisher->disconnect();
 
             continue;
         }

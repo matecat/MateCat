@@ -121,7 +121,7 @@ class getVolumeAnalysisController extends ajaxController {
 
         $this->_resultSet = getProjectStatsVolumeAnalysis( $this->id_project );
 
-        $amqHandler = new AnalysisQueueHandler();
+        $amqHandler = new Analysis_QueueHandler();
         $segmentsBeforeMine = $amqHandler->getActualForQID( $this->id_project );
         $this->_others_in_queue = ( $segmentsBeforeMine >= 0 ? $segmentsBeforeMine : 0 );
 
