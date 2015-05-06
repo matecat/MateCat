@@ -46,7 +46,7 @@ do {
 
     $pid_list = getProjectForVolumeAnalysis('fast', 5);
     if (empty($pid_list)) {
-        _TimeStampMsg( "no projects: wait 3 seconds" );
+        _TimeStampMsg( "No projects: wait 3 seconds", false );
         sleep(3);
         continue;
     }
@@ -183,7 +183,7 @@ function cleanShutDown(  ){
     $db->close();
 
     $msg = str_pad( " FAST ANALYSIS " . getmypid() . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( "$msg" );
+    _TimeStampMsg( $msg );
 
 }
 
@@ -209,8 +209,8 @@ function sigSwitch( $signo ) {
 
 }
 
-function _TimeStampMsg($msg) {
-    Log::doLog( $msg );
+function _TimeStampMsg( $msg, $log = true ) {
+    if( $log ) Log::doLog( $msg );
     echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
 }
 

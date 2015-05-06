@@ -362,7 +362,7 @@ class Analysis_QueueHandler extends Stomp {
     function reQueue( $failed_segment ){
 
         if ( !empty( $failed_segment ) ) {
-            Log::doLog( "Failed " . count( $failed_segment ) );
+            Log::doLog( "Failed " . var_export( $failed_segment, true ) );
             $this->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
         }
 

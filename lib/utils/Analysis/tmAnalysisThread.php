@@ -44,7 +44,7 @@ function cleanShutDown( ){
     $db->close();
 
     $msg = str_pad( " TM ANALYSIS " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( "$msg" );
+    _TimeStampMsg( $msg, true );
 
 }
 
@@ -66,12 +66,12 @@ function sigSwitch( $signo ) {
     }
 
     $msg = str_pad( " Handled Signal $signo ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( $msg );
+    _TimeStampMsg( $msg, true );
 
 }
 
-function _TimeStampMsg($msg) {
-//    Log::doLog( $msg );
+function _TimeStampMsg( $msg, $log = false ) {
+    if( $log ) Log::doLog( $msg );
     echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
 }
 

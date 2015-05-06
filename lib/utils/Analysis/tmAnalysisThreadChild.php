@@ -18,8 +18,8 @@ try {
 } catch ( Exception $ex ){
 
     $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
-    Log::doLog( $msg );
-    _TimeStampMsg( $msg );
+    _TimeStampMsg( $msg, true );
+    _TimeStampMsg( $ex->getMessage(), true );
     die();
 
 }
@@ -53,17 +53,22 @@ function myProcessExists( $pid ) {
 
 }
 
+function _TimeStampMsg( $msg, $log = true ) {
+    if( $log ) Log::doLog( $msg );
+    echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+}
+
 $i = 1;
 while ( 1 ) {
 
     if ( !myProcessExists( $my_pid ) ) {
-        Log::doLog( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
+        _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
         die( 0 );
     }
 
     // control if parent is still running
     if ( !isParentRunning( $parent_pid ) ) {
-        Log::doLog( "--- (child $my_pid) : EXITING : my parent seems to be died." );
+        _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
         exit ( -1 );
     }
 
@@ -78,7 +83,7 @@ while ( 1 ) {
         if ( $msg instanceof StompFrame && ( $msg->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msg->headers /* Stomp Client bug... hack */ ) ) ) {
 
             $i++;
-            Log::doLog( "--- (child $my_pid) : processing frame $i" );
+            _TimeStampMsg( "--- (child $my_pid) : processing frame $i" );
 
             $objQueue = json_decode( $msg->body, true );
             //empty message what to do?? it should not be there, acknowledge and process the next one
@@ -86,23 +91,23 @@ while ( 1 ) {
 
                 Utils::raiseJsonExceptionError();
 
-//                Log::doLog( $msg );
-                Log::doLog ( "--- (child $my_pid) : found frame but no valid segment found for tm volume analysis: wait 2 seconds" );
+//                _TimeStampMsg( $msg );
+                _TimeStampMsg ( "--- (child $my_pid) : found frame but no valid segment found for tm volume analysis: wait 2 seconds" );
                 $amqHandlerSubscriber->ack( $msg );
                 sleep( 2 );
                 continue;
 
             }
         } else {
-//            Log::doLog( "--- (child $my_pid) : no frame found. wait 5 second" );
+//            _TimeStampMsg( "--- (child $my_pid) : no frame found. wait 5 second" );
             sleep(5);
             continue;
         }
 
     } catch ( Exception $e ) {
-        Log::doLog( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
-        Log::doLog( $e->getMessage() );
-        Log::doLog( $e->getTraceAsString() );
+        _TimeStampMsg( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
+        _TimeStampMsg( $e->getMessage() );
+        _TimeStampMsg( $e->getTraceAsString() );
         continue; /* jump the ack */
     }
 
@@ -110,15 +115,15 @@ while ( 1 ) {
     $sid = $objQueue[ 'id_segment' ];
     $jid = $objQueue[ 'id_job' ];
 
-    Log::doLog( "--- (child $my_pid) : segment $sid-$jid found " );
-//        Log::doLog( "segment found is: " );
-//        Log::doLog( $objQueue );
+    _TimeStampMsg( "--- (child $my_pid) : segment $sid-$jid found " );
+//        _TimeStampMsg( "segment found is: " );
+//        _TimeStampMsg( $objQueue );
 
     $amqHandlerSubscriber->initializeTMAnalysis( $objQueue, $my_pid );
 
-    Log::doLog( "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid" );
+    _TimeStampMsg( "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid" );
     //lock segment
-    Log::doLog( "--- (child $my_pid) :  segment $sid-$jid locked" );
+    _TimeStampMsg( "--- (child $my_pid) :  segment $sid-$jid locked" );
 
     $source           = $objQueue[ 'source' ];
     $target           = $objQueue[ 'target' ];
@@ -130,7 +135,7 @@ while ( 1 ) {
     $text = $objQueue[ 'segment' ];
 
     if ( $raw_wc == 0 ) {
-        Log::doLog( "--- (child $my_pid) : empty segment. acknowledge and continue" );
+        _TimeStampMsg( "--- (child $my_pid) : empty segment. acknowledge and continue" );
         setSegmentTranslationError( $sid, $jid ); // SET as DONE
         $amqHandlerSubscriber->incrementAnalyzedCount( $pid, 0, 0 );
         $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
@@ -222,7 +227,7 @@ while ( 1 ) {
 
         } else {
 
-            Log::doLog( "--- (child $my_pid) : error from mymemory : set error and continue" ); // ERROR FROM MYMEMORY
+            _TimeStampMsg( "--- (child $my_pid) : error from mymemory : set error and continue" ); // ERROR FROM MYMEMORY
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
             $amqHandlerSubscriber->incrementAnalyzedCount( $pid, 0, 0 );
             $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
@@ -266,7 +271,7 @@ while ( 1 ) {
      * Only if No results found
      */
     if ( empty( $matches ) || !is_array( $matches ) ) {
-        Log::doLog( "--- (child $my_pid) : No contribution found : set error and continue" ); // ERROR FROM MYMEMORY
+        _TimeStampMsg( "--- (child $my_pid) : No contribution found : set error and continue" ); // ERROR FROM MYMEMORY
         setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
         $amqHandlerSubscriber->incrementAnalyzedCount( $pid, 0, 0 );
         $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
@@ -301,19 +306,19 @@ while ( 1 ) {
             if ( !$qaRealign->thereAreErrors() ) {
 
                 /*
-                Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $objQueue, true ) );
-                Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
-                Log::doLog( $log_prepend . "TMS RAW RESULT:" );
-                Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
+                _TimeStampMsg( $log_prepend . " - Requested Segment: " . var_export( $objQueue, true ) );
+                _TimeStampMsg( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
+                _TimeStampMsg( $log_prepend . "TMS RAW RESULT:" );
+                _TimeStampMsg( $log_prepend . var_export( $matches[ 0 ], true ) );
 
-                Log::doLog( $log_prepend . "Realignment Success:" );
+                _TimeStampMsg( $log_prepend . "Realignment Success:" );
                 */
                 $matches[ 0 ][ 'raw_translation' ] = $qaRealign->getTrgNormalized();
                 $matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
-                //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
+                //_TimeStampMsg( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
 
             } else {
-                Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $objQueue[ 'id_segment' ] );
+                _TimeStampMsg( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $objQueue[ 'id_segment' ] );
             }
 
         }
@@ -360,7 +365,7 @@ while ( 1 ) {
         $check = new PostProcess( $text, $suggestion );
         $check->performTagCheckOnly();
 
-        //log::doLog( $check->getErrors() );
+        //_TimeStampMsg( $check->getErrors() );
 
         if ( $check->thereAreErrors() ) {
             $err_json = $check->getErrorsJSON();
@@ -372,7 +377,7 @@ while ( 1 ) {
 
     ( !empty( $matches[ 0 ][ 'sentence_confidence' ] ) ? $mt_qe = floatval( $matches[ 0 ][ 'sentence_confidence' ] ) : $mt_qe = null );
 
-//        Log::doLog ( "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words" );
+//        _TimeStampMsg ( "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[ $new_match_type ] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words" );
 
     $tm_data                             = array();
     $tm_data[ 'id_job' ]                 = $jid;
@@ -397,7 +402,7 @@ while ( 1 ) {
 
     $amqHandlerSubscriber->ack( $msg );
 
-    Log::doLog( "--- (child $my_pid) : segment $sid-$jid acknowledged" );
+    _TimeStampMsg( "--- (child $my_pid) : segment $sid-$jid acknowledged" );
 
     //set memcache
     $amqHandlerSubscriber->incrementAnalyzedCount( $pid, $eq_words, $standard_words );
@@ -517,12 +522,12 @@ function updateTMValues( $tm_data ){
                 "code" => -5,
                 "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}"
         );
-        Log::doLog( $result );
+        _TimeStampMsg( $result );
 
     } else {
 
         //There was not a fast Analysis??? Impossible.
-        Log::doLog( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
+        _TimeStampMsg( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
 
     }
 
