@@ -5,6 +5,7 @@ include "main.php";
 $UNIQUID = uniqid( '', true );
 $my_pid     = getmypid();
 $parent_pid = posix_getppid();
+$RUNNING = true;
 Log::$fileName = "tm_analysis.log";
 
 try {
@@ -18,13 +19,49 @@ try {
 } catch ( Exception $ex ){
 
     $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
-    _TimeStampMsg( $msg, true );
-    _TimeStampMsg( $ex->getMessage(), true );
+    _TimeStampMsg( $msg );
+    _TimeStampMsg( $ex->getMessage() );
     die();
 
 }
 
 // PROCESS CONTROL FUNCTIONS
+
+function sigSwitch( $signo ) {
+
+    global $RUNNING;
+
+    switch ($signo) {
+        case SIGTERM :
+        case SIGINT :
+        case SIGHUP :
+            $RUNNING = false;
+            break;
+        default :
+            break;
+    }
+
+    $msg = str_pad( " CHILD " . getmypid() . " Caught Signal $signo ", 50, "-", STR_PAD_BOTH );
+    _TimeStampMsg( $msg );
+
+}
+
+function cleanShutDown( ){
+
+    global $redisHandler, $amqHandlerSubscriber, $db;
+
+    //SHUTDOWN
+    $redisHandler->disconnect();
+    $db->close();
+    $amqHandlerSubscriber->disconnect();
+
+    $msg = str_pad( " CHILD " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
+    _TimeStampMsg( $msg, true );
+
+    die();
+
+}
+
 function isParentRunning($pid) {
 
     /**
@@ -53,23 +90,18 @@ function myProcessExists( $pid ) {
 
 }
 
-function _TimeStampMsg( $msg, $log = true ) {
-    if( $log ) Log::doLog( $msg );
-    echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
-}
-
 $i = 1;
-while ( 1 ) {
+do {
 
     if ( !myProcessExists( $my_pid ) ) {
         _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
-        die( 0 );
+        cleanShutDown();
     }
 
     // control if parent is still running
     if ( !isParentRunning( $parent_pid ) ) {
         _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
-        exit ( -1 );
+        cleanShutDown();
     }
 
     $msg      = null;
@@ -409,7 +441,13 @@ while ( 1 ) {
     $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
     $amqHandlerSubscriber->tryToCloseProject( $pid, $my_pid );
 
-}
+} while ( $RUNNING );
+
+cleanShutDown();
+
+
+
+//ANALYSIS FUNCTIONS
 
 
 /**

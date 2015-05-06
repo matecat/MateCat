@@ -18,17 +18,38 @@ try {
 Log::$fileName = "fastAnalysis.log";
 $RUNNING = true;
 
-declare ( ticks = 1 );
-if (! function_exists ( 'pcntl_signal' )) {
-    $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
+function sigSwitch( $signo ) {
+
+    global $RUNNING;
+
+    switch ($signo) {
+        case SIGTERM :
+        case SIGINT :
+            $RUNNING = false;
+            break;
+        case SIGHUP :
+            $RUNNING = false;
+            cleanShutDown();
+            break;
+        default :
+            break;
+    }
+
+    $msg = str_pad( " CHILD " . getmypid() . " Caught Signal $signo ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg );
-} else {
 
-    pcntl_signal( SIGTERM, 'sigSwitch' );
-    pcntl_signal( SIGINT, 'sigSwitch' );
-    pcntl_signal( SIGHUP, 'sigSwitch' );
+}
 
-    $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
+function cleanShutDown(  ){
+
+    global $redisHandler, $db;
+
+    //SHUTDOWN
+    $redisHandler->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, getmypid() );
+    $redisHandler->disconnect();
+    $db->close();
+
+    $msg = str_pad( " FAST ANALYSIS " . getmypid() . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg );
 
 }
@@ -158,7 +179,14 @@ do {
         unset( $segment_hashes );
         _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
-        insertData( $pid, $data, INIT::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+        // INSERT DATA
+        _TimeStampMsg( "inserting segments..." );
+        $insertReportRes = insertFastAnalysis( $pid, $data, INIT::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+        if ( $insertReportRes < 0 ) {
+            _TimeStampMsg( "insertFastAnalysis failed...." );
+        }
+        _TimeStampMsg( "done" );
+        // INSERT DATA
 
         unset( $data );
         _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
@@ -171,61 +199,9 @@ do {
 
 cleanShutDown();
 
-die();
 
-function cleanShutDown(  ){
 
-    global $redisHandler, $db;
-
-    //SHUTDOWN
-    $redisHandler->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, getmypid() );
-    $redisHandler->disconnect();
-    $db->close();
-
-    $msg = str_pad( " FAST ANALYSIS " . getmypid() . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( $msg );
-
-}
-
-function sigSwitch( $signo ) {
-
-    global $RUNNING;
-
-    switch ($signo) {
-        case SIGTERM :
-        case SIGINT :
-            $RUNNING = false;
-            break;
-        case SIGHUP :
-            $RUNNING = false;
-            cleanShutDown();
-            break;
-        default :
-            break;
-    }
-
-    $msg = str_pad( " Handled Signal $signo ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( $msg );
-
-}
-
-function _TimeStampMsg( $msg, $log = true ) {
-    if( $log ) Log::doLog( $msg );
-    echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
-}
-
-function insertData( $pid, &$data, $equivalentWordMapping, $perform_Tms_Analysis ){
-
-    _TimeStampMsg( "inserting segments..." );
-
-    $insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
-    if ( $insertReportRes < 0 ) {
-        _TimeStampMsg( "insertFastAnalysis failed...." );
-    }
-
-    _TimeStampMsg( "done" );
-
-}
+//FAST FUNCTIONS
 
 function updateProject( $pid, $status ){
 

@@ -807,7 +807,7 @@ class ProjectManager {
         $filename2SourceLangCheck = array();
 
         //istantiate MyMemory analyzer and detect languages for each file uploaded
-        $mma = new MyMemoryAnalyzer( 1 /* MyMemory */ );
+        $mma = Engine::getInstance( 1 /* MyMemory */ );
         $res = $mma->detectLanguage( $filesSegments, $this->projectStructure[ 'lang_detect_files' ] );
 
         //for each language detected, check if it's not equal to the source language

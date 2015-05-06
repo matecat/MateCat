@@ -2,7 +2,7 @@ INSTALL.TXT
 ===========
 
 Server side requirements
-- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2) + PHP 5 CLI (version >= 5.2)
+- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.3) + PHP 5 CLI (version >= 5.3)
 - Apache htaccess enabled
 - Apache rewrite module installed
 - Apache filter  module installed
@@ -15,7 +15,8 @@ Server side requirements
     post_max_size = 32MB
     upload_max_filesize = 32MB
     memory_limit = 1024M
-
+- Apache ActiveMQ installed
+- Redis-Server installed
 
 Client side requirements
 - Chrome or Firefox web browser installed 

@@ -10,28 +10,14 @@ try {
     $redisHandler->set( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID, $my_pid );
 } catch ( Exception $ex ){
     $msg = "****** No REDIS instances found. Exiting. ******";
-    Log::doLog( $msg );
-    _TimeStampMsg( $msg );
+    _TimeStampMsg( $msg, true );
     die();
 }
 
 Log::$fileName = "tm_analysis.log";
 $RUNNING = true;
 
-declare ( ticks = 1 );
-if (! function_exists ( 'pcntl_signal' )) {
-    $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-    _TimeStampMsg( $msg );
-} else {
-
-    pcntl_signal( SIGTERM, 'sigSwitch' );
-    pcntl_signal( SIGINT, 'sigSwitch' );
-    pcntl_signal( SIGHUP, 'sigSwitch' );
-
-    $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( "$msg" );
-
-}
+// PROCESS CONTROL FUNCTIONS
 
 function cleanShutDown( ){
 
@@ -65,17 +51,11 @@ function sigSwitch( $signo ) {
             break;
     }
 
-    $msg = str_pad( " Handled Signal $signo ", 50, "-", STR_PAD_BOTH );
-    _TimeStampMsg( $msg, true );
+    $msg = str_pad( " TM ANALYSIS " . getmypid() . " Caught Signal $signo ", 50, "-", STR_PAD_BOTH );
+    _TimeStampMsg( $msg );
 
 }
 
-function _TimeStampMsg( $msg, $log = false ) {
-    if( $log ) Log::doLog( $msg );
-    echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
-}
-
-// PROCESS CONTROL FUNCTIONS
 function isRunningChild($pid) {
 
     /**
@@ -90,11 +70,12 @@ function isRunningChild($pid) {
     }
 
     return false;
+
 }
 
-_TimeStampMsg( "(parent $my_pid) : ------------------- cleaning old resources -------------------" );
+_TimeStampMsg( "(parent $my_pid) : ------------------- cleaning old resources -------------------", false );
 // delete other processes of old execution
-$deletedPidList = deletePid();
+deletePid();
 // wait all old children exits
 
 //START EVENTS
@@ -103,12 +84,18 @@ do {
 
 //    _TimeStampMsg( "(parent $my_pid) : PARENT MONITORING START" );
 
+    if( !$redisHandler->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID ) ) {
+        cleanShutDown();
+        _TimeStampMsg( "(parent $my_pid) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!", true );
+        die();
+    }
+
     //avoid zombies : the parent is aware of the death of one of the children
     $dead = pcntl_waitpid( -1, $status, WNOHANG );
     if ( $dead > 0 ) {
-        _TimeStampMsg( "(parent $my_pid) : child $dead exited: deleting file ...." );
+        _TimeStampMsg( "(parent $my_pid) : child $dead exited: deleting file ....", false );
         deletePid( $dead );
-        _TimeStampMsg( "DONE" );
+        _TimeStampMsg( "DONE", false );
     }
     $numProcesses        = setNumProcesses();
     $childrenRunningList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
@@ -123,26 +110,27 @@ do {
 
         case $numProcessesDiff < 0:
             //launch abs($numProcessesDiff) processes
-//            _TimeStampMsg( "(parent $my_pid) : need to launch additional $numProcessesToLaunchOrDelete processes" );
+//            _TimeStampMsg( "(parent $my_pid) : need to launch additional $numProcessesToLaunchOrDelete processes", false );
             $res = launchProcesses( $numProcessesToLaunchOrDelete );
             if ( $res < 0 ) {
-                die( "(parent $my_pid) : ERROR OCCURRED :  PARENT EXITING !!" );
+                cleanShutDown();
+                _TimeStampMsg( "(parent $my_pid) : ERROR OCCURRED :  PARENT EXITING !!", true );
+                die();
             }
             break;
         case $numProcessesDiff > 0:
-            _TimeStampMsg( "(parent $my_pid) : need to delete $numProcessesToLaunchOrDelete processes" );
+            _TimeStampMsg( "(parent $my_pid) : need to delete $numProcessesToLaunchOrDelete processes", false );
             deletePid( "", $numProcessesToLaunchOrDelete );
             break;
         default:
-            _TimeStampMsg( "(parent $my_pid) : no pid to delete everithing  works well" );
+            _TimeStampMsg( "(parent $my_pid) : no pid to delete everithing  works well", false );
 
     }
 
-    _TimeStampMsg( "(parent) : PARENT MONITORING PAUSE ($my_pid) sleeping ...." );
+    _TimeStampMsg( "(parent) : PARENT MONITORING PAUSE ($my_pid) sleeping ....", false );
     sleep( 5 );
 
-}
-while( $RUNNING );
+} while( $RUNNING );
 
 cleanShutDown();
 
@@ -158,19 +146,19 @@ function launchProcesses( $numProcesses = 1 ) {
     global $redisHandler;
 
     $processLaunched = 0;
-//    _TimeStampMsg( __FUNCTION__ . " : parent launching $numProcesses processes - $processLaunched  already launched " );
+//    _TimeStampMsg( __FUNCTION__ . " : parent launching $numProcesses processes - $processLaunched  already launched ", false );
 
     while ( $processLaunched < $numProcesses ) {
-        _TimeStampMsg( "launching ....." );
+        _TimeStampMsg( "launching .....", false );
         $pid = pcntl_fork();
 
         if ( $pid == -1 ) {
-            _TimeStampMsg( "PARENT FATAL !! cannot fork. Exiting!" );
+            _TimeStampMsg( "PARENT FATAL !! cannot fork. Exiting!", false );
 
             return -1;
         }
         if ( $pid ) {
-            _TimeStampMsg( "DONE pid is $pid" );
+            _TimeStampMsg( "DONE pid is $pid", false );
             // parent process runs what is here
             $processLaunched += 1;
         } else {
@@ -178,16 +166,16 @@ function launchProcesses( $numProcesses = 1 ) {
             $pid = getmypid();
 
             if ( !$redisHandler->rpush( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, $pid ) ) {
-                _TimeStampMsg( "(child $pid) : FATAL !! cannot create child file. Exiting!" );
+                _TimeStampMsg( "(child $pid) : FATAL !! cannot create child file. Exiting!", false );
                 return -2;
 
             } else {
-                _TimeStampMsg( "(child $pid) : created !!!" );
+                _TimeStampMsg( "(child $pid) : created !!!", false );
             }
 
             pcntl_exec( "/usr/bin/php", array( "tmAnalysisThreadChild.php" ) );
 
-            exit;
+            exit; //never executed
         }
 
         // this sleep is for tempt to avoid two fork select the same segment: backward compatibility with MySql Child
@@ -204,7 +192,7 @@ function deletePid( $pid = "", $num = -1 ) {
      */
     global $redisHandler;
 
-    _TimeStampMsg( "Request to delete pid = " . var_export( $pid, true ) . ", num = " . var_export( $num, true ) );
+    _TimeStampMsg( "Request to delete pid = " . var_export( $pid, true ) . ", num = " . var_export( $num, true ), false );
 
     $numDeleted = 0;
     $files      = array();
@@ -212,14 +200,14 @@ function deletePid( $pid = "", $num = -1 ) {
     if ( empty( $pid ) ) {
 
         if ( $num > 0 ) {
-            _TimeStampMsg( "Deleting $num pid in the list." );
+            _TimeStampMsg( "Deleting $num pid in the list.", false );
         }
 
         $files = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
 
     } else {
 
-        _TimeStampMsg( "Single PID to delete: $pid" );
+        _TimeStampMsg( "Single PID to delete: $pid", false );
         $files[ ] = $pid;
 
     }
@@ -227,7 +215,7 @@ function deletePid( $pid = "", $num = -1 ) {
     if( empty( $pid ) && $num == -1 ){
 
         //default params
-        _TimeStampMsg( "Deleting all pid process id" );
+        _TimeStampMsg( "Deleting all pid process id", false );
         $redisHandler->del( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST );
         $numDeleted = count( $files );
 
@@ -254,7 +242,7 @@ function deletePid( $pid = "", $num = -1 ) {
 
     }
 
-    _TimeStampMsg( "Deleted $numDeleted files" );
+    _TimeStampMsg( "Deleted $numDeleted files", false );
 
 }
 
@@ -267,7 +255,7 @@ function setNumProcesses() {
     }
 
     if ( !is_int( $num_processes ) ) {
-        _TimeStampMsg( "WARNING : num processes from file is not numeric. Back to default value NUM_PROCESSES = 1" );
+        _TimeStampMsg( "WARNING : num processes from file is not numeric. Back to default value NUM_PROCESSES = 1", false );
         $num_processes = 1;
     }
 

@@ -19,7 +19,7 @@
 /* vim: set expandtab tabstop=3 shiftwidth=3: */
 
 require_once 'Stomp/Frame.php';
-
+require_once 'Stomp/Exception.php';
 /**
  * A Stomp Connection
  *
