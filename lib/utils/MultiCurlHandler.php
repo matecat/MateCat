@@ -9,7 +9,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 14/04/14
  * Time: 18.35
- * 
+ *
  */
 class MultiCurlHandler {
 
@@ -45,12 +45,12 @@ class MultiCurlHandler {
      * Class Constructor, init the multi curl handler
      *
      */
-    public function __construct(){
+    public function __construct() {
 
         $this->multi_handler = curl_multi_init();
 
         Utils::getPHPVersion();
-        if( PHP_MINOR_VERSION >= 5 ){
+        if ( PHP_MINOR_VERSION >= 5 ) {
 //          curl_multi_setopt only for (PHP 5 >= 5.5.0) Default 10
 
             curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
@@ -62,7 +62,7 @@ class MultiCurlHandler {
      * Class destructor
      *
      */
-    public function __destruct(){
+    public function __destruct() {
         $this->multiCurlCloseAll();
     }
 
@@ -70,13 +70,13 @@ class MultiCurlHandler {
      * Close all active curl handlers and multi curl handler itself
      *
      */
-    public function multiCurlCloseAll(){
+    public function multiCurlCloseAll() {
 
-        if( is_resource( $this->multi_handler ) ){
+        if ( is_resource( $this->multi_handler ) ) {
 
-            foreach( $this->curl_handlers as $curl_handler ){
+            foreach ( $this->curl_handlers as $curl_handler ) {
                 curl_multi_remove_handle( $this->multi_handler, $curl_handler );
-                if( is_resource( $curl_handler ) ){
+                if ( is_resource( $curl_handler ) ) {
                     curl_close( $curl_handler );
                     $curl_handler = null;
                 }
@@ -95,7 +95,7 @@ class MultiCurlHandler {
      */
     public function multiExec() {
 
-        $_info          = array();
+        $_info         = array();
         $still_running = null;
 
         do {
@@ -127,7 +127,7 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ]                                = $_info[ (int)$curl_resource ][ 'result' ];
+            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
 
             //Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ]);
 
@@ -138,14 +138,14 @@ class MultiCurlHandler {
     /**
      * Create a curl resource and add it to the pool indexing it with an unique identifier
      *
-     * @param $url string
-     * @param $options array
+     * @param $url       string
+     * @param $options   array
      * @param $tokenHash string
      *
      * @return string Curl identifier
      *
      */
-    public function createResource( $url, $options, $tokenHash = null ){
+    public function createResource( $url, $options, $tokenHash = null ) {
 
         if ( empty( $tokenHash ) ) {
             $tokenHash = md5( uniqid( "", true ) );
@@ -163,13 +163,13 @@ class MultiCurlHandler {
     /**
      * Add an already existent curl resource to the pool indexing it with an unique identifier
      *
-     * @param resource     $curl_resource
-     * @param null|string  $tokenHash
+     * @param resource    $curl_resource
+     * @param null|string $tokenHash
      *
      * @return string
      * @throws LogicException
      */
-    public function addResource( $curl_resource, $tokenHash = null ){
+    public function addResource( $curl_resource, $tokenHash = null ) {
 
         if ( $tokenHash == null ) {
             $tokenHash = md5( uniqid( '', true ) );
@@ -195,7 +195,7 @@ class MultiCurlHandler {
      *
      * @return array
      */
-    public function getAllContents(){
+    public function getAllContents() {
         return $this->multi_curl_results;
     }
 
@@ -204,7 +204,7 @@ class MultiCurlHandler {
      *
      * @return array[]
      */
-    public function getAllInfo(){
+    public function getAllInfo() {
         return $this->multi_curl_info;
     }
 
@@ -215,10 +215,11 @@ class MultiCurlHandler {
      *
      * @return string|bool|null
      */
-    public function getSingleContent( $tokenHash ){
-        if( array_key_exists( $tokenHash, $this->multi_curl_results ) ){
+    public function getSingleContent( $tokenHash ) {
+        if ( array_key_exists( $tokenHash, $this->multi_curl_results ) ) {
             return $this->multi_curl_results[ $tokenHash ];
         }
+
         return null;
     }
 
@@ -229,19 +230,21 @@ class MultiCurlHandler {
      *
      * @return array|null
      */
-    public function getSingleInfo( $tokenHash ){
-        if( array_key_exists( $tokenHash, $this->multi_curl_info ) ){
+    public function getSingleInfo( $tokenHash ) {
+        if ( array_key_exists( $tokenHash, $this->multi_curl_info ) ) {
             return $this->multi_curl_info[ $tokenHash ];
         }
+
         return null;
     }
 
 
-    public function getError( $tokenHash ){
-        $res = array();
-        $res['http_code'] = $this->multi_curl_info[ $tokenHash ][ 'http_code' ];
-        $res['error']     = $this->multi_curl_info[ $tokenHash ][ 'error' ];
-        $res['errno']     = $this->multi_curl_info[ $tokenHash ][ 'errno' ];
+    public function getError( $tokenHash ) {
+        $res                = array();
+        $res[ 'http_code' ] = $this->multi_curl_info[ $tokenHash ][ 'http_code' ];
+        $res[ 'error' ]     = $this->multi_curl_info[ $tokenHash ][ 'error' ];
+        $res[ 'errno' ]     = $this->multi_curl_info[ $tokenHash ][ 'errno' ];
+
         return $res;
     }
 
@@ -252,7 +255,7 @@ class MultiCurlHandler {
      *
      * @return bool
      */
-    public function hasError( $tokenHash ){
+    public function hasError( $tokenHash ) {
         return !empty( $this->multi_curl_info[ $tokenHash ][ 'error' ] ) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0;
     }
 
