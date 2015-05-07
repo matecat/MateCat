@@ -60,7 +60,7 @@ class ProjectManager {
                             'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
                             'segments'             => array(), //array of files_id => segmentsArray()
                             'translations'         => array(),
-                        //one translation for every file because translations are files related
+                            //one translation for every file because translations are files related
                             'query_translations'   => array(),
                             'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
                             'job_to_split'         => null,
@@ -609,27 +609,27 @@ class ProjectManager {
 
 
         $query_project_summary = "
-			SELECT
-			COUNT( s.id ) AS project_segments,
-				SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
-				FROM segments s
-				INNER JOIN files_job fj ON fj.id_file = s.id_file
-				INNER JOIN jobs j ON j.id= fj.id_job
-				LEFT JOIN segment_translations st ON s.id = st.id_segment
-				WHERE j.id_project = %u
-				";
+            SELECT
+                 COUNT( s.id ) AS project_segments,
+                 SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
+            FROM segments s
+            INNER JOIN files_job fj ON fj.id_file = s.id_file
+            INNER JOIN jobs j ON j.id= fj.id_job
+            LEFT JOIN segment_translations st ON s.id = st.id_segment
+            WHERE j.id_project = %u
+        ";
 
         $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
 
         $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
 
         $update_project_count = "
-			UPDATE projects
-			SET
-			standard_analysis_wc = %.2F,
-			status_analysis = '%s'
-			WHERE id = %u
-			";
+            UPDATE projects
+              SET
+                standard_analysis_wc = %.2F,
+                status_analysis = '%s'
+            WHERE id = %u
+        ";
 
         $update_project_count = sprintf(
                 $update_project_count,
@@ -640,8 +640,6 @@ class ProjectManager {
 
         $this->dbHandler->query( $update_project_count );
 
-        //    var_dump($this->projectStructure);
-        //        exit;
 
     }
 
@@ -695,8 +693,7 @@ class ProjectManager {
                 //set private tm key string to the first tm_key for retro-compatibility
 
                 Log::doLog( $projectStructure[ 'private_tm_key' ] );
-
-                //                $projectStructure[ 'private_tm_key' ] = $projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+                
             }
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
@@ -748,7 +745,7 @@ class ProjectManager {
         $filename2SourceLangCheck = array();
 
         //istantiate MyMemory analyzer and detect languages for each file uploaded
-        $mma = new MyMemoryAnalyzer( 1 /* MyMemory */ );
+        $mma = Engine::getInstance( 1 /* MyMemory */ );
         $res = $mma->detectLanguage( $filesSegments, $this->projectStructure[ 'lang_detect_files' ] );
 
         //for each language detected, check if it's not equal to the source language
@@ -858,16 +855,16 @@ class ProjectManager {
          *
          */
         $query = "SELECT
-			SUM( raw_word_count ) AS raw_word_count,
-				SUM(eq_word_count) AS eq_word_count,
-				job_first_segment, job_last_segment, s.id, s.show_in_cattool
-				FROM segments s
-				LEFT  JOIN segment_translations st ON st.id_segment = s.id
-				INNER JOIN jobs j ON j.id = st.id_job
-				WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
-				AND j.id = %u
-				AND j.password = '%s'
-				GROUP BY s.id WITH ROLLUP";
+            SUM( raw_word_count ) AS raw_word_count,
+            SUM(eq_word_count) AS eq_word_count,
+            job_first_segment, job_last_segment, s.id, s.show_in_cattool
+                FROM segments s
+                LEFT  JOIN segment_translations st ON st.id_segment = s.id
+                INNER JOIN jobs j ON j.id = st.id_job
+                WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                AND j.id = %u
+                AND j.password = '%s'
+                GROUP BY s.id WITH ROLLUP";
 
         $query = sprintf( $query,
                 $projectStructure[ 'job_to_split' ],
@@ -999,11 +996,11 @@ class ProjectManager {
             $jobInfo[ 'job_last_segment' ]    = $contents[ 'segment_end' ];
 
             $query = "INSERT INTO jobs ( " . implode( ", ", array_keys( $jobInfo ) ) . " )
-				VALUES ( '" . implode( "', '", array_values( $jobInfo ) ) . "' )
-				ON DUPLICATE KEY UPDATE
-				last_opened_segment = {$jobInfo['last_opened_segment']},
-				job_first_segment = '{$jobInfo['job_first_segment']}',
-				job_last_segment = '{$jobInfo['job_last_segment']}'";
+                VALUES ( '" . implode( "', '", array_values( $jobInfo ) ) . "' )
+                ON DUPLICATE KEY UPDATE
+                last_opened_segment = {$jobInfo['last_opened_segment']},
+                job_first_segment = '{$jobInfo['job_first_segment']}',
+                job_last_segment = '{$jobInfo['job_last_segment']}'";
 
 
             //add here job id to list
@@ -1035,71 +1032,7 @@ class ProjectManager {
             }
         }
 
-
-        $this->projectStructure[ 'result' ][ 'code' ]            = 1;
-        $this->projectStructure[ 'result' ][ 'data' ]            = "OK";
-        $this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
-        $this->projectStructure[ 'result' ][ 'password' ]        = $this->projectStructure[ 'array_jobs' ][ 'job_pass' ];
-        $this->projectStructure[ 'result' ][ 'id_job' ]          = $this->projectStructure[ 'array_jobs' ][ 'job_list' ];
-        $this->projectStructure[ 'result' ][ 'job_segments' ]    = $this->projectStructure[ 'array_jobs' ][ 'job_segments' ];
-        $this->projectStructure[ 'result' ][ 'id_project' ]      = $this->projectStructure[ 'id_project' ];
-        $this->projectStructure[ 'result' ][ 'project_name' ]    = $this->projectStructure[ 'project_name' ];
-        $this->projectStructure[ 'result' ][ 'source_language' ] = $this->projectStructure[ 'source_language' ];
-        $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
-        $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
-        $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
-
-
-        $query_project_summary = "
-			SELECT
-			COUNT( s.id ) AS project_segments,
-				SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
-				FROM segments s
-				INNER JOIN files_job fj ON fj.id_file = s.id_file
-				INNER JOIN jobs j ON j.id= fj.id_job
-				LEFT JOIN segment_translations st ON s.id = st.id_segment
-				WHERE j.id_project = %u
-				";
-
-        $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
-
-        $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
-
-        /**
-         * TODO: remove after queue implementation
-         */
-        if ( $project_summary[ 0 ][ 'project_segments' ] > 50000 ) {
-            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
-
-            $msg = "
-				WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[ 0 ][ 'project_segments' ] . " )\n" .
-                    var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
-                    "  " .
-                    var_export( $project_summary[ 0 ], true ) . "\n";
-
-            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
-
-        }
-
-        $update_project_count = "
-			UPDATE projects
-			SET
-			standard_analysis_wc = %.2F,
-			status_analysis = '%s'
-			WHERE id = %u
-			";
-
-        $update_project_count = sprintf(
-                $update_project_count,
-                $project_summary[ 0 ][ 'project_raw_wordcount' ],
-                $this->projectStructure[ 'status' ],
-                $this->projectStructure[ 'id_project' ]
-        );
-
-        $this->dbHandler->query( $update_project_count );
     }
-    //    var_dump($this->projectStructure);
-    //        exit;
 
     /**
      * Apply new structure of job
@@ -1114,9 +1047,9 @@ class ProjectManager {
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
 
         $query_job = "SELECT *
-			FROM jobs
-			WHERE id = %u
-			ORDER BY job_first_segment";
+            FROM jobs
+            WHERE id = %u
+            ORDER BY job_first_segment";
 
         $query_job = sprintf( $query_job, $projectStructure[ 'job_to_merge' ] );
         //$projectStructure[ 'job_to_split' ]
@@ -1299,7 +1232,7 @@ class ProjectManager {
 
                             //Log::doLog( $xliff_trans_unit ); die();
 
-                            //                            $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
+//                            $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
 
                             $mid               = $this->dbHandler->escape( $seg_source[ 'mid' ] );
                             $ext_tags          = $this->dbHandler->escape( $seg_source[ 'ext-prec-tags' ] );
@@ -1325,10 +1258,10 @@ class ProjectManager {
 
                         $tempSeg = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
                         $tempSeg = trim( $tempSeg );
-                        //                        $tempSeg = CatUtils::placeholdnbsp( $tempSeg );
+//                        $tempSeg = CatUtils::placeholdnbsp( $tempSeg );
                         $prec_tags = null;
                         $succ_tags = null;
-                        if ( empty( $tempSeg ) ) {
+                        if ( empty( $tempSeg ) ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
                             $show_in_cattool = 0;
                         } else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
@@ -1401,7 +1334,7 @@ class ProjectManager {
 
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         //split the query in to chunks if there are too much segments
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 1000 ) );
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 200 ) );
 
         Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 
@@ -1464,11 +1397,11 @@ class ProjectManager {
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
             //split the query in to chunks if there are too much segments
-            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 1000 ) );
+            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 200 ) );
 
             Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
 
-            //            Log::doLog( print_r( $this->projectStructure['translations'],true ) );
+//            Log::doLog( print_r( $this->projectStructure['translations'],true ) );
 
             foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
 
@@ -1650,7 +1583,6 @@ class ProjectManager {
             return $file_reference_id;
         }
     }
-
 
     protected function _sanitizeName( $nameString ) {
 

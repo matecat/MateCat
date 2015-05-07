@@ -39,8 +39,12 @@ class CatUtils {
                     "it" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
@@ -48,8 +52,12 @@ class CatUtils {
                     "fr" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
@@ -57,8 +65,13 @@ class CatUtils {
                     "pt" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
@@ -66,8 +79,12 @@ class CatUtils {
                     "es" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
@@ -75,8 +92,12 @@ class CatUtils {
                     "nl" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 80
@@ -84,8 +105,12 @@ class CatUtils {
                     "pl" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -93,8 +118,12 @@ class CatUtils {
                     "uk" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -102,8 +131,12 @@ class CatUtils {
                     "hi" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -111,8 +144,12 @@ class CatUtils {
                     "fi" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -120,8 +157,12 @@ class CatUtils {
                     "tr" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -129,8 +170,12 @@ class CatUtils {
                     "ru" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -138,8 +183,12 @@ class CatUtils {
                     "zh" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -147,8 +196,12 @@ class CatUtils {
                     "ar" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -156,8 +209,12 @@ class CatUtils {
                     "ko" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -165,8 +222,12 @@ class CatUtils {
                     "lt" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -174,8 +235,12 @@ class CatUtils {
                     "ja" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -183,8 +248,12 @@ class CatUtils {
                     "he" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -192,8 +261,12 @@ class CatUtils {
                     "sr" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
-                            '75%-99%'     => 60,
+                            //'75%-99%'     => 60,
+                            '75%-84%'     => 60,
+                            '85%-94%'     => 60,
+                            '95%-99%'     => 60,
                             '100%'        => 30,
+                            '100%_PUBLIC' => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
                             'MT'          => 90
@@ -774,6 +847,29 @@ class CatUtils {
 
     }
 
+    /**
+     * No More used
+     *
+     * @deprecated
+     *
+     * @param        $id_segment
+     * @param        $id_job
+     * @param string $suggestions_json_array
+     * @param string $suggestion
+     * @param string $suggestion_match
+     * @param string $suggestion_source
+     * @param string $match_type
+     * @param int    $eq_words
+     * @param int    $standard_words
+     * @param string $translation
+     * @param string $tm_status_analysis
+     * @param int    $warning
+     * @param string $err_json
+     * @param int    $mt_qe
+     * @param int    $pretranslate_100
+     *
+     * @return int
+     */
     public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0, $pretranslate_100 = 0) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
@@ -1254,16 +1350,16 @@ class CatUtils {
     public static function getTMProps( $job_data ){
 
         try {
-            $memcacheHandler = MemcacheHandler::getInstance();
+            $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
         } catch ( Exception $e ) {
             Log::doLog( $e->getMessage() );
             Log::doLog( "No Memcache server(s) configured." );
         }
 
-        if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-            $_existingResult = $memcacheHandler->get( "project_data_for_job_id:" . $job_data['id'] );
+        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
+            $_existingResult = $redisHandler->get( "project_data_for_job_id:" . $job_data['id'] );
             if ( !empty( $_existingResult ) ) {
-                return $_existingResult;
+                return unserialize( $_existingResult );
             }
         }
 
@@ -1275,11 +1371,11 @@ class CatUtils {
                 'job_id'       => $job_data[ 'id' ],
         );
 
-        if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-            $memcacheHandler->set(
+        if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
+            $redisHandler->setex(
                     "project_data_for_job_id:" . $job_data['id'],
-                    $result,
-                    60 * 60 * 24 * 15 /* 15 days of lifetime */
+                    60 * 60 * 24 * 15, /* 15 days of lifetime */
+                    serialize( $result )
             );
         }
 

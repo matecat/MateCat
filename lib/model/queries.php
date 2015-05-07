@@ -508,46 +508,6 @@ function getJobData( $id_job, $password = null ) {
     return $results[ 0 ];
 }
 
-function getEngineData( $id ) {
-
-    if ( is_array( $id ) ) {
-        $id = explode( ",", $id );
-    }
-
-    $query = "select * from engines where  id IN ($id)";
-
-    try {
-        $memcacheHandler = MemcacheHandler::getInstance();
-    } catch ( Exception $e ) {
-        Log::doLog( $e->getMessage() );
-        Log::doLog( "No Memcache server(s) configured." );
-    }
-
-    if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-        $_existingResult = $memcacheHandler->get( $query );
-        if ( !empty( $_existingResult ) ) {
-            return $_existingResult;
-        }
-    }
-
-    $db = Database::obtain();
-
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    if ( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ) {
-        $memcacheHandler->set( $query, @$results[ 0 ], 60 * 5 );
-    }
-
-    return @$results[ 0 ];
-}
-
 /**
  * @param $job_id       int The job ID
  * @param $job_password int The job password
@@ -1284,32 +1244,12 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 }
 */
 
-function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = null ) {
-    $data                          = array();
-    $data[ 'id_job' ]              = $id_job;
-    $data[ 'suggestions_array' ]   = $suggestions_json_array;
-    $data[ 'suggestion' ]          = $suggestion;
-    $data[ 'suggestion_match' ]    = $suggestion_match;
-    $data[ 'suggestion_source' ]   = $suggestion_source;
-    $data[ 'match_type' ]          = $match_type;
-    $data[ 'eq_word_count' ]       = $eq_words;
-    $data[ 'standard_word_count' ] = $standard_words;
-    $data[ 'mt_qe' ]               = $mt_qe;
+function setSuggestionUpdate( $data ) {
 
-    ( $segment_status !== null ) ? $data[ 'status' ] = $segment_status : null;
+    $id_segment = (int)$data[ 'id_segment' ];
+    $id_job = (int)$data[ 'id_job' ];
 
-    ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
-    ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
-
-    $data[ 'warning' ]                = $warning;
-    $data[ 'serialized_errors_list' ] = $err_json_list;
-
-    $and_sugg = "";
-    if ( $tm_status_analysis != 'DONE' ) {
-        $and_sugg = "and suggestions_array is NULL";
-    }
-
-    $where = " id_segment=$id_segment and id_job=$id_job $and_sugg";
+    $where = " id_segment=$id_segment and id_job=$id_job";
 
     $db = Database::obtain();
     $db->update( 'segment_translations', $data, $where );
@@ -2185,55 +2125,6 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 
     return $results;
 }
-
-function getProjectStatsVolumeAnalysis2( $pid, $groupby = "job" ) {
-
-    $db = Database::obtain();
-
-    switch ( $groupby ) {
-        case 'job':
-            $first_column = "j.id";
-            $groupby      = " GROUP BY j.id";
-            break;
-        case 'file':
-            $first_column = "fj.id_file,fj.id_job,";
-            $groupby      = " GROUP BY fj.id_file,fj.id_job";
-            break;
-        default:
-            $first_column = "j.id";
-            $groupby      = " GROUP BY j.id";
-    }
-
-    $query   = "select $first_column,
-		sum(if(st.match_type='INTERNAL' ,s.raw_word_count,0)) as INTERNAL_MATCHES,
-		sum(if(st.match_type='MT' ,s.raw_word_count,0)) as MT,
-		sum(if(st.match_type='NEW' ,s.raw_word_count,0)) as NEW,
-		sum(if(st.match_type='NO_MATCH' ,s.raw_word_count,0)) as NO_MATCH,
-		sum(if(st.match_type='100%' ,s.raw_word_count,0)) as `100%`,
-		sum(if(st.match_type='75%-99%' ,s.raw_word_count,0)) as `75%-99%`,
-		sum(if(st.match_type='50%-74%' ,s.raw_word_count,0)) as `50%-74%`,
-		sum(if(st.match_type='REPETITIONS' ,s.raw_word_count,0)) as REPETITIONS
-			from jobs j 
-			inner join projects p on p.id=j.id_project
-			inner join files_job fj on fj.id_job=j.id
-			inner join segments s on s.id_file=fj.id_file
-			left outer join segment_translations st on st.id_segment=s.id 
-
-			where id_project=$pid  and p.status_analysis in ('NEW', 'FAST_OK','DONE') and st.match_type<>''
-			group by 1
-			";
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    return $results;
-}
-
 function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
@@ -2268,6 +2159,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			p.id = $pid
 			AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
 			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+			AND eq_word_count != 0
 			";
 
     $db      = Database::obtain();
@@ -2294,7 +2186,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     } else {
         $status_search = Constants_ProjectStatus::STATUS_FAST_OK;
     }
-    $query = "select p.id, id_tms, id_mt_engine, group_concat( distinct j.id ) as jid_list
+    $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
 		from projects p
 		inner join jobs j on j.id_project=p.id
 		where status_analysis = '$status_search'
@@ -2317,8 +2209,13 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id
-		from segments as s 
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
+
+		s.raw_word_count,
+		j.target,
+		j.payable_rates
+
+		from segments as s
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id
 		left join segment_translations as st on st.id_segment = s.id
@@ -2415,13 +2312,13 @@ function updateWordCount( WordCount_Struct $wStruct ) {
 
     //Update in Transaction
     $query = "UPDATE jobs AS j SET
-		new_words = new_words + " . $wStruct->getNewWords() . ",
-				  draft_words = draft_words + " . $wStruct->getDraftWords() . ",
-				  translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
-				  approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
-				  rejected_words = rejected_words + " . $wStruct->getRejectedWords() . "
-					  WHERE j.id = " . (int)$wStruct->getIdJob() . "
-					  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
+                new_words = new_words + " . $wStruct->getNewWords() . ",
+                draft_words = draft_words + " . $wStruct->getDraftWords() . ",
+                translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
+                approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
+                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . "
+                  WHERE j.id = " . (int)$wStruct->getIdJob() . "
+                  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
 
     $db->query( $query );
 
@@ -2455,197 +2352,6 @@ function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
 
         return $errno * -1;
     }
-
-    return $db->affected_rows;
-}
-
-function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform_Tms_Analysis = true ) {
-
-    $db   = Database::obtain();
-    $data = array();
-
-    $total_eq_wc       = 0;
-    $total_standard_wc = 0;
-
-    $data[ 'id_segment' ]          = null;
-    $data[ 'id_job' ]              = null;
-    $data[ 'segment_hash' ]        = null;
-    $data[ 'match_type' ]          = null;
-    $data[ 'eq_word_count' ]       = null;
-    $data[ 'standard_word_count' ] = null;
-
-    $data_queue[ 'id_job' ]      = null;
-    $data_queue[ 'id_segment' ]  = null;
-    $data_queue[ 'pid' ]         = null;
-    $data_queue[ 'date_insert' ] = null;
-
-    $segment_translations = "INSERT INTO `segment_translations` ( " . implode( ", ", array_keys( $data ) ) . " ) VALUES ";
-    $st_values            = array();
-
-    $segment_translations_queue = "INSERT IGNORE INTO matecat_analysis.segment_translations_analysis_queue ( " . implode( ", ", array_keys( $data_queue ) ) . " ) VALUES ";
-    $st_queue_values            = array();
-
-    foreach ( $fastReport as $k => $v ) {
-        $jid_fid    = explode( "-", $k );
-        $id_segment = $jid_fid[ 0 ];
-        $id_jobs    = $jid_fid[ 1 ];
-
-        $type = strtoupper( $v[ 'type' ] );
-
-        if ( array_key_exists( $type, $equivalentWordMapping ) ) {
-            $eq_word = ( $v[ 'wc' ] * $equivalentWordMapping[ $type ] / 100 );
-            if ( $type == "INTERNAL" ) {
-            }
-        } else {
-            $eq_word = $v[ 'wc' ];
-        }
-
-        $total_eq_wc += $eq_word;
-        $standard_words = $eq_word;
-
-        if ( $type == "INTERNAL" or $type == "MT" ) {
-            $standard_words = $v[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
-        }
-
-        $total_standard_wc += $standard_words;
-
-        $id_jobs = explode( ',', $id_jobs );
-        foreach ( $id_jobs as $id_job ) {
-
-            list( $id_job, $job_pass ) = explode( ":", $id_job );
-
-            $data[ 'id_segment' ]          = (int)$id_segment;
-            $data[ 'id_job' ]              = (int)$id_job;
-            $data[ 'segment_hash' ]        = $db->escape( $v[ 'segment_hash' ] );
-            $data[ 'match_type' ]          = $db->escape( $type );
-            $data[ 'eq_word_count' ]       = (float)$eq_word;
-            $data[ 'standard_word_count' ] = (float)$standard_words;
-
-            $st_values[ ] = " ( '" . implode( "', '", array_values( $data ) ) . "' )";
-
-            if ( $data[ 'eq_word_count' ] > 0 && $perform_Tms_Analysis ) {
-
-                $data_queue[ 'id_job' ] = (int)$id_job;;
-                $data_queue[ 'id_segment' ]  = (int)$id_segment;
-                $data_queue[ 'pid' ]         = (int)$pid;
-                $data_queue[ 'date_insert' ] = date_create()->format( 'Y-m-d H:i:s' );
-
-                $st_queue_values[ ] = " ( '" . implode( "', '", array_values( $data_queue ) ) . "' )";
-            } else {
-                Log::doLog( 'Skipped Fast Segment: ' . var_export( $data, true ) );
-            }
-        }
-    }
-
-    $chunks_st = array_chunk( $st_values, 200 );
-
-    //	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
-    Log::doLog( 'Insert Segment Translations: ' . count( $st_values ) );
-
-    //	echo 'Queries: ' . count($chunks_st) . "\n";
-    Log::doLog( 'Queries: ' . count( $chunks_st ) );
-
-    //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
-    $db->query( 'SET autocommit=0' );
-    $db->query( 'START TRANSACTION' );
-
-    foreach ( $chunks_st as $k => $chunk ) {
-
-        $query_st = $segment_translations . implode( ", ", $chunk ) .
-                " ON DUPLICATE KEY UPDATE
-			match_type = VALUES( match_type ),
-					   eq_word_count = VALUES( eq_word_count ),
-					   standard_word_count = VALUES( standard_word_count )
-						   ";
-
-        $db->query( $query_st );
-
-        //echo "Executed " . ( $k + 1 ) ."\n";
-        //Log::doLog(  "Executed " . ( $k + 1 ) );
-
-        $err = $db->get_error();
-        if ( $err[ 'error_code' ] != 0 ) {
-            Log::doLog( $err );
-
-            return $err[ 'error_code' ] * -1;
-        }
-    }
-
-    /*
-     * IF NO TM ANALYSIS, upload the jobs global word count
-     */
-    if ( !$perform_Tms_Analysis ) {
-        $_details = getProjectSegmentsTranslationSummary( $pid );
-
-        echo "--- trying to initialize job total word count.\n";
-        Log::doLog( "--- trying to initialize job total word count." );
-
-        $project_details = array_pop( $_details ); //remove rollup
-
-        foreach ( $_details as $job_info ) {
-            $counter = new WordCount_Counter();
-            $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
-        }
-    }
-    /* IF NO TM ANALYSIS, upload the jobs global word count */
-
-    //echo "Done.\n";
-    //Log::doLog( 'Done.' );
-
-    if ( count( $st_queue_values ) ) {
-
-        $chunks_st_queue = array_chunk( $st_queue_values, 200 );
-
-        //		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
-        Log::doLog( 'Insert Segment Translations Queue: ' . count( $st_queue_values ) );
-
-        //		echo 'Queries: ' . count($chunks_st_queue) . "\n";
-        Log::doLog( 'Queries: ' . count( $chunks_st_queue ) );
-
-        foreach ( $chunks_st_queue as $k => $queue_chunk ) {
-
-            $query_st_queue = $segment_translations_queue . implode( ", ", $queue_chunk );
-
-            $db->useDb( 'matecat_analysis' );
-            $db->query( $query_st_queue );
-            $db->useDb( INIT::$DB_DATABASE );
-
-            //echo "Executed " . ( $k + 1 ) ."\n";
-            //Log::doLog(  "Executed " . ( $k + 1 ) );
-
-            $err = $db->get_error();
-            if ( $err[ 'error_code' ] != 0 ) {
-                $db->query( 'ROLLBACK' );
-                $db->query( 'SET autocommit=1' );
-                Log::doLog( $err );
-
-                return $err[ 'error_code' ] * -1;
-            }
-        }
-
-        //echo "Done.\n";
-        //Log::doLog( 'Done.' );
-
-    }
-
-    $data2[ 'fast_analysis_wc' ] = $total_eq_wc;
-    //    $data2[ 'standard_analysis_wc' ] = $total_standard_wc;
-
-    $where = " id = $pid";
-    $db->update( 'projects', $data2, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-
-        $db->query( 'ROLLBACK' );
-        $db->query( 'SET autocommit=1' );
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    $db->query( 'COMMIT' );
-    $db->query( 'SET autocommit=1' );
 
     return $db->affected_rows;
 }
@@ -2961,6 +2667,13 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     return $results;
 }
 
+/**
+ * @deprecated
+ *
+ * @param $currentPid
+ *
+ * @return int
+ */
 function getNumSegmentsInQueue( $currentPid ) {
     $query = "select count(*) as num_segments from matecat_analysis.segment_translations_analysis_queue where pid < $currentPid ";
 
@@ -3117,20 +2830,20 @@ function getProjectSegmentsTranslationSummary( $pid ) {
 		password,
 		SUM(eq_word_count) AS eq_wc,
 		SUM(standard_word_count) AS st_wc
-			, SUM( IF( IFNULL( eq_word_count, -1 ) = -1, raw_word_count, eq_word_count) ) as TOTAL
-			, COUNT( s.id ) AS project_segments,
-		SUM(
-				CASE
-				WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-				WHEN st.standard_word_count = 0 THEN 1
-				END
-		   ) AS num_analyzed
-			FROM segment_translations st
-			JOIN segments s ON s.id = id_segment
-			INNER JOIN jobs j ON j.id=st.id_job
-			WHERE j.id_project = $pid
-			AND st.locked = 0
-			GROUP BY id_job WITH ROLLUP";
+        , SUM( IF( IFNULL( eq_word_count, -1 ) = -1, raw_word_count, eq_word_count) ) as TOTAL
+        , COUNT( s.id ) AS project_segments,
+        SUM(
+            CASE
+                WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                WHEN st.standard_word_count = 0 THEN 1
+            END
+        ) AS num_analyzed
+        FROM segment_translations st
+        JOIN segments s ON s.id = id_segment
+        INNER JOIN jobs j ON j.id=st.id_job
+        WHERE j.id_project = $pid
+        AND st.locked = 0
+        GROUP BY id_job WITH ROLLUP";
 
     $results = $db->fetch_array( $query );
 
@@ -3156,19 +2869,19 @@ function countSegmentsTranslationAnalyzed( $pid ) {
     $db = Database::obtain();
 
     $query = "SELECT
-		COUNT( s.id ) AS project_segments,
-		SUM(
-				CASE
-				WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-				WHEN st.standard_word_count = 0 THEN 1
-				END
-		   ) AS num_analyzed,
-		SUM(eq_word_count) AS eq_wc ,
-		SUM(standard_word_count) AS st_wc
-			FROM segments s
-			JOIN segment_translations st ON s.id = st.id_segment
-			INNER JOIN jobs j ON j.id = st.id_job
-			WHERE j.id_project = $pid";
+            COUNT( s.id ) AS project_segments,
+            SUM(
+                CASE
+                    WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                    WHEN st.standard_word_count = 0 THEN 1
+                END
+            ) AS num_analyzed,
+            SUM(eq_word_count) AS eq_wc ,
+            SUM(standard_word_count) AS st_wc
+            FROM segments s
+            JOIN segment_translations st ON s.id = st.id_segment
+            INNER JOIN jobs j ON j.id = st.id_job
+            WHERE j.id_project = $pid";
 
     $results = $db->query_first( $query );
 
@@ -3214,21 +2927,21 @@ function getArchivableJobs( $jobs = array() ) {
     $db    = Database::obtain();
     $query =
             "
-		SELECT j.id, j.password , SBS.translation_date
-		FROM jobs j
-		JOIN (
-				SELECT MAX( translation_date ) AS translation_date, id_job
-				FROM segment_translations
-				WHERE id_job IN( %s )
-				GROUP BY id_job
-			 ) AS SBS
-		ON SBS.id_job = j.id
-		AND IFNULL( SBS.translation_date, DATE( '1970-01-01' ) ) < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY  )
-		WHERE
-		j.status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'
-		AND j.create_date < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
-		AND j.status = '" . Constants_JobStatus::STATUS_ACTIVE . "'
-		GROUP BY j.id, j.password";
+        SELECT j.id, j.password , SBS.translation_date
+            FROM jobs j
+            JOIN (
+                SELECT MAX( translation_date ) AS translation_date, id_job
+                FROM segment_translations
+                    WHERE id_job IN( %s )
+                    GROUP BY id_job
+                ) AS SBS
+                ON SBS.id_job = j.id
+                AND IFNULL( SBS.translation_date, DATE( '1970-01-01' ) ) < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY  )
+           WHERE
+                j.status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'
+                AND j.create_date < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
+                AND j.status = '" . Constants_JobStatus::STATUS_ACTIVE . "'
+           GROUP BY j.id, j.password";
 
     $results = $db->fetch_array(
             sprintf(
@@ -3251,9 +2964,9 @@ function getArchivableJobs( $jobs = array() ) {
 
 function getLastTranslationDate( $jid ) {
     $query = "SELECT
-		IFNULL( MAX(translation_date), DATE('1970-01-01') ) AS last_translation_date
-		FROM segment_translations
-		WHERE id_job = %u";
+                IFNULL( MAX(translation_date), DATE('1970-01-01') ) AS last_translation_date
+                FROM segment_translations
+                WHERE id_job = %u";
     $db    = Database::obtain();
     $res   = $db->query_first( sprintf( $query, $jid ) );
 
@@ -3263,11 +2976,11 @@ function getLastTranslationDate( $jid ) {
 function getMaxJobUntilDaysAgo( $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ) {
 
     $last_id_query = "
-		SELECT
-		MAX(id) AS max
-		FROM jobs
-		WHERE create_date < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
-		AND status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'";
+            SELECT
+                MAX(id) AS max
+            FROM jobs
+            WHERE create_date < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
+            AND status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'";
 
     $db      = Database::obtain();
     $last_id = $db->query_first( $last_id_query );
@@ -3279,10 +2992,10 @@ function getMaxJobUntilDaysAgo( $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ) {
 function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ) {
 
     $query_archive_jobs = "
-		UPDATE jobs
-		SET status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
-		WHERE %s
-		AND last_update < ( curdate() - INTERVAL %u DAY )";
+        UPDATE jobs
+            SET status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
+            WHERE %s
+            AND last_update < ( curdate() - INTERVAL %u DAY )";
 
     $tuple_of_double_indexes = array();
     foreach ( $jobs as $job ) {

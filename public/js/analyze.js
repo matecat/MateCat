@@ -431,41 +431,43 @@ UI = {
                 jpassword: jpassword
 			},
 			success: function(d) {
-				if (d.data) {
-					var s = d.data.summary;
-					//temp 
+                if ( d.data ) {
+                    var s = d.data.summary;
+                    //temp
 //					config.daemon_warning = false;
 //					s.IN_QUEUE_BEFORE = 10;
-					//end temp					
-					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
-						$('.loadingbar').addClass('open');
+                    //end temp
+                    if ( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
+                        $( '.loadingbar' ).addClass( 'open' );
 
-						if( config.daemon_warning ){
-						if(-1==config.support_mail.indexOf('@')){
-							analyzerNotRunningErrorString='The analysis seems not to be running. Contact '+config.support_mail+'.';
-						}else{
-							analyzerNotRunningErrorString='The analysis seems not to be running. Contact <a href="mailto:'+config.support_mail+'">'+config.support_mail+'</a>.';
-						}
-						UI.displayError(analyzerNotRunningErrorString);
+                        if ( config.daemon_warning ) {
 
-						$('#standard-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
-						$('#matecat-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
-						return false;
-						} else if (s.IN_QUEUE_BEFORE > 0) {
-							//increasing number of segments ( fast analysis on another project )
-							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
-								$('#shortloading' ).show().html('<p class="label">There are other projects in queue. Please wait...</p>');
-								$('#longloading' ).hide();
-							} else { //decreasing ( TM analysis on another project )
-								if ( !$('#shortloading .queue').length ) {
-									$('#shortloading').html('<p class="label">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
-								} else {
-									$('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);
-								}
-							}
-						}
-						UI.previousQueueSize = s.IN_QUEUE_BEFORE;
-					}
+                            if ( -1 == config.support_mail.indexOf( '@' ) ) {
+                                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+                            } else {
+                                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
+                            }
+                            UI.displayError( analyzerNotRunningErrorString );
+
+                            $( '#standard-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
+                            $( '#matecat-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
+                            return false;
+
+                        } else if ( s.IN_QUEUE_BEFORE > 0 ) {
+                            //increasing number of segments ( fast analysis on another project )
+                            if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
+                                $( '#shortloading' ).show().html( '<p class="label">There are other projects in queue. Please wait...</p>' );
+                                $( '#longloading' ).hide();
+                            } else { //decreasing ( TM analysis on another project )
+                                if ( !$( '#shortloading .queue' ).length ) {
+                                    $( '#shortloading' ).html( '<p class="label">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>' );
+                                } else {
+                                    $( '#shortloading .queue .number' ).text( s.IN_QUEUE_BEFORE_PRINT );
+                                }
+                            }
+                        }
+                        UI.previousQueueSize = s.IN_QUEUE_BEFORE;
+                    }
 
 					//                    this is not used, for now we never get an empty status from controller
 					//                    else if(s.STATUS == 'EMPTY') {
@@ -476,19 +478,23 @@ UI = {
 					else if (s.STATUS == 'FAST_OK' && s.IN_QUEUE_BEFORE == 0) {
 						//                        UI.progressBar(UI.progressPerc)
 						if (UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
+
 							UI.lastProgressSegments = s.SEGMENTS_ANALYZED;
 							UI.noProgressTail = 0;
+
 						} else {
-							UI.noProgressTail++;
-							if (UI.noProgressTail > 9) {
-								if(-1==config.support_mail.indexOf('@')){
-									analyzerNotRunningErrorString='The analysis seems not to be running. Contact '+config.support_mail+'.';
-								}else{
-									analyzerNotRunningErrorString='The analysis seems not to be running. Contact <a href="mailto:'+config.support_mail+'">'+config.support_mail+'</a> or try refreshing the page.';
-								}
-								UI.displayError(analyzerNotRunningErrorString);
-								return false;
-							}
+
+                            UI.noProgressTail++;
+                            if ( UI.noProgressTail > 9 ) {
+                                if ( -1 == config.support_mail.indexOf( '@' ) ) {
+                                    analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+                                } else {
+                                    analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a> or try refreshing the page.';
+                                }
+                                UI.displayError( analyzerNotRunningErrorString );
+                                return false;
+                            }
+
 						}
 						UI.progressBar(s.SEGMENTS_ANALYZED / s.TOTAL_SEGMENTS);
 						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
@@ -600,11 +606,35 @@ UI = {
 									if ( s_tm75_txt != tot.TM_75_99[1] )
 										s_tm75.effect( "highlight", {}, 1000 );
 
+                                    var s_tm75_84 = $( '.stat_tm75_84', context );
+                                    s_tm75_84_txt = s_tm75_84.text();
+                                    s_tm75_84.text( tot.TM_75_84[1] );
+                                    if ( s_tm75_84_txt != tot.TM_75_84[1] )
+                                        s_tm75_84.effect( "highlight", {}, 1000 );
+
+                                    var s_tm85_94 = $( '.stat_tm85_94', context );
+                                    s_tm85_94_txt = s_tm75_84.text();
+                                    s_tm85_94.text( tot.TM_85_94[1] );
+                                    if ( s_tm85_94_txt != tot.TM_85_94[1] )
+                                        s_tm85_94.effect( "highlight", {}, 1000 );
+
+                                    var s_tm95_99 = $( '.stat_tm95_99', context );
+                                    s_tm95_99_txt = s_tm75_84.text();
+                                    s_tm95_99.text( tot.TM_95_99[1] );
+                                    if ( s_tm95_99_txt != tot.TM_95_99[1] )
+                                        s_tm95_99.effect( "highlight", {}, 1000 );
+
 									var s_tm100 = $( '.stat_tm100', context );
 									s_tm100_txt = s_tm100.text();
 									s_tm100.text( tot.TM_100[1] );
 									if ( s_tm100_txt != tot.TM_100[1] )
 										s_tm100.effect( "highlight", {}, 1000 );
+
+                                    var s_tm100_public = $( '.stat_tm100_public', context );
+                                    s_tm100_public_txt = s_tm100.text();
+                                    s_tm100_public.text( tot.TM_100_PUBLIC[1] );
+                                    if ( s_tm100_public_txt != tot.TM_100_PUBLIC[1] )
+                                        s_tm100_public.effect( "highlight", {}, 1000 );
 
 									var s_tmic = $( '.stat_tmic', context );
 									s_tmic_txt = s_tmic.text();
@@ -620,7 +650,6 @@ UI = {
 
 
 								} );
-
 								$.each( files_group, function ( jPassword, files_object ) {
 
 										$.each( files_object, function ( id_file, file_details ) {
@@ -663,11 +692,35 @@ UI = {
 											if ( s_tm75_txt != file_details.TM_75_99[1] )
 												s_tm75.effect( "highlight", {}, 1000 );
 
-											var s_tm100 = $( '.stat_tm100', context );
-											s_tm100_txt = s_tm100.text();
-											s_tm100.text( file_details.TM_100[1] );
-											if ( s_tm100_txt != file_details.TM_100[1] )
-												s_tm100.effect( "highlight", {}, 1000 );
+                                            var s_tm75_84 = $( '.stat_tm75_84', context );
+                                            s_tm75_84_txt = s_tm75_84.text();
+                                            s_tm75_84.text( file_details.TM_75_84[1] );
+                                            if ( s_tm75_84_txt != file_details.TM_75_84[1] )
+                                                s_tm75_84.effect( "highlight", {}, 1000 );
+
+                                            var s_tm85_94 = $( '.stat_tm85_94', context );
+                                            s_tm85_94_txt = s_tm75_84.text();
+                                            s_tm85_94.text( file_details.TM_85_94[1] );
+                                            if ( s_tm85_94_txt != file_details.TM_85_94[1] )
+                                                s_tm85_94.effect( "highlight", {}, 1000 );
+
+                                            var s_tm95_99 = $( '.stat_tm95_99', context );
+                                            s_tm95_99_txt = s_tm75_84.text();
+                                            s_tm95_99.text( file_details.TM_95_99[1] );
+                                            if ( s_tm95_99_txt != file_details.TM_95_99[1] )
+                                                s_tm95_99.effect( "highlight", {}, 1000 );
+
+                                            var s_tm100 = $( '.stat_tm100', context );
+                                            s_tm100_txt = s_tm100.text();
+                                            s_tm100.text( file_details.TM_100[1] );
+                                            if ( s_tm100_txt != file_details.TM_100[1] )
+                                                s_tm100.effect( "highlight", {}, 1000 );
+
+                                            var s_tm100_public = $( '.stat_tm100_public', context );
+                                            s_tm100_public_txt = s_tm100_public.text();
+                                            s_tm100_public.text( file_details.TM_100_PUBLIC[1] );
+                                            if ( s_tm100_public_txt != file_details.TM_100_PUBLIC[1] )
+                                                s_tm100_public.effect( "highlight", {}, 1000 );
 
 											var s_tmic = $( '.stat_tmic', context );
 											s_tmic_txt = s_tmic.text();

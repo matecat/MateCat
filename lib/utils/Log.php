@@ -58,6 +58,8 @@ class Log {
 
     public static function doLog() {
 
+        if ( !INIT::$DEBUG ) return;
+
         $head = self::_getHeader();
 
         $string = "";

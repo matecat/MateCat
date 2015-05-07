@@ -8,12 +8,16 @@ class INIT {
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
-    public static $DEBUG;
+    public static $DEBUG = true;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
     public static $MEMCACHE_SERVERS = array();
+    public static $REDIS_SERVERS = array();
+    public static $QUEUE_BROKER_ADDRESS;
+    public static $QUEUE_JMX_ADDRESS;
+    public static $QUEUE_NAME = "matecat_analysis_queue";
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
     public static $UPLOAD_REPOSITORY;
@@ -88,8 +92,12 @@ class INIT {
     public static $DEFAULT_PAYABLE_RATES = array(
             'NO_MATCH'    => 100,
             '50%-74%'     => 100,
-            '75%-99%'     => 60,
+            //            '75%-99%'     => 60,
+            '75%-80%'     => 60,
+            '81%-90%'     => 60,
+            '91%-99%'     => 60,
             '100%'        => 30,
+            '100%_PUBLIC' => 30,
             'REPETITIONS' => 30,
             'INTERNAL'    => 60,
             'MT'          => 85
@@ -121,7 +129,8 @@ class INIT {
                 self::$ROOT . "/inc/PHPTAL",
                 self::$ROOT . "/lib/utils/API",
                 self::$ROOT . "/lib/utils",
-                self::$ROOT . "/lib/model",
+                self::$ROOT . "/lib/utils/Predis/src",
+                self::$ROOT . "/lib/model" ,
         );
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
@@ -140,9 +149,9 @@ class INIT {
             $fileName  = str_replace( '\\', DIRECTORY_SEPARATOR, $namespace ) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
-        //@include $fileName;
+        @include $fileName;
 
-        @require $fileName;
+//        @require $fileName;
 
     }
 
@@ -162,7 +171,8 @@ class INIT {
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
         } else {
-            echo "\nPHP Running in CLI mode.\n\n";
+            if( INIT::$DEBUG )
+                echo "\nPHP Running in CLI mode.\n\n";
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
 
@@ -177,7 +187,10 @@ class INIT {
         self::$DB_USER     = "matecat"; //database login
         self::$DB_PASS     = "matecat01"; //database password
 
-        self::$MEMCACHE_SERVERS = array( /* "localhost:11211" => 1 */ );
+        self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
+        self::$REDIS_SERVERS        = "tcp://localhost:6379";
+        self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
+        self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
 
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
@@ -195,7 +208,8 @@ class INIT {
 
         $this->_setIncludePath();
         spl_autoload_register( 'INIT::loadClass' );
-
+        require_once 'Predis/autoload.php';
+        
         if ( !is_dir( self::$STORAGE_DIR ) ) {
             mkdir( self::$STORAGE_DIR, 0755, true );
         }
@@ -421,12 +435,8 @@ class INIT {
 
                 ini_set( 'display_errors', 'Off' );
 
-                if ( !ob_get_level() ) {
-                    ob_start();
-                } else {
-                    ob_end_clean();
-                    ob_start();
-                }
+                if( !ob_get_level() ){ ob_start(); }
+                else { ob_end_clean(); ob_start(); }
 
                 debug_print_backtrace();
                 $output = ob_get_contents();

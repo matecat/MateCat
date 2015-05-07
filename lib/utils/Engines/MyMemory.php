@@ -53,36 +53,38 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         }
 
         $result_object = null;
-        switch ( $functionName ) {
-            case 'api_key_check_auth_url':
-                $result_object = new Engines_Results_MyMemory_AuthKeyResponse( $decoded );
-                break;
-            case 'api_key_create_user_url':
-                $result_object = new Engines_Results_MyMemory_CreateUserResponse( $decoded );
-                break;
-            case 'tmx_import_relative_url':
-            case 'tmx_status_relative_url':
-                $result_object = new Engines_Results_MyMemory_TmxResponse( $decoded );
-                break;
-            case 'tmx_export_create_url' :
-            case 'tmx_export_check_url' :
-                $result_object = new Engines_Results_MyMemory_ExportResponse( $decoded );
-                break;
-            case 'analyze_url':
-                $result_object = new Engines_Results_MyMemory_AnalyzeResponse( $decoded );
-                break;
-            case 'contribute_relative_url':
-                $result_object = new Engines_Results_MyMemory_SetContributionResponse( $decoded );
-                break;
-            default:
 
-                foreach( $decoded['matches'] as $pos => $match ){
-                    $decoded[ 'matches' ][ $pos ][ 'segment' ] = $this->_resetSpecialStrings( $match[ 'segment' ] );
-                    $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
-                }
+        if(!isset($rawValue['error'])) {
+            switch ( $functionName ) {
+                case 'api_key_check_auth_url':
+                    $result_object = new Engines_Results_MyMemory_AuthKeyResponse( $decoded );
+                    break;
+                case 'api_key_create_user_url':
+                    $result_object = new Engines_Results_MyMemory_CreateUserResponse( $decoded );
+                    break;
+                case 'tmx_import_relative_url':
+                case 'tmx_status_relative_url':
+                    $result_object = new Engines_Results_MyMemory_TmxResponse( $decoded );
+                    break;
+                case 'tmx_export_create_url' :
+                case 'tmx_export_check_url' :
+                    $result_object = new Engines_Results_MyMemory_ExportResponse( $decoded );
+                    break;
+                case 'analyze_url':
+                    $result_object = new Engines_Results_MyMemory_AnalyzeResponse( $decoded );
+                    break;
+                case 'contribute_relative_url':
+                    $result_object = new Engines_Results_MyMemory_SetContributionResponse( $decoded );
+                    break;
+                default:
+                    foreach ( $decoded[ 'matches' ] as $pos => $match ) {
+                        $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
+                        $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
+                    }
 
-                $result_object = new Engines_Results_MyMemory_TMS( $decoded );
-                break;
+                    $result_object = new Engines_Results_MyMemory_TMS( $decoded );
+                    break;
+            }
         }
 
         return $result_object;
@@ -449,7 +451,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     /******************************************/
 
-    public function fastAnalysis( $segs_array ) {
+    public function fastAnalysis( &$segs_array ) {
         if ( !is_array( $segs_array ) ) {
 
             return null;
