@@ -299,8 +299,9 @@ class ProjectManager {
                 //get file
                 $filePathName = "$uploadDir/$fileName";
 
-                //calculate hash
-                $sha1 = sha1( file_get_contents( $filePathName ) );
+                //calculate hash + add the fileName, if i load 3 equal files with the same content
+                // they will be squashed to the last one
+                $sha1 = sha1( file_get_contents( $filePathName ) . $filePathName );
 
                 //make a cache package (with work/ only, emtpy orig/)
                 $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );

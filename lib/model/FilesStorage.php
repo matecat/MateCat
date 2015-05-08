@@ -45,6 +45,14 @@ class FilesStorage {
         }
     }
 
+    /**
+     * Rebuild the filename that will be taken from disk in the cache directory
+     *
+     * @param $hash
+     * @param $lang
+     *
+     * @return bool|string
+     */
     public function getOriginalFromCache( $hash, $lang ) {
         //compose path
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
@@ -60,6 +68,13 @@ class FilesStorage {
         return $filePath;
     }
 
+    /**
+     * Rebuild the filename that will be taken from disk in files directory
+     *
+     * @param $id
+     *
+     * @return bool|string
+     */
     public function getOriginalFromFileDir( $id ) {
         //compose path
         $path = $this->filesDir . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
