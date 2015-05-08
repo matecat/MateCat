@@ -1763,12 +1763,6 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $sha
 
     $idFile = $results[ 'LAST_INSERT_ID()' ];
 
-    //get storage object
-    $fs = new FilesStorage();
-
-    //move the file in the right directory from the packages to the file dir
-    $fs->moveFromCacheToFileDir( $sha1_original, $projectStructure[ 'source_language' ], $idFile );
-
     return $idFile;
 }
 

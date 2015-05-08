@@ -123,8 +123,8 @@ class downloadFileController extends downloadController {
 				if ( !file_exists( dirname( $outputPath ) ) ) {
 
 					Log::doLog( 'exec ("chmod 666 ' . escapeshellarg( $outputPath ) . '");' );
-					mkdir( dirname( $outputPath ), 0777, true );
-					exec( "chmod 666 " . escapeshellarg( $outputPath ) );
+					mkdir( dirname( $outputPath ), 0775, true );
+//					exec( "chmod 666 " . escapeshellarg( $outputPath ) );
 
 				}
 
@@ -188,8 +188,6 @@ class downloadFileController extends downloadController {
 					$output_content[ $fileID ][ 'filename' ] = basename($outputPath);
 				}
 
-				//TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
-				//TODO so we can load from database the original file blob ONLY when needed
 				/**
 				 * Conversion Enforce
 				 */
@@ -236,7 +234,7 @@ class downloadFileController extends downloadController {
 
 			foreach ( array_keys( $files_buffer ) as $fileID ) {
 
-				$output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
+				$output_content[ $fileID ][ 'documentContent' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
 
 				//in case of .strings, they are required to be in UTF-16
 				//get extension to perform file detection
@@ -268,6 +266,7 @@ class downloadFileController extends downloadController {
 
 		//qui prodest to check download type?
 		if ( $this->download_type == 'omegat' ) {
+
 			$this->filename .= ".zip";
 
 			$tmsService = new TMSService();
@@ -306,8 +305,8 @@ class downloadFileController extends downloadController {
 			}
 
 			$this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
-		}
-		else if ( count( $output_content ) > 1 ) {
+
+		} else if ( count( $output_content ) > 1 ) {
 
 			if ( $pathinfo[ 'extension' ] != 'zip' ) {
 				if ( $this->forceXliff ) {
@@ -320,8 +319,7 @@ class downloadFileController extends downloadController {
 
 			$this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
 
-		}
-		else {
+		} else {
 			//always an array with 1 element, pop it, Ex: array( array() )
 			$output_content = array_pop( $output_content );
 			$this->setContent( $output_content );
@@ -574,7 +572,7 @@ class downloadFileController extends downloadController {
 	 *
 	 * @return string
 	 */
-	public function removeTargetMarks( $documentContent, $path ) {
+	public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
 		$extension = pathinfo( $path );
 		if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {

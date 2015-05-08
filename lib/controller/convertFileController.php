@@ -217,7 +217,6 @@ class convertFileController extends ajaxController {
 				//save in cache
 				$res_insert=$fs->makeCachePackage($sha1, $this->source_lang, $file_path, $xliffPath);
 
-
 				if (!$res_insert) {
 					//custom error message passed directly to javascript client and displayed as is
 					$convertResult[ 'errorMessage' ] = "Error: failed to save file on storage intermediate cache";
@@ -302,17 +301,15 @@ class convertFileController extends ajaxController {
 		}
 
 		//if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
-		if (isset($xliffPath) and !empty($xliffPath)){
-			//put reference to cache in upload dir to link cache to session
-			$fs->linkSessionToCache($sha1, $this->source_lang, $_COOKIE[ 'upload_session' ]);
+        if ( isset( $xliffPath ) and !empty( $xliffPath ) ) {
+            //put reference to cache in upload dir to link cache to session
+            $fs->linkSessionToCache( $sha1, $this->source_lang, $_COOKIE[ 'upload_session' ] );
 
-			//temporary stuff is useless, so clean it
-			unlink($file_path);
+            //temporary stuff is useless, so clean it
+            unlink( $file_path ); //TODO check it is not useful, already moved when we create the cache
 
-			//a usable package is available, give positive feedback
-			$this->result[ 'code' ] = 1;
-		}
+            //a usable package is available, give positive feedback
+            $this->result[ 'code' ] = 1;
+        }
 	}
 }
-
-?>

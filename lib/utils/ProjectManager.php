@@ -320,7 +320,7 @@ class ProjectManager {
         foreach ( $linkFiles as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = basename( array_pop( $linkFiles ) );
+            $hashFile = basename( $linkFile );
             $hashFile = explode( '|', $hashFile );
 
             //use hash and lang to fetch file from package
@@ -351,6 +351,10 @@ class ProjectManager {
                 $mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
 
                 $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $sha1_original );
+
+                //move the file in the right directory from the packages to the file dir
+                $fs->moveFromCacheToFileDir( $sha1_original, $this->projectStructure[ 'source_language' ], $fid );
+
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
                 $this->_extractSegments( file_get_contents( $xliffFilePathName ), $fid );

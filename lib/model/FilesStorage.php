@@ -1,4 +1,5 @@
 <?
+
 /*
 
 files
@@ -24,337 +25,353 @@ cache
 				|_xliff file
 
 */
-class FilesStorage{
 
-	private $filesDir;
-	private $cacheDir;
+class FilesStorage {
 
-	public function __construct($files=false,$cache=false){
-		//override default config
-		if($files){
-			$this->filesDir=$files;
-		}else{
-			$this->filesDir=INIT::$FILES_REPOSITORY;
-		}
-		if($cache){
-			$this->cacheDir=$cache;
-		}else{
-			$this->cacheDir=INIT::$CACHE_REPOSITORY;
-		}
-	}
+    private $filesDir;
+    private $cacheDir;
 
-	public function getOriginalFromCache($hash,$lang){
-		//compose path
-		$path=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig";
+    public function __construct( $files = false, $cache = false ) {
+        //override default config
+        if ( $files ) {
+            $this->filesDir = $files;
+        } else {
+            $this->filesDir = INIT::$FILES_REPOSITORY;
+        }
+        if ( $cache ) {
+            $this->cacheDir = $cache;
+        } else {
+            $this->cacheDir = INIT::$CACHE_REPOSITORY;
+        }
+    }
 
-		//return file
-		$filePath=$this->getSingleFileInPath($path);
+    public function getOriginalFromCache( $hash, $lang ) {
+        //compose path
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
 
-		//an unconverted xliff is never stored in orig dir; look for it in xliff dir
-		if(!$filePath){
-			$filePath=$this->getXliffFromCache($hash,$lang);
-		}
+        //return file
+        $filePath = $this->getSingleFileInPath( $path );
 
-		return $filePath;
-	}
+        //an unconverted xliff is never stored in orig dir; look for it in xliff dir
+        if ( !$filePath ) {
+            $filePath = $this->getXliffFromCache( $hash, $lang );
+        }
 
-	public function getOriginalFromFileDir($id){
-		//compose path
-		$path=$this->filesDir.DIRECTORY_SEPARATOR.$id.DIRECTORY_SEPARATOR."orig";
+        return $filePath;
+    }
 
-		//return file
-		$filePath=$this->getSingleFileInPath($path);
+    public function getOriginalFromFileDir( $id ) {
+        //compose path
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
 
-		//an unconverted xliff is never stored in orig dir; look for it in xliff dir
-		if(!$filePath){
-			$filePath=$this->getXliffFromFileDir($id);
-		}
+        //return file
+        $filePath = $this->getSingleFileInPath( $path );
 
-		return $filePath;
-	}
+        //an unconverted xliff is never stored in orig dir; look for it in xliff dir
+        if ( !$filePath ) {
+            $filePath = $this->getXliffFromFileDir( $id );
+        }
 
-	public function getXliffFromCache($hash,$lang){
-		//compose path
-		$path=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work";
+        return $filePath;
+    }
 
-		//return file
-		return $this->getSingleFileInPath($path);
-	}
+    public function getXliffFromCache( $hash, $lang ) {
+        //compose path
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
 
-	public function getXliffFromFileDir($id){
-		//compose path
-		$path=$this->filesDir.DIRECTORY_SEPARATOR.$id.DIRECTORY_SEPARATOR."xliff";
+        //return file
+        return $this->getSingleFileInPath( $path );
+    }
 
-		//return file
-		return $this->getSingleFileInPath($path);
-	}
+    public function getXliffFromFileDir( $id ) {
+        //compose path
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
 
-	public function makeCachePackage($hash, $lang, $originalPath=false, $xliffPath){
-		//ensure old stuff is overwritten
-		if(is_dir($this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang)){
-			shell_exec("rm -fr ".$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang);
-		}
+        //return file
+        return $this->getSingleFileInPath( $path );
+    }
 
-		//create cache dir structure
-		$cacheDir=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package";
-		mkdir($cacheDir,0755,true);
-		mkdir($cacheDir.DIRECTORY_SEPARATOR."orig");
-		mkdir($cacheDir.DIRECTORY_SEPARATOR."work");
+    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
 
-		//if it's not an xliff as original
-		if(!$originalPath){
-			//set original moval as successful
-			$outcome1=true;
+        //ensure old stuff is overwritten
+        if ( is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang ) ) {
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
+        }
 
-			//use original xliff
-			$xliffDestination=$cacheDir.DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($xliffPath);
-		}else{
-			//move original
-			$outcome1=rename($originalPath,$cacheDir.DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($originalPath));
+        //create cache dir structure
+        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, 0755, true );
+        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package";
+        mkdir( $cacheDir, 0755, true );
+        mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
+        mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
 
-			//set naming for converted xliff
-			$xliffDestination=$cacheDir.DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($originalPath).'.xlf';
-		}
+        //if it's not an xliff as original
+        if ( !$originalPath ) {
+            //set original moval as successful
+            $outcome1 = true;
 
-		//move converted xliff
-		$outcome2=rename($xliffPath, $xliffDestination);
+            //use original xliff
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $xliffPath );
+        } else {
+            //move original
+            $outcome1 = rename( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $originalPath ) );
 
-		return $outcome1 and $outcome2;
-	}
+            //set naming for converted xliff
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $originalPath ) . '.xlf';
+        }
 
-	public function linkSessionToCache($hash, $lang, $uid){
-		//get upload dir
-		$dir=INIT::$UPLOAD_REPOSITORY.DIRECTORY_SEPARATOR.$uid;
+        //move converted xliff
+        $outcome2 = rename( $xliffPath, $xliffDestination );
 
-		//create a file in it, named after cache position on storage
-		return touch($dir.DIRECTORY_SEPARATOR.$hash."|".$lang);
-	}
+        return $outcome1 and $outcome2;
+    }
 
-	public function moveFromCacheToFileDir($hash,$lang,$idFile){
+    public function linkSessionToCache( $hash, $lang, $uid ) {
+        //get upload dir
+        $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
-		//destination dir
-		$fileDir=$this->filesDir.DIRECTORY_SEPARATOR.$idFile;
-		$cacheDir=$this->cacheDir.DIRECTORY_SEPARATOR.$hash."|".$lang.DIRECTORY_SEPARATOR."package";
+        //create a file in it, named after cache position on storage
+        return touch( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
+    }
 
-		//check if doesn't exist
-		if(!is_dir($fileDir)){
-			//make files' directory structure
-			mkdir($fileDir);
-			mkdir($fileDir.DIRECTORY_SEPARATOR."package");
-			mkdir($fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig");
-			mkdir($fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work");
-			mkdir($fileDir.DIRECTORY_SEPARATOR."orig");
-			mkdir($fileDir.DIRECTORY_SEPARATOR."xliff");
-		}
+    public function moveFromCacheToFileDir( $hash, $lang, $idFile ) {
 
-		//make links from cache to files
-		//BUG: this stuff may not work if FILES and CACHES are on different filesystems
-		//FIX: we could check in advance and, in case, use copy instead of links
+        //destination dir
+        $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $idFile;
+        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package";
 
-		//check if manifest from a LongHorn conversion exists
-		$manifestFile=$cacheDir.DIRECTORY_SEPARATOR."manifest.rkm";
-		if(file_exists($manifestFile)) $longhorn=true;
+        //check if doesn't exist
+        if ( !is_dir( $fileDir ) ) {
+            //make files' directory structure
+            mkdir( $fileDir );
+            mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" );
+            mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" );
+            mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" );
+            mkdir( $fileDir . DIRECTORY_SEPARATOR . "orig" );
+            mkdir( $fileDir . DIRECTORY_SEPARATOR . "xliff" );
+        }
 
-		if($longhorn){
-			link($manifestFile, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR.basename($manifestFile));
-		}
+        //make links from cache to files
+        //BUG: this stuff may not work if FILES and CACHES are on different filesystems
+        //FIX: we could check in advance and, in case, use copy instead of links
 
-		//orig
-		$filePath=$this->getSingleFileInPath($cacheDir.DIRECTORY_SEPARATOR."orig");
-		link($filePath, $fileDir.DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($filePath));
+        //orig
+        $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
+        link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
 
-		if($longhorn){
-			link($filePath, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."orig".DIRECTORY_SEPARATOR.basename($filePath));
-		}
+        //work
+        $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
+        link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . basename( $filePath ) );
 
-		//work
-		$filePath=$this->getSingleFileInPath($cacheDir.DIRECTORY_SEPARATOR."work");
-		link($filePath, $fileDir.DIRECTORY_SEPARATOR."xliff".DIRECTORY_SEPARATOR.basename($filePath));
+        //check if manifest from a LongHorn conversion exists
+        $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
+        if ( file_exists( $manifestFile ) ) {
+            link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . basename( $manifestFile ) );
+            link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        }
 
-		if($longhorn){
-			link($filePath, $fileDir.DIRECTORY_SEPARATOR."package".DIRECTORY_SEPARATOR."work".DIRECTORY_SEPARATOR.basename($filePath));
-		}
-	}
+    }
 
-	public function getSingleFileInPath($path){
-		//check if it actually exist
-		if(is_dir($path)){
-			//get files in dir
-			$files=scandir($path);
+    public function getSingleFileInPath( $path ) {
 
-			//init file name dir
-			$filename=false;
+        //check if it actually exist
+        $filePath = false;
+        $files = array();
+        try {
+            $files = new DirectoryIterator( $path );
+        } catch ( Exception $e ) {
+            //directory does not exists
+            Log::doLog( "Directory $path does not exists." );
+        }
 
-			//scan dir for file
-			foreach($files as $file){
-				//skip dir pointers
-				if('.'==$file or '..'==$file) continue;
+        foreach ( $files as $key => $file ) {
 
-				//get the remaining file (it's the only file in dir)
-				$filename=$file;
+            if ( $file->isDot() ) {
+                continue;
+            }
 
-				//no need to loop anymore
-				break;
-			}
+            //get the remaining file (it's the only file in dir)
+            $filePath = $path . DIRECTORY_SEPARATOR . $file->getFilename();
+            //no need to loop anymore
+            break;
 
-			if(!$filename){
-				//file not found (dir was empty)
-				$filePath=false;
-			}else{
-				//compose path
-				$filePath=$path.DIRECTORY_SEPARATOR.$filename;
-			}
-		}else{
-			//non existent dir
-			$filePath=false;
-		}
+        }
 
-		return $filePath;
-	}
+        return $filePath;
+    }
 
 
-	public function getOriginalFilesForJob($id_job, $id_file, $password){
-		$where_id_file = "";
-		if ( !empty( $id_file ) ) {
-			$where_id_file = " and fj.id_file=$id_file";
-		}
-		$query = "select fj.id_file, f.filename, j.source from files_job fj
+    /**
+     *
+     * Used when we get info to download the original file
+     *
+     * @param $id_job
+     * @param $id_file
+     * @param $password
+     *
+     * @return array
+     */
+    public function getOriginalFilesForJob( $id_job, $id_file, $password ) {
+
+        $where_id_file = "";
+        if ( !empty( $id_file ) ) {
+            $where_id_file = " and fj.id_file=$id_file";
+        }
+        $query = "select fj.id_file, f.filename, j.source, mime_type from files_job fj
 			inner join files f on f.id=fj.id_file
 			inner join jobs j on j.id=fj.id_job
 			where fj.id_job=$id_job $where_id_file and j.password='$password'";
 
-		$db      = Database::obtain();
-		$results = $db->fetch_array( $query );
+        $db      = Database::obtain();
+        $results = $db->fetch_array( $query );
 
-		foreach($results as $k=>$result){
-			//try fetching from files dir
-			$filePath=$this->getOriginalFromFileDir($result['id_file']);
+        foreach ( $results as $k => $result ) {
+            //try fetching from files dir
+            $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
 
-			if(!$filePath){
-				//file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
-				//this moves both original and xliff
-				$this->migrateFileDB2FS($result['id_file'], $result['filename'], $result['source']);
+            if ( !$filePath ) {
+                //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
+                //this moves both original and xliff
+                $this->migrateFileDB2FS( $result[ 'id_file' ], $result[ 'filename' ], $result[ 'source' ] );
 
-				//now, try again fetching from disk :)
-				$filePath=$this->getOriginalFromFileDir($result['id_file']);
-			}
+                //now, try again fetching from disk :)
+                $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
+            }
 
-			$results[$k]['originalFilePath']=$filePath;
-		}
+            $results[ $k ][ 'originalFilePath' ] = $filePath;
+        }
 
-		return $results;
-	}
+        return $results;
+    }
 
-	public function getFilesForJob( $id_job, $id_file ) {
-		$where_id_file = "";
+    /**
+     * Used when we take the files after the translation
+     *
+     * @param $id_job
+     * @param $id_file
+     *
+     * @return array
+     */
+    public function getFilesForJob( $id_job, $id_file ) {
 
-		if ( !empty( $id_file ) ) {
-			$where_id_file = " and id_file=$id_file";
-		}
+        $where_id_file = "";
 
-		$query = "select fj.id_file, f.filename, j.source from files_job fj
+        if ( !empty( $id_file ) ) {
+            $where_id_file = " and id_file=$id_file";
+        }
+
+        $query = "select fj.id_file, f.filename, j.source, mime_type from files_job fj
 			inner join files f on f.id=fj.id_file
 			join jobs as j on j.id=fj.id_job
 			where fj.id_job = $id_job $where_id_file";
 
-		$db      = Database::obtain();
-		$results = $db->fetch_array( $query );
+        $db      = Database::obtain();
+        $results = $db->fetch_array( $query );
 
-		foreach($results as $k=>$result){
-			//try fetching from files dir
-			$originalPath=$this->getOriginalFromFileDir($result['id_file']);
+        foreach ( $results as $k => $result ) {
+            //try fetching from files dir
+            $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
 
-			if(!$originalPath){
-				//file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
-				//this moves both original and xliff
-				$this->migrateFileDB2FS($result['id_file'], $result['filename'], $result['source']);
+            if ( !$originalPath ) {
+                //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
+                //this moves both original and xliff
+                $this->migrateFileDB2FS( $result[ 'id_file' ], $result[ 'filename' ], $result[ 'source' ] );
 
-				//now, try again fetching from disk :)
-				$originalPath=$this->getOriginalFromFileDir($result['id_file']);
-			}
+                //now, try again fetching from disk :)
+                $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
+            }
 
-			$results[$k]['originalFilePath']=$originalPath;
+            $results[ $k ][ 'originalFilePath' ] = $originalPath;
 
-			//note that we trust this to succeed on first try since, at this stage, we already built the file package
-			$results[$k]['xliffFilePath']=$this->getXliffFromFileDir($result['id_file']);
-		}
+            //note that we trust this to succeed on first try since, at this stage, we already built the file package
+            $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ] );
+        }
 
-		return $results;
-	}
+        return $results;
+    }
 
-	private function migrateFileDB2FS($id_file, $filename, $source_lang){
-		//create temporary storage to place stuff
-		$tempdir="/tmp".DIRECTORY_SEPARATOR.str_shuffle(sha1(time()));
-		mkdir($tempdir,0755);
+    /**
+     * Backwards compatibility method and forward
+     *
+     * @param $id_file
+     * @param $filename
+     * @param $source_lang
+     */
+    private function migrateFileDB2FS( $id_file, $filename, $source_lang ) {
 
-		//fetch xliff from the files database
-		$xliffContent=$this->getXliffFromDB($id_file);
+        //create temporary storage to place stuff
+        $tempdir = "/tmp" . DIRECTORY_SEPARATOR . uniqid( "", true );
+        mkdir( $tempdir, 0755 );
 
-		//try pulling the original content too (if it's empty it means that it was an unconverted xliff)
-		$fileContent=$this->getOriginalFromDB($id_file);
+        //fetch xliff from the files database
+        $xliffContent = $this->getXliffFromDB( $id_file );
 
-		if(!empty($fileContent)){
-			//it's a converted file
-			//create temporary file with appropriately modified name
-			$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$filename.".xlf";
+        //try pulling the original content too (if it's empty it means that it was an unconverted xliff)
+        $fileContent = $this->getOriginalFromDB( $id_file );
 
-			//create file
-			$tempOriginal = $tempdir.DIRECTORY_SEPARATOR.$filename;
+        if ( !empty( $fileContent ) ) {
+            //it's a converted file
+            //create temporary file with appropriately modified name
+            $tempXliff = $tempdir . DIRECTORY_SEPARATOR . $filename . ".xlf";
 
-			//flush content
-			file_put_contents($tempOriginal, $fileContent);
+            //create file
+            $tempOriginal = $tempdir . DIRECTORY_SEPARATOR . $filename;
 
-			//get hash, based on original
-			$sha1=sha1($fileContent);
+            //flush content
+            file_put_contents( $tempOriginal, $fileContent );
 
-			//free memory
-			unset($fileContent);
-		}else{
-			//if it's a unconverted xliff
-			//create temporary file with original name
-			$tempXliff = $tempdir.DIRECTORY_SEPARATOR.$filename;
+            //get hash, based on original
+            $sha1 = sha1( $fileContent );
 
-			// set original to empty
-			$tempOriginal=false;
+            //free memory
+            unset( $fileContent );
+        } else {
+            //if it's a unconverted xliff
+            //create temporary file with original name
+            $tempXliff = $tempdir . DIRECTORY_SEPARATOR . $filename;
 
-			//get hash
-			$sha1=sha1($xliffContent);
-		}
+            // set original to empty
+            $tempOriginal = false;
 
-		//flush xliff file content
-		file_put_contents($tempXliff, $xliffContent);
+            //get hash
+            $sha1 = sha1( $xliffContent );
+        }
 
-		//free memory
-		unset($xliffContent);
+        //flush xliff file content
+        file_put_contents( $tempXliff, $xliffContent );
 
-		//build a cache package
-		$this->makeCachePackage($sha1, $source_lang, $tempOriginal, $tempXliff);
+        //free memory
+        unset( $xliffContent );
 
-		//build a file package
-		$this->moveFromCacheToFileDir($sha1, $source_lang, $id_file);
+        //build a cache package
+        $this->makeCachePackage( $sha1, $source_lang, $tempOriginal, $tempXliff );
 
-		//clean temporary stuff
-		Utils::deleteDir($tempdir);
-	}
+        //build a file package
+        $this->moveFromCacheToFileDir( $sha1, $source_lang, $id_file );
 
-	public function getOriginalFromDB($id_file){
-		$query = "select original_file from files where id= $id_file";
+        //clean temporary stuff
+        Utils::deleteDir( $tempdir );
+    }
 
-		$db      = Database::obtain();
-		$results = $db->fetch_array( $query );
+    public function getOriginalFromDB( $id_file ) {
+        $query = "select original_file from files where id= $id_file";
 
-		return gzinflate($results[0]['original_file']);
+        $db      = Database::obtain();
+        $results = $db->fetch_array( $query );
 
-	}
+        return gzinflate( $results[ 0 ][ 'original_file' ] );
 
-	public function getXliffFromDB($id_file){
-		$query = "select xliff_file from files where id= $id_file";
+    }
 
-		$db      = Database::obtain();
-		$results = $db->fetch_array( $query );
+    public function getXliffFromDB( $id_file ) {
+        $query = "select xliff_file from files where id= $id_file";
 
-		return $results[0]['xliff_file'];
-	}
+        $db      = Database::obtain();
+        $results = $db->fetch_array( $query );
+
+        return $results[ 0 ][ 'xliff_file' ];
+    }
 }
 
 ?>
