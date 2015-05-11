@@ -1806,7 +1806,9 @@ console.log('ecco');
         }
 		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
         var label = (t == 'translated' || t == 'approved') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
+        var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
 		$('#downloadProject').attr('value', label);
+        $('#previewDropdown').attr('data-download', isDownload);
 	},
 	setProgress: function(stats) {
 		var s = stats;

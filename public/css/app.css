@@ -4093,7 +4093,11 @@ box-shadow: 0 1px 2px #ccc;
 	  left: -131px;
   width: 162px;
 }
-
+.header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
+.header-menu .wrapper-dropdown-5 .dropdown[data-download='true'] li.previewLink
+{
+    display: none;
+}
 .topmenu-drop form {
     margin-right: 0;
 }
