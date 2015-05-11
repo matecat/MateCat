@@ -31,7 +31,6 @@ abstract class ajaxController extends controller {
      * Class constructor, initialize the header content type.
      */
     protected function __construct() {
-        parent::__construct();
 
         $buffer = ob_get_contents();
         ob_get_clean();

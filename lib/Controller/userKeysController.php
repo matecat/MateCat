@@ -21,6 +21,8 @@ class userKeysController extends ajaxController {
 
     public function __construct() {
 
+        parent::__construct();
+
         //Session Enabled
         $this->checkLogin();
         //Session Disabled

@@ -46,6 +46,10 @@ abstract class controller {
         //Default :  catController
         $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
         $className = $action . "Controller";
+
+        //Put here all actions we want to be performed by ALL controllers
+        require_once INIT::$MODEL_ROOT . '/queries.php';
+
         return new $className();
 
     }
@@ -89,29 +93,6 @@ abstract class controller {
         header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
         header("Cache-Control: post-check=0, pre-check=0", false);
         header("Pragma: no-cache");
-    }
-
-    /**
-     * Class constructor
-     *
-     */
-    protected function __construct() {
-
-        try {
-
-            //Put here all actions we want to be performed by ALL controllers
-
-            require_once INIT::$MODEL_ROOT . '/queries.php';
-            require_once INIT::$UTILS_ROOT . '/AuthCookie.php';
-
-        } catch ( Exception $e ) {
-            echo "<pre>";
-            print_r($e);
-            echo "\n\n\n";
-            echo "</pre>";
-            exit;
-        }
-
     }
 
     /**

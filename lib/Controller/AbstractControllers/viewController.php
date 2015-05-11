@@ -151,7 +151,6 @@ abstract class viewController extends controller {
 
         //SESSION ENABLED
         parent::sessionStart();
-        parent::__construct();
 
         //load Template Engine
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';

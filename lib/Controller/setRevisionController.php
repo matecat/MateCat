@@ -25,6 +25,9 @@ class setRevisionController extends ajaxController {
     );
 
     public function __construct() {
+
+        parent::__construct();
+
         $filterArgs = array(
                 'job'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'segment'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),

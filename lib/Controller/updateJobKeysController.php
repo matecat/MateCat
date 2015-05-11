@@ -19,6 +19,8 @@ class updateJobKeysController extends ajaxController {
 
     public function __construct() {
 
+        parent::__construct();
+        
         //Session Enabled
 
         //define input filters
