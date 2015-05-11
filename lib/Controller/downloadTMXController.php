@@ -64,7 +64,6 @@ class downloadTMXController extends downloadController {
 
         parent::sessionStart();
 
-        parent::__construct();
         $filterArgs = array(
 
             'tm_key' =>  array(

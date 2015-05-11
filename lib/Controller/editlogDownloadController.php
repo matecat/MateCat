@@ -1,7 +1,5 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-
 /**
  * Description of catController
  *
@@ -13,8 +11,6 @@ class editlogDownloadController extends downloadController {
     private $password;
 
     public function __construct() {
-        parent::__construct();
-
 
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),

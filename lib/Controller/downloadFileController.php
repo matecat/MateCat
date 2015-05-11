@@ -44,7 +44,6 @@ class downloadFileController extends downloadController {
 
     public function __construct() {
 
-        parent::__construct();
         $filterArgs = array(
                 'filename'      => array(
                         'filter' => FILTER_SANITIZE_STRING,

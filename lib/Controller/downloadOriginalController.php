@@ -12,7 +12,6 @@ class downloadOriginalController extends downloadController {
    
 
     public function __construct() {
-        parent::__construct();
 
         $filterArgs = array(
                 'filename'      => array(
