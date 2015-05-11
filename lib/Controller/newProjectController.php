@@ -1,7 +1,5 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
-
 class newProjectController extends viewController {
 
     private $guid = '';
@@ -26,8 +24,8 @@ class newProjectController extends viewController {
         parent::makeTemplate( "upload.html" );
 
         $this->guid            = Utils::create_guid();
-        $this->lang_handler    = Languages::getInstance();
-        $this->subject_handler = langs_LanguageDomains::getInstance();
+        $this->lang_handler    = Langs_Languages::getInstance();
+        $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
     }

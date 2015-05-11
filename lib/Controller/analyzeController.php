@@ -1,6 +1,5 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class analyzeController extends viewController {
 
@@ -86,7 +85,7 @@ class analyzeController extends viewController {
 
         $project_by_jobs_data = getProjectData( $this->pid, $this->ppassword, $this->jid, $this->jpassword );
 
-        $lang_handler = Languages::getInstance();
+        $lang_handler = Langs_Languages::getInstance();
 
         if ( empty( $project_by_jobs_data ) ) {
             $this->project_not_found = true;
@@ -332,7 +331,7 @@ class analyzeController extends viewController {
         $this->template->outsource_service_login    = $this->_outsource_login_API;
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
-        $langDomains = langs_LanguageDomains::getInstance();
+        $langDomains = Langs_LanguageDomains::getInstance();
         $this->subject = $langDomains::getDisplayDomain($this->subject);
         $this->template->subject                    = $this->subject;
 

@@ -2,7 +2,7 @@
 /*
    this class manages supported languages in the CAT tool
  */
-class langs_LanguageDomains{
+class Langs_LanguageDomains{
 
 	private static $instance; //singleton instance
 	private static $subjectMap;
@@ -10,7 +10,7 @@ class langs_LanguageDomains{
 	//access singleton
 	public static function getInstance() {
 		if (!self::$instance) {
-			self::$instance = new langs_LanguageDomains();
+			self::$instance = new Langs_LanguageDomains();
 		}
 		return self::$instance;
 	}
@@ -22,7 +22,7 @@ class langs_LanguageDomains{
             // SDL supported language codes 
             // http://kb.sdl.com/kb/?ArticleId=2993&source=Article&c=12&cid=23#tab:homeTab:crumb:7:artId:4878
             
-		$file=INIT::$UTILS_ROOT.'/langs/languageDomains.json';
+		$file=INIT::$UTILS_ROOT.'/Langs/languageDomains.json';
 
 		if(!file_exists($file)){
 			log::doLog("no subject defs found in $file");

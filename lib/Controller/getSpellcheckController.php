@@ -1,8 +1,6 @@
 <?php
 
-#include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$UTILS_ROOT . '/SpellChecker/SpellCheckFactory.php';
-include_once INIT::$UTILS_ROOT . '/langs/languages.class.php';
 
 class getSpellcheckController extends ajaxController {
 

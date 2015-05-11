@@ -4,7 +4,7 @@
    this class manages supported languages in the CAT tool
  */
 
-class Languages {
+class Langs_Languages {
 
     private static $instance; //singleton instance
     private static $map_string2rfc; //associative map on language names -> codes
@@ -18,7 +18,7 @@ class Languages {
     //access singleton
     public static function getInstance() {
         if ( !self::$instance ) {
-            self::$instance = new Languages();
+            self::$instance = new Langs_Languages();
         }
 
         return self::$instance;
@@ -31,7 +31,7 @@ class Languages {
         // SDL supported language codes
         // http://kb.sdl.com/kb/?ArticleId=2993&source=Article&c=12&cid=23#tab:homeTab:crumb:7:artId:4878
 
-        $file = INIT::$UTILS_ROOT . '/langs/supported_langs.json';
+        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
         if ( !file_exists( $file ) ) {
             log::doLog( "no language defs found in $file" );
             exit;

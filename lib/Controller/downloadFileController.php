@@ -194,7 +194,7 @@ class downloadFileController extends downloadController {
                 $debug[ 'replace' ][ ] = time();
 
                 //instatiate parser
-                $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $fp );
+                $xsp = new XliffSAXTranslationReplacer( $path, $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $fp );
 
                 if ( $this->download_type == 'omegat' ) {
                     $xsp->setSourceInTarget( true );

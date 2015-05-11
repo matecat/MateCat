@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -70,7 +69,7 @@ class getSegmentsController extends ajaxController {
             return;
         }
 
-		$lang_handler = Languages::getInstance();
+		$lang_handler = Langs_Languages::getInstance();
 
 		if ($this->ref_segment == '') {
 			$this->ref_segment = 0;

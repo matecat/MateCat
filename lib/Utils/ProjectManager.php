@@ -7,7 +7,6 @@
  *
  */
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
-include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
 
 class ProjectManager {
 
@@ -81,7 +80,7 @@ class ProjectManager {
         //get the TMX management component from the factory
         $this->tmxServiceWrapper = new TMSService();
 
-        $this->langService = Languages::getInstance();
+        $this->langService = Langs_Languages::getInstance();
 
         $this->checkTMX = 0;
 
@@ -835,10 +834,10 @@ class ProjectManager {
 
                 Log::dolog( __CLASS__ . " - DETECT LANG COMPARISON:", "$fileLang@@$sourceLang" );
                 //get extended language name using google language code
-                $languageExtendedName = langs_GoogleLanguageMapper::getLanguageCode( $fileLang );
+                $languageExtendedName = Langs_GoogleLanguageMapper::getLanguageCode( $fileLang );
 
                 //get extended language name using standard language code
-                $langClass                  = Languages::getInstance();
+                $langClass                  = Langs_Languages::getInstance();
                 $sourceLanguageExtendedName = strtolower( $langClass->getLocalizedName( $sourceLang ) );
                 Log::dolog( __CLASS__ . " - DETECT LANG NAME COMPARISON:", "$sourceLanguageExtendedName@@$languageExtendedName" );
 

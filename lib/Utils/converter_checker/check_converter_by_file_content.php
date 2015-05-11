@@ -65,7 +65,7 @@ class ConvertersMonitor {
         $this->db->connect();
 
         //init params
-        $this->path      = $this->ROOT . '/lib/utils/converter_checker';
+        $this->path      = $this->ROOT . '/lib/Utils/converter_checker';
         $resultSet       = $this->db->fetch_array( self::selectAllNotOffline );
 
         if( empty($resultSet) ){

@@ -1,6 +1,5 @@
 <?php
 include_once INIT::$UTILS_ROOT . "/manage.class.php";
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 /**
  * Description of manageController
@@ -10,7 +9,7 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 class getProjectsController extends ajaxController {
 
     /**
-     * @var Languages
+     * @var Langs_Languages
      */
     private $lang_handler;
 
@@ -107,7 +106,7 @@ class getProjectsController extends ajaxController {
             $postInput[ 'status' ] = Constants_JobStatus::STATUS_ACTIVE;
         }
 
-        $this->lang_handler = Languages::getInstance();
+        $this->lang_handler = Langs_Languages::getInstance();
         $this->page                 = (int) $postInput[ 'page' ];
         $this->step                 = (int) $postInput[ 'step' ];
         $this->project_id           = $postInput[ 'project' ];

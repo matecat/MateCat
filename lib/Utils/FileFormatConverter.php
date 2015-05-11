@@ -3,9 +3,6 @@
 set_time_limit( 0 );
 define ( "BOM", "\xEF\xBB\xBF" );
 
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
-
-
 class FileFormatConverter {
 
     private $ip; //current converter chosen for this job
@@ -49,7 +46,7 @@ class FileFormatConverter {
             INIT::obtain();
         }
         $this->opt[ 'httpheader' ] = array( "Content-Type:multipart/form-data;charset=UTF-8" );
-        $this->lang_handler        = Languages::getInstance();
+        $this->lang_handler        = Langs_Languages::getInstance();
 
         $this->conversionObject = new ArrayObject( array(
                 'ip_machine'      => null,

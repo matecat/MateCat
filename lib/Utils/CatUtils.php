@@ -2,8 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
-include_once INIT::$UTILS_ROOT . "/Utils.php";
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
@@ -704,7 +702,7 @@ class CatUtils {
 
             $seg['pe_effort_perc'] .= "%";
 
-            $lh = Languages::getInstance();
+            $lh = Langs_Languages::getInstance();
             $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg['target_lang'] ) );
 
             $sug_for_diff = self::placehold_xliff_tags( $seg[ 'sug' ] );

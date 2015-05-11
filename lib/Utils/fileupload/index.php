@@ -15,11 +15,7 @@ ini_set('max_input_time',3600);
 
 require realpath(dirname(__FILE__) . '/../../../') . '/inc/config.inc.php';
 @INIT::obtain();
-require INIT::$UTILS_ROOT . '/Utils.php';
-require INIT::$UTILS_ROOT . '/Log.php';
 require('upload.class.php');
-require( INIT::$UTILS_ROOT . '/DetectProprietaryXliff.php' );
-
 
 $upload_handler = new UploadHandler();
 

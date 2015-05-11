@@ -1,7 +1,5 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
-
 /**
  * Description of manageController
  *
@@ -29,7 +27,7 @@ class manageController extends viewController {
         if($this->page == null || empty($this->page)){
             $this->page = 1;
         }
-		$this->lang_handler = Languages::getInstance();
+		$this->lang_handler = Langs_Languages::getInstance();
 
 		if ($postInput[ 'filter' ] !== null && $postInput[ 'filter' ]) {
 			$this->filter_enabled = true;

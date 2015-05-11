@@ -1,9 +1,5 @@
 <?
 
-include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
-
 class ManageUtils {
 
     /**
@@ -36,7 +32,7 @@ class ManageUtils {
         //get job data using job IDs
         $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted );
 
-        $lang_handler = Languages::getInstance();
+        $lang_handler = Langs_Languages::getInstance();
 
         //Prepare job data
         $project2jobChunk = array();

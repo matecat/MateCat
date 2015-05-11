@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class langs_GoogleLanguageMapper
+ * Class Langs_GoogleLanguageMapper
  * This class is responsible of mapping google web interface language codes
  * to Matecat languages.<br/>
  * The reference language list is placed in
@@ -9,7 +9,7 @@
  * https://sites.google.com/site/tomihasa/google-language-codes
  * </a>
  */
-class langs_GoogleLanguageMapper {
+class Langs_GoogleLanguageMapper {
 
 	public static $googleLang2lang = array(
 		"af"	    =>	"afrikaans",

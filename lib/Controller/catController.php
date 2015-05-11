@@ -1,6 +1,5 @@
 <?php
 
-include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 /**
  * Description of catController
@@ -111,7 +110,7 @@ class catController extends viewController {
 
     public function doAction() {
         $files_found  = array();
-        $lang_handler = Languages::getInstance();
+        $lang_handler = Langs_Languages::getInstance();
 
         $data = getSegmentsInfo( $this->jid, $this->password );
         if ( empty( $data ) or $data < 0 ) {
