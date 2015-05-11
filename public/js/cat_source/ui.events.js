@@ -779,6 +779,12 @@ $.extend(UI, {
 		} ).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
+        }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
+            e.preventDefault();
+            $('#downloadProject').click();
+        }).on('click', '#previewDropdown .previewLink a', function(e) {
+            e.preventDefault();
+            $('.downloadtr-button.draft').click();
         }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             if( $('#downloadProject').hasClass('disabled') ) return false;
@@ -809,7 +815,7 @@ $.extend(UI, {
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '.downloadtr-button .draft', function() {
+		}).on('click', '.downloadtr-button.draft', function() {
 			if (UI.isChrome) {
 				$('.download-chrome').addClass('d-open');
 				setTimeout(function() {
