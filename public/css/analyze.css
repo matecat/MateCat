@@ -1,11 +1,11 @@
 ﻿/* GENERALI */
-body {margin:0; padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0;}
+body {margin:0;   min-width: 1150px;padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0;}
 th, td { padding: 0px; }
 table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;} 
 header{background:#4D4D4D;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #5F5F5F;padding:2px 0 0px 0;height:45px;}
 .logo{float:left;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;margin-top:4px}
 /*.wrapper{width:960px;margin:0 auto;text-align:left}*/
-.wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
+.wrapper{width:96%;min-width:1024px;margin:0px auto 0 auto;padding:5px 0 0 0;font-size:14px;position:relative;text-align:left;}
 header .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
 h1{font-size:30px;margin:30px 0 0px 0;max-height:80px;overflow:hidden;}
 h2{font-size:28px;margin:-30px 0 0px 0 ;color:#6d6e71;font-weight:normal;display:none}
@@ -57,10 +57,10 @@ a:hover{text-decoration:none}
 
 /* TABELLA */
 .tablestats{font-size:16px;/*margin-top:5px;padding-bottom: 50px;*/clear: both;}
-.tablestats th, .tablestats td{ background:#fff;padding:8px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
+.tablestats th, .tablestats td{ background:#fff;padding:7px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
 .tablestats th{border-top:1px solid #ccc;background:#F6F6F6;text-align:center;font-size:14px;}
-.tablestats th:first-child {width: 35%; border-left:1px solid #ccc;}
-.tablestats td:first-child {width: 35%; border-left:1px solid #ccc;}
+.tablestats th:first-child {width: 35%; min-width: 250px; border-left:1px solid #ccc;}
+.tablestats td:first-child {width: 35%; min-width: 250px;border-left:1px solid #ccc;}
 .tablestats th.new, .tablestats td.stat_new,
 .tablestats th.repetition, .tablestats td.repetition,
 .tablestats th.internal-matches, .tablestats td.internal-matches,
@@ -294,9 +294,9 @@ div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn {display:
 }
 
 
-.subfile p{margin:0 -35px 0 0px;	word-break: break-word;
-		   padding:0 30px;background: url(../img/sprite.png) 3px -304px no-repeat;background-size:26px;}
-.totaltable td{font-size:18px;}
+.subfile p{margin:0 0 0 0px;	  width: 215px;word-break: break-word;
+		   padding:0 0 0 30px;background: url(../img/sprite.png) 3px -304px no-repeat;background-size:26px;}
+.totaltable td{font-size:16px;}
 .totaltable td.languages{border-left:1px solid #ccc;}
 table tr.totaltable td.stat-payable {
 	background: #c4df9b;
@@ -305,6 +305,7 @@ table tr.subfile td.stat-name
 {
 	border-left: 1px solid #ccc;
 	text-align: left !important;
+	  font-size: 15px;
 }
 table tr.totaltable td.total
 {
@@ -830,6 +831,38 @@ top: 25%;
 	overflow: auto;
 }
 
+@media only screen and (max-width : 1370px) {
+	
+	.tablestats th, .tablestats td {
+		padding: 5px;
+	}
+}
+
+@media only screen and (max-width : 1270px) {
+	
+	.tablestats th, .tablestats td {
+		padding: 4px;
+	}
+	.wrapper {
+  width: 98%;
+}
+@media only screen and (max-width : 1200px) {
+	
+	.tablestats th {
+		font-size:13px;
+	}
+
+
+
+	.tablestats th:first-child,
+	.tablestats td:first-child
+	 {
+  min-width: 200px;
+}
+.subfile p {
+  width: 215px;
+  }
+}
 
 
 /* retina display query */
