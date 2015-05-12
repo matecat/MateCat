@@ -5,19 +5,24 @@ require "main.php";
 define( 'ANALYSIS_ROOT', INIT::$UTILS_ROOT . "/Analysis/.num_processes" );
 $my_pid = getmypid();
 
-try {
-    $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS, array( 'read_write_timeout' => 30, 'timeout' => 30 ) );
-    $redisHandler->set( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID, $my_pid );
-} catch ( Exception $ex ){
-    $msg = "****** No REDIS instances found. Exiting. ******";
-    _TimeStampMsg( $msg, true );
-    die();
-}
+$redisHandler = getRedisConnection();
 
 Log::$fileName = "tm_analysis.log";
 $RUNNING = true;
 
 // PROCESS CONTROL FUNCTIONS
+
+function getRedisConnection(){
+    try {
+        $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS, array( 'read_write_timeout' => 30, 'timeout' => 30 ) );
+        $redisHandler->set( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID, getmypid() );
+    } catch ( Exception $ex ){
+        $msg = "****** No REDIS instances found. Exiting. ******";
+        _TimeStampMsg( $msg, true );
+        die();
+    }
+    return $redisHandler;
+}
 
 function cleanShutDown( ){
 
@@ -84,10 +89,19 @@ do {
 
 //    _TimeStampMsg( "(parent $my_pid) : PARENT MONITORING START" );
 
-    if( !$redisHandler->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID ) ) {
-        cleanShutDown();
-        _TimeStampMsg( "(parent $my_pid) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!", true );
-        die();
+    try {
+
+        if( !$redisHandler->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID ) ) {
+            cleanShutDown();
+            _TimeStampMsg( "(parent $my_pid) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!", true );
+            die();
+        }
+
+    } catch ( Exception $e ){
+        $redisHandler = getRedisConnection();
+        _TimeStampMsg( "(child $pid) : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle", true );
+        _TimeStampMsg( "(child $pid) : FATAL !! " . $e->getMessage(), true );
+        continue;
     }
 
     //avoid zombies : the parent is aware of the death of one of the children
@@ -98,7 +112,15 @@ do {
         _TimeStampMsg( "DONE", false );
     }
     $numProcesses        = setNumProcesses();
-    $childrenRunningList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
+
+    try {
+        $childrenRunningList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
+    } catch ( Exception $e ){
+        $redisHandler = getRedisConnection();
+        _TimeStampMsg( "(child $pid) : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle", true );
+        _TimeStampMsg( "(child $pid) : FATAL !! " . $e->getMessage(), true );
+        continue;
+    }
 
     $numProcessesNow  = count( $childrenRunningList );
     $numProcessesDiff = $numProcessesNow - $numProcesses;
@@ -153,7 +175,7 @@ function launchProcesses( $numProcesses = 1 ) {
         $pid = pcntl_fork();
 
         if ( $pid == -1 ) {
-            _TimeStampMsg( "PARENT FATAL !! cannot fork. Exiting!", false );
+            _TimeStampMsg( "PARENT FATAL !! cannot fork. Exiting!", true );
 
             return -1;
         }
@@ -165,17 +187,27 @@ function launchProcesses( $numProcesses = 1 ) {
             // child process runs what is here
             $pid = getmypid();
 
-            if ( !$redisHandler->rpush( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, $pid ) ) {
-                _TimeStampMsg( "(child $pid) : FATAL !! cannot create child file. Exiting!", false );
-                return -2;
+            try {
 
-            } else {
-                _TimeStampMsg( "(child $pid) : created !!!", false );
+                if ( !$redisHandler->rpush( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, $pid ) ) {
+                    _TimeStampMsg( "(child $pid) : FATAL !! cannot create child file. Exiting!", true );
+                    return -2;
+
+                } else {
+                    _TimeStampMsg( "(child $pid) : created !!!", false );
+                }
+
+            } catch ( Exception $e ){
+                $redisHandler = getRedisConnection();
+                $redisHandler->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $pid );
+                _TimeStampMsg( "(child $pid) : FATAL !! Redis Server not available. Re-instantiated the connection and removed last pid from list.", true );
+                _TimeStampMsg( "(child $pid) : FATAL !! " . $e->getMessage(), true );
+                return 0;
             }
 
             pcntl_exec( "/usr/bin/php", array( "tmAnalysisThreadChild.php" ) );
 
-            exit; //never executed
+            exit; //exit process
         }
 
         // this sleep is for tempt to avoid two fork select the same segment: backward compatibility with MySql Child

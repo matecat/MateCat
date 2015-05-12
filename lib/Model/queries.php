@@ -2298,7 +2298,7 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
     $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
 
 		s.raw_word_count,
-		j.target,
+		group_concat( distinct j.target ) as target,
 		j.payable_rates
 
 		from segments as s

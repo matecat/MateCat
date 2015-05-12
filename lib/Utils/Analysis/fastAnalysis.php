@@ -111,7 +111,7 @@ do {
                     $segment['segment'],
                     $segment['raw_word_count'],
                     $segment['source'],
-                    $segment['target'],
+                    $segment['target'],  //now target holds more than one language ex: ( it-IT,fr-FR )
                     $segment['payable_rates']
             );
 
@@ -165,7 +165,7 @@ do {
             $data[ $k ][ 'segment' ]          = $segment_hashes[ $sid ][ 1 ];
             $data[ $k ][ 'raw_word_count' ]   = $segment_hashes[ $sid ][ 2 ];
             $data[ $k ][ 'source' ]           = $segment_hashes[ $sid ][ 3 ];
-            $data[ $k ][ 'target' ]           = $segment_hashes[ $sid ][ 4 ];
+            $data[ $k ][ 'target' ]           = $segment_hashes[ $sid ][ 4 ];  //now target holds more than one language ex: ( it-IT,fr-FR )
             $data[ $k ][ 'payable_rates' ]    = $segment_hashes[ $sid ][ 5 ];
             $data[ $k ][ 'pretranslate_100' ] = $pid_res[ 'pretranslate_100' ];
             $data[ $k ][ 'tm_keys' ]          = $pid_res[ 'tm_keys' ];
@@ -368,22 +368,30 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     if ( count( $fastReport ) ) {
 
 //        $chunks_st_queue = array_chunk( $fastReport, 10 );
-        $chunks_st_queue = &$fastReport;
 
         _TimeStampMsg( 'Insert Segment Translations Queue: ' . count( $fastReport ) );
-        _TimeStampMsg( 'Queries: ' . count( $chunks_st_queue ) );
+        _TimeStampMsg( 'Queries: ' . count( $fastReport ) );
 
         $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
 
         $time_start = microtime(true);
-        foreach ( $chunks_st_queue as $k => $queue_chunk ) {
+        foreach ( $fastReport as $k => $queue_element ) {
 
             try {
 
-                $jsonObj = json_encode( $queue_chunk );
-                Utils::raiseJsonExceptionError();
-                $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
+                $languages = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( it-IT,fr-FR )
+
+                //in memory replacement avoid duplication of the segment list
+                //send in queue every element * number of languages
+                foreach( $languages as $lang){
+                    $queue_element[ 'target' ] = $lang;
+
+                    $jsonObj = json_encode( $queue_element );
+                    Utils::raiseJsonExceptionError();
+                    $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
 //                _TimeStampMsg( "Executed " . ( $k +1 ) );
+
+                }
 
             } catch ( Exception $e ){
                 Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString() , "Fast Analysis set queue failed." );
@@ -395,7 +403,6 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
         _TimeStampMsg( 'Done in ' . ( microtime(true) - $time_start ) . " seconds." );
         _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
-        unset( $chunks_st_queue );
         unset( $fastReport );
 
         _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
