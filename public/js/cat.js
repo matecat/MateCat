@@ -174,8 +174,6 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
-//            segment.find('.actions .split.cancel').click();
-//            segment.find('.actions').hide();
             this.deActivateSegment(byButton);
             this.removeGlossaryMarksFormSource();
 
@@ -1515,28 +1513,6 @@ UI = {
 
 		$("html,body").stop();
         pointSpeed = (quick)? 0 : 500;
-/*
-        console.log('segment: ', segment.attr('id'));
-
-        console.log('prev: ', UI.currentSegment.prev().attr('id'));
-
-        if(config.isReview) {
-            setTimeout(function() {
-                $("html,body").animate({
-                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
-                }, 500);
-            }, 300);
-        } else {
-            $("html,body").animate({
-                scrollTop: segment.prev().offset().top - $('.header-menu').height()
-            }, 500);
-        }
-*/
-/*
-		$("html,body").animate({
-			scrollTop: destinationTop - 20
-		}, pointSpeed);
-*/
         if(config.isReview) {
             setTimeout(function() {
                 $("html,body").animate({
@@ -1548,7 +1524,6 @@ UI = {
                 scrollTop: destinationTop - 20
             }, pointSpeed);
         }
-
 		setTimeout(function() {
 			UI.goingToNext = false;
         }, pointSpeed);
@@ -1831,7 +1806,9 @@ console.log('ecco');
         }
 		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
         var label = (t == 'translated' || t == 'approved') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
+        var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
 		$('#downloadProject').attr('value', label);
+        $('#previewDropdown').attr('data-download', isDownload);
 	},
 	setProgress: function(stats) {
 		var s = stats;
@@ -3532,7 +3509,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.3b";
+		this.version = "0.5.3c";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -4602,6 +4579,12 @@ $.extend(UI, {
 		} ).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
+        }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
+            e.preventDefault();
+            $('#downloadProject').click();
+        }).on('click', '#previewDropdown .previewLink a', function(e) {
+            e.preventDefault();
+            $('.downloadtr-button.draft').click();
         }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             if( $('#downloadProject').hasClass('disabled') ) return false;
@@ -4632,7 +4615,7 @@ $.extend(UI, {
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '.downloadtr-button .draft', function() {
+		}).on('click', '.downloadtr-button.draft', function() {
 			if (UI.isChrome) {
 				$('.download-chrome').addClass('d-open');
 				setTimeout(function() {

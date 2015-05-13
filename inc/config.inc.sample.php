@@ -8,7 +8,7 @@ class INIT {
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
-    public static $DEBUG = true;
+    public static $DEBUG = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
@@ -89,21 +89,6 @@ class INIT {
      */
     public static $ENABLE_OUTSOURCE = true;
 
-    public static $DEFAULT_PAYABLE_RATES = array(
-            'NO_MATCH'    => 100,
-            '50%-74%'     => 100,
-            //            '75%-99%'     => 60,
-            '75%-80%'     => 60,
-            '81%-90%'     => 60,
-            '91%-99%'     => 60,
-            '100%'        => 30,
-            '100%_PUBLIC' => 30,
-            'REPETITIONS' => 30,
-            'INTERNAL'    => 60,
-            'MT'          => 85
-    );
-
-
     public static function obtain() {
         if ( !self::$instance ) {
             self::$instance = new INIT();
@@ -122,15 +107,15 @@ class INIT {
 
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = array(
-                self::$ROOT,
-                self::$ROOT . "/lib/controller/AbstractControllers",
-                self::$ROOT . "/lib/controller/API",
-                self::$ROOT . "/lib/controller",
-                self::$ROOT . "/inc/PHPTAL",
-                self::$ROOT . "/lib/utils/API",
-                self::$ROOT . "/lib/utils",
-                self::$ROOT . "/lib/utils/Predis/src",
-                self::$ROOT . "/lib/model" ,
+            self::$ROOT,
+            self::$ROOT . "/lib/Controller/AbstractControllers",
+            self::$ROOT . "/lib/Controller/API",
+            self::$ROOT . "/lib/Controller",
+            self::$ROOT . "/inc/PHPTAL",
+            self::$ROOT . "/lib/Utils/API",
+            self::$ROOT . "/lib/Utils",
+            self::$ROOT . "/lib/Utils/Predis/src",
+            self::$ROOT . "/lib/Model" ,
         );
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
@@ -201,10 +186,10 @@ class INIT {
         self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
         self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
         self::$REFERENCE_REPOSITORY            = self::$STORAGE_DIR . "/reference_files";
-        self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/view";
-        self::$MODEL_ROOT                      = self::$ROOT . '/lib/model';
-        self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';
-        self::$UTILS_ROOT                      = self::$ROOT . '/lib/utils';
+        self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/View";
+        self::$MODEL_ROOT                      = self::$ROOT . '/lib/Model';
+        self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/Controller';
+        self::$UTILS_ROOT                      = self::$ROOT . '/lib/Utils';
 
         $this->_setIncludePath();
         spl_autoload_register( 'INIT::loadClass' );
