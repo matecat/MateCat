@@ -316,7 +316,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
         $db->query( $query_st );
 
-        //_TimeStampMsg( "Executed " . ( $k + 1 )  );
+        _TimeStampMsg( "Executed " . ( $k + 1 )  );
 
         $err = $db->get_error();
         if ( $err[ 'error_code' ] != 0 ) {
