@@ -3509,7 +3509,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.3c";
+		this.version = "0.5.4";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;

@@ -249,7 +249,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.5.3c';
+        self::$BUILD_NUMBER = '0.5.4';
         self::$VOLUME_ANALYSIS_ENABLED = true;
         self::$SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
