@@ -87,21 +87,6 @@ class INIT {
      */
     public static $ENABLE_OUTSOURCE = true;
 
-    public static $DEFAULT_PAYABLE_RATES = array(
-            'NO_MATCH'    => 100,
-            '50%-74%'     => 100,
-            //            '75%-99%'     => 60,
-            '75%-84%'     => 60,
-            '85%-94%'     => 60,
-            '95%-99%'     => 60,
-            '100%'        => 30,
-            '100%_PUBLIC' => 30,
-            'REPETITIONS' => 30,
-            'INTERNAL'    => 60,
-            'MT'          => 85
-    );
-
-
     public static function obtain() {
         if (!self::$instance) {
             self::$instance = new INIT();

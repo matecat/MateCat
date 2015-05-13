@@ -712,7 +712,7 @@ class ProjectManager {
             $shortTargetLang = substr( $target, 0, 2 );
 
             //get payable rates
-            $projectStructure[ 'payable_rates' ] = CatUtils::getPayableRates( $shortSourceLang, $shortTargetLang );
+            $projectStructure[ 'payable_rates' ] = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
 
             $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment
                 FROM segments WHERE id_file IN ( %s )";

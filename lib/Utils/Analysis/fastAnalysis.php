@@ -111,7 +111,7 @@ do {
                     $segment['segment'],
                     $segment['raw_word_count'],
                     $segment['source'],
-                    $segment['target'],  //now target holds more than one language ex: ( it-IT,fr-FR )
+                    $segment['target'],  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     $segment['payable_rates']
             );
 
@@ -165,7 +165,7 @@ do {
             $data[ $k ][ 'segment' ]          = $segment_hashes[ $sid ][ 1 ];
             $data[ $k ][ 'raw_word_count' ]   = $segment_hashes[ $sid ][ 2 ];
             $data[ $k ][ 'source' ]           = $segment_hashes[ $sid ][ 3 ];
-            $data[ $k ][ 'target' ]           = $segment_hashes[ $sid ][ 4 ];  //now target holds more than one language ex: ( it-IT,fr-FR )
+            $data[ $k ][ 'target' ]           = $segment_hashes[ $sid ][ 4 ];  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
             $data[ $k ][ 'payable_rates' ]    = $segment_hashes[ $sid ][ 5 ];
             $data[ $k ][ 'pretranslate_100' ] = $pid_res[ 'pretranslate_100' ];
             $data[ $k ][ 'tm_keys' ]          = $pid_res[ 'tm_keys' ];
@@ -181,7 +181,7 @@ do {
 
         // INSERT DATA
         _TimeStampMsg( "inserting segments..." );
-        $insertReportRes = insertFastAnalysis( $pid, $data, INIT::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+        $insertReportRes = insertFastAnalysis( $pid, $data, Analysis_PayableRates::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
         if ( $insertReportRes < 0 ) {
             _TimeStampMsg( "insertFastAnalysis failed...." );
         }
@@ -240,7 +240,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
         $jid_fid    = explode( "-", $k );
 
         $id_segment = $jid_fid[ 0 ];
-        $id_jobs    = $jid_fid[ 1 ];
+        $list_id_jobs_password    = $jid_fid[ 1 ];
 
         if ( array_key_exists( $v[ 'match_type' ], $equivalentWordMapping ) ) {
             $eq_word = ( $v[ 'wc' ] * $equivalentWordMapping[ $v[ 'match_type' ] ] / 100 );
@@ -260,8 +260,8 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
         $total_standard_wc += $standard_words;
         unset( $fastReport[ $k ]['wc'] );
 
-        $id_jobs = explode( ',', $id_jobs );
-        foreach ( $id_jobs as $id_job ) {
+        $list_id_jobs_password = explode( ',', $list_id_jobs_password );
+        foreach ( $list_id_jobs_password as $id_job ) {
 
             list( $id_job, $job_pass ) = explode( ":", $id_job );
 
@@ -276,7 +276,11 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
             if ( $data[ 'eq_word_count' ] > 0 && $perform_Tms_Analysis ) {
 
-                $fastReport[ $k ][ 'id_job' ]              = (int)$id_job;
+                /**
+                 *
+                 * IMPORTANT
+                 * id_job will be taken from languages ( 80415:fr-FR,80416:it-IT )
+                 */
                 $fastReport[ $k ][ 'pid' ]                 = (int)$pid;
                 $fastReport[ $k ][ 'date_insert' ]         = date_create()->format( 'Y-m-d H:i:s' );
                 $fastReport[ $k ][ 'eq_word_count' ]       = (float)$eq_word;
@@ -288,6 +292,8 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
             }
         }
     }
+
+    unset( $data );
 
     $chunks_st = array_chunk( $st_values, 200 );
 
@@ -379,12 +385,15 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
             try {
 
-                $languages = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( it-IT,fr-FR )
-
+                $languages_job = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                 //in memory replacement avoid duplication of the segment list
                 //send in queue every element * number of languages
-                foreach( $languages as $lang){
-                    $queue_element[ 'target' ] = $lang;
+                foreach( $languages_job as $_language){
+
+                    list( $id_job, $language ) = explode( ":", $_language );
+
+                    $queue_element[ 'target' ] = $language;
+                    $queue_element[ 'id_job' ] = $id_job;
 
                     $jsonObj = json_encode( $queue_element );
                     Utils::raiseJsonExceptionError();
