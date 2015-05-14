@@ -9,9 +9,9 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     public function __construct( $result ) {
 
 
-        $this->responseData    = $result[ 'responseData' ];
+        $this->responseData    = isset( $result[ 'responseData' ] ) ? $result[ 'responseData' ] : '';
         $this->responseDetails = isset( $result[ 'responseDetails' ] ) ? $result[ 'responseDetails' ] : '';
-        $this->responseStatus  = $result[ 'responseStatus' ];
+        $this->responseStatus  = isset( $result[ 'responseStatus' ] ) ? $result[ 'responseStatus' ] : '';
 
 
         if ( is_array( $result ) and !empty( $result ) and array_key_exists( 'matches', $result ) ) {

@@ -151,6 +151,21 @@ do {
 //        _TimeStampMsg( "segment found is: " );
 //        _TimeStampMsg( $objQueue );
 
+    /**
+     *
+     * check for loop re-queuing
+     */
+    if( isset( $objQueue[ 'reQueueNum' ] ) && $objQueue[ 'reQueueNum' ] >= 100 ){
+        _TimeStampMsg( "--- (child $my_pid) :  Frame Re-queue max value reached, acknowledge and skip." );
+        $amqHandlerSubscriber->incrementAnalyzedCount( $pid, 0, 0 );
+        $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
+        $amqHandlerSubscriber->tryToCloseProject( $pid, $my_pid );
+        $amqHandlerSubscriber->ack( $msg );
+        continue;
+    } elseif( isset( $objQueue[ 'reQueueNum' ] ) ){
+        _TimeStampMsg( "--- (child $my_pid) :  Frame re-queued {$objQueue[ 'reQueueNum' ]} times." );
+    }
+
     $amqHandlerSubscriber->initializeTMAnalysis( $objQueue, $my_pid );
 
     _TimeStampMsg( "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid" );
@@ -261,10 +276,11 @@ do {
 
             _TimeStampMsg( "--- (child $my_pid) : error from mymemory : set error and continue" ); // ERROR FROM MYMEMORY
             setSegmentTranslationError( $sid, $jid ); // devo settarli come done e lasciare il vecchio livello di match
-            $amqHandlerSubscriber->incrementAnalyzedCount( $pid, 0, 0 );
-            $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
             $amqHandlerSubscriber->tryToCloseProject( $pid, $my_pid );
             $amqHandlerSubscriber->ack( $msg );
+
+            //set/increment the reQueue number
+            $objQueue[ 'reQueueNum' ] = @++$objQueue[ 'reQueueNum' ];
 
             $amqHandlerPublisher = new Analysis_QueueHandler();
             $amqHandlerPublisher->reQueue( $objQueue );

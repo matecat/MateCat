@@ -8,7 +8,8 @@ class INIT {
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
-    public static $DEBUG = false;
+    public static $DEBUG = true;
+    public static $EXCEPTION_DEBUG = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
@@ -259,7 +260,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER            = '0.5.3c';
+        self::$BUILD_NUMBER = '0.5.4';
         self::$VOLUME_ANALYSIS_ENABLED = true;
         self::$SUPPORT_MAIL            = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
@@ -448,10 +449,8 @@ class INIT {
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
-                    if ( INIT::$DEBUG ) {
-                        echo json_encode( array(
-                                "errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array()
-                        ) );
+                    if( INIT::$EXCEPTION_DEBUG ){
+                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() ) );
                     } else {
                         echo json_encode( array(
                                 "errors"  => array(
@@ -463,7 +462,7 @@ class INIT {
                         ) );
                     }
 
-                } elseif ( INIT::$DEBUG ) {
+                } elseif( INIT::$EXCEPTION_DEBUG ){
                     echo $output;
                 }
 

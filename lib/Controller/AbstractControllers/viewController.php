@@ -116,7 +116,7 @@ abstract class viewController extends controller {
             if ( strripos( $u_agent, "Version" ) < strripos( $u_agent, $ub ) ) {
                 $version = $matches[ 'version' ][ 0 ];
             } else {
-                $version = $matches[ 'version' ][ 1 ];
+                $version = @$matches[ 'version' ][ 1 ];
             }
         } else {
             $version = $matches[ 'version' ][ 0 ];

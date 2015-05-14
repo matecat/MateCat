@@ -54,37 +54,38 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $result_object = null;
 
-        if(!isset($rawValue['error'])) {
-            switch ( $functionName ) {
-                case 'api_key_check_auth_url':
-                    $result_object = new Engines_Results_MyMemory_AuthKeyResponse( $decoded );
-                    break;
-                case 'api_key_create_user_url':
-                    $result_object = new Engines_Results_MyMemory_CreateUserResponse( $decoded );
-                    break;
-                case 'tmx_import_relative_url':
-                case 'tmx_status_relative_url':
-                    $result_object = new Engines_Results_MyMemory_TmxResponse( $decoded );
-                    break;
-                case 'tmx_export_create_url' :
-                case 'tmx_export_check_url' :
-                    $result_object = new Engines_Results_MyMemory_ExportResponse( $decoded );
-                    break;
-                case 'analyze_url':
-                    $result_object = new Engines_Results_MyMemory_AnalyzeResponse( $decoded );
-                    break;
-                case 'contribute_relative_url':
-                    $result_object = new Engines_Results_MyMemory_SetContributionResponse( $decoded );
-                    break;
-                default:
+        switch ( $functionName ) {
+            case 'api_key_check_auth_url':
+                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded );
+                break;
+            case 'api_key_create_user_url':
+                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded );
+                break;
+            case 'tmx_import_relative_url':
+            case 'tmx_status_relative_url':
+                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded );
+                break;
+            case 'tmx_export_create_url' :
+            case 'tmx_export_check_url' :
+                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded );
+                break;
+            case 'analyze_url':
+                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded );
+                break;
+            case 'contribute_relative_url':
+                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded );
+                break;
+            default:
+
+                if( isset( $decoded[ 'matches' ] ) ){
                     foreach ( $decoded[ 'matches' ] as $pos => $match ) {
                         $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
                         $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
                     }
+                }
 
-                    $result_object = new Engines_Results_MyMemory_TMS( $decoded );
-                    break;
-            }
+                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded );
+                break;
         }
 
         return $result_object;
