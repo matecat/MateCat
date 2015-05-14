@@ -189,7 +189,7 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        $this->_getRedisConnection()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid, 60 * 60 /* 1 hour TTL */, $_total );
+        $this->_getRedisConnection()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
         $this->_getRedisConnection()->rpush( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, $_qid );
 
     }
@@ -282,7 +282,7 @@ class Analysis_QueueHandler extends Stomp {
 
         if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->_getRedisConnection()->setnx( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1 ) ) {
 
-            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 /* 1 hour TTL */ );
+            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
             $_analyzed_report = getProjectSegmentsTranslationSummary( $pid );
 
@@ -329,19 +329,19 @@ class Analysis_QueueHandler extends Stomp {
         $pid = $objQueue[ 'pid' ];
 
         //get the number of segments in job
-        $_acquiredLock = $this->_getRedisConnection()->setnx( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 1 month
+        $_acquiredLock = $this->_getRedisConnection()->setnx( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 24 hours
         if ( !empty( $_acquiredLock ) ) {
 
-            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 /* 1 hour TTL */ );
+            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
             $total_segs = getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
             Log::doLog( $total_segs );
 
-            $this->_getRedisConnection()->setex( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 /* 1 hour TTL */, $total_segs[ 'project_segments' ] );
+            $this->_getRedisConnection()->setex( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
             $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
-            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 /* 1 hour TTL */ );
+            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
             Log::doLog ( "--- (child $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
 
         } else {
