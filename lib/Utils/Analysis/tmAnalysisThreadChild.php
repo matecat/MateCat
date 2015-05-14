@@ -279,7 +279,7 @@ do {
             $amqHandlerSubscriber->ack( $msg );
 
             //set/increment the reQueue number
-            $objQueue[ 'reQueueNum' ] = @$objQueue[ 'reQueueNum' ]++;
+            $objQueue[ 'reQueueNum' ] = @++$objQueue[ 'reQueueNum' ];
 
             $amqHandlerPublisher = new Analysis_QueueHandler();
             $amqHandlerPublisher->reQueue( $objQueue );
