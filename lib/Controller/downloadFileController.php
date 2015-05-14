@@ -4,459 +4,457 @@ set_time_limit( 180 );
 
 class downloadFileController extends downloadController {
 
-	protected $id_job;
-	protected $password;
-	protected $fname;
-	protected $download_type;
-	protected $jobInfo;
-	protected $forceXliff;
-	protected $downloadToken;
-
-	const FILES_CHUNK_SIZE = 3;
-
-	public function __construct() {
-
-		$filterArgs = array(
-				'filename'      => array(
-					'filter' => FILTER_SANITIZE_STRING,
-					'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-					),
-				'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-				'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-				'download_type' => array(
-					'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-					),
-				'password'      => array(
-					'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-					),
-				'downloadToken' => array(
-					'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-					),
-				'forceXliff'    => array()
-				);
-
-		$__postInput = filter_var_array( $_REQUEST, $filterArgs );
-
-		//NOTE: This is for debug purpose only,
-		//NOTE: Global $_POST Overriding from CLI Test scripts
-		//$__postInput = filter_var_array( $_POST, $filterArgs );
-
-		$this->fname         = $__postInput[ 'filename' ];
-		$this->id_file       = $__postInput[ 'id_file' ];
-		$this->id_job        = $__postInput[ 'id_job' ];
-		$this->download_type = $__postInput[ 'download_type' ];
-		$this->password      = $__postInput[ 'password' ];
-		$this->downloadToken = $__postInput[ 'downloadToken' ];
-
-		$this->filename   = $this->fname;
-		$this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
-
-		if ( empty( $this->id_job ) ) {
-			$this->id_job = "Unknown";
-		}
-	}
-
-	public function doAction() {
-		$debug               = array();
-		$debug[ 'total' ][ ] = time();
-
-		//get job language and data
-		//Fixed Bug: need a specific job, because we need The target Language
-		//Removed from within the foreach cycle, the job is always the same....
-		$jobData = $this->jobInfo = getJobData( $this->id_job, $this->password );
-
-		$pCheck = new AjaxPasswordCheck();
-
-		//check for Password correctness
-		if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
-			$msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-			Log::doLog( $msg );
-			Utils::sendErrMailReport( $msg );
-
-			return null;
-		}
-
-		$debug[ 'get_file' ][ ] = time();
-
-		//get storage object
-		$fs= new FilesStorage();
-		$files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
-
-		$debug[ 'get_file' ][ ] = time();
-		$nonew                  = 0;
-		$output_content         = array();
-
-		/*
-		   the procedure:
-		   1)original xliff file is read directly from disk; a file handler is obtained
-		   2)the file is read chunk by chunk by a stream parser: for each trans-unit that is encountered, target is replaced (or added) with the corresponding translation obtained from the DB
-		   3)the parsed portion of xliff in the buffer is flushed on temporary file
-		   4)the temporary file is sent to the converter and an original file is obtained
-		   5)the temporary file is deleted
-		 */
-
-		//file array is chuncked. Each chunk will be used for a parallel conversion request.
-		$files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
-		foreach ( $files_job as $chunk ) {
-
-			$converter = new FileFormatConverter();
-
-			$files_buffer = array();
-
-			foreach ( $chunk as $file ) {
-
-				$mime_type        = $file[ 'mime_type' ];
-				$fileID           = $file[ 'id_file' ];
-				$current_filename = $file[ 'filename' ];
+    protected $id_job;
+    protected $password;
+    protected $fname;
+    protected $download_type;
+    protected $jobInfo;
+    protected $forceXliff;
+    protected $downloadToken;
+
+    const FILES_CHUNK_SIZE = 3;
+
+    public function __construct() {
+
+        $filterArgs = array(
+                'filename'      => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'download_type' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'password'      => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'downloadToken' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'forceXliff'    => array()
+        );
+
+        $__postInput = filter_var_array( $_REQUEST, $filterArgs );
+
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->fname         = $__postInput[ 'filename' ];
+        $this->id_file       = $__postInput[ 'id_file' ];
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->download_type = $__postInput[ 'download_type' ];
+        $this->password      = $__postInput[ 'password' ];
+        $this->downloadToken = $__postInput[ 'downloadToken' ];
+
+
+        $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
+
+        if ( empty( $this->id_job ) ) {
+            $this->id_job = "Unknown";
+        }
+    }
+
+    public function doAction() {
+        $debug               = array();
+        $debug[ 'total' ][ ] = time();
+
+        //get job language and data
+        //Fixed Bug: need a specific job, because we need The target Language
+        //Removed from within the foreach cycle, the job is always the same....
+        $jobData = $this->jobInfo = getJobData( $this->id_job, $this->password );
+
+        $pCheck = new AjaxPasswordCheck();
+
+        //check for Password correctness
+        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
+            $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+
+            return null;
+        }
+
+        $debug[ 'get_file' ][ ] = time();
+
+        //get storage object
+        $fs        = new FilesStorage();
+        $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
+
+        $debug[ 'get_file' ][ ] = time();
+        $nonew                  = 0;
+        $output_content         = array();
+
+        /*
+           the procedure:
+           1)original xliff file is read directly from disk; a file handler is obtained
+           2)the file is read chunk by chunk by a stream parser: for each trans-unit that is encountered, target is replaced (or added) with the corresponding translation obtained from the DB
+           3)the parsed portion of xliff in the buffer is flushed on temporary file
+           4)the temporary file is sent to the converter and an original file is obtained
+           5)the temporary file is deleted
+         */
+
+        //file array is chuncked. Each chunk will be used for a parallel conversion request.
+        $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
+        foreach ( $files_job as $chunk ) {
+
+            $converter = new FileFormatConverter();
+
+            $files_buffer = array();
+
+            foreach ( $chunk as $file ) {
+
+                $mime_type        = $file[ 'mime_type' ];
+                $fileID           = $file[ 'id_file' ];
+                $current_filename = $file[ 'filename' ];
 
-				//get path for the output file
-				$outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.out.xlf';
+                //get path for the output file
+                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.out.xlf';
 
-				//make dir if doesn't exist
-				if ( !file_exists( dirname( $outputPath ) ) ) {
+                //make dir if doesn't exist
+                if ( !file_exists( dirname( $outputPath ) ) ) {
 
-					Log::doLog( 'exec ("chmod 666 ' . escapeshellarg( $outputPath ) . '");' );
-					mkdir( dirname( $outputPath ), 0775, true );
-//					exec( "chmod 666 " . escapeshellarg( $outputPath ) );
+                    Log::doLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) . '' );
+                    mkdir( dirname( $outputPath ), 0775, true );
 
-				}
+                }
 
-				$debug[ 'get_segments' ][ ] = time();
-				$data                       = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
-				$debug[ 'get_segments' ][ ] = time();
+                $debug[ 'get_segments' ][ ] = time();
+                $data                       = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
+                $debug[ 'get_segments' ][ ] = time();
 
-				//prepare regexp for nest step
-				$regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
-				$regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
+                //prepare regexp for nest step
+                $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
+                $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
-				foreach ( $data as $i => $k ) {
-					//create a secondary indexing mechanism on segments' array; this will be useful
-					//prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
-					$data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
+                foreach ( $data as $i => $k ) {
+                    //create a secondary indexing mechanism on segments' array; this will be useful
+                    //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
+                    $data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
 
-					//FIXME: temporary patch
-					$data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
-					$data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
+                    //FIXME: temporary patch
+                    $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
+                    $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
 
-					//remove binary chars in some xliff files
-					$sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
-					$sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
+                    //remove binary chars in some xliff files
+                    $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
+                    $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
 
-					//clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
-					$sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
-					$sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
-					if ( $sanitized_src != null ) {
-						$data[ $i ][ 'segment' ] = $sanitized_src;
-					}
-					if ( $sanitized_trg != null ) {
-						$data[ $i ][ 'translation' ] = $sanitized_trg;
-					}
+                    //clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
+                    $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
+                    $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
+                    if ( $sanitized_src != null ) {
+                        $data[ $i ][ 'segment' ] = $sanitized_src;
+                    }
+                    if ( $sanitized_trg != null ) {
+                        $data[ $i ][ 'translation' ] = $sanitized_trg;
+                    }
 
-				}
+                }
 
-				$debug[ 'replace' ][ ] = time();
+                $debug[ 'replace' ][ ] = time();
 
-				//instatiate parser
-				$xsp = new XliffSAXTranslationReplacer( $file['xliffFilePath'], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
+                //instatiate parser
+                $xsp = new XliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
 
-				if ( $this->download_type == 'omegat' ) {
-					$xsp->setSourceInTarget( true );
-				}
+                if ( $this->download_type == 'omegat' ) {
+                    $xsp->setSourceInTarget( true );
+                }
 
-				//run parsing
-				Log::doLog( "work on " . $fileID . " " . $current_filename );
-				$xsp->replaceTranslation();
+                //run parsing
+                Log::doLog( "work on " . $fileID . " " . $current_filename );
+                $xsp->replaceTranslation();
 
-				//free memory
-				unset( $xsp );
-				unset($data);
+                //free memory
+                unset( $xsp );
+                unset( $data );
 
-				$debug[ 'replace' ][ ] = time();
+                $debug[ 'replace' ][ ] = time();
 
-				$output_content[ $fileID ][ 'documentContent' ] = file_get_contents( $outputPath );
-				$output_content[ $fileID ][ 'filename' ]        = $current_filename;
+                $output_content[ $fileID ][ 'documentContent' ] = file_get_contents( $outputPath );
+                $output_content[ $fileID ][ 'filename' ]        = $current_filename;
 
-				if ( $this->forceXliff ) {
-					$file_info_details                       = pathinfo( $output_content[ $fileID ][ 'filename' ] );
-					$output_content[ $fileID ][ 'filename' ] = basename($outputPath);
-				}
+                if ( $this->forceXliff ) {
+                    $file_info_details                       = pathinfo( $output_content[ $fileID ][ 'filename' ] );
+                    $output_content[ $fileID ][ 'filename' ] = basename( $outputPath );
+                }
 
-				/**
-				 * Conversion Enforce
-				 */
-				$convertBackToOriginal = true;
-				try {
+                /**
+                 * Conversion Enforce
+                 */
+                $convertBackToOriginal = true;
+                try {
 
-					
-					//if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-					$file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-					if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file['xliffFilePath'] and $mime_type == 'sdlxliff' ) or $this->forceXliff ) {
-						$convertBackToOriginal = false;
-						Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-					}
-					else {
-						//TODO: dos2unix ??? why??
-						//force unix type files
-						Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-					}
+                    //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
+                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
+                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $mime_type == 'sdlxliff' ) or $this->forceXliff ) {
+                        $convertBackToOriginal = false;
+                        Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                    } else {
+                        //TODO: dos2unix ??? why??
+                        //force unix type files
+                        Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                    }
 
-				} catch ( Exception $e ) {
-					Log::doLog( $e->getMessage() );
-				}
 
-				if ( $convertBackToOriginal ) {
+                } catch ( Exception $e ) {
+                    Log::doLog( $e->getMessage() );
+                }
 
-					$output_content[ $fileID ][ 'out_xliff_name' ] = $outputPath;
-					$output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
-					$output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
+                if ( $convertBackToOriginal ) {
 
-					$files_buffer [ $fileID ] = $output_content[ $fileID ];
+                    $output_content[ $fileID ][ 'out_xliff_name' ] = $outputPath;
+                    $output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
+                    $output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
 
-				} elseif( $this->forceXliff ) {
+                    $files_buffer [ $fileID ] = $output_content[ $fileID ];
 
-					$this->cleanFilePath( $output_content[ $fileID ][ 'documentContent' ] );
+                } elseif ( $this->forceXliff ) {
 
-				}
+                    $this->cleanFilePath( $output_content[ $fileID ][ 'documentContent' ] );
 
-			}
+                }
 
-			$debug[ 'do_conversion' ][ ] = time();
-			$convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
+            }
 
-			foreach ( array_keys( $files_buffer ) as $fileID ) {
+            $debug[ 'do_conversion' ][ ] = time();
+            $convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
 
-				$output_content[ $fileID ][ 'documentContent' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
+            foreach ( array_keys( $files_buffer ) as $fileID ) {
 
-				//in case of .strings, they are required to be in UTF-16
-				//get extension to perform file detection
-				$extension = pathinfo( $output_content[ $fileID ][ 'filename' ], PATHINFO_EXTENSION );
-				if ( strtoupper( $extension ) == 'STRINGS' ) {
-					//use this function to convert stuff
-					$encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'documentContent' ] );
+                $output_content[ $fileID ][ 'documentContent' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
 
+                //in case of .strings, they are required to be in UTF-16
+                //get extension to perform file detection
+                $extension = pathinfo( $output_content[ $fileID ][ 'filename' ], PATHINFO_EXTENSION );
+                if ( strtoupper( $extension ) == 'STRINGS' ) {
+                    //use this function to convert stuff
+                    $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'documentContent' ] );
 
-					//strip previously added BOM
-					$encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
 
-					//store new content
-					$output_content[ $fileID ][ 'documentContent' ] = $encodingConvertedFile[ 1 ];
+                    //strip previously added BOM
+                    $encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
 
-					//trash temporary data
-					unset( $encodingConvertedFile );
-				}
-			}
+                    //store new content
+                    $output_content[ $fileID ][ 'documentContent' ] = $encodingConvertedFile[ 1 ];
 
-			//            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
-			unset( $convertResult );
-			$debug[ 'do_conversion' ][ ] = time();
-		}
+                    //trash temporary data
+                    unset( $encodingConvertedFile );
+                }
+            }
 
-		//set the file Name
-		$pathinfo       = pathinfo( $this->fname );
-		$this->filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
+            //            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
+            unset( $convertResult );
+            $debug[ 'do_conversion' ][ ] = time();
+        }
 
-		//qui prodest to check download type?
-		if ( $this->download_type == 'omegat' ) {
+        //set the file Name
+        $pathinfo        = pathinfo( $this->fname );
+        $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
-			$this->filename .= ".zip";
+        //qui prodest to check download type?
+        if ( $this->download_type == 'omegat' ) {
 
-			$tmsService = new TMSService();
-			$tmsService->setOutputType( 'tm' );
+            $this->_filename .= ".zip";
 
-			/**
-			 * @var $tmFile SplTempFileObject
-			 */
-			$tmFile = $tmsService->exportJobAsTMX( $this->id_job, $this->password, $jobData[ 'source' ], $jobData[ 'target' ] );
+            $tmsService = new TMSService();
+            $tmsService->setOutputType( 'tm' );
 
-			$tmsService->setOutputType( 'mt' );
+            /**
+             * @var $tmFile SplTempFileObject
+             */
+            $tmFile = $tmsService->exportJobAsTMX( $this->id_job, $this->password, $jobData[ 'source' ], $jobData[ 'target' ] );
 
-			/**
-			 * @var $mtFile SplTempFileObject
-			 */
-			$mtFile = $tmsService->exportJobAsTMX( $this->id_job, $this->password, $jobData[ 'source' ], $jobData[ 'target' ] );
+            $tmsService->setOutputType( 'mt' );
 
-			$tm_id                    = uniqid( 'tm' );
-			$mt_id                    = uniqid( 'mt' );
-			$output_content[ $tm_id ] = array(
-				'documentContent' => '',
-				'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_TM . tmx"
-			);
+            /**
+             * @var $mtFile SplTempFileObject
+             */
+            $mtFile = $tmsService->exportJobAsTMX( $this->id_job, $this->password, $jobData[ 'source' ], $jobData[ 'target' ] );
 
-			foreach ( $tmFile as $lineNumber => $content ) {
-				$output_content[ $tm_id ][ 'documentContent' ] .= $content;
-			}
+            $tm_id                    = uniqid( 'tm' );
+            $mt_id                    = uniqid( 'mt' );
+            $output_content[ $tm_id ] = array(
+                    'documentContent' => '',
+                    'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_TM . tmx"
+            );
 
-			$output_content[ $mt_id ] = array(
-				'documentContent' => '',
-				'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_MT . tmx"
-			);
+            foreach ( $tmFile as $lineNumber => $content ) {
+                $output_content[ $tm_id ][ 'documentContent' ] .= $content;
+            }
 
-			foreach ( $mtFile as $lineNumber => $content ) {
-				$output_content[ $mt_id ][ 'documentContent' ] .= $content;
-			}
+            $output_content[ $mt_id ] = array(
+                    'documentContent' => '',
+                    'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_MT . tmx"
+            );
 
-			$this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
+            foreach ( $mtFile as $lineNumber => $content ) {
+                $output_content[ $mt_id ][ 'documentContent' ] .= $content;
+            }
 
-		} else if ( count( $output_content ) > 1 ) {
+            $this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
 
-			if ( $pathinfo[ 'extension' ] != 'zip' ) {
-				if ( $this->forceXliff ) {
-					$this->filename = $this->id_job . ".zip";
-				}
-				else {
-					$this->filename = $pathinfo[ 'basename' ] . ".zip";
-				}
-			}
+        } else {
+            if ( count( $output_content ) > 1 ) {
 
-			$this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
+                if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                    if ( $this->forceXliff ) {
+                        $this->_filename = $this->id_job . ".zip";
+                    } else {
+                        $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                    }
+                }
 
-		} else {
-			//always an array with 1 element, pop it, Ex: array( array() )
-			$output_content = array_pop( $output_content );
-			$this->setContent( $output_content );
-		}
+                $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
 
-		$debug[ 'total' ][ ] = time();
+            } else {
+                //always an array with 1 element, pop it, Ex: array( array() )
+                $output_content = array_pop( $output_content );
+                $this->setContent( $output_content );
+            }
+        }
 
-		Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+        $debug[ 'total' ][ ] = time();
 
-	}
+        Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
-	protected function setContent( $output_content ) {
+    }
 
-		$this->filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
-		$this->content  = $output_content[ 'documentContent' ];
+    protected function setContent( $output_content ) {
 
-	}
+        $this->_filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
+        $this->content   = $output_content[ 'documentContent' ];
 
-	protected function sanitizeFileExtension( $filename ) {
+    }
 
-		$pathinfo = pathinfo( $filename );
+    protected function sanitizeFileExtension( $filename ) {
 
-		if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
-			$filename = $pathinfo[ 'basename' ] . ".docx";
-		}
+        $pathinfo = pathinfo( $filename );
 
-		return $filename;
+        if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
+            $filename = $pathinfo[ 'basename' ] . ".docx";
+        }
 
-	}
+        return $filename;
 
-	protected function composeZip( $output_content, $sourceLang ) {
-		$file = tempnam( "/tmp", "zipmatecat" );
-		$zip  = new ZipArchive();
-		$zip->open( $file, ZipArchive::OVERWRITE );
+    }
 
-		$rev_index_name = array();
+    protected function composeZip( $output_content, $sourceLang ) {
+        $file = tempnam( "/tmp", "zipmatecat" );
+        $zip  = new ZipArchive();
+        $zip->open( $file, ZipArchive::OVERWRITE );
 
-		// Staff with content
-		foreach ( $output_content as $f ) {
+        $rev_index_name = array();
 
-			$f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
+        // Staff with content
+        foreach ( $output_content as $f ) {
 
-			//Php Zip bug, utf-8 not supported
-			$fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§]/u', "_", $f[ 'filename' ] );
-			$fName = preg_replace( '/[_]{2,}/', "_", $fName );
-			$fName = str_replace( '_.', ".", $fName );
+            $f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
 
-			$nFinfo = pathinfo( $fName );
-			$_name  = $nFinfo[ 'filename' ];
-			if ( strlen( $_name ) < 3 ) {
-				$fName = substr( uniqid(), -5 ) . "_" . $fName;
-			}
+            //Php Zip bug, utf-8 not supported
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§]/u', "_", $f[ 'filename' ] );
+            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
+            $fName = str_replace( '_.', ".", $fName );
 
-			if ( array_key_exists( $fName, $rev_index_name ) ) {
-				$fName = uniqid() . $fName;
-			}
+            $nFinfo = pathinfo( $fName );
+            $_name  = $nFinfo[ 'filename' ];
+            if ( strlen( $_name ) < 3 ) {
+                $fName = substr( uniqid(), -5 ) . "_" . $fName;
+            }
 
-			$rev_index_name[ $fName ] = $fName;
+            if ( array_key_exists( $fName, $rev_index_name ) ) {
+                $fName = uniqid() . $fName;
+            }
 
-			$zip->addFromString( $fName, $f[ 'documentContent' ] );
+            $rev_index_name[ $fName ] = $fName;
 
-		}
+            $zip->addFromString( $fName, $f[ 'documentContent' ] );
 
-		// Close and send to users
-		$zip->close();
-		$zip_content = file_get_contents( "$file" );
-		unlink( $file );
+        }
 
-		$this->content = $zip_content;
-	}
+        // Close and send to users
+        $zip->close();
+        $zip_content = file_get_contents( "$file" );
+        unlink( $file );
 
-	protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {
-		$file = tempnam( "/tmp", "zipmatecat" );
+        $this->content = $zip_content;
+    }
 
-		$zip = new ZipArchive();
-		$zip->open( $file, ZipArchive::OVERWRITE );
+    protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {
+        $file = tempnam( "/tmp", "zipmatecat" );
 
-		$zip_baseDir   = $this->jobInfo[ 'id' ] . "/";
-		$zip_fileDir   = $zip_baseDir . "inbox/";
-		$zip_tm_mt_Dir = $zip_baseDir . "tm/";
+        $zip = new ZipArchive();
+        $zip->open( $file, ZipArchive::OVERWRITE );
 
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "glossary" );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "inbox" );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "omegat" );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "target" );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "terminology" );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm" );
-		$a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
+        $zip_baseDir   = $this->jobInfo[ 'id' ] . "/";
+        $zip_fileDir   = $zip_baseDir . "inbox/";
+        $zip_tm_mt_Dir = $zip_baseDir . "tm/";
 
-		$rev_index_name = array();
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "glossary" );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "inbox" );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "omegat" );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "target" );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "terminology" );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm" );
+        $a[ ] = $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
 
-		// Staff with content
-		foreach ( $output_content as $key => $f ) {
+        $rev_index_name = array();
 
-			$f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
+        // Staff with content
+        foreach ( $output_content as $key => $f ) {
 
-			//Php Zip bug, utf-8 not supported
-			$fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'filename' ] );
-			$fName = preg_replace( '/[_]{2,}/', "_", $fName );
-			$fName = str_replace( '_.', ".", $fName );
-			$fName = str_replace( '._', ".", $fName );
-			$fName = str_replace(".out.sdlxliff", ".sdlxliff", $fName);
+            $f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
 
-			$nFinfo = pathinfo( $fName );
-			$_name  = $nFinfo[ 'filename' ];
-			if ( strlen( $_name ) < 3 ) {
-				$fName = substr( uniqid(), -5 ) . "_" . $fName;
-			}
+            //Php Zip bug, utf-8 not supported
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'filename' ] );
+            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
+            $fName = str_replace( '_.', ".", $fName );
+            $fName = str_replace( '._', ".", $fName );
+            $fName = str_replace( ".out.sdlxliff", ".sdlxliff", $fName );
 
-			if ( array_key_exists( $fName, $rev_index_name ) ) {
-				$fName = uniqid() . $fName;
-			}
+            $nFinfo = pathinfo( $fName );
+            $_name  = $nFinfo[ 'filename' ];
+            if ( strlen( $_name ) < 3 ) {
+                $fName = substr( uniqid(), -5 ) . "_" . $fName;
+            }
 
-			$rev_index_name[ $fName ] = $fName;
+            if ( array_key_exists( $fName, $rev_index_name ) ) {
+                $fName = uniqid() . $fName;
+            }
 
-			if ( substr( $key, 0, 2 ) == 'tm' || substr( $key, 0, 2 ) == 'mt' ) {
-				$path = $zip_tm_mt_Dir;
-			}
-			else {
-				$path = $zip_fileDir;
-			}
+            $rev_index_name[ $fName ] = $fName;
 
-			$zip->addFromString( $path . $fName, $f[ 'documentContent' ] );
+            if ( substr( $key, 0, 2 ) == 'tm' || substr( $key, 0, 2 ) == 'mt' ) {
+                $path = $zip_tm_mt_Dir;
+            } else {
+                $path = $zip_fileDir;
+            }
 
-		}
+            $zip->addFromString( $path . $fName, $f[ 'documentContent' ] );
 
-		$zip_prjFile = $this->getOmegatProjectFile( $sourceLang, $targetLang );
-		$zip->addFromString( $zip_baseDir . "omegat.project", $zip_prjFile );
+        }
 
-		// Close and send to users
-		$zip->close();
-		$zip_content = file_get_contents( "$file" );
-		unlink( $file );
+        $zip_prjFile = $this->getOmegatProjectFile( $sourceLang, $targetLang );
+        $zip->addFromString( $zip_baseDir . "omegat.project", $zip_prjFile );
 
-		$this->content = $zip_content;
-	}
+        // Close and send to users
+        $zip->close();
+        $zip_content = file_get_contents( "$file" );
+        unlink( $file );
 
-	private function getOmegatProjectFile( $source, $target ) {
-		$source           = strtoupper( $source );
-		$target           = strtoupper( $target );
-		$defaultTokenizer = "LuceneEnglishTokenizer";
+        $this->content = $zip_content;
+    }
 
-		$omegatFile ='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    private function getOmegatProjectFile( $source, $target ) {
+        $source           = strtoupper( $source );
+        $target           = strtoupper( $target );
+        $defaultTokenizer = "LuceneEnglishTokenizer";
+
+        $omegatFile = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 			<omegat>
 			<project version="1.0">
 			<source_dir>inbox</source_dir>
@@ -482,143 +480,144 @@ class downloadFileController extends downloadController {
 			</project>
 			</omegat>';
 
-		$omegatTokenizerMap = array(
-			"AR"           => "LuceneArabicTokenizer",
-			"HY"           => "LuceneArmenianTokenizer",
-			"EU"           => "LuceneBasqueTokenizer",
-			"BG"           => "LuceneBulgarianTokenizer",
-			"CA"           => "LuceneCatalanTokenizer",
-			"ZH"           => "LuceneSmartChineseTokenizer",
-			"CZ"           => "LuceneCzechTokenizer",
-			"DK"           => "LuceneDanishTokenizer",
-			"NL"           => "LuceneDutchTokenizer",
-			"EN"           => "LuceneEnglishTokenizer",
-			"FI"           => "LuceneFinnishTokenizer",
-			"FR"           => "LuceneFrenchTokenizer",
-			"GL"           => "LuceneGalicianTokenizer",
-			"DE"           => "LuceneGermanTokenizer",
-			"GR"           => "LuceneGreekTokenizer",
-			"IN"           => "LuceneHindiTokenizer",
-			"HU"           => "LuceneHungarianTokenizer",
-			"ID"           => "LuceneIndonesianTokenizer",
-			"IE"           => "LuceneIrishTokenizer",
-			"IT"           => "LuceneItalianTokenizer",
-			"JA"           => "LuceneJapaneseTokenizer",
-			"KO"           => "LuceneKoreanTokenizer",
-			"LV"           => "LuceneLatvianTokenizer",
-			"NO"           => "LuceneNorwegianTokenizer",
-			"FA"           => "LucenePersianTokenizer",
-			"PT"           => "LucenePortugueseTokenizer",
-			"RO"           => "LuceneRomanianTokenizer",
-			"RU"           => "LuceneRussianTokenizer",
-			"ES"           => "LuceneSpanishTokenizer",
-			"SE"           => "LuceneSwedishTokenizer",
-			"TH"           => "LuceneThaiTokenizer",
-			"TR"           => "LuceneTurkishTokenizer"
+        $omegatTokenizerMap = array(
+                "AR" => "LuceneArabicTokenizer",
+                "HY" => "LuceneArmenianTokenizer",
+                "EU" => "LuceneBasqueTokenizer",
+                "BG" => "LuceneBulgarianTokenizer",
+                "CA" => "LuceneCatalanTokenizer",
+                "ZH" => "LuceneSmartChineseTokenizer",
+                "CZ" => "LuceneCzechTokenizer",
+                "DK" => "LuceneDanishTokenizer",
+                "NL" => "LuceneDutchTokenizer",
+                "EN" => "LuceneEnglishTokenizer",
+                "FI" => "LuceneFinnishTokenizer",
+                "FR" => "LuceneFrenchTokenizer",
+                "GL" => "LuceneGalicianTokenizer",
+                "DE" => "LuceneGermanTokenizer",
+                "GR" => "LuceneGreekTokenizer",
+                "IN" => "LuceneHindiTokenizer",
+                "HU" => "LuceneHungarianTokenizer",
+                "ID" => "LuceneIndonesianTokenizer",
+                "IE" => "LuceneIrishTokenizer",
+                "IT" => "LuceneItalianTokenizer",
+                "JA" => "LuceneJapaneseTokenizer",
+                "KO" => "LuceneKoreanTokenizer",
+                "LV" => "LuceneLatvianTokenizer",
+                "NO" => "LuceneNorwegianTokenizer",
+                "FA" => "LucenePersianTokenizer",
+                "PT" => "LucenePortugueseTokenizer",
+                "RO" => "LuceneRomanianTokenizer",
+                "RU" => "LuceneRussianTokenizer",
+                "ES" => "LuceneSpanishTokenizer",
+                "SE" => "LuceneSwedishTokenizer",
+                "TH" => "LuceneThaiTokenizer",
+                "TR" => "LuceneTurkishTokenizer"
 
-		);
+        );
 
-		$source_lang     = substr( $source, 0, 2 );
-		$target_lang     = substr( $target, 0, 2 );
-		$sourceTokenizer = $omegatTokenizerMap[ $source_lang ];
-		$targetTokenizer = $omegatTokenizerMap[ $target_lang ];
+        $source_lang     = substr( $source, 0, 2 );
+        $target_lang     = substr( $target, 0, 2 );
+        $sourceTokenizer = $omegatTokenizerMap[ $source_lang ];
+        $targetTokenizer = $omegatTokenizerMap[ $target_lang ];
 
-		if ( $sourceTokenizer == null ) {
-			$sourceTokenizer = $defaultTokenizer;
-	}
-	if ( $targetTokenizer == null ) {
-		$targetTokenizer = $defaultTokenizer;
-	}
+        if ( $sourceTokenizer == null ) {
+            $sourceTokenizer = $defaultTokenizer;
+        }
+        if ( $targetTokenizer == null ) {
+            $targetTokenizer = $defaultTokenizer;
+        }
 
-	return str_replace(
-		array( "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ),
-					array( $source, $target, $sourceTokenizer, $targetTokenizer ),
-					$omegatFile );
+        return str_replace(
+                array( "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ),
+                array( $source, $target, $sourceTokenizer, $targetTokenizer ),
+                $omegatFile );
 
 
-	}
+    }
 
-	public function cleanFilePath( &$documentContent ){
+    public function cleanFilePath( &$documentContent ) {
 
-		if( !function_exists( '_clean' ) ){
-			function _clean( $file ){
-				$file_parts = explode( "\\", $file[2] );
-				$file[0] = str_replace( $file[2], array_pop( $file_parts ), $file[0] );
-				return $file[0];
-			}
-		}
+        if ( !function_exists( '_clean' ) ) {
+            function _clean( $file ) {
+                $file_parts = explode( "\\", $file[ 2 ] );
+                $file[ 0 ]  = str_replace( $file[ 2 ], array_pop( $file_parts ), $file[ 0 ] );
 
-		//remove system confidential information
-		$documentContent = preg_replace_callback( '|(<file [^>]*?original="([^>]*?)" [^>]*>)|si', '_clean', $documentContent );
-		$documentContent = preg_replace_callback( '|(o-path="([^>]*?))"|si', '_clean', $documentContent );
-		$documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
+                return $file[ 0 ];
+            }
+        }
 
-	}
+        //remove system confidential information
+        $documentContent = preg_replace_callback( '|(<file [^>]*?original="([^>]*?)" [^>]*>)|si', '_clean', $documentContent );
+        $documentContent = preg_replace_callback( '|(o-path="([^>]*?))"|si', '_clean', $documentContent );
+        $documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
 
-	/**
-	 * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
-	 *
-	 * Also, check for encoding and transform utf16 to utf8 and back
-	 *
-	 * @param $documentContent
-	 * @param $path
-	 *
-	 * @return string
-	 */
-	public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
+    }
 
-		$extension = pathinfo( $path );
-		if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
-			return $documentContent;
-		}
+    /**
+     * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
+     *
+     * Also, check for encoding and transform utf16 to utf8 and back
+     *
+     * @param $documentContent
+     * @param $path
+     *
+     * @return string
+     */
+    public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
-		$is_utf8          = true;
-		$original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
+        $extension = pathinfo( $path );
+        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
+            return $documentContent;
+        }
 
-		//The file is UTF-16 Encoded
-		if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
+        $is_utf8          = true;
+        $original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
 
-			$is_utf8 = false;
-			list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+        //The file is UTF-16 Encoded
+        if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
 
-		}
+            $is_utf8 = false;
+            list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
 
-		//avoid in memory copy of very large files if possible
-		$detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+        }
 
-		//clean mrk tags for GlobalSight application compatibility
-		//this should be a sax parser instead of in memory copy for every trans-unit
-		if ( $detect_result[ 'proprietary_short_name' ] == 'globalsight' ) {
+        //avoid in memory copy of very large files if possible
+        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
-			// Getting Trans-units
-			$trans_units = explode( '<trans-unit', $documentContent );
+        //clean mrk tags for GlobalSight application compatibility
+        //this should be a sax parser instead of in memory copy for every trans-unit
+        if ( $detect_result[ 'proprietary_short_name' ] == 'globalsight' ) {
 
-			foreach ( $trans_units as $pos => $trans_unit ) {
+            // Getting Trans-units
+            $trans_units = explode( '<trans-unit', $documentContent );
 
-				// First element in the XLIFF split is the header, not the first file
-				if ( $pos > 0 ) {
+            foreach ( $trans_units as $pos => $trans_unit ) {
 
-					//remove seg-source tags
-					$trans_unit = preg_replace( '|<seg-source.*?</seg-source>|si', '', $trans_unit );
-					//take the target content
-					$trans_unit = preg_replace( '#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
+                // First element in the XLIFF split is the header, not the first file
+                if ( $pos > 0 ) {
 
-					$trans_units[ $pos ] = $trans_unit;
+                    //remove seg-source tags
+                    $trans_unit = preg_replace( '|<seg-source.*?</seg-source>|si', '', $trans_unit );
+                    //take the target content
+                    $trans_unit = preg_replace( '#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
 
-				}
+                    $trans_units[ $pos ] = $trans_unit;
 
-			} // End of trans-units
+                }
 
-			$documentContent = implode( '<trans-unit', $trans_units );
+            } // End of trans-units
 
-		}
+            $documentContent = implode( '<trans-unit', $trans_units );
 
-		if ( !$is_utf8 ) {
-			list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
-		}
+        }
 
-		return $documentContent;
+        if ( !$is_utf8 ) {
+            list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+        }
 
-	}
+        return $documentContent;
+
+    }
 
 }

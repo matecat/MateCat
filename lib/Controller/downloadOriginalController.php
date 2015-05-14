@@ -57,10 +57,10 @@ class downloadOriginalController extends downloadController {
 
 		if ( $this->download_type == 'all' ) {
 			if ( count( $output_content ) > 1 ) {
-				$this->filename = $this->fname;
+				$this->_filename = $this->fname;
 				$pathinfo       = pathinfo( $this->fname );
 				if ( $pathinfo[ 'extension' ] != 'zip' ) {
-					$this->filename = $pathinfo[ 'basename' ] . ".zip";
+					$this->_filename = $pathinfo[ 'basename' ] . ".zip";
 				}
 				$this->content = $this->composeZip( $output_content ); //add zip archive content here;
 			} elseif ( count( $output_content ) == 1 ) {
@@ -78,7 +78,7 @@ class downloadOriginalController extends downloadController {
 	 */
 	private function setContent( $output_content ) {
 		foreach ( $output_content as $oc ) {
-			$this->filename = $oc[ 'filename' ];
+			$this->_filename = $oc[ 'filename' ];
 			$this->content  = file_get_contents($oc[ 'contentPath' ]);
 		}
 	}
