@@ -13,14 +13,16 @@ class Engines_Results_MyMemory_CreateUserResponse extends Engines_Results_Abstra
     public $pass;
 
     public function __construct( $response ) {
+
         if ( !is_array( $response ) ) {
             throw new Exception( "Invalid Response", -1 );
         }
 
-        $this->responseStatus = $response[ 'code' ];
-        $this->key            = $response[ 'key' ];
-        $this->id             = $response[ 'id' ];
-        $this->pass           = $response[ 'pass' ];
+        $this->responseStatus = isset( $response[ 'code' ] ) ? $response[ 'code' ] : '';
+        $this->key            = isset( $response[ 'key' ] ) ? $response[ 'key' ] : '';
+        $this->id             = isset( $response[ 'id' ] ) ? $response[ 'id' ] : '';
+        $this->pass           = isset( $response[ 'pass' ] ) ? $response[ 'pass' ] : '';
+
     }
 
 } 

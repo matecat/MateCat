@@ -12,11 +12,15 @@ class Engines_Results_MyMemory_ExportResponse extends Engines_Results_AbstractRe
     public $resourceLink;
 
     public function __construct( $response ) {
-        $this->responseStatus  = $response[ 'responseStatus' ];
-        $this->responseData    = $response[ 'responseData' ];
-        $this->id              = $response[ 'responseData' ][ 'id' ];
-        $this->resourceLink    = $response[ 'resourceLink' ];
-        $this->responseDetails = $response[ 'status' ];
+
+        $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';
+        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
+        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
+        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
+        $this->id              = isset( $response[ 'responseData' ][ 'id' ] ) ? $response[ 'responseData' ][ 'id' ] : '';
+        $this->resourceLink    = isset( $response[ 'resourceLink' ] ) ? $response[ 'resourceLink' ] : '';
+        $this->responseDetails = isset( $response[ 'status' ] ) ? $response[ 'status' ] : '';
+
     }
 
 } 

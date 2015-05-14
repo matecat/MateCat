@@ -9,9 +9,11 @@
 class Engines_Results_MyMemory_AnalyzeResponse extends Engines_Results_AbstractResponse{
 
     public function __construct($response){
-        $this->responseStatus = $response['responseStatus'];
-        $this->responseDetails = $response['responseData'];
-        $this->responseData = $response['data'];
+
+        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
+        $this->responseDetails = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
+        $this->responseData    = isset( $response[ 'data' ] ) ? $response[ 'data' ] : '';
+
     }
 
 } 
