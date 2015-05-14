@@ -161,6 +161,7 @@ do {
         $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
         $amqHandlerSubscriber->tryToCloseProject( $pid, $my_pid );
         $amqHandlerSubscriber->ack( $msg );
+        continue;
     } elseif( isset( $objQueue[ 'reQueueNum' ] ) ){
         _TimeStampMsg( "--- (child $my_pid) :  Frame re-queued {$objQueue[ 'reQueueNum' ]} times." );
     }
