@@ -268,8 +268,8 @@ class Analysis_QueueHandler extends Stomp {
         $project_totals                       = array();
         $project_totals[ 'project_segments' ] = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
         $project_totals[ 'num_analyzed' ]     = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-        $project_totals[ 'eq_wc' ]            = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 100;
-        $project_totals[ 'st_wc' ]            = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 100;
+        $project_totals[ 'eq_wc' ]            = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 1000;
+        $project_totals[ 'st_wc' ]            = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 1000;
 
         Log::doLog ( "--- (child $child_process_id) : count segments in project $pid = " . $project_totals[ 'project_segments' ] . "" );
         Log::doLog ( "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals[ 'num_analyzed' ] . "" );
@@ -361,8 +361,8 @@ class Analysis_QueueHandler extends Stomp {
      * @param $standard_words
      */
     public function incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
-        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, $eq_words * 100 );
-        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, $standard_words * 100 );
+        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)$eq_words * 1000 );
+        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)$standard_words * 1000 );
         $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
     }
 
