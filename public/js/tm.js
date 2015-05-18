@@ -489,6 +489,7 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function(tab, elToClick) {
+        console.log('openLanguageResourcesPanel');
         tab = tab || 'tm';
         elToClick = elToClick || null;
         $('body').addClass('side-popup');
