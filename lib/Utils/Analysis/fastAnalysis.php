@@ -400,7 +400,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
                     $jsonObj = json_encode( $queue_element );
                     Utils::raiseJsonExceptionError();
                     $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
-//                _TimeStampMsg( "Executed " . ( $k +1 ) );
+                    _TimeStampMsg( "AMQ Set Executed " . ( $k +1 ) );
 
                 }
 
