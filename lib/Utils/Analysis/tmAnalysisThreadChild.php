@@ -121,9 +121,7 @@ do {
     $objQueue = array();
     try {
 
-        if ( $amqHandlerSubscriber->hasFrameToRead() ) {
-            $msg = $amqHandlerSubscriber->readFrame();
-        }
+        $msg = $amqHandlerSubscriber->readFrame();
 
         if ( $msg instanceof StompFrame && ( $msg->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msg->headers /* Stomp Client bug... hack */ ) ) ) {
 
@@ -152,7 +150,7 @@ do {
     } catch ( Exception $e ) {
         _TimeStampMsg( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
         _TimeStampMsg( $e->getMessage() );
-        _TimeStampMsg( $e->getTraceAsString() );
+//        _TimeStampMsg( $e->getTraceAsString() );
         continue; /* jump the ack */
     }
 
