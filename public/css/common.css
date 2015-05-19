@@ -687,7 +687,7 @@ color:#333;}
   position: absolute;
   border: 1px solid #717171;
   border-radius: 20px;
-  width: 13px;
+  width: 13px!important;
   font-size: 13px;
   height: 11px;
   font-weight: bold;
