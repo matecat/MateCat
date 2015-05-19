@@ -13,8 +13,7 @@ try {
     $amqHandlerSubscriber = new Analysis_QueueHandler();
     $amqHandlerSubscriber->subscribe();
 
-    $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
-    $redisHandler->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
+    $amqHandlerSubscriber->getRedisClient()->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
 
 } catch ( Exception $ex ){
 
@@ -48,10 +47,10 @@ function sigSwitch( $signo ) {
 
 function cleanShutDown( ){
 
-    global $redisHandler, $amqHandlerSubscriber, $db;
+    global $amqHandlerSubscriber, $db;
 
     //SHUTDOWN
-    $redisHandler->disconnect();
+    $amqHandlerSubscriber->getRedisClient()->disconnect();
     $db->close();
     $amqHandlerSubscriber->disconnect();
 
@@ -65,22 +64,22 @@ function cleanShutDown( ){
 function isParentRunning($pid) {
 
     /**
-     * @var $redisHandler Predis\Client
+     * @var $amqHandlerSubscriber Analysis_QueueHandler
      */
-    global $redisHandler;
+    global $amqHandlerSubscriber;
 
-    return (bool)$redisHandler->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
+    return (bool)$amqHandlerSubscriber->getRedisClient()->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
 
 }
 
 function myProcessExists( $pid ) {
 
     /**
-     * @var $redisHandler Predis\Client
+     * @var $amqHandlerSubscriber Analysis_QueueHandler
      */
-    global $redisHandler;
+    global $amqHandlerSubscriber;
 
-    $pidList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
+    $pidList = $amqHandlerSubscriber->getRedisClient()->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
 
     if( array_search( $pid, $pidList ) !== false ){
         return true;
@@ -93,24 +92,36 @@ function myProcessExists( $pid ) {
 $i = 1;
 do {
 
-    if ( !myProcessExists( $my_pid ) ) {
-        _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
-        cleanShutDown();
+    try {
+
+        // PROCESS CONTROL FUNCTIONS
+        if ( !myProcessExists( $my_pid ) ) {
+            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
+            cleanShutDown();
+        }
+
+        // control if parent is still running
+        if ( !isParentRunning( $parent_pid ) ) {
+            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
+            cleanShutDown();
+        }
+        // PROCESS CONTROL FUNCTIONS
+
+    } catch( Exception $e ){
+        $secs = 3;
+        _TimeStampMsg( "--- (child $my_pid) : Failed to read from Redis. Doing nothing, wait $secs seconds and re-try in next cycle." );
+        _TimeStampMsg( $e->getMessage() );
+        sleep($secs);
+        continue;
+
     }
 
-    // control if parent is still running
-    if ( !isParentRunning( $parent_pid ) ) {
-        _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
-        cleanShutDown();
-    }
 
     $msg      = null;
     $objQueue = array();
     try {
 
-        if ( $amqHandlerSubscriber->hasFrameToRead() ) {
-            $msg = $amqHandlerSubscriber->readFrame();
-        }
+        $msg = $amqHandlerSubscriber->readFrame();
 
         if ( $msg instanceof StompFrame && ( $msg->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msg->headers /* Stomp Client bug... hack */ ) ) ) {
 
@@ -139,7 +150,7 @@ do {
     } catch ( Exception $e ) {
         _TimeStampMsg( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
         _TimeStampMsg( $e->getMessage() );
-        _TimeStampMsg( $e->getTraceAsString() );
+//        _TimeStampMsg( $e->getTraceAsString() );
         continue; /* jump the ack */
     }
 

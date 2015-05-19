@@ -924,6 +924,18 @@ class CatUtils {
         } else {
 
             $string = str_replace( " ", "<sep>", $string );
+            $string = str_replace( "  ", "<sep>", $string ); //Non breaking space
+
+            $string = str_replace( "„", "<sep>", $string );
+            $string = str_replace( "‚", "<sep>", $string ); //single low quotation mark
+            $string = str_replace( "‘", "<sep>", $string );
+            $string = str_replace( "’", "<sep>", $string );
+            $string = str_replace( "“", "<sep>", $string );
+            $string = str_replace( "”", "<sep>", $string );
+            $string = str_replace( "·", "<sep>", $string ); //Middle dot - Georgian comma
+            $string = str_replace( "«", "<sep>", $string );
+            $string = str_replace( "»", "<sep>", $string );
+
             $string = str_replace( ", ", "<sep>", $string );
             $string = str_replace( ". ", "<sep>", $string );
             $string = str_replace( "' ", "<sep>", $string );

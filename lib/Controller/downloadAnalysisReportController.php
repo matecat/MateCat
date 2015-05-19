@@ -36,9 +36,6 @@ class downloadAnalysisReportController extends downloadController {
      */
     function doAction() {
 
-        //get job language and data
-        //Fixed Bug: need a specific job, because we need The target Language
-        //Removed from within the foreach cycle, the job is always the same....
         $_project_data = getProjectJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();
@@ -52,8 +49,11 @@ class downloadAnalysisReportController extends downloadController {
             return null;
         }
 
-        $analysisStatus = new Analysis_APIStatus( $_project_data );
-        $result = $analysisStatus->fetchData()->getResult();
+        $analysisStatus = new Analysis_XTRFStatus( $_project_data );
+        $this->content = $analysisStatus->fetchData()->getResult();
+
+        //TODO
+        $this->filename;
 
     }
 

@@ -989,7 +989,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     
 
-    $( ".memory-mgmt" ).on("click", function ( e ) {
+    $( "a.memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
         tab = $(this).attr('data-tab') || 'tm';
         elToClick = $(this).attr('data-el-to-click') || null;

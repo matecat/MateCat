@@ -7,11 +7,13 @@ include_once 'main.php';
 $my_pid = getmypid();
 
 try {
-    $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
-    $redisHandler->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
+    $queueHandler = new Analysis_QueueHandler();
+    $queueHandler->getRedisClient()->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
 } catch ( Exception $ex ){
-    $msg = "****** No REDIS instances found. Exiting. ******";
-    _TimeStampMsg( $msg );
+
+    $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
+    _TimeStampMsg( $msg, true );
+    _TimeStampMsg( $ex->getMessage(), true );
     die();
 }
 
@@ -42,11 +44,11 @@ function sigSwitch( $signo ) {
 
 function cleanShutDown(  ){
 
-    global $redisHandler, $db;
+    global $queueHandler, $db;
 
     //SHUTDOWN
-    $redisHandler->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, getmypid() );
-    $redisHandler->disconnect();
+    $queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, getmypid() );
+    $queueHandler->getRedisClient()->disconnect();
     $db->close();
 
     $msg = str_pad( " FAST ANALYSIS " . getmypid() . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
@@ -398,7 +400,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
                     $jsonObj = json_encode( $queue_element );
                     Utils::raiseJsonExceptionError();
                     $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
-//                _TimeStampMsg( "Executed " . ( $k +1 ) );
+                    _TimeStampMsg( "AMQ Set Executed " . ( $k +1 ) );
 
                 }
 
