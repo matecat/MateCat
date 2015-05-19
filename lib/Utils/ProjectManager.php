@@ -723,7 +723,7 @@ class ProjectManager {
                     $dqfTaskStruct                  = DQF_DqfTaskStruct::getStruct();
                     $dqfTaskStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
                     $dqfTaskStruct->project_id      = $this->projectStructure[ 'id_project' ];
-                    $dqfTaskStruct->job_id          = $jobID;
+                    $dqfTaskStruct->task_id         = $jobID;
                     $dqfTaskStruct->target_language = $this->projectStructure[ 'target_language' ][ $i ];
                     $dqfTaskStruct->file_name       = $this->projectStructure[ 'project_name' ];
 

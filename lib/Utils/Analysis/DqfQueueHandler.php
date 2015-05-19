@@ -33,7 +33,7 @@ class Analysis_DqfQueueHandler extends Analysis_QueueHandler {
 
         if($data == FALSE) throw new Exception ("Failed on json_encode");
 
-        return $this->send(INIT::$DQF_PROJECTS_TASKS_QUEUE_NAME, $data);
+        return $this->send(INIT::$DQF_PROJECTS_TASKS_QUEUE_NAME, $data, array('persistent' => $this->persistent) );
     }
 
     /**
@@ -47,15 +47,15 @@ class Analysis_DqfQueueHandler extends Analysis_QueueHandler {
 
         if($data == FALSE) throw new Exception ("Failed on json_encode");
 
-        return $this->send(INIT::$DQF_PROJECTS_TASKS_QUEUE_NAME, $data);
+        return $this->send(INIT::$DQF_PROJECTS_TASKS_QUEUE_NAME, $data, array('persistent' => $this->persistent));
     }
 
-    public function createSegment(Array $data){
+    public function createSegment(DQF_DqfSegmentStruct $data){
         $data = json_encode($data);
 
         if($data == FALSE) throw new Exception ("Failed on json_encode");
 
-        return $this->send(INIT::$DQF_SEGMENTS_QUEUE_NAME, $data);
+        return $this->send(INIT::$DQF_SEGMENTS_QUEUE_NAME, $data, array('persistent' => $this->persistent));
     }
 
 }
