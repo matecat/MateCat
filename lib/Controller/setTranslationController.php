@@ -285,6 +285,30 @@ class setTranslationController extends ajaxController {
             return -1;
         }
 
+        if( !empty($this->jobData['dqf_key']) ){
+            $dqfSegmentStruct = DQF_DqfSegmentStruct::getStruct();
+            $dqfSegmentStruct->task_id = $this->id_job;
+            $dqfSegmentStruct->segment_id = $this->id_segment;
+            $dqfSegmentStruct->source_segment = $segment['segment'];
+            $dqfSegmentStruct->target_segment = $old_translation[ 'suggestion' ];
+            $dqfSegmentStruct->new_target_segment = $_Translation[ 'translation' ];
+
+            $dqfSegmentStruct->time = time();
+            $dqfSegmentStruct->tm_match = $old_translation[ 'suggestion_match' ];
+            $dqfSegmentStruct->mtengine = $this->jobData['id_mt_engine'];
+            $dqfSegmentStruct->mt_engine_version = 1;
+
+            try {
+                $dqfQueueHandler = new Analysis_DqfQueueHandler();
+                $dqfQueueHandler->createSegment( $dqfSegmentStruct );
+            }
+            catch(Exception $exn){
+                $msg = $exn->getMessage() . "\n\n" . $exn->getTraceAsString();
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
+        }
+
         //propagate translations
         $TPropagation                             = array();
 
