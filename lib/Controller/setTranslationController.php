@@ -285,7 +285,8 @@ class setTranslationController extends ajaxController {
             return -1;
         }
 
-        if( !empty($this->jobData['dqf_key']) ){
+        if( !empty($this->jobData['dqf_key']) &&
+                $_Translation[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED){
             $dqfSegmentStruct = DQF_DqfSegmentStruct::getStruct();
             $dqfSegmentStruct->task_id = $this->id_job;
             $dqfSegmentStruct->segment_id = $this->id_segment;

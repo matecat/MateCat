@@ -25,11 +25,13 @@ class DQF_DqfSegmentStruct extends DQF_DqfAbstractStruct implements JsonSerializ
     public $source_segment;
 
     /**
+     * The suggestion from the MT or TM
      * @var string
      */
     public $target_segment;
 
     /**
+     * The translator's translation
      * @var string
      */
     public $new_target_segment;
@@ -67,10 +69,10 @@ class DQF_DqfSegmentStruct extends DQF_DqfAbstractStruct implements JsonSerializ
     public static function getStruct() {
         return new DQF_DqfSegmentStruct(
                 array(
-                        'v'           => Constants_DqfAPI::API_VERSION,
-                        'app'         => 'MateCAT',
-                        'app_version' => INIT::$BUILD_NUMBER,
-                        'type'        => 'task',
+                        'v'                  => Constants_DqfAPI::API_VERSION,
+                        'app'                => 'MateCAT',
+                        'app_version'        => INIT::$BUILD_NUMBER,
+                        'type'               => 'task',
                         'task_id'            => null,
                         'segment_id'         => null,
                         'source_segment'     => null,

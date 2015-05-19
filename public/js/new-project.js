@@ -99,13 +99,12 @@ $(document).ready(function() {
                 disable_tms_engine	: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 				mt_engine			: $('#mt_engine').val(),
                 private_tm_key		: $('#private-tm-key').val(),
-                dqf_key		       : $('#df-key').val(),
                 private_keys_list	: tm_data,
 				private_tm_user		: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
 				private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
 				lang_detect_files  	: UI.skipLangDetectArr,
-                pretranslate_100    : ($(".translate-box input[type='checkbox']" ).is(':checked')) ? 1 : 0
-
+                pretranslate_100    : ($(".translate-box input[type='checkbox']" ).is(':checked')) ? 1 : 0,
+                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null
 			},
 			beforeSend: function (){
 				$('.error-message').hide();

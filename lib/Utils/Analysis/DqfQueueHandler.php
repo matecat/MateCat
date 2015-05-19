@@ -8,6 +8,16 @@
 
 class Analysis_DqfQueueHandler extends Analysis_QueueHandler {
 
+    public function __construct( $brokerUri = null ){
+
+        if( !is_null( $brokerUri ) ){
+            parent::__construct( $brokerUri );
+        } else {
+            parent::__construct( INIT::$QUEUE_DQF_ADDRESS );
+        }
+
+    }
+
     /**
      * @param null $queueName
      *

@@ -1,5 +1,5 @@
 <?php
-date_default_timezone_set("Europe/Rome");
+date_default_timezone_set( "Europe/Rome" );
 
 class INIT {
 
@@ -17,6 +17,7 @@ class INIT {
     public static $MEMCACHE_SERVERS = array();
     public static $REDIS_SERVERS = array();
     public static $QUEUE_BROKER_ADDRESS;
+    public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $QUEUE_NAME = "matecat_analysis_queue";
 
@@ -71,7 +72,7 @@ class INIT {
 
     public static $OAUTH_CONFIG;
     public static $CONFIG_VERSION_ERR_MESSAGE;
-	public static $SUPPORT_MAIL;
+    public static $SUPPORT_MAIL;
 
     public static $DQF_ENABLED = false;
 
@@ -96,37 +97,37 @@ class INIT {
     public static $ENABLE_OUTSOURCE = true;
 
     public static function obtain() {
-        if (!self::$instance) {
+        if ( !self::$instance ) {
             self::$instance = new INIT();
         }
 
         return self::$instance;
     }
 
-    public static function sessionClose(){
+    public static function sessionClose() {
         @session_write_close();
     }
 
-    public static function sessionStart(){
+    public static function sessionStart() {
         @session_start();
     }
 
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = array(
-            self::$ROOT,
-            self::$ROOT . "/lib/Controller/AbstractControllers",
-            self::$ROOT . "/lib/Controller/API",
-            self::$ROOT . "/lib/Controller",
-            self::$ROOT . "/inc/PHPTAL",
-            self::$ROOT . "/lib/Utils/API",
-            self::$ROOT . "/lib/Utils",
-            self::$ROOT . "/lib/Utils/Predis/src",
-            self::$ROOT . "/lib/Model" ,
+                self::$ROOT,
+                self::$ROOT . "/lib/Controller/AbstractControllers",
+                self::$ROOT . "/lib/Controller/API",
+                self::$ROOT . "/lib/Controller",
+                self::$ROOT . "/inc/PHPTAL",
+                self::$ROOT . "/lib/Utils/API",
+                self::$ROOT . "/lib/Utils",
+                self::$ROOT . "/lib/Utils/Predis/src",
+                self::$ROOT . "/lib/Model",
         );
-        if( !empty($custom_paths) ){
+        if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path ( implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path() );
+        set_include_path( implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path() );
     }
 
     public static function loadClass( $className ) {
@@ -148,22 +149,24 @@ class INIT {
 
     private function __construct() {
 
-        $root = realpath(dirname(__FILE__) . '/../');
-        $OAUTH_CONFIG = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
-        self::$OAUTH_CONFIG = $OAUTH_CONFIG['OAUTH_CONFIG'];
+        $root               = realpath( dirname( __FILE__ ) . '/../' );
+        $OAUTH_CONFIG       = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
+        self::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
 
         register_shutdown_function( 'INIT::fatalErrorHandler' );
 
-        if( stripos( PHP_SAPI, 'cli' ) === false ){
+        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
             register_shutdown_function( 'INIT::sessionClose' );
 
-            self::$PROTOCOL = isset($_SERVER['HTTPS']) ? "https" : "http";
-            self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
+            self::$PROTOCOL = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
+            self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
-        } else {
-            if( INIT::$DEBUG )
+        }
+        else {
+            if ( INIT::$DEBUG ) {
                 echo "\nPHP Running in CLI mode.\n\n";
+            }
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
 
@@ -181,6 +184,7 @@ class INIT {
         self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
         self::$REDIS_SERVERS        = "tcp://localhost:6379";
         self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
+        self::$QUEUE_DQF_ADDRESS    = "tcp://localhost:61613";
         self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
 
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
@@ -196,20 +200,20 @@ class INIT {
         self::$UTILS_ROOT                      = self::$ROOT . '/lib/Utils';
 
         $this->_setIncludePath();
-        spl_autoload_register('INIT::loadClass');
+        spl_autoload_register( 'INIT::loadClass' );
         require_once 'Predis/autoload.php';
 
-        if (!is_dir(self::$STORAGE_DIR)){
-            mkdir (self::$STORAGE_DIR,0755,true);
+        if ( !is_dir( self::$STORAGE_DIR ) ) {
+            mkdir( self::$STORAGE_DIR, 0755, true );
         }
-        if (!is_dir(self::$LOG_REPOSITORY)){
-            mkdir (self::$LOG_REPOSITORY,0755,true);
+        if ( !is_dir( self::$LOG_REPOSITORY ) ) {
+            mkdir( self::$LOG_REPOSITORY, 0755, true );
         }
-        if (!is_dir(self::$UPLOAD_REPOSITORY)){
-            mkdir (self::$UPLOAD_REPOSITORY,0755,true);
+        if ( !is_dir( self::$UPLOAD_REPOSITORY ) ) {
+            mkdir( self::$UPLOAD_REPOSITORY, 0755, true );
         }
-        if (!is_dir(self::$CONVERSIONERRORS_REPOSITORY)){
-            mkdir (self::$CONVERSIONERRORS_REPOSITORY,0755,true);
+        if ( !is_dir( self::$CONVERSIONERRORS_REPOSITORY ) ) {
+            mkdir( self::$CONVERSIONERRORS_REPOSITORY, 0755, true );
         }
 
         //auth sections
@@ -218,7 +222,8 @@ class INIT {
         if ( file_exists( self::$AUTHSECRET_PATH ) ) {
             //fetch it
             self::$AUTHSECRET = file_get_contents( self::$AUTHSECRET_PATH );
-        } else {
+        }
+        else {
             //try creating the file and the fetch it
             //generate pass
             $secret = self::generate_password( 512 );
@@ -228,19 +233,20 @@ class INIT {
             if ( file_exists( self::$AUTHSECRET_PATH ) ) {
                 //restrict permissions
                 chmod( self::$AUTHSECRET_PATH, 0400 );
-            } else {
+            }
+            else {
                 //if couldn't create due to permissions, use default secret
                 self::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
         }
 
-        self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari'); //, 'firefox');
+        self::$ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
         // This occurs especially in mobile environment. As an example, when you try to open a link from within
         // the GMail app, it redirect to an internal browser that does not declare a valid user agent
         // In this case we will show a notice on the top of the page instead of deny the access
-        self::$UNTESTED_BROWSERS = array('mozillageneric');
+        self::$UNTESTED_BROWSERS = array( 'mozillageneric' );
 
         /**
          * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
@@ -257,24 +263,24 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.5.4';
+        self::$BUILD_NUMBER            = '0.5.4';
         self::$VOLUME_ANALYSIS_ENABLED = true;
-        self::$SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
+        self::$SUPPORT_MAIL            = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
-        self::$AUTHCOOKIENAME='matecat_login_v2';
-        self::$AUTHCOOKIEDURATION=86400*60;
+        self::$AUTHCOOKIENAME     = 'matecat_login_v2';
+        self::$AUTHCOOKIEDURATION = 86400 * 60;
 
-        self::$FORCE_XLIFF_CONVERSION = false;
-        self::$WARNING_POLLING_INTERVAL = 20; //seconds
+        self::$FORCE_XLIFF_CONVERSION    = false;
+        self::$WARNING_POLLING_INTERVAL  = 20; //seconds
         self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
 
         self::$SPELL_CHECK_TRANSPORT_TYPE = 'shell';
-        self::$SPELL_CHECK_ENABLED = false;
+        self::$SPELL_CHECK_ENABLED        = false;
 
         self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
-        self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
-        self::$MAX_UPLOAD_TMX_FILE_SIZE = 100 * 1024 * 1024; // bytes
-        self::$MAX_NUM_FILES = 100;
+        self::$MAX_UPLOAD_FILE_SIZE         = 60 * 1024 * 1024; // bytes
+        self::$MAX_UPLOAD_TMX_FILE_SIZE     = 100 * 1024 * 1024; // bytes
+        self::$MAX_NUM_FILES                = 100;
 
         self::$SUPPORTED_FILE_TYPES = array(
                 'Office'              => array(
@@ -309,7 +315,7 @@ class INIT {
                         'odp'  => array( '', '', 'extppt' ),
                         'sxi'  => array( '', '', 'extppt' ),
                         'xml'  => array( '', '', 'extxml' ),
-                    //                'vxd' => array("Try converting to XML")
+                        //                'vxd' => array("Try converting to XML")
                 ),
                 'Web'                 => array(
                         'htm'   => array( '', '', 'exthtm' ),
@@ -327,15 +333,15 @@ class INIT {
                 ),
                 "Desktop Publishing"  => array(
                     //                'fm' => array('', "Try converting to MIF"),
-                        'mif'  => array( '', '', 'extmif' ),
-                        'inx'  => array( '', '', 'extidd' ),
-                        'idml' => array( '', '', 'extidd' ),
-                        'icml' => array( '', '', 'extidd' ),
+                    'mif'  => array( '', '', 'extmif' ),
+                    'inx'  => array( '', '', 'extidd' ),
+                    'idml' => array( '', '', 'extidd' ),
+                    'icml' => array( '', '', 'extidd' ),
                     //                'indd' => array('', "Try converting to INX"),
-                        'xtg'  => array( '', '', 'extqxp' ),
-                        'tag'  => array( '', '', 'exttag' ),
-                        'xml'  => array( '', '', 'extxml' ),
-                        'dita' => array( '', '', 'extdit' )
+                    'xtg'  => array( '', '', 'extqxp' ),
+                    'tag'  => array( '', '', 'exttag' ),
+                    'xml'  => array( '', '', 'extxml' ),
+                    'dita' => array( '', '', 'extdit' )
                 ),
                 "Localization"        => array(
                         'properties'  => array( '', '', 'extpro' ),
@@ -380,12 +386,12 @@ class INIT {
          *
          * Done!
          */
-        self::$OAUTH_CLIENT_ID       = self::$OAUTH_CONFIG['OAUTH_CLIENT_ID'];
-        self::$OAUTH_CLIENT_SECRET   = self::$OAUTH_CONFIG['OAUTH_CLIENT_SECRET'];
-        self::$OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG['OAUTH_CLIENT_APP_NAME'];
+        self::$OAUTH_CLIENT_ID       = self::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
+        self::$OAUTH_CLIENT_SECRET   = self::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
+        self::$OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
 
-        self::$OAUTH_REDIRECT_URL    = self::$HTTPHOST . "/oauth/response";
-        self::$OAUTH_SCOPES = array(
+        self::$OAUTH_REDIRECT_URL = self::$HTTPHOST . "/oauth/response";
+        self::$OAUTH_SCOPES       = array(
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
@@ -396,20 +402,20 @@ class INIT {
 
     public static function fatalErrorHandler() {
 
-        $errorType = array (
+        $errorType = array(
                 E_CORE_ERROR        => 'E_CORE_ERROR',
                 E_COMPILE_ERROR     => 'E_COMPILE_ERROR',
                 E_ERROR             => 'E_ERROR',
                 E_USER_ERROR        => 'E_USER_ERROR',
                 E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-            //E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
+                //E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
         );
 
         # Getting last error
         $error = error_get_last();
 
         # Checking if last error is a fatal error
-        switch ( $error['type'] ){
+        switch ( $error[ 'type' ] ) {
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
             case E_ERROR:
@@ -418,8 +424,13 @@ class INIT {
 
                 ini_set( 'display_errors', 'Off' );
 
-                if( !ob_get_level() ){ ob_start(); }
-                else { ob_end_clean(); ob_start(); }
+                if ( !ob_get_level() ) {
+                    ob_start();
+                }
+                else {
+                    ob_end_clean();
+                    ob_start();
+                }
 
                 debug_print_backtrace();
                 $output = ob_get_contents();
@@ -429,12 +440,12 @@ class INIT {
                 $output .= "<pre>\n";
                 $output .= "[ {$errorType[$error['type']]} ]\n\t";
                 $output .= "{$error['message']}\n\t";
-                $output .=  "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
-                $output .=  " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
-                $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-                $output .=  "\n\t";
-                $output .=  "Aborting...\n";
+                $output .= "Not Recoverable Error on line {$error['line']} in file " . $error[ 'file' ];
+                $output .= " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
+                $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+                $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+                $output .= "\n\t";
+                $output .= "Aborting...\n";
                 $output .= "</pre>";
 
                 Log::$fileName = 'fatal_errors.txt';
@@ -443,16 +454,27 @@ class INIT {
 
                 header( "HTTP/1.1 200 OK" );
 
-                if( ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) || $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
-                    if( INIT::$EXCEPTION_DEBUG ){
-                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() ) );
-                    } else {
-                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>" ) ), "data" => array() ) ) ;
+                    if ( INIT::$EXCEPTION_DEBUG ) {
+                        echo json_encode( array(
+                                "errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array()
+                        ) );
+                    }
+                    else {
+                        echo json_encode( array(
+                                "errors"  => array(
+                                        array(
+                                                "code"    => -1000,
+                                                "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>"
+                                        )
+                                ), "data" => array()
+                        ) );
                     }
 
-                } elseif( INIT::$EXCEPTION_DEBUG ){
+                }
+                elseif ( INIT::$EXCEPTION_DEBUG ) {
                     echo $output;
                 }
 
@@ -463,11 +485,11 @@ class INIT {
 
     private static function generate_password( $length = 12 ) {
 
-        $_pwd = md5( uniqid('',true) );
-        $pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
+        $_pwd = md5( uniqid( '', true ) );
+        $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
 
-        if( $length > 12 ){
-            while( strlen($pwd) < $length ){
+        if ( $length > 12 ) {
+            while ( strlen( $pwd ) < $length ) {
                 $pwd .= self::generate_password();
             }
             $pwd = substr( $pwd, 0, $length );

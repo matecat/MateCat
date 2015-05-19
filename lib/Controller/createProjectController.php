@@ -117,10 +117,6 @@ class createProjectController extends ajaxController {
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
 
-        if(!empty($this->dqf_key)) {
-            INIT::$DQF_ENABLED = true;
-        }
-
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
         }
@@ -249,8 +245,10 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
-        $projectStructure[ 'dqf_key' ]              = $this->dqf_key;
 
+        if ( INIT::$DQF_ENABLED ) {
+            $projectStructure[ 'dqf_key' ] = $this->dqf_key;
+        }
 
         //if user is logged in, set the uid and the userIsLogged flag
         $this->checkLogin( false );

@@ -725,7 +725,7 @@ class ProjectManager {
                     $dqfTaskStruct->project_id      = $this->projectStructure[ 'id_project' ];
                     $dqfTaskStruct->task_id         = $jobID;
                     $dqfTaskStruct->target_language = $this->projectStructure[ 'target_language' ][ $i ];
-                    $dqfTaskStruct->file_name       = $this->projectStructure[ 'project_name' ];
+                    $dqfTaskStruct->file_name       = uniqid('',true) . $this->projectStructure[ 'project_name' ];
 
                     $dqfQueue->createTask( $dqfTaskStruct );
 
