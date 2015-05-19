@@ -440,6 +440,29 @@ float: left;
   
   .cancel-btn{background:#f26522 url(../img/sprite.png) -4px -1157px no-repeat !Important}
   .cancel-btn:hover{background:#d1581c url(../img/sprite.png)  -4px -1157px no-repeat !Important}
+
+.translate-box a.tooltip {
+  text-align: center;
+  text-decoration: none!important;
+  position: relative;
+  float: left;
+  margin-top: 5px;
+  margin-left: 10px;
+}
+
+.translate-box a.tooltip.gray span,
+.translate-box a.tooltip.gray {
+    background: #EEE;
+}
+
+.translate-box a.tooltip.gray span:after {
+	border-top:10px solid #eee;
+}
+
+.translate-box a.tooltip:hover span {
+  top: -70px;
+}
+
 /* Fix for IE 6: */
 *html .fileinput-button {
   margin-right: -2px;

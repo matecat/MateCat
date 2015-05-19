@@ -721,10 +721,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-<<<<<<< HEAD
   padding: 5px 10px!important;
-=======
->>>>>>> ab6f35f5d7c689159bd77b594f68f7dbde7fbeaf
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
@@ -739,13 +736,9 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input.translated, .topmenu-drop input.approved {
 	  width: auto!important;
 	  border-radius: 2px 0 0 2px;
-<<<<<<< HEAD
-  text-transform: uppercase;
-=======
 	    padding: 0 18px!important;
   text-transform: uppercase;
   margin: 0!important
->>>>>>> ab6f35f5d7c689159bd77b594f68f7dbde7fbeaf
 }
 
 
@@ -3712,77 +3705,7 @@ color:red !important;
 	text-align: left;
 }
 
-.tooltip {
-  cursor: help;
-  position: absolute;
-  border: 1px solid #717171;
-  border-radius: 20px;
-  width: 13px;
-  font-size: 13px;
-  height: 11px;
-  font-weight: bold;
-  padding-left: 0px;
-  padding-top: 2px;
-  margin-top: -3px;
-  line-height: 11px;
-  background: #FBF3AA;
-  margin-left: 5px;
-  color: #717171;
-  box-shadow: 1px 1px 1px #999;
-}
 
-
-.tooltip:hover span {
-	opacity: 1;
-	top: -90px;
-}
-
-.tooltip span {	
-	width: 200px;
-	height: auto;
-	line-height: 22px;
-	color: #333;
-	padding: 10px;
-	left: -98px;
-	font-weight: 400;
-	font-size: 15px;
-	text-align: center;
-	border: 1px solid #727272;;
-	background: #FFF8BA;
-	text-indent: 0px;
-	border-radius: 5px;
-	position: absolute;
-	pointer-events: none;
-	top: -110px;
-	opacity: 0;
-	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-	-webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-	-moz-box-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-	-webkit-transition: all 0.3s ease-in-out;
-	-moz-transition: all 0.3s ease-in-out;
-	-o-transition: all 0.3s ease-in-out;
-	-ms-transition: all 0.3s ease-in-out;
-	transition: all 0.3s ease-in-out;
-	z-index: 1000000000000000;
-}
-
-.tooltip span:before, .tooltip span:after {
-	content: '';
-	position: absolute;
-	bottom: -11px;
-	left: 43%;
-	width: 0;
-	height: 0;
-	border-left: 10px solid transparent;
-	border-right: 10px solid transparent;
-	border-top: 10px solid #727272;;
-}
-
-.tooltip span:after {
-	bottom: -10px;
-	margin-left: -1px;
-	border-top: 10px solid #FFF8BA;;
-}
 
 
 .track-changes p {
