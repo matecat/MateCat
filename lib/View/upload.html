@@ -309,7 +309,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         -->
     </div>
 
-    <div class="translate-box">
+    <div tal:condition="true:DQF_enabled" class="translate-box">
         <h2>DF key</h2>
         <input name="df-key" type="text" class="upload-input" id="df-key"/>
     </div>
