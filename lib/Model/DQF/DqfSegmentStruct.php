@@ -80,8 +80,8 @@ class DQF_DqfSegmentStruct extends DQF_DqfAbstractStruct implements JsonSerializ
                         'new_target_segment' => null,
                         'time'               => null,//TODO: time() ?
                         'tm_match'           => null,
-                        'cattool'            => 1,
-                        'mtengine'           => null,
+                        'cattool'            => 12,
+                        'mtengine'           => 22,
                         'mt_engine_version'  => null
 
                 )

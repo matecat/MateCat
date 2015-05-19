@@ -296,7 +296,7 @@ class setTranslationController extends ajaxController {
 
             $dqfSegmentStruct->time = time();
             $dqfSegmentStruct->tm_match = $old_translation[ 'suggestion_match' ];
-            $dqfSegmentStruct->mtengine = $this->jobData['id_mt_engine'];
+//            $dqfSegmentStruct->mtengine = $this->jobData['id_mt_engine'];
             $dqfSegmentStruct->mt_engine_version = 1;
 
             try {
