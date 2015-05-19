@@ -1752,6 +1752,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
     $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
     $data[ 'payable_rates' ]     = json_encode($projectStructure[ 'payable_rates' ]);
+    $data[ 'dqf_key' ]           = $projectStructure['dqf_key'];
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 

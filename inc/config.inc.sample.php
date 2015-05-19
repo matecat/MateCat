@@ -19,6 +19,12 @@ class INIT {
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $QUEUE_NAME = "matecat_analysis_queue";
+
+    //This queue will be used for dqf project creation
+    public static $DQF_PROJECTS_TASKS_QUEUE_NAME = "matecat_dqf_project_task_queue";
+    //This queue will be used for dqf project creation
+    public static $DQF_SEGMENTS_QUEUE_NAME = "matecat_dqf_segment_queue";
+
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
     public static $UPLOAD_REPOSITORY;
@@ -67,9 +73,10 @@ class INIT {
     public static $CONFIG_VERSION_ERR_MESSAGE;
 	public static $SUPPORT_MAIL;
 
+    public static $DQF_ENABLED = false;
+
     /**
      * Default Matecat user agent string
-     *
      */
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 

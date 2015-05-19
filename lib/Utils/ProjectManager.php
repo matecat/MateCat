@@ -71,7 +71,8 @@ class ProjectManager {
                             'userIsLogged'         => false,
                             'uid'                  => null,
                             'skip_lang_validation' => false,
-                            'pretranslate_100'     => 0
+                            'pretranslate_100'     => 0,
+                            'dqf_key'              => null
                     ) );
         }
 
@@ -313,7 +314,8 @@ class ProjectManager {
                          * @see upload.class.php
                          * */
                         $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                "code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
+                                "code"    => -8,
+                                "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
                         );
                         setcookie( "upload_session", "", time() - 10000 );
 
@@ -403,7 +405,8 @@ class ProjectManager {
                 }
                 elseif ( $e->getCode() == -3 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -7, "message" => "File $fileName not found. Failed to save XLIFF conversion on disk"
+                            "code"    => -7,
+                            "message" => "File $fileName not found. Failed to save XLIFF conversion on disk"
                     );
                 }
                 elseif ( $e->getCode() == -4 ) {
@@ -697,6 +700,45 @@ class ProjectManager {
         );
 
         $this->dbHandler->query( $update_project_count );
+        Log::doLog( $this->projectStructure );
+        //create Project into DQF queue
+        if ( INIT::$DQF_ENABLED && $this->projectStructure[ 'dqf_key' ] !== null ) {
+
+            $dqfProjectStruct                  = DQF_DqfProjectStruct::getStruct();
+            $dqfProjectStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
+            $dqfProjectStruct->project_id      = $this->projectStructure[ 'id_project' ];
+            $dqfProjectStruct->name            = $this->projectStructure[ 'project_name' ];
+            $dqfProjectStruct->source_language = $this->projectStructure[ 'source_language' ];
+
+            $dqfQueue = new Analysis_DqfQueueHandler();
+
+            try {
+                $dqfQueue->createProject( $dqfProjectStruct );
+
+                //for each job, push a task into AMQ's DQF queue
+                foreach ( $this->projectStructure[ 'array_jobs' ][ 'job_list' ] as $i => $jobID ) {
+                    /**
+                     * @var $dqfTaskStruct DQF_DqfTaskStruct
+                     */
+                    $dqfTaskStruct                  = DQF_DqfTaskStruct::getStruct();
+                    $dqfTaskStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
+                    $dqfTaskStruct->project_id      = $this->projectStructure[ 'id_project' ];
+                    $dqfTaskStruct->job_id          = $jobID;
+                    $dqfTaskStruct->target_language = $this->projectStructure[ 'target_language' ][ $i ];
+                    $dqfTaskStruct->file_name       = $this->projectStructure[ 'project_name' ];
+
+                    $dqfQueue->createTask( $dqfTaskStruct );
+
+                }
+            } catch ( Exception $exn ) {
+                $output = __METHOD__ . " (code " . $exn->getCode() . " ) - " . $exn->getMessage();
+                Log::doLog( $output );
+
+                Utils::sendErrMailReport( $output, $exn->getMessage() );
+            }
+
+
+        }
 
 //    var_dump($this->projectStructure);
 //        exit;

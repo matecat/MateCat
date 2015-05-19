@@ -20,6 +20,8 @@ class createProjectController extends ajaxController {
     private $disable_tms_engine_flag;
     private $pretranslate_100;
 
+    private $dqf_key;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -43,6 +45,9 @@ class createProjectController extends ajaxController {
                 ),
                 'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'pretranslate_100'   => array( 'filter' => FILTER_VALIDATE_INT ),
+                'dqf_key'            => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -110,6 +115,11 @@ class createProjectController extends ajaxController {
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
+        $this->dqf_key                 = $__postInput[ 'dqf_key' ];
+
+        if(!empty($this->dqf_key)) {
+            INIT::$DQF_ENABLED = true;
+        }
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -131,7 +141,7 @@ class createProjectController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Missing job subject." );
         }
 
-        if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0) {
+        if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0 ) {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
         }
     }
@@ -239,6 +249,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
+        $projectStructure[ 'dqf_key' ]              = $this->dqf_key;
 
 
         //if user is logged in, set the uid and the userIsLogged flag

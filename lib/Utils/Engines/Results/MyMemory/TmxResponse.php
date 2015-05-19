@@ -12,9 +12,10 @@ class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractRespo
 
     public $id;
 
-    public function __construct($response){
-        $this->responseStatus = $response['responseStatus'];
-        $this->responseData = $response['responseData'];
+    public function __construct( $response ){
+
+        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
+        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
 
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
 
