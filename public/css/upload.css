@@ -635,6 +635,13 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
       margin: 0 0 5px 0;
 }
 
+#dqf_key
+{
+    width:220px;
+    height:28px;
+    margin: 0 0 5px 0;
+}
+
 
 /* upload footer */
 .upload-footer{width:100%;background:#ebebec;padding:10px 0;border-top:1px dashed #ccc;margin-top:-1px}
