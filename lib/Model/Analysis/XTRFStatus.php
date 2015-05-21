@@ -17,7 +17,7 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
             return $this->formatErrors();
         }
 
-        $fileContent = new stdClass();
+        $outputContent = array();
 
         /**
          * Every target language will be put in a separated txt file.
@@ -33,22 +33,39 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
 
                 list( $source, $target ) = explode( "|", $this->result[ 'jobs' ][ 'langpairs' ][ $idJob . "-" . $password ] );
 
-                $fileContent->{ $idJob . "-" . $password } = "";
+                $outputContent[ $idJob . "-" . $password ] = null;
 
                 foreach( $filesContainer as $idFile => $values ){
 
-                    $vector = new ArrayObject();
-                    $vector[ 'idFile' ] = $idFile;
-                    $vector[ 'source' ] = $source;
-                    $vector[ 'target' ] = $target;
+                    $vector = array();
+                    $vector[ 'firstLine' ] = str_pad( "File: ", 23, " ", STR_PAD_RIGHT ) . $idFile . "_" . $values[ 'FILENAME' ];
+                    $vector[ 'source' ]    = $source;
+                    $vector[ 'target' ]    = $target;
 
-                    $this->formatFile( $fileContent->{ $idJob . "-" . $password }, $values, $vector );
+                    $outputContent[ $idJob . "-" . $password ] .= $this->formatFile( $values, $vector );
 
                 }
+
+                $outputContent[ $idJob . "-" . $password ] .= str_repeat( "-", 80 ) . PHP_EOL . PHP_EOL;
+
+            }
+
+            foreach( $chunksContainer[ 'totals' ] as $password => $jobResume ){
+
+                list( $source, $target ) = explode( "|", $this->result[ 'jobs' ][ 'langpairs' ][ $idJob . "-" . $password ] );
+
+                $vector = array();
+                $vector[ 'firstLine' ] = str_pad( "Total: ", 23, " ", STR_PAD_RIGHT ) . count( $chunksContainer[ 'chunks' ][ $password ] ) . " files";
+                $vector[ 'source' ] = $source;
+                $vector[ 'target' ] = $target;
+
+                $outputContent[ $idJob . "-" . $password ] .= $this->formatFile( $chunksContainer[ 'totals' ][ $password ], $vector );
 
             }
 
         }
+
+        return $outputContent;
 
     }
 
@@ -56,7 +73,7 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
         return "Error.";
     }
 
-    protected function formatFile( &$fileContent, $values, $vector ){
+    protected function formatFile( $values, $vector ){
 
         $_TOTAL_RAW_SUM = (
                 $values[ 'ICE' ][0] +
@@ -72,7 +89,7 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
                 $values[ 'MT' ][0]
         );
 
-        $fileContent .= str_pad( "File: ", 23, " ", STR_PAD_RIGHT ) . $vector[ 'idFile' ] . "_" . $values[ 'FILENAME' ] . PHP_EOL;
+        $fileContent = $vector[ 'firstLine' ] . PHP_EOL;
         $fileContent .= str_pad( "Date: ", 23, " ", STR_PAD_RIGHT ) . date_create( $this->_project_data[0][ 'create_date' ] )->format( DATE_RFC822 ) . PHP_EOL;
         $fileContent .= str_pad( "Project: ", 23, " ", STR_PAD_RIGHT ) . $this->_project_data[0][ 'pname' ] . PHP_EOL;
         $fileContent .= str_pad( "Language direction: ", 23, " ", STR_PAD_RIGHT ) . $vector[ 'source' ] . " > " . $vector[ 'target' ] . PHP_EOL;
@@ -165,6 +182,8 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
                 PHP_EOL;
 
         $fileContent .= PHP_EOL . PHP_EOL;
+
+        return $fileContent;
 
     }
 
