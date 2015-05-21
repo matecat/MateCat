@@ -763,6 +763,16 @@ color:#333;}
   background: #F7F7F7;
 }
 
+#editlog-boxed {
+  border-radius: 4px;
+  border: 1px dashed #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-top:15px;
+  background: #F7F7F7;
+  font-size: 17px;
+}
+
 .slideMenu
 {
 	position: fixed;
