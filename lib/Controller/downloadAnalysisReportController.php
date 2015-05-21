@@ -36,9 +36,6 @@ class downloadAnalysisReportController extends downloadController {
      */
     function doAction() {
 
-        //get job language and data
-        //Fixed Bug: need a specific job, because we need The target Language
-        //Removed from within the foreach cycle, the job is always the same....
         $_project_data = getProjectJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();
@@ -52,10 +49,33 @@ class downloadAnalysisReportController extends downloadController {
             return null;
         }
 
-        $analysisStatus = new Analysis_APIStatus( $_project_data );
-        $result = $analysisStatus->fetchData()->getResult();
+        $analysisStatus = new Analysis_XTRFStatus( $_project_data );
+        $outputContent = $analysisStatus->fetchData()->getResult();
+
+        $this->content = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
+        $this->filename = $_project_data[0][ 'pname' ] . ".zip";
 
     }
 
+    protected function composeZip( $projectName , $outputContent ) {
+
+        $fileName = tempnam( "/tmp", "zipmat" );
+        $zip  = new ZipArchive();
+        $zip->open( $fileName, ZipArchive::OVERWRITE );
+
+        // Staff with content
+        foreach ( $outputContent as $jobName => $jobAnalysisValues ) {
+            $zip->addFromString( "Job-" . $jobName, $jobAnalysisValues );
+        }
+
+        // Close and send to users
+        $zip->close();
+
+        $fileContent = file_get_contents( $fileName );
+        unlink( $fileName );
+
+        return $fileContent;
+
+    }
 
 }

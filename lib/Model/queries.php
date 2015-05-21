@@ -1805,6 +1805,7 @@ function getProjectJobData( $pid ) {
 		projects.standard_analysis_wc,
 		projects.fast_analysis_wc,
 		projects.tm_analysis_wc,
+		projects.create_date,
 		jobs.id AS jid,
 		jobs.password AS jpassword,
 		job_first_segment,

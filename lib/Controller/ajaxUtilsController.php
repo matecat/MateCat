@@ -71,29 +71,6 @@ class ajaxUtilsController extends ajaxController {
                 }
 
                 break;
-            case 'tmxUploadStatus':
-
-                /**
-                 * @deprecated  tmxUploadStatus use loadTmxController instead
-                 */
-
-                $this->result[ 'errors' ] = array();
-
-                $tmxHandler = new TMSService();
-
-                $tmxHandler->setName( $this->__postInput['tmx_name'] );
-                $tmxHandler->setTmKey( $this->__postInput['tm_key'] );
-
-                try {
-                    $this->result = $tmxHandler->tmxUploadStatus();
-                } catch ( Exception $e ){
-
-                    $this->result[ 'errors' ][ ] = array(
-                            "code" => -15, "message" => "Cant't load TMX files right now, try later"
-                    );
-
-                    return false;
-                }
 
         }
 

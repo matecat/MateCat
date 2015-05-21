@@ -10,6 +10,10 @@
 class Analysis_QueueHandler extends Stomp {
 
     protected $amqHandler;
+
+    /**
+     * @var Predis\Client
+     */
     protected $redisHandler;
     protected $clientType = null;
 
@@ -45,9 +49,21 @@ class Analysis_QueueHandler extends Stomp {
      *
      * @throws \Predis\Connection\ConnectionException
      */
-    protected function _getRedisConnection( ){
+    public function getRedisClient( ){
 
-        if( $this->redisHandler === null ){
+        $resource = null;
+        if( $this->redisHandler != null ){
+            $reflectorClass = new ReflectionClass( $this->redisHandler->getConnection() );
+            $reflectorProperty = $reflectorClass->getParentClass()->getProperty( 'resource' );
+            $reflectorProperty->setAccessible( true );
+            $resource = $reflectorProperty->getValue( $this->redisHandler->getConnection() );
+        }
+
+        if(
+                $this->redisHandler === null
+                || !$this->redisHandler->getConnection()->isConnected()
+                || !is_resource( $resource )
+        ){
             $this->redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
         }
 
@@ -78,9 +94,9 @@ class Analysis_QueueHandler extends Stomp {
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
         $this->connect();
-        $this->setReadTimeout( 0, 50 );
+//        $this->setReadTimeout( 0, 200000 );
         $this->queueName = $queueName;
-        return parent::subscribe( '/queue/' . INIT::$QUEUE_NAME );
+        return parent::subscribe( '/queue/' . $queueName );
 
     }
 
@@ -189,8 +205,8 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        $this->_getRedisConnection()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
-        $this->_getRedisConnection()->rpush( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, $_qid );
+        $this->getRedisClient()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
+        $this->getRedisClient()->rpush( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, $_qid );
 
     }
 
@@ -214,7 +230,7 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        return $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid );
+        return $this->getRedisClient()->get( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid );
 
     }
 
@@ -235,7 +251,7 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        $working_jobs = $this->_getRedisConnection()->lrange( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, 0, -1 );
+        $working_jobs = $this->getRedisClient()->lrange( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, 0, -1 );
 
         /**
          * We have an unordered list of numeric keys [1,3,2,5,4]
@@ -251,7 +267,7 @@ class Analysis_QueueHandler extends Stomp {
                 $found = true;
             }
             if( $found ){
-                $this->_getRedisConnection()->decr( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $value );
+                $this->getRedisClient()->decr( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $value );
             }
         }
 
@@ -266,10 +282,10 @@ class Analysis_QueueHandler extends Stomp {
         }
 
         $project_totals                       = array();
-        $project_totals[ 'project_segments' ] = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-        $project_totals[ 'num_analyzed' ]     = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-        $project_totals[ 'eq_wc' ]            = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 100;
-        $project_totals[ 'st_wc' ]            = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 100;
+        $project_totals[ 'project_segments' ] = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
+        $project_totals[ 'num_analyzed' ]     = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
+        $project_totals[ 'eq_wc' ]            = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 1000;
+        $project_totals[ 'st_wc' ]            = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 1000;
 
         Log::doLog ( "--- (child $child_process_id) : count segments in project $pid = " . $project_totals[ 'project_segments' ] . "" );
         Log::doLog ( "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals[ 'num_analyzed' ] . "" );
@@ -280,9 +296,9 @@ class Analysis_QueueHandler extends Stomp {
             return;
         }
 
-        if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->_getRedisConnection()->setnx( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1 ) ) {
+        if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->getRedisClient()->setnx( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1 ) ) {
 
-            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->expire( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
             $_analyzed_report = getProjectSegmentsTranslationSummary( $pid );
 
@@ -296,7 +312,7 @@ class Analysis_QueueHandler extends Stomp {
             /*
              * Remove this job from the project list
              */
-            $this->_getRedisConnection()->lrem( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, 0, $_pid );
+            $this->getRedisClient()->lrem( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, 0, $_pid );
 
             Log::doLog ( "--- (child $child_process_id) : trying to initialize job total word count." );
             foreach ( $_analyzed_report as $job_info ) {
@@ -329,26 +345,26 @@ class Analysis_QueueHandler extends Stomp {
         $pid = $objQueue[ 'pid' ];
 
         //get the number of segments in job
-        $_acquiredLock = $this->_getRedisConnection()->setnx( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 24 hours
+        $_acquiredLock = $this->getRedisClient()->setnx( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 24 hours
         if ( !empty( $_acquiredLock ) ) {
 
-            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->expire( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
             $total_segs = getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
             Log::doLog( $total_segs );
 
-            $this->_getRedisConnection()->setex( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
-            $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
-            $this->_getRedisConnection()->expire( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->setex( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
+            $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
+            $this->getRedisClient()->expire( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
             Log::doLog ( "--- (child $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
 
         } else {
-            $_existingPid = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-            $_analyzed    = $this->_getRedisConnection()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-            Log::doLog ( "--- (child $process_pid) : found $_existingPid segments for PID $pid in Memcache" );
-            Log::doLog ( "--- (child $process_pid) : analyzed $_analyzed segments for PID $pid in Memcache" );
+            $_existingPid = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
+            $_analyzed    = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
+            Log::doLog ( "--- (child $process_pid) : found $_existingPid segments for PID $pid in Redis" );
+            Log::doLog ( "--- (child $process_pid) : analyzed $_analyzed segments for PID $pid in Redis" );
         }
 
         Log::doLog ( "--- (child $process_pid) : fetched data for segment $sid-$jid. Project ID is $pid" );
@@ -361,13 +377,13 @@ class Analysis_QueueHandler extends Stomp {
      * @param $standard_words
      */
     public function incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
-        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, $eq_words * 100 );
-        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, $standard_words * 100 );
-        $this->_getRedisConnection()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
+        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)$eq_words * 1000 );
+        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)$standard_words * 1000 );
+        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
     }
 
 
-    function reQueue( $failed_segment ){
+    public function reQueue( $failed_segment ){
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . var_export( $failed_segment, true ) );

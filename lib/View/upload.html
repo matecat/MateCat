@@ -303,7 +303,8 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         
         <div class="cl"></div>
         <div class="memory-mgmt">
-            <input type="checkbox" /><label>Pre-translate 100% match from TM</label>
+            <input id="pre-translate-check" type="checkbox" /><label for="pre-translate-check">Pre-translate 100% match
+            from TM</label>
         </div>
     </div>
 
@@ -984,10 +985,11 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     
 
-    $( ".memory-mgmt" ).on("click", function ( e ) {
+    $( "a.memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
         tab = $(this).attr('data-tab') || 'tm';
         elToClick = $(this).attr('data-el-to-click') || null;
+        console.log('qdddd');
         UI.openLanguageResourcesPanel(tab, elToClick);
     } );
 

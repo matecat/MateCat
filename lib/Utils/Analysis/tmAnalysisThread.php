@@ -5,33 +5,32 @@ require "main.php";
 define( 'ANALYSIS_ROOT', INIT::$UTILS_ROOT . "/Analysis/.num_processes" );
 $my_pid = getmypid();
 
-$redisHandler = getRedisConnection();
+
+try {
+    $queueHandler = new Analysis_QueueHandler();
+    $queueHandler->getRedisClient()->set( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID, getmypid() );
+} catch ( Exception $ex ){
+
+    $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
+    _TimeStampMsg( $msg, true );
+    _TimeStampMsg( $ex->getMessage(), true );
+    die();
+}
+
 
 Log::$fileName = "tm_analysis.log";
 $RUNNING = true;
 
 // PROCESS CONTROL FUNCTIONS
 
-function getRedisConnection(){
-    try {
-        $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS, array( 'read_write_timeout' => 30, 'timeout' => 30 ) );
-        $redisHandler->set( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID, getmypid() );
-    } catch ( Exception $ex ){
-        $msg = "****** No REDIS instances found. Exiting. ******";
-        _TimeStampMsg( $msg, true );
-        die();
-    }
-    return $redisHandler;
-}
-
 function cleanShutDown( ){
 
-    global $redisHandler, $db;
+    global $queueHandler, $db;
 
     //SHUTDOWN
     deletePid();
-    $redisHandler->del( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
-    $redisHandler->disconnect();
+    $queueHandler->getRedisClient()->del( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
+    $queueHandler->getRedisClient()->disconnect();
     $db->close();
 
     $msg = str_pad( " TM ANALYSIS " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
@@ -66,9 +65,9 @@ function isRunningChild($pid) {
     /**
      * @var $redisHandler Predis\Client
      */
-    global $redisHandler;
+    global $queueHandler;
 
-    $pidList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
+    $pidList = $queueHandler->getRedisClient()->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
 
     if( array_search( $pid, $pidList ) !== false ){
         return true;
@@ -91,21 +90,21 @@ do {
 
     try {
 
-        if( !$redisHandler->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID ) ) {
+        if( !$queueHandler->getRedisClient()->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID ) ) {
             cleanShutDown();
             _TimeStampMsg( "(parent $my_pid) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!", true );
             die();
         }
 
     } catch ( Exception $e ){
-        $redisHandler = getRedisConnection();
-        _TimeStampMsg( "(child $pid) : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle", true );
-        _TimeStampMsg( "(child $pid) : FATAL !! " . $e->getMessage(), true );
+        _TimeStampMsg( "(child $my_pid) : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle", true );
+        _TimeStampMsg( "(child $my_pid) : FATAL !! " . $e->getMessage(), true );
+        sleep(1);
         continue;
     }
 
     //avoid zombies : the parent is aware of the death of one of the children
-    $dead = pcntl_waitpid( -1, $status, WNOHANG );
+    $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
     if ( $dead > 0 ) {
         _TimeStampMsg( "(parent $my_pid) : child $dead exited: deleting file ....", false );
         deletePid( $dead );
@@ -114,11 +113,11 @@ do {
     $numProcesses        = setNumProcesses();
 
     try {
-        $childrenRunningList = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
+        $childrenRunningList = $queueHandler->getRedisClient()->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
     } catch ( Exception $e ){
-        $redisHandler = getRedisConnection();
         _TimeStampMsg( "(child $pid) : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle", true );
         _TimeStampMsg( "(child $pid) : FATAL !! " . $e->getMessage(), true );
+        sleep(1);
         continue;
     }
 
@@ -141,16 +140,15 @@ do {
             }
             break;
         case $numProcessesDiff > 0:
-            _TimeStampMsg( "(parent $my_pid) : need to delete $numProcessesToLaunchOrDelete processes", false );
+            _TimeStampMsg( "(parent $my_pid) : need to delete $numProcessesToLaunchOrDelete processes" );
             deletePid( "", $numProcessesToLaunchOrDelete );
+            sleep(1);
             break;
         default:
             _TimeStampMsg( "(parent $my_pid) : no pid to delete everithing  works well", false );
-
+            _TimeStampMsg( "(parent) : PARENT MONITORING PAUSE ($my_pid) sleeping ....", false );
+            sleep( 5 );
     }
-
-    _TimeStampMsg( "(parent) : PARENT MONITORING PAUSE ($my_pid) sleeping ....", false );
-    sleep( 5 );
 
 } while( $RUNNING );
 
@@ -163,9 +161,9 @@ function launchProcesses( $numProcesses = 1 ) {
 
 
     /**
-     * @var $redisHandler Predis\Client
+     * @var $redisHandler Analysis_QueueHandler
      */
-    global $redisHandler;
+    global $queueHandler;
 
     $processLaunched = 0;
 //    _TimeStampMsg( __FUNCTION__ . " : parent launching $numProcesses processes - $processLaunched  already launched ", false );
@@ -189,7 +187,7 @@ function launchProcesses( $numProcesses = 1 ) {
 
             try {
 
-                if ( !$redisHandler->rpush( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, $pid ) ) {
+                if ( !$queueHandler->getRedisClient()->rpush( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, $pid ) ) {
                     _TimeStampMsg( "(child $pid) : FATAL !! cannot create child file. Exiting!", true );
                     return -2;
 
@@ -198,8 +196,7 @@ function launchProcesses( $numProcesses = 1 ) {
                 }
 
             } catch ( Exception $e ){
-                $redisHandler = getRedisConnection();
-                $redisHandler->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $pid );
+                $queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $pid );
                 _TimeStampMsg( "(child $pid) : FATAL !! Redis Server not available. Re-instantiated the connection and removed last pid from list.", true );
                 _TimeStampMsg( "(child $pid) : FATAL !! " . $e->getMessage(), true );
                 return 0;
@@ -220,9 +217,9 @@ function launchProcesses( $numProcesses = 1 ) {
 function deletePid( $pid = "", $num = -1 ) {
 
     /**
-     * @var $redisHandler Predis\Client
+     * @var $redisHandler Analysis_QueueHandler
      */
-    global $redisHandler;
+    global $queueHandler;
 
     _TimeStampMsg( "Request to delete pid = " . var_export( $pid, true ) . ", num = " . var_export( $num, true ), false );
 
@@ -235,7 +232,7 @@ function deletePid( $pid = "", $num = -1 ) {
             _TimeStampMsg( "Deleting $num pid in the list.", false );
         }
 
-        $files = $redisHandler->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
+        $files = $queueHandler->getRedisClient()->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
 
     } else {
 
@@ -248,14 +245,14 @@ function deletePid( $pid = "", $num = -1 ) {
 
         //default params
         _TimeStampMsg( "Deleting all pid process id", false );
-        $redisHandler->del( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST );
+        $queueHandler->getRedisClient()->del( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST );
         $numDeleted = count( $files );
 
     } else {
 
         foreach( $files as $file ) { // iterate ids
 
-            $redisHandler->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $file  );
+            $queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $file  );
 
             if ( $num > 0 ) {
 
