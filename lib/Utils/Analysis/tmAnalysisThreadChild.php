@@ -116,7 +116,6 @@ do {
 
     }
 
-
     $msg      = null;
     $objQueue = array();
     try {
@@ -198,6 +197,7 @@ do {
         $amqHandlerSubscriber->incrementAnalyzedCount( $pid, 0, 0 );
         $amqHandlerSubscriber->decrementTotalForWaitingProjects( $pid );
         $amqHandlerSubscriber->tryToCloseProject( $pid, $my_pid );
+        $amqHandlerSubscriber->ack( $msg );
         continue;
     }
 
@@ -589,10 +589,14 @@ function updateTMValues( $tm_data ){
         );
         _TimeStampMsg( $result );
 
-    } else {
+    } elseif( $updateRes == 0 ) {
 
         //There was not a fast Analysis??? Impossible.
         _TimeStampMsg( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
+
+    } else {
+
+        _TimeStampMsg( "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.");
 
     }
 
