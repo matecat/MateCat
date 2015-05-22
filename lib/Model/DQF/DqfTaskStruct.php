@@ -39,7 +39,6 @@ class DQF_DqfTaskStruct extends DQF_DqfAbstractStruct implements JsonSerializabl
     public $file_name;
 
 
-
     /**
      * @return DQF_DqfTaskStruct
      */
@@ -52,7 +51,7 @@ class DQF_DqfTaskStruct extends DQF_DqfAbstractStruct implements JsonSerializabl
                         'type'            => 'task',
                         'api_key'         => null,
                         'project_id'      => null,
-                        'task_id'          => null,
+                        'task_id'         => null,
                         'target_language' => null,
                         'file_name'       => null,
                 )
@@ -75,7 +74,7 @@ class DQF_DqfTaskStruct extends DQF_DqfAbstractStruct implements JsonSerializabl
                 'payload'     => array(
                         'api_key'         => $this->api_key,
                         'project_id'      => $this->project_id,
-                        'task_id'          => $this->task_id,
+                        'task_id'         => $this->task_id,
                         'target_language' => $this->target_language,
                         'file_name'       => $this->file_name
                 )

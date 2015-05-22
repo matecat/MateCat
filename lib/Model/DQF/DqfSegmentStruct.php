@@ -37,6 +37,8 @@ class DQF_DqfSegmentStruct extends DQF_DqfAbstractStruct implements JsonSerializ
     public $new_target_segment;
 
     /**
+     * The time needed to edit segment. <br>
+     * E.g. the difference between the translation timestamp and the openSegment timestamp
      * @var int
      */
     public $time;
@@ -72,13 +74,13 @@ class DQF_DqfSegmentStruct extends DQF_DqfAbstractStruct implements JsonSerializ
                         'v'                  => Constants_DqfAPI::API_VERSION,
                         'app'                => 'MateCAT',
                         'app_version'        => INIT::$BUILD_NUMBER,
-                        'type'               => 'task',
+                        'type'               => 'segment',
                         'task_id'            => null,
                         'segment_id'         => null,
                         'source_segment'     => null,
                         'target_segment'     => null,
                         'new_target_segment' => null,
-                        'time'               => null,//TODO: time() ?
+                        'time'               => null,
                         'tm_match'           => null,
                         'cattool'            => 12,
                         'mtengine'           => 22,
@@ -116,5 +118,4 @@ class DQF_DqfSegmentStruct extends DQF_DqfAbstractStruct implements JsonSerializ
         );
 
     }
-
 }

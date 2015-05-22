@@ -702,7 +702,7 @@ class ProjectManager {
         $this->dbHandler->query( $update_project_count );
         Log::doLog( $this->projectStructure );
         //create Project into DQF queue
-        if ( INIT::$DQF_ENABLED && $this->projectStructure[ 'dqf_key' ] !== null ) {
+        if ( INIT::$DQF_ENABLED && !empty($this->projectStructure[ 'dqf_key' ]) ) {
 
             $dqfProjectStruct                  = DQF_DqfProjectStruct::getStruct();
             $dqfProjectStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
