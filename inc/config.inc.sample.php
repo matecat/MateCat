@@ -181,8 +181,8 @@ class INIT {
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
         self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
-        self::$FILES_REPOSITORY                = self::$STORAGE_DIR . "/files";
-        self::$CACHE_REPOSITORY                = self::$STORAGE_DIR . "/cache";
+        self::$FILES_REPOSITORY                = self::$STORAGE_DIR . "/files_storage/files";
+        self::$CACHE_REPOSITORY                = self::$STORAGE_DIR . "/files_storage/cache";
         self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
         self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
         self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
