@@ -43,8 +43,6 @@
     cursor: pointer;
     }
 
-.x-popup{background: url(../img/x-popup.png) center center no-repeat;display:block;height:40px;width:40px;float:right;margin:1px 0px 0 0;background-size:19px 19px;}
-  .x-popup:hover{background: url(../img/x-popup-hover.png) center center no-repeat;background-size:19px 19px;}
 
 .login-google .outer{
     margin-top: 10px;
@@ -486,15 +484,8 @@ top: 2%;
 margin: 0 0 0 -400px;
 }
 
-.popup .x-popup, .mgmt-panel .x-popup, .popup-tm .x-popup {
-background: url(../img/sprite.png) 10px -299px no-repeat;
-background-size: 22px;
-}
 
-.popup .x-popup:hover, .popup-tm .x-popup:hover {
-background: url(../img/sprite.png) 10px -328px no-repeat;
-background-size: 22px;
-}
+
 
 .outsource.modal .popup p {
 background-size: 200px;
