@@ -44,7 +44,13 @@ h3{margin:0px 0 0 0;padding:0;font-size:18px;color:#999999 !important;font-weigh
 .tablestats.continue{margin-bottom:4px !important;}
 .logo{margin-top:6px!important;}
 
-.error-symbol{background:url(../img/red-error-symbol.png) 0 0 no-repeat; position:absolute;margin:42px 0 0 -30px;display:block;width:23px;height:23px;background-size:21px 19px}
+.error-symbol{
+	position:absolute;
+	margin:42px 0 0 -30px;
+	display:block;
+	width:23px;
+	height:23px;
+}
 
 body.manage th.header
 	{
@@ -776,7 +782,7 @@ margin-top: 10px;}
 }
 .logosmall {display:none;}
 .menuscroll .logosmall {display:block}
-.logosmall {background: url(../img/sprite.png) 1px -1403px no-repeat;padding-top: 30px;}
+.logosmall {background: url(../img/logo-ico.png) no-repeat;padding-top: 30px; background-size:45px;}
 
 
 .block
@@ -882,22 +888,7 @@ font-size:12px;
 font-size: 14px;
 }
 
-/* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (in-resolution: 2dppx) { 
 
-
-.logosmall {
-	background: url(../img/sprite2x.png) 1px -1403px no-repeat;
-}
-body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
-	background-size:42px;	
-}
-}
 /* revise page */
 
 .lang-info {
