@@ -437,6 +437,8 @@ float: left;
     overflow: hidden;
 	text-overflow: ellipsis;
   }
+
+
   
   .cancel-btn{background:#f26522 url(../img/sprite.png) -4px -1157px no-repeat !Important}
   .cancel-btn:hover{background:#d1581c url(../img/sprite.png)  -4px -1157px no-repeat !Important}
