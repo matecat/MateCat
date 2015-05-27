@@ -65,7 +65,7 @@ class downloadAnalysisReportController extends downloadController {
 
         // Staff with content
         foreach ( $outputContent as $jobName => $jobAnalysisValues ) {
-            $zip->addFromString( "Job-" . $jobName, $jobAnalysisValues );
+            $zip->addFromString( "Job-" . $jobName . ".txt", $jobAnalysisValues );
         }
 
         // Close and send to users
