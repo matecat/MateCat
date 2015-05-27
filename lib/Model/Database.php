@@ -37,7 +37,7 @@ class Database {
 	private $pass = ""; //database login password
 	private $database = ""; //database name
 	public $error = "";
-	private $errno = 0;
+	public $errno = 0;
 	private $sql = "";
 
 #######################
@@ -78,7 +78,13 @@ class Database {
 #-#obtain()
 
 	public function get_error() {
+
+        //Hack for fix error handling in Database Class because Database class does not user exceptions
+        // but has a method to retrieve errors
+        $this->error = "";
+        $this->errno = 0;
 		return array("error_code" => $this->errno, 'error_description' => "$this->error - " . ( strlen( $this->sql ) > 2048 ? substr( $this->sql ,0, 2048 ) : $this->sql ) );
+
 	}
 
 	public function get_error_number() {
