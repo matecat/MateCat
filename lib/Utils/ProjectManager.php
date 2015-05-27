@@ -700,7 +700,7 @@ class ProjectManager {
         );
 
         $this->dbHandler->query( $update_project_count );
-        Log::doLog( $this->projectStructure );
+//        Log::doLog( $this->projectStructure );
         //create Project into DQF queue
         if ( INIT::$DQF_ENABLED && !empty($this->projectStructure[ 'dqf_key' ]) ) {
 
