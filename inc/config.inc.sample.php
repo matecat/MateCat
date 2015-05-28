@@ -17,8 +17,15 @@ class INIT {
     public static $MEMCACHE_SERVERS = array();
     public static $REDIS_SERVERS = array();
     public static $QUEUE_BROKER_ADDRESS;
+    public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $QUEUE_NAME = "matecat_analysis_queue";
+
+    //This queue will be used for dqf project creation
+    public static $DQF_PROJECTS_TASKS_QUEUE_NAME = "matecat_dqf_project_task_queue";
+    //This queue will be used for dqf project creation
+    public static $DQF_SEGMENTS_QUEUE_NAME = "matecat_dqf_segment_queue";
+
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
     public static $UPLOAD_REPOSITORY;
@@ -69,9 +76,10 @@ class INIT {
     public static $CONFIG_VERSION_ERR_MESSAGE;
     public static $SUPPORT_MAIL;
 
+    public static $DQF_ENABLED = false;
+
     /**
      * Default Matecat user agent string
-     *
      */
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
@@ -108,15 +116,15 @@ class INIT {
 
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = array(
-            self::$ROOT,
-            self::$ROOT . "/lib/Controller/AbstractControllers",
-            self::$ROOT . "/lib/Controller/API",
-            self::$ROOT . "/lib/Controller",
-            self::$ROOT . "/inc/PHPTAL",
-            self::$ROOT . "/lib/Utils/API",
-            self::$ROOT . "/lib/Utils",
-            self::$ROOT . "/lib/Utils/Predis/src",
-            self::$ROOT . "/lib/Model" ,
+                self::$ROOT,
+                self::$ROOT . "/lib/Controller/AbstractControllers",
+                self::$ROOT . "/lib/Controller/API",
+                self::$ROOT . "/lib/Controller",
+                self::$ROOT . "/inc/PHPTAL",
+                self::$ROOT . "/lib/Utils/API",
+                self::$ROOT . "/lib/Utils",
+                self::$ROOT . "/lib/Utils/Predis/src",
+                self::$ROOT . "/lib/Model",
         );
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
@@ -156,9 +164,11 @@ class INIT {
             self::$PROTOCOL = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
-        } else {
-            if( INIT::$DEBUG )
+        }
+        else {
+            if ( INIT::$DEBUG ) {
                 echo "\nPHP Running in CLI mode.\n\n";
+            }
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
 
@@ -176,6 +186,7 @@ class INIT {
         self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
         self::$REDIS_SERVERS        = "tcp://localhost:6379";
         self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
+        self::$QUEUE_DQF_ADDRESS    = "tcp://localhost:61613";
         self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
 
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
@@ -195,7 +206,7 @@ class INIT {
         $this->_setIncludePath();
         spl_autoload_register( 'INIT::loadClass' );
         require_once 'Predis/autoload.php';
-        
+
         if ( !is_dir( self::$STORAGE_DIR ) ) {
             mkdir( self::$STORAGE_DIR, 0755, true );
         }
@@ -260,7 +271,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.5.4';
+        self::$BUILD_NUMBER            = '0.5.4';
         self::$VOLUME_ANALYSIS_ENABLED = true;
         self::$SUPPORT_MAIL            = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
 
@@ -312,7 +323,7 @@ class INIT {
                         'odp'  => array( '', '', 'extppt' ),
                         'sxi'  => array( '', '', 'extppt' ),
                         'xml'  => array( '', '', 'extxml' ),
-                    //                'vxd' => array("Try converting to XML")
+                        //                'vxd' => array("Try converting to XML")
                 ),
                 'Web'                 => array(
                         'htm'   => array( '', '', 'exthtm' ),
@@ -329,12 +340,12 @@ class INIT {
                         'xlf'      => array( 'default', '', 'extxlf' )
                 ),
                 "Desktop Publishing"  => array(
-                    //                'fm' => array('', "Try converting to MIF"),
+                        //                'fm' => array('', "Try converting to MIF"),
                         'mif'  => array( '', '', 'extmif' ),
                         'inx'  => array( '', '', 'extidd' ),
                         'idml' => array( '', '', 'extidd' ),
                         'icml' => array( '', '', 'extidd' ),
-                    //                'indd' => array('', "Try converting to INX"),
+                        //                'indd' => array('', "Try converting to INX"),
                         'xtg'  => array( '', '', 'extqxp' ),
                         'tag'  => array( '', '', 'exttag' ),
                         'xml'  => array( '', '', 'extxml' ),
@@ -405,7 +416,7 @@ class INIT {
                 E_ERROR             => 'E_ERROR',
                 E_USER_ERROR        => 'E_USER_ERROR',
                 E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-            //E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
+                //E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
         );
 
         # Getting last error
@@ -421,8 +432,13 @@ class INIT {
 
                 ini_set( 'display_errors', 'Off' );
 
-                if( !ob_get_level() ){ ob_start(); }
-                else { ob_end_clean(); ob_start(); }
+                if ( !ob_get_level() ) {
+                    ob_start();
+                }
+                else {
+                    ob_end_clean();
+                    ob_start();
+                }
 
                 debug_print_backtrace();
                 $output = ob_get_contents();
@@ -452,14 +468,7 @@ class INIT {
                     if( INIT::$EXCEPTION_DEBUG ){
                         echo json_encode( array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() ) );
                     } else {
-                        echo json_encode( array(
-                                "errors"  => array(
-                                        array(
-                                                "code"    => -1000,
-                                                "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>"
-                                        )
-                                ), "data" => array()
-                        ) );
+                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>" ) ), "data" => array() ) ) ;
                     }
 
                 } elseif( INIT::$EXCEPTION_DEBUG ){

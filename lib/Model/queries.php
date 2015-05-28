@@ -489,7 +489,7 @@ function getJobData( $id_job, $password = null ) {
 
     $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject
+		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key
 			FROM jobs
 			WHERE id = %u";
 
@@ -1724,7 +1724,8 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
     $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
-    $data[ 'payable_rates' ]     = json_encode( $projectStructure[ 'payable_rates' ] );
+    $data[ 'payable_rates' ]     = json_encode($projectStructure[ 'payable_rates' ]);
+    $data[ 'dqf_key' ]           = $projectStructure['dqf_key'];
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1972,15 +1973,15 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
 
     $projectsQuery =
             "SELECT p.id AS pid,
-		p.name,
-		p.password,
-		p.tm_analysis_wc
-			FROM projects p
-			INNER JOIN jobs j ON j.id_project=p.id
-			WHERE %s
-			GROUP BY 1
-			ORDER BY 1 DESC
-			LIMIT %d, %d";
+                            p.name,
+                            p.password,
+                            p.tm_analysis_wc
+            FROM projects p
+            INNER JOIN jobs j ON j.id_project=p.id
+            WHERE %s
+            GROUP BY 1
+            ORDER BY 1 DESC
+            LIMIT %d, %d";
 
 
     $where_query = 1;
@@ -2032,29 +2033,29 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     }
 
     $jobsQuery = "SELECT
-		j.id,
-		j.id_project,
-		j.source,
-		j.target,
-		j.create_date,
-		j.password,
-		j.tm_keys,
-		j.status_owner,
-		j.job_first_segment,
-		j.job_last_segment,
-		j.id_mt_engine,
-		j.id_tms,
-		j.subject,
-		(draft_words + new_words) AS DRAFT,
-		rejected_words AS REJECT,
-		translated_words AS TRANSLATED,
-		approved_words AS APPROVED,
-		e.name
-			FROM jobs j
-			LEFT JOIN engines e ON j.id_mt_engine=e.id
-			WHERE j.id_project IN (%s) AND %s
-			ORDER BY j.id DESC,
-		j.job_first_segment ASC";
+                 j.id,
+				 j.id_project,
+				 j.source,
+				 j.target,
+				 j.create_date,
+				 j.password,
+				 j.tm_keys,
+				 j.status_owner,
+				 j.job_first_segment,
+				 j.job_last_segment,
+				 j.id_mt_engine,
+				 j.id_tms,
+				 j.subject,
+				(draft_words + new_words) AS DRAFT,
+				rejected_words AS REJECT,
+				translated_words AS TRANSLATED,
+				approved_words AS APPROVED,
+                e.name
+            FROM jobs j
+            LEFT JOIN engines e ON j.id_mt_engine=e.id
+            WHERE j.id_project IN (%s) AND %s
+            ORDER BY j.id DESC,
+                     j.job_first_segment ASC";
 
     $query = sprintf( $jobsQuery, $ids, $where_query );
 

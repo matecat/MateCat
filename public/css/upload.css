@@ -438,8 +438,37 @@ float: left;
 	text-overflow: ellipsis;
   }
   
-  .cancel-btn{background:#f26522 url(../img/sprite.png) -4px -1157px no-repeat !Important}
-  .cancel-btn:hover{background:#d1581c url(../img/sprite.png)  -4px -1157px no-repeat !Important}
+
+  .cancel-btn{background:#f26522;}
+  .cancel-btn:hover{background:#d1581c;}
+
+.translate-box a.tooltip {
+  text-align: center;
+  text-decoration: none!important;
+  position: relative;
+  float: left;
+  margin-top: 5px;
+  margin-left: 10px;
+}
+
+.translate-box a.tooltip.gray span,
+.translate-box a.tooltip.gray {
+    background: #EEE;
+}
+
+.translate-box a.tooltip.gray span:after {
+	border-top:10px solid #eee;
+}
+
+.translate-box a.tooltip:hover span {
+  top: -70px;
+}
+
+  .cancel-btn, #clear-all-files {background:#f26522;}
+  .cancel-btn:hover, #clear-all-files:hover {background:#d1581c;}
+
+
+
 /* Fix for IE 6: */
 *html .fileinput-button {
   margin-right: -2px;
@@ -562,8 +591,10 @@ h2.payoff
 .uploaded .btncontinue{display:block;}
 .btncontinue p{float:left !important;font-size:14px !important;margin:0px 0 0 0 !important;padding:0;}
 .btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 30px}
-#add-files {background-position: -4px -518px;}
 
+#add-files, #clear-all-files {
+	padding: 8px 10px 0px 10px!important;
+}
 
 
 .preview {border-right:none !Important; width:30px;}
@@ -574,7 +605,12 @@ h2.payoff
 
 
 /*UI buttons*/
-.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:12px 0px 4px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
+.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  
+	width:200px;  cursor:pointer;padding:12px 0px 4px 0;
+	background: #09beec;
+	color:#fff;font-weight:bold;margin-bottom:30px !important;
+}
+
 .upload-footer .fileinput-button 
 	{
 	position: relative;
@@ -583,11 +619,11 @@ h2.payoff
 .fileinput-button:hover{background-color:#12b4df}
 
 
-.delete .ui-button-text, .cancel .ui-button-text{color:#fff;text-align:left;margin:0px 0 0 10px !important}
-.delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;}
-.delete button, .cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
+.delete .ui-button-text, .cancel .ui-button-text{display:none;color:#fff;text-align:left;margin:0px 0 0 10px !important}
+.delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;  border: 0;}
+/*.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}*/
 
-.delete button:hover, .cancel button:hover{background:#ca2a2e url(../img/sprite.png) 12px -1115px  no-repeat !important;}
+.cancel button:hover,.delete button:hover {background:#ca2a2e;color:#fff;}
 .cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !Important;display:block;float:left;}
 
 
@@ -610,6 +646,13 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 	width:220px;
     height:28px;
       margin: 0 0 5px 0;
+}
+
+#dqf_key
+{
+    width:220px;
+    height:28px;
+    margin: 0 0 5px 0;
 }
 
 
@@ -805,8 +848,9 @@ tr.ready .size span{visibility: visible;}
 
 .advanced-box{display:none;margin:0px 0 10px 0;float:left;width:auto;}
 .advanced-box h2{margin-top:-17px !important; padding-top:0 !important}
-.more{background: url(../img/sprite.png) 0 -260px no-repeat;background-size:12px;padding:0 0 5px 18px;margin-bottom:5px;float:left}
-.minus{background: url(../img/sprite.png) 0 -285px no-repeat;background-size:12px;}
+.more {margin-bottom:5px;float:left; text-decoration: none;}
+.more span {text-decoration: underline;}
+.more:hover span {text-decoration: none;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
 
 
@@ -1073,16 +1117,19 @@ margin-top: 7px;
 #swaplang
     {
     float: left;
-    text-indent: -9999px;
     display: block;
     width: 15px;
+    text-decoration: none;
     height: 18px;
-    margin: 56px 7px 0 9px;
-	background: url(../img/sprite.png) -13px -561px no-repeat;    
-	opacity: 0.5;
+    margin: 51px 12px 0 10px;
+    font-size: 20px;
+    color:#ccc;
     }
+
+ #swaplang span {display: none;}
+
     #swaplang:hover {
-        opacity: 1;
+       color:#ddd;
     }
 
 /* job list table when analyze page is not available */
@@ -1099,43 +1146,6 @@ margin-top: 7px;
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px!important;}
 
 
-/* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (in-resolution: 2dppx) { 
- #swaplang {
-background: url(../img/sprite2x.png) -13px -561px no-repeat;
-}
-.fileinput-button {
-	background: #09beec url(../img/sprite2x.png) -4px -515px no-repeat;
-}
-
-
-
-.cancel-btn {
-background: #f26522 url(../img/sprite2x.png) -4px -1157px no-repeat !Important;
-}
-
-.cancel-btn:hover {
-background: #d1581c url(../img/sprite2x.png) -4px -1157px no-repeat !Important;
-}
-
-.delete button {
-background: url(../img/sprite2x.png) -8px -1074px no-repeat !important;
-}
-
-.delete button:hover, .cancel button:hover {
-background: #ca2a2e url(../img/sprite2x.png) -8px -1115px no-repeat !important;
-}
-
-#swaplang, .fileinput-button, .cancel-btn, .cancel-btn:hover, .delete button, .delete button:hover, .cancel button:hover  {
-	background-size: 42px!important;
-}
-
-}
 
 
 .error .label.label-important a{
@@ -1201,7 +1211,9 @@ font-size: 25px;
 .learnmore img {
 width: 250px;
 }
-
+.more, .more.minus {
+  color: #333; 
+ }
 
 .bottom-lm {
 	margin-top: 20px;

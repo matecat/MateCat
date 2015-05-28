@@ -316,6 +316,7 @@ class newProjectController extends viewController {
         $this->template->user_keys = $this->keyList;
 
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
+        $this->template->DQF_enabled = INIT::$DQF_ENABLED;
 
     }
 

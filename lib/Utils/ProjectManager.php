@@ -71,7 +71,8 @@ class ProjectManager {
                             'userIsLogged'         => false,
                             'uid'                  => null,
                             'skip_lang_validation' => false,
-                            'pretranslate_100'     => 0
+                            'pretranslate_100'     => 0,
+                            'dqf_key'              => null
                     ) );
         }
 
@@ -643,6 +644,45 @@ class ProjectManager {
         );
 
         $this->dbHandler->query( $update_project_count );
+//        Log::doLog( $this->projectStructure );
+        //create Project into DQF queue
+        if ( INIT::$DQF_ENABLED && !empty($this->projectStructure[ 'dqf_key' ]) ) {
+
+            $dqfProjectStruct                  = DQF_DqfProjectStruct::getStruct();
+            $dqfProjectStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
+            $dqfProjectStruct->project_id      = $this->projectStructure[ 'id_project' ];
+            $dqfProjectStruct->name            = $this->projectStructure[ 'project_name' ];
+            $dqfProjectStruct->source_language = $this->projectStructure[ 'source_language' ];
+
+            $dqfQueue = new Analysis_DqfQueueHandler();
+
+            try {
+                $dqfQueue->createProject( $dqfProjectStruct );
+
+                //for each job, push a task into AMQ's DQF queue
+                foreach ( $this->projectStructure[ 'array_jobs' ][ 'job_list' ] as $i => $jobID ) {
+                    /**
+                     * @var $dqfTaskStruct DQF_DqfTaskStruct
+                     */
+                    $dqfTaskStruct                  = DQF_DqfTaskStruct::getStruct();
+                    $dqfTaskStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
+                    $dqfTaskStruct->project_id      = $this->projectStructure[ 'id_project' ];
+                    $dqfTaskStruct->task_id         = $jobID;
+                    $dqfTaskStruct->target_language = $this->projectStructure[ 'target_language' ][ $i ];
+                    $dqfTaskStruct->file_name       = uniqid('',true) . $this->projectStructure[ 'project_name' ];
+
+                    $dqfQueue->createTask( $dqfTaskStruct );
+
+                }
+            } catch ( Exception $exn ) {
+                $output = __METHOD__ . " (code " . $exn->getCode() . " ) - " . $exn->getMessage();
+                Log::doLog( $output );
+
+                Utils::sendErrMailReport( $output, $exn->getMessage() );
+            }
+
+
+        }
 
 
     }

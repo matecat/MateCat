@@ -618,7 +618,7 @@ color:#333;}
 
 	text-decoration: none;
 	color: #333;
-	padding: 13px 10px 10px 52px;
+	padding: 13px 10px 10px 22px;
 	/*background: url(../img/xliff-icon.png) 12px 8px no-repeat;*/
 	display: block;
 	background-size: 24px; -webkit-transition: all 100ms ease-in;
@@ -659,20 +659,13 @@ color:#333;}
     .currSegment a
 
     {
-	    background: #efefef url(../img/sprite.png) 15px -160px no-repeat !important;
-	    background-size: 25px!important;  
+	    background: #efefef;  
 	    border-top: 1px solid #ccc;
 	    box-shadow: inset 0px 1px #fff;
 	    -moz-box-shadow: inset 0px 1px #fff;
 	    -webkit-box-shadow: inset 0px 1px #fff;
 
   }
-
-
-
-
-
-
 
 
   .topMenu ul li a:hover
@@ -682,9 +675,96 @@ color:#333;}
 
 
 
+.tooltip {
+  cursor: help;
+  position: absolute;
+  border: 1px solid #717171;
+  border-radius: 20px;
+  width: 13px!important;
+  font-size: 13px;
+  height: 11px;
+  font-weight: bold;
+  padding-left: 0px;
+  padding-top: 2px;
+  margin-top: -3px;
+  line-height: 11px;
+  background: #FBF3AA;
+  margin-left: 5px;
+  color: #717171;
+  box-shadow: 1px 1px 1px #999;
+}
 
 
+.tooltip:hover span {
+    opacity: 1;
+    top: -90px;
+}
 
+.tooltip span { 
+    width: 200px;
+    height: auto;
+    line-height: 22px;
+    color: #333;
+    padding: 10px;
+    left: -98px;
+    font-weight: 400;
+    font-size: 15px;
+    text-align: center;
+    border: 1px solid #727272;;
+    background: #FFF8BA;
+    text-indent: 0px;
+    border-radius: 5px;
+    position: absolute;
+    pointer-events: none;
+    top: -110px;
+    opacity: 0;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    -moz-box-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000000000000000;
+}
+
+.tooltip span:before, .tooltip span:after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 43%;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #727272;;
+}
+
+.tooltip span:after {
+    bottom: -10px;
+    margin-left: -1px;
+    border-top: 10px solid #FFF8BA;;
+}
+
+
+.mgmt-table-tm .boxed {
+  border-radius: 4px;
+  border: 1px dashed #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: #F7F7F7;
+}
+
+#editlog-boxed {
+  border-radius: 4px;
+  border: 1px dashed #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-top:15px;
+  background: #F7F7F7;
+  font-size: 17px;
+}
 
 .slideMenu
 {
@@ -994,13 +1074,14 @@ text-align: right;
 {
 	font-size: 18px;
     }
-    .popup h1, .popup-tm h1, .popup-languages.slide h1
+    .popup h1, .popup-tm h1, .popup-languages.slide h1, .slide-panel h1
     {
 	    overflow: visible;
 	    max-height: inherit;
 	    font-size: 24px;
-	    background: #4D4D4D url(../img/sprite.png) 10px 10px no-repeat;
+	    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
 	    padding: 10px 10px 7px 58px;
+        background-size: 35px;
 	    /*border-bottom: 1px solid #000;*/
 	    color: #fff;
 	    margin: 0 !important;
@@ -1072,13 +1153,19 @@ margin-left: 10px;
 
     .popup .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup
     {
-	    background: url(../img/sprite.png) 10px -304px no-repeat;
-	    display: block;
-	    height: 40px;
-	    width: 40px;
-	    float: right;
+	    color:#fff;
+        text-decoration: none;
+        display: block;
+        height: 30px;
+        font-size: 20px;
+        padding-top: 10px;
+  	    float: right;
 	    margin: 0 10px 0 0;
 	    background-size: 22px;
+    }
+
+    .popup .x-popup:hover, .slide-panel .x-popup:hover {
+        color:red;
     }
 	
 	 .mgmt-panel .x-popup {
@@ -1086,12 +1173,6 @@ margin-left: 10px;
 		margin-top: 10px;
 	 }
 	
-	
-    .popup .x-popup:hover, .slide-panel .x-popup:hover
-    {
-	    background: url(../img/sprite.png) 10px -334px no-repeat;
-	    background-size: 22px;
-    }  
 	
     .uploadtm.disabled {
     	background: #09beec!important;
@@ -1147,7 +1228,7 @@ font-size: 18px;
 }
 
 #sign-in-o {
-padding: 10px 10px 5px;
+padding: 5px 10px 10px;
 margin: 0 auto;
 width: 200px;
 text-align: center;
@@ -2185,9 +2266,9 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 td.action .btn .text {margin:0!important;}
 a.memory-mgmt.pull-right {
     margin-top: 35px;
-    background: url(../img/sprite.png) 0 -259px no-repeat;
+ /*   background: url(../img/sprite.png) 0 -259px no-repeat;
     background-size: 12px;
-    padding: 0 0 5px 18px;
+   */ padding: 0 0 5px 18px;
     margin-bottom: 5px;
 }
 
@@ -2593,16 +2674,9 @@ only screen and (in-resolution: 2dppx) {
 
 .popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 
-	body.cattool #jobMenu li a
-	{
-		background-size: 25px !important;
-}
+	
 
-.sub-editor .gl-search .set-glossary
-{
-	background: url(../img/add-black2x.png) no-repeat;
-	background-size: 20px;
-}    
+   
 .sub-editor .gl-search .search-glossary
 {
 	background: url(../img/searchgl-black2x.png) no-repeat;
@@ -2610,14 +2684,10 @@ only screen and (in-resolution: 2dppx) {
 }  
 
 .fileinput-button {
-	background: #09beec url(../img/sprite2x.png) -4px -516px no-repeat;
+	background: #09beec;
 }
 
-.popup h1, .slide-panel h1 {
-	background: #4D4D4D url(../img/sprite2x.png) 10px 10px no-repeat;	
-	background-size: 42px;
 
-}
 
 }
 
@@ -2673,11 +2743,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-vfjr9u');
-	src:url('fonts/icomoon.eot?#iefix-vfjr9u') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-vfjr9u') format('woff'),
-		url('fonts/icomoon.ttf?-vfjr9u') format('truetype'),
-		url('fonts/icomoon.svg?-vfjr9u#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-75v12b');
+	src:url('fonts/icomoon.eot?#iefix-75v12b') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-75v12b') format('woff'),
+		url('fonts/icomoon.ttf?-75v12b') format('truetype'),
+		url('fonts/icomoon.svg?-75v12b#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2702,7 +2772,13 @@ color: #000;
 .canceladdtmx.btn-grey .text:before,
 .deleteTM .text:before,
 .sorting:after,
+.splitbtn:before,
+.x-popup:before,
+.popup .x-popup:before, 
+.mgmt-panel .x-popup:before, 
+.popup-tm .x-popup:before,
 .noticon:after,
+.sub-editor .gl-search .set-glossary:before,
 td.actions a:before,
 a.cancel-project:before,
 a.archive-project:before,
@@ -2711,7 +2787,30 @@ a.unarchive-project:before,
 a.unarchive-project:after, 
 a.resume-project:after,
 .splitpoint:before,
+.mergebtn:before,
+.subfile p:before,
+.notific:before,
+#clear-all-files:before,
+#swaplang:after,
+.more:before,
+.currSegment a:before,
+#filterSwitch:before,
+.more.minus:before,
+.close:before,
+.notific.error:before,
+.breadcrumbs #pname:before,
+.delete button:before,
+.cancel button:before,
+.graysmall:hover .trash:before,
+.fileupload-buttonbar .fileinput-button:before,
+#add-files:before,
 .splitpoint-delete:after,
+#point2seg:after,
+.error-symbol:before,
+.warnings:before,
+.tab-switcher-al a:before,
+.error-message p:before,
+.text .alternatives:before,
 input.downloadtr-button:before,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
@@ -2832,8 +2931,127 @@ margin-top: -5px;
 float: left;
 }
 
+.splitbtn:before {
+    content: "\f065";
+    margin-right: 3px;
+}
+
+.sub-editor .gl-search .set-glossary:before {
+        content: "\f055";
+           transform: rotate(180deg);
+  display: inline-block;
+}
+
+.mergebtn:before {
+    content: "\f066";
+    margin-right: 3px;
+}
+
+.fileupload-buttonbar .fileinput-button:before, #add-files:before {
+    content: "\f067";
+      font-size: 14px;
+  margin-right: 20px;
+}
+.close:before {
+     content: "\ea0d";
+}
+.header .close:before {
+     content: "\ea0d";
+  text-align: center;
+  margin-top: 0px;
+  margin-left: -1px;
+  display: block;
+  vertical-align: middle;
+}
+
+.notific:before {
+    content: "\f058";
+      font-size: 25px;
+}
+.error-message p:before {
+     content: "\f071";
+     margin-right: 10px;
+}
+
+.tab-switcher-al a:before,
+.warnings:before,    
+.error-symbol:before,
+.text .alternatives:before {
+     content: "\f071";
+     color:#D65959;
+     margin-right: 10px;
+}
+
+.tab-switcher-al a:before {
+  font-size: 14px;
+}
+
+.currSegment a:before {
+       content: "\f112";
+       transform: rotate(180deg);
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.notific.error:before {
+        content: "\f071";
+         font-size: 25px;
+}
+
+#point2seg:after {
+      content: "\f071";
+  font-size: 25px;
+}
+
+#filterSwitch:before {
+    content: "\f002";
+}
+
+#clear-all-files:before {
+    content: "\f00d";
+      font-size: 14px;
+  margin-right: 20px;
+}
+
+#swaplang:after {
+    content: "\f0ec";
+}
 
 
+.review .breadcrumbs #pname:before,
+.cattool .breadcrumbs #pname:before {
+    content: "\f0dd";
+  font-size: 18px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+
+
+.more:before,
+.more.minus:before {
+    margin-right: 7px;
+    vertical-align: middle;
+}
+
+.graysmall:hover .trash:before {
+    content: "\f014"; 
+}
+
+.more:before {
+    content: "\f196";
+}
+
+.cancel button:before,
+.delete button:before {
+    content: "\f014";
+    font-size: 13px;
+      vertical-align: top;
+}
+
+.more.minus:before {
+    content: "\f147";
+}
 .canceladdtmx.btn-grey .text:before {
 	content: "\f00d";
 	padding-right: 8px;
@@ -2896,6 +3114,15 @@ float: right;
 
 }
 
+.x-popup:before {
+    content: "\f057";
+}
+
+.subfile p:before {
+    content: "\ea58";
+    margin-right:5px;
+    color:#555;
+}
 
 .add-tm:before {
 	content: "\f067";
@@ -3040,6 +3267,10 @@ text-align: left;
     content: "\f013";
 }
 
+.icon-make-group:before {
+    content: "\ea58";
+}
+
 .icon-trash-o:before {
     content: "\f014";
 }
@@ -3099,7 +3330,9 @@ text-align: left;
 .icon-compress:before {
     content: "\f066";
 }
-
+.icon-cancel-circle:before {
+    content: "\ea0d";
+}
 .icon-plus:before {
     content: "\f067";
 }
