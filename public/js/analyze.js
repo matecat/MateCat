@@ -46,8 +46,8 @@ UI = {
 		 */
 		$(".part3").click(function(e) {
 			e.preventDefault();
-			$(this).parents('tbody').find(".part3files").removeClass('start');
-//            $(this).parents('tbody').find(".part3files").toggleClass('open');
+            $(this).parents('tbody').find(".part3files").toggleClass('open');
+            $(".loadingbar").removeClass('start');
 		});
 		/*        
 		 $(".split").click(function(e){
@@ -767,7 +767,7 @@ UI = {
 								$('#shortloading').remove();
 								$('#longloading .meter').remove();
 								$('#longloading').show();
-								$('#longloading p').addClass('loaded').html('<span class="complete">Analysis complete</span>').append('<a class="downloadAnalysisReport standardbtn">Download Analysis Report</a>');
+								$('#longloading p').addClass('loaded').html('<span class="complete">Analysis complete</span>').append('<a class="downloadAnalysisReport">Download Analysis Report</a>');
 								}, 1000);
 						/*
 						   setTimeout(function(){

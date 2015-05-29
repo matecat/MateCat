@@ -108,8 +108,13 @@ a:hover{text-decoration:none}
 }
 .downloadAnalysisReport {
     margin-top: -8px !important;
+    text-decoration: underline;
+    cursor: pointer;
 }
-.span.complete {
+.downloadAnalysisReport:hover {
+    text-decoration: underline;
+}
+span.complete {
     margin-right: 30px !important;
 }
 
