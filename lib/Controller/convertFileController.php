@@ -300,10 +300,6 @@ class convertFileController extends ajaxController {
         if ( isset( $xliffPath ) and !empty( $xliffPath ) ) {
             //put reference to cache in upload dir to link cache to session
             $fs->linkSessionToCache( $sha1, $this->source_lang, $_COOKIE[ 'upload_session' ] );
-
-            //temporary stuff is useless, so clean it
-            unlink( $file_path ); //TODO check it is not useful, already moved when we create the cache
-
             //a usable package is available, give positive feedback
             $this->result[ 'code' ] = 1;
         }
