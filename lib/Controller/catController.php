@@ -500,7 +500,7 @@ class catController extends viewController {
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
         $this->template->owner_email         = $this->job_owner;
-        $this->template->ownerIsMe           = ( $this->logged_user[ 'email' ] == $this->job_owner );
+        $this->template->jobOwnerIsMe        = ( $this->logged_user[ 'email' ] == $this->job_owner );
 
         $this->template->isLogged            = $this->isLoggedIn(); // used in template
         $this->template->isAnonymousUser     = var_export( !$this->isLoggedIn() , true );  // used by the client
