@@ -9695,7 +9695,7 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $('body').on('click', 'tr.mine a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
+        $('body').on('click', 'tr.mine a.canceladdtmx, tr.ownergroup a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
             $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
@@ -9778,7 +9778,7 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
-        }).on('click', 'tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
+        }).on('click', 'tr.mine .uploadfile .addtmxfile:not(.disabled), tr.ownergroup .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
             $(this).parents('.uploadfile').find('.error').text('').hide();
 
@@ -9871,7 +9871,7 @@ $.extend(UI, {
             UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
-        }).on('change', 'tr.mine td.uploadfile input[type="file"]', function() {
+        }).on('change', 'tr.mine td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]', function() {
             if(this.files[0].size > config.maxTMXFileSize) {
                 numMb = config.maxTMXFileSize/(1024*1024);
                 APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
@@ -10284,7 +10284,16 @@ $.extend(UI, {
         } else {
             $(table).find('tr.uploadpanel .uploadfile').addClass('uploading');
         }
-        var trClass = (existing)? 'mine' : 'uploadpanel';
+        if(existing) {
+            if($(el).parents('tr').hasClass('mine')) {
+                trClass = 'mine';
+            } else {
+                trClass = 'ownergroup';
+            }
+        } else {
+            trClass = 'uploadpanel';
+        }
+//        var trClass = (existing)? 'mine' : 'uploadpanel';
         form = $(table).find('tr.' + trClass + ' .add-TM-Form')[0];
         path = $(el).parents('.uploadfile').find('input[type="file"]').val();
         file = path.split('\\')[path.split('\\').length-1];
@@ -10372,7 +10381,6 @@ $.extend(UI, {
         iframe.setAttribute("height", "0");
         iframe.setAttribute("border", "0");
         iframe.setAttribute("style", "width: 0; height: 0; border: none;");
-
         // Add to document...
         document.body.appendChild(iframe);
 //        form.parentNode.appendChild(iframe);
@@ -10404,7 +10412,13 @@ $.extend(UI, {
         if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
         if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
         existing = ($(form).hasClass('existing'))? true : false;
-        TMKey = (existing)? $(form).parents('.mine').find('.privatekey').first().text() : $('#new-tm-key').val();
+        if(existing) {
+            TR = $(form).parents('tr');
+            TMKey = TR.find('.privatekey').first().text();
+        } else {
+            TMKey = $('#new-tm-key').val();
+        }
+//        TMKey = (existing)? $(form).parents('.mine').find('.privatekey').first().text() : $('#new-tm-key').val();
 
         // Set properties of form...
         form.setAttribute("target", "upload_iframe");

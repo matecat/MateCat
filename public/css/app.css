@@ -1147,7 +1147,7 @@ font-size: 18px;
 }
 
 #sign-in-o {
-padding: 10px 10px 5px;
+padding: 5px 10px 10px;
 margin: 0 auto;
 width: 200px;
 text-align: center;
@@ -4043,10 +4043,7 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input {
   font-weight: normal;
   border: 0;
-<<<<<<< HEAD
   padding: 5px 10px!important;
-=======
->>>>>>> ab6f35f5d7c689159bd77b594f68f7dbde7fbeaf
   font-size: 17px!important;
   text-align: center;
   width: 130px!important;
@@ -4061,13 +4058,9 @@ box-shadow: 0 1px 2px #ccc;
 .topmenu-drop input.translated, .topmenu-drop input.approved {
 	  width: auto!important;
 	  border-radius: 2px 0 0 2px;
-<<<<<<< HEAD
-  text-transform: uppercase;
-=======
 	    padding: 0 18px!important;
   text-transform: uppercase;
   margin: 0!important
->>>>>>> ab6f35f5d7c689159bd77b594f68f7dbde7fbeaf
 }
 
 
@@ -4092,6 +4085,12 @@ box-shadow: 0 1px 2px #ccc;
 .header-menu .wrapper-dropdown-5 .dropdown {
 	  left: -131px;
   width: 162px;
+}
+
+
+.justdone .header-menu .wrapper-dropdown-5 .dropdown{
+	left: -226px;
+  width: 258px;
 }
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='true'] li.previewLink
