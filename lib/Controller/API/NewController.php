@@ -1,5 +1,7 @@
 <?php
 
+set_time_limit( 180 );
+
 /**
  *
  * Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol

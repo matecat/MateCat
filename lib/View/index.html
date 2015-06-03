@@ -35,7 +35,7 @@
                 target_rfc: '${target_code}',
                 source_lang: '${source}',
                 target_lang: '${target}',
-                ownerIsMe: ${ownerIsMe},
+                ownerIsMe: ${jobOwnerIsMe},
                 isAnonymousUser: ${isAnonymousUser},
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
@@ -407,6 +407,8 @@ $(window).resize(function() {
 
 
     <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
+
+    <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
     </body>
 

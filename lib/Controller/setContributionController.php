@@ -55,6 +55,12 @@ class setContributionController extends ajaxController {
         if ( empty( $this->id_customer ) ) {
             $this->id_customer = "Anonymous";
         }
+
+        //XXX log contributions
+        Log::$fileName = "setContribution.txt";
+        Log::doLog( $this->__postInput );
+        Log::$fileName = "log.txt";
+
     }
 
     public function doAction() {

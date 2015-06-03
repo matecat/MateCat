@@ -1094,9 +1094,11 @@ class CatUtils {
 
         try {
             $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
+            $redisHandler->get(1); //ping established connection
         } catch ( Exception $e ) {
+            $redisHandler = null;
             Log::doLog( $e->getMessage() );
-            Log::doLog( "No Memcache server(s) configured." );
+            Log::doLog( "No Redis server(s) available." );
         }
 
         if ( isset( $redisHandler ) && !empty( $redisHandler ) ) {
