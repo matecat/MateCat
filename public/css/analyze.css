@@ -69,7 +69,7 @@ a:hover{text-decoration:none}
 .tablestats th.tm-100-context, .tablestats td.tm-100-context,
 .tablestats th.mt, .tablestats td.mt {width: 60px;}
 .languages{font-weight:bold;font-size:18px;text-align:left !important; width:35%;}
-.loadingbar.start #shortloading, .loadingbar.start span.complete {
+.loadingbar.start #shortloading {
     display: none;
 }
 

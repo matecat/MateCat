@@ -39,7 +39,7 @@ module.exports = function(grunt) {
 					basePath + 'lib/rangy-core.js',
 					basePath + 'lib/rangy-selectionsaverestore.js',
 					basePath + 'lib/snapengage.js',
-					basePath + 'lib/waypoints.js',
+					basePath + 'lib/waypoints.js'
 				],
 				dest: basePath + 'libs.js'
 			},
@@ -68,7 +68,7 @@ module.exports = function(grunt) {
 				options: {
 					interrupt: true
 				}
-			},
+			}
 		},
 		jshint: {
 			options: {
