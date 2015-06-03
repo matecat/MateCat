@@ -2,6 +2,9 @@ php_value magic_quotes_gpc off
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
+RewriteCond "%{HTTP_HOST}"   "!^www\.matecat\.com" [NC]
+RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
+
 #RewriteCond %{REQUEST_URI} !/offline.html$
 #RewriteCond %{REQUEST_URI} !/public/css/common.css$
 #RewriteCond %{REQUEST_URI} !/public/img/logo.png$

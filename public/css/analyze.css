@@ -327,7 +327,18 @@ table tr.totaltable td.total
 {
 	text-align: right;
 }
-.tablespace td{background:#F0F0F0 !important;padding:0 !important;border-left:0 !Important; border-right:0 !Important;height:0px !Important;line-height:5px !Important}
+.tablespace td{
+	background:#F0F0F0 !important;
+	padding:0 !important;
+	border-bottom: 0!important;
+	border-left:0 !Important; 
+	border-right:0 !Important;height:0px !Important;line-height:5px !Important}
+
+
+tbody:nth-child(3) tr td:not(.empty) {
+  border-top: 1px solid #ccc !important;
+}
+
 .empty{border:0 !Important;background:#F0F0F0 !important;width: 120px;
 }
 
