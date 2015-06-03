@@ -57,13 +57,13 @@
                                 <tbody class="list sortable">
 
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
+                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
                                         <td class="privatekey">${key/key}</td>
-                                        <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
-                                        <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
-                                        <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
-                                        <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
+                                        <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
+                                        <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
+                                        <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r" /></td>
+                                        <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
                                         <td tal:condition="php: key.edit" class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -73,7 +73,7 @@
                                                     </ul>
                                                 </div>
                                         </td>
-                                        <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"></td>
+                                        <td tal:condition="php: !key.edit" class="action"></td>
                                     </tr>
                                 </tal:block>
 
@@ -319,7 +319,7 @@
                                                         <input type="checkbox" checked="checked" />
                                                     </td>
                                                     <td class="action">
-                                                        <a tal:condition="php: engine.id != 1 && ownerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
+                                                        <a tal:condition="php: engine.id != 1 && jobOwnerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
                                                     </td>
                                                 </tr>
                                             </tal:block>
