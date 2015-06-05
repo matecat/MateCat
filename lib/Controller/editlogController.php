@@ -13,6 +13,7 @@ class editlogController extends viewController {
 
     private $job_archived = false;
     private $job_owner_email;
+    private $jobData;
     private $job_stats;
     private $data;
 
@@ -38,7 +39,7 @@ class editlogController extends viewController {
         $this->generateAuthURL();
 
         //pay a little query to avoid to fetch 5000 rows
-        $jobData = getJobData( $this->jid, $this->password );
+        $this->jobData = $jobData = getJobData( $this->jid, $this->password );
 
         $wStruct = new WordCount_Struct();
         $wStruct->setIdJob( $this->jid );
@@ -84,6 +85,7 @@ class editlogController extends viewController {
         $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats    = $this->job_stats;
 
+        $this->template->showDQF = ( INIT::$DQF_ENABLED && !empty( $this->jobData['dqf_key'] ) );
 
         $this->template->build_number = INIT::$BUILD_NUMBER;
         $this->template->extended_user  = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
