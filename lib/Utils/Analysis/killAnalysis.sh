@@ -20,4 +20,4 @@ then
 else
 	echo "tm was not running"
 fi
-
+exit 0;
