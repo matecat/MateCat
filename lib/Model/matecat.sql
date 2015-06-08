@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.35, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: matecat
+-- Host: localhost    Database: matecat_sandbox
 -- ------------------------------------------------------
 -- Server version	5.5.35-0+wheezy1-log
 
@@ -226,6 +226,7 @@ CREATE TABLE `jobs` (
   `revision_stats_terminology_maj` int(11) NOT NULL DEFAULT '0',
   `revision_stats_language_quality_maj` int(11) NOT NULL DEFAULT '0',
   `revision_stats_style_maj` int(11) NOT NULL DEFAULT '0',
+  `dqf_key` varchar(255) DEFAULT NULL,
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
@@ -260,7 +261,9 @@ CREATE TABLE `memory_keys` (
   `deleted` int(11) DEFAULT '0',
   PRIMARY KEY (`uid`,`key_value`),
   KEY `uid_idx` (`uid`) USING BTREE,
-  KEY `key_value_idx` (`key_value`) USING BTREE
+  KEY `key_value_idx` (`key_value`) USING BTREE,
+  KEY `creation_date` (`creation_date`),
+  KEY `update_date` (`update_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -321,6 +324,7 @@ CREATE TABLE `projects` (
   `standard_analysis_wc` double(20,2) DEFAULT '0.00',
   `remote_ip_address` varchar(45) DEFAULT 'UNKNOWN',
   `for_debug` tinyint(4) NOT NULL DEFAULT '0',
+  `pretranslate_100` int(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
@@ -395,6 +399,24 @@ CREATE TABLE `segment_translations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `segment_translations_splits`
+--
+
+DROP TABLE IF EXISTS `segment_translations_splits`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `segment_translations_splits` (
+  `id_segment` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `source_chunk_lengths` varchar(1024) NOT NULL DEFAULT '[]',
+  `target_chunk_lengths` varchar(1024) NOT NULL DEFAULT '{"len":[0],"statuses":["DRAFT"]}',
+  PRIMARY KEY (`id_segment`,`id_job`),
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `id_segment` (`id_segment`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `segments`
 --
 
@@ -445,6 +467,21 @@ CREATE TABLE `segments_comments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Temporary table structure for view `show_clients`
+--
+
+DROP TABLE IF EXISTS `show_clients`;
+/*!50001 DROP VIEW IF EXISTS `show_clients`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `show_clients` (
+  `host_short` tinyint NOT NULL,
+  `users` tinyint NOT NULL,
+  `COUNT(*)` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Table structure for table `translators`
 --
 
@@ -486,31 +523,23 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Current Database: `matecat_analysis`
+-- Final view structure for view `show_clients`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat_analysis` /*!40100 DEFAULT CHARACTER SET latin1 */;
-
-USE `matecat_analysis`;
-
---
--- Table structure for table `segment_translations_analysis_queue`
---
-
-DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segment_translations_analysis_queue` (
-  `id_segment` int(11) NOT NULL,
-  `id_job` int(11) NOT NULL,
-  `locked` int(11) DEFAULT '0',
-  `pid` int(11) DEFAULT NULL,
-  `date_insert` datetime DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `locked` (`locked`) USING BTREE,
-  KEY `pid` (`pid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50001 DROP TABLE IF EXISTS `show_clients`*/;
+/*!50001 DROP VIEW IF EXISTS `show_clients`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`matecat`@`10.3%` SQL SECURITY DEFINER */
+/*!50001 VIEW `show_clients` AS select substring_index(`information_schema`.`processlist`.`HOST`,':',1) AS `host_short`,group_concat(distinct `information_schema`.`processlist`.`USER` separator ',') AS `users`,count(0) AS `COUNT(*)` from `information_schema`.`processlist` group by substring_index(`information_schema`.`processlist`.`HOST`,':',1) order by count(0),substring_index(`information_schema`.`processlist`.`HOST`,':',1) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -521,7 +550,7 @@ CREATE TABLE `segment_translations_analysis_queue` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-03-31 20:37:52
+-- Dump completed on 2015-06-05 18:43:05
 CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
 GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
 FLUSH PRIVILEGES;
