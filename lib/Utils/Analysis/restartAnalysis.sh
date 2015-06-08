@@ -1,6 +1,6 @@
 #!/bin/bash
-DIR=$( cd "$( dirname '${BASH_SOURCE[0]}' )" && pwd )
-cd $DIR/daemons
+DIR=$( cd "$( dirname "$0")"; pwd )
+cd $DIR
 /bin/bash killAnalysis.sh
 
 echo "Wait 10 seconds to daemons to die."
