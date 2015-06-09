@@ -1230,6 +1230,7 @@ class ProjectManager {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
                             $tempSeg = strip_tags( $seg_source[ 'raw-content' ] );
+                            $tempSeg = preg_replace( '#\p{P}+#u', "", $tempSeg );
                             $tempSeg = trim( $tempSeg );
 
                             //init tags
@@ -1301,11 +1302,11 @@ class ProjectManager {
                     } else {
 
                         $tempSeg = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+                        $tempSeg = preg_replace( '#\p{P}+#u', "", $tempSeg );
                         $tempSeg = trim( $tempSeg );
-//                        $tempSeg = CatUtils::placeholdnbsp( $tempSeg );
                         $prec_tags = null;
                         $succ_tags = null;
-                        if ( empty( $tempSeg ) ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
+                        if ( is_null( $tempSeg ) || $tempSeg === '' ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
                             $show_in_cattool = 0;
                         } else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
