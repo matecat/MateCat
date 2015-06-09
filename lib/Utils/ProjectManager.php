@@ -366,6 +366,7 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -1, "message" => "No text to translate in the file $fileName."
                     );
+                    $fs->deleteHashFromUploadDir( $uploadDir, $linkFile );
                 } elseif ( $e->getCode() == -2 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store segments in database for $fileName"

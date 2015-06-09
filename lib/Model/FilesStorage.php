@@ -149,6 +149,23 @@ class FilesStorage {
         return touch( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
     }
 
+    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ){
+        list( $shasum, $srcLang ) = explode( "|", $linkFile );
+
+        $iterator = new DirectoryIterator( $uploadDirPath );
+
+        foreach ( $iterator as $fileInfo ) {
+            if ( $fileInfo->isDot() || $fileInfo->isDir() ) {
+                continue;
+            }
+            if ( stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
+                unlink( $fileInfo->getPathname() );
+                Log::doLog( "Deleted Hash " . $fileInfo->getPathname() );
+            }
+        }
+
+    }
+
     public function moveFromCacheToFileDir( $hash, $lang, $idFile ) {
 
         //destination dir
