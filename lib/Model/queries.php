@@ -440,14 +440,14 @@ function tryInsertUserFromOAuth( $data ) {
         $results = insertUser( $data );
         //check outcome
         if ( $results ) {
-            $cid['email'] = $data[ 'email' ];
-            $cid['uid'] = $results;
+            $cid[ 'email' ] = $data[ 'email' ];
+            $cid[ 'uid' ]   = $results;
         } else {
             $cid = false;
         }
     } else {
-        $cid['email'] = $data[ 'email' ];
-        $cid['uid'] = $results[ 'uid' ];
+        $cid[ 'email' ] = $data[ 'email' ];
+        $cid[ 'uid' ]   = $results[ 'uid' ];
     }
 
     return $cid;
@@ -545,7 +545,7 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $query = "UPDATE jobs SET tm_keys = '%s' WHERE id = %d AND password = '%s'";
 
     $db = Database::obtain();
-    $db->query( sprintf( $query, $db->escape($tmKeysString), (int)$job_id, $job_password ) );
+    $db->query( sprintf( $query, $db->escape( $tmKeysString ), (int)$job_id, $job_password ) );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
@@ -659,9 +659,9 @@ function getEngines( $type = "MT" ) {
  *
  * @return array
  */
-function getTranslationsForTMXExport( $jid, $jPassword ){
+function getTranslationsForTMXExport( $jid, $jPassword ) {
 
-    $db = Database::obtain();
+    $db        = Database::obtain();
     $jPassword = $db->escape( $jPassword );
 
     $sql = "
@@ -671,21 +671,22 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
 
         JOIN files ON segments.id_file = files.id
 
-        JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) ."'
+        JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
             WHERE segment_translations.id_job = " . (int)$jid . "
-            AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '".Constants_TranslationStatus::STATUS_APPROVED."')
+            AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '" . Constants_TranslationStatus::STATUS_APPROVED . "')
             AND show_in_cattool = 1
 ";
 
 
     $results = $db->fetch_array( $sql );
 
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
         Log::doLog( $err );
+
         return $errno * -1;
     }
 
@@ -693,18 +694,18 @@ function getTranslationsForTMXExport( $jid, $jPassword ){
 
 }
 
-function getMTForTMXExport($jid, $jPassword){
+function getMTForTMXExport( $jid, $jPassword ) {
     //TODO: delete this function and put it in a DAO
-    $db = Database::obtain();
+    $db        = Database::obtain();
     $jPassword = $db->escape( $jPassword );
 
     $sql = "
         SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
         IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
-            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+            Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date
         FROM segment_translations st
         JOIN segments ON id = id_segment
-        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
             WHERE st.id_job = " . (int)$jid . "
             AND show_in_cattool = 1
@@ -713,29 +714,30 @@ function getMTForTMXExport($jid, $jPassword){
 
     $results = $db->fetch_array( $sql );
 
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
         Log::doLog( $err );
+
         return $errno * -1;
     }
 
     return $results;
 }
 
-function getTMForTMXExport($jid, $jPassword){
+function getTMForTMXExport( $jid, $jPassword ) {
     //TODO: delete this function and put it in a DAO
-    $db = Database::obtain();
+    $db        = Database::obtain();
     $jPassword = $db->escape( $jPassword );
 
     $sql = "
         SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
         IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
-            Constants_TranslationStatus::STATUS_APPROVED."'), translation_date, j.create_date ) as translation_date
+            Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date
         FROM segment_translations st
         JOIN segments ON id = id_segment
-        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) ."'
+        JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
             WHERE st.id_job = " . (int)$jid . "
             AND show_in_cattool = 1
@@ -746,11 +748,12 @@ function getTMForTMXExport($jid, $jPassword){
 
     $results = $db->fetch_array( $sql );
 
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
         Log::doLog( $err );
+
         return $errno * -1;
     }
 
@@ -1274,7 +1277,7 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'standard_word_count' ] = $standard_words;
     $data[ 'translation' ]         = $translation;
     $data[ 'tm_analysis_status' ]  = $tm_status_analysis;
-    $data[ 'status' ]  = $segment_status;
+    $data[ 'status' ]              = $segment_status;
 
     $data[ 'warning' ]                = $warning;
     $data[ 'serialized_errors_list' ] = $err_json_list;
@@ -1316,38 +1319,6 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     return $db->affected_rows;
 }
 
-function getFilesForJob( $id_job, $id_file ) {
-    $where_id_file = "";
-
-    if ( !empty( $id_file ) ) {
-        $where_id_file = " and id_file=$id_file";
-    }
-
-    $query = "select id_file, xliff_file, original_file, filename,mime_type from files_job fj
-		inner join files f on f.id=fj.id_file
-		where id_job = $id_job $where_id_file";
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-function getOriginalFilesForJob( $id_job, $id_file, $password ) {
-    $where_id_file = "";
-    if ( !empty( $id_file ) ) {
-        $where_id_file = " and id_file=$id_file";
-    }
-    $query = "select id_file, if(original_file is null, xliff_file,original_file) as original_file, filename from files_job fj
-		inner join files f on f.id=fj.id_file
-		inner join jobs j on j.id=fj.id_job
-		where id_job=$id_job $where_id_file and j.password='$password'";
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
 
 function getCurrentTranslation( $id_job, $id_segment ) {
 
@@ -1585,18 +1556,18 @@ function getEditLog( $jid, $pass ) {
  */
 function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = false ) {
 
-    $db      = Database::obtain();
+    $db = Database::obtain();
 
-    $jid      = (int)$jid;
-    $sid      = (int)$sid;
+    $jid = (int)$jid;
+    $sid = (int)$sid;
 
     $and_password = '';
-    if( !empty( $password ) ){
-        $password = $db->escape( $password );
+    if ( !empty( $password ) ) {
+        $password     = $db->escape( $password );
         $and_password = "AND jobs.password = '$password'";
     }
 
-    if( !$getTranslatedInstead ){
+    if ( !$getTranslatedInstead ) {
         $translationStatus = " ( st.status IN (
                 '" . Constants_TranslationStatus::STATUS_NEW . "',
                 '" . Constants_TranslationStatus::STATUS_DRAFT . "',
@@ -1636,24 +1607,26 @@ function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = fal
  * @return null
  */
 
-function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STATUS_NEW ){
+function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STATUS_NEW ) {
 
     $statusWeight = array(
-        Constants_TranslationStatus::STATUS_NEW        => 10,
-        Constants_TranslationStatus::STATUS_DRAFT      => 10,
-        Constants_TranslationStatus::STATUS_REJECTED   => 10,
-        Constants_TranslationStatus::STATUS_TRANSLATED => 40,
-        Constants_TranslationStatus::STATUS_APPROVED   => 50
+            Constants_TranslationStatus::STATUS_NEW        => 10,
+            Constants_TranslationStatus::STATUS_DRAFT      => 10,
+            Constants_TranslationStatus::STATUS_REJECTED   => 10,
+            Constants_TranslationStatus::STATUS_TRANSLATED => 40,
+            Constants_TranslationStatus::STATUS_APPROVED   => 50
     );
 
     $nSegment = null;
     if ( isset( $results[ 0 ][ 'id' ] ) ) {
         //if there are results check for next id,
         //otherwise get the first one in the list
-        $nSegment = $results[ 0 ]['id'];
+        $nSegment = $results[ 0 ][ 'id' ];
         foreach ( $results as $seg ) {
-            if( $seg['status'] == null ) $seg['status'] = Constants_TranslationStatus::STATUS_NEW;
-            if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg['status'] ] == $statusWeight[ $status ] ) {
+            if ( $seg[ 'status' ] == null ) {
+                $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+            }
+            if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
                 $nSegment = $seg[ 'id' ];
                 break;
             }
@@ -1708,8 +1681,8 @@ function insertTranslator( ArrayObject $projectStructure ) {
     //if this user already exists, return without inserting again ( do nothing )
     //this is because we allow to start a project with the bare key
 
-    $private_tm_key = ( is_array($projectStructure[ 'private_tm_key' ] ) ) ?
-            $projectStructure[ 'private_tm_key' ][0]['key'] :
+    $private_tm_key = ( is_array( $projectStructure[ 'private_tm_key' ] ) ) ?
+            $projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] :
             $projectStructure[ 'private_tm_key' ];
 
     $query   = "SELECT username FROM translators WHERE mymemory_api_key='" . $db->escape( $private_tm_key ) . "'";
@@ -1763,65 +1736,14 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFileIntoMap( $sha1, $source, $target, $deflated_file, $deflated_xliff, $segmentation_rule ) {
-    $db                          = Database::obtain();
-    $data                        = array();
-    $data[ 'sha1' ]              = $sha1;
-    $data[ 'source' ]            = $source;
-    $data[ 'target' ]            = $target;
-    $data[ 'deflated_file' ]     = $deflated_file;
-    $data[ 'deflated_xliff' ]    = $deflated_xliff;
-    $data[ 'creation_date' ]     = date( "Y-m-d" );
-    $data[ 'segmentation_rule' ] = $segmentation_rule;
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $sha1_original ) {
+    $data                         = array();
+    $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
+    $data[ 'filename' ]           = $file_name;
+    $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
+    $data[ 'mime_type' ]          = $mime_type;
+    $data[ 'sha1_original_file' ] = $sha1_original;
 
-    $db->insert( 'original_files_map', $data );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 and $errno != 1062 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    return 1;
-}
-
-function getXliffBySHA1( $sha1, $source, $target, $not_older_than_days = 0, $segmentation_rule ) {
-    $db                  = Database::obtain();
-    $where_creation_date = "";
-    if ( $not_older_than_days != 0 ) {
-        $where_creation_date = " AND creation_date > DATE_SUB(NOW(), INTERVAL $not_older_than_days DAY)";
-    }
-    $query = "select deflated_xliff from original_files_map where sha1='$sha1' and source='$source' and target ='$target' and segmentation_rule='$segmentation_rule' $where_creation_date";
-    $res   = $db->query_first( $query );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    return $res[ 'deflated_xliff' ];
-}
-
-//function insertFile( $id_project, $file_name, $source_language, $mime_type, $contents, $sha1_original = null, $original_file = null ) {
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $contents, $sha1_original = null, $original_file = null ) {
-    $data                      = array();
-    $data[ 'id_project' ]      = $projectStructure[ 'id_project' ];
-    $data[ 'filename' ]        = $file_name;
-    $data[ 'source_language' ] = $projectStructure[ 'source_language' ];
-    $data[ 'mime_type' ]       = $mime_type;
-    $data[ 'xliff_file' ]      = $contents;
-    if ( !is_null( $sha1_original ) ) {
-        $data[ 'sha1_original_file' ] = $sha1_original;
-    }
-
-    if ( !is_null( $original_file ) and !empty( $original_file ) ) {
-        $data[ 'original_file' ] = $original_file;
-    }
-
-    $query = "SELECT LAST_INSERT_ID() FROM files";
 
     $db = Database::obtain();
 
@@ -1831,30 +1753,18 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $con
     if ( $errno == 1153 ) {
         Log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
 
-        $maxp = $db->query_first( 'SELECT @@global.max_allowed_packet' );
-        Log::doLog( "max_allowed_packet: " . $maxp . " > try Upgrade to 500MB" );
-        // to set the max_allowed_packet to 500MB
-        //FIXME User matecat has no superuser privileges
-        //ERROR 1227 (42000): Access denied; you need (at least one of) the SUPER privilege(s) for this operation
-        $db->query( 'SET @@global.max_allowed_packet = ' . 500 * 1024 * 1024 );
-        $db->insert( 'files', $data );
-
-        $err   = $db->get_error();
-        $errno = $err[ 'error_code' ];
-
-        $db->query( 'SET @@global.max_allowed_packet = ' . 32 * 1024 * 1024 ); //restore to 32 MB
-
-        if ( $errno > 0 ) {
-            throw new Exception( "Database insert Large file error: $errno ", -$errno );
-        }
-    } elseif ( $errno > 0 ) {
-        Log::doLog( "Database insert Large file error: $errno " );
         throw new Exception( "Database insert Large file error: $errno ", -$errno );
+    } elseif ( $errno > 0 ) {
+        Log::doLog( "Database insert error: $errno " );
+        throw new Exception( "Database insert file error: $errno ", -$errno );
     }
 
+    $query   = "SELECT LAST_INSERT_ID() FROM files";
     $results = $db->query_first( $query );
 
-    return $results[ 'LAST_INSERT_ID()' ];
+    $idFile = $results[ 'LAST_INSERT_ID()' ];
+
+    return $idFile;
 }
 
 function insertFilesJob( $id_job, $id_file ) {
@@ -2081,20 +1991,18 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
 
     $query = sprintf( $projectsQuery, $where_query, $start, $step );
 
-//    Log::doLog( $query );
+    //    Log::doLog( $query );
 
     $db = Database::obtain();
-//    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
+    //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
     $results = $db->fetch_array( $query );
 
-//    Log::doLog( $results );
+    //    Log::doLog( $results );
     return $results;
 }
 
 
-
-
-function getJobsFromProjects(array $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted) {
+function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted ) {
 
     $jobs_filter_query = array();
 
@@ -2151,13 +2059,13 @@ function getJobsFromProjects(array $projectIDs, $search_source, $search_target, 
 
     $query = sprintf( $jobsQuery, $ids, $where_query );
 
-//    Log::doLog( $query );
+    //    Log::doLog( $query );
 
     $db = Database::obtain();
-//    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
+    //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
     $results = $db->fetch_array( $query );
 
-//    Log::doLog( $results );
+    //    Log::doLog( $results );
     return $results;
 }
 
@@ -2206,7 +2114,7 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 		left join translators t on j.id_translator=t.username
 		$jobs_filter_query";
 
-//    Log::doLog($query);
+    //    Log::doLog($query);
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -2410,7 +2318,7 @@ function updateWordCount( WordCount_Struct $wStruct ) {
 
     $db->query( $query );
 
-//	Log::doLog( $query . "\n" );
+    //	Log::doLog( $query . "\n" );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
@@ -2543,8 +2451,8 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
             //help!!!
             foreach ( $arStatus as $item ) {
                 $ss = explode( ':', $item );
-                $cases .= " when id=" . $db->escape( $ss[0] ) . " then '" . $db->escape( $ss[1] ) . "'";
-                $ids .= $db->escape( $ss[0] ) . ",";
+                $cases .= " when id=" . $db->escape( $ss[ 0 ] ) . " then '" . $db->escape( $ss[ 1 ] ) . "'";
+                $ids .= $db->escape( $ss[ 0 ] ) . ",";
             }
             $ids   = trim( $ids, ',' );
             $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
@@ -2560,19 +2468,19 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
             // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
             //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
             $select_max_id = "
-                    SELECT max(id_segment) as id_segment
-					    FROM segment_translations
-						JOIN jobs ON id_job = id
-						WHERE id_project = " . (int)$id;
+				SELECT max(id_segment) as id_segment
+				FROM segment_translations
+				JOIN jobs ON id_job = id
+				WHERE id_project = " . (int)$id;
 
             $_id_segment = $db->fetch_array( $select_max_id );
             $_id_segment = array_pop( $_id_segment );
             $id_segment  = $_id_segment[ 'id_segment' ];
 
             $query_for_translations = "
-                UPDATE segment_translations
-                    SET translation_date = NOW()
-                WHERE id_segment = $id_segment";
+				UPDATE segment_translations
+				SET translation_date = NOW()
+				WHERE id_segment = $id_segment";
 
             $db->query( $query_for_translations );
         }
@@ -2582,20 +2490,20 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
         $db->query( $query );
 
         $select_max_id = "
-                    SELECT max(id_segment) as id_segment
-					    FROM segment_translations
-						JOIN jobs ON id_job = id
-						WHERE id = $id
-						 AND password = '" . $db->escape( $jPassword ) . "'";
+			SELECT max(id_segment) as id_segment
+			FROM segment_translations
+			JOIN jobs ON id_job = id
+			WHERE id = $id
+			AND password = '" . $db->escape( $jPassword ) . "'";
 
         $_id_segment = $db->fetch_array( $select_max_id );
         $_id_segment = array_pop( $_id_segment );
         $id_segment  = $_id_segment[ 'id_segment' ];
 
         $query_for_translations = "
-                UPDATE segment_translations
-                    SET translation_date = NOW()
-                WHERE id_segment = $id_segment";
+			UPDATE segment_translations
+			SET translation_date = NOW()
+			WHERE id_segment = $id_segment";
 
         $db->query( $query_for_translations );
     }

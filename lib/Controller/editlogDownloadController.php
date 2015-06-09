@@ -21,7 +21,7 @@ class editlogDownloadController extends downloadController {
 
         $this->jid      = $__postInput[ "jid" ];
         $this->password = $__postInput[ "password" ];
-        $this->filename = "Edit-log-export-" . $this->jid . ".csv";
+        $this->_filename = "Edit-log-export-" . $this->jid . ".csv";
 
     }
 

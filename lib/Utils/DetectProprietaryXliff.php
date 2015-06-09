@@ -151,4 +151,52 @@ class DetectProprietaryXliff {
 
 	}
 
+	public static function isConversionToEnforce($fullPath){
+		$isAConvertedFile = true;
+
+		$fileType = self::getInfo($fullPath);
+
+		if ( self::isXliffExtension() ) {
+
+			if ( INIT::$CONVERSION_ENABLED ) {
+
+				//conversion enforce
+				if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
+
+					//ONLY IDIOM is forced to be converted
+					//if file is not proprietary like idiom AND Enforce is disabled
+					//we take it as is
+					if ( !$fileType[ 'proprietary' ] ) {
+						$isAConvertedFile = false;
+						//ok don't convert a standard sdlxliff
+					}
+				}
+				else {
+					//if conversion enforce is active
+					//we force all xliff files but not files produced by SDL Studio because we can handle them
+					if ( $fileType[ 'proprietary_short_name' ] == 'trados' ) {
+						$isAConvertedFile = false;
+						//ok don't convert a standard sdlxliff
+					}
+				}
+			}
+			elseif ( $fileType[ 'proprietary' ] ) {
+
+				/**
+				 * Application misconfiguration.
+				 * upload should not be happened, but if we are here, raise an error.
+				 * @see upload.class.php
+				 * */
+
+				$isAConvertedFile =-1;
+				//stop execution
+			}
+			elseif ( !$fileType[ 'proprietary' ] ) {
+				$isAConvertedFile = false;
+				//ok don't convert a standard sdlxliff
+			}
+		}
+		return $isAConvertedFile;
+	}
+
 }

@@ -10,7 +10,7 @@
 abstract class downloadController extends controller {
 
     protected $content = "";
-    protected $filename = "unknown";
+    protected $_filename = "unknown";
 
     protected function unlockToken(){
 
@@ -37,7 +37,7 @@ abstract class downloadController extends controller {
             header("Content-Type: application/force-download");
             header("Content-Type: application/octet-stream");
             header("Content-Type: application/download");
-            header("Content-Disposition: attachment; filename=\"$this->filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
+            header("Content-Disposition: attachment; filename=\"$this->_filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
             header("Expires: 0");
             header("Connection: close");
             echo $this->content;

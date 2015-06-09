@@ -1,43 +1,15 @@
 <?php
 
 set_time_limit( 180 );
-include_once( INIT::$UTILS_ROOT . '/XliffSAXTranslationReplacer.class.php' );
 
 class downloadFileController extends downloadController {
 
-    /**
-     * @var string
-     */
     protected $id_job;
-
-    /**
-     * @var
-     */
     protected $password;
-
-    /**
-     * @var
-     */
     protected $fname;
-
-    /**
-     * @var
-     */
     protected $download_type;
-
-    /**
-     * @var
-     */
     protected $jobInfo;
-
-    /**
-     * @var bool
-     */
     protected $forceXliff;
-
-    /**
-     * @var
-     */
     protected $downloadToken;
 
     const FILES_CHUNK_SIZE = 3;
@@ -76,7 +48,7 @@ class downloadFileController extends downloadController {
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
-        $this->filename   = $this->fname;
+
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
 
         if ( empty( $this->id_job ) ) {
@@ -105,20 +77,22 @@ class downloadFileController extends downloadController {
         }
 
         $debug[ 'get_file' ][ ] = time();
-        $files_job              = getFilesForJob( $this->id_job, $this->id_file );
+
+        //get storage object
+        $fs        = new FilesStorage();
+        $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
+
         $debug[ 'get_file' ][ ] = time();
         $nonew                  = 0;
         $output_content         = array();
 
         /*
-         * the procedure is now as follows:
-         * 1)original file is loaded from DB into RAM and the flushed in a temp file on disk; a file handler is obtained
-         * 2)RAM gets freed from original content
-         * 3)the file is read chunk by chunk by a stream parser: for each tran-unit that is encountered,
-         *     target is replaced (or added) with the corresponding translation among segments
-         *     the current string in the buffer is flushed on standard output
-         * 4)the temporary file is deleted by another process after some time
-         *
+           the procedure:
+           1)original xliff file is read directly from disk; a file handler is obtained
+           2)the file is read chunk by chunk by a stream parser: for each trans-unit that is encountered, target is replaced (or added) with the corresponding translation obtained from the DB
+           3)the parsed portion of xliff in the buffer is flushed on temporary file
+           4)the temporary file is sent to the converter and an original file is obtained
+           5)the temporary file is deleted
          */
 
         //file array is chuncked. Each chunk will be used for a parallel conversion request.
@@ -134,51 +108,40 @@ class downloadFileController extends downloadController {
                 $mime_type        = $file[ 'mime_type' ];
                 $fileID           = $file[ 'id_file' ];
                 $current_filename = $file[ 'filename' ];
-                $original_xliff   = $file[ 'xliff_file' ];
 
-                //get path
-                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.sdlxliff';
+                //get path for the output file
+                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.out.xlf';
 
                 //make dir if doesn't exist
-                if ( !file_exists( dirname( $path ) ) ) {
+                if ( !file_exists( dirname( $outputPath ) ) ) {
 
-                    Log::doLog( 'exec ("chmod 666 ' . escapeshellarg( $path ) . '");' );
-                    mkdir( dirname( $path ), 0777, true );
-                    exec( "chmod 666 " . escapeshellarg( $path ) );
+                    Log::doLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) . '' );
+                    mkdir( dirname( $outputPath ), 0775, true );
 
                 }
-
-                //create file
-                $fp = fopen( $path, 'w+' );
-
-                //flush file to disk
-                fwrite( $fp, $original_xliff );
-
-                //free memory, as we can work with file on disk now
-                unset( $original_xliff );
-
 
                 $debug[ 'get_segments' ][ ] = time();
                 $data                       = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
                 $debug[ 'get_segments' ][ ] = time();
 
-                //create a secondary indexing mechanism on segments' array; this will be useful
-                //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
-                //clean also not valid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
+                //prepare regexp for nest step
                 $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
-
-                //remove binary chars in some xliff files
-                $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
+                $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
                 foreach ( $data as $i => $k ) {
+                    //create a secondary indexing mechanism on segments' array; this will be useful
+                    //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
                     $data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
+
                     //FIXME: temporary patch
                     $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
                     $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
 
+                    //remove binary chars in some xliff files
                     $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
                     $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
 
+                    //clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
                     $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
                     $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
                     if ( $sanitized_src != null ) {
@@ -193,7 +156,7 @@ class downloadFileController extends downloadController {
                 $debug[ 'replace' ][ ] = time();
 
                 //instatiate parser
-                $xsp = new XliffSAXTranslationReplacer( $path, $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $fp );
+                $xsp = new XliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
 
                 if ( $this->download_type == 'omegat' ) {
                     $xsp->setSourceInTarget( true );
@@ -202,41 +165,35 @@ class downloadFileController extends downloadController {
                 //run parsing
                 Log::doLog( "work on " . $fileID . " " . $current_filename );
                 $xsp->replaceTranslation();
-                fclose( $fp );
+
+                //free memory
                 unset( $xsp );
+                unset( $data );
 
                 $debug[ 'replace' ][ ] = time();
 
-                $output_xliff = file_get_contents( $path . '.out.sdlxliff' );
-
-                $output_content[ $fileID ][ 'documentContent' ] = $output_xliff;
+                $output_content[ $fileID ][ 'documentContent' ] = file_get_contents( $outputPath );
                 $output_content[ $fileID ][ 'filename' ]        = $current_filename;
-                unset( $output_xliff );
 
                 if ( $this->forceXliff ) {
                     $file_info_details                       = pathinfo( $output_content[ $fileID ][ 'filename' ] );
-                    $output_content[ $fileID ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
+                    $output_content[ $fileID ][ 'filename' ] = basename( $outputPath );
                 }
 
-                //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
-                //TODO so we can load from database the original file blob ONLY when needed
                 /**
                  * Conversion Enforce
                  */
                 $convertBackToOriginal = true;
                 try {
 
-                    //if it is a not converted file ( sdlxliff ) we have an empty field original_file
-                    //so we can simplify all the logic with:
-                    // is empty original_file? if it is, we don't need conversion back because
-                    // we already have an sdlxliff or an accepted file
-                    $file[ 'original_file' ] = @gzinflate( $file[ 'original_file' ] );
 
-                    if ( !INIT::$CONVERSION_ENABLED || ( empty( $file[ 'original_file' ] ) && $mime_type == 'sdlxliff' ) || $this->forceXliff ) {
+                    //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
+                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+
+                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $mime_type == 'sdlxliff' ) or $this->forceXliff ) {
                         $convertBackToOriginal = false;
                         Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                    }
-                    else {
+                    } else {
                         //TODO: dos2unix ??? why??
                         //force unix type files
                         Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
@@ -249,13 +206,13 @@ class downloadFileController extends downloadController {
 
                 if ( $convertBackToOriginal ) {
 
-                    $output_content[ $fileID ][ 'out_xliff_name' ] = $path . '.out.sdlxliff';
+                    $output_content[ $fileID ][ 'out_xliff_name' ] = $outputPath;
                     $output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
                     $output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
 
                     $files_buffer [ $fileID ] = $output_content[ $fileID ];
 
-                } elseif( $this->forceXliff ) {
+                } elseif ( $this->forceXliff ) {
 
                     $this->cleanFilePath( $output_content[ $fileID ][ 'documentContent' ] );
 
@@ -268,7 +225,7 @@ class downloadFileController extends downloadController {
 
             foreach ( array_keys( $files_buffer ) as $fileID ) {
 
-                $output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
+                $output_content[ $fileID ][ 'documentContent' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
 
                 //in case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
@@ -295,12 +252,13 @@ class downloadFileController extends downloadController {
         }
 
         //set the file Name
-        $pathinfo       = pathinfo( $this->fname );
-        $this->filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
+        $pathinfo        = pathinfo( $this->fname );
+        $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
         //qui prodest to check download type?
         if ( $this->download_type == 'omegat' ) {
-            $this->filename .= ".zip";
+
+            $this->_filename .= ".zip";
 
             $tmsService = new TMSService();
             $tmsService->setOutputType( 'tm' );
@@ -338,25 +296,25 @@ class downloadFileController extends downloadController {
             }
 
             $this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
-        }
-        else if ( count( $output_content ) > 1 ) {
 
-            if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                if ( $this->forceXliff ) {
-                    $this->filename = $this->id_job . ".zip";
+        } else {
+            if ( count( $output_content ) > 1 ) {
+
+                if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                    if ( $this->forceXliff ) {
+                        $this->_filename = $this->id_job . ".zip";
+                    } else {
+                        $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                    }
                 }
-                else {
-                    $this->filename = $pathinfo[ 'basename' ] . ".zip";
-                }
+
+                $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
+
+            } else {
+                //always an array with 1 element, pop it, Ex: array( array() )
+                $output_content = array_pop( $output_content );
+                $this->setContent( $output_content );
             }
-
-            $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
-
-        }
-        else {
-            //always an array with 1 element, pop it, Ex: array( array() )
-            $output_content = array_pop( $output_content );
-            $this->setContent( $output_content );
         }
 
         $debug[ 'total' ][ ] = time();
@@ -367,8 +325,8 @@ class downloadFileController extends downloadController {
 
     protected function setContent( $output_content ) {
 
-        $this->filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
-        $this->content  = $output_content[ 'documentContent' ];
+        $this->_filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
+        $this->content   = $output_content[ 'documentContent' ];
 
     }
 
@@ -456,7 +414,7 @@ class downloadFileController extends downloadController {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
             $fName = str_replace( '._', ".", $fName );
-            $fName = str_replace(".out.sdlxliff", ".sdlxliff", $fName);
+            $fName = str_replace( ".out.sdlxliff", ".sdlxliff", $fName );
 
             $nFinfo = pathinfo( $fName );
             $_name  = $nFinfo[ 'filename' ];
@@ -472,8 +430,7 @@ class downloadFileController extends downloadController {
 
             if ( substr( $key, 0, 2 ) == 'tm' || substr( $key, 0, 2 ) == 'mt' ) {
                 $path = $zip_tm_mt_Dir;
-            }
-            else {
+            } else {
                 $path = $zip_fileDir;
             }
 
@@ -497,67 +454,65 @@ class downloadFileController extends downloadController {
         $target           = strtoupper( $target );
         $defaultTokenizer = "LuceneEnglishTokenizer";
 
-        $omegatFile = <<<FOO
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<omegat>
-    <project version="1.0">
-        <source_dir>inbox</source_dir>
-        <source_dir_excludes>
-            <mask>**/.svn/**</mask>
-            <mask>**/CSV/**</mask>
-            <mask>**/.cvs/**</mask>
-            <mask>**/desktop.ini</mask>
-            <mask>**/Thumbs.db</mask>
-        </source_dir_excludes>
-        <target_dir>__DEFAULT__</target_dir>
-        <tm_dir>__DEFAULT__</tm_dir>
-        <glossary_dir>terminology</glossary_dir>
-        <glossary_file>terminology/new-glossary.txt</glossary_file>
-        <dictionary_dir>__DEFAULT__</dictionary_dir>
-        <source_lang>@@@SOURCE@@@</source_lang>
-        <target_lang>@@@TARGET@@@</target_lang>
-        <source_tok>org.omegat.tokenizer.@@@TOK_SOURCE@@@</source_tok>
-        <target_tok>org.omegat.tokenizer.@@@TOK_TARGET@@@</target_tok>
-        <sentence_seg>false</sentence_seg>
-        <support_default_translations>true</support_default_translations>
-        <remove_tags>false</remove_tags>
-    </project>
-</omegat>
-FOO;
+        $omegatFile = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+			<omegat>
+			<project version="1.0">
+			<source_dir>inbox</source_dir>
+			<source_dir_excludes>
+			<mask>**/.svn/**</mask>
+			<mask>**/CSV/**</mask>
+			<mask>**/.cvs/**</mask>
+			<mask>**/desktop.ini</mask>
+			<mask>**/Thumbs.db</mask>
+			</source_dir_excludes>
+			<target_dir>__DEFAULT__</target_dir>
+			<tm_dir>__DEFAULT__</tm_dir>
+			<glossary_dir>terminology</glossary_dir>
+			<glossary_file>terminology/new-glossary.txt</glossary_file>
+			<dictionary_dir>__DEFAULT__</dictionary_dir>
+			<source_lang>@@@SOURCE@@@</source_lang>
+			<target_lang>@@@TARGET@@@</target_lang>
+			<source_tok>org.omegat.tokenizer.@@@TOK_SOURCE@@@</source_tok>
+			<target_tok>org.omegat.tokenizer.@@@TOK_TARGET@@@</target_tok>
+			<sentence_seg>false</sentence_seg>
+			<support_default_translations>true</support_default_translations>
+			<remove_tags>false</remove_tags>
+			</project>
+			</omegat>';
 
         $omegatTokenizerMap = array(
-                "AR"           => "LuceneArabicTokenizer",
-                "HY"           => "LuceneArmenianTokenizer",
-                "EU"           => "LuceneBasqueTokenizer",
-                "BG"           => "LuceneBulgarianTokenizer",
-                "CA"           => "LuceneCatalanTokenizer",
-                "ZH"           => "LuceneSmartChineseTokenizer",
-                "CZ"           => "LuceneCzechTokenizer",
-                "DK"           => "LuceneDanishTokenizer",
-                "NL"           => "LuceneDutchTokenizer",
-                "EN"           => "LuceneEnglishTokenizer",
-                "FI"           => "LuceneFinnishTokenizer",
-                "FR"           => "LuceneFrenchTokenizer",
-                "GL"           => "LuceneGalicianTokenizer",
-                "DE"           => "LuceneGermanTokenizer",
-                "GR"           => "LuceneGreekTokenizer",
-                "IN"           => "LuceneHindiTokenizer",
-                "HU"           => "LuceneHungarianTokenizer",
-                "ID"           => "LuceneIndonesianTokenizer",
-                "IE"           => "LuceneIrishTokenizer",
-                "IT"           => "LuceneItalianTokenizer",
-                "JA"           => "LuceneJapaneseTokenizer",
-                "KO"           => "LuceneKoreanTokenizer",
-                "LV"           => "LuceneLatvianTokenizer",
-                "NO"           => "LuceneNorwegianTokenizer",
-                "FA"           => "LucenePersianTokenizer",
-                "PT"           => "LucenePortugueseTokenizer",
-                "RO"           => "LuceneRomanianTokenizer",
-                "RU"           => "LuceneRussianTokenizer",
-                "ES"           => "LuceneSpanishTokenizer",
-                "SE"           => "LuceneSwedishTokenizer",
-                "TH"           => "LuceneThaiTokenizer",
-                "TR"           => "LuceneTurkishTokenizer"
+                "AR" => "LuceneArabicTokenizer",
+                "HY" => "LuceneArmenianTokenizer",
+                "EU" => "LuceneBasqueTokenizer",
+                "BG" => "LuceneBulgarianTokenizer",
+                "CA" => "LuceneCatalanTokenizer",
+                "ZH" => "LuceneSmartChineseTokenizer",
+                "CZ" => "LuceneCzechTokenizer",
+                "DK" => "LuceneDanishTokenizer",
+                "NL" => "LuceneDutchTokenizer",
+                "EN" => "LuceneEnglishTokenizer",
+                "FI" => "LuceneFinnishTokenizer",
+                "FR" => "LuceneFrenchTokenizer",
+                "GL" => "LuceneGalicianTokenizer",
+                "DE" => "LuceneGermanTokenizer",
+                "GR" => "LuceneGreekTokenizer",
+                "IN" => "LuceneHindiTokenizer",
+                "HU" => "LuceneHungarianTokenizer",
+                "ID" => "LuceneIndonesianTokenizer",
+                "IE" => "LuceneIrishTokenizer",
+                "IT" => "LuceneItalianTokenizer",
+                "JA" => "LuceneJapaneseTokenizer",
+                "KO" => "LuceneKoreanTokenizer",
+                "LV" => "LuceneLatvianTokenizer",
+                "NO" => "LuceneNorwegianTokenizer",
+                "FA" => "LucenePersianTokenizer",
+                "PT" => "LucenePortugueseTokenizer",
+                "RO" => "LuceneRomanianTokenizer",
+                "RU" => "LuceneRussianTokenizer",
+                "ES" => "LuceneSpanishTokenizer",
+                "SE" => "LuceneSwedishTokenizer",
+                "TH" => "LuceneThaiTokenizer",
+                "TR" => "LuceneTurkishTokenizer"
 
         );
 
@@ -581,13 +536,14 @@ FOO;
 
     }
 
-    public function cleanFilePath( &$documentContent ){
+    public function cleanFilePath( &$documentContent ) {
 
-        if( !function_exists( '_clean' ) ){
-            function _clean( $file ){
-                $file_parts = explode( "\\", $file[2] );
-                $file[0] = str_replace( $file[2], array_pop( $file_parts ), $file[0] );
-                return $file[0];
+        if ( !function_exists( '_clean' ) ) {
+            function _clean( $file ) {
+                $file_parts = explode( "\\", $file[ 2 ] );
+                $file[ 0 ]  = str_replace( $file[ 2 ], array_pop( $file_parts ), $file[ 0 ] );
+
+                return $file[ 0 ];
             }
         }
 
@@ -608,7 +564,7 @@ FOO;
      *
      * @return string
      */
-    public function removeTargetMarks( $documentContent, $path ) {
+    public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
         $extension = pathinfo( $path );
         if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {

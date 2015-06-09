@@ -179,12 +179,10 @@ class MultiCurlHandler {
             if ( get_resource_type( $curl_resource ) == 'curl' ) {
                 curl_multi_add_handle( $this->multi_handler, $curl_resource );
                 $this->curl_handlers[ $tokenHash ] = $curl_resource;
-            }
-            else {
+            } else {
                 throw new LogicException( __CLASS__ . " - " . "Provided resource is not a valid Curl resource" );
             }
-        }
-        else {
+        } else {
             throw new LogicException( __CLASS__ . " - " . var_export( $curl_resource, true ) . " is not a valid resource type." );
         }
 

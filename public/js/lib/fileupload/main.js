@@ -952,17 +952,46 @@ function goodbye(e) {
                 e.preventDefault();
             }
 
-            //return works for Chrome and Safari
-            return leave_message;
         }
+
+        //return works for Chrome and Safari
+        clearNotCompletedUploads();
+
+        return leave_message;
     }
 }
 
-window.onbeforeunload = function(e) {
-    goodbye(e);
-//    UI.clearStorage('contribution');
+window.onbeforeunload = function ( e ) {
 
-//			localStorage.clear();
+    var leave_message = null;
+    if ( $( '.popup-tm .notify' ).length ) {
+
+        var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+        leave_message = 'You have a pending operation. Are you sure you want to quit?';
+        if ( dont_confirm_leave !== 1 ) {
+            if ( !e ) e = window.event;
+            //e.cancelBubble is supported by IE - this will kill the bubbling process.
+            e.cancelBubble = true;
+            e.returnValue = leave_message;
+            //e.stopPropagation works in Firefox.
+            if ( e.stopPropagation ) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+        }
+
+    }
+
+    //return works for Chrome and Safari
+    //function in new-project.js this function does an ajax call to clean uploaded files when an user
+    // refresh a page without click the analyze method
+    clearNotCompletedUploads();
+
+    if( leave_message != null ){
+        return leave_message;
+    }
+
 };
 
 $(document).ready(function() {
@@ -970,4 +999,3 @@ $(document).ready(function() {
 	checkInit();
     UI.init();
 });
-
