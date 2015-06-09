@@ -132,9 +132,15 @@ $(document).ready(function() {
 
 						switch(this.code) {
 							//no useful memories found in TMX
-							case -16 : 	UI.addTMXLangFailure();
+							case -16 :
+                                UI.addTMXLangFailure();
 								break;
-
+                            case -14 :
+                                UI.addInlineMessage(
+                                    ".tmx",
+                                    this.message
+                                );
+                                break;
 							//no text to translate found.
 							case -1  : 	var fileName = this.message.replace("No text to translate in the file ", "")
 								.replace(/.$/g,"");

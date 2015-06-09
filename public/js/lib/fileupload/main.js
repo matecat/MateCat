@@ -169,7 +169,7 @@ UI = {
     },
 
     addInlineMessage: function (fileName, message){
-        var currDeleteDiv = $('.upload-table td.name:contains("'+fileName+'")').next().next().addClass("error");
+        var currDeleteDiv = $('.upload-table td.name:contains("'+fileName+'")').next().next().addClass("file_upload_error");
 
         if($(currDeleteDiv).find(".skiplangdetect").length == 0){
             $(currDeleteDiv).html("")
@@ -699,7 +699,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        			$('.operation',filerow).remove();
 			},50);
 //       		$('.progress',filerow).remove();
-       		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>Server error, try again.');
+       		$('td.size',filerow).next().addClass('file_upload_error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>Server error, try again.');
        		$(filerow).addClass('has-errors');
 			UI.checkFailedConversionsNumber();
        		return false;

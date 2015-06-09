@@ -298,6 +298,11 @@ class convertFileController extends ajaxController {
 
 		//if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
         if ( isset( $xliffPath ) and !empty( $xliffPath ) ) {
+
+            //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR .  $_COOKIE[ 'upload_session' ];
+            $fs->deleteHashFromUploadDir( $uploadDir, $sha1 );
+
             //put reference to cache in upload dir to link cache to session
             $fs->linkSessionToCache( $sha1, $this->source_lang, $_COOKIE[ 'upload_session' ] );
             //a usable package is available, give positive feedback
