@@ -132,9 +132,15 @@ $(document).ready(function() {
 
 						switch(this.code) {
 							//no useful memories found in TMX
-							case -16 : 	UI.addTMXLangFailure();
+							case -16 :
+                                UI.addTMXLangFailure();
 								break;
-
+                            case -14 :
+                                UI.addInlineMessage(
+                                    ".tmx",
+                                    this.message
+                                );
+                                break;
 							//no text to translate found.
 							case -1  : 	var fileName = this.message.replace("No text to translate in the file ", "")
 								.replace(/.$/g,"");
@@ -169,7 +175,10 @@ $(document).ready(function() {
 					$('body').removeClass('creating');
 
 				} else {
-					//							$.cookie('upload_session', null);
+
+                    //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
+                    //--> we don't want to delete the files on the upload directory
+                    clearNotCompletedUploads = function(){};
 
 					if( config.analysisEnabled ) {
 
@@ -277,7 +286,6 @@ $(document).ready(function() {
 	$(".popup-outer.lang-slide, #cancelMultilang, #chooseMultilang").click(function(e) {
 		closeMLPanel();
 	});
-	
 
 
 
@@ -354,3 +362,16 @@ $(document).ready(function() {
 
 });
 
+/**
+ * ajax call to clear the uploaded files when an user refresh the home page
+ * called in main.js
+ */
+clearNotCompletedUploads = function() {
+    $.ajax({
+        async: false,
+        url: config.basepath + '?action=ajaxUtils&' + ( new Date().getTime() ),
+        data: {exec:'clearNotCompletedUploads'},
+        type: 'POST',
+        dataType: 'json'
+    });
+};

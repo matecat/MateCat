@@ -53,7 +53,7 @@ class downloadAnalysisReportController extends downloadController {
         $outputContent = $analysisStatus->fetchData()->getResult();
 
         $this->content = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
-        $this->filename = $_project_data[0][ 'pname' ] . ".zip";
+        $this->_filename = $_project_data[0][ 'pname' ] . ".zip";
 
     }
 

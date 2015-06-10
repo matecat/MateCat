@@ -61,7 +61,7 @@ function cleanShutDown( ){
 
 }
 
-function isParentRunning($pid) {
+function isParentRunning() {
 
     /**
      * @var $amqHandlerSubscriber Analysis_QueueHandler

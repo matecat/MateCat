@@ -463,6 +463,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'df' ]   = "matecat_array";
         $parameters[ 'segs' ] = $json_segs;
 
+        $this->_setAdditionalCurlParams( array(
+                        CURLOPT_TIMEOUT    => 300
+                )
+        );
+
+
         $this->call( "analyze_url", $parameters, true );
 
         return $this->result;

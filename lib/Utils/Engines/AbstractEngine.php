@@ -7,7 +7,6 @@
  * Time: 11.59
  *
  */
-
 abstract class Engines_AbstractEngine {
 
     /**
@@ -29,12 +28,12 @@ abstract class Engines_AbstractEngine {
 
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
-        $this->className = get_class( $this );
+        $this->className    = get_class( $this );
 
         $this->curl_additional_params = array(
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
@@ -46,16 +45,17 @@ abstract class Engines_AbstractEngine {
      *
      *
      * @param $_string
+     *
      * @return string
      */
-    protected function _preserveSpecialStrings( $_string ){
+    protected function _preserveSpecialStrings( $_string ) {
 
         preg_match_all( self::IOS_STRINGS_REGEXP, $_string, $matches );
-        $matches = $matches[0];
+        $matches = $matches[ 0 ];
 
         $placeholders = array();
-        for( $i = 0; $i < count( $matches ); $i++ ){
-            $placeholders[] = CatUtils::generate_password();
+        for ( $i = 0; $i < count( $matches ); $i++ ) {
+            $placeholders[ ] = CatUtils::generate_password();
         }
 
         $this->_patterns_found = array_combine(
@@ -63,16 +63,16 @@ abstract class Engines_AbstractEngine {
                 $placeholders
         );
 
-        foreach( $this->_patterns_found as $str => $placeholder ){
+        foreach ( $this->_patterns_found as $str => $placeholder ) {
             $_string = str_replace( $str, $placeholder, $_string );
         }
 
         return $_string;
     }
 
-    protected function _resetSpecialStrings( $_string ){
+    protected function _resetSpecialStrings( $_string ) {
 
-        foreach( $this->_patterns_found as $str => $placeholder ){
+        foreach ( $this->_patterns_found as $str => $placeholder ) {
             $_string = str_ireplace( $placeholder, $str, $_string );
         }
 
@@ -109,7 +109,7 @@ abstract class Engines_AbstractEngine {
         } elseif ( array_key_exists( $key, $this->engineRecord->extra_parameters ) ) {
             $this->engineRecord->extra_parameters[ $key ] = $value;
         } else {
-            throw new DomainException( "Property $key does not exists in " . get_class($this) );
+            throw new DomainException( "Property $key does not exists in " . get_class( $this ) );
         }
     }
 
@@ -134,11 +134,11 @@ abstract class Engines_AbstractEngine {
 
         if ( $mh->hasError( $resourceHash ) ) {
             $curl_error = $mh->getError( $resourceHash );
-            Log::doLog( 'Curl Error: (http status ' . $curl_error['http_code'] .') '. $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
+            Log::doLog( 'Curl Error: (http status ' . $curl_error[ 'http_code' ] .') '. $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
             $rawValue = array(
                     'error' => array(
                             'code'    => -$curl_error[ 'errno' ],
-                            'message' => " {$curl_error['error']}. Server Not Available (http status " . $curl_error['http_code'] .")"
+                            'message' => " {$curl_error[ 'error' ]}. Server Not Available (http status " . $curl_error[ 'http_code' ] .")"
                     )
             ); //return negative number
         } else {
@@ -155,7 +155,7 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    public function call( $function, Array $parameters = array(), $isPostRequest = false ){
+    public function call( $function, Array $parameters = array(), $isPostRequest = false ) {
 
         $this->error = array(); // reset last error
         if ( !$this->$function ) {
@@ -169,16 +169,16 @@ abstract class Engines_AbstractEngine {
             return;
         }
 
-        if( $isPostRequest ){
-            $function  = strtolower( trim( $function ) );
-            $url = "{$this->engineRecord['base_url']}/" . $this->$function;
+        if ( $isPostRequest ) {
+            $function = strtolower( trim( $function ) );
+            $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
                     CURLOPT_POSTFIELDS => $parameters,
-                    CURLOPT_TIMEOUT => 120
+                    CURLOPT_TIMEOUT    => 120
             );
         } else {
-            $function  = strtolower( trim( $function ) );
-            $url = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
+            $function = strtolower( trim( $function ) );
+            $url      = "{$this->engineRecord['base_url']}/" . $this->$function . "?";
             $url .= http_build_query( $parameters );
             $curl_opt = array(
                     CURLOPT_HTTPGET => true,
@@ -199,7 +199,7 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    protected function _setAdditionalCurlParams( Array $curlOptParams = array() ){
+    protected function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
 
         /*
          * Append array elements from the second array
@@ -211,7 +211,7 @@ abstract class Engines_AbstractEngine {
         $this->curl_additional_params = $curlOptParams + $this->curl_additional_params;
     }
 
-    public function getConfigStruct(){
+    public function getConfigStruct() {
         return $this->_config;
     }
 

@@ -29,6 +29,8 @@ class INIT {
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
     public static $UPLOAD_REPOSITORY;
+    public static $FILES_REPOSITORY;
+    public static $CACHE_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY_WEB;
     public static $TMP_DOWNLOAD;
@@ -190,6 +192,8 @@ class INIT {
         self::$STORAGE_DIR                     = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
         self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
+        self::$FILES_REPOSITORY                = self::$STORAGE_DIR . "/files_storage/files";
+        self::$CACHE_REPOSITORY                = self::$STORAGE_DIR . "/files_storage/cache";
         self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
         self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
         self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
@@ -212,6 +216,12 @@ class INIT {
         if ( !is_dir( self::$UPLOAD_REPOSITORY ) ) {
             mkdir( self::$UPLOAD_REPOSITORY, 0755, true );
         }
+        if ( !is_dir( self::$FILES_REPOSITORY ) ) {
+            mkdir( self::$FILES_REPOSITORY, 0755, true );
+        }
+        if ( !is_dir( self::$CACHE_REPOSITORY ) ) {
+            mkdir( self::$CACHE_REPOSITORY, 0755, true );
+        }
         if ( !is_dir( self::$CONVERSIONERRORS_REPOSITORY ) ) {
             mkdir( self::$CONVERSIONERRORS_REPOSITORY, 0755, true );
         }
@@ -222,8 +232,7 @@ class INIT {
         if ( file_exists( self::$AUTHSECRET_PATH ) ) {
             //fetch it
             self::$AUTHSECRET = file_get_contents( self::$AUTHSECRET_PATH );
-        }
-        else {
+        } else {
             //try creating the file and the fetch it
             //generate pass
             $secret = self::generate_password( 512 );
@@ -233,8 +242,7 @@ class INIT {
             if ( file_exists( self::$AUTHSECRET_PATH ) ) {
                 //restrict permissions
                 chmod( self::$AUTHSECRET_PATH, 0400 );
-            }
-            else {
+            } else {
                 //if couldn't create due to permissions, use default secret
                 self::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
@@ -332,16 +340,16 @@ class INIT {
                         'xlf'      => array( 'default', '', 'extxlf' )
                 ),
                 "Desktop Publishing"  => array(
-                    //                'fm' => array('', "Try converting to MIF"),
-                    'mif'  => array( '', '', 'extmif' ),
-                    'inx'  => array( '', '', 'extidd' ),
-                    'idml' => array( '', '', 'extidd' ),
-                    'icml' => array( '', '', 'extidd' ),
-                    //                'indd' => array('', "Try converting to INX"),
-                    'xtg'  => array( '', '', 'extqxp' ),
-                    'tag'  => array( '', '', 'exttag' ),
-                    'xml'  => array( '', '', 'extxml' ),
-                    'dita' => array( '', '', 'extdit' )
+                        //                'fm' => array('', "Try converting to MIF"),
+                        'mif'  => array( '', '', 'extmif' ),
+                        'inx'  => array( '', '', 'extidd' ),
+                        'idml' => array( '', '', 'extidd' ),
+                        'icml' => array( '', '', 'extidd' ),
+                        //                'indd' => array('', "Try converting to INX"),
+                        'xtg'  => array( '', '', 'extqxp' ),
+                        'tag'  => array( '', '', 'exttag' ),
+                        'xml'  => array( '', '', 'extxml' ),
+                        'dita' => array( '', '', 'extdit' )
                 ),
                 "Localization"        => array(
                         'properties'  => array( '', '', 'extpro' ),
@@ -457,24 +465,13 @@ class INIT {
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
-                    if ( INIT::$EXCEPTION_DEBUG ) {
-                        echo json_encode( array(
-                                "errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array()
-                        ) );
-                    }
-                    else {
-                        echo json_encode( array(
-                                "errors"  => array(
-                                        array(
-                                                "code"    => -1000,
-                                                "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>"
-                                        )
-                                ), "data" => array()
-                        ) );
+                    if( INIT::$EXCEPTION_DEBUG ){
+                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() ) );
+                    } else {
+                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>" ) ), "data" => array() ) ) ;
                     }
 
-                }
-                elseif ( INIT::$EXCEPTION_DEBUG ) {
+                } elseif( INIT::$EXCEPTION_DEBUG ){
                     echo $output;
                 }
 

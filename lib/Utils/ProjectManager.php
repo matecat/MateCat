@@ -186,8 +186,7 @@ class ProjectManager {
                         $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
 
                         $memoryKeysToBeInserted[ ] = $newMemoryKey;
-                    }
-                    else {
+                    } else {
                         Log::doLog( 'skip insertion' );
                     }
 
@@ -228,8 +227,7 @@ class ProjectManager {
                 //found TMX, enable language checking routines
                 $this->checkTMX = 1;
                 array_unshift( $sortedFiles, $fileName );
-            }
-            else {
+            } else {
                 array_push( $sortedFiles, $fileName );
             }
 
@@ -239,11 +237,30 @@ class ProjectManager {
 
 
         $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
+
+
+        //fetch cache links, created by converter, from upload directory
+        $linkFiles = scandir( $uploadDir );
+
+        //remove dir hardlinks, as uninteresting, as weel as regular files; only hash-links
+        foreach ( $linkFiles as $k => $linkFile ) {
+            if ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
+                unset( $linkFiles[ $k ] );
+            }
+        }
+
+        /*
+            loop through all input files to
+            1)upload TMX
+            2)convert, in case, non standard XLIFF files to a format that Matecat understands
+
+            Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
+         */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             //if TMX,
             if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
-
+                //load it into MyMemory; we'll check later on how it went
                 $file            = new stdClass();
                 $file->file_path = "$uploadDir/$fileName";
                 $this->tmxServiceWrapper->setName( $fileName );
@@ -263,109 +280,63 @@ class ProjectManager {
                 continue;
             }
 
-            /**
-             * Conversion Enforce
-             *
-             * we have to know if a file can be found in _converted directory
-             *
-             * Check Extension no more sufficient, we want check content
-             * if this is an idiom xlf file type, conversion are enforced
-             * $enforcedConversion = true; //( if conversion is enabled )
-             */
-            $isAConvertedFile = true;
-            try {
-
-                $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName );
-
-                if ( DetectProprietaryXliff::isXliffExtension() ) {
-
-                    if ( INIT::$CONVERSION_ENABLED ) {
-
-                        //conversion enforce
-                        if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
-
-                            //ONLY IDIOM is forced to be converted
-                            //if file is not proprietary like idiom AND Enforce is disabled
-                            //we take it as is
-                            if ( !$fileType[ 'proprietary' ] ) {
-                                $isAConvertedFile = false;
-                                //ok don't convert a standard sdlxliff
-                            }
-
-                        }
-                        else {
-
-                            //if conversion enforce is active
-                            //we force all xliff files but not files produced by SDL Studio because we can handle them
-                            if ( $fileType[ 'proprietary_short_name' ] == 'trados' ) {
-                                $isAConvertedFile = false;
-                                //ok don't convert a standard sdlxliff
-
-                            }
-
-                        }
-
-                    }
-                    elseif ( $fileType[ 'proprietary' ] ) {
-
-                        /**
-                         * Application misconfiguration.
-                         * upload should not be happened, but if we are here, raise an error.
-                         * @see upload.class.php
-                         * */
-                        $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                "code"    => -8,
-                                "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
-                        );
-                        setcookie( "upload_session", "", time() - 10000 );
-
-                        return -1;
-                        //stop execution
-
-                    }
-                    elseif ( !$fileType[ 'proprietary' ] ) {
-                        $isAConvertedFile = false;
-                        //ok don't convert a standard sdlxliff
-                    }
-
-                }
-
-            } catch ( Exception $e ) {
-                Log::doLog( $e->getMessage() );
-            }
-
-
-            $mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
-
-            $original_content = "";
-
             /*
-               if it's not one of the listed formats (or it is, but you had to convert it anyway), 
-               and conversion is enabled in first place
+               Conversion Enforce
+               Checking Extension is no more sufficient, we want check content if this is an idiom xlf file type, conversion are enforced
+               $enforcedConversion = true; //( if conversion is enabled )
              */
-            if ( $isAConvertedFile ) {
+            $isAConvertedFile = $this->isConversionToEnforce( $fileName );
 
-                //converted file is inside "_converted" directory
-                $fileDir          = $uploadDir . '_converted';
-                $original_content = file_get_contents( "$uploadDir/$fileName" );
-                $sha1_original    = sha1( $original_content );
-                $original_content = gzdeflate( $original_content, 5 );
+            //we are going to access the storage, get model object to manipulate it
+            $fs = new FilesStorage();
 
-                //file name is a xliff converted like: 'a_word_document.doc.sdlxliff'
-                $real_fileName = $fileName . '.sdlxliff';
+            //if it's one of the listed formats or conversion is not enabled in first place
+            if ( !$isAConvertedFile ) {
+                /*
+                   filename is already an xliff and it's in upload directory
+                   we have to make a cache package from it to avoid altering the original path
+                 */
+                //get file
+                $filePathName = "$uploadDir/$fileName";
 
+                //calculate hash + add the fileName, if i load 3 equal files with the same content
+                // they will be squashed to the last one
+                $sha1 = sha1( file_get_contents( $filePathName ) . $filePathName );
+
+                //make a cache package (with work/ only, emtpy orig/)
+                $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+
+                //put reference to cache in upload dir to link cache to session
+                $fs->linkSessionToCache( $sha1, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'uploadToken' ] );
+
+                //add newly created link to list
+                $linkFiles[ ] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+
+                unset( $sha1 );
             }
-            else {
+        }
 
-                //filename is already an xliff and it is in a canonical normal directory
-                $sha1_original = "";
-                $fileDir       = $uploadDir;
-                $real_fileName = $fileName;
-            }
+        //now, upload dir contains only hash-links
+        //we start copying files to "file" dir, inserting metadata in db and extracting segments
+        foreach ( $linkFiles as $linkFile ) {
+            //converted file is inside cache directory
+            //get hash from file name inside UUID dir
+            $hashFile = basename( $linkFile );
+            $hashFile = explode( '|', $hashFile );
 
-            $filePathName = $fileDir . DIRECTORY_SEPARATOR . $real_fileName;
+            //use hash and lang to fetch file from package
+            $xliffFilePathName = $fs->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
 
-            if ( !file_exists( $filePathName ) ) {
+            //get sha
+            $sha1_original = $hashFile[ 0 ];
+
+            //get original file name
+            $originalFilePathName = $fs->getOriginalFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
+            $fileName             = basename( $originalFilePathName );
+
+            unset( $hashFile );
+
+            if ( !file_exists( $xliffFilePathName ) ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                         "code" => -6, "message" => "File not found on server after upload."
                 );
@@ -373,23 +344,21 @@ class ProjectManager {
 
             try {
 
-                $info = pathinfo( $filePathName );
+                $info = pathinfo( $xliffFilePathName );
 
-                if ( ( $info[ 'extension' ] == 'xliff' ) || ( $info[ 'extension' ] == 'sdlxliff' ) || ( $info[ 'extension' ] == 'xlf' ) ) {
-                    $contents = file_get_contents( $filePathName );
-                }
-                else {
+                if ( !in_array( $info[ 'extension' ], array( 'xliff', 'sdlxliff', 'xlf' ) ) ) {
                     throw new Exception( "Failed to find Xliff - no segments found", -3 );
                 }
+                $mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
 
-                $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $contents, $sha1_original, $original_content );
+                $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $sha1_original );
+
+                //move the file in the right directory from the packages to the file dir
+                $fs->moveFromCacheToFileDir( $sha1_original, $this->projectStructure[ 'source_language' ], $fid );
+
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-                $this->_extractSegments( $contents, $fid );
-
-                unset( $contents ); //free memory
-
-                //Log::doLog( $this->projectStructure['segments'] );
+                $this->_extractSegments( file_get_contents( $xliffFilePathName ), $fid );
 
             } catch ( Exception $e ) {
 
@@ -397,34 +366,29 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -1, "message" => "No text to translate in the file $fileName."
                     );
-                }
-                elseif ( $e->getCode() == -2 ) {
+                    $fs->deleteHashFromUploadDir( $uploadDir, $linkFile );
+                } elseif ( $e->getCode() == -2 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store segments in database for $fileName"
                     );
-                }
-                elseif ( $e->getCode() == -3 ) {
+                } elseif ( $e->getCode() == -3 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code"    => -7,
                             "message" => "File $fileName not found. Failed to save XLIFF conversion on disk"
                     );
-                }
-                elseif ( $e->getCode() == -4 ) {
+                } elseif ( $e->getCode() == -4 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $fileName )"
                     );
-                }
-                elseif ( $e->getCode() == -11 ) {
+                } elseif ( $e->getCode() == -11 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store reference files on disk. Permission denied"
                     );
-                }
-                elseif ( $e->getCode() == -12 ) {
+                } elseif ( $e->getCode() == -12 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store reference files in database"
                     );
-                }
-                else {
+                } else {
                     //mysql insert Blob Error
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "File is Too large. ( $fileName )"
@@ -434,8 +398,7 @@ class ProjectManager {
                 Log::doLog( $e->getMessage() );
 
             }
-            //exit;
-        }
+        }//end of hash-link loop
 
         //check if the files language equals the source language. If not, set an error message.
         if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
@@ -514,8 +477,7 @@ class ProjectManager {
                         //the TMX is good to go
                         $this->checkTMX = 0;
 
-                    }
-                    elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+                    } elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
 
                         /*
                          * This means that the TMX has a srclang as specification in the header. Warn the user.
@@ -567,8 +529,7 @@ class ProjectManager {
 
         if ( isset( $_SESSION[ 'cid' ] ) and !empty( $_SESSION[ 'cid' ] ) ) {
             $owner = $_SESSION[ 'cid' ];
-        }
-        else {
+        } else {
             $_SESSION[ '_anonym_pid' ] = $this->projectStructure[ 'id_project' ];
             //default user
             $owner = '';
@@ -584,7 +545,7 @@ class ProjectManager {
             //we need compare the number of segments with translations, but take an eye to the opensource
 
             $query_visible_segments = "SELECT count(*) as cattool_segments
-                FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
+				FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
 
             $string_file_list       = implode( ",", $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
@@ -668,22 +629,6 @@ class ProjectManager {
 
         $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
 
-        /**
-         * TODO: remove after queue implementation
-         */
-//        if( 0 && $project_summary[0]['project_segments'] > 50000 ) {
-//            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
-//
-//            $msg = "
-//        WARNING: a project with more than 50.000 segments was created. ( " . $project_summary[0]['project_segments'] . " )\n" .
-//        var_export( $this->projectStructure[ 'result' ], true ) . "\n\n" .
-//                    "  " .
-//        var_export( $project_summary[0] , true ) . "\n";
-//
-//            Utils::sendErrMailReport( $msg, "Alert: Project Creation Abort. - " );
-//
-//        }
-
         $update_project_count = "
             UPDATE projects
               SET
@@ -740,8 +685,6 @@ class ProjectManager {
 
         }
 
-//    var_dump($this->projectStructure);
-//        exit;
 
     }
 
@@ -757,7 +700,7 @@ class ProjectManager {
             $projectStructure[ 'payable_rates' ] = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
 
             $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment
-                FROM segments WHERE id_file IN ( %s )";
+				FROM segments WHERE id_file IN ( %s )";
 
             $string_file_list    = implode( ",", $projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $last_segments_query = sprintf( $query_min_max, $string_file_list );
@@ -795,8 +738,7 @@ class ProjectManager {
                 //set private tm key string to the first tm_key for retro-compatibility
 
                 Log::doLog( $projectStructure[ 'private_tm_key' ] );
-
-//                $projectStructure[ 'private_tm_key' ] = $projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+                
             }
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
@@ -869,8 +811,7 @@ class ProjectManager {
                     //PHP Strict: Only variables should be passed by reference
                     $_tmp       = explode( "-", $this->projectStructure[ 'source_language' ] );
                     $sourceLang = array_shift( $_tmp );
-                }
-                else {
+                } else {
                     $sourceLang = $this->projectStructure[ 'source_language' ];
                 }
 
@@ -898,8 +839,7 @@ class ProjectManager {
                             "message" => "The source language you selected seems " .
                                     "to be different from the source language in \"$currFileName\". Please check."
                     );
-                }
-                else {
+                } else {
                     $filename2SourceLangCheck[ $currFileName ] = 'ok';
                 }
 
@@ -909,8 +849,7 @@ class ProjectManager {
             if ( in_array( "warning", array_values( $filename2SourceLangCheck ) ) ) {
                 $this->projectStructure[ 'result' ][ 'lang_detect' ] = $filename2SourceLangCheck;
             }
-        }
-        else {
+        } else {
             //There are errors while parsing JSON.
             //Noop
         }
@@ -999,8 +938,7 @@ class ProjectManager {
              * Simple Split with pretty equivalent number of words per chunk
              */
             $words_per_job = array_fill( 0, $num_split, round( $total_words / $num_split, 0 ) );
-        }
-        else {
+        } else {
             /*
              * User defined words per chunk, needs some checks and control structures
              */
@@ -1285,8 +1223,7 @@ class ProjectManager {
                     //No segments to translate
                     //don't increment global counter '$fileCounter_Show_In_Cattool'
                     $show_in_cattool = 0;
-                }
-                else {
+                } else {
 
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
@@ -1294,6 +1231,7 @@ class ProjectManager {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
                             $tempSeg = strip_tags( $seg_source[ 'raw-content' ] );
+                            $tempSeg = preg_replace( '#\p{P}+#u', "", $tempSeg );
                             $tempSeg = trim( $tempSeg );
 
                             //init tags
@@ -1302,8 +1240,7 @@ class ProjectManager {
 
                             if ( is_null( $tempSeg ) || $tempSeg === '' ) {
                                 $show_in_cattool = 0;
-                            }
-                            else {
+                            } else {
                                 $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
                                 $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
                                 $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
@@ -1355,8 +1292,7 @@ class ProjectManager {
 
                             if ( $this->projectStructure[ 'file_references' ]->offsetExists( $fid ) ) {
                                 $file_reference = (int)$this->projectStructure[ 'file_references' ][ $fid ];
-                            }
-                            else {
+                            } else {
                                 $file_reference = 'NULL';
                             }
 
@@ -1364,18 +1300,16 @@ class ProjectManager {
 
                         }
 
-                    }
-                    else {
+                    } else {
 
                         $tempSeg = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
+                        $tempSeg = preg_replace( '#\p{P}+#u', "", $tempSeg );
                         $tempSeg = trim( $tempSeg );
-//                        $tempSeg = CatUtils::placeholdnbsp( $tempSeg );
                         $prec_tags = null;
                         $succ_tags = null;
-                        if ( empty( $tempSeg ) ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
+                        if ( is_null( $tempSeg ) || $tempSeg === '' ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
                             $show_in_cattool = 0;
-                        }
-                        else {
+                        } else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
                             $prec_tags                                     = empty( $extract_external[ 'prec' ] ) ? null : $extract_external[ 'prec' ];
                             $succ_tags                                     = empty( $extract_external[ 'succ' ] ) ? null : $extract_external[ 'succ' ];
@@ -1420,8 +1354,7 @@ class ProjectManager {
 
                         if ( $this->projectStructure[ 'file_references' ]->offsetExists( $fid ) ) {
                             $file_reference = (int)$this->projectStructure[ 'file_references' ][ $fid ];
-                        }
-                        else {
+                        } else {
                             $file_reference = 'NULL';
                         }
 
@@ -1484,7 +1417,6 @@ class ProjectManager {
             }
 
         }
-
     }
 
     protected function _insertPreTranslations( $jid ) {
@@ -1507,7 +1439,7 @@ class ProjectManager {
         if ( !empty( $this->projectStructure[ 'query_translations' ] ) ) {
 
             $baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked, match_type )
-                values ";
+				values ";
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
             //split the query in to chunks if there are too much segments
@@ -1631,8 +1563,7 @@ class ProjectManager {
 
         if ( $fName != false ) {
             $fName = $this->dbHandler->escape( $fName );
-        }
-        else {
+        } else {
             $fName = '';
         }
 
@@ -1696,10 +1627,7 @@ class ProjectManager {
             }
 
             return $file_reference_id;
-
         }
-
-
     }
 
     protected function _sanitizeName( $nameString ) {
@@ -1725,6 +1653,28 @@ class ProjectManager {
 
     private function sortByStrLenAsc( $a, $b ) {
         return strlen( $a ) >= strlen( $b );
+    }
+
+    private function isConversionToEnforce( $fileName ) {
+        $isAConvertedFile = true;
+
+        $fullPath = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ] . DIRECTORY_SEPARATOR . $fileName;
+        try {
+            $isAConvertedFile = DetectProprietaryXliff::isConversionToEnforce( $fullPath );
+
+            if ( -1 === $isAConvertedFile ) {
+                $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                        "code"    => -8,
+                        "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)"
+                );
+                setcookie( "upload_session", "", time() - 10000 );
+            }
+
+        } catch ( Exception $e ) {
+            Log::doLog( $e->getMessage() );
+        }
+
+        return $isAConvertedFile;
     }
 
 }

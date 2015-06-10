@@ -495,11 +495,15 @@ class FileFormatConverter {
 
     public function multiConvertToOriginal( $xliffVector_array, $chosen_by_user_machine = false ) {
 
+        if ( empty( $xliffVector_array ) ) {
+            return array();
+        }
+
         $multiCurlObj = new MultiCurlHandler();
 
         $conversionObjects = array();
 
-	$temporary_files=array();
+        $temporary_files = array();
 
         //iterate files.
         //For each file prepare a curl resource
@@ -525,8 +529,8 @@ class FileFormatConverter {
             $data[ 'uid' ] = $uid_ext[ 0 ];
 
             //get random name for temporary location
-            $tmp_name = tempnam( "/tmp", "MAT_BW" );
-	    $temporary_files[]=$tmp_name;
+            $tmp_name           = tempnam( "/tmp", "MAT_BW" );
+            $temporary_files[ ] = $tmp_name;
 
             //write encoded file to temporary location
             $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
@@ -574,10 +578,10 @@ class FileFormatConverter {
             $multiResponses[ $hash ]                     = $this->__parseOutput( $multiResponses[ $hash ], $conversionObjects[ $hash ] );
         }
 
-	//remove temporary files
-	foreach($temporary_files as $temp_name){
-		unlink($tmp_name);
-	}
+        //remove temporary files
+        foreach ( $temporary_files as $temp_name ) {
+            unlink( $temp_name );
+        }
 
         return $multiResponses;
     }

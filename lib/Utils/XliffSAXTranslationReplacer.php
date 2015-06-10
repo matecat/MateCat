@@ -2,7 +2,6 @@
 
 class XliffSAXTranslationReplacer {
 
-    private $filename; //source filename
     private $originalFP;
 
     private $inTU = false;//flag to check whether we are in a <trans-unit>
@@ -23,20 +22,19 @@ class XliffSAXTranslationReplacer {
 
     private $sourceInTarget;
 
-    public function __construct( $filename, $segments, $trg_lang = null, $filePointer = null ) {
+    public function __construct( $originalXliffFilename, $segments, $trg_lang = null, $outputFile = null ) {
 
-        $this->filename = $filename;
-
-        if ( is_resource( $filePointer ) ) {
-            $this->originalFP = $filePointer;
-            rewind( $this->originalFP );
+        if ( is_resource( $outputFile ) ) {
+            $this->outputFP = $outputFile;
+            rewind( $this->outputFP );
         } else {
-            if ( !( $this->originalFP = fopen( $this->filename, "r" ) ) ) {
-                die( "could not open XML input" );
-            }
+            $this->outputFP = fopen( $outputFile, 'w+' );
         }
 
-        $this->outputFP    = fopen( $this->filename . '.out.sdlxliff', 'w+' );
+        if ( !( $this->originalFP = fopen( $originalXliffFilename, "r" ) ) ) {
+            die( "could not open XML input" );
+        }
+
         $this->segments    = $segments;
         $this->target_lang = $trg_lang;
         $this->sourceInTarget = false;

@@ -1,6 +1,7 @@
 #!/bin/bash
-
-. killAnalysis.sh
+DIR=$( cd "$( dirname "$0")"; pwd )
+cd $DIR
+/bin/bash killAnalysis.sh
 
 echo "Wait 10 seconds to daemons to die."
 sleep 10

@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 	var basePath = '../../public/js/';
 	var incPath = '../../inc/';
 	var conf = grunt.file.read(incPath + 'config.inc.sample.php');
-	var version = conf.match(/self\:\:\$BUILD\_NUMBER = \'(.*?)\'/gi)[0].replace(/self\:\:\$BUILD\_NUMBER = \'(.*?)\'/gi, "$1");
+	var version = conf.match(/self\:\:\$BUILD\_NUMBER[ ]+=[ ]+\'(.*?)\'/gi)[0].replace(/self\:\:\$BUILD\_NUMBER[ ]+=[ ]+\'(.*?)\'/gi, "$1");
 
 	
   // Configuration goes here

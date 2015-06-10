@@ -268,8 +268,13 @@ class Utils {
                 self::deleteDir( $fileInfo->getPathname() );
             } else {
                 $fileName = $fileInfo->getFilename();
-                if( $fileName{0} == '.' ) continue;
-                unlink( $fileInfo->getPathname() );
+                if ( $fileName{0} == '.' ) {
+                    continue;
+                }
+                $outcome = unlink( $fileInfo->getPathname() );
+                if ( !$outcome ) {
+                    Log::doLog( "fail deleting " . $fileInfo->getPathname() );
+                }
             }
         }
         rmdir( $iterator->getPath() );
