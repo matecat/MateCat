@@ -14,6 +14,7 @@ class ConvertFileWrapper extends convertFileController {
     public $target_lang;
     public $intDir;
     public $errDir;
+    public $cookieDir;
 
     protected $fileStruct;
     protected $resultStack = array();

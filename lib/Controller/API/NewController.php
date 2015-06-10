@@ -200,12 +200,13 @@ class NewController extends ajaxController {
 		}
 
 		/* Do conversions here */
-		$converter = new ConvertFileWrapper( $stdResult );
-		$converter->intDir = $uploadFile->getUploadPath();
-		$converter->errDir = INIT::$CONVERSIONERRORS_REPOSITORY . DIRECTORY_SEPARATOR . $uploadFile->getDirUploadToken();
-		$converter->source_lang = $this->source_lang;
-		$converter->target_lang = $this->target_lang;
-		$converter->doAction();
+        $converter              = new ConvertFileWrapper( $stdResult );
+        $converter->intDir      = $uploadFile->getUploadPath();
+        $converter->errDir      = INIT::$CONVERSIONERRORS_REPOSITORY . DIRECTORY_SEPARATOR . $uploadFile->getDirUploadToken();
+        $converter->cookieDir   = $uploadFile->getDirUploadToken();
+        $converter->source_lang = $this->source_lang;
+        $converter->target_lang = $this->target_lang;
+        $converter->doAction();
 
 	    $status = $converter->checkResult();
 		if( !empty( $status ) ){
