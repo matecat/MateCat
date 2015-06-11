@@ -1925,6 +1925,7 @@ UI = {
         console.log('x');
 //        console.log('newStr: ', newStr);
 //		replaceSelectedText(newStr);
+        console.log('newStr: ', newStr);
 		replaceSelectedHtml(newStr);
         console.log('a: ', UI.editarea.html());
 		UI.lockTags();
