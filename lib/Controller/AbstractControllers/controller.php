@@ -59,15 +59,12 @@ abstract class controller {
 	 * @return bool true if version is up to date, false otherwise
 	 */
 
-	public static function isRightVersion(){
-		$version_config = parse_ini_file(INIT::$ROOT."/inc/version.ini");
-		$version = $version_config['version'];
+    public static function isRightVersion() {
 
 //		Log::doLog("Same version number? ".($version == INIT::$BUILD_NUMBER));
+        return Bootstrap::$_INI_VERSION == INIT::$BUILD_NUMBER;
 
-		return $version == INIT::$BUILD_NUMBER;
-
-	}
+    }
 
     /**
      * When Called it perform the controller action to retrieve/manipulate data
@@ -111,7 +108,7 @@ abstract class controller {
     }
 
     public function sessionStart(){
-        INIT::sessionStart();
+        Bootstrap::sessionStart();
     }
 
     /**
@@ -121,7 +118,7 @@ abstract class controller {
      *
      */
     public function disableSessions(){
-        INIT::sessionClose();
+        Bootstrap::sessionClose();
     }
 
 }

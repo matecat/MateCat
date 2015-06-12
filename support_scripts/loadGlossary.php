@@ -8,7 +8,7 @@
 
 	include '../inc/config.inc.php';
 
-	@INIT::obtain();
+	@Bootstrap::start();
 	include_once INIT::$MODEL_ROOT . '/queries.php';
 	$db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 	$db->debug = INIT::$DEBUG;

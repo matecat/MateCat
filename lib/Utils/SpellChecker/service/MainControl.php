@@ -10,7 +10,7 @@ ini_set("display_errors", E_ALL);
 set_time_limit( 0 );
 
 include '/var/www/cattool/inc/config.inc.php';
-@INIT::obtain();
+@Bootstrap::start();
 include '/var/www/cattool/lib/Utils/Utils.php';
 include '/var/www/cattool/lib/Utils/Log.php';
 

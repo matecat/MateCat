@@ -3,7 +3,7 @@ $test = false;
 $skip = true;
 
 include '/var/www/cattool/inc/config.inc.php';
-@INIT::obtain();
+@Bootstrap::start();
 include_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . '/Engines/engine.class.php';
 include_once INIT::$UTILS_ROOT . '/Engines/tms.class.php';
