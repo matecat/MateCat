@@ -8,6 +8,7 @@ class INIT {
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
+    public static $ENV = 'dev';
     public static $DEBUG = true;
     public static $EXCEPTION_DEBUG = false;
     public static $DB_SERVER;
@@ -178,18 +179,9 @@ class INIT {
         self::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
-        self::$DB_SERVER   = "localhost"; //database server
-        self::$DB_DATABASE = "matecat"; //database name
-        self::$DB_USER     = "matecat"; //database login
-        self::$DB_PASS     = "matecat01"; //database password
+        //get the environment configuration
+        self::getConf();
 
-        self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
-        self::$REDIS_SERVERS        = "tcp://localhost:6379";
-        self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
-        self::$QUEUE_DQF_ADDRESS    = "tcp://localhost:61613";
-        self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
-
-        self::$STORAGE_DIR                     = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
         self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
         self::$FILES_REPOSITORY                = self::$STORAGE_DIR . "/files_storage/files";
@@ -493,6 +485,42 @@ class INIT {
         }
 
         return $pwd;
+
+    }
+
+    private static function getConf() {
+
+        if ( self::$ENV == 'prod' ) {
+
+            self::$DB_SERVER   = "localhost"; //database server
+            self::$DB_DATABASE = "matecat"; //database name
+            self::$DB_USER     = "matecat"; //database login
+            self::$DB_PASS     = "matecat01"; //database password
+
+            self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
+            self::$REDIS_SERVERS        = "tcp://localhost:6379";
+            self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
+            self::$QUEUE_DQF_ADDRESS    = "tcp://localhost:61613";
+            self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
+
+            self::$STORAGE_DIR = self::$ROOT . "/storage";
+
+        } else {
+
+            self::$DB_SERVER   = "localhost"; //database server
+            self::$DB_DATABASE = "matecat"; //database name
+            self::$DB_USER     = "matecat"; //database login
+            self::$DB_PASS     = "matecat01"; //database password
+
+            self::$MEMCACHE_SERVERS     = array( /* "localhost:11211" => 1 */ ); //Not Used
+            self::$REDIS_SERVERS        = "tcp://localhost:6379";
+            self::$QUEUE_BROKER_ADDRESS = "tcp://localhost:61613";
+            self::$QUEUE_DQF_ADDRESS    = "tcp://localhost:61613";
+            self::$QUEUE_JMX_ADDRESS    = "http://localhost:8161";
+
+            self::$STORAGE_DIR = self::$ROOT . "/local_storage";
+
+        }
 
     }
 
