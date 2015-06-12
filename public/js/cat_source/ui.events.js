@@ -842,7 +842,8 @@ $.extend(UI, {
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
             if(!UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                    if(!UI.isFirefox) UI.showEditToolbar();
+                    UI.showEditToolbar();
+//                    if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
              /*
@@ -875,10 +876,10 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
-//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
+//            if(typeof UI.currentSegment != 'undefined') return true;
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();

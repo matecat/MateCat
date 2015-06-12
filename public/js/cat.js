@@ -50,7 +50,7 @@ UI = {
 	},
 	cacheObjects: function(editarea) {
 		this.editarea = $(editarea);
-		// current and last opened object reference caching
+        // current and last opened object reference caching
 		this.lastOpenedSegment = this.currentSegment;
 		this.lastOpenedEditarea = $('.editarea', this.currentSegment);
 		this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
@@ -58,7 +58,7 @@ UI = {
 		this.currentFile = segment.parent();
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
-		this.sourceTags = sourceTags || [];
+        this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
 //        console.log('byStatus: ', byStatus);
@@ -767,7 +767,6 @@ UI = {
 				$('#segment-' + options.segmentToOpen + ' .editarea').click();
 			}
 			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
-//				console.log('a');
 				UI.openSegment(UI.editarea);
 			}
 			if (options.caller == 'link2file') {
@@ -996,7 +995,7 @@ UI = {
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
-		this.updateJobMenu();
+        this.updateJobMenu();
 		$(window).trigger({
 			type: "segmentOpened",
 			segment: segment
@@ -1494,20 +1493,16 @@ UI = {
 			if ($(segment).offset().top > $(current).offset().top) { // if segment to open is below the current segment
 				if (!current.is($(segment).prev())) { // if segment to open is not the immediate follower of the current segment
 					var diff = (this.firstLoad) ? ($(current).height() - 200 + 120) : 20;
-                    console.log('a');
 					destinationTop = destinationTop - diff;
 				} else { // if segment to open is the immediate follower of the current segment
-                    console.log('b');
 					destinationTop = destinationTop - spread;
 				}
 			} else { // if segment to open is above the current segment
-//                console.log('c');
 //                if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
 				destinationTop = destinationTop - spread;
                 UI.provaCoso = true;
 			}
 		} else { // if no segment is opened
-            console.log('d');
 			destinationTop = destinationTop - spread;
 		}
 
@@ -1654,7 +1649,6 @@ UI = {
     },
 
     detectTranslationAlternatives: function(d) {
-console.log('ecco');
         /**
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
@@ -4642,7 +4636,8 @@ $.extend(UI, {
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
             if(!UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                    if(!UI.isFirefox) UI.showEditToolbar();
+                    UI.showEditToolbar();
+//                    if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
              /*
@@ -4675,10 +4670,10 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
-//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
+//            if(typeof UI.currentSegment != 'undefined') return true;
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
@@ -8764,11 +8759,13 @@ function saveSelection() {
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
 	try {
-		//we need this try because when we are in revision
+        //we need this try because when we are in revision
 		// and we open a draft segment from a link we have not a editarea.html()
 		//so javascript crash
-		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
+//        editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){
+	 /* create and empty div */ UI.editarea = $('<div>');
+    }
 	UI.savedSelActiveElement = document.activeElement;
 }
 

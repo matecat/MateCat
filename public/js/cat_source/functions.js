@@ -425,11 +425,13 @@ function saveSelection() {
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
 	try {
-		//we need this try because when we are in revision
+        //we need this try because when we are in revision
 		// and we open a draft segment from a link we have not a editarea.html()
 		//so javascript crash
-		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
+//        editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){
+	 /* create and empty div */ UI.editarea = $('<div>');
+    }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
