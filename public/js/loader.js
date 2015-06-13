@@ -4,7 +4,7 @@
 */
 
 Loader = {
-	concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
+	concatSources: true, // set to true if you want to load all the js source components instead of the whole cat.js
 //	components: new Array (
 //		'common',
 //		'cat'
@@ -23,7 +23,9 @@ Loader = {
 		'ui.customization',
         'ui.review',
         'ui.offline',
-        'ui.split'
+        'ui.split',
+        'sse',
+        'ui.comment'
 	),
     other_components: new Array (
         'tm'
