@@ -571,33 +571,6 @@ LOCK TABLES `segments` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `segments_comments`
---
-
-DROP TABLE IF EXISTS `segments_comments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segments_comments` (
-  `id` int(11) NOT NULL,
-  `id_segment` int(11) NOT NULL,
-  `comment` text,
-  `create_date` datetime DEFAULT NULL,
-  `created_by` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_segment` (`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `segments_comments`
---
-
-LOCK TABLES `segments_comments` WRITE;
-/*!40000 ALTER TABLE `segments_comments` DISABLE KEYS */;
-/*!40000 ALTER TABLE `segments_comments` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `translators`
 --
 
@@ -670,3 +643,4 @@ FLUSH PRIVILEGES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+-- Dump completed on 2015-06-05 18:43:05
