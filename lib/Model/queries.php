@@ -3104,3 +3104,42 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
 
     return $db->affected_rows;
 }
+
+function insertComment( $commentData ) {
+    $db    = Database::obtain();
+
+    // TODO: check if everything is escaped properly
+    $id_job       = (int) $commentData['id_job'];
+    $id_segment   = (int) $commentData['id_segment'];
+    $uid          = (int) $commentData['uid'];
+    $user_role    = (int) $commentData['user_role'];
+    $message_type = (int) $commentData['message_type'];
+
+    $message      = $db->escape( $commentData['message'] );
+    $email        = $db->escape( $commentData['email'] );
+    $full_name    = $db->escape( $commentData['full_name'] );
+
+    // TODO: check if dates are to be saved in database
+    $create_date = gmdate('Y-M-D H:i:s');
+
+    $query = " INSERT INTO comments " .
+      " ( " .
+      " id_job, id_segment, create_date, email, full_name, uid, resolve_date," .
+      " user_role, message_type, message ) " .
+      " VALUES " .
+      " ( $id_job, $id_segment, '$create_date', '$email', '$full_name', $uid, '$resolve_date', " .
+      " $user_role, $message_type, '$message' ) " ;
+
+    Log::doLog( $query );
+
+    try {
+      $db->query_first( $query );
+    } catch ( Exception $e ) {
+      Log::doLog( $e->getMessage() );
+      Log::doLog( $query );
+
+      return false ;
+    }
+
+    return $db->affected_rows;
+}

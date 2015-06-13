@@ -11,7 +11,7 @@ module.exports = function(grunt) {
 		concat: {
 			components: {
 				src: [
-					basePath + 'cat_source/ui.core.js', 
+					basePath + 'cat_source/ui.core.js',
 					basePath + 'cat_source/ui.init.js',
 					basePath + 'cat_source/ui.render.js',
 					basePath + 'cat_source/ui.events.js',
@@ -25,7 +25,9 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.review.js',
                     basePath + 'tm.js',
                     basePath + 'cat_source/ui.offline.js',
-                    basePath + 'cat_source/ui.split.js'
+                    basePath + 'cat_source/ui.split.js',
+                    basePath + 'cat_source/sse.js',
+                    basePath + 'cat_source/ui.comment.js',
 				],
 				dest: basePath + 'cat.js'
 			},
