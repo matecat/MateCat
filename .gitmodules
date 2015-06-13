@@ -1,0 +1,30 @@
+[submodule "tools/puppet/modules/apache"]
+	path = tools/puppet/modules/apache
+	url = git@github.com:puppetlabs/puppetlabs-apache.git
+[submodule "tools/puppet/modules/stdlib"]
+	path = tools/puppet/modules/stdlib
+	url = git@github.com:puppetlabs/puppetlabs-stdlib.git
+[submodule "tools/puppet/modules/concat"]
+	path = tools/puppet/modules/concat
+	url = git@github.com:puppetlabs/puppetlabs-concat.git
+[submodule "tools/puppet/modules/java"]
+	path = tools/puppet/modules/java
+	url = git@github.com:puppetlabs/puppetlabs-java.git
+[submodule "tools/puppet/modules/activemq"]
+	path = tools/puppet/modules/activemq
+	url = git@github.com:jbussdieker/puppet-activemq.git
+[submodule "tools/puppet/modules/mysql"]
+	path = tools/puppet/modules/mysql
+	url = git@github.com:puppetlabs/puppetlabs-mysql.git
+[submodule "tools/puppet/modules/apt"]
+	path = tools/puppet/modules/apt
+	url = git@github.com:puppetlabs/puppetlabs-apt.git
+[submodule "tools/puppet/modules/wget"]
+	path = tools/puppet/modules/wget
+	url = git://github.com/maestrodev/puppet-wget.git
+[submodule "tools/puppet/modules/--force"]
+	path = tools/puppet/modules/--force
+	url = git://github.com/willdurand/puppet-nodejs.git
+[submodule "tools/puppet/modules/puppet-nodejs"]
+	path = tools/puppet/modules/nodejs
+	url = git://github.com/willdurand/puppet-nodejs.git
