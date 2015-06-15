@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/sse.js',
-                    basePath + 'cat_source/ui.comment.js',
+                    basePath + 'cat_source/ui.comment.js'
 				],
 				dest: basePath + 'cat.js'
 			},
@@ -59,7 +59,8 @@ module.exports = function(grunt) {
 				src: [
 					basePath + '../css/common.css',
 //					basePath + '../css/jquery-ui.css',
-					basePath + '../css/style.css'
+					basePath + '../css/style.css',
+					basePath + '../css/mbc-style.css'
 				],
 				dest: basePath + '../css/app.css'
 			}

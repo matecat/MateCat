@@ -8,6 +8,8 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.2/css/perfect-scrollbar.min.css"/>
+
         <script type="text/javascript">
             /*<![CDATA[*/
             var config = {
@@ -385,7 +387,8 @@ $(window).resize(function() {
 });
 		</script>
 
-
+    <!-- CDN mbc perfectscroll -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.2/js/min/perfect-scrollbar.jquery.min.js"></script>
 
 
     <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
