@@ -46,12 +46,6 @@ class commentController extends ajaxController {
             'password'   => $this->__postInput[ 'password' ],
         );
 
-        // `id_job` bigint(20) NOT NULL,
-        // `id_segment` bigint(20) NOT NULL,
-        // `full_name` varchar(100) NOT NULL,
-        // `user_role` tinyint(4) DEFAULT NULL,
-        // `message` text,
-        //
         $this->validateInput();
     }
 
@@ -70,7 +64,6 @@ class commentController extends ajaxController {
       // TODO: insert the record in database
       // TODO: enqueue event to AMQ
       //
-      Log::doLog("---------");
 
     }
 
@@ -98,7 +91,7 @@ class commentController extends ajaxController {
         $this->commentData['resolve_date'] = $this->getResolveDate();
         $this->commentData['message_type'] = $this->getMessageType();
 
-        Log::doLog($this->commentData);
+        // Log::doLog($this->commentData);
         $comment = insertComment($this->commentData);
         Log::doLog("comment insert done " . $comment);
     }
@@ -124,7 +117,32 @@ class commentController extends ajaxController {
     }
 
     private function enqueueComment() {
+        Log::doLog("----------- enqueue");
 
+        $message = json_encode( array(
+            '_type' => 'comment',
+            'data' => array(
+                'id_job' => $this->commentData['id_job'],
+                'password' => $this->commentData['password'],
+                'id_client' => $this->commentData['id_client'],
+                'payload' => array(
+                    '_type' => 'comment',
+                    'message' => $this->commentData['message'],
+                    'id_segment' => $this->commentData['id_segment']
+                )
+            )
+        ) );
+
+        $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
+
+        $connect = $stomp->connect();
+
+        $end = $stomp->send( INIT::$SSE_COMMENTS_QUEUE_NAME,
+            $message,
+            array( 'persistent' => 'true' )
+        );
+
+        Log::doLog( "sent message: ", $end );
     }
 
     private function loggedIn() {
