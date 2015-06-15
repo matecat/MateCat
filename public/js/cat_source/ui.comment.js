@@ -6,6 +6,10 @@ if ( config.commentEnabled && !!window.EventSource ) {
     SSE.init();
     var source = SSE.getSource('comments');
 
+    var getRole = function() {
+        return 'revisor';
+    }
+
     source.addEventListener('message', function(e) {
         console.log('message', JSON.parse(e.data));
     }, false);
