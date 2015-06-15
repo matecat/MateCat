@@ -262,27 +262,27 @@ class Bootstrap {
      */
     public static function getEnvConfig() {
 
-        $fileSystem = shell_exec( "df -T files_storage/ | awk '{print $2 }' | sed -n 2p" );
-
-        if ( self::$CONFIG['ENV'] == 'production' ) {
-            $env = self::$CONFIG['production'];
-            if( $fileSystem != 'nfs' && self::$CONFIG['CHECK_FS'] ){
-                die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
-            }
-        } else {
-            $env = self::$CONFIG['development'];
-            if( $fileSystem == 'nfs' && self::$CONFIG['CHECK_FS'] ){
-                die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
-            }
-        }
+        $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
 
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
         foreach( $env as $KEY => $value ){
             if( $KEY == 'STORAGE_DIR' ) {
-                INIT::$STORAGE_DIR                    = INIT::$ROOT . $value;
+                INIT::$STORAGE_DIR = INIT::$ROOT . $value;
                 continue;
             }
             INIT::${$KEY} = $value;
+        }
+
+        $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
+
+        if ( self::$CONFIG['ENV'] == 'production' ) {
+            if( $fileSystem != 'nfs' && self::$CONFIG['CHECK_FS'] ){
+                die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
+            }
+        } else {
+            if( $fileSystem == 'nfs' && self::$CONFIG['CHECK_FS'] ){
+                die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
+            }
         }
 
     }
