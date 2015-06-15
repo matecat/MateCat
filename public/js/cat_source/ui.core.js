@@ -61,12 +61,39 @@ UI = {
         this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
+
+        console.log('byStatus: ', byStatus);
+        var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
+        segment_id = this.getSegmentId(segment);
+//        console.log('segment: ', segment);
+//        console.log('segment_id: ', segment_id);
+
+        $('.percentuage', segment).removeClass('visible');
+//		if (!segment.hasClass('saved'))
+        this.setTranslation(this.getSegmentId(segment), status, false);
+        segment.removeClass('saved');
+        this.setContribution(segment_id, status, byStatus);
+        this.setContributionMT(segment_id, status, byStatus);
+        this.getNextSegment(this.currentSegment, 'untranslated');
+        if(!this.nextUntranslatedSegmentId) {
+            $(window).trigger({
+                type: "allTranslated"
+            });
+        }
+        $(window).trigger({
+            type: "statusChanged",
+            segment: segment,
+            status: status
+        });
+
+
+/*
 //        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 //        console.log('segment: ', segment);
         segment_id = this.getSegmentId(segment);
 //        console.log('segment_id: ', segment_id);
-
+console.log('changeStatus');
         var options = {
             segment_id: segment_id,
             status: status,
@@ -74,6 +101,7 @@ UI = {
         };
         optionsStr = JSON.stringify(options);
         if(this.autopropagateConfirmNeeded()) {
+            console.log('aa');
             APP.confirm({
                 name: 'confirmAutopropagation',
                 cancelTxt: 'Propagate to All',
@@ -84,9 +112,10 @@ UI = {
                 msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
             });
         } else {
+            console.log('bb');
             this.execChangeStatus(optionsStr);
         }
-
+*/
 	},
     preExecChangeStatus: function (options) {
         console.log('preExecChangeStatus');
@@ -1458,9 +1487,9 @@ UI = {
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
             // temp, simulation
-            this.same_source_segments = true;
+//            this.same_source_segments = true;
             // end temp
-            var autoPropagable = this.same_source_segments;
+            var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
 //            console.log('this: ', this);
             if(typeof this.segment == 'object') console.log(this);
 //            console.log('this.segment: ', this);
@@ -1992,8 +2021,8 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
-        console.log('setStatus - segment: ', segment);
-        console.log('setStatus - status: ', status);
+//        console.log('setStatus - segment: ', segment);
+//        console.log('setStatus - status: ', status);
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
@@ -2326,7 +2355,7 @@ UI = {
 //        console.log('setTranslation');
 //        console.log('id_segment: ', id_segment);
 //        console.log('status: ', status);
-//        console.log('caller: ', caller);
+        console.log('caller: ', caller);
         // add to setTranslation tail
         alreadySet = this.alreadyInSetTranslationTail(id_segment);
 //        console.log('prova: ', '"' + $('#segment-' + id_segment + ' .editarea').text().trim().length + '"');
@@ -2386,10 +2415,12 @@ UI = {
         var item = {
             id_segment: id_segment,
             status: status,
-            caller: caller,
+            caller: "'" + caller + "'",
             callback: callback
         }
         this.setTranslationTail.push(item);
+        console.log(this.setTranslationTail);
+
     },
     updateToSetTranslationTail: function (id_segment, status, caller, callback) {
 //        console.log('addToSetTranslationTail ' + id_segment);
@@ -2511,7 +2542,7 @@ UI = {
                 UI.decrementOfflineCacheRemaining();
             },
 			success: function(d) {
-//                console.log('this: ', this);
+                console.log('this: ', this);
 //                console.log('execSetTranslation success');
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
@@ -3114,6 +3145,7 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status, byStatus) {
+//        console.log('setTranslation_success');
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
@@ -3121,7 +3153,7 @@ UI = {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
-
+//console.log('byStatus: ', byStatus);
             //if this was in pending state remove
             $( segment ).removeClass( 'setTranslationPending' );
 
@@ -3129,10 +3161,11 @@ UI = {
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
         //    $(segment).removeClass('setTranslationPending');
+//console.log('AAAA: ', JSON.stringify(byStatus));
 
-            if(!byStatus) {
+ //           if(!byStatus) {
                 this.beforePropagateTranslation(segment, status);
-            }
+ //           }
         }
         this.resetRecoverUnsavedSegmentsTimer();
     },
@@ -3245,9 +3278,9 @@ UI = {
     propagateTranslation: function(segment, status, evenTranslated) {
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
-
+console.log('status: ', status);
         if( status == 'translated' ){
-
+console.log('eccolo');
             plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
@@ -3255,6 +3288,7 @@ UI = {
                 $('.editarea', this).html( $('.editarea', segment).html() );
 
                 // if status is not set to draft, the segment content is not displayed
+                console.log('$(this): ', $(this));
                 UI.setStatus($(this), status); // now the status, too, is propagated
 //                UI.setStatus($(this), 'draft');
                 //set segment as autoPropagated
