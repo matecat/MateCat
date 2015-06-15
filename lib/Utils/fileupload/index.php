@@ -13,8 +13,8 @@ error_reporting(E_ALL | E_STRICT);
 
 ini_set('max_input_time',3600);
 
-require realpath(dirname(__FILE__) . '/../../../') . '/inc/config.inc.php';
-@INIT::obtain();
+require realpath( dirname(__FILE__) . '/../../../' ) . '/inc/Bootstrap.php';
+@Bootstrap::start();
 require('upload.class.php');
 
 $upload_handler = new UploadHandler();

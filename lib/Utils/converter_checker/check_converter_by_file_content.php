@@ -59,7 +59,7 @@ class ConvertersMonitor {
 
         //imports
         require_once $this->ROOT . '/inc/config.inc.php';
-        INIT::obtain();
+        Bootstrap::start();
 
         $this->db = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->db->connect();

@@ -14,6 +14,8 @@ class convertFileController extends ajaxController {
 	protected $intDir;
 	protected $errDir;
 
+    protected $cookieDir;
+
 	public function __construct() {
 
 		parent::__construct();
@@ -46,9 +48,9 @@ class convertFileController extends ajaxController {
 
 		if( $this->segmentation_rule == "") $this->segmentation_rule = null;
 
-
-		$this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
-		$this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $this->cookieDir = $_COOKIE[ 'upload_session' ];
+		$this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+		$this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
 	}
 
@@ -296,17 +298,21 @@ class convertFileController extends ajaxController {
 
 		}
 
-		//if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
+        //if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
         if ( isset( $xliffPath ) and !empty( $xliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR .  $_COOKIE[ 'upload_session' ];
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR .  $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $sha1 );
 
             //put reference to cache in upload dir to link cache to session
-            $fs->linkSessionToCache( $sha1, $this->source_lang, $_COOKIE[ 'upload_session' ] );
+            $fs->linkSessionToCache( $sha1, $this->source_lang, $this->cookieDir );
             //a usable package is available, give positive feedback
             $this->result[ 'code' ] = 1;
+
         }
+
 	}
+
+
 }

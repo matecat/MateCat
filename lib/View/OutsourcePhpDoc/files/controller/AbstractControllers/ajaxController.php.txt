@@ -27,7 +27,7 @@ abstract class ajaxController extends controller {
      *
      */
     public function disableSessions(){
-        INIT::sessionClose();
+        Bootstrap::sessionClose();
     }
 
     /**

@@ -21,7 +21,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
     public function __construct() {
 
         //SESSION ENABLED
-        INIT::sessionStart();
+        Bootstrap::sessionStart();
 
         $this->currency    = "EUR";
         $this->change_rate = 1;

@@ -150,7 +150,7 @@ class FilesStorage {
     }
 
     public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ){
-        list( $shasum, $srcLang ) = explode( "|", $linkFile );
+        @list( $shasum, $srcLang ) = explode( "|", $linkFile );
 
         $iterator = new DirectoryIterator( $uploadDirPath );
 
@@ -187,9 +187,9 @@ class FilesStorage {
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //FIX: we could check in advance and, in case, use copy instead of links
 
-        //orig
+        //orig, suppress error because of xliff files have not original one
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
-        link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        @link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
 
         //work
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );

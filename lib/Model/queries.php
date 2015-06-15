@@ -876,7 +876,9 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
 
-			,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
+        ,( SELECT COUNT( segment_hash ) FROM segment_translations WHERE segment_hash = s.segment_hash AND id_job =  j.id ) repetitions_in_chunk
+
+        ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
 			FROM jobs j
 			INNER JOIN projects p ON p.id=j.id_project
