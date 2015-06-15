@@ -95,11 +95,13 @@ class { 'java':
 class { 'activemq': }
 
 activemq::instance { 'matecat':
-  stomp_queue_port => 61613,
-  stomp_queue      => true,
-  user_name        => 'login',
-  user_password    => 'passcode',
-  user_auth_queue  => '>',
+  stomp_queue_port       => 61613,
+  stomp_queue            => true,
+  authorization_enabled  => false,
+  authentication_enabled => false,
+  user_name              => 'login',
+  user_password          => 'passcode',
+  user_auth_queue        => '>'
 }
 
 # MateCAT config
