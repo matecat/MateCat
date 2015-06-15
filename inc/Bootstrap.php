@@ -32,9 +32,6 @@ class Bootstrap {
         spl_autoload_register( 'Bootstrap::loadClass' );
         require_once 'Predis/autoload.php';
 
-        INIT::obtain();
-        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
-
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
             register_shutdown_function( 'Bootstrap::sessionClose' );
@@ -48,6 +45,9 @@ class Bootstrap {
             }
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
+
+        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
+        INIT::obtain();
 
         INIT::$ROOT                           = self::$_ROOT; // Accesible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accesible by the browser
