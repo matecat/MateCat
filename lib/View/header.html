@@ -8,6 +8,25 @@
 
 <header metal:define-macro="main_header">
 
+        <!-- mbc chat temp and remove in production -->
+            <div class="dev-btn-set">
+                <ul>
+                    <li><a href="#" class="dev-btn dev-commento-visibile">* Commento visibile</a>
+                        <ul>
+                            <li>** Thread resolved</li>
+                            <li><a href="#" class="dev-btn dev-thread-justresolved">*** Thread just resolved</a></li>
+                            <li><a href="#" class="dev-btn dev-thread-resolved-ask">*** Thread resolved Ask new question</a></li>
+                            <li>** Thread active
+                                <ul>
+                                    <li><a href="#" class="dev-btn dev-first-comment">*** Insert first comment</a></li>
+                                    <li><a href="#" class="dev-btn dev-reply-comment">*** Reply to comment</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
     <p class="warning" tal:condition="php:supportedBrowser EQ -1" >
         MateCAT was not tested with this browser.<br/>
         Please, use Google Chrome or Mozilla Firefox
@@ -71,6 +90,53 @@
             <li id='filterSwitch' title="Search or Filter results">
                 <span class="numbererror"></span>
             </li>
+            <!-- mbc chat history list item -->
+            <li id='mbc-history' title="View notifications">
+                <span class="icon-bubble2"></span>
+                <span class="mbc-comment-highlight mbc-comment-highlight-history">1</span>
+            </li>
+            <!-- mbc chat history balloon -->
+            <div class="mbc-history-balloon-outer hide">
+                <div class="triangle triangle-top"></div>
+                <div class="mbc-history-balloon">
+                <a href="#" class="mbc-close-btn">&#10005;</a>
+                    <div class="mbc-thread-wrap mbc-thread-number">
+                        <div class="mbc-show-comment mbc-show-first-comment">
+                        <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>
+                        <div class="mbc-comment-info-wrap mbc-clearfix">
+                        <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>
+                        <span class="mbc-comment-info mbc-comment-role">translator</span>
+                        </div>
+                        <p class="mbc-comment-body">I’d say “dimostrata” instead of “dimostrato” as if refers to the “legge”.</p>
+                        </div>
+                        <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">View</a></div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="mbc-thread-wrap mbc-thread-number">
+                        <div class="mbc-show-comment mbc-show-first-comment">
+                        <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>
+                        <div class="mbc-comment-info-wrap mbc-clearfix">
+                        <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>
+                        <span class="mbc-comment-info mbc-comment-role">translator</span>
+                        </div>
+                        <p class="mbc-comment-body">Consider this simple case; you have a menu item called “Manual”.</p>
+                        </div>
+                        <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">View</a></div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="mbc-thread-wrap mbc-thread-number">
+                        <div class="mbc-show-comment mbc-show-first-comment">
+                        <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>
+                        <div class="mbc-comment-info-wrap mbc-clearfix">
+                        <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>
+                        <span class="mbc-comment-info mbc-comment-role">translator</span>
+                        </div>
+                        <p class="mbc-comment-body">Words that can be used as a noun or verb in English but may have different names in another language</p>
+                        </div>
+                        <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">View</a></div>
+                    </div>
+                </div>
+            </div>
         </ul>
 
         <a href="${basepath}" class="logo">

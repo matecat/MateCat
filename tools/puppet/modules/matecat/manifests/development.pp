@@ -28,8 +28,7 @@ class {'nodejs':
 } -> file {'/usr/bin/npm':
   ensure => 'link',
   target => '/usr/local/node/node-default/bin/npm'
-}
-
+} ->
 package {'grunt-cli':
   provider => npm
 } -> file {'/usr/bin/grunt':
@@ -95,13 +94,11 @@ class { 'java':
 class { 'activemq': }
 
 activemq::instance { 'matecat':
-  stomp_queue_port       => 61613,
-  stomp_queue            => true,
-  authorization_enabled  => false,
-  authentication_enabled => false,
-  user_name              => 'login',
-  user_password          => 'passcode',
-  user_auth_queue        => '>'
+  stomp_queue_port => 61613,
+  stomp_queue      => true,
+  user_name        => 'login',
+  user_password    => 'passcode',
+  user_auth_queue  => '>',
 }
 
 # MateCAT config

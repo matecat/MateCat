@@ -1361,7 +1361,7 @@ console.log('changeStatus');
 
 			if (articleToAdd) {
 				filenametoshow = truncate_filename(this.filename, 40);
-				newFile += '<article id="file-' + fid + '" class="loading">' +
+				newFile += '<article id="file-' + fid + '" class="loading mbc-commenting-closed">' +
 						'	<ul class="projectbar" data-job="job-' + this.jid + '">' +
 						'		<li class="filename">' +
 						'			<form class="download" action="/" method="post">' +
@@ -1477,6 +1477,212 @@ console.log('changeStatus');
             '		</div>' +
             '		<div class="footer toggle"></div> <!-- .footer -->     ' +
             '	</div> <!-- .body -->' +
+            //////////// mbc commenting starts here
+            ' <div class="mbc-comment-link">' +
+            ' <div class="txt">' +
+            ' <span class="mbc-comment-total">1</span>' +
+            ' <span class="mbc-comment-icon icon-bubbles4"></span>' +
+            ' <span class="mbc-comment-highlight mbc-comment-total-none">1</span>' +
+            '</div>' +
+            '</div>' +
+            ////
+            //// Thread risolto
+            ////
+            ////////
+            //////// Thread appena risolto
+            ////////
+            ' <div class="mbc-comment-balloon-outer mbc-thread-resolved mbc-thread-justresolved hide">' +
+            ' <div class="triangle triangle-topleft"></div>' +
+            // Close btn
+            '<a href="#" class="mbc-close-btn">&#10005;</a>' +
+            // balloon outer starts here
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-resolved mbc-thread-number">' +
+            // thread wrap starts here
+            // Show posted comment
+            ' <div class="mbc-show-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+            ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +
+            ' <span class="mbc-comment-info mbc-comment-role">translator</span>' +
+            ' </div>' +
+            ' <p class="mbc-comment-body">I’d say “dimostrata” instead of “dimostrato” as if refers to the “legge”.</p>' +
+            ' </div>' +
+            ' <div class="divider"></div>' +
+            // Show posted comment
+            ' <div class="mbc-show-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+            ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +
+            ' <span class="mbc-comment-info mbc-comment-role">revisor</span>' +
+            ' </div>' +
+            ' <p class="mbc-comment-body">Ok, got it. Following your suggestion I’d make a change to “scoperto” too and translate it with “scoperta” as both are referring to “legge”</p>' +
+            ' </div>' +
+            ' <div class="divider"></div>' +
+            ' <div class="mbc-show-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-resolvedby mbc-truncate">Anonymous</span>' +
+            ' <span class="mbc-comment-resolved-label">resolved</span>' +
+            ' </div>' +
+            // thread wrap ends here
+            ' </div>' +
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            // thread wrap starts here
+            ' <a href="#" class="mbc-comment-btn mbc-ask-btn mbc-show-form-btn">Ask new question</a>' +
+            ' <div class="mbc-ask-comment-wrap hide">' +
+            // wrap ask question starts here
+            ' <div class="mbc-first-comment-wrap">' +
+            // first comment wrap starts here
+            ' <span class="mbc-comment-label mbc-first-comment-label">Insert a comment</span>' +
+            ' <div class="divider"></div>' +
+						// first comment wrap ends here
+            ' </div>' +
+            ' <div class="mbc-post-comment">' +
+            // mbc post comment starts here. Form template: textarea + send or reply button
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <textarea class="mbc-comment-textarea"></textarea>' +
+            ' <div><a href="#" class="mbc-comment-btn">Send</a></div>' +
+            // mbc post comment ends here
+            ' </div>' +
+            // wrap ask question wrap ends here
+            ' </div>' +
+            // thread wrap ends here
+            ' </div>' +
+            // balloon-outer ends here
+            ' </div>' +
+            ////////
+            //////// Thread risolto ask new question collapse/expand
+            ////////
+            ' <div class="mbc-comment-balloon-outer mbc-thread-resolved mbc-thread-resolved-ask hide">' +
+            ' <div class="triangle triangle-topleft"></div>' +
+            // Close btn
+            '<a href="#" class="mbc-close-btn">&#10005;</a>' +
+            // balloon outer starts here
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-resolved mbc-thread-number">' +
+            // thread wrap starts here
+            // Show posted comment
+            ' <div class="mbc-show-comment mbc-show-first-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+            ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +
+            ' <span class="mbc-comment-info mbc-comment-role">translator</span>' +
+            ' </div>' +
+            ' <p class="mbc-comment-body">I’d say “dimostrata” instead of “dimostrato” as if refers to the “legge”.</p>' +
+            ' </div>' +
+            ' <div class="divider"></div>' +
+            ' <div class="thread-collapsed hide">' +
+            // Show posted comment
+            ' <div class="mbc-show-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+            ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +
+            ' <span class="mbc-comment-info mbc-comment-role">revisor</span>' +
+            ' </div>' +
+            ' <p class="mbc-comment-body">Ok, got it. Following your suggestion I’d make a change to “scoperto” too and translate it with “scoperta” as both are referring to “legge”</p>' +
+            ' </div>' +
+            ' <div class="divider"></div>' +
+            ' </div>' +
+            // Show more / less
+            ' <a href="#" class="show-thread-btn"><span class="show-thread-label">Show more</span> (1) <span class="show-toggle-icon">+</span></a>' +
+            ' <div class="divider"></div>' +
+            ' <div class="mbc-show-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-resolvedby mbc-truncate">Anonymous</span>' +
+            ' <span class="mbc-comment-resolved-label">resolved</span>' +
+            ' </div>' +
+            // thread wrap ends here
+            ' </div>' +
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            // thread wrap starts here
+            ' <a href="#" class="mbc-comment-btn mbc-ask-btn mbc-show-form-btn">Ask new question</a>' +
+            ' <div class="mbc-ask-comment-wrap hide">' +
+            // wrap ask question starts here
+            ' <div class="mbc-first-comment-wrap">' +
+            // first comment wrap starts here
+            ' <span class="mbc-comment-label mbc-first-comment-label">Insert a comment</span>' +
+            ' <div class="divider"></div>' +
+						// first comment wrap ends here
+            ' </div>' +
+            ' <div class="mbc-post-comment">' +
+            // mbc post comment starts here. Form template: textarea + send or reply button
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <textarea class="mbc-comment-textarea"></textarea>' +
+            ' <div><a href="#" class="mbc-comment-btn">Send</a></div>' +
+            // mbc post comment ends here
+            ' </div>' +
+            // wrap ask question wrap ends here
+            ' </div>' +
+            // thread wrap ends here
+            ' </div>' +
+            // balloon-outer ends here
+            ' </div>' +
+            ////
+            //// Thread attivo
+            ////
+            ////////
+            //////// Thread attivo post first comment
+            ////////
+            ' <div class="mbc-comment-balloon-outer mbc-thread-active mbc-thread-active-first-comment hide">' +
+            ' <div class="triangle triangle-topleft"></div>' +
+            // Close btn
+            '<a href="#" class="mbc-close-btn">&#10005;</a>' +
+            // balloon outer starts here
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            // thread wrap starts here
+            ' <div class="mbc-first-comment-header">' +
+            // first comment wrap starts here
+            ' <span class="mbc-comment-label mbc-first-comment-label">Insert a comment</span>' +
+            ' <div class="divider"></div>' +
+						// first comment wrap ends here
+            ' </div>' +
+            // mbc elements for first comment: header Insert a comment + divider
+            // mbc post first comment
+            ' <div class="mbc-post-comment">' +
+            // mbc post comment starts here. Form template: textarea + send or reply button
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <textarea class="mbc-comment-textarea"></textarea>' +
+            ' <div><a href="#" class="mbc-comment-btn">Send</a></div>' +
+            // mbc post comment ends here
+            ' </div>' +
+            // thread wrap ends here
+            ' </div>' +
+            // balloon-outer ends here
+            ' </div>' +
+            ////////
+            //////// Thread attivo post reply comment
+            ////////
+            ' <div class="mbc-comment-balloon-outer mbc-thread-active mbc-thread-active-reply-comment hide">' +
+            ' <div class="triangle triangle-topleft"></div>' +
+            // Close btn
+            '<a href="#" class="mbc-close-btn">&#10005;</a>' +
+            // balloon outer starts here
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            // thread wrap starts here
+            // Show posted comment
+            ' <div class="mbc-show-comment mbc-show-first-comment">' +
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+            ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +
+            ' <span class="mbc-comment-info mbc-comment-role">translator</span>' +
+            ' </div>' +
+            ' <p class="mbc-comment-body">I’d say “dimostrata” instead of “dimostrato” as if refers to the “legge”.</p>' +
+            ' </div>' +
+            ' <div class="divider"></div>' +
+            // Reply to comment
+            ' <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">Reply</a></div>' +
+            ' <div class="mbc-post-comment hide">' +
+            // mbc post comment starts here. Form template: textarea + send or reply button
+            ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+            // mbc post comment form template: textarea + send or reply button
+            ' <textarea class="mbc-comment-textarea"></textarea>' +
+            ' <div><a href="#" class="mbc-comment-btn">Send</a></div>' +
+            // mbc post comment ends here
+            ' </div>' +
+            ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn">Resolve</a>' +
+            // thread wrap ends here
+            ' </div>' +
+            // balloon-outer ends here
+            ' </div>' +
+
+
+            //////////// mbc commenting ends here
             '	<ul class="statusmenu"></ul>' +
             '</section> ';
         return newSegmentMarkup;
