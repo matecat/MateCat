@@ -63,28 +63,68 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
 //        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-		segment_id = this.getSegmentId(segment);
 //        console.log('segment: ', segment);
+        segment_id = this.getSegmentId(segment);
 //        console.log('segment_id: ', segment_id);
+
+        var options = {
+            segment_id: segment_id,
+            status: status,
+            byStatus: byStatus
+        };
+        optionsStr = JSON.stringify(options);
+        if(this.autopropagateConfirmNeeded()) {
+            APP.confirm({
+                name: 'confirmAutopropagation',
+                cancelTxt: 'Propagate to All',
+                onCancel: 'execChangeStatus',
+                callback: 'preExecChangeStatus',
+                okTxt: 'Only this segment',
+                context: optionsStr,
+                msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
+            });
+        } else {
+            this.execChangeStatus(optionsStr);
+        }
+
+	},
+    preExecChangeStatus: function (options) {
+        console.log('preExecChangeStatus');
+        this.execChangeStatus(options, true);
+    },
+
+    execChangeStatus: function (optionsStr, noPropagation) {
+        options = $.parseJSON(optionsStr);
+        console.log('options: ', options);
+        segment_id = options.segment;
+        segment = $('#segment-' + segment_id);
+        status = options.status;
+        byStatus = options.byStatus;
+//        console.log();
+        noPropagation = noPropagation || false;
+
+        console.log('solo questo segmento? ', noPropagation);
+
 
         $('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
-		this.setTranslation(this.getSegmentId(segment), status, false);
-		segment.removeClass('saved');
-		this.setContribution(segment_id, status, byStatus);
-		this.setContributionMT(segment_id, status, byStatus);
-		this.getNextSegment(this.currentSegment, 'untranslated');
-		if(!this.nextUntranslatedSegmentId) {
-			$(window).trigger({
-				type: "allTranslated"
-			});
-		}
-		$(window).trigger({
-			type: "statusChanged",
-			segment: segment,
-			status: status
-		});
-	},
+        this.setTranslation(segment_id, status, false);
+        segment.removeClass('saved');
+        this.setContribution(segment_id, status, byStatus);
+        this.setContributionMT(segment_id, status, byStatus);
+        this.getNextSegment(this.currentSegment, 'untranslated');
+        if(!this.nextUntranslatedSegmentId) {
+            $(window).trigger({
+                type: "allTranslated"
+            });
+        }
+        $(window).trigger({
+            type: "statusChanged",
+            segment: segment,
+            status: status
+        });
+    },
+
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
 
@@ -1270,7 +1310,7 @@ UI = {
 			this.init();
 		}
 	},
-    getSegmentMarkup: function (segment, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId) {
+    getSegmentMarkup: function (segment, t, readonly, autoPropagated, autoPropagable, escapedSegment, splitAr, splitGroup, originalId) {
 //        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
 //        console.log('VEDIAMO: ', segment);
 //        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
@@ -1279,7 +1319,7 @@ UI = {
         // END TEMP
         splitGroup = segment.split_group || splitGroup || '';
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
-        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
+        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-propagable="' + autoPropagable + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
 //            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
             '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
@@ -1334,6 +1374,16 @@ UI = {
             '	<ul class="statusmenu"></ul>' +
             '</section> ';
         return newSegmentMarkup;
+    },
+    autopropagateConfirmNeeded: function () {
+        segment = UI.currentSegment;
+        if( (segment.attr('data-propagable') == 'true') && (segment.is('.status-draft, .status-new')) ) {
+            console.log('non serve popup');
+            return false;
+        } else {
+            console.log('serve popup');
+            return true;
+        }
     },
     stripSpans: function (str) {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
@@ -1407,6 +1457,10 @@ UI = {
 //                this.readonly = true;
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
+            // temp, simulation
+            this.same_source_segments = true;
+            // end temp
+            var autoPropagable = this.same_source_segments;
 //            console.log('this: ', this);
             if(typeof this.segment == 'object') console.log(this);
 //            console.log('this.segment: ', this);
@@ -1432,7 +1486,7 @@ UI = {
             escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
             originalId = this.sid.split('-')[0];
             if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, escapedSegment, splitAr, splitGroup, originalId, 0);
+                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, autoPropagable, escapedSegment, splitAr, splitGroup, originalId, 0);
             } else {
 
             }
@@ -3201,7 +3255,8 @@ UI = {
                 $('.editarea', this).html( $('.editarea', segment).html() );
 
                 // if status is not set to draft, the segment content is not displayed
-                UI.setStatus($(this), 'draft');
+                UI.setStatus($(this), status); // now the status, too, is propagated
+//                UI.setStatus($(this), 'draft');
                 //set segment as autoPropagated
                 $( this ).data( 'autopropagated', true );
             });
