@@ -137,7 +137,7 @@ class DetectProprietaryXliff {
             self::$fileType['info'] = $pathInfo;
         }
 
-        switch( self::$fileType['info']['extension'] ){
+        switch( strtolower( self::$fileType['info']['extension'] ) ){
 			case 'xliff':
 			case 'sdlxliff':
 			case 'tmx':
