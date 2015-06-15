@@ -20,7 +20,7 @@ stompit.connect(connectOptions, function(error, client) {
     }
 
     var sendHeaders = {
-        'destination': '/queue/matecat.sse',
+        'destination': '/queue/matecat_sse_comments',
         'content-type': 'text/plain'
     };
 
@@ -32,7 +32,7 @@ stompit.connect(connectOptions, function(error, client) {
             password : '3494ab77e7d7',
             payload: {
                 _type: 'comment',
-                rand : Math.random(),
+                id_segment : Math.random(),
                 message : _.sample(['hello', 'hi', 'help', 'sorry'])
             }
         }

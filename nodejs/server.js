@@ -11,7 +11,7 @@ winston.add( winston.transports.File, { filename: 'server.log' } );
 winston.remove( winston.transports.Console );
 winston.level = 'debug';
 
-var queueName = '/queue/matecat.sse';
+var queueName = '/queue/matecat_sse_comments';
 
 var connectOptions = {
     'host': 'localhost',
@@ -114,6 +114,14 @@ var stompMessageReceived = function(body) {
 
 var startStompConnection = function()   {
   stompit.connect(connectOptions, function(error, client) {
+
+    if (typeof client === 'undefined') {
+      // TODO handle this case this happens when AMQ restarts
+      setTimeout(startStompConnection, 10000);
+      console.log("** client error, restarting connection in 10 seconds");
+      return;
+    }
+
     client.subscribe(subscribeHeaders, function(error, message) {
       console.log('** event received in client subscription');
 
