@@ -10,9 +10,6 @@
 [submodule "tools/puppet/modules/java"]
 	path = tools/puppet/modules/java
 	url = git@github.com:puppetlabs/puppetlabs-java.git
-[submodule "tools/puppet/modules/activemq"]
-	path = tools/puppet/modules/activemq
-	url = git@github.com:jbussdieker/puppet-activemq.git
 [submodule "tools/puppet/modules/mysql"]
 	path = tools/puppet/modules/mysql
 	url = git@github.com:puppetlabs/puppetlabs-mysql.git
@@ -22,9 +19,6 @@
 [submodule "tools/puppet/modules/wget"]
 	path = tools/puppet/modules/wget
 	url = git://github.com/maestrodev/puppet-wget.git
-[submodule "tools/puppet/modules/--force"]
-	path = tools/puppet/modules/--force
-	url = git://github.com/willdurand/puppet-nodejs.git
 [submodule "tools/puppet/modules/puppet-nodejs"]
 	path = tools/puppet/modules/nodejs
 	url = git://github.com/willdurand/puppet-nodejs.git
