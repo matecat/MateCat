@@ -1,6 +1,6 @@
 <?php
 $root = realpath(dirname(__FILE__) . '/../../../');
-include_once "$root/inc/config.inc.php";
+include_once "$root/inc/Bootstrap.php";
 Bootstrap::start();
 require_once INIT::$MODEL_ROOT.'/queries.php';
 
