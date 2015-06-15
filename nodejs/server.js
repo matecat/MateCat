@@ -1,15 +1,17 @@
-var SseChannel = require('sse-channel');
-var http = require('http');
-var os = require('os');
-var stompit = require('stompit');
-var url = require('url');
-var qs = require('querystring');
-var _ = require('lodash');
-var winston = require('winston');
+var SseChannel = require( 'sse-channel' );
+var http       = require( 'http' );
+var os         = require( 'os' );
+var stompit    = require( 'stompit' );
+var url        = require( 'url' );
+var qs         = require( 'querystring' );
+var _          = require( 'lodash' );
+var winston    = require( 'winston' );
 
-winston.add(winston.transports.File, { filename: 'server.log' });
-winston.remove(winston.transports.Console);
+winston.add( winston.transports.File, { filename: 'server.log' } );
+winston.remove( winston.transports.Console );
 winston.level = 'debug';
+
+var queueName = '/queue/matecat.sse';
 
 var connectOptions = {
     'host': 'localhost',
@@ -23,7 +25,7 @@ var connectOptions = {
 };
 
 var subscribeHeaders = {
-    'destination': '/queue/matecat.sse',
+    'destination': queueName,
     'ack': 'client-individual'
   };
 
@@ -48,13 +50,6 @@ var generateUid = function (separator) {
 };
 
 var browserLoopIntervalTime = 2000;
-var queueName = '/queue/matecat.sse';
-
-var browserLoop = function() {
-    // browserChannel.send({
-    //     data: 'test'
-    // });
-};
 
 browserChannel.on('message', function(message) {
     // TODO: a message was sent to clients, nothing interesting to do here.
@@ -80,76 +75,71 @@ browserChannel.on('connect', function(context, req, res) {
 });
 
 http.createServer(function(req, res) {
-    // find job id from requested path
-    var parsedUrl = url.parse( req.url ) ;
-    var path = parsedUrl.path  ;
+  // find job id from requested path
+  var parsedUrl = url.parse( req.url ) ;
+  var path = parsedUrl.path  ;
+
+  if (path.indexOf('/channel/comments') === 0 ) {
     var query = qs.parse( parsedUrl.query ) ;
 
-    if (path.indexOf('/channel/comments') === 0 ) {
+    res._clientId = generateUid();
+    res._matecatJobId = query.jid ;
+    res._matecatPw = query.pw ;
 
-        res._clientId = generateUid();
-        res._matecatJobId = query.jid ;
-        res._matecatPw = query.pw ;
+    browserChannel.addClient(req, res);
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
 
-        browserChannel.addClient(req, res);
-
-        // TODO: immediately send to the client it's own connectionId
-
-    } else {
-        res.writeHead(404);
-        res.end();
-    }
-    }).listen(7788, '0.0.0.0', function() {
-        console.log('Listening on http://127.0.0.1:7788/');
-    });
-
-setInterval(browserLoop, browserLoopIntervalTime);
-
+}).listen(7788, '0.0.0.0', function() {
+  console.log('Listening on http://127.0.0.1:7788/');
+});
 
 var stompMessageReceived = function(body) {
-    var message = JSON.parse(body);
+  var message = JSON.parse(body);
 
-    var dest = _.filter(browserChannel.connections, function(ele) {
-        return ele._matecatJobId == message.data.id_job && ele._matecatPw == message.data.password;
-    });
+  var dest = _.filter(browserChannel.connections, function(ele) {
+    return ele._matecatJobId == message.data.id_job && ele._matecatPw == message.data.password;
+  });
 
-    console.log('browser channel connections', dest.length);
+  console.log('browser channel connections', dest.length);
 
-    browserChannel.send({ data: message.data.payload }, dest);
+  browserChannel.send({ data: message.data.payload }, dest);
 
-    // find channel, SSE can serve multiple purposes
-    // find subs by job_id, and skip those where password does not match
-    console.log('stompMessageReceived id', message.data.id_job);
-
+  // find channel, SSE can serve multiple purposes
+  // find subs by job_id, and skip those where password does not match
+  console.log('stompMessageReceived id', message.data.id_job);
 }
 
 var startStompConnection = function()   {
-    stompit.connect(connectOptions, function(error, client) {
-        client.subscribe(subscribeHeaders, function(error, message) {
-            console.log('** event received in client subscription');
+  stompit.connect(connectOptions, function(error, client) {
+    client.subscribe(subscribeHeaders, function(error, message) {
+      console.log('** event received in client subscription');
 
-            if (error) {
-                console.log('!! subscribe error ' + error.message);
+      if (error) {
+        console.log('!! subscribe error ' + error.message);
 
-                client.disconnect();
+        client.disconnect();
+        startStompConnection();
 
-                startStompConnection();
-                return;
-            }
+        return;
+      }
 
-            message.readString('utf-8', function(error, body) {
+      message.readString('utf-8', function(error, body) {
 
-                if (error) {
-                    console.log('!! read message error ' + error.message);
-                    return;
-                }
-                else {
-                    stompMessageReceived(body);
-                    message.ack();
-                }
-            });
-        });
+        if (error) {
+          console.log('!! read message error ' + error.message);
+          return;
+        }
+        else {
+          console.log('message received');
+          stompMessageReceived(body);
+          message.ack();
+        }
+      });
     });
+  });
 }
 
 startStompConnection();
