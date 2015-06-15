@@ -125,14 +125,29 @@ class FilesStorage {
             //set original moval as successful
             $outcome1 = true;
 
+            $fileType = DetectProprietaryXliff::getInfo( $xliffPath );
+            if ( !$fileType[ 'proprietary' ] ) {
+                $force_extension = '.sdlxliff';
+            }
+
             //use original xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $xliffPath );
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $xliffPath ) . @$force_extension;
         } else {
             //move original
             $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $originalPath ) );
 
+            //check if manifest from a LongHorn conversion exists
+            $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
+            if ( file_exists( $manifestFile ) ) {
+                Log::doLog( "Alternative Conversion detected" );
+                $file_extension = '.xlf';
+            } else{
+                Log::doLog( "Normal Conversion detected" );
+                $file_extension = '.sdlxliff';
+            }
+
             //set naming for converted xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $originalPath ) . '.xlf';
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $originalPath ) . $file_extension;
         }
 
         //move converted xliff
