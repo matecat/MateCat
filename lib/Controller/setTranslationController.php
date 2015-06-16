@@ -363,7 +363,8 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
         if ( in_array( $this->status, array(
-                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED
+                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
+                Constants_TranslationStatus::STATUS_REJECTED
         ) ) ) {
 
             try {
