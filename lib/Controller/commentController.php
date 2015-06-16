@@ -21,6 +21,7 @@ class commentController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
+            '_sub'        => array( 'filter' => FILTER_SANITIZE_STRING ),
             'id_client'   => array( 'filter' => FILTER_SANITIZE_STRING ),
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -35,6 +36,54 @@ class commentController extends ajaxController {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+    }
+
+    public function doAction() {
+        if ($this->validateLogin()) {
+            switch( $this->__postInput['_sub'] ) {
+            case 'getlist':
+                $this->getList();
+            case 'resolve':
+                $this->resolveThread();
+            case 'create':
+                $this->create();
+                break;
+            default:
+                $this->result[ 'errors' ][ ] = array( "code" => -127, "message" => "No valid action provided." );
+            }
+        }
+        else {
+            // TODO: handle login failure
+
+        }
+    }
+
+    private function getList() {
+        // TODO: find segments
+
+    }
+
+    private function resolveThread() {
+        $job_data = getJobData(
+            $this->__postInput[ 'id_job' ],
+            $this->__postInput[ 'password' ]
+        );
+
+        return !empty($job_data);
+    }
+
+    private function validateLogin() {
+        if ( !empty($job_data) ) {
+            Log::doLog($job_data);
+            $this->processComment();
+
+        } else {
+            $this->result[ 'errors' ][ ] = array( "code" => -127, "message" => "Job not found." ) ;
+        }
+
+    }
+
+    private function create() {
         $this->commentData = array(
             'id_segment' => $this->__postInput[ 'id_segment' ],
             'id_job'     => $this->__postInput[ 'id_job' ],
@@ -43,27 +92,21 @@ class commentController extends ajaxController {
             'user_role'  => $this->__postInput[ 'role' ],
             'message'    => $this->__postInput[ 'message' ],
             'password'   => $this->__postInput[ 'password' ],
+            'parsed_date' => gmdate('Y-m-d H:i:s'), // TODO: check this
         );
 
         $this->validateInput();
+        if ( $this->processComment() ) {
+            array_push( $this->result[ 'data' ], $this->commentData );
+        } else {
+            // TODO: handle error
+            $this->result[ 'errors' ][ ] = array( "code" => -127, "message" => "Error on comment create." ) ;
+        }
+
+        // TODO: detect if user is logged in
+        // TODO: validate the segment exists
     }
 
-    public function doAction() {
-        // TODO: optimize this, optionally check the segmnt exists
-        $job_data = getJobData(
-            $this->commentData[ 'id_job' ],
-            $this->commentData[ 'password' ]
-        );
-
-        if ( !empty($job_data) ) {
-          Log::doLog($job_data);
-          $this->processComment();
-      }
-
-      // TODO: detect if user is logged in
-      // TODO: validate the segment exists
-
-    }
 
     private function processComment() {
         // TODO: move this in a separate class
@@ -76,20 +119,24 @@ class commentController extends ajaxController {
             if ($this->loggedIn()) {
                 $this->sendEmail();
             }
+            return true;
             // $db->commit();
         } catch (Exception $e) {
             Log::doLog($e->getMessage()) ;
             // $db->rollback();
+            return false;
         }
     }
 
     private function writeComment() {
-        $this->commentData['uid'] = $this->getUid();
-        $this->commentData['email'] = $this->getEmail();
-        $this->commentData['resolve_date'] = $this->getResolveDate();
-        $this->commentData['message_type'] = $this->getMessageType();
+        $dataForDb = $this->commentData ;
 
-        $comment = insertComment($this->commentData);
+        $dataForDb['uid'] = $this->getUid();
+        $dataForDb['email'] = $this->getEmail();
+        $dataForDb['resolve_date'] = $this->getResolveDate();
+        $dataForDb['message_type'] = $this->getMessageType();
+
+        $comment = insertComment($dataForDb);
         Log::doLog("comment insert done " . $comment);
     }
 
@@ -121,11 +168,12 @@ class commentController extends ajaxController {
                 'password'  => $this->commentData['password'],
                 'id_client' => $this->commentData['id_client'],
                 'payload' => array(
-                    '_type'      => 'comment',
-                    'message'    => $this->commentData['message'],
-                    'id_segment' => $this->commentData['id_segment'],
-                    'username'   => $this->commentData['full_name'],
-                    'role'       => 'translator',
+                    '_type'       => 'comment',
+                    'message'     => $this->commentData['message'],
+                    'id_segment'  => $this->commentData['id_segment'],
+                    'username'    => $this->commentData['full_name'],
+                    'role'        => 'translator',
+                    'parsed_date' => $this->commentData['parsed_date']
                 )
             )
         ) );
@@ -140,6 +188,8 @@ class commentController extends ajaxController {
         );
 
         Log::doLog( "sent message: ", $end );
+
+
     }
 
     private function loggedIn() {
