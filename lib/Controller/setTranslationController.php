@@ -68,7 +68,9 @@ class setTranslationController extends ajaxController {
         $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
 
-        if(is_null($this->propagate) || !isset($this->propagate) ) $this->propagate = true;
+        if(is_null($this->propagate) || !isset($this->propagate) ){
+            $this->propagate = true;
+        }
         Log::doLog( $this->__postInput );
 
     }
