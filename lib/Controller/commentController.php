@@ -2,10 +2,9 @@
 
 class commentController extends ajaxController {
 
-    private $__postInput = null;
-
     protected $id_segment;
 
+    private $__postInput = null;
     private $id_job;
     private $password = false;
     private $username ;
@@ -50,20 +49,19 @@ class commentController extends ajaxController {
     }
 
     public function doAction() {
-      // TODO: optimize this, optionally check the segmnt exists
-      $job_data = getJobData( $this->commentData[ 'id_job' ], $this->commentData[ 'password' ] );
+        // TODO: optimize this, optionally check the segmnt exists
+        $job_data = getJobData(
+            $this->commentData[ 'id_job' ],
+            $this->commentData[ 'password' ]
+        );
 
-      if ( !empty($job_data) ) {
+        if ( !empty($job_data) ) {
           Log::doLog($job_data);
           $this->processComment();
       }
 
-      // TODO: read job id and segment id
       // TODO: detect if user is logged in
       // TODO: validate the segment exists
-      // TODO: insert the record in database
-      // TODO: enqueue event to AMQ
-      //
 
     }
 
@@ -91,7 +89,6 @@ class commentController extends ajaxController {
         $this->commentData['resolve_date'] = $this->getResolveDate();
         $this->commentData['message_type'] = $this->getMessageType();
 
-        // Log::doLog($this->commentData);
         $comment = insertComment($this->commentData);
         Log::doLog("comment insert done " . $comment);
     }
@@ -117,8 +114,6 @@ class commentController extends ajaxController {
     }
 
     private function enqueueComment() {
-        Log::doLog("----------- enqueue");
-
         $message = json_encode( array(
             '_type' => 'comment',
             'data' => array(
