@@ -96,27 +96,36 @@ http.createServer(function(req, res) {
   console.log('Listening on http://127.0.0.1:7788/');
 });
 
-var stompMessageReceived = function(body) {
-  var message = JSON.parse(body);
+var stompMessageReceived = function( body ) {
+  var message = JSON.parse( body );
 
-  var dest = _.filter(browserChannel.connections, function(ele) {
-    return ele._matecatJobId == message.data.id_job && ele._matecatPw == message.data.password;
-  });
+  var dest = _.filter( browserChannel.connections, function( ele ) {
+    console.log( ele._clientId );
 
-  console.log('browser channel connections', dest.length);
+    if ( typeof ele._clientId == 'undefined' ) {
+      return false;
+    }
 
-  browserChannel.send({ data: message.data.payload }, dest);
+    return (
+      ele._matecatJobId == message.data.id_job &&
+        ele._matecatPw == message.data.password
+        ele._clientId != message.id_client
+      );
+  } );
+
+  console.log( 'browser channel connections', dest.length );
+
+  browserChannel.send( { data: message.data.payload }, dest );
 
   // find channel, SSE can serve multiple purposes
   // find subs by job_id, and skip those where password does not match
-  console.log('stompMessageReceived id', message.data.id_job);
+  console.log( 'stompMessageReceived id', message.data.id_job );
 }
 
 var startStompConnection = function()   {
-  stompit.connect(connectOptions, function(error, client) {
+  stompit.connect( connectOptions, function( error, client ) {
 
     if (typeof client === 'undefined') {
-      // TODO handle this case this happens when AMQ restarts
       setTimeout(startStompConnection, 10000);
       console.log("** client error, restarting connection in 10 seconds");
       return;
@@ -125,7 +134,7 @@ var startStompConnection = function()   {
     client.subscribe(subscribeHeaders, function(error, message) {
       console.log('** event received in client subscription');
 
-      if (error) {
+      if ( error ) {
         console.log('!! subscribe error ' + error.message);
 
         client.disconnect();
@@ -134,9 +143,9 @@ var startStompConnection = function()   {
         return;
       }
 
-      message.readString('utf-8', function(error, body) {
+      message.readString( 'utf-8', function(error, body) {
 
-        if (error) {
+        if ( error ) {
           console.log('!! read message error ' + error.message);
           return;
         }
@@ -145,9 +154,9 @@ var startStompConnection = function()   {
           stompMessageReceived(body);
           message.ack();
         }
-      });
+      } );
     });
-  });
+  } );
 }
 
 startStompConnection();
