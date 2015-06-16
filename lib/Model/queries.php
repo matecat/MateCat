@@ -1764,6 +1764,13 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $sha
     $query   = "SELECT LAST_INSERT_ID() FROM files";
     $results = $db->query_first( $query );
 
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
+    if ( $errno > 0 ) {
+        Log::doLog( "Database failure, failed to get last index. $err: $errno ", -$errno );
+        throw new Exception( "Database failure, failed to get last index. $err: $errno ", -$errno );
+    }
+
     $idFile = $results[ 'LAST_INSERT_ID()' ];
 
     return $idFile;
