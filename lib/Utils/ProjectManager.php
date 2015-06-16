@@ -391,7 +391,7 @@ class ProjectManager {
                 } else {
                     //mysql insert Blob Error
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -7, "message" => "File is Too large. ( $fileName )"
+                            "code" => -7, "message" => "Failed to create project. Database Error on $fileName. Please try again."
                     );
                 }
 

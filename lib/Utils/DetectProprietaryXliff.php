@@ -115,6 +115,16 @@ class DetectProprietaryXliff {
         }
     }
 
+    protected static function _checkOkapi( $tmp ){
+        if( isset($tmp[0]) ){
+            if( stripos( $tmp[0], 'xmlns:okp="okapi-framework' ) !== false ) {
+                self::$fileType[ 'proprietary' ]            = true;
+                self::$fileType[ 'proprietary_name' ]       = 'Okapi-Longhorn Download File';
+                self::$fileType[ 'proprietary_short_name' ] = 'okapi';
+            }
+        }
+    }
+
     public static function getInfoByStringData( $stringData ) {
 
 		self::_reset();
@@ -125,6 +135,7 @@ class DetectProprietaryXliff {
 		self::_checkIdiom( $tmp );
         self::_checkSDL( $tmp );
         self::_checkGlobalSight( $tmp );
+        self::_checkOkapi( $tmp );
 		return self::$fileType;
 
 	}

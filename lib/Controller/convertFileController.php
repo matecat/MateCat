@@ -285,7 +285,10 @@ class convertFileController extends ajaxController {
 					$convertResult[ 'errorMessage' ] = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
 				} elseif ( $file[ 'extension' ] == 'idml' ) {
 					$convertResult[ 'errorMessage' ] = $defaultError;
-				} else {
+				} elseif( stripos( $convertResult[ 'errorMessage' ], "Error: The source language of the file" ) !== false ){
+                    //Error: The source language of the file (English (United States)) is different from the project source language.
+                    //we take the error, is good
+                } else {
 					$convertResult[ 'errorMessage' ] = "Import error. Try converting it to a compatible file format (e.g. doc > docx, xlsx > xls)";
 				}
 
