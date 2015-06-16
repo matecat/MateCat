@@ -1,103 +1,196 @@
 /*
  Component: ui.comment
  */
-if ( config.commentEnabled && !!window.EventSource ) {
 
-    SSE.init();
-    var source = SSE.getSource('comments');
+(function($,config,window,undefined) {
+    if ( config.commentEnabled && !!window.EventSource ) {
+        SSE.init();
 
-    var getRole = function() {
-        return 'revisor';
-    }
+        var tpls = {
+            divider : '' +
+                '<div class="divider"></div>',
 
-    source.addEventListener('message', function(e) {
-        console.log('message', JSON.parse(e.data));
-    }, false);
+            showComment : '' +
+                '<div class="mbc-show-comment mbc-show-first-comment">' +
+                ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
+                ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+                ' <span class="mbc-comment-info mbc-comment-time"></span>' +
+                ' <span class="mbc-comment-info mbc-comment-role"></span>' +
+                ' </div>' +
+                ' <p class="mbc-comment-body"></p>' +
+                ' </div>' ,
 
-    source.addEventListener('open', function(e) {
-        // Connection was opened.
-        console.log('connection open');
-    }, false);
+            postComment : '' +
+                '<div class="mbc-post-comment">' +
+                ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+                ' <textarea class="mbc-comment-textarea"></textarea>' +
+                ' <div><a href="#" class="mbc-comment-btn">Send</a></div>' +
+                ' </div>',
 
-    source.addEventListener('error', function(e) {
-        if (e.readyState == EventSource.CLOSED) {
-            // Connection was closed.
-            console.log('connection closed');
+            comment : '' +
+                '<div class="mbc-first-comment-header">' +
+                '<span class="mbc-comment-label mbc-first-comment-label">Insert a comment</span>' +
+                '<div class="divider"></div>' +
+                '</div>',
+
+            segmentThread : '' +
+                ' <div class="mbc-comment-balloon-outer mbc-thread-active mbc-thread-active-first-comment">' +
+                ' <div class="triangle triangle-topleft"></div>' +
+                '<a href="#" class="mbc-close-btn">&#10005;</a>' +
+                ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+                ' ' +
+                ' ' +
+                ' </div>' +
+                ' </div>',
+
+            commentLink : '' +
+                '<div class="mbc-comment-link">' +
+                ' <div class="txt">' +
+                ' <span class="mbc-comment-total"></span>' +
+                ' <span class="mbc-comment-icon icon-bubbles4"></span>' +
+                ' <span class="mbc-comment-highlight mbc-comment-total-none"></span>' +
+                '</div>' +
+                '</div>',
         }
-    }, false);
 
-    // temp global
-    window.mbc_postComment = function() {
-        var data = {
-            action : 'comment',
-            id_client: 123,
-            id_job: config.job_id,
-            id_segment: 12345,
-            username: 'John Doe',
-            password: config.password,
-            role: getRole(),
-            message: 'this is my message'
+        var db = {
+            segments: [ ],
+            };
+
+        var source = SSE.getSource('comments');
+
+        var getRole = function() {
+            return 'translator';
         }
 
-        APP.doRequest({
-            data: data,
-            success: function() {
-                console.log('success');
-            },
-            failure: function() {
+        // SSE event listeners
+        source.addEventListener('message', function(e) {
+            console.log('message', JSON.parse(e.data));
+        }, false);
 
+        source.addEventListener('open', function(e) {
+        }, false);
+
+        source.addEventListener('error', function(e) {
+            if (e.readyState == EventSource.CLOSED) {
+                console.log('connection closed');
             }
+        }, false);
+
+
+        // behaviour and rendering functions
+        var openSegmentComment = function(el) {
+            var id_segment = el.attr('id').split('-')[1];
+            // open comments
+            $('article').addClass('mbc-commenting-opened');
+
+            // TODO: remove all comments, optimize this
+            $('.mbc-comment-balloon-outer').remove();
+
+            el.find('.editarea').click(); // simualte click on edit area to open segment
+            el.append( $(tpls.segmentThread).show() );
+        }
+
+        var closeSegment = function(el) {
+            $('.mbc-comment-balloon-outer').remove();
+            $('article').removeClass('mbc-commenting-opened');
+        }
+
+        // DOM bindings
+        $(document).on('click', '.mbc-comment-link', function(e) {
+            e.preventDefault();
+            openSegmentComment( $(e.target).closest('section') );
         });
+
+        $(document).on('click', '.mbc-close-btn', function(e) {
+            e.preventDefault();
+            closeSegment( $(e.target).closest('section') );
+        });
+
+        $(document).on('ready', function() {
+            // TODO: init links when first call to get remote comments is done
+        });
+        // TODO: on page load get comments struct
+        // TODO: on new segments loaded get new struct for new segments
+        // TODO: click on icon to post a comment
+        //
+
+        // temp global functions
+        // AJAX functions
+        window.mbc_postComment = function() {
+            var data = {
+                action : 'comment',
+                id_client: 123,
+                id_job: config.job_id,
+                id_segment: 12345,
+                username: 'John Doe',
+                password: config.password,
+                role: getRole(),
+                message: 'this is my message'
+            }
+
+            APP.doRequest({
+                data: data,
+                success: function() {
+                    console.log('success');
+                },
+                failure: function() {
+
+                }
+            });
+        }
+
     }
 
-}
+    // Dev front-end
+    $(document).ready(function(){
 
-// Dev front-end
-$(document).ready(function(){
-    // Activate Commento visibile state
-    $('.dev-commento-visibile').on('click', function(){
-        $('article').toggleClass('mbc-commenting-opened');
-        event.preventDefault();
-    });
-    // Show active thread Show add first comment balloon
-    $('.dev-first-comment').on('click', function(){
-        $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
-        $('.mbc-thread-active-first-comment').toggleClass('visible');
-        $('.mbc-thread-active-reply-comment, .mbc-thread-justresolved, .mbc-thread-resolved-ask').removeClass('visible');
-        event.preventDefault();
-    });
-    // Show active thread Show reply to comment balloon
-    $('.dev-reply-comment').on('click', function(){
-        $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
-        $('.mbc-thread-active-reply-comment').toggleClass('visible');
-        $('.mbc-thread-active-first-comment, .mbc-thread-justresolved, .mbc-thread-resolved-ask').removeClass('visible');
-        event.preventDefault();
+        return false;
+
+        // Activate Commento visibile state
+        $('.dev-commento-visibile').on('click', function(){
+            $('article').toggleClass('mbc-commenting-opened');
+            event.preventDefault();
+        });
+        // Show active thread Show add first comment balloon
+        $('.dev-first-comment').on('click', function(){
+            $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
+            $('.mbc-thread-active-first-comment').toggleClass('visible');
+            $('.mbc-thread-active-reply-comment, .mbc-thread-justresolved, .mbc-thread-resolved-ask').removeClass('visible');
+            event.preventDefault();
+        });
+        // Show active thread Show reply to comment balloon
+        $('.dev-reply-comment').on('click', function(){
+            $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
+            $('.mbc-thread-active-reply-comment').toggleClass('visible');
+            $('.mbc-thread-active-first-comment, .mbc-thread-justresolved, .mbc-thread-resolved-ask').removeClass('visible');
+            event.preventDefault();
             $('.mbc-show-form-btn').on('click', function(){
                 $(this).addClass('hide').closest('div').next('.mbc-post-comment').removeClass('hide');
                 event.preventDefault();
             });
-    });
+        });
 
-    // Show thread just resolved
-    $('.dev-thread-justresolved').on('click', function(){
-        $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
-        $('.mbc-thread-justresolved').toggleClass('visible');
-        $('.mbc-thread-active-first-comment, .mbc-thread-active-reply-comment').removeClass('visible');
-        $('.mbc-thread-resolved-ask').removeClass('visible');
-        event.preventDefault();
+        // Show thread just resolved
+        $('.dev-thread-justresolved').on('click', function(){
+            $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
+            $('.mbc-thread-justresolved').toggleClass('visible');
+            $('.mbc-thread-active-first-comment, .mbc-thread-active-reply-comment').removeClass('visible');
+            $('.mbc-thread-resolved-ask').removeClass('visible');
+            event.preventDefault();
             $('.mbc-show-form-btn').on('click', function(){
                 $(this).addClass('hide').next('.mbc-ask-comment-wrap').removeClass('hide');
                 event.preventDefault();
             });
-    });
-    // Show thread resolved Ask new question
-    $('.dev-thread-resolved-ask').on('click', function(){
-        $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
-        $('.mbc-thread-resolved-ask').toggleClass('visible');
-        $('.mbc-thread-ask').removeClass('hide')
-        $('.mbc-thread-active-first-comment, .mbc-thread-active-reply-comment').removeClass('visible');
-        $('.mbc-thread-justresolved').removeClass('visible');
-        event.preventDefault();
+        });
+        // Show thread resolved Ask new question
+        $('.dev-thread-resolved-ask').on('click', function(){
+            $('article').addClass('mbc-commenting-opened').removeClass('mbc-commenting-closed');
+            $('.mbc-thread-resolved-ask').toggleClass('visible');
+            $('.mbc-thread-ask').removeClass('hide')
+            $('.mbc-thread-active-first-comment, .mbc-thread-active-reply-comment').removeClass('visible');
+            $('.mbc-thread-justresolved').removeClass('visible');
+            event.preventDefault();
             $('.show-thread-btn').on('click', function(){
                 $('.thread-collapsed').stop().slideToggle();
                 var showlabel = $(this).find('.show-thread-label');
@@ -110,13 +203,14 @@ $(document).ready(function(){
                 $(this).addClass('hide').next('.mbc-ask-comment-wrap').removeClass('hide');
                 event.preventDefault();
             });
-    });
-    $('#mbc-history').on('click', function(){
-        $('.mbc-history-balloon-outer').toggleClass('visible');
-    });
-    // Perfect scroll
-    $(document).ready(function(){
+        });
+        $('#mbc-history').on('click', function(){
+            $('.mbc-history-balloon-outer').toggleClass('visible');
+        });
         // Perfect scroll
-        $('.mbc-history-balloon-perfectscrollbar').perfectScrollbar();
+        $(document).ready(function(){
+            // Perfect scroll
+            // $('.mbc-history-balloon').perfectScrollbar();
+        });
     });
-});
+})(jQuery, config, window, undefined);

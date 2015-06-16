@@ -1485,6 +1485,7 @@ console.log('changeStatus');
             ' <span class="mbc-comment-highlight mbc-comment-total-none">1</span>' +
             '</div>' +
             '</div>' +
+            /*
             ////
             //// Thread risolto
             ////
@@ -1683,6 +1684,7 @@ console.log('changeStatus');
 
 
             //////////// mbc commenting ends here
+            */
             '	<ul class="statusmenu"></ul>' +
             '</section> ';
         return newSegmentMarkup;
