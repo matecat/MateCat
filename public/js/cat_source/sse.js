@@ -17,3 +17,14 @@ SSE = {
         return new EventSource(SSE.baseURL + source );
     }
 }
+
+SSE.Message = function(data) {
+  this._type = data._type;
+  this.eventIdentifier = 'sse:' + this._type;
+  this.data = data;
+
+  this.isValid = function() {
+    var types = new Array('resolve', 'comment', 'ack');
+    return ( types.indexOf( this._type ) != -1 ) ;
+  }
+}

@@ -117,13 +117,15 @@ class commentController extends ajaxController {
         $message = json_encode( array(
             '_type' => 'comment',
             'data' => array(
-                'id_job' => $this->commentData['id_job'],
-                'password' => $this->commentData['password'],
+                'id_job'    => $this->commentData['id_job'],
+                'password'  => $this->commentData['password'],
                 'id_client' => $this->commentData['id_client'],
                 'payload' => array(
-                    '_type' => 'comment',
-                    'message' => $this->commentData['message'],
-                    'id_segment' => $this->commentData['id_segment']
+                    '_type'      => 'comment',
+                    'message'    => $this->commentData['message'],
+                    'id_segment' => $this->commentData['id_segment'],
+                    'username'   => $this->commentData['full_name'],
+                    'role'       => 'translator',
                 )
             )
         ) );
