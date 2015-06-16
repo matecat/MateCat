@@ -27,7 +27,7 @@
                 ' <div><a href="#" class="mbc-comment-btn">Send</a></div>' +
                 ' </div>',
 
-            comment : '' +
+            commentHeader : '' +
                 '<div class="mbc-first-comment-header">' +
                 '<span class="mbc-comment-label mbc-first-comment-label">Insert a comment</span>' +
                 '<div class="divider"></div>' +
@@ -84,11 +84,24 @@
             // open comments
             $('article').addClass('mbc-commenting-opened');
 
-            // TODO: remove all comments, optimize this
             $('.mbc-comment-balloon-outer').remove();
 
-            el.find('.editarea').click(); // simualte click on edit area to open segment
-            el.append( $(tpls.segmentThread).show() );
+            el.find('.editarea').click();
+
+            // TODO: read into database and populate this template
+            //       according to current data
+            //
+            var root = $(tpls.segmentThread);
+            var header = $(tpls.commentHeader);
+            var postComment = $(tpls.postComment);
+
+            root.find('.mbc-thread-wrap')
+                .append(header)
+                .append(postComment);
+
+            el.append( root.show() );
+
+
         }
 
         var closeSegment = function(el) {
