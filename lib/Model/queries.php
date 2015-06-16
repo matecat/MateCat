@@ -3120,7 +3120,7 @@ function insertComment( $commentData ) {
     $full_name    = $db->escape( $commentData['full_name'] );
 
     // TODO: check if dates are to be saved in database
-    $create_date = gmdate('Y-M-D H:i:s');
+    $create_date = gmdate('Y-m-d H:i:s');
 
     $query = " INSERT INTO comments " .
       " ( " .
