@@ -1114,6 +1114,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     $db = Database::obtain();
 
+    $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
     $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
     $st_new        = Constants_TranslationStatus::STATUS_NEW;
     $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
@@ -1123,8 +1124,9 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
         if ( $key == 'status' ) {
 
             if ( $propagateToTranslated ) {
-                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
-                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated' )";
+//                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
+                $q[ ]      = $key . " = '".$db->escape( $value )."' ";
+                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated', '$st_approved' )";
             } else {
                 $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
                 $andStatus = "AND status IN ( '$st_draft', '$st_new' )";

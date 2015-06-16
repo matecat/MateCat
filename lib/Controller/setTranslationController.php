@@ -4,7 +4,7 @@ class setTranslationController extends ajaxController {
 
     protected $__postInput = array();
 
-    protected $propagateAll = false;
+    protected $propagate = false;
     protected $id_job = false;
     protected $password = false;
 
@@ -29,7 +29,7 @@ class setTranslationController extends ajaxController {
                 'password'                => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
-                'propagateAll'            => array(
+                'propagate'               => array(
                         'filter' => FILTER_VALIDATE_BOOLEAN, 'flags' => FILTER_NULL_ON_FAILURE
                 ),
                 'id_segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -52,7 +52,7 @@ class setTranslationController extends ajaxController {
 
         $this->id_job                = $this->__postInput[ 'id_job' ];
         $this->password              = $this->__postInput[ 'password' ];
-        $this->propagateAll          = $this->__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
+        $this->propagate             = $this->__postInput[ 'propagate' ]; //not used here but used in child class setAutoPropagationController
         $this->id_segment            = $this->__postInput[ 'id_segment' ];
         $this->time_to_edit          = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
         $this->id_translator         = $this->__postInput[ 'id_translator' ];
@@ -67,6 +67,10 @@ class setTranslationController extends ajaxController {
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
+
+        if(is_null($this->propagate) || !isset($this->propagate) ){
+            $this->propagate = true;
+        }
         Log::doLog( $this->__postInput );
 
     }
@@ -321,7 +325,7 @@ class setTranslationController extends ajaxController {
             $dqfSegmentStruct->source_segment     = $segment[ 'segment' ];
             $dqfSegmentStruct->new_target_segment = $_Translation[ 'translation' ];
 
-            $dqfSegmentStruct->time     = $_Translation['time_to_edit'];
+            $dqfSegmentStruct->time = $_Translation[ 'time_to_edit' ];
 //            $dqfSegmentStruct->mtengine = $this->jobData['id_mt_engine'];
             $dqfSegmentStruct->mt_engine_version = 1;
 
@@ -335,6 +339,13 @@ class setTranslationController extends ajaxController {
             }
         }
 
+        $propagateToTranslated = true;
+
+        //for the moment, this is set explicitely
+        if ( $this->propagate == false ) {
+            $propagateToTranslated = false;
+        }
+
         //propagate translations
         $TPropagation = array();
 
@@ -343,7 +354,7 @@ class setTranslationController extends ajaxController {
         $_idSegment = $this->id_segment;
 
         $TPropagation[ 'id_job' ]                 = $this->id_job;
-        $TPropagation[ 'status' ]                 = Constants_TranslationStatus::STATUS_DRAFT;
+        $TPropagation[ 'status' ]                 = ( $propagateToTranslated ) ? $this->status : Constants_TranslationStatus::STATUS_DRAFT;
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
@@ -351,22 +362,24 @@ class setTranslationController extends ajaxController {
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
-        if ( $this->status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+        if ( in_array( $this->status, array(
+                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED
+        ) ) ) {
 
             try {
 
-                $cookie_key = '_auto-propagation-' . $this->id_job . "-" . $this->password;
+//                $cookie_key = '_auto-propagation-' . $this->id_job . "-" . $this->password;
+//
+//                /**
+//                 * This set auto-propagation to all with status DRAFT, NEW, REJECTED
+//                 *
+//                 * This set also to status TRANSLATED if a cookie for Auto-propagate ALL is set on the client
+//                 *
+//                 */
+//                $propagateToTranslated = false;
+//                if ( isset( $_COOKIE[ $cookie_key ] ) ) {
 
-                /**
-                 * This set auto-propagation to all with status DRAFT, NEW, REJECTED
-                 *
-                 * This set also to status TRANSLATED if a cookie for Auto-propagate ALL is set on the client
-                 *
-                 */
-                $propagateToTranslated = false;
-                if ( isset( $_COOKIE[ $cookie_key ] ) ) {
-                    $propagateToTranslated = true;
-                }
+//                }
 
                 propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
 
