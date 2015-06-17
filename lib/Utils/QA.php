@@ -1777,9 +1777,11 @@ class QA {
         }
 
         //remove placeholders and symbols from source and target and search for special symbols mismatch
-
         $cleaned_source = str_replace( $symbols, "", $this->source_seg );
         $cleaned_target = str_replace( $symbols, "", $this->target_seg );
+
+        $cleaned_source = preg_replace('/##\$_..\$##/',"",$cleaned_source);
+        $cleaned_target = preg_replace('/##\$_..\$##/',"",$cleaned_target);
 
         foreach ( $specialSymbols as $sym ) {
             $symbolOccurrencesInSource = mb_substr_count( $cleaned_source, $sym );
