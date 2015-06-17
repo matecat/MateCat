@@ -1843,6 +1843,10 @@ class QA {
 
     }
 
+    public function performGlossaryCheck($glossaryList){
+
+    }
+
 }
 
 ?>
