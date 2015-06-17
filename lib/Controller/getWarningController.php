@@ -20,8 +20,8 @@ class getWarningController extends ajaxController {
             'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'token'       => array( 'filter' => FILTER_SANITIZE_STRING,
                                     'flags'  => FILTER_FLAG_STRIP_LOW ),
-            'logs'        => array( 'filter' => FILTER_UNSAFE_RAW )
-
+            'logs'        => array( 'filter' => FILTER_UNSAFE_RAW),
+            'glossaryList' => array( 'filter' => FILTER_CALLBACK, 'options' => array('self','filterString') )
         );
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
@@ -137,6 +137,8 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
+        $QA->performGlossaryCheck($this->__postInput->glossaryList );
+
         if ( $QA->thereAreNotices() ) {
 //        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                 = array();
@@ -155,6 +157,18 @@ class getWarningController extends ajaxController {
         }
 
     }
+
+    private static  function filterString($glossaryWord) {
+        $glossaryWord = (string) $glossaryWord;
+        $glossaryWord = filter_var(
+                $glossaryWord,
+                FILTER_SANITIZE_STRING,
+                array( 'flags' => FILTER_FLAG_STRIP_LOW )
+        );
+
+        return $glossaryWord;
+    }
+
 
 }
 

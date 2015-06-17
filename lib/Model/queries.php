@@ -1123,14 +1123,10 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     $q = array();
     foreach ( $params as $key => $value ) {
         if ( $key == 'status' ) {
-
             if ( $propagateToTranslated ) {
 //                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
                 $q[ ]      = $key . " = '".$db->escape( $value )."' ";
                 $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated', '$st_approved', '$st_rejected' )";
-            } else {
-                $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
-                $andStatus = "AND status IN ( '$st_draft', '$st_new' )";
             }
         } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value, true );

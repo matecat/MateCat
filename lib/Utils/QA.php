@@ -188,7 +188,6 @@ class QA {
     const ERR_BOUNDARY_HEAD_TEXT = 14;
     const ERR_TAG_ORDER = 15;
     const ERR_NEWLINE_MISMATCH = 16;
-
     const ERR_DOLLAR_MISMATCH = 17;
     const ERR_AMPERSAND_MISMATCH = 18;
     const ERR_AT_MISMATCH = 19;
@@ -198,7 +197,7 @@ class QA {
     const ERR_EQUALSIGN_MISMATCH = 23;
     const ERR_TAB_MISMATCH = 24;
     const ERR_STARSIGN_MISMATCH = 25;
-    
+    const ERR_GLOSSARY_MISMATCH = 26;
 
     const ERR_TAG_MISMATCH = 1000;
 
@@ -258,7 +257,7 @@ class QA {
             23 => 'Equalsign sign mismatch',
             24 => 'Tab sign mismatch',
             25 => 'Star sign mismatch',
-
+            26 => 'Glossary mismatch',
 
             /*
              * grouping
@@ -1845,6 +1844,23 @@ class QA {
 
     public function performGlossaryCheck($glossaryList){
 
+        $targetSeg = strip_tags($this->target_seg);
+        $targetSeg = preg_split('/\s+/', $targetSeg);
+
+        foreach ( $glossaryList as $glossaryWord ) {
+            $found = false;
+            foreach ( $targetSeg as $token ) {
+                if( strtolower($token) == strtolower($glossaryWord) ){
+                    $found = true;
+                    break;
+                }
+            }
+
+            if(!$found){
+                $this->_addError(self::ERR_GLOSSARY_MISMATCH);
+            }
+
+        }
     }
 
 }
