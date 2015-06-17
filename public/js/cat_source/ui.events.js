@@ -970,7 +970,7 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-			console.log('keypress: ', UI.editarea.html());
+//			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -979,10 +979,6 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-				console.log('Q: ', UI.editarea.html());
-                setTimeout(function() { // wait for creation
-                    console.log('R: ', UI.editarea.html());
-                }, 200);
             }
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
@@ -2036,6 +2032,10 @@ $.extend(UI, {
 				UI.setFindFunction('find');
 			}
 		});
+        $('#replace-target').on('focus', function() {
+//            console.log('aaa');
+//            console.log($('#enable-replace').prop('checked'));
+        });
 		$("#search-target").on('input', function() {
 			if ($(this).val() === '') {
 				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
