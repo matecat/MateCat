@@ -490,6 +490,7 @@ article.mbc-commenting-opened section.editor .mbc-thread-active-reply-comment.vi
 
 .mbc-history-balloon-has-comment {
   max-height: 400px;
+  overflow-y: scroll;
 }
 
 .mbc-history-balloon-has-no-comments {
