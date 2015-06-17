@@ -98,10 +98,11 @@
             <!-- mbc chat history balloon -->
             <div class="mbc-history-balloon-outer hide">
                 <div class="triangle triangle-top"></div>
-                <div class="mbc-history-balloon">
+                <!-- mbc history balloon has active comments  -->
+                <div class="mbc-history-balloon mbc-history-balloon-has-comment mbc-history-balloon-perfectscrollbar" style="display: none;">
                 <a href="#" class="mbc-close-btn">&#10005;</a>
                     <div class="mbc-thread-wrap mbc-thread-number">
-                        <div class="mbc-show-comment mbc-show-first-comment">
+                        <div class="mbc-show-comment">
                         <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>
                         <div class="mbc-comment-info-wrap mbc-clearfix">
                         <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>
@@ -109,11 +110,11 @@
                         </div>
                         <p class="mbc-comment-body">I’d say “dimostrata” instead of “dimostrato” as if refers to the “legge”.</p>
                         </div>
+                        <div class="divider"></div>
                         <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">View</a></div>
                     </div>
-                    <div class="divider"></div>
                     <div class="mbc-thread-wrap mbc-thread-number">
-                        <div class="mbc-show-comment mbc-show-first-comment">
+                        <div class="mbc-show-comment">
                         <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>
                         <div class="mbc-comment-info-wrap mbc-clearfix">
                         <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>
@@ -121,11 +122,11 @@
                         </div>
                         <p class="mbc-comment-body">Consider this simple case; you have a menu item called “Manual”.</p>
                         </div>
+                        <div class="divider"></div>
                         <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">View</a></div>
                     </div>
-                    <div class="divider"></div>
                     <div class="mbc-thread-wrap mbc-thread-number">
-                        <div class="mbc-show-comment mbc-show-first-comment">
+                        <div class="mbc-show-comment">
                         <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>
                         <div class="mbc-comment-info-wrap mbc-clearfix">
                         <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>
@@ -133,7 +134,15 @@
                         </div>
                         <p class="mbc-comment-body">Words that can be used as a noun or verb in English but may have different names in another language</p>
                         </div>
+                        <div class="divider"></div>
                         <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">View</a></div>
+                    </div>
+                </div>
+                <!-- mbc history balloon no active comments -->
+                <div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">
+                <a href="#" class="mbc-close-btn">&#10005;</a>
+                    <div class="mbc-thread-wrap mbc-thread-number">
+                        <span class="mbc-comment-label">No notifications</span>
                     </div>
                 </div>
             </div>

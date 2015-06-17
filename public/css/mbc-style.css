@@ -62,10 +62,12 @@
 
 .mbc-first-comment-label {
   text-transform: uppercase;
+  margin-bottom: 10px;
 }
 
 .mbc-comment-username-label {
   color: #323232;
+  margin-bottom: 5px;
 }
 
 .mbc-comment-info-wrap {
@@ -210,7 +212,6 @@ a:active.show-thread-btn {
   display: inline-block;
   font-size: 14px;
   font-weight: bold;
-  margin-bottom: 5px;
 }
 
 
@@ -482,8 +483,15 @@ article.mbc-commenting-opened section.editor .mbc-thread-active-reply-comment.vi
 
 .mbc-history-balloon {
   background-color: #fff;
-  height: 400px;
   margin-top: 12px;
   padding: 0 12px 12px 12px; /* Add padding for consistency with comment in thread layout */
   position: relative;
+}
+
+.mbc-history-balloon-has-comment {
+  max-height: 400px;
+}
+
+.mbc-history-balloon-has-no-comments {
+  height: auto;
 }

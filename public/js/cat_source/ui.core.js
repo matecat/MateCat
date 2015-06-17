@@ -1559,7 +1559,7 @@ console.log('changeStatus');
             ' <div class="mbc-thread-wrap mbc-thread-wrap-resolved mbc-thread-number">' +
             // thread wrap starts here
             // Show posted comment
-            ' <div class="mbc-show-comment mbc-show-first-comment">' +
+            ' <div class="mbc-show-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +
@@ -1656,7 +1656,7 @@ console.log('changeStatus');
             ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
             // thread wrap starts here
             // Show posted comment
-            ' <div class="mbc-show-comment mbc-show-first-comment">' +
+            ' <div class="mbc-show-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             ' <span class="mbc-comment-info mbc-comment-time">9:43 AM - 23 Mar 2016</span>' +

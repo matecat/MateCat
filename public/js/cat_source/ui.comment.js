@@ -117,6 +117,6 @@ $(document).ready(function(){
     // Perfect scroll
     $(document).ready(function(){
         // Perfect scroll
-        $('.mbc-history-balloon').perfectScrollbar();
+        $('.mbc-history-balloon-perfectscrollbar').perfectScrollbar();
     });
 });
