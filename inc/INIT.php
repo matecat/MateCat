@@ -51,8 +51,14 @@ class INIT {
     public static $DQF_ENABLED = true;
 
 
-    public static $LONGHORN_SERVER = "http://10.30.1.232:8080/okapi-longhorn";
-    public static $LONGHORN_FILTERS_CONFIGURATION = array();
+    public static $LONGHORN_SERVER = false;
+    public static $LONGHORN_OFFICE_SERVER_URL;
+    public static $LONGHORN_OFFICE_SERVER_PORT;
+    public static $LONGHORN_ANT_PATH;
+
+    public static $LONGHORN_PIPELINE_PATH;
+    public static $LONGHORN_SEGMENTATION_PATH;
+    public static $LONGHORN_CONFIGURATION_PATH;
 
 
     public static $FORCE_XLIFF_CONVERSION    = true;
@@ -162,12 +168,19 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-        self::$LONGHORN_FILTERS_CONFIGURATION = array(
-                self::$UTILS_ROOT . DIRECTORY_SEPARATOR . 'LongHornFilters/toOriginal.bconf',
-                self::$UTILS_ROOT . DIRECTORY_SEPARATOR . 'LongHornFilters/toXliff.bconf'
-        );
-
     }
+
+    public static $LONGHORN_CONVERTIBLE_EXTENSIONS = array(
+            "doc"  => "docx",
+            "dot"  => "docx",
+            "xls"  => "xlsx",
+            "xlt"  => "xlsx",
+            "xlsb" => "xlsx",
+            "xlw"  => "xlsx",
+            "ppt"  => "pptx",
+            "pot"  => "pptx",
+            "pps"  => "pptx"
+    );
 
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
