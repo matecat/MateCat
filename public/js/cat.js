@@ -3245,7 +3245,6 @@ console.log('changeStatus');
             $(segment).attr('data-version', d.version);
         //    $(segment).removeClass('setTranslationPending');
 //console.log('AAAA: ', JSON.stringify(byStatus));
-
             if((!byStatus)&&(propagate)) {
                 this.beforePropagateTranslation(segment, status);
             }
@@ -3365,7 +3364,8 @@ console.log('changeStatus');
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
         if( status == 'translated' ){
-            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+            plusTranslated = ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated';
+//            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
             $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function() {
