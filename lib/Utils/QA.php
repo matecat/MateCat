@@ -188,12 +188,23 @@ class QA {
     const ERR_BOUNDARY_HEAD_TEXT = 14;
     const ERR_TAG_ORDER = 15;
     const ERR_NEWLINE_MISMATCH = 16;
-    const ERR_SYMBOL_MISMATCH = 17;
+
+    const ERR_DOLLAR_MISMATCH = 17;
+    const ERR_AMPERSAND_MISMATCH = 18;
+    const ERR_AT_MISMATCH = 19;
+    const ERR_HASH_MISMATCH = 20;
+    const ERR_POUNDSIGN_MISMATCH = 21;
+    const ERR_PERCENT_MISMATCH = 22;
+    const ERR_EQUALSIGN_MISMATCH = 23;
+    const ERR_TAB_MISMATCH = 24;
+    const ERR_STARSIGN_MISMATCH = 25;
+    
 
     const ERR_TAG_MISMATCH = 1000;
 
     const ERR_SPACE_MISMATCH = 1100;
 
+    const ERR_SYMBOL_MISMATCH = 1200;
     /**
      * Human Readable error map.
      * Created accordly with Error constants
@@ -238,7 +249,16 @@ class QA {
             14   => 'Char mismatch before a tag',
             15   => 'Tag order mismatch',
             16   => 'New line mismatch',
-            17   => 'Symbol mismatch',
+            17 => 'Dollar sign mismatch',
+            18 => 'Ampersand sign mismatch',
+            19 => 'At sign mismatch',
+            20 => 'Hash sign mismatch',
+            21 => 'Pound sign mismatch',
+            22 => 'Percent sign mismatch',
+            23 => 'Equalsign sign mismatch',
+            24 => 'Tab sign mismatch',
+            25 => 'Star sign mismatch',
+
 
             /*
              * grouping
@@ -260,6 +280,20 @@ class QA {
              *  14 => 'Char mismatch before a tag',
              */
             1100 => 'More/fewer whitespaces found next to the tags.',
+
+            /*
+             * grouping 
+             * 17 => 'Dollar sign mismatch',
+             * 18 => 'Ampersand sign mismatch',
+             * 19 => 'At sign mismatch',
+             * 20 => 'Hash sign mismatch',
+             * 21 => 'Pound sign mismatch',
+             * 22 => 'Percent sign mismatch',
+             * 23 => 'Equalsign sign mismatch',
+             * 24 => 'Tab sign mismatch',
+             * 25 => 'Star sign mismatch',
+             */
+            1200   => 'Symbol mismatch',
     );
 
     protected static $asciiPlaceHoldMap = array(
@@ -370,6 +404,21 @@ class QA {
                         'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[ self::ERR_SPACE_MISMATCH ]
                 ) );
                 break;
+
+            case self::ERR_DOLLAR_MISMATCH :
+            case self::ERR_AMPERSAND_MISMATCH :
+            case self::ERR_AT_MISMATCH :
+            case self::ERR_HASH_MISMATCH :
+            case self::ERR_POUNDSIGN_MISMATCH :
+            case self::ERR_PERCENT_MISMATCH :
+            case self::ERR_EQUALSIGN_MISMATCH :
+            case self::ERR_TAB_MISMATCH :
+            case self::ERR_STARSIGN_MISMATCH :
+            $this->exceptionList[ self::INFO ][ ] = errObject::get( array(
+                    'outcome' => self::ERR_SYMBOL_MISMATCH, 'debug' => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ]
+            ) );
+            break;
+
             case self::ERR_TAG_ORDER:
             default:
                 $this->exceptionList[ self::WARNING ][ ] = errObject::get( array(
@@ -1777,9 +1826,11 @@ class QA {
         }
 
         //remove placeholders and symbols from source and target and search for special symbols mismatch
-
         $cleaned_source = str_replace( $symbols, "", $this->source_seg );
         $cleaned_target = str_replace( $symbols, "", $this->target_seg );
+
+        $cleaned_source = preg_replace('/##\$_..\$##/',"",$cleaned_source);
+        $cleaned_target = preg_replace('/##\$_..\$##/',"",$cleaned_target);
 
         foreach ( $specialSymbols as $sym ) {
             $symbolOccurrencesInSource = mb_substr_count( $cleaned_source, $sym );
