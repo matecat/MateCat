@@ -57,14 +57,11 @@ browserChannel.on('message', function(message) {
 });
 
 browserChannel.on('disconnect', function(context, res) {
-    // TODO: remove client from the jobid:
     console.log('browserChannel disconnect', res._clientId);
 });
 
 browserChannel.on('connect', function(context, req, res) {
-    // TODO: a new client connected, update the jobids index
-    console.log('browserChannel connect connectionId', res._clientId);
-    console.log('browserChannel connect jobId', res._matecatJobId);
+    console.log('browserChannel connect ', res._clientId, res._matecatJobId);
 
     browserChannel.send({
         data : {
@@ -100,26 +97,28 @@ var stompMessageReceived = function( body ) {
   var message = JSON.parse( body );
 
   var dest = _.filter( browserChannel.connections, function( ele ) {
-    console.log( ele._clientId );
-
     if ( typeof ele._clientId == 'undefined' ) {
       return false;
     }
 
-    return (
+    var candidate = (
       ele._matecatJobId == message.data.id_job &&
-        ele._matecatPw == message.data.password
-        ele._clientId != message.id_client
-      );
+      ele._matecatPw == message.data.password &&
+      ele._clientId != message.data.id_client
+    );
+
+    if (candidate) {
+      console.log('candidate found', ele._clientId) ;
+    }
+
+    return candidate ;
   } );
 
-  console.log( 'browser channel connections', dest.length );
+  message.data.payload._type = 'comment' ;
 
-  browserChannel.send( { data: message.data.payload }, dest );
-
-  // find channel, SSE can serve multiple purposes
-  // find subs by job_id, and skip those where password does not match
-  console.log( 'stompMessageReceived id', message.data.id_job );
+  browserChannel.send( {
+    data: message.data.payload
+  }, dest );
 }
 
 var startStompConnection = function()   {
@@ -150,7 +149,6 @@ var startStompConnection = function()   {
           return;
         }
         else {
-          console.log('message received');
           stompMessageReceived(body);
           message.ack();
         }

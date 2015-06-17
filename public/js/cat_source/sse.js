@@ -20,11 +20,12 @@ SSE = {
 
 SSE.Message = function(data) {
   this._type = data._type;
-  this.eventIdentifier = 'sse:' + this._type;
   this.data = data;
 
+  this.eventIdentifier = 'sse:' + this._type;
+
   this.isValid = function() {
-    var types = new Array('resolve', 'comment', 'ack');
+    var types = new Array('comment', 'ack');
     return ( types.indexOf( this._type ) != -1 ) ;
   }
 }
