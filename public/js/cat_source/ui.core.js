@@ -164,11 +164,26 @@ console.log('changeStatus');
     autopropagateConfirmNeeded: function () {
         segment = UI.currentSegment;
 //        console.log('propagable: ', segment.attr('data-propagable'));
+        if(segment.attr('data-propagable') == 'true') {
+            if(config.isReview) {
+                return true;
+            } else {
+                if(segment.is('.status-translated, .status-approved, .status-rejected')) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+/*
         if( (segment.attr('data-propagable') == 'true') && (segment.is('.status-translated, .status-approved, .status-rejected')) ) {
             return true;
         } else {
             return false;
         }
+*/
     },
     preExecChangeStatus: function (optStr) {
         opt = $.parseJSON(optStr);
