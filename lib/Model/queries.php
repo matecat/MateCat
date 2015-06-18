@@ -1741,13 +1741,13 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $sha1_original ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
     $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
     $data[ 'mime_type' ]          = $mime_type;
-    $data[ 'sha1_original_file' ] = $sha1_original;
+    $data[ 'sha1_original_file' ] = $fileDateSha1Path;
 
 
     $db = Database::obtain();

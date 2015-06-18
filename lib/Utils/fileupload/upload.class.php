@@ -496,6 +496,8 @@ class UploadHandler {
         }
 
         $file_path = $this->options['upload_dir'] . $file_name;
+        $file_sha = glob( $this->options['upload_dir'] . sha1_file( $file_path ) . "*" ); //delete sha1 also
+        @unlink( @$file_sha[ 0 ] );
         $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
         if ($success) {
             foreach ($this->options['image_versions'] as $version => $options) {

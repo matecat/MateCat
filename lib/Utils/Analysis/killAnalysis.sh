@@ -11,6 +11,7 @@ then
 	kill ${pid_fast};
 else
 	echo "fast was not running"
+        pid_fast=0
 fi
 
 if [[ -n ${pid_tm} ]];
@@ -19,6 +20,7 @@ then
 	kill ${pid_tm};
 else
 	echo "tm was not running"
+        pid_tm=0
 fi
 
 if [ ${pid_tm} -eq 0 ] && [ ${pid_fast} -eq 0 ]; then
