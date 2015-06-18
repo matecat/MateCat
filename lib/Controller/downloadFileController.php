@@ -109,8 +109,9 @@ class downloadFileController extends downloadController {
                 $fileID           = $file[ 'id_file' ];
                 $current_filename = $file[ 'filename' ];
 
-                //get path for the output file
-                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) . '.out.xlf';
+                //get path for the output file converted to know it's right extension
+                $_fileName = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
+                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
 
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {

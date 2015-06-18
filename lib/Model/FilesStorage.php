@@ -151,7 +151,10 @@ class FilesStorage {
         }
 
         //move converted xliff
-        $outcome2 = rename( $xliffPath, $xliffDestination );
+        //In Unix you can't rename or move between filesystems,
+        //Instead you must copy the file from one source location to the destination location, then delete the source.
+        $outcome2 = copy( $xliffPath, $xliffDestination );
+        unlink( $xliffPath );
 
         return $outcome1 and $outcome2;
     }
