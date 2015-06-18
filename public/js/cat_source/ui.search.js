@@ -16,7 +16,14 @@ $.extend(UI, {
 		$('#exec-find').removeAttr('disabled');
 		this.enableTagMark();
 	},
-	execFind: function() {
+    checkReplaceAvailability: function () {
+        if(($('#search-target').val() == '') && ($('#replace-target').val() != '') ) {
+            $('#search-target').addClass('warn');
+        } else {
+            $('#search-target').removeClass('warn');
+        }
+    },
+    execFind: function() {
 		this.searchResultsSegments = false;
 		$('.search-display').removeClass('displaying');
 		$('section.currSearchSegment').removeClass('currSearchSegment');
@@ -29,11 +36,11 @@ $.extend(UI, {
 
 		if ($('#search-target').val() !== '') {
 			this.searchParams.target = $('#search-target').val();
-			if ($('#enable-replace').is(':checked'))
-				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
+//			if ($('#enable-replace').is(':checked'))
+//				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 		} else {
 			delete this.searchParams.target;
-			$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
+//			$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 		}
 
 		if ($('#select-status').val() !== '') {

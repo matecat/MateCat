@@ -2021,10 +2021,10 @@ $.extend(UI, {
 
         });
 		$("#enable-replace").on('change', function() {
-			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
-				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
+			if ($('#enable-replace').is(':checked')) {
+				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
-				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
+				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			}
 		});
 		$("#search-source, #search-target").on('input', function() {
@@ -2033,16 +2033,21 @@ $.extend(UI, {
 			}
 		});
         $('#replace-target').on('focus', function() {
+            if(!$('#enable-replace').prop('checked')) {
+                $('label[for=enable-replace]').trigger('click');
+                $('#replace-target').trigger('click');
+            }
 //            console.log('aaa');
 //            console.log($('#enable-replace').prop('checked'));
         });
+        $('#replace-target').on('input', function() {
+            if($(this).val() != '') {
+                if(!$('#enable-replace').prop('checked')) $('label[for=enable-replace]').trigger('click');
+            }
+            UI.checkReplaceAvailability();
+        });
 		$("#search-target").on('input', function() {
-			if ($(this).val() === '') {
-				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
-			} else {
-				if ($('#enable-replace').is(':checked'))
-					$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
-			}
+            UI.checkReplaceAvailability();
 		});
 		$("#select-status").on('change', function() {
 			if (UI.checkSearchChanges()) {
