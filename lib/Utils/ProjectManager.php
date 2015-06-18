@@ -711,7 +711,7 @@ class ProjectManager {
 
             if ( !$rows || count( $rows ) == 0 ) {
                 Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . var_export( $this->dbHandler->get_error(), true ) . " - \n" );
-                throw new Exception( "Segment import - DB Error: " . var_export( $this->dbHandler->get_error(), true ), -5 );
+                throw new Exception( "Files not found.", -5 );
             }
 
             //IT IS EVERY TIME ONLY A LINE!! don't worry about a cycle

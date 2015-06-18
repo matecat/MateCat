@@ -152,6 +152,7 @@ class FilesStorage {
 
         //if it's not an xliff as original
         if ( !$originalPath ) {
+
             //set original moval as successful
             $outcome1 = true;
 
@@ -165,6 +166,13 @@ class FilesStorage {
         } else {
             //move original
             $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $originalPath ) );
+
+            if( !$outcome1 ){
+                //Original directory deleted!!!
+                //CLEAR ALL CACHE
+                Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+                return $outcome1;
+            }
 
             //check if manifest from a LongHorn conversion exists
             $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
@@ -186,7 +194,15 @@ class FilesStorage {
         $outcome2 = copy( $xliffPath, $xliffDestination );
         unlink( $xliffPath );
 
-        return $outcome1 and $outcome2;
+        if ( !$outcome2 ) {
+            //Original directory deleted!!!
+            //CLEAR ALL CACHE
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+            return $outcome2;
+        }
+
+        return true;
+
     }
 
     public function linkSessionToCache( $hash, $lang, $uid ) {
