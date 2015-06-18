@@ -140,7 +140,7 @@ class FilesStorage {
             if( !$outcome1 ){
                 //Original directory deleted!!!
                 //CLEAR ALL CACHE
-                Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+                Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
                 return $outcome1;
             }
 
@@ -167,7 +167,7 @@ class FilesStorage {
         if ( !$outcome2 ) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE
-            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
             return $outcome2;
         }
 
