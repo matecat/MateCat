@@ -9,6 +9,7 @@
 
         var types = { resolve: '2', comment: '1' };
         var openCommentsOnSegmentOpen = false;
+        var lastResolvedSegment ;
 
         // TODO: Make this private
         window.db = {
@@ -81,6 +82,17 @@
         };
 
         window.tpls = { // TODO: make this local
+            threadCollapsedControl : '' +
+            ' <a href="javascript:" class="show-thread-btn">' +
+            ' <span class="show-thread-label">Show more</span> ' +
+            ' <span class="show-thread-number">(1)</span> ' +
+            ' <span class="show-toggle-icon">+</span>' +
+            ' </a>' +
+            ' <div class="divider"></div>',
+
+            threadCollapsedWrapper : '' +
+                '<div class="thread-collapsed hide"></div>',
+
             insertCommentHeader : '' +
                 '<div class="mbc-first-comment-header">' +
                 ' <span class="mbc-comment-label mbc-first-comment-label">Insert a comment</span>' +
@@ -227,19 +239,41 @@
             el.append( root.show() );
         }
 
+        var applyCollapsedThreadWrap = function(root) {
+            if (lastResolvedSegment == UI.currentSegmentId) return ;
+
+            root.find('.mbc-thread-wrap-resolved').each(function(i, el) {
+                var e = $(el), c = e.data('count') ;
+                if ( c > 1 ) {
+                    console.log('wrap to apply');
+                    e.find('.mbc-show-comment')
+                        .not(':first')
+                        .not(':last')
+                        .wrapAll($(tpls.threadCollapsedWrapper));
+                    $(tpls.threadCollapsedControl)
+                        .insertAfter(e.find('.thread-collapsed'))
+                        .find('span.show-thread-number').text('(' + (c-1) + ')');
+                }
+            });
+        }
+
         var populateWithComments = function(root, comments, panel) {
             if (comments.length == 0) {
                 return root;
             }
-            var thread_wrap = null, thread_id = 0 ;
+            var thread_wrap = null, thread_id = 0, count = 0 ;
 
             for (var i = 0 ; i < comments.length ; i++) {
                 if ( comments[i].thread_id != thread_id ) {
                     // start a new thread
                     if (thread_wrap != null) {
                         root.append(thread_wrap);
+                        count = 0 ;
                     }
                     thread_wrap = $(tpls.threadWrap) ;
+                }
+                if (comments[i].message_type == types.comment) {
+                    count++;
                 }
                 if (comments[i].thread_id == null) {
                     thread_wrap.addClass('mbc-thread-wrap-active');
@@ -247,12 +281,14 @@
                 else {
                     thread_wrap.addClass('mbc-thread-wrap-resolved');
                 }
-                // thread_wrap.data('thread_id', comments[i].thread_id);
                 thread_wrap.append( populateCommentTemplate(comments[i]) ) ;
+                thread_wrap.data( 'count', count );
+
                 thread_id = comments[i].thread_id ;
             }
-
             root.append(thread_wrap);
+
+            applyCollapsedThreadWrap(root);
 
             // add buttons
             if (comments[i-1].thread_id) {
@@ -274,7 +310,7 @@
 
         var renderSegmentComments = function(el, comments) {
             var root = $(tpls.segmentThread);
-            root = populateWithComments(root, comments, 'segment');
+            populateWithComments(root, comments, 'segment');
             el.append( root.show() );
         }
 
@@ -298,6 +334,7 @@
         }
 
         var closeSegment = function(el) {
+            lastResolvedSegment = null ;
             $('.mbc-comment-balloon-outer').remove();
             $('article').removeClass('mbc-commenting-opened');
         }
@@ -415,6 +452,7 @@
 
         var ajaxResolveSuccess = function(resp) {
             db.pushSegment(resp.data[0]);
+            lastResolvedSegment = UI.currentSegmentId ;
             $(document).trigger('mbc:comment:new', resp.data[0]);
         }
 
@@ -551,6 +589,24 @@
                 openSegmentComment($(e.segment));
                 openCommentsOnSegmentOpen = false;
             }
+        });
+
+        $(document).on('click', '.show-thread-btn', function(e) {
+            e.preventDefault();
+            var el = $(e.target).closest('a');
+            var panel = el.siblings('.thread-collapsed');
+            var showlabel = $(el).find('.show-thread-label');
+            var showIconlabel = $(el).find('.show-toggle-icon');
+
+            if (panel.is(':visible')) {
+                $(showlabel).text( 'Show more' );
+                $(showIconlabel).text( '+' );
+            } else {
+                $(showlabel).text( 'Show less' );
+                $(showIconlabel).text( '-' );
+            }
+
+            panel.stop().slideToggle();
         });
 
         $(document).on('mbc:segment:update', function(ev, el) {
