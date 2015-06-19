@@ -26,7 +26,7 @@ class commentController extends ajaxController {
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'username'    => array( 'filter' => FILTER_SANITIZE_STRING ),
-            'role'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'user_role'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'message'     => array( 'filter' => FILTER_SANITIZE_STRING ),
             'first_seg'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'last_seg'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -126,7 +126,7 @@ class commentController extends ajaxController {
             'id_job'     => $this->__postInput[ 'id_job' ],
             'full_name'  => $this->__postInput[ 'username' ],
             'id_client'  => $this->__postInput[ 'id_client' ],
-            'user_role'  => $this->__postInput[ 'role' ],
+            'user_role'  => $this->__postInput[ 'user_role' ],
             'message'    => $this->__postInput[ 'message' ],
             'password'   => $this->__postInput[ 'password' ],
         );
@@ -203,7 +203,7 @@ class commentController extends ajaxController {
                     'message'        => $this->commentData['message'],
                     'id_segment'     => $this->commentData['id_segment'],
                     'full_name'      => $this->commentData['full_name'],
-                    'role'           => 'translator',
+                    'user_role'      => $this->commentData['user_role'],
                     'formatted_date' => $this->commentData['formatted_date'],
                     'thread_id'      => $this->commentData['thread_id'],
                 )
@@ -220,8 +220,6 @@ class commentController extends ajaxController {
         );
 
         Log::doLog( "sent message: ", $end );
-
-
     }
 
     private function loggedIn() {
