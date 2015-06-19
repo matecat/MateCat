@@ -7,7 +7,8 @@
 
         SSE.init();
 
-        var types = { resolve: '2', comment: '1' };
+        var types = { sticky: '3', resolve: '2', comment: '1' };
+        var roles = { revisor: '2', translator: '1' };
         var openCommentsOnSegmentOpen = false;
         var lastResolvedSegment ;
 
@@ -218,12 +219,25 @@
             }
         }, false);
 
+        var decodeRole = function(role) {
+            if (Number(role) == roles.translator) {
+                return 'translator';
+            } else {
+                return 'revisor' ;
+            }
+        }
+
         var getUsername = function() {
             return 'John Doe';
         }
 
         var getRole = function() {
-            return 'translator';
+            if (window.location.pathname.split('/')[1] == 'revise') {
+                return roles.revisor ;
+            }
+            else {
+                return roles.translator ;
+            }
         }
 
         var buildFirstCommentHeader = function() {
@@ -354,7 +368,7 @@
                 var root = $(tpls.showComment) ;
                 root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
                 root.find('.mbc-comment-time').text( data.formatted_date );
-                root.find('.mbc-comment-role').text( data.role );
+                root.find('.mbc-comment-role').text( decodeRole (data.user_role) );
                 root.find('.mbc-comment-body').text( htmlDecode(data.message) );
             }
             return root ;
@@ -371,9 +385,8 @@
                 id_segment : id_segment,
                 username   : 'John Doe', // TODO
                 password   : config.password,
-                role       : getRole(),
+                user_role  : getRole(),
                 message    : el.find('.mbc-comment-textarea').val(),
-                post_time  : new Date(),
             }
 
             APP.doRequest({
@@ -436,7 +449,7 @@
                 id_client  : config.id_client,
                 id_segment : UI.currentSegmentId,
                 password   : config.password,
-                role       : getRole(),
+                user_roler : getRole(),
                 username   : getUsername(),
             }
 
@@ -485,15 +498,11 @@
             APP.doRequest({
                 data: data,
                 success : function(resp) {
-
-                    console.log(resp.data);
-
                     db.resetSegments();
                     db.storeSegments( resp.data.current_comments );
                     db.storeSegments( resp.data.open_comments );
 
                     $(document).trigger('mbc:ready');
-
                 },
                 failure : function() {
                     console.log('failure');
@@ -513,9 +522,6 @@
         });
 
         $(document).on('sse:comment', function(ev, message) {
-            // specific to this module
-            console.log('sse:comment', message.data);
-
             db.pushSegment( message.data ) ;
             updateHistoryWithLoadedSegments();
             renderCommentIconLinks();
@@ -582,10 +588,7 @@
         });
 
         $(window).on('segmentOpened', function(e) {
-            console.log('segmentOpened', openCommentsOnSegmentOpen);
-
             if (openCommentsOnSegmentOpen) {
-                console.log('opening segment');
                 openSegmentComment($(e.segment));
                 openCommentsOnSegmentOpen = false;
             }
