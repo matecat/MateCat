@@ -1143,11 +1143,7 @@ console.log('changeStatus');
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
-        this.updateJobMenu();
-		$(window).trigger({
-			type: "segmentOpened",
-			segment: segment
-		});
+		this.updateJobMenu();
 
 		this.clearUndoStack();
 		this.saveInUndoStack('open');
@@ -1242,7 +1238,13 @@ console.log('changeStatus');
 		}
 		if (this.debug)
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
-	},
+
+        $(window).trigger({
+            type: "segmentOpened",
+            segment: segment
+        });
+    },
+
     reactivateJob: function() {
         APP.doRequest({
             data: {
