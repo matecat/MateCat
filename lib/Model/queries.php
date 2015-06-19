@@ -3186,6 +3186,7 @@ function getOpenCommentsInJob( $id_job, $first_seg, $last_seg) {
     $query = "SELECT " .
         " id_job, id_segment, create_date, full_name, resolve_date, user_role, message_type, message, " .
         " DATE_FORMAT(create_date, '%l:%i %p %e %b %Y') AS formatted_date " .
+        " NULL as thread_id " .
         " FROM comments " .
         " WHERE id_job = $id_job " .
         " AND resolve_date IS NULL " .
