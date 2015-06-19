@@ -71,7 +71,11 @@ class commentController extends ajaxController {
     }
 
     private function getRange() {
-        $openComments = getOpenCommentsInJob( $this->__postInput[ 'id_job' ] );
+        $openComments = getOpenCommentsInJob(
+            $this->__postInput[ 'id_job' ] ,
+            $this->__postInput[ 'first_seg' ],
+            $this->__postInput[ 'last_seg' ]
+        );
 
         $comments = getCommentsBySegmentsRange(
             $this->__postInput[ 'id_job' ],

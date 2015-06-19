@@ -8,19 +8,32 @@
         SSE.init();
 
         var types = { resolve: '2', comment: '1' };
-        var calloutCount = 0;
+        var openCommentsOnSegmentOpen = false;
 
         // TODO: Make this private
         window.db = {
             segments: {},
             history: {},
-
-            storeInSegmentsArray : function(array) {
+            storeInHistory : function(array) {
                 for(var i = 0 ; i < array.length ; i++ ) {
-                    this.storeInSegments(array[i]);
+                    var s = data.id_segment ;
+                    if (typeof db.history[s] == 'undefined') {
+                        db.history[s] = [ data ];
+                    }
+                    else {
+                        db.history[s].push( data );
+                    }
                 }
             },
-            storeInSegments : function(data) {
+            resetSegments : function() {
+                this.segments = {};
+            },
+            storeSegments : function(array) {
+                for(var i = 0 ; i < array.length ; i++ ) {
+                    this.pushSegment(array[i]);
+                }
+            },
+            pushSegment : function(data) {
                 var s = data.id_segment ;
                 if (typeof db.segments[s] == 'undefined') {
                     db.segments[s] = [ data ];
@@ -279,14 +292,6 @@
             });
         }
 
-        $(document).on('mbc:segment:update', function(ev, el) {
-            var s = UI.getSegmentId(el);
-            var count = db.getCommentsCountBySegment(s) ;
-            if (count > 0) {
-                $(el).find('.mbc-comment-link .mbc-comment-total').text(count);
-            }
-        });
-
         var populateCommentTemplate = function(data) {
             if (data.message_type == types.resolve) {
                 var root = $(tpls.showResolve)
@@ -330,7 +335,15 @@
 
         $(document).on('click', '.mbc-show-comment-btn', function(e) {
             e.preventDefault();
-            window.location.hash = '#' + $(e.target).closest('div').data('id');
+            openCommentsOnSegmentOpen = true;
+            $('.mbc-history-balloon-outer').removeClass('visible');
+            var sid = $(e.target).closest('div').data('id')
+            if (Number(sid) == UI.currentSegmentId) {
+                UI.scrollSegment(sid);
+                openSegmentComment(($(UI.currentSegment)));
+            } else {
+                window.location.hash = '#' + sid;
+            }
         });
 
         $(document).on('click', '.mbc-comment-link', function(e) {
@@ -384,7 +397,7 @@
         });
 
         var ajaxResolveSuccess = function(resp) {
-            db.storeInSegments(resp.data[0]);
+            db.pushSegment(resp.data[0]);
             $(document).trigger('mbc:comment:new', resp.data[0]);
         }
 
@@ -404,7 +417,6 @@
         });
 
         $(document).on('getSegments_success', function(e) {
-            console.log('getSegments_success');
 
             var data = {
                 action    : 'comment',
@@ -418,7 +430,13 @@
             APP.doRequest({
                 data: data,
                 success : function(resp) {
-                    db.storeInSegmentsArray( resp.data.current_comments );
+
+                    console.log(resp.data);
+
+                    db.resetSegments();
+                    db.storeSegments( resp.data.current_comments );
+                    db.storeSegments( resp.data.open_comments );
+
                     $(document).trigger('mbc:ready');
 
                 },
@@ -431,7 +449,7 @@
 
         $(document).on('mbc:ready', function(ev) {
             renderCommentIconLinks();
-            updateHistory();
+            updateHistoryWithLoadedSegments();
         });
 
         $(document).on('sse:ack', function(ev, message) {
@@ -443,8 +461,8 @@
             // specific to this module
             console.log('sse:comment', message.data);
 
-            db.storeInSegments( message.data ) ;
-            updateHistory();
+            db.pushSegment( message.data ) ;
+            updateHistoryWithLoadedSegments();
             renderCommentIconLinks();
         });
 
@@ -477,9 +495,7 @@
             $('.mbc-comment-highlight-history').text( count ).addClass( 'visible' );
         }
 
-        window.history = {}
-
-        window.updateHistory = function() {
+        window.updateHistoryWithLoadedSegments = function() {
             db.history = {};
             var count = 0
             for (var i in db.segments) {
@@ -507,7 +523,7 @@
         }
 
         $(document).on('mbc:comment:new', function(ev, data) {
-            updateHistory();
+            updateHistoryWithLoadedSegments();
             renderCommentIconLinks();
 
             if (UI.currentSegmentId == Number(data.id_segment)) {
@@ -517,11 +533,34 @@
 
         $(document).on('mbc:comment:saved', function(ev, data) {
             $(document).find('section .mbc-thread-wrap').remove();
-            db.storeInSegments(data); // TODO: move this in ajax success?
+            db.pushSegment(data); // TODO: move this in ajax success?
             $(document).trigger('mbc:comment:new', data);
         });
 
+        $(window).on('segmentClosed', function(e) {
+            closeSegment($(e.segment));
+        });
+
+        $(window).on('segmentOpened', function(e) {
+            console.log('segmentOpened', openCommentsOnSegmentOpen);
+
+            if (openCommentsOnSegmentOpen) {
+                console.log('opening segment');
+                openSegmentComment($(e.segment));
+                openCommentsOnSegmentOpen = false;
+            }
+        });
+
+        $(document).on('mbc:segment:update', function(ev, el) {
+            var s = UI.getSegmentId(el);
+            var count = db.getCommentsCountBySegment(s) ;
+            if (count > 0) {
+                $(el).find('.mbc-comment-link .mbc-comment-total').text(count);
+            }
+        });
+
         $(document).ready(function(){
+            // load for history
             $('.header-menu').append($(tpls.historyIcon));
             $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
         });

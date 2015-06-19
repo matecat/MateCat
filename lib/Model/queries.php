@@ -3176,23 +3176,34 @@ function insertCommentRecord( $commentData ) {
     return $db->affected_rows;
 }
 
-function getOpenCommentsInJob( $id_job ) {
-  $db     = Database::obtain();
-  $id_job = (int) $id_job ;
+function getOpenCommentsInJob( $id_job, $first_seg, $last_seg) {
+    $db    = Database::obtain();
 
+    $id_job        = (int) $id_job ;
+    $first_seg     = (int) $first_seg ;
+    $last_seg      = (int) $last_seg ;
 
-  $query = "SELECT " .
-    " id_job, id_segment, create_date, full_name, resolve_date, user_role, message_type, message, " .
-    " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) AS thread_id, " .
-    " DATE_FORMAT(create_date, '%l:%i %p %e %b %Y') AS formatted_date " .
-    " FROM comments " .
-    " WHERE id_job = $id_job " .
-    " AND resolve_date IS NULL " .
-    " ORDER BY id_job, resolve_date DESC ";
+    $query = "SELECT " .
+        " id_job, id_segment, create_date, full_name, resolve_date, user_role, message_type, message, " .
+        " DATE_FORMAT(create_date, '%l:%i %p %e %b %Y') AS formatted_date " .
+        " FROM comments " .
+        " WHERE id_job = $id_job " .
+        " AND resolve_date IS NULL " .
+        " AND id_segment < $first_seg OR id_segment > $last_seg " .
+        " ORDER BY id_segment ASC, create_date ASC ";
 
-  $results = $db->fetch_array( $query );
+    $results = $db->fetch_array( $query );
 
-  return $results ;
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( "$errno: " . var_export( $err, true ) );
+
+        return $errno * -1;
+    }
+
+    return $results ;
 }
 
 function getCommentsBySegmentsRange( $id_job, $first_seg, $last_seg ) {
@@ -3210,8 +3221,6 @@ function getCommentsBySegmentsRange( $id_job, $first_seg, $last_seg ) {
         " WHERE id_job = $id_job " .
         " AND id_segment >= $first_seg AND id_segment <= $last_seg " .
         " ORDER BY id_segment ASC, create_date ASC ";
-
-    Log::doLog( $query );
 
     $results = $db->fetch_array( $query );
 
