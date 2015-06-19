@@ -428,7 +428,7 @@
             $(e.target).closest('.mbc-history-balloon-outer').toggleClass('visible');
         });
 
-        $(document).on('click', '.mbc-close-btn', function(e) {
+        $(document).on('click', 'section .mbc-close-btn', function(e) {
             e.preventDefault();
             closeSegment( $(e.target).closest('section') );
         });
