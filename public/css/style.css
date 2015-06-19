@@ -1385,6 +1385,9 @@ body.searchActive .search-display
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
 	color:#000
 }
+.search-input.warn {
+    border-color: red;
+}
 .searchbox input[type=button]:hover {
     border-width: 2px;
 }
@@ -1592,23 +1595,18 @@ body.review .loader
 
 .header .repetition
 {
-/*	float: left;
-	margin: 4px 0 0 6px;
-	text-transform: uppercase;
-	color: #888;
-	font-size: 11px;*/
 	float: left;
-	margin: 0px 0 0 0px;
+    margin: 0px 0 0 0px;
 	text-transform: uppercase;
 	color: #FFF;
 	font-size: 11px;
 	background: #999;
 	padding: 4px 8px;
+
+    left: 46%;
+    position:absolute;
+    z-index: 10;
 }
-
-
-
-
 
 
 .close{   width: 14px;
@@ -1638,7 +1636,23 @@ body.review .loader
 
 .h-text{width:auto;height:20px;display:block;position:absolute;left:10px;top:2px;color:#fff;font-size:12px;text-decoration:none;text-transform:none;}
 .white{background:#fff url(../img/gray-point.gif) repeat-y 46.5% center !important;font-size:16px !important;position:relative;line-height:22px;float:left;width:100%;}
-.percentuage{display:none;line-height:180%;height:20px;width:auto;text-align:center;width:25px;top:-9px;position:absolute;left:46.8%;color:#fff;font-size:11px;text-decoraton:none;font-weight:bold;text-decoration:none;cursor:default;padding:0 10px;}
+.percentuage
+    {
+    display:none;
+    line-height:180%;
+    height:20px;
+    text-align:center;
+    width:25px;
+    top:-9px;
+    position:absolute;
+    left:46.8%;
+    color:#fff;
+    font-size:11px;
+    text-decoration:none;
+    font-weight:bold;
+    cursor:default;
+    padding:0 10px;
+}
 /*
 .editor .percentuage{display:block !important;}
 */

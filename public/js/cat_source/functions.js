@@ -704,13 +704,18 @@ function replaceSelectedText(replacementText) {
 function replaceSelectedHtml(replacementHtml) {
     var sel, range;
     if (window.getSelection) {
+        console.log('UI.editarea.html() 0: ', UI.editarea.html());
         sel = window.getSelection();
+        console.log('sel: ', sel);
         if (sel.rangeCount) {
             range = sel.getRangeAt(0);
+            console.log('range: ', range);
+            console.log('UI.editarea.html() 1: ', UI.editarea.html());
             range.deleteContents();
-			pasteHtmlAtCaret(replacementHtml);
+            console.log('UI.editarea.html() 2: ', UI.editarea.html());
+//            pasteHtmlAtCaret(replacementHtml);
         }
-    } else if (document.selection && document.selection.createRange) {console.log('c');
+    } else if (document.selection && document.selection.createRange) {
         range = document.selection.createRange();
         range.text = replacementText;
     }
