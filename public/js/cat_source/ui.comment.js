@@ -14,25 +14,40 @@
         window.db = {
             segments: {},
             history: {},
-            storeInHistory : function(array) {
-                for(var i = 0 ; i < array.length ; i++ ) {
-                    var s = data.id_segment ;
-                    if (typeof db.history[s] == 'undefined') {
-                        db.history[s] = [ data ];
-                    }
-                    else {
-                        db.history[s].push( data );
+            refreshHistory : function() {
+                var count = 0,
+                    comment ;
+                for (var i in this.segments) {
+                    if (isNaN(i)) { continue; }
+
+                    for (var ii = this.segments[i].length - 1; ii >= 0 ; ii--) {
+                        comment = this.segments[i][ii] ;
+
+                        if (comment.thread_id == null) {
+                            if (! this.history.hasOwnProperty(i) ) {
+                                this.history[i] = [];
+                            }
+                            this.history[i].push( comment );
+                            if (comment.message_type == types.comment) {
+                                count++ ;
+                            }
+                        }
+                        else { break; }
                     }
                 }
+                return count;
             },
+
             resetSegments : function() {
                 this.segments = {};
             },
+
             storeSegments : function(array) {
                 for(var i = 0 ; i < array.length ; i++ ) {
                     this.pushSegment(array[i]);
                 }
             },
+
             pushSegment : function(data) {
                 var s = data.id_segment ;
                 if (typeof db.segments[s] == 'undefined') {
@@ -49,6 +64,7 @@
                     });
                 }
             },
+
             getCommentsBySegment : function(s) {
                 if (typeof this.segments[s] == 'undefined') {
                     return [];
@@ -56,6 +72,7 @@
                     return this.segments[s];
                 }
             },
+
             getCommentsCountBySegment : function(s) {
                 return $(this.getCommentsBySegment(s)).filter(function(i,x) {
                     return x.message_type == types.comment;
@@ -497,23 +514,8 @@
 
         window.updateHistoryWithLoadedSegments = function() {
             db.history = {};
-            var count = 0
-            for (var i in db.segments) {
-                if (isNaN(i)) { continue; }
 
-                for (var ii = db.segments[i].length-1; ii >= 0 ; ii--) {
-                    if (db.segments[i][ii].thread_id == null) {
-                        if (!db.history.hasOwnProperty[i]) {
-                            db.history[i] = [];
-                        }
-                        db.history[i].push( db.segments[i][ii] );
-                        if (db.segments[i][ii].message_type == types.comment) {
-                            count++ ;
-                        }
-                    }
-                    else { break; }
-                }
-            }
+            var count = db.refreshHistory();
 
             if (count == 0) {
                 renderHistoryWithNoComments();
