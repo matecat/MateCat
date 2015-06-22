@@ -2373,6 +2373,12 @@ console.log('changeStatus');
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
+        var glossarySourcesAr = [];
+        $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
+            glossarySourcesAr.push($(this).text());
+        })
+//        console.log(glossarySourcesAr);
+//        console.log(JSON.stringify(glossarySourcesAr));
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2380,7 +2386,8 @@ console.log('changeStatus');
 				token: token,
 				password: config.password,
 				src_content: src_content,
-				trg_content: trg_content
+				trg_content: trg_content,
+                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
@@ -3691,7 +3698,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.6";
+		this.version = "0.5.7";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
