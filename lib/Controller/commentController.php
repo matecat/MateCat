@@ -12,6 +12,9 @@ class commentController extends ajaxController {
     private $role ;
     private $message ;
 
+    private $struct ;
+    private $new_record ;
+
     public function __destruct() {
     }
 
@@ -71,104 +74,77 @@ class commentController extends ajaxController {
     }
 
     private function getRange() {
-        $openComments = getOpenCommentsInJob(
-            $this->__postInput[ 'id_job' ] ,
-            $this->__postInput[ 'first_seg' ],
-            $this->__postInput[ 'last_seg' ]
-        );
+        $this->struct = new Comments_CommentStruct() ;
+        $this->struct->id_job        = $this->__postInput[ 'id_job' ] ;
+        $this->struct->first_segment = $this->__postInput[ 'first_seg' ] ;
+        $this->struct->last_segment  = $this->__postInput[ 'last_seg' ] ;
 
-        $comments = getCommentsBySegmentsRange(
-            $this->__postInput[ 'id_job' ],
-            $this->__postInput[ 'first_seg' ],
-            $this->__postInput[ 'last_seg' ]
-        );
+        $commentDao = new Comments_CommentDao( Database::obtain() );
 
-        $this->result[ 'data' ]['open_comments'] = $openComments ;
-        $this->result[ 'data' ]['current_comments'] = $comments ;
+        $this->result[ 'data' ] = array(
+            'open_comments'    => $commentDao->getOpenCommentsInJob( $this->struct ),
+            'current_comments' => $commentDao->getCommentsBySegmentsRange( $this->struct )
+        );
     }
 
     private function resolve() {
+        $this->struct = new Comments_CommentStruct() ;
+
         $this->prepareCommentData();
-        $this->validateInput();
 
-        $this->commentData['message_type'] = '2' ; // resolve
+        $commentDao = new Comments_CommentDao( Database::obtain() );
 
-        $this->writeResolve();
+        $this->new_record = $commentDao->resolveThread( $this->struct );
 
         $this->enqueueComment();
+
         if ($this->loggedIn()) {
             $this->sendEmail();
         }
 
-        $this->result[ 'data' ][ ] = $this->commentData ;
+        array_push( $this->result[ 'data' ], $this->payload );
     }
 
     private function create() {
+        $this->struct = new Comments_CommentStruct() ;
         $this->prepareCommentData();
-        $this->validateInput();
 
-        $this->commentData['message_type'] = '1' ; // comment
-        $this->commentData['formatted_date'] = strftime('%l:%M %p %e %b %Y');
+        $commentDao = new Comments_CommentDao( Database::obtain() );
 
-        if ( $this->processComment() ) {
-            array_push( $this->result[ 'data' ], $this->commentData );
-        } else {
-            // TODO: handle error
-            $this->result[ 'errors' ][ ] = array(
-                "code" => -127, "message" => "Error on comment create."
-            ) ;
+        $this->new_record = $commentDao->saveComment( $this->struct );
+
+        $this->enqueueComment();
+
+        if ($this->loggedIn()) {
+            $this->sendEmail();
         }
+
+        array_push( $this->result[ 'data' ], $this->payload );
     }
 
     private function prepareCommentData() {
-        $this->commentData = array(
-            'id_segment' => $this->__postInput[ 'id_segment' ],
-            'id_job'     => $this->__postInput[ 'id_job' ],
-            'full_name'  => $this->__postInput[ 'username' ],
-            'id_client'  => $this->__postInput[ 'id_client' ],
-            'user_role'  => $this->__postInput[ 'user_role' ],
-            'message'    => $this->__postInput[ 'message' ],
-            'password'   => $this->__postInput[ 'password' ],
-        );
+        $this->struct = new Comments_CommentStruct() ;
+
+        $this->struct->id_segment = $this->__postInput[ 'id_segment' ];
+        $this->struct->id_job     = $this->__postInput[ 'id_job' ];
+        $this->struct->full_name  = $this->__postInput[ 'username' ];
+        $this->struct->user_role  = $this->__postInput[ 'user_role' ];
+        $this->struct->message    = $this->__postInput[ 'message' ];
+        $this->struct->email      = $this->getEmail();
+        $this->struct->uid        = $this->getUid();
     }
 
-    private function processComment() {
-        // TODO: move this in a separate class
-        $db = Database::obtain();
-
+    private function postProcess() {
         try {
-            // $db->begin();
-            $this->writeComment();
             $this->enqueueComment();
             if ($this->loggedIn()) {
                 $this->sendEmail();
             }
             return true;
-            // $db->commit();
         } catch (Exception $e) {
             Log::doLog($e->getMessage()) ;
-            // $db->rollback();
             return false;
         }
-    }
-
-    private function writeComment() {
-        $dataForDb = $this->commentData ;
-
-        $dataForDb['uid'] = $this->getUid();
-        $dataForDb['email'] = $this->getEmail();
-
-        insertCommentRecord($dataForDb);
-    }
-
-    private function writeResolve() {
-
-        $dataForDb = $this->commentData ;
-        $dataForDb['uid'] = $this->getUid();
-        $dataForDb['email'] = $this->getEmail();
-
-        Log::doLog( $dataForDb ) ;
-        $this->commentData['thread_id'] = resolveCommentThread($dataForDb);
     }
 
     private function sendEmail() {
@@ -192,23 +168,25 @@ class commentController extends ajaxController {
     }
 
     private function enqueueComment() {
+        $this->payload = array(
+            'message_type'   => $this->new_record->message_type,
+            'message'        => $this->new_record->message,
+            'id_segment'     => $this->new_record->id_segment,
+            'full_name'      => $this->new_record->full_name,
+            'user_role'      => $this->new_record->user_role,
+            'formatted_date' => $this->new_record->getFormattedDate(),
+            'thread_id'      => $this->new_record->thread_id,
+        ) ;
+
         $message = json_encode( array(
             '_type' => 'comment',
             'data' => array(
-                'id_job'    => $this->commentData['id_job'],
-                'password'  => $this->commentData['password'],
-                'id_client' => $this->commentData['id_client'],
-                'payload' => array(
-                    'message_type'   => $this->commentData['message_type'],
-                    'message'        => $this->commentData['message'],
-                    'id_segment'     => $this->commentData['id_segment'],
-                    'full_name'      => $this->commentData['full_name'],
-                    'user_role'      => $this->commentData['user_role'],
-                    'formatted_date' => $this->commentData['formatted_date'],
-                    'thread_id'      => $this->commentData['thread_id'],
-                )
+                'id_job'    => $this->__postInput['id_job'],
+                'password'  => $this->__postInput['password'],
+                'id_client' => $this->__postInput['id_client'],
+                'payload'   => $this->payload
             )
-        ) );
+        ));
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
 
@@ -218,8 +196,6 @@ class commentController extends ajaxController {
             $message,
             array( 'persistent' => 'true' )
         );
-
-        Log::doLog( "sent message: ", $end );
     }
 
     private function loggedIn() {
@@ -227,11 +203,6 @@ class commentController extends ajaxController {
         return false ;
     }
 
-    private function validateInput() {
-        // TODO: validate
-        // - presence of required attributes
-        // - role code to be correct
-    }
 }
 
 ?>
