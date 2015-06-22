@@ -7,8 +7,8 @@
 
         SSE.init();
 
-        var types = { sticky: '3', resolve: '2', comment: '1' };
-        var roles = { revisor: '2', translator: '1' };
+        var types = { sticky: 3, resolve: 2, comment: 1 };
+        var roles = { revisor: 2, translator: 1 };
         var openCommentsOnSegmentOpen = false;
         var lastResolvedSegment ;
 
@@ -30,7 +30,7 @@
                                 this.history[i] = [];
                             }
                             this.history[i].push( comment );
-                            if (comment.message_type == types.comment) {
+                            if (Number(comment.message_type) == types.comment) {
                                 count++ ;
                             }
                         }
@@ -58,7 +58,7 @@
                 else {
                     db.segments[s].push( data );
                 }
-                if (data.message_type == types.resolve) {
+                if (Number(data.message_type) == types.resolve) {
                     $(db.segments[s]).each(function(i,x) {
                         if (x.thread_id == null) {
                             x.thread_id = data.thread_id
@@ -77,7 +77,7 @@
 
             getCommentsCountBySegment : function(s) {
                 return $(this.getCommentsBySegment(s)).filter(function(i,x) {
-                    return x.message_type == types.comment;
+                    return Number(x.message_type) == types.comment;
                 }).length ;
             }
         };
@@ -286,7 +286,7 @@
                     }
                     thread_wrap = $(tpls.threadWrap) ;
                 }
-                if (comments[i].message_type == types.comment) {
+                if (Number(comments[i].message_type) == types.comment) {
                     count++;
                 }
                 if (comments[i].thread_id == null) {
@@ -361,7 +361,7 @@
         }
 
         var populateCommentTemplate = function(data) {
-            if (data.message_type == types.resolve) {
+            if (Number(data.message_type) == types.resolve) {
                 var root = $(tpls.showResolve)
                 root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
             } else {
@@ -406,8 +406,8 @@
             $('.mbc-history-balloon-outer').removeClass('visible');
             var sid = $(e.target).closest('div').data('id')
             if (Number(sid) == UI.currentSegmentId) {
-                UI.scrollSegment(sid);
-                openSegmentComment(($(UI.currentSegment)));
+                UI.scrollSegment(UI.currentSegment);
+                openSegmentComment( $(UI.currentSegment) );
             } else {
                 window.location.hash = '#' + sid;
             }
@@ -449,7 +449,7 @@
                 id_client  : config.id_client,
                 id_segment : UI.currentSegmentId,
                 password   : config.password,
-                user_roler : getRole(),
+                user_role  : getRole(),
                 username   : getUsername(),
             }
 
