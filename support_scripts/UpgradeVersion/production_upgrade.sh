@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
+SERVICES_DIR=/services/
+
 MATECAT_HOME=/home/matecat/pro_matecat_com/
+MATECAT_HOME=/var/www/cattool/
 
 # branch of directory
-MATECAT_BRANCH="master"
+MATECAT_BRANCH="develop"
+
+USER_OWNER="www-data"
+USER_OWNER="domenico"
 
 # Email Subject
 SUBJECT="Git Pull failed";
@@ -30,7 +36,7 @@ then
         exit 1
 fi
 
-hist=$(setuid www-data git pull origin ${MATECAT_BRANCH})
+hist=$(setuid ${USER_OWNER} git pull origin ${MATECAT_BRANCH})
 
 ret=$?
 
@@ -43,4 +49,19 @@ then
 fi
 
 popd
-setuid www-data php Upgrade.php $1
+setuid ${USER_OWNER} php Upgrade.php $1
+
+
+########### DAEMON TOOOL SERVICES UPDATE
+
+# Update services
+# Update MultiLog
+cp "${MATECAT_HOME}lib/Utils/Analysis/supervise/fastAnalysis/run" "${SERVICES_DIR}/matecat_fastAnalysis/run.sh.new"
+mv -f "${SERVICES_DIR}/matecat_fastAnalysis/run.sh.new" "${SERVICES_DIR}/matecat_fastAnalysis/run.sh" # atomically replace run
+
+cp "${MATECAT_HOME}lib/Utils/Analysis/supervise/fastAnalysis/log.sh" "${SERVICES_DIR}/matecat_fastAnalysis/log/log.sh.new"
+mv -f "${SERVICES_DIR}/matecat_fastAnalysis/log/log.sh.new" "${SERVICES_DIR}/matecat_fastAnalysis/log/log.sh" # atomically replace run
+
+
+# restart Daemons
+svc -t "${SERVICES_DIR}/matecat_fastAnalysis"
