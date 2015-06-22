@@ -9676,14 +9676,15 @@ if(config.enableReview && config.isReview) {
 
             // find in current UI
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-console.log('A');
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
-
+                console.log('translatedList: ', translatedList);
+                console.log('approvedList: ', approvedList);
                 if( translatedList.length ) {
                     translatedList.first().find('.editarea').click();
                 } else {
-                    approvedList.first().find('.editarea').click();
+                    UI.reloadWarning();
+//                    approvedList.first().find('.editarea').click();
                 }
 
             } else {
@@ -9696,7 +9697,8 @@ console.log('A');
                     if( translatedList.length ) {
                         translatedList.first().find('.editarea').click();
                     } else {
-                        approvedList.first().find('.editarea').click();
+                        UI.reloadWarning();
+//                        approvedList.first().find('.editarea').click();
                     }
 
                     return false;
