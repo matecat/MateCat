@@ -2387,7 +2387,8 @@ console.log('changeStatus');
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
-                glossaryList: JSON.stringify(glossarySourcesAr)
+                glossaryList: glossarySourcesAr
+//                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
