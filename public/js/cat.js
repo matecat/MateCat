@@ -2373,6 +2373,12 @@ console.log('changeStatus');
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
+        var glossarySourcesAr = [];
+        $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
+            glossarySourcesAr.push($(this).text());
+        })
+//        console.log(glossarySourcesAr);
+//        console.log(JSON.stringify(glossarySourcesAr));
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2380,7 +2386,9 @@ console.log('changeStatus');
 				token: token,
 				password: config.password,
 				src_content: src_content,
-				trg_content: trg_content
+				trg_content: trg_content,
+                glossaryList: glossarySourcesAr
+//                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
@@ -9668,14 +9676,15 @@ if(config.enableReview && config.isReview) {
 
             // find in current UI
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
-console.log('A');
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
-
+                console.log('translatedList: ', translatedList);
+                console.log('approvedList: ', approvedList);
                 if( translatedList.length ) {
                     translatedList.first().find('.editarea').click();
                 } else {
-                    approvedList.first().find('.editarea').click();
+                    UI.reloadWarning();
+//                    approvedList.first().find('.editarea').click();
                 }
 
             } else {
@@ -9688,7 +9697,8 @@ console.log('A');
                     if( translatedList.length ) {
                         translatedList.first().find('.editarea').click();
                     } else {
-                        approvedList.first().find('.editarea').click();
+                        UI.reloadWarning();
+//                        approvedList.first().find('.editarea').click();
                     }
 
                     return false;
