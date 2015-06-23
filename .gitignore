@@ -3,6 +3,7 @@ inc/login_secret.dat
 inc/config.inc.php
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
+inc/config.ini
 .agignore
 
 # Ignore artifacts
