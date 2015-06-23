@@ -14,6 +14,7 @@ class commentController extends ajaxController {
 
     private $struct ;
     private $new_record ;
+    private $current_user ;
 
     public function __destruct() {
     }
@@ -43,6 +44,15 @@ class commentController extends ajaxController {
 
     public function doAction() {
         $job_data = getJobData( $this->__postInput[ 'id_job' ] );
+
+        $this->checkLogin() ;
+        if ( $this->userIsLogged ) {
+            $this->loadUser();
+        }
+
+        error_log( '@@ isLoggedIn ' . $this->userMail );
+        error_log( '@@ isLoggedIn ' . $this->current_user->first_name );
+        // error_log( '@@ isLoggedIn ' . var_export($_SESSION, true) );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
@@ -94,7 +104,7 @@ class commentController extends ajaxController {
 
         $this->enqueueComment();
 
-        if ($this->loggedIn()) {
+        if ($this->isLoggedIn()) {
             $this->sendEmail();
         }
 
@@ -110,7 +120,7 @@ class commentController extends ajaxController {
 
         $this->enqueueComment();
 
-        if ($this->loggedIn()) {
+        if ($this->isLoggedIn()) {
             $this->sendEmail();
         }
 
@@ -141,12 +151,23 @@ class commentController extends ajaxController {
         return null;
     }
 
-    private function loggedIn() {
-        return false ;
-    }
-
     private function getResolveDate() {
         return null;
+    }
+
+    private function loadUser() {
+        $userStruct = new Users_UserStruct();
+        $userStruct->uid = $this->uid;
+
+        $userDao = new Users_UserDao( Database::obtain() ) ;
+        $result = $userDao->read( $userStruct );
+
+        if ( empty($result) ) {
+            throw new Exception( "User not found by UID." );
+        }
+
+        $this->current_user = $result[0] ;
+        error_log( '@@ current_user ' . $this->current_user->first_name );
     }
 
     private function enqueueComment() {
