@@ -50,12 +50,7 @@ class commentController extends ajaxController {
             $this->loadUser();
         }
 
-        error_log( '@@ isLoggedIn ' . $this->userMail );
-        error_log( '@@ isLoggedIn ' . $this->current_user->first_name );
-        // error_log( '@@ isLoggedIn ' . var_export($_SESSION, true) );
-
         $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness
         if( !$pCheck->grantJobAccessByJobData( $job_data, $this->__postInput[ 'password' ] ) ){
             $this->result['errors'][] = array("code" => -10, "message" => "wrong password");
             return;
@@ -89,10 +84,11 @@ class commentController extends ajaxController {
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
 
-        $this->result[ 'data' ] = array(
+        $this->result[ 'data' ][ 'entries' ] = array(
             'open_comments'    => $commentDao->getOpenCommentsInJob( $this->struct ),
             'current_comments' => $commentDao->getCommentsBySegmentsRange( $this->struct )
         );
+        $this->appendUser();
     }
 
     private function resolve() {
@@ -104,11 +100,19 @@ class commentController extends ajaxController {
 
         $this->enqueueComment();
 
-        if ($this->isLoggedIn()) {
+        if ( $this->userIsLogged ) {
             $this->sendEmail();
         }
 
-        array_push( $this->result[ 'data' ], $this->payload );
+        $this->result[ 'data' ][ 'entries' ] = array( $this->payload );
+    }
+
+    private function appendUser() {
+        if ( $this->userIsLogged ) {
+            $this->result[ 'data' ][ 'user' ] = array(
+                'full_name' => $this->current_user->fullName()
+            );
+        }
     }
 
     private function create() {
@@ -120,11 +124,13 @@ class commentController extends ajaxController {
 
         $this->enqueueComment();
 
-        if ($this->isLoggedIn()) {
+        if ( $this->userIsLogged ) {
             $this->sendEmail();
         }
 
-        array_push( $this->result[ 'data' ], $this->payload );
+        $this->result[ 'data' ][ 'entries' ] = array( $this->payload ) ;
+
+        $this->appendUser();
     }
 
     private function prepareCommentData() {
