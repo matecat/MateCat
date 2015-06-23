@@ -11,7 +11,8 @@
         var roles = { revisor: 2, translator: 1 };
         var openCommentsOnSegmentOpen = false;
         var lastResolvedSegment ;
-        var currentGoogleUser ;
+        window.loggedUserName = null ;
+        window.customUserName = null ;
 
         // TODO: Make this private
         window.db = {
@@ -150,7 +151,7 @@
 
             showResolve : '' +
                 '<div class="mbc-show-comment">' +
-                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-resolvedby mbc-truncate">Anonymous</span>' +
+                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-resolvedby mbc-truncate"></span>' +
                 ' <span class="mbc-comment-resolved-label">resolved</span>' +
                 ' </div>' ,
 
@@ -172,7 +173,7 @@
 
             inputForm : '' +
                 ' <div class="mbc-post-comment">' +
-                ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
+                ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
                 ' <textarea class="mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
@@ -232,7 +233,11 @@
         }
 
         var getUsername = function() {
-            return 'John Doe';
+            console.log('getUsername');
+
+            if ( customUserName ) return customUserName ;
+            if ( loggedUserName ) return loggedUserName ;
+            return 'Anonymous';
         }
 
         var getRole = function() {
@@ -387,7 +392,7 @@
                 id_client  : config.id_client,
                 id_job     : config.job_id,
                 id_segment : id_segment,
-                username   : 'John Doe', // TODO
+                username   : getUsername(),
                 password   : config.password,
                 user_role  : getRole(),
                 message    : el.find('.mbc-comment-textarea').val(),
@@ -396,7 +401,7 @@
             APP.doRequest({
                 data: data,
                 success : function(resp) {
-                    $(document).trigger('mbc:comment:saved', resp.data[0]);
+                    $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
                 },
                 failure : function() {
                     console.log('failure');
@@ -468,25 +473,33 @@
         });
 
         var ajaxResolveSuccess = function(resp) {
-            db.pushSegment(resp.data[0]);
+            db.pushSegment(resp.data.entries[0]);
             lastResolvedSegment = UI.currentSegmentId ;
-            $(document).trigger('mbc:comment:new', resp.data[0]);
+            $(document).trigger('mbc:comment:new', resp.data.entries[0]);
         }
 
         $(document).on('click', '.mbc-show-form-btn', function(e) {
             e.preventDefault();
             var t = $(e.target);
+            var outer = t.closest('.mbc-comment-balloon-outer');
 
-            t.closest('.mbc-comment-balloon-outer')
-                .find('.mbc-post-comment')
-                .addClass('visible');
-
-            t.closest('.mbc-comment-balloon-outer')
-                .find('.mbc-ask-comment-wrap')
-                .addClass('visible');
+            outer.find('.mbc-post-comment').addClass('visible');
+            outer.find('.mbc-ask-comment-wrap').addClass('visible');
+            outer.find('.mbc-post-comment .mbc-comment-username-label').text( getUsername() ) ;
+            if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login').hide();
+            else outer.find('.mbc-post-comment .mbc-login').show();
 
             t.remove();
         });
+
+
+        var refreshUserInfo = function(user) {
+            if (typeof user == 'undefined') {
+                loggedUserName = null;
+            } else  {
+                loggedUserName = user.full_name ;
+            }
+        }
 
         $(document).on('getSegments_success', function(e) {
 
@@ -503,8 +516,9 @@
                 data: data,
                 success : function(resp) {
                     db.resetSegments();
-                    db.storeSegments( resp.data.current_comments );
-                    db.storeSegments( resp.data.open_comments );
+                    db.storeSegments( resp.data.entries.current_comments );
+                    db.storeSegments( resp.data.entries.open_comments );
+                    refreshUserInfo( resp.data.user ) ;
 
                     $(document).trigger('mbc:ready');
                 },
@@ -636,6 +650,10 @@
 
         $(document).on('login:window:close', function(e) {
             console.log('login window close');
+        });
+
+        $(document).on('mbc:user:refresh', function(e) {
+            console.log('user refreshed');
 
         });
 
