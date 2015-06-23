@@ -19,8 +19,6 @@ class commentController extends ajaxController {
     }
 
     public function __construct() {
-        Log::$fileName = 'comments.log';
-
         parent::__construct();
 
         $filterArgs = array(
@@ -69,7 +67,7 @@ class commentController extends ajaxController {
             break;
         default:
             $this->result[ 'errors' ][ ] = array(
-                "code" => -127, "message" => "No valid action provided." );
+                "code" => -127, "message" => "Unable to route action." );
         }
     }
 
@@ -88,8 +86,6 @@ class commentController extends ajaxController {
     }
 
     private function resolve() {
-        $this->struct = new Comments_CommentStruct() ;
-
         $this->prepareCommentData();
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
@@ -106,7 +102,6 @@ class commentController extends ajaxController {
     }
 
     private function create() {
-        $this->struct = new Comments_CommentStruct() ;
         $this->prepareCommentData();
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
@@ -134,25 +129,8 @@ class commentController extends ajaxController {
         $this->struct->uid        = $this->getUid();
     }
 
-    private function postProcess() {
-        try {
-            $this->enqueueComment();
-            if ($this->loggedIn()) {
-                $this->sendEmail();
-            }
-            return true;
-        } catch (Exception $e) {
-            Log::doLog($e->getMessage()) ;
-            return false;
-        }
-    }
-
     private function sendEmail() {
 
-    }
-
-    private function getMessageType() {
-        return null;
     }
 
     private function getEmail() {
@@ -161,6 +139,10 @@ class commentController extends ajaxController {
 
     private function getUid() {
         return null;
+    }
+
+    private function loggedIn() {
+        return false ;
     }
 
     private function getResolveDate() {
@@ -189,18 +171,11 @@ class commentController extends ajaxController {
         ));
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
-
-        $connect = $stomp->connect();
-
-        $end = $stomp->send( INIT::$SSE_COMMENTS_QUEUE_NAME,
+        $stomp->connect();
+        $stomp->send( INIT::$SSE_COMMENTS_QUEUE_NAME,
             $message,
             array( 'persistent' => 'true' )
         );
-    }
-
-    private function loggedIn() {
-        // TODO:
-        return false ;
     }
 
 }
