@@ -11,6 +11,7 @@
         var roles = { revisor: 2, translator: 1 };
         var openCommentsOnSegmentOpen = false;
         var lastResolvedSegment ;
+        var currentGoogleUser ;
 
         // TODO: Make this private
         window.db = {
@@ -173,7 +174,10 @@
                 ' <div class="mbc-post-comment">' +
                 ' <span class="mbc-comment-label mbc-comment-username-label">Anonymous</span>' +
                 ' <textarea class="mbc-comment-textarea"></textarea>' +
-                ' <div><a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a></div>' +
+                ' <div>' +
+                ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
+                ' <a href="javascript:" class="mbc-login">Login to be notified</a>' +
+                ' </div>' +
                 ' </div>',
 
             inputFirstComment : '' +
@@ -457,7 +461,7 @@
             APP.doRequest({
                 data: data,
                 success : ajaxResolveSuccess,
-                failure : function() {
+                error : function() {
                     console.log('failure');
                 }
             });
@@ -504,7 +508,7 @@
 
                     $(document).trigger('mbc:ready');
                 },
-                failure : function() {
+                error : function() {
                     console.log('failure');
                 }
             });
@@ -625,6 +629,16 @@
             $('.header-menu').append($(tpls.historyIcon));
             $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
         });
+
+        $(document).on('click', '.mbc-login', function(e) {
+            $('.login-google').show();
+        });
+
+        $(document).on('login:window:close', function(e) {
+            console.log('login window close');
+
+        });
+
     }
 
 })(jQuery, config, window, undefined);
