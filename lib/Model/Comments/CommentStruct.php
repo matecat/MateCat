@@ -33,4 +33,8 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
     return strftime( '%l:%M %p %e %b %Y', strtotime($this->create_date) );
   }
 
+  public function getThreadId() {
+    return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
+  }
+
 }

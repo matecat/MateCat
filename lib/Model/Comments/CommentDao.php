@@ -73,7 +73,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           $this->con->rollback();
       }
 
-      $obj->thread_id = md5($id_job . '-' . $id_segment . '-' . $resolve_date);
+      $obj->thread_id = $obj->getThreadId() ;
 
       return $obj ;
 
@@ -86,7 +86,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       $query = $this->finderQuery() .
           " WHERE id_job = $obj->id_job " .
           " AND resolve_date IS NULL " .
-          " AND id_segment < $obj->first_segment OR id_segment > $obj->last_segment " .
+          " AND ( id_segment < $obj->first_segment OR id_segment > $obj->last_segment ) " .
           " ORDER BY id_segment ASC, create_date ASC ";
 
       $this->con->query( $query );
