@@ -13,10 +13,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
       $obj->create_date = date( 'Y-m-d H:i:s' ) ;
 
-
       if ($obj->message_type == null) {
           $obj->message_type = self::TYPE_COMMENT ;
       }
+
+      $this->validateForComment($obj);
 
       $query = " INSERT INTO comments " .
           " ( " .
@@ -68,7 +69,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
           $this->con->commit();
       } catch ( Exception $e ) {
-          $err = $db->get_error();
+          $err = $this->con->get_error();
           Log::doLog( "Error: " . var_export( $err, true ) );
           $this->con->rollback();
       }
@@ -122,9 +123,15 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           " FROM " . self::TABLE ;
   }
 
+
+  private function validateForComment($obj) {
+      if ( empty($obj->message) && $obj->message_type == self::TYPE_COMMENT ) {
+          throw new Exception( "Comment message can't be blank." );
+      }
+  }
+
   protected function _buildResult( $array_result ) {
       $result = array();
-
 
       foreach ( $array_result as $item ) {
           $build_arr = array(
@@ -162,7 +169,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       $input->first_segment = self::intWithNull( $input->first_segment );
       $input->last_segment  = self::intWithNull( $input->last_segment );
 
-      $input->message      = self::escapeWithNull( $input->message );
+      $input->message      = self::escapeWithNull( trim( $input->message ) );
       $input->email        = self::escapeWithNull( $input->email );
       $input->full_name    = self::escapeWithNull( $input->full_name );
 
