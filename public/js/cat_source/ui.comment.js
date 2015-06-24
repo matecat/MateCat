@@ -204,7 +204,7 @@
                 ' <div class="txt">' +
                 ' <span class="mbc-comment-total"></span>' +
                 ' <span class="mbc-comment-icon icon-bubbles4"></span>' +
-                ' <span class="mbc-comment-highlight mbc-comment-total-none"></span>' +
+                ' <span class="mbc-comment-highlight vis-hidden"></span>' +
                 '</div>' +
                 '</div>',
         }
