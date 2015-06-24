@@ -475,6 +475,12 @@ Connect your TAUS DQF account to measure productivity.
     <tr class="template-upload fade">
         <td class="preview">
              {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
+
+             {% if (o.files[i].type == "application/zip") { %}
+             <span class="extzip"></span>
+             {% mimeok=1 } %}
+
+
             {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
 			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 			

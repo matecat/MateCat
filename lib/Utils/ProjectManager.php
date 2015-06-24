@@ -242,7 +242,7 @@ class ProjectManager {
         //fetch cache links, created by converter, from upload directory
         $linkFiles = scandir( $uploadDir );
 
-        //remove dir hardlinks, as uninteresting, as weel as regular files; only hash-links
+        //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
         foreach ( $linkFiles as $k => $linkFile ) {
             if ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
                 unset( $linkFiles[ $k ] );

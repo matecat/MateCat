@@ -19,16 +19,17 @@ class ConvertFileWrapper extends convertFileController {
     protected $fileStruct;
     protected $resultStack = array();
 
-    public function __construct( $stdResult ) {
-        $this->fileStruct = $stdResult;
+    public function __construct( $stdResult, $convertZipFile = true ) {
+        $this->fileStruct     = $stdResult;
+        $this->convertZipFile = $convertZipFile;
     }
 
     public function doAction() {
 
         foreach ( $this->fileStruct as $_file ) {
-            $this->file_name   = $_file->name;
+            $this->file_name = $_file->name;
             parent::doAction();
-            $this->resultStack[] = $this->result;
+            $this->resultStack[ ] = $this->result;
         }
 
     }
@@ -43,13 +44,18 @@ class ConvertFileWrapper extends convertFileController {
 //        Log::doLog( $this->resultStack );
 
         $failure = false;
-        foreach( $this->resultStack as $res ){
-            if( $res['code'] < 0 ) { $failure = true; }
+        foreach ( $this->resultStack as $res ) {
+            if ( $res[ 'code' ] <= 0 ) {
+                $failure = true;
+            }
         }
 
         $result = array( 'errors' => array() );
-        if( $failure ) $result = end( $this->resultStack );
-        $this->resultStack = $result['errors'];
+        if ( $failure ) {
+            $result = end( $this->resultStack );
+        }
+        $this->resultStack = $result[ 'errors' ];
+
         return $this->resultStack;
 
     }

@@ -225,6 +225,35 @@ class createProjectController extends ajaxController {
 
         setcookie( "targetLang", $newCookieVal, time() + ( 86400 * 365 ) );
 
+        //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
+
+        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $newArFiles = array();
+        $linkFiles = scandir( $uploadDir );
+
+        foreach($arFiles as $__fName){
+           if ( 'zip' == pathinfo( $__fName, PATHINFO_EXTENSION ) ) {
+               @unlink($uploadDir . DIRECTORY_SEPARATOR . $__fName);
+               $linkFiles = scandir( $uploadDir );
+
+               //fetch cache links, created by converter, from upload directory
+               foreach ( $linkFiles as $storedFileName ) {
+                   //check if file begins with the name of the zip file.
+                   // If so, then it was stored in the zip file.
+                   if(strpos($storedFileName, $__fName) !== false &&
+                           substr($storedFileName,0, strlen($__fName)) == $__fName ){
+                       //add file name to the files array
+                       $newArFiles[] = $storedFileName;
+                   }
+               }
+           }
+            else{ //this file was not in a zip. Add it normally
+                $newArFiles[] = $__fName;
+            }
+        }
+
+        $arFiles = $newArFiles;
+
         $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();
