@@ -48,7 +48,7 @@ class INIT {
     public static $AUTHSECRET;
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
-    public static $DQF_ENABLED = true;
+    public static $DQF_ENABLED = false;
 
 
     public static $LONGHORN_SERVER = false;
@@ -61,7 +61,7 @@ class INIT {
     public static $LONGHORN_CONFIGURATION_PATH;
 
 
-    public static $FORCE_XLIFF_CONVERSION    = true;
+    public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
@@ -108,7 +108,7 @@ class INIT {
      *  b) Set $CONVERSION_ENABLED to true and implement your own converter
      *
      */
-    public static $CONVERSION_ENABLED = true;
+    public static $CONVERSION_ENABLED = false;
 
     /**
      * The MateCat Version

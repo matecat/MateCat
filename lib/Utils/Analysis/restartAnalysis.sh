@@ -1,4 +1,9 @@
 #!/bin/bash
+
+################
+#  DEPRECATED  #
+################
+
 DIR=$( cd "$( dirname "$0")"; pwd )
 cd ${DIR}
 /bin/bash killAnalysis.sh

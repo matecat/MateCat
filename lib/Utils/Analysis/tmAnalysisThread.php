@@ -8,6 +8,11 @@ $my_pid = getmypid();
 
 try {
     $queueHandler = new Analysis_QueueHandler();
+
+    if ( $queueHandler->getRedisClient()->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID ) ){
+        deletePid();
+    }
+
     $queueHandler->getRedisClient()->set( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID, getmypid() );
 } catch ( Exception $ex ){
 
@@ -110,7 +115,7 @@ do {
         deletePid( $dead );
         _TimeStampMsg( "DONE", false );
     }
-    $numProcesses        = setNumProcesses();
+    $numProcesses = setNumProcesses();
 
     try {
         $childrenRunningList = $queueHandler->getRedisClient()->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, -1 );
@@ -176,8 +181,7 @@ function launchProcesses( $numProcesses = 1 ) {
             _TimeStampMsg( "PARENT FATAL !! cannot fork. Exiting!", true );
 
             return -1;
-        }
-        if ( $pid ) {
+        } elseif ( $pid ) {
             _TimeStampMsg( "DONE pid is $pid", false );
             // parent process runs what is here
             $processLaunched += 1;
@@ -221,7 +225,7 @@ function deletePid( $pid = "", $num = -1 ) {
      */
     global $queueHandler;
 
-    _TimeStampMsg( "Request to delete pid = " . var_export( $pid, true ) . ", num = " . var_export( $num, true ), false );
+    _TimeStampMsg( "Request to delete pid = " . var_export( $pid, true ) . ", num = " . var_export( $num, true ), true );
 
     $numDeleted = 0;
     $files      = array();
@@ -247,12 +251,16 @@ function deletePid( $pid = "", $num = -1 ) {
         _TimeStampMsg( "Deleting all pid process id", false );
         $queueHandler->getRedisClient()->del( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST );
         $numDeleted = count( $files );
+        foreach( $files as $_pid ){
+            posix_kill( $_pid, SIGTERM );
+        }
 
     } else {
 
         foreach( $files as $file ) { // iterate ids
 
             $queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $file  );
+            posix_kill( $pid, SIGTERM );
 
             if ( $num > 0 ) {
 
@@ -271,7 +279,7 @@ function deletePid( $pid = "", $num = -1 ) {
 
     }
 
-    _TimeStampMsg( "Deleted $numDeleted files", false );
+    _TimeStampMsg( "Deleted $numDeleted files", true );
 
 }
 

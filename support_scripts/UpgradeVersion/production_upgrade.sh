@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-SERVICES_DIR=/services/
+SERVICES_DIR=/etc/init.d
 
-MATECAT_HOME=/home/matecat/pro_matecat_com/
-MATECAT_HOME=/var/www/cattool/
+MATECAT_HOME=/home/matecat/pro_matecat_com
+MATECAT_HOME=/var/www/cattool
 
 # branch of directory
-MATECAT_BRANCH="develop"
+MATECAT_BRANCH="master"
 
 USER_OWNER="www-data"
-USER_OWNER="domenico"
 
 # Email Subject
 SUBJECT="Git Pull failed";
@@ -36,7 +35,7 @@ then
         exit 1
 fi
 
-hist=$(setuid ${USER_OWNER} git pull origin ${MATECAT_BRANCH})
+hist=$(git pull origin ${MATECAT_BRANCH})
 
 ret=$?
 
@@ -48,20 +47,19 @@ then
         exit 1
 fi
 
+sudo chown -R ${USER_OWNER} ./*
+
 popd
 setuid ${USER_OWNER} php Upgrade.php $1
 
 
-########### DAEMON TOOOL SERVICES UPDATE
+########### MONIT TOOL SERVICES UPDATE
 
-# Update services
-# Update MultiLog
-cp "${MATECAT_HOME}lib/Utils/Analysis/supervise/fastAnalysis/run" "${SERVICES_DIR}/matecat_fastAnalysis/run.sh.new"
-mv -f "${SERVICES_DIR}/matecat_fastAnalysis/run.sh.new" "${SERVICES_DIR}/matecat_fastAnalysis/run.sh" # atomically replace run
+cp "${MATECAT_HOME}/lib/Utils/Analysis/monit/fastAnalysis/fastAnalysis.sh" "/etc/init.d/fastAnalysis"
+chmod +x "${SERVICES_DIR}/fastAnalysis"
 
-cp "${MATECAT_HOME}lib/Utils/Analysis/supervise/fastAnalysis/log.sh" "${SERVICES_DIR}/matecat_fastAnalysis/log/log.sh.new"
-mv -f "${SERVICES_DIR}/matecat_fastAnalysis/log/log.sh.new" "${SERVICES_DIR}/matecat_fastAnalysis/log/log.sh" # atomically replace run
-
+cp "${MATECAT_HOME}/lib/Utils/Analysis/monit/tmAnalysis/tmAnalysis.sh" "/etc/init.d/tmAnalysis"
+chmod +x "${SERVICES_DIR}/tmAnalysis"
 
 # restart Daemons
-svc -t "${SERVICES_DIR}/matecat_fastAnalysis"
+monit reload

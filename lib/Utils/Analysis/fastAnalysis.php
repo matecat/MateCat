@@ -34,6 +34,8 @@ function sigSwitch( $signo ) {
             cleanShutDown();
             break;
         default :
+            $msg = str_pad( " CHILD " . getmypid() . " Received Signal $signo ", 50, "-", STR_PAD_BOTH );
+            _TimeStampMsg( $msg );
             break;
     }
 
@@ -183,10 +185,21 @@ do {
 
         // INSERT DATA
         _TimeStampMsg( "inserting segments..." );
-        $insertReportRes = insertFastAnalysis( $pid, $data, Analysis_PayableRates::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+
+        try {
+            $insertReportRes = insertFastAnalysis( $pid, $data, Analysis_PayableRates::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+        } catch( Exception $e ){
+            //Logging done and email sent
+            //set to error
+            $insertReportRes = -1;
+        }
+
         if ( $insertReportRes < 0 ) {
             _TimeStampMsg( "insertFastAnalysis failed...." );
+            _TimeStampMsg( "Try next cycle...." );
+            continue;
         }
+
         _TimeStampMsg( "done" );
         // INSERT DATA
 
@@ -380,7 +393,13 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
         _TimeStampMsg( 'Insert Segment Translations Queue: ' . count( $fastReport ) );
         _TimeStampMsg( 'Queries: ' . count( $fastReport ) );
 
-        $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
+        try {
+            $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
+        } catch ( Exception $e ){
+            Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString() , "Fast Analysis set Total values failed." );
+            _TimeStampMsg(  $e->getMessage() . "" . $e->getTraceAsString() );
+            throw $e;
+        }
 
         $time_start = microtime(true);
         foreach ( $fastReport as $k => $queue_element ) {
@@ -407,6 +426,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
             } catch ( Exception $e ){
                 Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString() , "Fast Analysis set queue failed." );
                 _TimeStampMsg(  $e->getMessage() . "" . $e->getTraceAsString() );
+                throw $e;
             }
 
         }
