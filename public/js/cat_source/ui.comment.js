@@ -261,10 +261,13 @@
 
         var renderSegmentCommentsFirstInput = function(el) {
             var root = $(tpls.segmentThread);
-            var inputFirstComment = $(tpls.inputFirstComment);
+            var inputFirstComment = $(tpls.inputFirstComment) ;
+            var inputForm = $(tpls.inputForm);
+            inputForm.find('.mbc-comment-username-label').text( getUsername() );
+
             root
                 .append(buildFirstCommentHeader())
-                .append(inputFirstComment.append($(tpls.inputForm)));
+                .append(inputFirstComment.append( inputForm ));
             el.append( root.show() );
         }
 
