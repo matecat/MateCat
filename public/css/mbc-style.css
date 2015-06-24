@@ -94,6 +94,7 @@
   color: #323232;
   font-size: 14px;
   margin: 12px 0 16px;
+  word-wrap: break-word;
 }
 
 
