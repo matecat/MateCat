@@ -177,7 +177,7 @@
                 ' <textarea class="mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
-                ' <a href="javascript:" class="mbc-login">Login to be notified</a>' +
+                ' <a href="javascript:" class="mbc-login-link">Login to be notified</a>' +
                 ' </div>' +
                 ' </div>',
 
@@ -486,8 +486,8 @@
             outer.find('.mbc-post-comment').addClass('visible');
             outer.find('.mbc-ask-comment-wrap').addClass('visible');
             outer.find('.mbc-post-comment .mbc-comment-username-label').text( getUsername() ) ;
-            if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login').hide();
-            else outer.find('.mbc-post-comment .mbc-login').show();
+            if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').hide();
+            else outer.find('.mbc-post-comment .mbc-login-link').show();
 
             t.remove();
         });
@@ -644,7 +644,7 @@
             $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
         });
 
-        $(document).on('click', '.mbc-login', function(e) {
+        $(document).on('click', '.mbc-login-link', function(e) {
             $('.login-google').show();
         });
 
