@@ -102,9 +102,9 @@ activemq::instance { 'matecat':
 }
 
 # MateCAT config
-file { 'config.inc.php':
-  path   => '/vagrant/inc/config.inc.php',
-  source => 'puppet:///modules/matecat/config.inc.php',
+file { 'config.ini':
+  path   => '/vagrant/inc/config.ini',
+  source => 'puppet:///modules/matecat/config.ini',
   owner  => 'vagrant',
   group  => 'vagrant',
   mode   => '0755',
