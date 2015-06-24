@@ -81,7 +81,8 @@ UI = {
         if ( file.type.match( /^image/ ) ) {
             msg = 'Images not allowed in MateCat';
         } else if (
-            (file.type == 'application/zip' ||
+            (
+            //file.type == 'application/zip' ||
             file.type == 'application/x-gzip' ||
             file.type == 'application/x-tar' ||
             file.type == 'application/x-gtar' ||

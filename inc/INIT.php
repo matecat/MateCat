@@ -217,6 +217,7 @@ class INIT {
                     'odp'  => array( '', '', 'extppt' ),
                     'sxi'  => array( '', '', 'extppt' ),
                     'xml'  => array( '', '', 'extxml' ),
+                    'zip'  => array( '', '', 'extzip' ),
                 //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
