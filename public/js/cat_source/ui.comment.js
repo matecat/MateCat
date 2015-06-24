@@ -226,9 +226,15 @@
             }
         }, false);
 
+        source.addEventListener('open', function(e) {
+            console.log('SSE connection open');
+        }, false);
+
         source.addEventListener('error', function(e) {
+            console.log(e.readyState);
+
             if (e.readyState == EventSource.CLOSED) {
-                console.log('connection closed');
+                console.log('SSE connection closed');
             }
         }, false);
 
