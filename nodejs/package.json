@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "lodash": "^3.9.3",
+    "node-ini": "^1.0.0",
     "sse-channel": "^1.0.5",
     "stompit": "^0.21.0",
     "winston": "^1.0.0"
