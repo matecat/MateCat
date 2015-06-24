@@ -206,6 +206,23 @@ a:active.show-thread-btn {
 }
 
 
+.mbc-login-link {
+  display: inline-block;
+
+}
+
+a:link.mbc-login-link,
+a:visited.mbc-login-link {
+  color: #7f7f7f;
+  font-size: 14px;
+  padding: 6px 4px;
+  text-decoration: underline;
+}
+
+a:hover.mbc-login-link,
+a:active.mbc-login-link {
+  text-decoration: none;
+}
 
 /* Common selector for labels in speech balloon */
 .mbc-comment-label {
@@ -305,6 +322,7 @@ a:active.show-thread-btn {
 .mbc-comment-link .txt {
   /* styles based on .sid 401 style.css */
   background: transparent;
+  cursor: pointer;
   margin:20px auto 0;
   padding: 10px 0;
   width: 80px;

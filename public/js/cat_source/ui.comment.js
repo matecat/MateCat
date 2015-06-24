@@ -177,6 +177,8 @@
                 ' <textarea class="mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
+                ' </div>' +
+                ' <div>' +
                 ' <a href="javascript:" class="mbc-login-link">Login to be notified</a>' +
                 ' </div>' +
                 ' </div>',
@@ -422,7 +424,7 @@
             }
         });
 
-        $(document).on('click', '.mbc-comment-link', function(e) {
+        $(document).on('click', '.mbc-comment-link .txt', function(e) {
             e.preventDefault();
             var section = $(e.target).closest('section');
             if ( section.hasClass('readonly') ) {
