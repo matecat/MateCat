@@ -3,7 +3,6 @@
 SERVICES_DIR=/etc/init.d
 
 MATECAT_HOME=/home/matecat/pro_matecat_com
-MATECAT_HOME=/var/www/cattool
 
 # branch of directory
 MATECAT_BRANCH="master"
@@ -60,6 +59,9 @@ chmod +x "${SERVICES_DIR}/fastAnalysis"
 
 cp "${MATECAT_HOME}/lib/Utils/Analysis/monit/tmAnalysis/tmAnalysis.sh" "/etc/init.d/tmAnalysis"
 chmod +x "${SERVICES_DIR}/tmAnalysis"
+
+cp "${MATECAT_HOME}/lib/Utils/Analysis/monit/tmAnalysis/testTMWorkers.sh" "/usr/local/bin/TestTMWorkers"
+chmod +x "/usr/local/bin/TestTMWorkers"
 
 # restart Daemons
 monit reload

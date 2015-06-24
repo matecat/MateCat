@@ -2,7 +2,8 @@
 set_time_limit(0);
 require "main.php";
 
-define( 'ANALYSIS_ROOT', INIT::$UTILS_ROOT . "/Analysis/.num_processes" );
+define( 'NUM_WORKERS', INIT::$UTILS_ROOT . "/Analysis/.num_processes" );
+define( 'DEFAULT_NUM_WORKERS', require( 'DefaultNumTMWorkers.php' ) );
 $my_pid = getmypid();
 
 
@@ -286,9 +287,9 @@ function deletePid( $pid = "", $num = -1 ) {
 function setNumProcesses() {
 
     // legge quanti processi lanciare
-    $num_processes = null;
-    if ( file_exists( ANALYSIS_ROOT ) ) {
-        $num_processes = intval( file_get_contents( ANALYSIS_ROOT ) );
+    $num_processes = DEFAULT_NUM_WORKERS;
+    if ( file_exists( NUM_WORKERS ) ) {
+        $num_processes = intval( file_get_contents( NUM_WORKERS ) );
     }
 
     if ( !is_int( $num_processes ) ) {
