@@ -253,8 +253,6 @@ a:active.show-thread-btn {
   filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
 }
 
-
-
 .mbc-thread-resolved .triangle-topleft {
   border-top-color: #efefef;
 }
@@ -377,16 +375,6 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
   z-index: 9999;
 }
 
-article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
-  display: block;
-}
-
-article.mbc-commenting-opened section .mbc-comment-balloon-outer {
-  display: none;
-}
-
-
-
 /* Dev button states */
 .dev-btn-set {
   background: rgba(255,255,255,0.8);
@@ -406,28 +394,13 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   display: block
 }
 
-article.mbc-commenting-opened section.editor .mbc-thread-justresolved,
-article.mbc-commenting-opened section.editor .mbc-thread-resolved-ask,
-article.mbc-commenting-opened section.editor .mbc-thread-active-first-comment,
-article.mbc-commenting-opened section.editor .mbc-thread-active-reply-comment {
-  display: none;
+.vis-hidden {
+  visibility: hidden;
 }
 
-article.mbc-commenting-opened section.editor .mbc-thread-justresolved.hide,
-article.mbc-commenting-opened section.editor .mbc-thread-resolved-ask,
-article.mbc-commenting-opened section.editor .mbc-thread-active-first-comment.hide,
-article.mbc-commenting-opened section.editor .mbc-thread-active-reply-comment.hide {
-  display: none;
+.vis-visible {
+  visibility: visible;
 }
-
-article.mbc-commenting-opened section.editor .mbc-thread-justresolved.visible,
-article.mbc-commenting-opened section.editor .mbc-thread-resolved-ask.visible,
-article.mbc-commenting-opened section.editor .mbc-thread-active-first-comment.visible,
-article.mbc-commenting-opened section.editor .mbc-thread-active-reply-comment.visible {
-  display: block
-}
-
-
 
 /* History balloon */
 
