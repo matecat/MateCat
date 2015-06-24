@@ -26,6 +26,7 @@ class INIT {
     //This queue will be used for dqf project creation
     public static $DQF_SEGMENTS_QUEUE_NAME = "matecat_dqf_segment_queue";
     public static $SSE_COMMENTS_QUEUE_NAME = "matecat_sse_comments";
+    public static $SSE_BASE_URL;
 
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
