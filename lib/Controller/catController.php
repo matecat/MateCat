@@ -581,6 +581,7 @@ class catController extends viewController {
             $this->template->nbspPlaceholder      = CatUtils::nbspPlaceholder;
             $this->template->nbspPlaceholderClass = CatUtils::nbspPlaceholderClass;
             $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
+            $this->template->sse_base_url         = INIT::$SSE_BASE_URL ;
 
         }
 

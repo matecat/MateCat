@@ -1,13 +1,13 @@
 SSE = {
     init : function() {
         // TODO configure this
-        this.baseURL = 'http://127.0.0.1:7788';
+        this.baseURL = config.sse_base_url ;
     },
     getSource : function(what) {
         var source = '';
         switch(what) {
             case 'comments':
-                source = '/channel/comments' + '?jid=' + config.job_id + '&pw=' + config.password ;
+                source = 'channel/comments' + '?jid=' + config.job_id + '&pw=' + config.password ;
                 break;
 
             default:
