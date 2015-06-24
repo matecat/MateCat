@@ -329,11 +329,6 @@ a:active.show-thread-btn {
   border-radius: 10px;
 }
 
-
-.mbc-comment-total-none {
-  visibility: hidden;
-}
-
 .editing .mbc-comment-link .txt {
   /* styles based on .sid 408 style.css */
   background: transparent;
