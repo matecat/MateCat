@@ -232,66 +232,6 @@ a:active.mbc-login-link {
 }
 
 
-/* Helpers */
-.mbc-truncate {
-  width: 110px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mbc-comment-balloon-outer *,
-.mbc-history-balloon-outer * {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
-.divider {
-  height: 1px;
-  width:100%;
-  display:block; /* for use on default inline elements like span */
-  margin: 0;
-  overflow: hidden;
-  background-color: #dadada;
-}
-
-.triangle {
-  width: 0;
-  height: 0;
-}
-
-.triangle-topleft {
-  border-top-style: solid;
-  border-top-width: 10px;
-  border-left: 12px solid transparent;
-  margin-left: -12px;
-  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-}
-
-.mbc-thread-resolved .triangle-topleft {
-  border-top-color: #efefef;
-}
-
-.mbc-thread-active .triangle-topleft  {
-  border-top-color: #f7f7f7;
-}
-
-.mbc-clearfix {
-  *zoom: 1;
-}
-.mbc-clearfix:before,
-.mbc-clearfix:after {
-  display: table;
-  content: "";
-  line-height: 0;
-}
-
-.mbc-clearfix:after {
-  clear: both;
-}
-
 
 /* Comment icon in layout */
 .mbc-comment-link {
@@ -362,6 +302,8 @@ section:hover .mbc-comment-link {
 
 article.mbc-commenting-closed {
   width: 87.5%; /* add selector to article tag line 874 style.css */
+  -webkit-transition: width .1s ease-in-out;
+  transition: width .1s ease-in-out;
 }
 
 article.mbc-commenting-closed .mbc-comment-balloon-outer {
@@ -388,32 +330,6 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
   z-index: 9999;
 }
 
-/* Dev button states */
-.dev-btn-set {
-  background: rgba(255,255,255,0.8);
-  line-height: 2;
-  text-align: left;
-  position: absolute;
-  top: 60px;
-  left: 20px;
-  z-index: 9999;
-}
-
-.hide {
-  display: none;
-}
-
-.visible {
-  display: block
-}
-
-.vis-hidden {
-  visibility: hidden;
-}
-
-.vis-visible {
-  visibility: visible;
-}
 
 /* History balloon */
 
@@ -445,7 +361,6 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
 }
 
 /* History balloon */
-
 .mbc-history-balloon-outer {
   background-color: #fff;
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
@@ -481,4 +396,83 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
 
 .mbc-history-balloon-has-no-comments {
   height: auto;
+}
+
+
+
+
+/* Helpers */
+.mbc-truncate {
+  width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mbc-comment-balloon-outer *,
+.mbc-history-balloon-outer * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.divider {
+  height: 1px;
+  width:100%;
+  display:block; /* for use on default inline elements like span */
+  margin: 0;
+  overflow: hidden;
+  background-color: #dadada;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+}
+
+.triangle-topleft {
+  border-top-style: solid;
+  border-top-width: 10px;
+  border-left: 12px solid transparent;
+  margin-left: -12px;
+  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+}
+
+.mbc-thread-resolved .triangle-topleft {
+  border-top-color: #efefef;
+}
+
+.mbc-thread-active .triangle-topleft  {
+  border-top-color: #f7f7f7;
+}
+
+.mbc-clearfix {
+  *zoom: 1;
+}
+.mbc-clearfix:before,
+.mbc-clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+
+.mbc-clearfix:after {
+  clear: both;
+}
+
+.hide {
+  display: none;
+}
+
+.visible {
+  display: block
+}
+
+.vis-hidden {
+  visibility: hidden;
+}
+
+.vis-visible {
+  visibility: visible;
 }
