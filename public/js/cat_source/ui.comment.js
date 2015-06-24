@@ -11,8 +11,8 @@
         var roles = { revisor: 2, translator: 1 };
         var openCommentsOnSegmentOpen = false;
         var lastResolvedSegment ;
-        window.loggedUserName = null ;
-        window.customUserName = null ;
+        var loggedUserName = null ;
+        var customUserName = null ;
 
         // TODO: Make this private
         window.db = {
@@ -78,9 +78,15 @@
             },
 
             getCommentsCountBySegment : function(s) {
-                return $(this.getCommentsBySegment(s)).filter(function(i,x) {
-                    return Number(x.message_type) == types.comment;
-                }).length ;
+                var active = 0, total = 0 ;
+
+                $(this.getCommentsBySegment(s)).each(function(i,x) {
+                    if (Number(x.message_type) == types.comment) {
+                        if (null == x.thread_id) active++;
+                        total++;
+                    }
+                });
+                return { active: active, total: total };
             }
         };
 
@@ -235,8 +241,6 @@
         }
 
         var getUsername = function() {
-            console.log('getUsername');
-
             if ( customUserName ) return customUserName ;
             if ( loggedUserName ) return loggedUserName ;
             return 'Anonymous';
@@ -330,6 +334,14 @@
                     .append($(tpls.inputForm).addClass('hide'))
                     .append($(tpls.resolveButton));
             }
+
+            // update outer balloon with proper style depending on resolved / active state
+            if ( root.find('.mbc-thread-wrap:first').is('.mbc-thread-wrap-resolved') ) {
+                root.addClass('mbc-thread-resolved');
+                root.removeClass('mbc-thread-active');
+            } else {
+            }
+
             return root;
         }
 
@@ -576,9 +588,8 @@
             $('.mbc-comment-highlight-history').text( count ).addClass( 'visible' );
         }
 
-        window.updateHistoryWithLoadedSegments = function() {
+        var updateHistoryWithLoadedSegments = function() {
             db.history = {};
-
             var count = db.refreshHistory();
 
             if (count == 0) {
@@ -634,10 +645,21 @@
 
         $(document).on('mbc:segment:update', function(ev, el) {
             var s = UI.getSegmentId(el);
-            var count = db.getCommentsCountBySegment(s) ;
-            if (count > 0) {
-                $(el).find('.mbc-comment-link .mbc-comment-total').text(count);
+            var d = db.getCommentsCountBySegment(s) ;
+            var highlight = $(el).find('.mbc-comment-link .mbc-comment-highlight') ;
+
+            highlight.text(d.active);
+
+            if (d.total > 0) {
+                $(el).find('.mbc-comment-link .mbc-comment-total').text(d.total);
             }
+
+            if (d.active > 0) {
+                highlight.removeClass('mbc-comment-total-none') ;
+            } else {
+                highlight.addClass('mbc-comment-total-none') ;
+            }
+
         });
 
         $(document).ready(function(){
