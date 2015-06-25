@@ -127,7 +127,7 @@
             historyIcon : '' +
                 '  <li id="mbc-history" title="View notifications"> ' +
                 '      <span class="icon-bubble2"></span> ' +
-                '      <span class="mbc-comment-highlight mbc-comment-highlight-history hide"></span> ' +
+                '      <span class="mbc-comment-highlight mbc-comment-highlight-history vis-hidden"></span> ' +
                 '  </li>',
 
             historyOuter : '' +
@@ -212,7 +212,7 @@
                 ' <div class="txt">' +
                 ' <span class="mbc-comment-total"></span>' +
                 ' <span class="mbc-comment-icon icon-bubbles4"></span>' +
-                ' <span class="mbc-comment-highlight vis-hidden"></span>' +
+                ' <span class="mbc-comment-highlight mbc-comment-highlight-segment vis-hidden"></span>' +
                 '</div>' +
                 '</div>',
         }
@@ -575,7 +575,7 @@
         var renderHistoryWithNoComments = function() {
             $('.mbc-history-balloon-has-comment').remove();
             $('.mbc-history-balloon-has-no-comments').show();
-            $('.mbc-comment-highlight-history').removeClass('visible');
+            $('.mbc-comment-highlight-history').removeClass('vis-visible');
         }
 
         var renderHistoryWithComments = function( count ) {
@@ -594,7 +594,7 @@
             $('.mbc-history-balloon-has-no-comments').hide();
 
             $('.mbc-history-balloon-outer').append(root);
-            $('.mbc-comment-highlight-history').text( count ).addClass( 'visible' );
+            $('.mbc-comment-highlight-history').text( count ).addClass( 'vis-visible' );
         }
 
         var updateHistoryWithLoadedSegments = function() {

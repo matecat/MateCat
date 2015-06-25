@@ -10,7 +10,7 @@
 
 .mbc-comment-balloon-outer {
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  margin-top: 28px;
+  margin-top: 4px;
 }
 
 .mbc-thread-resolved {
@@ -267,6 +267,7 @@ a:active.mbc-login-link {
   cursor: pointer;
   margin:20px auto 0;
   padding: 10px 0;
+  position: relative;
   width: 80px;
 }
 
@@ -277,16 +278,27 @@ a:active.mbc-login-link {
   margin-right: 4px;
 }
 
+.mbc-comment-icon {
+  margin-right: 20px;
+}
+
+/* Common selector for notification highlighter of active comments */
 .mbc-comment-highlight {
   background: #ffe400;
+  border: 1px solid #fff;
+  border-radius: 14px;
   display: inline-block;
-  float: right;
   font-size: 11px;
   font-weight: bold;
-  margin-top: -16px;
-  padding: 2px 6px;
+  padding: 0px 6px;
+  position: absolute;
   text-align: center;
-  border-radius: 10px;
+}
+
+/* Notification highlighter in segment */
+.mbc-comment-highlight-segment {
+  left: 50px;
+  top: 0px;
 }
 
 .editing .mbc-comment-link .txt {
@@ -352,10 +364,11 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
   color:#ccc;
 }
 
+/* Notification highlighter in header */
 .mbc-comment-highlight-history {
   color:#6d6e71;
-  position: absolute;
-  top: 20px;
+  right: 24px;
+  top: 11px;
 }
 
 .mbc-comment-highlight-history:hover {
@@ -399,8 +412,6 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
 .mbc-history-balloon-has-no-comments {
   height: auto;
 }
-
-
 
 
 /* Helpers */
