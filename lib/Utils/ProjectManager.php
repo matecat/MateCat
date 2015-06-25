@@ -362,7 +362,8 @@ class ProjectManager {
 
                 $this->_extractSegments( file_get_contents( $xliffFilePathName ), $fid );
 
-            } catch ( Exception $e ) {
+            }
+            catch ( Exception $e ) {
 
                 if ( $e->getCode() == -1 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
