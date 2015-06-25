@@ -30,7 +30,7 @@ QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 STORAGE_DIR = "/local_storage"
-SSE_BASE_URL = "http://localhost:7788/"
+SSE_BASE_URL = "http://localhost:7788"
 
 ;----------------------------------------
 [production]
@@ -45,6 +45,6 @@ QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 STORAGE_DIR = "/storage"
-SSE_BASE_URL = "http://localhost:7788/"
+SSE_BASE_URL = "http://localhost:7788"
 
 ;----------------------------------------
