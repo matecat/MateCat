@@ -1,4 +1,4 @@
-<?
+<?php
 
 class commentController extends ajaxController {
 
@@ -100,9 +100,7 @@ class commentController extends ajaxController {
 
         $this->enqueueComment();
 
-        if ( $this->userIsLogged ) {
-            $this->sendEmail();
-        }
+        $this->sendEmail();
 
         $this->result[ 'data' ][ 'entries' ] = array( $this->payload );
     }
@@ -124,9 +122,7 @@ class commentController extends ajaxController {
 
         $this->enqueueComment();
 
-        if ( $this->userIsLogged ) {
-            $this->sendEmail();
-        }
+        $this->sendEmail();
 
         $this->result[ 'data' ][ 'entries' ] = array( $this->payload ) ;
 
@@ -146,19 +142,44 @@ class commentController extends ajaxController {
     }
 
     private function sendEmail() {
+        // TODO: fix this, replace the need for referer with a server side
+        // function to build translate or revise paths based on job and
+        // segmnt ids.
 
+        if (empty($_SERVER['HTTP_REFERER'])) {
+            Log::doLog('Skipping email due to missing referrer link');
+            return;
+        }
+        list($url, $anchor) = explode('#', $_SERVER['HTTP_REFERER']);
+        $url .= '#' . $this->struct->id_segment ;
+        Log::doLog($url);
+
+        $commentDao = new Comments_CommentDao( Database::obtain() );
+        $result = $commentDao->getThreadContributorUids( $this->struct );
+
+        $userDao = new Users_UserDao( Database::obtain() );
+        $users = $userDao->getByUids( $result );
+
+        foreach($users as $user) {
+            $email = new Comments_CommentEmail($user, $this->struct, $url);
+            $email->deliver();
+        }
     }
 
     private function getEmail() {
-        return null;
+        if ( $this->userIsLogged ) {
+            return $this->current_user->email ;
+        } else {
+            return null;
+        }
     }
 
     private function getUid() {
-        return null;
-    }
-
-    private function getResolveDate() {
-        return null;
+        if ( $this->userIsLogged) {
+            return $this->current_user->uid;
+        } else {
+            return null;
+        }
     }
 
     private function loadUser() {
@@ -173,7 +194,6 @@ class commentController extends ajaxController {
         }
 
         $this->current_user = $result[0] ;
-        error_log( '@@ current_user ' . $this->current_user->first_name );
     }
 
     private function enqueueComment() {

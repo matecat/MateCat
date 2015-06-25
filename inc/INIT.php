@@ -28,6 +28,15 @@ class INIT {
     public static $SSE_COMMENTS_QUEUE_NAME = "matecat_sse_comments";
     public static $SSE_BASE_URL;
 
+    public static $SMTP_HOST;
+    public static $SMTP_PORT;
+    public static $SMTP_SENDER;
+    public static $SMTP_HOSTNAME;
+
+    public static $MAILER_FROM = 'cattool@matecat.com' ;
+    public static $MAILER_FROM_NAME = 'Matecat Tool';
+    public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
+
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
     public static $UPLOAD_REPOSITORY;

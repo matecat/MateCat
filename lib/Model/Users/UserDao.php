@@ -47,6 +47,26 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $this->_buildResult( $arr_result );
     }
 
+    public function getByUids( $uids_array ) {
+        $sanitized_array = array();
+        foreach($uids_array as $v) {
+            array_push($sanitized_array, ( (int) $v) );
+        }
+
+        if (empty($sanitized_array)) {
+            return array();
+        }
+
+        $query = "SELECT * FROM " . self::TABLE .
+            " WHERE uid IN ( " . implode(', ', $sanitized_array) . " ) " ;
+
+        $arr_result = $this->con->fetch_array( $query );
+
+        $this->_checkForErrors();
+
+        return $this->_buildResult( $arr_result );
+    }
+
     /**
      * @param Users_UserStruct $input
      *

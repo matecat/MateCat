@@ -37,4 +37,8 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
     return md5($this->id_job . '-' . $this->id_segment . '-' . $this->resolve_date);
   }
 
+  public function isComment() {
+    return $this->message_type == Comments_CommentDao::TYPE_COMMENT ;
+  }
+
 }
