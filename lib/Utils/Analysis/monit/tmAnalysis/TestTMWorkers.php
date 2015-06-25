@@ -13,8 +13,7 @@ Bootstrap::start();
 
 //---------------------------
 
-
-define( 'DEFAULT_NUM_WORKERS', include( '../../DefaultNumTMWorkers.php' ) );
+define( 'DEFAULT_NUM_WORKERS', include( INIT::$UTILS_ROOT . '/Analysis/DefaultNumTMWorkers.php' ) );
 define( 'NUM_WORKERS', INIT::$UTILS_ROOT . "/Analysis/.num_processes" );
 
 
@@ -28,7 +27,8 @@ if ( file_exists( NUM_WORKERS ) ) {
 
 if( $desiredCount > $consumers ){
     exit(127);
+
 } elseif( empty( $desiredCount ) ){
-    exit(1);
+    exit(3);
 }
 exit(0);
