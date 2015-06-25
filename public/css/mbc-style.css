@@ -33,6 +33,7 @@
 /* Thread active */
 .mbc-thread-wrap-resolved {
   background: #efefef;
+  border-bottom: 1px solid rgba(124,197,118,.4); /* #7cc576 */
 }
 
 /* Comment speech balloon style */
