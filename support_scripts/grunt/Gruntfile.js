@@ -1,11 +1,12 @@
 module.exports = function(grunt) {
 	var basePath = '../../public/js/';
 	var incPath = '../../inc/';
-	var conf = grunt.file.read(incPath + 'config.inc.sample.php');
-	var version = conf.match(/self\:\:\$BUILD\_NUMBER[ ]+=[ ]+\'(.*?)\'/gi)[0].replace(/self\:\:\$BUILD\_NUMBER[ ]+=[ ]+\'(.*?)\'/gi, "$1");
 
-	
-  // Configuration goes here
+    var conf = grunt.file.read( incPath + 'version.ini' );
+    var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
+    grunt.log.ok( 'Matecat Version: ' + version );
+
+    // Configuration goes here
 	grunt.initConfig({
 		concat: {
 			components: {

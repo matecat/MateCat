@@ -1,8 +1,8 @@
 <?php
-if( !@include_once 'inc/config.inc.php')
+if( !@include_once 'inc/Bootstrap.php')
 	header("Location: configMissing");
 
-INIT::obtain();
+Bootstrap::start();
 $db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 $db->connect ();
 

@@ -876,7 +876,9 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
 
-			,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
+        ,( SELECT COUNT( segment_hash ) FROM segment_translations WHERE segment_hash = s.segment_hash AND id_job =  j.id ) repetitions_in_chunk
+
+        ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
 			FROM jobs j
 			INNER JOIN projects p ON p.id=j.id_project
@@ -1112,6 +1114,8 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     $db = Database::obtain();
 
+    $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
+    $st_rejected   = Constants_TranslationStatus::STATUS_REJECTED;
     $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
     $st_new        = Constants_TranslationStatus::STATUS_NEW;
     $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
@@ -1119,13 +1123,10 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     $q = array();
     foreach ( $params as $key => $value ) {
         if ( $key == 'status' ) {
-
             if ( $propagateToTranslated ) {
-                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
-                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated' )";
-            } else {
-                $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
-                $andStatus = "AND status IN ( '$st_draft', '$st_new' )";
+//                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
+                $q[ ]      = $key . " = '".$db->escape( $value )."' ";
+                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated', '$st_approved', '$st_rejected' )";
             }
         } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value, true );
@@ -1736,13 +1737,13 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $sha1_original ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
     $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
     $data[ 'mime_type' ]          = $mime_type;
-    $data[ 'sha1_original_file' ] = $sha1_original;
+    $data[ 'sha1_original_file' ] = $fileDateSha1Path;
 
 
     $db = Database::obtain();

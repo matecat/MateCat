@@ -842,7 +842,8 @@ $.extend(UI, {
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
             if(!UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                    if(!UI.isFirefox) UI.showEditToolbar();
+                    UI.showEditToolbar();
+//                    if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
              /*
@@ -875,10 +876,10 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
-//            console.log('CLICK');
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
+//            if(typeof UI.currentSegment != 'undefined') return true;
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
@@ -969,7 +970,7 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-			console.log('keypress: ', UI.editarea.html());
+//			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -978,10 +979,6 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-				console.log('Q: ', UI.editarea.html());
-                setTimeout(function() { // wait for creation
-                    console.log('R: ', UI.editarea.html());
-                }, 200);
             }
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
@@ -2024,10 +2021,10 @@ $.extend(UI, {
 
         });
 		$("#enable-replace").on('change', function() {
-			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
-				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
+			if ($('#enable-replace').is(':checked')) {
+				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
-				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
+				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			}
 		});
 		$("#search-source, #search-target").on('input', function() {
@@ -2035,13 +2032,22 @@ $.extend(UI, {
 				UI.setFindFunction('find');
 			}
 		});
+        $('#replace-target').on('focus', function() {
+            if(!$('#enable-replace').prop('checked')) {
+                $('label[for=enable-replace]').trigger('click');
+                $('#replace-target').trigger('click');
+            }
+//            console.log('aaa');
+//            console.log($('#enable-replace').prop('checked'));
+        });
+        $('#replace-target').on('input', function() {
+            if($(this).val() != '') {
+                if(!$('#enable-replace').prop('checked')) $('label[for=enable-replace]').trigger('click');
+            }
+            UI.checkReplaceAvailability();
+        });
 		$("#search-target").on('input', function() {
-			if ($(this).val() === '') {
-				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
-			} else {
-				if ($('#enable-replace').is(':checked'))
-					$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
-			}
+            UI.checkReplaceAvailability();
 		});
 		$("#select-status").on('change', function() {
 			if (UI.checkSearchChanges()) {

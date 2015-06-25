@@ -285,13 +285,13 @@ class ProjectManager {
                Checking Extension is no more sufficient, we want check content if this is an idiom xlf file type, conversion are enforced
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAConvertedFile = $this->isConversionToEnforce( $fileName );
+            $isAnXliffToConvert = $this->isConversionToEnforce( $fileName );
 
             //we are going to access the storage, get model object to manipulate it
             $fs = new FilesStorage();
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAConvertedFile ) {
+            if ( !$isAnXliffToConvert ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
@@ -351,10 +351,12 @@ class ProjectManager {
                 }
                 $mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
 
-                $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $sha1_original );
+                $yearMonthPath = date_create()->format("Ymd");
+                $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
+                $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $fileDateSha1Path );
 
                 //move the file in the right directory from the packages to the file dir
-                $fs->moveFromCacheToFileDir( $sha1_original, $this->projectStructure[ 'source_language' ], $fid );
+                $fs->moveFromCacheToFileDir( $fileDateSha1Path, $this->projectStructure[ 'source_language' ], $fid );
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 

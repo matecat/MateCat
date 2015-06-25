@@ -61,7 +61,7 @@ $.extend(UI, {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 //			console.log('hasclass loaded');
-			console.log('qualcosa nella tab matches? ', segment.find('.footer .matches .overflow').text().length);
+//			console.log('qualcosa nella tab matches? ', segment.find('.footer .matches .overflow').text().length);
             if(segment.find('.footer .matches .overflow').text().length) {
                 this.spellCheck();
                 if (next) {

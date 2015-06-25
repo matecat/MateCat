@@ -54,8 +54,11 @@ class FilesStorage {
      * @return bool|string
      */
     public function getOriginalFromCache( $hash, $lang ) {
+
         //compose path
-        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
 
         //return file
         $filePath = $this->getSingleFileInPath( $path );
@@ -75,32 +78,57 @@ class FilesStorage {
      *
      * @return bool|string
      */
-    public function getOriginalFromFileDir( $id ) {
+    public function getOriginalFromFileDir( $id, $dateHashPath ) {
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+
         //compose path
-        $path = $this->filesDir . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR. $id . DIRECTORY_SEPARATOR . "orig";
 
         //return file
         $filePath = $this->getSingleFileInPath( $path );
 
         //an unconverted xliff is never stored in orig dir; look for it in xliff dir
         if ( !$filePath ) {
-            $filePath = $this->getXliffFromFileDir( $id );
+            $filePath = $this->getXliffFromFileDir( $id, $dateHashPath );
         }
 
         return $filePath;
     }
 
+    /*
+     * Cache Handling Methods --- START
+     */
+
+    protected function _composeCachePath( $hash ){
+
+        $cacheTree = array(
+                'firstLevel'  => $hash{0} . $hash{1},
+                'secondLevel' => $hash{2} . $hash{3},
+                'thirdLevel'  => substr( $hash, 4 )
+        );
+
+        return $cacheTree;
+
+    }
+
     public function getXliffFromCache( $hash, $lang ) {
+
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+
         //compose path
-        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
 
         //return file
         return $this->getSingleFileInPath( $path );
     }
 
-    public function getXliffFromFileDir( $id ) {
+    public function getXliffFromFileDir( $id, $dateHashPath ) {
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+
         //compose path
-        $path = $this->filesDir . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
 
         //return file
         return $this->getSingleFileInPath( $path );
@@ -108,14 +136,16 @@ class FilesStorage {
 
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
 
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+
         //ensure old stuff is overwritten
-        if ( is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang ) ) {
-            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
+        if ( is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
         }
 
         //create cache dir structure
-        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, 0755, true );
-        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package";
+        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
+        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
         mkdir( $cacheDir, 0755, true );
         mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
         mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
@@ -140,7 +170,7 @@ class FilesStorage {
             if( !$outcome1 ){
                 //Original directory deleted!!!
                 //CLEAR ALL CACHE
-                Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
+                Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
                 return $outcome1;
             }
 
@@ -167,7 +197,7 @@ class FilesStorage {
         if ( !$outcome2 ) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE
-            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
+            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
             return $outcome2;
         }
 
@@ -182,6 +212,10 @@ class FilesStorage {
         //create a file in it, named after cache position on storage
         return touch( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
     }
+
+    /*
+     * Cache Handling Methods --- END
+     */
 
     public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ){
         @list( $shasum, $srcLang ) = explode( "|", $linkFile );
@@ -200,16 +234,19 @@ class FilesStorage {
 
     }
 
-    public function moveFromCacheToFileDir( $hash, $lang, $idFile ) {
+    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile ) {
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
 
         //destination dir
-        $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $idFile;
-        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $hash . "|" . $lang . DIRECTORY_SEPARATOR . "package";
+        $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
+        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
 
         //check if doesn't exist
         if ( !is_dir( $fileDir ) ) {
             //make files' directory structure
-            mkdir( $fileDir );
+            mkdir( $fileDir, 0755, true );
             mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" );
             mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" );
             mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" );
@@ -284,7 +321,7 @@ class FilesStorage {
         if ( !empty( $id_file ) ) {
             $where_id_file = " and fj.id_file=$id_file";
         }
-        $query = "select fj.id_file, f.filename, j.source, mime_type from files_job fj
+        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file from files_job fj
 			inner join files f on f.id=fj.id_file
 			inner join jobs j on j.id=fj.id_job
 			where fj.id_job=$id_job $where_id_file and j.password='$password'";
@@ -294,15 +331,15 @@ class FilesStorage {
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
-            $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
+            $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
 
             if ( !$filePath ) {
                 //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
                 //this moves both original and xliff
-                $this->migrateFileDB2FS( $result[ 'id_file' ], $result[ 'filename' ], $result[ 'source' ] );
+                $this->migrateFileDB2FS( $result );
 
                 //now, try again fetching from disk :)
-                $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
+                $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
             }
 
             $results[ $k ][ 'originalFilePath' ] = $filePath;
@@ -312,7 +349,7 @@ class FilesStorage {
     }
 
     /**
-     * Used when we take the files after the translation
+     * Used when we take the files after the translation ( Download )
      *
      * @param $id_job
      * @param $id_file
@@ -327,7 +364,7 @@ class FilesStorage {
             $where_id_file = " and id_file=$id_file";
         }
 
-        $query = "select fj.id_file, f.filename, j.source, mime_type from files_job fj
+        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file from files_job fj
 			inner join files f on f.id=fj.id_file
 			join jobs as j on j.id=fj.id_job
 			where fj.id_job = $id_job $where_id_file";
@@ -337,52 +374,66 @@ class FilesStorage {
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
-            $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
+            $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
 
             if ( !$originalPath ) {
                 //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
                 //this moves both original and xliff
-                $this->migrateFileDB2FS( $result[ 'id_file' ], $result[ 'filename' ], $result[ 'source' ] );
+                $this->migrateFileDB2FS( $result );
 
                 //now, try again fetching from disk :)
-                $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ] );
+                $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
             }
 
             $results[ $k ][ 'originalFilePath' ] = $originalPath;
 
             //note that we trust this to succeed on first try since, at this stage, we already built the file package
-            $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ] );
+            $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
         }
 
         return $results;
     }
 
+    //TODO FIX
     /**
      * Backwards compatibility method and forward
      *
-     * @param $id_file
-     * @param $filename
-     * @param $source_lang
+     * Works by Reference variable
+     *
+     * @param $fileMetaData [
+     *                          "id_file",
+     *                          "filename",
+     *                          "source",
+     *                          "mime_type",
+     *                          "sha1_original_file"
+     *                      ]
      */
-    private function migrateFileDB2FS( $id_file, $filename, $source_lang ) {
+    private function migrateFileDB2FS( &$fileMetaData ) {
 
         //create temporary storage to place stuff
-        $tempdir = "/tmp" . DIRECTORY_SEPARATOR . uniqid( "", true );
-        mkdir( $tempdir, 0755 );
+        $tempDir = "/tmp" . DIRECTORY_SEPARATOR . uniqid( "", true );
+        mkdir( $tempDir, 0755 );
 
         //fetch xliff from the files database
-        $xliffContent = $this->getXliffFromDB( $id_file );
+        $xliffContent = $this->getXliffFromDB( $fileMetaData[ 'id_file' ] );
 
         //try pulling the original content too (if it's empty it means that it was an unconverted xliff)
-        $fileContent = $this->getOriginalFromDB( $id_file );
+        $fileContent = $this->getOriginalFromDB( $fileMetaData[ 'id_file' ] );
 
         if ( !empty( $fileContent ) ) {
             //it's a converted file
+
+            //i'd like to know it's real extension....
             //create temporary file with appropriately modified name
-            $tempXliff = $tempdir . DIRECTORY_SEPARATOR . $filename . ".xlf";
+            $result = DetectProprietaryXliff::getInfoByStringData( $xliffContent );
+            if( $result['proprietary_short_name'] == 'trados' ){
+                $tempXliff = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ] . ".sdlxliff";
+            } else {
+                $tempXliff = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ] . ".xlf";
+            }
 
             //create file
-            $tempOriginal = $tempdir . DIRECTORY_SEPARATOR . $filename;
+            $tempOriginal = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ];
 
             //flush content
             file_put_contents( $tempOriginal, $fileContent );
@@ -395,7 +446,7 @@ class FilesStorage {
         } else {
             //if it's a unconverted xliff
             //create temporary file with original name
-            $tempXliff = $tempdir . DIRECTORY_SEPARATOR . $filename;
+            $tempXliff = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ];
 
             // set original to empty
             $tempOriginal = false;
@@ -410,14 +461,31 @@ class FilesStorage {
         //free memory
         unset( $xliffContent );
 
+        if( stripos( $fileMetaData[ 'sha1_original_file' ], DIRECTORY_SEPARATOR ) === false ){
+
+            $query        = "select create_date from projects where id = {$fileMetaData[ 'id_project' ]}";
+            $db           = Database::obtain();
+            $results      = $db->fetch_array( $query );
+            $dateHashPath = date_create( $results[ 0 ][ 'create_date' ] )->format( 'Ymd' ) . DIRECTORY_SEPARATOR . $sha1;
+            $db->update(
+                    'files',
+                    array( "sha1_original_file" => $dateHashPath ),
+                    'id = ' . $fileMetaData[ 'id_file' ]
+            );
+
+            //update Reference
+            $fileMetaData[ 'sha1_original_file' ] = $dateHashPath;
+
+        }
+
         //build a cache package
-        $this->makeCachePackage( $sha1, $source_lang, $tempOriginal, $tempXliff );
+        $this->makeCachePackage( $sha1, $fileMetaData[ 'source' ], $tempOriginal, $tempXliff );
 
         //build a file package
-        $this->moveFromCacheToFileDir( $sha1, $source_lang, $id_file );
+        $this->moveFromCacheToFileDir( $fileMetaData[ 'sha1_original_file' ], $fileMetaData[ 'source' ], $fileMetaData[ 'id_file' ] );
 
         //clean temporary stuff
-        Utils::deleteDir( $tempdir );
+        Utils::deleteDir( $tempDir );
     }
 
     public function getOriginalFromDB( $id_file ) {
@@ -440,4 +508,3 @@ class FilesStorage {
     }
 }
 
-?>

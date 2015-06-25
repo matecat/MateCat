@@ -134,11 +134,56 @@ class Analysis_QueueHandler extends Stomp {
 
         if( !empty( $queueName ) ){
             $queue = $queueName;
-        } else {
+        } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
+        } else {
+            $queue = INIT::$QUEUE_NAME;
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/QueueSize";
+
+        $mHandler = new MultiCurlHandler();
+
+        $options = array(
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_HTTPHEADER => array( 'Authorization: Basic '. base64_encode("admin:admin") )
+        );
+
+        $resource = $mHandler->createResource( $queue_inteface_url, $options );
+        $mHandler->multiExec();
+        $result = $mHandler->getSingleContent( $resource );
+        $mHandler->multiCurlCloseAll();
+        $result = json_decode( $result, true );
+
+        Utils::raiseJsonExceptionError();
+        return $result[ 'value' ];
+
+    }
+
+    /**
+     * Get the number of consumers for this queue
+     *
+     * @param null $queueName
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function getConsumerCount( $queueName = null ){
+
+        if( !empty( $queueName ) ){
+            $queue = $queueName;
+        } elseif( !empty( $this->queueName ) ) {
+            $queue = $this->queueName;
+        } else {
+            $queue = INIT::$QUEUE_NAME;
+        }
+
+        $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/ConsumerCount";
 
         $mHandler = new MultiCurlHandler();
 

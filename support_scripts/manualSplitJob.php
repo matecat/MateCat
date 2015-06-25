@@ -10,7 +10,7 @@ $job_pass= $argv[2];
 $num_split = $argv[3];
 $apply_split=isset($argv[4]) && $argv[4]=="--apply";
 
-@INIT::obtain();
+@Bootstrap::start();
 include_once INIT::$UTILS_ROOT . '/CatUtils.php';
 include_once INIT::$UTILS_ROOT . '/Utils.php';
 include_once INIT::$UTILS_ROOT . '/Log.php';

@@ -9,7 +9,7 @@
 if( !class_exists('INIT', false ) ){
     $root = realpath( dirname(__FILE__) . '/../../inc/' );
     include $root . '/config.inc.php';
-    INIT::obtain();
+    Bootstrap::start();
 
     set_include_path ( get_include_path() . PATH_SEPARATOR . realpath( dirname(__FILE__) . '/../' ) );
 

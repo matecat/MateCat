@@ -425,11 +425,13 @@ function saveSelection() {
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
 	try {
-		//we need this try because when we are in revision
+        //we need this try because when we are in revision
 		// and we open a draft segment from a link we have not a editarea.html()
 		//so javascript crash
-		editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	} catch(e){ /* create and empty div */ UI.editarea = $('<div>'); }
+//        editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
+	} catch(e){
+	 /* create and empty div */ UI.editarea = $('<div>');
+    }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -702,13 +704,18 @@ function replaceSelectedText(replacementText) {
 function replaceSelectedHtml(replacementHtml) {
     var sel, range;
     if (window.getSelection) {
+        console.log('UI.editarea.html() 0: ', UI.editarea.html());
         sel = window.getSelection();
+        console.log('sel: ', sel);
         if (sel.rangeCount) {
             range = sel.getRangeAt(0);
+            console.log('range: ', range);
+            console.log('UI.editarea.html() 1: ', UI.editarea.html());
             range.deleteContents();
-			pasteHtmlAtCaret(replacementHtml);
+            console.log('UI.editarea.html() 2: ', UI.editarea.html());
+//            pasteHtmlAtCaret(replacementHtml);
         }
-    } else if (document.selection && document.selection.createRange) {console.log('c');
+    } else if (document.selection && document.selection.createRange) {
         range = document.selection.createRange();
         range.text = replacementText;
     }

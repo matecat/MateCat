@@ -39,14 +39,14 @@ class setAutoPropagationController extends setTranslationController {
 
         $cookie_key = '_auto-propagation-' . $this->id_job . "-" . $this->password;
 
-        $boolString = (string)(int)$this->propagateAll;
+        $boolString = (string)(int)$this->propagate;
 
         $cookieLife = new DateTime();
         $cookieLife->modify( '+15 days' );
 
         $db = Database::obtain();
 
-        if( $this->propagateAll ){
+        if( $this->propagate ){
 
             $db->begin();
 
@@ -93,7 +93,7 @@ class setAutoPropagationController extends setTranslationController {
         setcookie( $cookie_key, $boolString, $cookieLife->getTimestamp(), "/", $_SERVER['HTTP_HOST'] );
 
         Log::doLog( "Auto-propagation for already translated segments on Job " . $this->id_job . " set to '"
-                . var_export( $this->propagateAll, true ) ."'. Cookie Expire at " . $cookieLife->format('Y-m-d H:i:s') );
+                . var_export( $this->propagate, true ) ."'. Cookie Expire at " . $cookieLife->format('Y-m-d H:i:s') );
 
         $this->result['errors'][] = array("code" => 0, "message" => "OK");
 

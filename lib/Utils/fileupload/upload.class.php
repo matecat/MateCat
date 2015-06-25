@@ -19,7 +19,7 @@ class UploadHandler {
     function __construct($options = null) {
         $this->options = array(
             'script_url' => $this->getFullUrl() . '/',
-            'upload_dir' => $_SERVER["DOCUMENT_ROOT"] . '/storage/upload/' . $_COOKIE['upload_session'] . '/',
+            'upload_dir' => INIT::$UPLOAD_REPOSITORY . "/" . $_COOKIE['upload_session'] . '/',
             'upload_url' => $this->getFullUrl() . '/files/',
             'param_name' => 'files',
             // Set the following option to 'POST', if your server does not support
@@ -496,6 +496,8 @@ class UploadHandler {
         }
 
         $file_path = $this->options['upload_dir'] . $file_name;
+        $file_sha = glob( $this->options['upload_dir'] . sha1_file( $file_path ) . "*" ); //delete sha1 also
+        @unlink( @$file_sha[ 0 ] );
         $success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
         if ($success) {
             foreach ($this->options['image_versions'] as $version => $options) {
