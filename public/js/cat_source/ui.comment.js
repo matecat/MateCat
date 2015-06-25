@@ -664,9 +664,9 @@
             }
 
             if (d.active > 0) {
-                highlight.removeClass('mbc-comment-total-none') ;
+                highlight.removeClass('vis-hidden') ;
             } else {
-                highlight.addClass('mbc-comment-total-none') ;
+                highlight.addClass('vis-hidden') ;
             }
 
         });
