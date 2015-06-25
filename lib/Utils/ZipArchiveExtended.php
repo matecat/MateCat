@@ -193,10 +193,10 @@ class ZipArchiveExtended extends ZipArchive {
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ( $this->treeList as $filePath ) {
             $realPath = str_replace(
-                    array( self::INTERNAL_SEPARATOR, pathinfo($this->filename, PATHINFO_BASENAME)),
-                    array( DIRECTORY_SEPARATOR, "") ,
+                    array( self::INTERNAL_SEPARATOR, pathinfo( $this->filename, PATHINFO_BASENAME ) ),
+                    array( DIRECTORY_SEPARATOR, "" ),
                     $filePath );
-            $realPath = ltrim($realPath, "/");
+            $realPath = ltrim( $realPath, "/" );
 
             $fp = $this->getStream( $realPath );
 
@@ -211,8 +211,8 @@ class ZipArchiveExtended extends ZipArchive {
                 fwrite( $tmpFp, fread( $fp, 8192 ) );
                 $fileSize += 8192;
 
-                if($fileSize > INIT::$MAX_UPLOAD_FILE_SIZE){
-                    throw new Exception( __METHOD__ . ' -> Max upload file size exceeded.');
+                if ( $fileSize > INIT::$MAX_UPLOAD_FILE_SIZE ) {
+                    throw new Exception( __METHOD__ . ' -> Max upload file size exceeded.' );
                 }
             }
 
@@ -228,6 +228,46 @@ class ZipArchiveExtended extends ZipArchive {
 
     private function prependZipFileName( $fName ) {
         return pathinfo( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
+    }
+
+    /**
+     * Gets path informations for a file unzipped using ZipArchiveExtended.
+     *
+     * @param $path string A valid ZipArchiveExtended path. it must be a path that uses the internal
+     *                     separator of this class.
+     *
+     * @return array|null Returns null if path is not valid, otherwise it will return the array returned
+     *                    by pathinfo() function, plus a 'zipfilename' key, containing the zip file name.
+     */
+    public static function zipPathInfo( $path ) {
+        if ( strpos( $path, self::INTERNAL_SEPARATOR ) === false ) {
+            return null;
+        }
+        $path = explode( self::INTERNAL_SEPARATOR, $path );
+
+        $zipFile  = array_shift( $path );
+        $basename = array_pop( $path );
+
+        $filenameInfo = explode( ".", $basename );
+        $extension    = $filenameInfo[ 1 ];
+        $filename     = $filenameInfo[ 0 ];
+        $dirname      = implode( DIRECTORY_SEPARATOR, $path );
+
+        $pathInfo = array(
+                'dirname'     => $dirname,
+                'basename'    => $basename,
+                'extension'   => $extension,
+                'filename'    => $filename,
+                'zipfilename' => $zipFile
+        );
+
+        return $pathInfo;
+    }
+
+    // TODO
+    public static function getFileName($internalFileName){
+        $path = explode( self::INTERNAL_SEPARATOR, $internalFileName );
+
     }
 
 }
