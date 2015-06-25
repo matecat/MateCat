@@ -406,7 +406,13 @@
             return root ;
         }
 
+        var nothingToSubmit = function() {
+           return $.trim($('.mbc-comment-textarea').val()) == '';
+        }
+
         var submitComment = function(el) {
+            if ( nothingToSubmit() ) return;
+
             var id_segment = el.attr('id').split('-')[1];
 
             var data = {
