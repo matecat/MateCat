@@ -46,7 +46,7 @@ then
         exit 1
 fi
 
-sudo chown -R ${USER_OWNER} ./*
+chown -R ${USER_OWNER} ./*
 
 popd
 setuid ${USER_OWNER} php Upgrade.php $1
