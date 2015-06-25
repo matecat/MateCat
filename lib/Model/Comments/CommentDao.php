@@ -80,6 +80,28 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
   }
 
+  public function getThreadContributorUids( $input ) {
+      $obj = $this->sanitize( $input );
+
+      $query = "SELECT DISTINCT(uid) FROM " . self::TABLE  .
+          " WHERE id_job = $obj->id_job " .
+          " AND id_segment = $obj->id_segment " .
+          " AND uid IS NOT NULL " ;
+
+      Log::doLog( $query );
+
+      if ( $input->uid ) {
+          $query .= " AND uid <> $obj->uid " ;
+      }
+
+      $this->con->query( $query );
+
+      $arr_result = $this->_fetch_array( $query );
+
+      $this->_checkForErrors();
+      return $arr_result ;
+  }
+
   public function getOpenCommentsInJob( $input ) {
       // sanitize input
       $obj = $this->sanitize( $input );
