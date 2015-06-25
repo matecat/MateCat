@@ -262,18 +262,18 @@
         }
 
         var buildFirstCommentHeader = function() {
-            return $(tpls.firstCommentHeader).append($(tpls.insertCommentHeader)) ;
+            return $(tpls.firstCommentHeader).append($(tpls.insertCommentHeader));
         }
 
         var renderSegmentCommentsFirstInput = function(el) {
             var root = $(tpls.segmentThread);
-            var inputFirstComment = $(tpls.inputFirstComment) ;
+            var insertCommentHeader = $(tpls.inputFirstComment) ;
             var inputForm = $(tpls.inputForm);
             inputForm.find('.mbc-comment-username-label').text( getUsername() );
 
             root
-                .append(buildFirstCommentHeader())
-                .append(inputFirstComment.append( inputForm ));
+                .append(buildFirstCommentHeader()
+                .append( inputForm ));
             el.append( root.show() );
         }
 
