@@ -530,6 +530,7 @@
 
             outer.find('.mbc-post-comment').addClass('visible');
             outer.find('.mbc-ask-comment-wrap').addClass('visible');
+            outer.find('.mbc-comment-textarea').focus();
             outer.find('.mbc-post-comment .mbc-comment-username-label')
                 .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
                 .text( getUsername() ) ;
