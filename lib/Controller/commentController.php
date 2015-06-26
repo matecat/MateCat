@@ -29,7 +29,7 @@ class commentController extends ajaxController {
             'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'username'    => array( 'filter' => FILTER_SANITIZE_STRING ),
             'user_role'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'message'     => array( 'filter' => FILTER_SANITIZE_STRING ),
+            'message'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'first_seg'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'last_seg'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'    => array(
@@ -39,6 +39,7 @@ class commentController extends ajaxController {
         );
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $this->__postInput['message'] = htmlspecialchars( $this->__postInput['message'] );
 
     }
 
