@@ -200,9 +200,9 @@ class commentController extends ajaxController {
     private function enqueueComment() {
         $this->payload = array(
             'message_type'   => $this->new_record->message_type,
-            'message'        => stripslashes( $this->new_record->message ),
+            'message'        => $this->new_record->message,
             'id_segment'     => $this->new_record->id_segment,
-            'full_name'      => stripslashes( $this->new_record->full_name ),
+            'full_name'      => $this->new_record->full_name,
             'user_role'      => $this->new_record->user_role,
             'formatted_date' => $this->new_record->getFormattedDate(),
             'thread_id'      => $this->new_record->thread_id,
