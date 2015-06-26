@@ -158,6 +158,8 @@ class commentController extends ajaxController {
         $commentDao = new Comments_CommentDao( Database::obtain() );
         $result = $commentDao->getThreadContributorUids( $this->struct );
 
+        Log::doLog( $result );
+
         $userDao = new Users_UserDao( Database::obtain() );
         $users = $userDao->getByUids( $result );
 
