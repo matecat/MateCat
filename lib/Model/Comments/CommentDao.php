@@ -86,11 +86,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           " AND id_segment = $obj->id_segment " .
           " AND uid IS NOT NULL " ;
 
-      Log::doLog( $query );
-
       if ( $input->uid ) {
           $query .= " AND uid <> $obj->uid " ;
       }
+
+      Log::doLog( $query );
 
       $this->con->query( $query );
 

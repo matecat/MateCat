@@ -38,7 +38,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
   }
 
   public function isComment() {
-    return $this->message_type == Comments_CommentDao::TYPE_COMMENT ;
+    return ((int) $this->message_type == Comments_CommentDao::TYPE_COMMENT);
   }
 
 }
