@@ -17,7 +17,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           $obj->message_type = self::TYPE_COMMENT ;
       }
 
-      $this->validateForComment($obj);
+      $this->validateForCommentAndResolve($obj);
 
       $query = " INSERT INTO comments " .
           " ( " .
@@ -29,8 +29,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                $obj->id_job  ,
                $obj->id_segment  ,
                "'$obj->create_date'"  ,
-               $obj->email     == null ? "'NULL'" : "'$obj->email'",
-               $obj->full_name == null ? "'NULL'" : "'$obj->full_name'",
+               $obj->email     == null ? "NULL" : "'$obj->email'",
+               $obj->full_name == null ? "NULL" : "'$obj->full_name'",
                $obj->uid       == null ? "NULL"   : $obj->uid ,
                $obj->user_role ,
                $obj->message_type ,
@@ -145,9 +145,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   }
 
 
-  private function validateForComment($obj) {
+  private function validateForCommentAndResolve($obj) {
       if ( empty($obj->message) && $obj->message_type == self::TYPE_COMMENT ) {
           throw new Exception( "Comment message can't be blank." );
+      }
+      if ( empty($obj->full_name) ) {
+          throw new Exception( "Full name can't be blank." );
       }
   }
 

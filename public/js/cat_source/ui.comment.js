@@ -54,7 +54,7 @@
 
             pushSegment : function(data) {
                 var s = data.id_segment ;
-                if (typeof db.segments[s] == 'undefined') {
+                if (typeof db.segments[s] === 'undefined') {
                     db.segments[s] = [ data ];
                 }
                 else {
@@ -70,7 +70,7 @@
             },
 
             getCommentsBySegment : function(s) {
-                if (typeof this.segments[s] == 'undefined') {
+                if (typeof this.segments[s] === 'undefined') {
                     return [];
                 } else {
                     return this.segments[s];
@@ -403,13 +403,22 @@
                 root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
                 root.find('.mbc-comment-time').text( data.formatted_date );
                 root.find('.mbc-comment-role').text( decodeRole (data.user_role) );
-                root.find('.mbc-comment-body').text( htmlDecode(data.message) );
+                root.find('.mbc-comment-body').html( nl2br( data.message ) );
             }
             return root ;
         }
 
+        var nl2br = function(str, is_xhtml) {
+            var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+            return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+        }
+
         var nothingToSubmit = function() {
            return $.trim($('.mbc-comment-textarea').val()) == '';
+        }
+
+        var showSubmitError = function() {
+            alert('Something went wrong, please try again later.');
         }
 
         var submitComment = function(el) {
@@ -432,10 +441,15 @@
             APP.doRequest({
                 data: data,
                 success : function(resp) {
-                    $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
+                    if (resp.errors.length) {
+                        showSubmitError();
+                    } else {
+                        console.log(resp.data.entries[0]);
+                        $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
+                    }
                 },
                 failure : function() {
-                    console.log('failure');
+                    showSubmitError();
                 }
             });
         }
@@ -527,7 +541,7 @@
 
 
         var refreshUserInfo = function(user) {
-            if (typeof user == 'undefined') {
+            if (typeof user === 'undefined') {
                 loggedUserName = null;
             } else  {
                 loggedUserName = user.full_name ;
@@ -702,11 +716,12 @@
             var elem = $(this);
             var replaceWith = $('<input name="customName" type="text" class="mbc-comment-input mbc-comment-textinput" />').val( getUsername() );
             var action = function() {
-                if ($(this).val() == "") {
+                var tmpval = $.trim(htmlDecode($(this).val())) ;
+                if ( tmpval == "" ) {
                     customUserName = null;
                 } else {
-                    customUserName = $(this).val();
-                    elem.text($(this).val());
+                    customUserName = tmpval ;
+                    elem.text( customUserName ) ;
                 }
                 $(this).remove();
                 elem.text( getUsername() ).show();
