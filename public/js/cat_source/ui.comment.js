@@ -278,9 +278,8 @@
                         .attr('title', 'Click to edit');
                 }
 
-            root
-                .append(buildFirstCommentHeader()
-                .append( inputForm ));
+            root.append( buildFirstCommentHeader().append( inputForm ) );
+
             el.append( root.show() );
         }
 
