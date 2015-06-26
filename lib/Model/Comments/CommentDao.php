@@ -8,8 +8,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   const TYPE_COMMENT = 1 ;
   const TYPE_RESOLVE = 2 ;
 
-  public function saveComment( $obj ) {
-      $obj = $this->sanitize( $obj );
+  public function saveComment( $input ) {
+      $obj = $this->sanitize( $input );
 
       $obj->create_date = date( 'Y-m-d H:i:s' ) ;
 
@@ -38,19 +38,17 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           ) ) . " ) ";
 
 
-      Log::doLog( $query );
-
       $this->con->query( $query );
       $this->_checkForErrors();
 
-      return $obj ;
+      return $input ;
   }
 
-  public function resolveThread( $obj ) {
-      $obj->message_type = self::TYPE_RESOLVE ;
-      $obj->resolve_date  = date('Y-m-d H:i:s');
+  public function resolveThread( $input ) {
+      $input->message_type = self::TYPE_RESOLVE ;
+      $input->resolve_date  = date('Y-m-d H:i:s');
 
-      $obj = $this->sanitize( $obj );
+      $obj = $this->sanitize( $input );
 
       $this->con->begin();
 
@@ -103,7 +101,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   }
 
   public function getOpenCommentsInJob( $input ) {
-      // sanitize input
       $obj = $this->sanitize( $input );
 
       $query = $this->finderQuery() .
@@ -181,23 +178,23 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   }
 
   public function sanitize( $input ) {
+      $cloned = clone $input;
       parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
+      $cloned->id_job       = self::intWithNull( $input->id_job );
+      $cloned->id_segment   = self::intWithNull( $input->id_segment );
+      $cloned->uid          = self::intWithNull( $input->uid );
+      $cloned->user_role    = self::intWithNull( $input->user_role );
+      $cloned->message_type = self::intWithNull( $input->message_type );
 
-      $input->id_job       = self::intWithNull( $input->id_job );
-      $input->id_segment   = self::intWithNull( $input->id_segment );
-      $input->uid          = self::intWithNull( $input->uid );
-      $input->user_role    = self::intWithNull( $input->user_role );
-      $input->message_type = self::intWithNull( $input->message_type );
+      $cloned->first_segment = self::intWithNull( $input->first_segment );
+      $cloned->last_segment  = self::intWithNull( $input->last_segment );
 
-      $input->first_segment = self::intWithNull( $input->first_segment );
-      $input->last_segment  = self::intWithNull( $input->last_segment );
+      $cloned->message      = self::escapeWithNull( trim( $input->message ) );
+      $cloned->email        = self::escapeWithNull( $input->email );
+      $cloned->full_name    = self::escapeWithNull( $input->full_name );
 
-      $input->message      = self::escapeWithNull( trim( $input->message ) );
-      $input->email        = self::escapeWithNull( $input->email );
-      $input->full_name    = self::escapeWithNull( $input->full_name );
-
-      return $input ;
+      return $cloned ;
   }
 
   private static function escapeWithNull($value) {
