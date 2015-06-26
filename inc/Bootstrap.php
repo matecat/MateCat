@@ -276,11 +276,11 @@ class Bootstrap {
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
 
         if ( self::$CONFIG['ENV'] == 'production' ) {
-            if( $fileSystem != 'nfs4' && self::$CONFIG['CHECK_FS'] ){
+            if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
                 die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
             }
         } else {
-            if( $fileSystem == 'nfs' && self::$CONFIG['CHECK_FS'] ){
+            if( stripos( $fileSystem, 'nfs' ) !== false && self::$CONFIG['CHECK_FS'] ){
                 die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
             }
         }
