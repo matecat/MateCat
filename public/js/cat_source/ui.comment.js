@@ -179,7 +179,7 @@
 
             inputForm : '' +
                 ' <div class="mbc-post-comment">' +
-                ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
+                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
                 ' <textarea class="mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
@@ -514,7 +514,9 @@
 
             outer.find('.mbc-post-comment').addClass('visible');
             outer.find('.mbc-ask-comment-wrap').addClass('visible');
-            outer.find('.mbc-post-comment .mbc-comment-username-label').text( getUsername() ) ;
+            outer.find('.mbc-post-comment .mbc-comment-username-label')
+                .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
+                .text( getUsername() ) ;
             if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').hide();
             else outer.find('.mbc-post-comment .mbc-login-link').show();
 
@@ -694,6 +696,28 @@
             $('.login-google').show();
         });
 
+        $(document).on('click', '.mbc-comment-anonymous-label', function() {
+            var elem = $(this);
+            var replaceWith = $('<input name="customName" type="text" />').val( getUsername() );
+            var action = function() {
+                if ($(this).val() == "") {
+                    customUserName = null;
+                } else {
+                    customUserName = $(this).val();
+                    elem.text($(this).val());
+                }
+                $(this).remove();
+                elem.text( getUsername() ).show();
+            }
+
+            elem.hide().after(replaceWith);
+
+            replaceWith.blur(action).keypress(function(ev) {
+                if (ev.which == 13) {
+                    action.call(ev.target);
+                }
+            }).focus();
+        });
 
     }
 
