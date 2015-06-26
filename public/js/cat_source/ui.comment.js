@@ -10,7 +10,6 @@
         var types = { sticky: 3, resolve: 2, comment: 1 };
         var roles = { revisor: 2, translator: 1 };
         var openCommentsOnSegmentOpen = false;
-        var lastResolvedSegment ;
         var loggedUserName = null ;
         var customUserName = null ;
 
@@ -284,12 +283,9 @@
         }
 
         var applyCollapsedThreadWrap = function(root) {
-            if (lastResolvedSegment == UI.currentSegmentId) return ;
-
             root.find('.mbc-thread-wrap-resolved').each(function(i, el) {
                 var e = $(el), c = e.data('count') ;
                 if ( c > 1 ) {
-                    console.log('wrap to apply');
                     e.find('.mbc-show-comment')
                         .not(':first')
                         .not(':last')
@@ -386,7 +382,6 @@
         }
 
         var closeSegment = function(el) {
-            lastResolvedSegment = null ;
             $('.mbc-comment-balloon-outer').remove();
             $('article').removeClass('mbc-commenting-opened');
         }
@@ -523,7 +518,6 @@
 
         var ajaxResolveSuccess = function(resp) {
             db.pushSegment(resp.data.entries[0]);
-            lastResolvedSegment = UI.currentSegmentId ;
             $(document).trigger('mbc:comment:new', resp.data.entries[0]);
         }
 
