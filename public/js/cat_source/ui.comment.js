@@ -721,4 +721,12 @@
 
     }
 
+    $(document).on('keyup', '.mbc-comment-textarea', function(e) {
+        while($(this).outerHeight() < this.scrollHeight +
+        parseFloat($(this).css("borderTopWidth")) +
+        parseFloat($(this).css("borderBottomWidth"))) {
+            $(this).height($(this).height()+10);
+        };
+    });
+
 })(jQuery, config, window, undefined);
