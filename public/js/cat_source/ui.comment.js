@@ -185,7 +185,7 @@
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
                 ' </div>' +
                 ' <div>' +
-                ' <a href="javascript:" class="mbc-login-link">Login to be notified</a>' +
+                ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
                 ' </div>' +
                 ' </div>',
 
