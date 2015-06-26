@@ -574,8 +574,15 @@
             renderCommentIconLinks();
         });
 
+        $(document).on('click', '#filterSwitch', function(e) {
+            $('.mbc-history-balloon-outer').removeClass('visible');
+        });
+
         $(document).on('click', '#mbc-history', function(ev) {
             $('.mbc-history-balloon-outer').toggleClass('visible');
+            if ($('.searchbox').is(':visible')) {
+                UI.toggleSearch(ev) ;
+            }
         });
 
         var renderHistoryWithNoComments = function() {
@@ -687,14 +694,6 @@
             $('.login-google').show();
         });
 
-        $(document).on('login:window:close', function(e) {
-            console.log('login window close');
-        });
-
-        $(document).on('mbc:user:refresh', function(e) {
-            console.log('user refreshed');
-
-        });
 
     }
 
