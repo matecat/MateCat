@@ -49,8 +49,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     public function getByUids( $uids_array ) {
         $sanitized_array = array();
-        foreach($uids_array as $v) {
-            array_push($sanitized_array, ( (int) $v) );
+        foreach($uids_array as $k => $v) {
+            array_push($sanitized_array, ( (int) $v['uid']) );
         }
 
         if (empty($sanitized_array)) {
