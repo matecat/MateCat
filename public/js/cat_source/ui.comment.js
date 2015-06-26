@@ -269,7 +269,9 @@
             var root = $(tpls.segmentThread);
             var insertCommentHeader = $(tpls.inputFirstComment) ;
             var inputForm = $(tpls.inputForm);
-            inputForm.find('.mbc-comment-username-label').text( getUsername() );
+            inputForm.find('.mbc-comment-username-label')
+                .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
+                .text( getUsername() );
 
             root
                 .append(buildFirstCommentHeader()
