@@ -29,7 +29,7 @@ class commentController extends ajaxController {
             'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'username'    => array( 'filter' => FILTER_SANITIZE_STRING ),
             'user_role'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'message'     => array( 'filter' => FILTER_SANITIZE_SPECIAL_CHARS ),
+            'message'     => array( 'filter' => FILTER_SANITIZE_STRING ),
             'first_seg'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'last_seg'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'    => array(
@@ -199,9 +199,9 @@ class commentController extends ajaxController {
     private function enqueueComment() {
         $this->payload = array(
             'message_type'   => $this->new_record->message_type,
-            'message'        => $this->new_record->message,
+            'message'        => stripslashes( $this->new_record->message ),
             'id_segment'     => $this->new_record->id_segment,
-            'full_name'      => $this->new_record->full_name,
+            'full_name'      => stripslashes( $this->new_record->full_name ),
             'user_role'      => $this->new_record->user_role,
             'formatted_date' => $this->new_record->getFormattedDate(),
             'thread_id'      => $this->new_record->thread_id,
