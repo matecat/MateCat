@@ -48,17 +48,31 @@
   margin: 14px 0 0;
 }
 
-.mbc-comment-textarea {
+.mbc-comment-input {
+  border: 1px solid rgb(169, 169, 169);
   border-radius: 2px;
   float: left;
-  margin: 0;
   max-width: 186px;
+  outline-width: 0;
+
+  width: 100%;
+}
+
+.mbc-comment-textarea {
+  font-size: 16px;
   overflow-x: hidden;
   overflow-y: hidden;
-  outline-width: 0;
+  margin: 0;
   padding: 4px;
   resize: none;
-  width: 100%;
+}
+
+.mbc-comment-textinput {
+  background-color: #fffbe1;
+  font-size: 14px;
+  margin: 0 0 2px;
+  height: 26px;
+  padding: 4px;
 }
 
 .mbc-first-comment-label {
@@ -68,7 +82,15 @@
 
 .mbc-comment-username-label {
   color: #323232;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.mbc-comment-anonymous-label {
+  cursor: pointer;
+}
+
+.mbc-comment-anonymous-label:hover {
+  text-decoration: underline;
 }
 
 .mbc-comment-info-wrap {

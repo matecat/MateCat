@@ -179,8 +179,8 @@
 
             inputForm : '' +
                 ' <div class="mbc-post-comment">' +
-                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
-                ' <textarea class="mbc-comment-textarea"></textarea>' +
+                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label" title="Click to edit"></span>' +
+                ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
                 ' </div>' +
@@ -700,7 +700,7 @@
 
         $(document).on('click', '.mbc-comment-anonymous-label', function() {
             var elem = $(this);
-            var replaceWith = $('<input name="customName" type="text" />').val( getUsername() );
+            var replaceWith = $('<input name="customName" type="text" class="mbc-comment-input mbc-comment-textinput" />').val( getUsername() );
             var action = function() {
                 if ($(this).val() == "") {
                     customUserName = null;
