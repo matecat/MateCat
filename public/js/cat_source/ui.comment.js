@@ -179,7 +179,7 @@
 
             inputForm : '' +
                 ' <div class="mbc-post-comment">' +
-                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label" title="Click to edit"></span>' +
+                ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
                 ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
@@ -272,6 +272,11 @@
             inputForm.find('.mbc-comment-username-label')
                 .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
                 .text( getUsername() );
+
+                if (!loggedUserName) {
+                    inputForm.find('.mbc-comment-username-label')
+                        .attr('title', 'Click to edit');
+                }
 
             root
                 .append(buildFirstCommentHeader()
