@@ -9,13 +9,13 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   const TYPE_RESOLVE = 2 ;
 
   public function saveComment( $input ) {
+      if ($input->message_type == null) {
+          $input->message_type = self::TYPE_COMMENT ;
+      }
+
       $obj = $this->sanitize( $input );
 
       $obj->create_date = date( 'Y-m-d H:i:s' ) ;
-
-      if ($obj->message_type == null) {
-          $obj->message_type = self::TYPE_COMMENT ;
-      }
 
       $this->validateForCommentAndResolve($obj);
 
