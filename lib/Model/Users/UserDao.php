@@ -60,6 +60,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $query = "SELECT * FROM " . self::TABLE .
             " WHERE uid IN ( " . implode(', ', $sanitized_array) . " ) " ;
 
+        Log::doLog($query);
         $arr_result = $this->con->fetch_array( $query );
 
         $this->_checkForErrors();
