@@ -13,8 +13,7 @@
         var loggedUserName = null ;
         var customUserName = null ;
 
-        // TODO: Make this private
-        window.db = {
+        var db = {
             segments: {},
             history: {},
             refreshHistory : function() {
@@ -364,7 +363,7 @@
 
         var refreshSegmentContent = function(el) {
             var id_segment = UI.getSegmentId(el);
-            var coms = window.db.getCommentsBySegment(id_segment);
+            var coms = db.getCommentsBySegment(id_segment);
             $('.mbc-comment-balloon-outer').remove();
 
             if (coms.length > 0) {
@@ -437,6 +436,8 @@
                 message    : el.find('.mbc-comment-textarea').val(),
             }
 
+            $('.mbc-comment-textarea').attr('disabled', 'disabled');
+
             APP.doRequest({
                 data: data,
                 success : function(resp) {
@@ -449,6 +450,9 @@
                 },
                 failure : function() {
                     showSubmitError();
+                },
+                always : function() {
+                    $('.mbc-comment-textarea').removeAttr('disabled');
                 }
             });
         }
