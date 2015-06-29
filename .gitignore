@@ -1,10 +1,10 @@
-.vagrant
+# Configuration files
 inc/login_secret.dat
 inc/config.inc.php
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
-.agignore
+lib/Utils/Analysis/.num_processes
 
 # Ignore artifacts
 public/css/app.css
@@ -15,3 +15,7 @@ public/js/cat.min.js
 # NodeJs stuff
 nodejs/*.log
 node_modules
+
+# Development env config files
+.agignore
+.vagrant
