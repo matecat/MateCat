@@ -104,8 +104,12 @@ class downloadOriginalController extends downloadController {
     private function setContent( $output_content ) {
         foreach ( $output_content as $oc ) {
             $this->_filename = $oc[ 'filename' ];
-//            $this->content   = file_get_contents( $oc[ 'contentPath' ] );
-            $this->content = $oc['document_content'];
+            if(isset($oc[ 'document_content' ]) && !empty($oc[ 'document_content' ])) {
+                $this->content = $oc[ 'document_content' ];
+            }
+            else {
+                $this->content = file_get_contents( $oc[ 'contentPath' ] );
+            }
         }
     }
 
@@ -185,6 +189,8 @@ class downloadOriginalController extends downloadController {
             $internalFile = self::getOutputContentsWithZipFiles( $internalFile );
 
             foreach ( $internalFile as $key => $iFile ) {
+                $iFile[ 'input_filename' ] = $iFile[ 'contentPath' ];
+                unset ( $iFile[ 'contentPath' ] );
                 $internalFile[ $key ] = new ZipContentObject( $iFile );
             }
 
