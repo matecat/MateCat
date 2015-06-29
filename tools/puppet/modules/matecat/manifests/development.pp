@@ -37,7 +37,11 @@ package {'grunt-cli':
 }
 
 # runtime required packages
-package {['php5', 'libapache2-mod-php5', 'php5-curl', 'php5-mysql']:
+package {[
+  'php5', 'libapache2-mod-php5',
+  'php5-curl', 'php5-mysql',
+  'php-pear'
+  ]:
   ensure  => installed
 }
 
