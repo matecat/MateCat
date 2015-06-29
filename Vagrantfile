@@ -50,7 +50,7 @@ Vagrant::Config.run do |config|
   # #               Managed by Puppet.\n"
   # # }
   #
-  config.vm.provision :shell, path: 'tools/vagrant-boot.sh'
+  config.vm.provision :shell, path: 'support_scripts/vagrant-boot.sh'
 
   # config.vm.provision :puppet do |puppet|
   #   puppet.manifests_path = "tools/puppet/manifests"
