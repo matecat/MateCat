@@ -233,7 +233,7 @@ class ZipArchiveExtended extends ZipArchive {
     /**
      * Gets path informations for a file unzipped using ZipArchiveExtended.
      *
-     * @param $path string A valid ZipArchiveExtended path. it must be a path that uses the internal
+     * @param $path        string A valid ZipArchiveExtended path. it must be a path that uses the internal
      *                     separator of this class.
      *
      * @return array|null Returns null if path is not valid, otherwise it will return the array returned
@@ -264,10 +264,26 @@ class ZipArchiveExtended extends ZipArchive {
         return $pathInfo;
     }
 
-    // TODO
-    public static function getFileName($internalFileName){
+    /**
+     * @param $internalFileName string
+     *
+     * @return string
+     */
+    public static function getFileName( $internalFileName ) {
         $path = explode( self::INTERNAL_SEPARATOR, $internalFileName );
 
+        return implode( DIRECTORY_SEPARATOR, $path );
+    }
+
+    /**
+     * @param $fileName string
+     *
+     * @return string
+     */
+    public static function getInternalFileName( $fileName ) {
+        $path = explode( DIRECTORY_SEPARATOR, $fileName );
+
+        return implode( self::INTERNAL_SEPARATOR, $path );
     }
 
 }

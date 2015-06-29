@@ -481,6 +481,12 @@ class UploadHandler {
     }
 
     public function delete() {
+//
+//        if(/* è un file zip */){}
+//        elseif(/* inizia per ROBA.zip/,,,,,,    */){}
+//        else{ /* è un file semplice, delete normale */}
+//
+
 
         /*
          * BUG FIXED: UTF16 / UTF8 File name conversion related
@@ -510,5 +516,9 @@ class UploadHandler {
         header('Content-type: application/json');
         echo json_encode($success);
     }
+
+    private function normalFileDelete(){}
+    private function zipFileDelete(){}
+    private function zipInternalFileDelete(){}
 
 }
