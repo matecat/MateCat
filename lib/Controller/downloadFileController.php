@@ -313,9 +313,6 @@ class downloadFileController extends downloadController {
 
             $output_content = self::getOutputContentsWithZipFiles( $output_content );
 
-
-
-
             if ( count( $output_content ) > 1 ) {
 
                 //cast $output_content elements to ZipContentObject
@@ -686,14 +683,31 @@ class downloadFileController extends downloadController {
 
         $newOutputContent = array_merge( $newOutputContent, $output_content );
 
-        foreach ( $newOutputContent as $key => $iFile ) {
-            if(isset($iFile['documentContent']) && !isset($iFile['document_content'])){
-                $newOutputContent[$key]['document_content'] = $newOutputContent[$key]['documentContent'];
-                unset($newOutputContent[$key]['documentContent']);
-            }
-        }
-
-        return $newOutputContent;
+        return self::getValidInputForZipContentObject($newOutputContent);
     }
 
+    private static function getValidInputForZipContentObject( $array_input ){
+        foreach ( $array_input as $key => $iFile ) {
+            $filteredArray = null;
+
+            if(isset($iFile['documentContent']) && !isset($iFile['document_content'])){
+                $array_input[$key]['document_content'] = $array_input[$key]['documentContent'];
+
+                unset($array_input[$key]['documentContent']);
+            }
+            if(isset($iFile['filename']) && !isset($iFile['output_filename'])){
+                $array_input[$key]['output_filename'] = $array_input[$key]['filename'];
+                unset($array_input[$key]['filename']);
+            }
+
+            $filteredArray = array(
+                    'output_filename' => $array_input[$key]['output_filename'],
+                    'document_content' => $array_input[$key]['document_content']
+            );
+
+            $array_input[$key] = $filteredArray;
+        }
+
+        return $array_input;
+    }
 }
