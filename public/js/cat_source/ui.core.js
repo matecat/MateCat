@@ -1072,7 +1072,9 @@ console.log('changeStatus');
         }
         var el = $("#segment-" + id + "-target").find(".editarea");
 //        console.log('el: ', el);
-        $(el).click();
+        try {
+            $(el).click();
+        } catch (err) { console.log('error', err); }
     },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
