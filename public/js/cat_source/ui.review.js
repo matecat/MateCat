@@ -4,19 +4,27 @@
 if(config.enableReview && config.isReview) {
 
     $('html').on('just-open', 'section', function() {
-        if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
+        var section = $(this);
+
+        if((section.hasClass('status-new'))||(section.hasClass('status-draft'))) {
 //            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
             sid = $(this).attr('id').split('-')[1];
-            APP.confirm({
-                name: 'confirmNotYetTranslated',
-                cancelTxt: 'Close',
-//                onCancel: 'closeNotYetTranslated',
-                callback: 'openNextTranslated',
-                okTxt: 'Open next translated segment',
-                context: sid,
-                msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
-            });
+            // APP.confirm({
+            //     name: 'confirmNotYetTranslated',
+            //     cancelTxt: 'Close',
+//          //       onCancel: 'closeNotYetTranslated',
+            //     callback: 'openNextTranslated',
+            //     okTxt: 'Open next translated segment',
+            //     context: sid,
+            //     msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
+            // });
+            //
+
+            $('section .close').click();
+            UI.scrollSegment( section );
             UI.openableSegment = false;
+
+            // UI.scrollSegment(this);
 //            UI.openNextTranslated(sid);
         }
     }).on('open', 'section', function() {
