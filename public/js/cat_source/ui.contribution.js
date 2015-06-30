@@ -160,8 +160,10 @@ $.extend(UI, {
 	processContributions: function(d, segment) {
         if(!d) return true;
 		this.renderContributions(d, segment);
-		if (this.getSegmentId(segment) == UI.currentSegmentId)
-			this.currentSegmentQA();
+//		if (this.getSegmentId(segment) == UI.currentSegmentId) {
+//            console.log('è glossary-loaded?', $(segment).hasClass('glossary-loaded'));
+//            this.currentSegmentQA();
+//        }
 		this.lockTags(this.editarea);
 		this.spellCheck();
 
