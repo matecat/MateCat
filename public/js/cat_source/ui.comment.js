@@ -273,19 +273,22 @@
             var root = $(tpls.segmentThread);
             var insertCommentHeader = $(tpls.inputFirstComment) ;
             var inputForm = $(tpls.inputForm);
+
             inputForm.find('.mbc-comment-username-label')
                 .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
                 .text( getUsername() );
 
-                if (!loggedUserName) {
-                    inputForm.find('.mbc-comment-username-label')
+            if (loggedUserName) {
+                inputForm.find('.mbc-login-link').hide();
+            } else {
+                inputForm.find('.mbc-login-link').show();
+                inputForm.find('.mbc-comment-username-label')
                         .attr('title', 'Click to edit');
-                }
+            }
 
             root.append( buildFirstCommentHeader().append( inputForm ) );
 
             el.append( root.show() );
-
             startTextAreaFocusCheck();
         }
 
