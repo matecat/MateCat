@@ -285,6 +285,8 @@
             root.append( buildFirstCommentHeader().append( inputForm ) );
 
             el.append( root.show() );
+
+            startTextAreaFocusCheck();
         }
 
         var applyCollapsedThreadWrap = function(root) {
@@ -545,7 +547,6 @@
 
             outer.find('.mbc-post-comment').addClass('visible');
             outer.find('.mbc-ask-comment-wrap').addClass('visible');
-            outer.find('.mbc-comment-textarea').focus();
             outer.find('.mbc-post-comment .mbc-comment-username-label')
                 .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
                 .text( getUsername() ) ;
@@ -553,6 +554,8 @@
             else outer.find('.mbc-post-comment .mbc-login-link').show();
 
             t.remove();
+
+            startTextAreaFocusCheck();
         });
 
 
@@ -681,7 +684,7 @@
             }
         });
 
-        $(document).on('EditAreaFocused', function(e) {
+        var startTextAreaFocusCheck = function() {
             if ($('article').hasClass('mbc-commenting-opened')) {
                 var f = setInterval(function() {
                     if ( $('.mbc-comment-textarea').is(':visible')) {
@@ -690,6 +693,10 @@
                     }
                 }, 500);
             }
+        };
+
+        $(document).on('EditAreaFocused', function(e) {
+            startTextAreaFocusCheck();
         });
 
         $(document).on('click', '.show-thread-btn', function(e) {
