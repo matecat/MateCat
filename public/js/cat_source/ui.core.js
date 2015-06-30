@@ -1193,6 +1193,7 @@ console.log('changeStatus');
 		this.focusEditarea = setTimeout(function() {
 			UI.editarea.focus();
 			clearTimeout(UI.focusEditarea);
+            UI.currentSegment.trigger('EditAreaFocused');
 		}, 100);
 		this.currentIsLoaded = false;
 		this.nextIsLoaded = false;

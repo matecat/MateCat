@@ -373,9 +373,9 @@
             }
         }
 
-        // behaviour and rendering functions
         var openSegmentComment = function(el) {
             el.find('.editarea').click();
+
             $('article').addClass('mbc-commenting-opened');
             refreshSegmentContent(el);
         }
@@ -665,6 +665,17 @@
             if (openCommentsOnSegmentOpen) {
                 openSegmentComment($(e.segment));
                 openCommentsOnSegmentOpen = false;
+            }
+        });
+
+        $(document).on('EditAreaFocused', function(e) {
+            if ($('article').hasClass('mbc-commenting-opened')) {
+                var f = setInterval(function() {
+                    if ( $('.mbc-comment-textarea').is(':visible')) {
+                        clearInterval(f);
+                        $('.mbc-comment-textarea:visible').focus();
+                    }
+                }, 500);
             }
         });
 
