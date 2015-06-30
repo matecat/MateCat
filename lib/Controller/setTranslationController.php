@@ -362,6 +362,7 @@ class setTranslationController extends ajaxController {
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
+        $propagationMultiplier = 1;
         if ( in_array( $this->status, array(
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
                 Constants_TranslationStatus::STATUS_REJECTED
@@ -382,7 +383,7 @@ class setTranslationController extends ajaxController {
 
 //                }
 
-                propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
+                $propagationMultiplier += propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
@@ -421,7 +422,7 @@ class setTranslationController extends ajaxController {
             $counter = new WordCount_Counter( $old_wStruct );
             $counter->setOldStatus( $old_status );
             $counter->setNewStatus( $this->status );
-            $newValues = $counter->getUpdatedValues( $old_count );
+            $newValues = $counter->getUpdatedValues( $old_count * $propagationMultiplier );
 
             try {
                 $newTotals = $counter->updateDB( $newValues );
