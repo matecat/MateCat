@@ -389,7 +389,7 @@
         }
 
         var openSegmentComment = function(el) {
-            el.find('.editarea').click();
+            // el.find('.editarea').click();
 
             $('article').addClass('mbc-commenting-opened');
             refreshSegmentContent(el);
