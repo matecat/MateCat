@@ -120,6 +120,9 @@
 
             replyToComment : '' +
                 ' <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">Reply</a></div>' +
+                ' <div class="mbc-ajax-message-wrap">' +
+                ' <span class="mbc-warnings hide">Oops, something went wrong. Please try again later.</span>' +
+                ' </div>' +
                 '' , // insert inputForm here (with hide class)
 
             historyIcon : '' +
@@ -181,6 +184,9 @@
                 ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
                 ' <div>' +
                 ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
+                ' </div>' +
+                ' <div class="mbc-ajax-message-wrap">' +
+                ' <span class="mbc-warnings hide">Oops, something went wrong. Please try again later.</span>' +
                 ' </div>' +
                 ' <div>' +
                 ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
@@ -415,10 +421,6 @@
            return $.trim($('.mbc-comment-textarea').val()) == '';
         }
 
-        var showSubmitError = function() {
-            alert('Something went wrong, please try again later.');
-        }
-
         var submitComment = function(el) {
             if ( nothingToSubmit() ) return;
 
@@ -438,18 +440,20 @@
 
             $('.mbc-comment-textarea').attr('disabled', 'disabled');
 
+            clearGenericWarning();
+
             APP.doRequest({
                 data: data,
                 success : function(resp) {
                     if (resp.errors.length) {
-                        showSubmitError();
+                        showGenericWarning();
                     } else {
                         console.log(resp.data.entries[0]);
                         $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
                     }
                 },
-                failure : function() {
-                    showSubmitError();
+                error : function() {
+                    showGenericWarning();
                 },
                 always : function() {
                     $('.mbc-comment-textarea').removeAttr('disabled');
@@ -496,8 +500,17 @@
             // var id_segment = el.attr('id').split('-')[1];
         });
 
+        var showGenericWarning = function() {
+            $('.mbc-warnings').show();
+        }
+
+        var clearGenericWarning = function() {
+            $('.mbc-warnings').hide();
+        }
+
         $(document).on('click', '.mbc-comment-resolve-btn', function(e) {
             e.preventDefault();
+            clearGenericWarning();
 
             var data = {
                 action     : 'comment',
@@ -515,7 +528,7 @@
                 data: data,
                 success : ajaxResolveSuccess,
                 error : function() {
-                    console.log('failure');
+                    showGenericWarning();
                 }
             });
         });
@@ -573,7 +586,7 @@
                     $(document).trigger('mbc:ready');
                 },
                 error : function() {
-                    console.log('failure');
+                    // TODO: handle error on comments fetch
                 }
             });
 
