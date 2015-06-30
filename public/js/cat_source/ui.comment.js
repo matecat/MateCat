@@ -363,6 +363,10 @@
             } else {
             }
 
+            if ( root.find('.mbc-ajax-message-wrap').length > 1 ) {
+                root.find('.mbc-ajax-message-wrap:first').remove();
+            }
+
             return root;
         }
 
