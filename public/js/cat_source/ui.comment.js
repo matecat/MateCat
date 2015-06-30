@@ -12,6 +12,7 @@
         var openCommentsOnSegmentOpen = false;
         var loggedUserName = null ;
         var customUserName = null ;
+        var commentsRequestedByHash = null;
 
         var db = {
             segments: {},
@@ -389,8 +390,8 @@
         }
 
         var openSegmentComment = function(el) {
-            // el.find('.editarea').click();
-            UI.scrollSegment(el)
+            el.find('.editarea').click();
+            // UI.scrollSegment(el)
 
             $('article').addClass('mbc-commenting-opened');
             refreshSegmentContent(el);
@@ -475,12 +476,14 @@
             e.preventDefault();
             openCommentsOnSegmentOpen = true;
             $('.mbc-history-balloon-outer').removeClass('visible');
+
             var sid = $(e.target).closest('div').data('id')
+
             if (Number(sid) == UI.currentSegmentId) {
                 UI.scrollSegment(UI.currentSegment);
                 openSegmentComment( $(UI.currentSegment) );
             } else {
-                window.location.hash = '#' + sid;
+                window.location.hash = '#' + sid + '-comment';
             }
         });
 
@@ -606,6 +609,9 @@
         $(document).on('mbc:ready', function(ev) {
             renderCommentIconLinks();
             updateHistoryWithLoadedSegments();
+            if ( commentsRequestedByHash ) {
+                openSegmentComment(UI.currentSegment);
+            }
         });
 
         $(document).on('sse:ack', function(ev, message) {
@@ -779,6 +785,12 @@
         });
 
     }
+
+    $(document).on('beforeHashChange', function(ev, hash) {
+        if (hash.substr(1).split('-')[1] === 'comment') {
+            commentsRequestedByHash = true ;
+        }
+    });
 
     $(document).on('keyup', '.mbc-comment-textarea', function(e) {
         while($(this).outerHeight() < this.scrollHeight +
