@@ -59,6 +59,7 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
+        this.currentSegmentTranslation = this.editarea.text(); 
 	},
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -163,6 +164,9 @@ console.log('changeStatus');
 	},
     autopropagateConfirmNeeded: function () {
         segment = UI.currentSegment;
+        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+            return false;
+        }
 //        console.log('propagable: ', segment.attr('data-propagable'));
         if(segment.attr('data-propagable') == 'true') {
             if(config.isReview) {
