@@ -2843,6 +2843,7 @@ a.resume-project:after,
 #point2seg:after,
 .error-symbol:before,
 .warnings:before,
+.mbc-warnings:before,
 .tab-switcher-al a:before,
 .error-message p:before,
 .text .alternatives:before,
@@ -3009,7 +3010,8 @@ float: left;
 }
 
 .tab-switcher-al a:before,
-.warnings:before,    
+.warnings:before,
+.mbc-warnings:before,
 .error-symbol:before,
 .text .alternatives:before {
      content: "\f071";

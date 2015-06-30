@@ -1,7 +1,6 @@
 /*
 .mbc-layout = selector added to article for chat integration
 .mbc-comment-link = comment icon element
-
 */
 
 /*
@@ -366,6 +365,16 @@ article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
   z-index: 9999;
 }
 
+
+/* Error messages */
+.mbc-ajax-message-wrap {
+  padding: 6px 4px;
+}
+/* Warnings style.css line 136 */
+.mbc-warnings {
+  color:#D65959;
+  font-size:14px;
+}
 
 /* History balloon */
 
