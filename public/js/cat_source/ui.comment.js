@@ -390,6 +390,7 @@
 
         var openSegmentComment = function(el) {
             // el.find('.editarea').click();
+            UI.scrollSegment(el)
 
             $('article').addClass('mbc-commenting-opened');
             refreshSegmentContent(el);
@@ -487,7 +488,7 @@
             e.preventDefault();
             var section = $(e.target).closest('section');
             if ( section.hasClass('readonly') ) {
-                section.find('.targetarea').click();
+                section.find('.targetarea').click();  // should never happen TODO check for remove
             } else {
                 openSegmentComment( section );
             }
