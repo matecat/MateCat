@@ -354,7 +354,7 @@ article.mbc-commenting-opened {
 
 
 
-article.mbc-commenting-opened section.editor .mbc-comment-balloon-outer {
+article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   border: 1px solid #cdcdcd;
   float: right;
   margin-right: -230px;
