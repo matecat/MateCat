@@ -64,7 +64,7 @@ class getSearchController extends ajaxController {
                 break;
         }
 
-        $this->queryParams = new ArrayObject( array(
+        $this->queryParams = array(
             'job'         => $this->job,
             'password'    => $this->password,
             'key'         => null,
@@ -74,7 +74,7 @@ class getSearchController extends ajaxController {
             'replacement' => $this->replace,
             'matchCase'   => $this->matchCase,
             'exactMatch'  => $this->exactMatch,
-        ) );
+        );
 
     }
 

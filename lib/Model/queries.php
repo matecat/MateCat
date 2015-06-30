@@ -1,11 +1,19 @@
 <?php
 
-function doSearchQuery( ArrayObject $queryParams ) {
+function doSearchQuery( Array $queryParams ) {
     $db = Database::obtain();
 
     $key = $queryParams[ 'key' ]; //no escape: not related with Database
-    $src = $db->escape( $queryParams[ 'src' ] );
-    $trg = $db->escape( $queryParams[ 'trg' ] );
+
+    $src = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'src' ] );
+
+    // in the database at the target we have not html entities but normal quotes
+    //so we have do not escape the translations
+//    $trg = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'trg' ] );
+    $trg = $queryParams[ 'trg' ];
+
+    $src = $db->escape( $src );
+    $trg = $db->escape( $trg );
 
 //	Log::doLog( $queryParams );
 //	Log::doLog( $trg );
@@ -35,9 +43,11 @@ function doSearchQuery( ArrayObject $queryParams ) {
      *
      */
     $_regexpEscapedSrc = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'src' ] );
+    $_regexpEscapedSrc = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedSrc );
     $_regexpEscapedSrc = $db->escape( $_regexpEscapedSrc );
 
     $_regexpEscapedTrg = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'trg' ] );
+//    $_regexpEscapedTrg = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedTrg );
     $_regexpEscapedTrg = $db->escape( $_regexpEscapedTrg );
 
     $query = "";
@@ -1122,7 +1132,10 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     $q = array();
     foreach ( $params as $key => $value ) {
-        if ( $key == 'status' ) {
+
+        if ( $key == 'translation' ) {
+            $_Translation[ $key ] = "'" . $db->escape( $value ) . "'";
+        } elseif ( $key == 'status' ) {
             if ( $propagateToTranslated ) {
 //                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
                 $q[ ]      = $key . " = '".$db->escape( $value )."' ";

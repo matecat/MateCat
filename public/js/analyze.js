@@ -574,9 +574,9 @@ UI = {
 									s_total_txt = s_total.text();
 									//                                s_total_txt = "0";
 									if(parseFloat(s_total_txt) < 1) {
-									$(context.parents('.jobcontainer').find('.splitbtn')).addClass('disabled').attr('title', 'You cannot split a job with 1 or 0 payable words.');
+//									    $(context.parents('.jobcontainer').find('.splitbtn')).addClass('disabled').attr('title', 'You cannot split a job with 1 or 0 payable words.');
 									} else {
-									$(context.parents('.jobcontainer').find('.splitbtn')).removeClass('disabled').attr('title', '');
+//									    $(context.parents('.jobcontainer').find('.splitbtn')).removeClass('disabled').attr('title', '');
 									}
 									s_total.text( tot.TOTAL_PAYABLE[1] );
 									if ( s_total_txt != s.TOTAL_TM_WC_PRINT )
@@ -768,11 +768,12 @@ UI = {
 								$('#longloading .meter').remove();
 								$('#longloading').show();
 								$('#longloading p').addClass('loaded').html('<span class="complete">Analysis complete</span>').append('<a class="downloadAnalysisReport">Download Analysis Report</a>');
-								}, 1000);
+                                $('.splitbtn').removeClass('disabled').attr('title', '');
+                        }, 1000);
 						/*
 						   setTimeout(function(){
 						   $('.loadingbar').removeClass('open');
-						   },2000);     
+						   },2000);
 						 */
 					}
 

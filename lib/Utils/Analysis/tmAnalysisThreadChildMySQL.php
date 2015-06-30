@@ -1,4 +1,7 @@
 <?php
+
+die("DEPRECATED NO MORE WORKING.");
+
 set_time_limit(0);
 include "main.php";
 include INIT::$UTILS_ROOT . "/QA.php";

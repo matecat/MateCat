@@ -59,6 +59,7 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
+        this.currentSegmentTranslation = this.editarea.text(); 
 	},
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -163,6 +164,9 @@ console.log('changeStatus');
 	},
     autopropagateConfirmNeeded: function () {
         segment = UI.currentSegment;
+        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+            return false;
+        }
 //        console.log('propagable: ', segment.attr('data-propagable'));
         if(segment.attr('data-propagable') == 'true') {
             if(config.isReview) {
@@ -2076,9 +2080,9 @@ console.log('changeStatus');
 		});
         console.log('x');
 //        console.log('newStr: ', newStr);
-//		replaceSelectedText(newStr);
+		replaceSelectedText(newStr);
         console.log('newStr: ', newStr);
-		replaceSelectedHtml(newStr);
+//		replaceSelectedHtml(newStr);
         console.log('a: ', UI.editarea.html());
 		UI.lockTags();
         console.log('b: ', UI.editarea.html());
@@ -2377,7 +2381,7 @@ console.log('changeStatus');
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
         })
-//        console.log(glossarySourcesAr);
+//        console.log('glossarySourcesAr: ', glossarySourcesAr);
 //        console.log(JSON.stringify(glossarySourcesAr));
 		APP.doRequest({
 			data: {

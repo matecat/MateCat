@@ -243,15 +243,16 @@ class FilesStorage {
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
 
+        $res = true;
         //check if doesn't exist
         if ( !is_dir( $fileDir ) ) {
             //make files' directory structure
-            mkdir( $fileDir, 0755, true );
-            mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" );
-            mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" );
-            mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" );
-            mkdir( $fileDir . DIRECTORY_SEPARATOR . "orig" );
-            mkdir( $fileDir . DIRECTORY_SEPARATOR . "xliff" );
+            $res &= mkdir( $fileDir, 0755, true );
+            $res &= mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" );
+            $res &= mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" );
+            $res &= mkdir( $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" );
+            $res &= mkdir( $fileDir . DIRECTORY_SEPARATOR . "orig" );
+            $res &= mkdir( $fileDir . DIRECTORY_SEPARATOR . "xliff" );
         }
 
         //make links from cache to files
@@ -260,18 +261,24 @@ class FilesStorage {
 
         //orig, suppress error because of xliff files have not original one
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
-        @link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        if( is_file( $filePath ) ){
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        }
 
         //work
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
-        link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . basename( $filePath ) );
 
         //check if manifest from a LongHorn conversion exists
         $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
         if ( file_exists( $manifestFile ) ) {
-            link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . basename( $manifestFile ) );
-            link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
-            link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . basename( $manifestFile ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        }
+
+        if( !$res ){
+            throw new UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
         }
 
     }

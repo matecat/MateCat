@@ -59,6 +59,7 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
+        this.currentSegmentTranslation = this.editarea.text(); 
 	},
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -163,6 +164,9 @@ console.log('changeStatus');
 	},
     autopropagateConfirmNeeded: function () {
         segment = UI.currentSegment;
+        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+            return false;
+        }
 //        console.log('propagable: ', segment.attr('data-propagable'));
         if(segment.attr('data-propagable') == 'true') {
             if(config.isReview) {
@@ -2076,9 +2080,9 @@ console.log('changeStatus');
 		});
         console.log('x');
 //        console.log('newStr: ', newStr);
-//		replaceSelectedText(newStr);
+		replaceSelectedText(newStr);
         console.log('newStr: ', newStr);
-		replaceSelectedHtml(newStr);
+//		replaceSelectedHtml(newStr);
         console.log('a: ', UI.editarea.html());
 		UI.lockTags();
         console.log('b: ', UI.editarea.html());
@@ -2377,7 +2381,7 @@ console.log('changeStatus');
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
         })
-//        console.log(glossarySourcesAr);
+//        console.log('glossarySourcesAr: ', glossarySourcesAr);
 //        console.log(JSON.stringify(glossarySourcesAr));
 		APP.doRequest({
 			data: {
@@ -3699,7 +3703,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.7";
+		this.version = "0.5.7b";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -6219,8 +6223,10 @@ $.extend(UI, {
 	processContributions: function(d, segment) {
         if(!d) return true;
 		this.renderContributions(d, segment);
-		if (this.getSegmentId(segment) == UI.currentSegmentId)
-			this.currentSegmentQA();
+//		if (this.getSegmentId(segment) == UI.currentSegmentId) {
+//            console.log('è glossary-loaded?', $(segment).hasClass('glossary-loaded'));
+//            this.currentSegmentQA();
+//        }
 		this.lockTags(this.editarea);
 		this.spellCheck();
 
@@ -6356,8 +6362,7 @@ $.extend(UI, {
 			if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
-                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
-
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
 		}
 	},
@@ -7565,7 +7570,6 @@ $.extend(UI, {
 			n = segment;
 		}
 //		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
-		$(n).addClass('glossary-loaded');
 		$('.gl-search', n).addClass('loading');
 		if(config.tms_enabled) {
 			$('.sub-editor.glossary .overflow .results', n).empty();
@@ -7596,6 +7600,10 @@ $.extend(UI, {
 				UI.failedConnection(0, 'glossary');
 			},
 			success: function(d) {
+                if(!$(segment).hasClass('glossary-loaded')) {
+                    UI.currentSegmentQA();
+                }
+                $(n).addClass('glossary-loaded');
                 //temp
 //                d = {"error":[],"data":{"matches":{"is":[{"id":"459372897","raw_segment":"is","segment":"is","translation":"\u00e8","target_note":"","raw_translation":"\u00e8","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:33:42","last_update_date":"2014-12-23","match":"62%","prop":[]}],"this":[{"id":"459372893","raw_segment":"this","segment":"this","translation":"questo","target_note":"","raw_translation":"questo","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:32:49","last_update_date":"2014-12-23","match":"62%","prop":[]}]}}};
 

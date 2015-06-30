@@ -160,8 +160,10 @@ $.extend(UI, {
 	processContributions: function(d, segment) {
         if(!d) return true;
 		this.renderContributions(d, segment);
-		if (this.getSegmentId(segment) == UI.currentSegmentId)
-			this.currentSegmentQA();
+//		if (this.getSegmentId(segment) == UI.currentSegmentId) {
+//            console.log('è glossary-loaded?', $(segment).hasClass('glossary-loaded'));
+//            this.currentSegmentQA();
+//        }
 		this.lockTags(this.editarea);
 		this.spellCheck();
 
@@ -297,8 +299,7 @@ $.extend(UI, {
 			if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
-                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
-
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
 		}
 	},

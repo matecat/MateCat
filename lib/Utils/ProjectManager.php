@@ -391,6 +391,12 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => -7, "message" => "Failed to store reference files in database"
                     );
+                } elseif ( $e->getCode() == -13 ) {
+                    $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                            "code" => -13, "message" => $e->getMessage()
+                    );
+                    Log::doLog( $e->getMessage() );
+                    return null; // SEVERE EXCEPTION we can not write to disk!! Break project creation
                 } else {
                     //mysql insert Blob Error
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(

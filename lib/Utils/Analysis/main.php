@@ -8,8 +8,7 @@ $db=Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB
 $db->debug=false;
 $db->connect();
 
-
-declare ( ticks = 1 );
+declare ( ticks = 10 );
 if (! function_exists ( 'pcntl_signal' )) {
     $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
     _TimeStampMsg( $msg );

@@ -53,6 +53,9 @@ if( $matecatBranch == 'master' ) {
 
     $iniHandler->set( null, 'ENV', 'development' );
     $iniHandler->set( null, 'CHECK_FS', true );
+    $iniHandler->set( 'development', 'CONVERSION_ENABLED', true );
+    $iniHandler->set( 'development', 'FORCE_XLIFF_CONVERSION', true );
+    $iniHandler->set( 'development', 'DQF_ENABLED', true );
 
 }
 
