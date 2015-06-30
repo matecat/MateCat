@@ -13,9 +13,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           $input->message_type = self::TYPE_COMMENT ;
       }
 
-      $obj = $this->sanitize( $input );
+      $input->create_date = date( 'Y-m-d H:i:s' ) ;
 
-      $obj->create_date = date( 'Y-m-d H:i:s' ) ;
+      $obj = $this->sanitize( $input );
 
       $this->validateForCommentAndResolve($obj);
 
@@ -26,15 +26,15 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           " VALUES " .
           " ( "  .
           implode(", ", array(
-               $obj->id_job  ,
-               $obj->id_segment  ,
-               "'$obj->create_date'"  ,
-               $obj->email     == null ? "NULL" : "'$obj->email'",
-               $obj->full_name == null ? "NULL" : "'$obj->full_name'",
-               $obj->uid       == null ? "NULL"   : $obj->uid ,
-               $obj->user_role ,
-               $obj->message_type ,
-               "'$obj->message'"
+               $obj->id_job,
+               $obj->id_segment,
+               $obj->create_date,
+               $obj->email,
+               $obj->full_name,
+               $obj->uid,
+               $obj->user_role,
+               $obj->message_type,
+               $obj->message
           ) ) . " ) ";
 
 
@@ -46,16 +46,16 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
   public function resolveThread( $input ) {
       $input->message_type = self::TYPE_RESOLVE ;
-      $input->resolve_date  = date('Y-m-d H:i:s');
-
-      $obj = $this->sanitize( $input );
+      $input->resolve_date = date('Y-m-d H:i:s');
 
       $this->con->begin();
 
       try {
-          $new_record = $this->saveComment( $obj );
+          $this->saveComment( $input );
 
-          $update = "UPDATE comments SET resolve_date = '$obj->resolve_date' " .
+          $obj = $this->sanitize( $input );
+
+          $update = "UPDATE comments SET resolve_date = $obj->resolve_date " .
               " WHERE id_segment = $obj->id_segment " .
               " AND id_job = $obj->id_job " .
               " AND resolve_date IS NULL " ;
@@ -72,10 +72,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           $this->con->rollback();
       }
 
-      $obj->thread_id = $obj->getThreadId() ;
+      $input->thread_id = $input->getThreadId() ;
 
-      return $obj ;
-
+      return $input ;
   }
 
   public function getThreadContributorUids( $input ) {
@@ -193,6 +192,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       $cloned->message      = self::escapeWithNull( trim( $input->message ) );
       $cloned->email        = self::escapeWithNull( $input->email );
       $cloned->full_name    = self::escapeWithNull( $input->full_name );
+      $cloned->create_date  = self::escapeWithNull( $input->create_date );
+      $cloned->resolve_date  = self::escapeWithNull( $input->resolve_date );
 
       return $cloned ;
   }
@@ -200,16 +201,16 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   private static function escapeWithNull($value) {
       $conn = self::getConnection();
       if ( $value !== null ) {
-          return $conn->escape( $value );
+          return " '{$conn->escape( $value )}' " ;
       }
       else {
-          return null ;
+          return "NULL"  ;
       }
   }
 
   private static function intWithNull( $value ) {
       if ( $value === null ) {
-          return null  ;
+          return "NULL"  ;
       } else {
           return (int) $value ;
       }
