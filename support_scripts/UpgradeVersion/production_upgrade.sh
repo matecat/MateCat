@@ -46,11 +46,12 @@ then
         exit 1
 fi
 
-chown -R ${USER_OWNER} ./*
-
 popd
 setuid ${USER_OWNER} php Upgrade.php $1
 
+pushd ${MATECAT_HOME}
+chown -R ${USER_OWNER} ./*
+popd
 
 ########### MONIT TOOL SERVICES UPDATE
 

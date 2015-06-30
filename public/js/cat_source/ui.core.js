@@ -2381,7 +2381,7 @@ console.log('changeStatus');
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
         })
-//        console.log(glossarySourcesAr);
+//        console.log('glossarySourcesAr: ', glossarySourcesAr);
 //        console.log(JSON.stringify(glossarySourcesAr));
 		APP.doRequest({
 			data: {
