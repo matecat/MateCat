@@ -635,13 +635,16 @@ $.extend(UI, {
                 if(!UI.isSafari) saveSelection();
             }
             $('.editor .rangySelectionBoundary').addClass('focusOut');
-            hasFocusBefore = UI.editarea.is(":focus");
-            setTimeout(function() {
-                hasFocusAfter = UI.editarea.is(":focus");
-                if(hasFocusBefore && hasFocusAfter){
-                    $('.editor .rangySelectionBoundary.focusOut').remove();
-                }
-            }, 600);
+
+            if ( UI.editarea != '') {
+                hasFocusBefore = UI.editarea.is(":focus");
+                setTimeout(function() {
+                    hasFocusAfter = UI.editarea.is(":focus");
+                    if(hasFocusBefore && hasFocusAfter){
+                        $('.editor .rangySelectionBoundary.focusOut').remove();
+                    }
+                }, 600);
+            }
         });
 //		window.onbeforeunload = goodbye;
 
@@ -712,16 +715,28 @@ $.extend(UI, {
 				UI.removeStatusMenu(statusMenu);
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
-			e.preventDefault();
-//            if(config.isReview) return false;
-			if (UI.justSelecting('readonly'))
-				return;
-			if (UI.someUserSelection)
-				return;
-			var msg = (UI.body.hasClass('archived'))? 'Job has been archived and cannot be edited.' : 'This part has not been assigned to you.';
-			UI.selectingReadonly = setTimeout(function() {
-				APP.alert({msg: msg});
-			}, 200);
+
+            e.preventDefault();
+
+            var section = $(e.target).closest('section');
+
+			if ( UI.justSelecting('readonly') )   return;
+			if ( UI.someUserSelection )           return;
+
+            var doShowAlert = function () {
+                return true ;
+                // return ! ( MBC.enabled() && MBC.popLastSelectedOnHistory() == sid ) ;
+            }
+
+            if ( doShowAlert() ) {
+                var msgArchived = 'Job has been archived and cannot be edited.' ;
+                var msgOther = 'This part has not been assigned to you.' ;
+                var msg = (UI.body.hasClass('archived'))? msgArchived : msgOther ;
+
+                UI.selectingReadonly = setTimeout(function() {
+                    APP.alert({msg: msg});
+                }, 200);
+            }
 
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
@@ -864,7 +879,7 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
-            if(!UI.editarea.find('.locked.selected').length) {
+            if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     UI.showEditToolbar();
 //                    if(!UI.isFirefox) UI.showEditToolbar();
@@ -943,8 +958,10 @@ $.extend(UI, {
                 }
 			}
 
-            UI.lockTags(UI.editarea);
-            UI.checkTagProximity();
+            if (UI.editarea != '') {
+                UI.lockTags(UI.editarea);
+                UI.checkTagProximity();
+            }
 
             if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));

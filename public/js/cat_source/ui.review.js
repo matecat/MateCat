@@ -1,33 +1,45 @@
 /*
  Component: ui.review
  */
-if(config.enableReview && config.isReview) {
 
-    $('html').on('just-open', 'section', function() {
-        var section = $(this);
+Review = {
+    enabled : function() {
+        return config.enableReview && config.isReview ;
+    },
+};
 
-        if((section.hasClass('status-new'))||(section.hasClass('status-draft'))) {
-//            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
-            sid = $(this).attr('id').split('-')[1];
-            // APP.confirm({
-            //     name: 'confirmNotYetTranslated',
-            //     cancelTxt: 'Close',
-//          //       onCancel: 'closeNotYetTranslated',
-            //     callback: 'openNextTranslated',
-            //     okTxt: 'Open next translated segment',
-            //     context: sid,
-            //     msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
-            // });
-            //
+if ( Review.enabled() )
+(function(Review, window) {
+    var alertNotTranslatedYet = function( sid ) {
+        APP.confirm({
+            name: 'confirmNotYetTranslated',
+            cancelTxt: 'Close',
+            callback: 'openNextTranslated',
+            okTxt: 'Open next translated segment',
+            context: sid,
+            msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
+        });
+    }
 
-            $('section .close').click();
-            UI.scrollSegment( section );
-            UI.openableSegment = false;
+    $.extend(Review, {
+        evalOpenableSegment : function(section) {
+            if ( isTranslated(section) ) return true ;
 
-            // UI.scrollSegment(this);
-//            UI.openNextTranslated(sid);
-        }
-    }).on('open', 'section', function() {
+            var sid = UI.getSegmentId( section );
+
+            if ( ! ( MBC.enabled() && MBC.popLastSelectedOnHistory() == sid ) ) {
+                alertNotTranslatedYet( sid ) ;
+            }
+
+            $(document).trigger('review:unopenableSegment', section);
+
+            return false ;
+        },
+    });
+})(Review, window);
+
+if ( Review.enabled() ) {
+    $('html').on('open', 'section', function() {
 //        console.log('new? ', $(this).hasClass('status-new'));
 //        console.log('draft? ', $(this).hasClass('status-draft'));
         if($(this).hasClass('opened')) {

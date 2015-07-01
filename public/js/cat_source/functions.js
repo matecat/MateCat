@@ -756,3 +756,10 @@ if (typeof String.prototype.endsWith !== 'function') {
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
     };
 }
+
+function isTranslated(section) {
+    return ! (
+        section.hasClass('status-new') ||
+        section.hasClass('status-draft')
+    );
+}

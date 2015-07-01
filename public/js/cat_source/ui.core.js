@@ -913,6 +913,7 @@ console.log('changeStatus');
 			if (options.segmentToOpen) {
 				$('#segment-' + options.segmentToOpen + ' .editarea').click();
 			}
+
 			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
 				UI.openSegment(UI.editarea);
 			}
@@ -1072,9 +1073,7 @@ console.log('changeStatus');
         }
         var el = $("#segment-" + id + "-target").find(".editarea");
 //        console.log('el: ', el);
-        try {
-            $(el).click();
-        } catch (err) { console.log('error', err); }
+        $(el).click();
     },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
@@ -1119,17 +1118,14 @@ console.log('changeStatus');
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
-//        console.log('open segment - editarea: ', UI.currentSegmentId);
-//        console.log('operation: ', operation);
-//		if(UI.body.hasClass('archived')) return;
-
+        // TODO: check why this global var is needed
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
-        UI.openableSegment = true;
-        segment.trigger('just-open');
-//        console.log('UI.openableSegment: ', UI.openableSegment);
-        if(!UI.openableSegment) return false;
-        UI.openableSegment = false;
+
+        if (Review.enabled() && !Review.evalOpenableSegment( segment )) {
+            return false ;
+        }
+
         this.openSegmentStart = new Date();
 		if(UI.warningStopped) {
 			UI.warningStopped = false;
@@ -1139,7 +1135,6 @@ console.log('changeStatus');
 			if (this.justSelecting('editarea'))
 				return;
 		}
-
 
         this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
@@ -1754,6 +1749,8 @@ console.log('changeStatus');
 			setTimeout(function() {
 //				var hash_value = window.location.hash;
                 $(document).trigger('beforeHashChange', window.location.hash);
+                console.log('window.location.hash', window.location.hash);
+                console.log(UI.currentSegmentId);
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
