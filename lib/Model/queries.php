@@ -1133,9 +1133,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     $q = array();
     foreach ( $params as $key => $value ) {
 
-        if ( $key == 'translation' ) {
-            $_Translation[ $key ] = "'" . $db->escape( $value ) . "'";
-        } elseif ( $key == 'status' ) {
+        if ( $key == 'status' ) {
             if ( $propagateToTranslated ) {
 //                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
                 $q[ ]      = $key . " = '".$db->escape( $value )."' ";
@@ -1143,7 +1141,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
             }
         } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value, true );
-        } elseif ( !is_numeric( $value ) ) {
+        } elseif ( !is_numeric( $value ) || $key == 'translation' ) {
             $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
         } else {
             $q[ ] = $key . " = " . (float)$value;
