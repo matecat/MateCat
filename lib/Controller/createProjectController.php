@@ -233,7 +233,10 @@ class createProjectController extends ajaxController {
 
         foreach($arFiles as $__fName){
            if ( 'zip' == pathinfo( $__fName, PATHINFO_EXTENSION ) ) {
-               @unlink($uploadDir . DIRECTORY_SEPARATOR . $__fName);
+
+               $fs = new FilesStorage();
+               $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
+
                $linkFiles = scandir( $uploadDir );
 
                //fetch cache links, created by converter, from upload directory
@@ -246,10 +249,14 @@ class createProjectController extends ajaxController {
                        $newArFiles[] = $storedFileName;
                    }
                }
+
+           } else { //this file was not in a zip. Add it normally
+
+               if( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ){
+                   $newArFiles[ ] = $__fName;
+               }
+
            }
-            else{ //this file was not in a zip. Add it normally
-                $newArFiles[] = $__fName;
-            }
         }
 
         $arFiles = $newArFiles;

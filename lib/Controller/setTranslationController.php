@@ -377,6 +377,9 @@ class setTranslationController extends ajaxController {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );
+                $db->rollback();
+                return $e->getCode();
+
             }
 
         }

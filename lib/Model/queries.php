@@ -1678,7 +1678,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
-    $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
+    $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];

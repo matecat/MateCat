@@ -318,7 +318,7 @@ class ConversionHandler {
 
             // The true flag makes Upload get the upload directory from the cookie.
             // In this way it'll find the unzipped files
-            $uploadFile = new Upload( $_COOKIE[ 'upload_session' ] );
+            $uploadFile = new Upload( $this->cookieDir );
 
             try{
                 $stdResult  = $uploadFile->uploadFiles( $filesArray );
