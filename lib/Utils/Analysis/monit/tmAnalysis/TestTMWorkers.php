@@ -27,7 +27,8 @@ if ( file_exists( NUM_WORKERS ) ) {
 
 if( $desiredCount > $consumers ){
     exit(127);
-
+} elseif( $consumers > $desiredCount ) {
+    exit( -127 );
 } elseif( empty( $desiredCount ) ){
     exit(3);
 }

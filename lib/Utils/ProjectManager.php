@@ -34,6 +34,7 @@ class ProjectManager {
             $projectStructure = new RecursiveArrayObject(
                     array(
                             'id_project'           => null,
+                            'create_date'          => date( "Y-m-d H:i:s" ),
                             'id_customer'          => null,
                             'user_ip'              => null,
                             'project_name'         => null,
@@ -238,15 +239,23 @@ class ProjectManager {
 
         $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
+        //we are going to access the storage, get model object to manipulate it
+        $fs = new FilesStorage();
+        $linkFiles= $fs->getHashesFromDir( $uploadDir );
 
-        //fetch cache links, created by converter, from upload directory
-        $linkFiles = scandir( $uploadDir );
+        foreach( $linkFiles[ 'zipHashes' ] as $zipHash ){
 
-        //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
-        foreach ( $linkFiles as $k => $linkFile ) {
-            if ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
-                unset( $linkFiles[ $k ] );
+            $result = $fs->linkZipToProject(
+                    $this->projectStructure['create_date'],
+                    $zipHash,
+                    $this->projectStructure['id_project']
+            );
+
+            if( !$result ){
+                Log::doLog( "Failed to store the Zip file $zipHash - \n" );
+                throw new Exception( "Failed to store the original Zip $zipHash ", -10 );
             }
+
         }
 
         /*
@@ -287,9 +296,6 @@ class ProjectManager {
              */
             $isAnXliffToConvert = $this->isConversionToEnforce( $fileName );
 
-            //we are going to access the storage, get model object to manipulate it
-            $fs = new FilesStorage();
-
             //if it's one of the listed formats or conversion is not enabled in first place
             if ( !$isAnXliffToConvert ) {
                 /*
@@ -310,7 +316,7 @@ class ProjectManager {
                 $fs->linkSessionToCache( $sha1, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'uploadToken' ] );
 
                 //add newly created link to list
-                $linkFiles[ ] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ ] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
 
                 unset( $sha1 );
             }
@@ -318,7 +324,7 @@ class ProjectManager {
 
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
-        foreach ( $linkFiles as $linkFile ) {
+        foreach ( $linkFiles[ 'conversionHashes' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
             $hashFile = basename( $linkFile );
@@ -351,7 +357,7 @@ class ProjectManager {
                 }
                 $mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
 
-                $yearMonthPath = date_create()->format("Ymd");
+                $yearMonthPath = date_create( $this->projectStructure[ 'date_create' ] )->format( 'Ymd' );
                 $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
                 $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $fileDateSha1Path );
 
@@ -570,6 +576,22 @@ class ProjectManager {
                 Log::doLog( "Segment Search: No segments in this project - \n" );
                 $isEmptyProject = true;
             }
+
+            foreach( $linkFiles[ 'zipHashes' ] as $zipHash ){
+
+                $result = $fs->linkZipToProject(
+                        $this->projectStructure['create_date'],
+                        $zipHash,
+                        $this->projectStructure['id_project']
+                );
+
+                if( !$result ){
+                    Log::doLog( "Failed to store the original Zip $zipHash - \n" );
+                    throw new Exception( "Failed to store the original Zip $zipHash ", -10 );
+                }
+
+            }
+
 
         } catch ( Exception $ex ) {
             $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(

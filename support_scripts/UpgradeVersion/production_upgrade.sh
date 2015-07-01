@@ -50,7 +50,12 @@ popd
 setuid ${USER_OWNER} php Upgrade.php $1
 
 pushd ${MATECAT_HOME}
-chown -R ${USER_OWNER} ./*
+chown -R ${USER_OWNER} ./lib
+chown -R ${USER_OWNER} ./inc
+chown -R ${USER_OWNER} ./public
+chown -R ${USER_OWNER} ./support_scripts
+chown -R root ./support_scripts/UpgradeVersion
+chown ${USER_OWNER} ./index.php
 popd
 
 ########### MONIT TOOL SERVICES UPDATE

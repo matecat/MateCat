@@ -30,19 +30,29 @@ class FilesStorage {
 
     private $filesDir;
     private $cacheDir;
+    private $zipDir;
 
-    public function __construct( $files = false, $cache = false ) {
+    public function __construct( $files = false, $cache = false, $zip = false ) {
+
         //override default config
         if ( $files ) {
             $this->filesDir = $files;
         } else {
             $this->filesDir = INIT::$FILES_REPOSITORY;
         }
+
         if ( $cache ) {
             $this->cacheDir = $cache;
         } else {
             $this->cacheDir = INIT::$CACHE_REPOSITORY;
         }
+
+        if( $zip ){
+            $this->zipDir = $zip;
+        } else {
+            $this->zipDir = INIT::$ZIP_REPOSITORY;
+        }
+
     }
 
     /**
@@ -153,9 +163,9 @@ class FilesStorage {
         //if it's not an xliff as original
         if ( !$originalPath ) {
 
-            //set original moval as successful
-            $outcome1 = true;
-
+            //if there is not an original path this is an unconverted file,
+            // the original does not exists
+            // detect which type of xliff
             $fileType = DetectProprietaryXliff::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] ) {
                 $force_extension = '.sdlxliff';
@@ -192,7 +202,6 @@ class FilesStorage {
         //In Unix you can't rename or move between filesystems,
         //Instead you must copy the file from one source location to the destination location, then delete the source.
         $outcome2 = copy( $xliffPath, $xliffDestination );
-        unlink( $xliffPath );
 
         if ( !$outcome2 ) {
             //Original directory deleted!!!
@@ -201,7 +210,106 @@ class FilesStorage {
             return $outcome2;
         }
 
+        unlink( $xliffPath );
         return true;
+
+    }
+
+    /**
+     * Make a temporary cache copy for the original zip file
+     *
+     * @param $hash
+     * @param $zipPath
+     *
+     * @return bool
+     */
+    public function cacheZipArchive( $hash, $zipPath ){
+
+        $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . "__##originalZip##";
+
+        //ensure old stuff is overwritten
+        if ( is_dir( $thisZipDir ) ) {
+            Utils::deleteDir( $thisZipDir );
+        }
+
+        //create cache dir structure
+        $created = mkdir( $thisZipDir, 0755, true );
+
+        if( !$created ){
+            return $created;
+        }
+
+        //move original
+        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . basename( $zipPath ) );
+
+        if( !$outcome1 ){
+            //Original directory deleted!!!
+            //CLEAR ALL CACHE
+            Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . "__##originalZip##" );
+            return $outcome1;
+        }
+
+        unlink( $zipPath );
+
+        //link this zip to the upload directory by creating a file name as the ash of the zip file
+        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . "__##originalZip##" );
+
+        return true;
+
+    }
+
+    public function linkZipToProject( $create_date, $zipHash, $projectID ){
+
+        $datePath = date_create( $create_date )->format( 'Ymd' );
+
+        $fileName = basename( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
+
+        //destination dir
+        $newZipDir  = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID ;
+
+        //check if doesn't exist
+        if ( !is_dir( $newZipDir ) ) {
+            //make files' directory structure
+            if( ! mkdir( $newZipDir, 0755, true ) ) {
+                return false;
+            }
+        }
+
+        //link original
+        $outcome1 = link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
+
+        if( !$outcome1 ){
+            //Failed to copy the original file zip
+            return $outcome1;
+        }
+
+        Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
+
+        return true;
+
+    }
+
+    public function getHashesFromDir( $dirToScan ){
+
+        //fetch cache links, created by converter, from a directory
+        $linkFiles = scandir( $dirToScan );
+        $zipFilesHash = array();
+        //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
+        foreach ( $linkFiles as $k => $linkFile ) {
+
+            if( strpos( $linkFile, "__##originalZip##" ) !== false ){
+                $zipFilesHash[ ] = $linkFile;
+                unset( $linkFiles[ $k ] );
+            } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
+                unset( $linkFiles[ $k ] );
+            }
+
+        }
+
+        return array(
+                'conversionHashes' => $linkFiles,
+                'zipHashes'        => $zipFilesHash
+        );
 
     }
 
@@ -257,8 +365,6 @@ class FilesStorage {
 
         //make links from cache to files
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
-        //FIX: we could check in advance and, in case, use copy instead of links
-
         //orig, suppress error because of xliff files have not original one
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
         if( is_file( $filePath ) ){
