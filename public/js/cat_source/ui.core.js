@@ -199,7 +199,6 @@ console.log('changeStatus');
         options = opt;
         noPropagation = opt.noPropagation;
 
-
         segment_id = options.segment_id;
         segment = $('#segment-' + segment_id);
         status = options.status;
@@ -2470,7 +2469,6 @@ console.log('changeStatus');
 //        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
 //        console.log('UI.offline: ', UI.offline);
 //        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
-
         if ( this.offline && config.offlineModeEnabled ) {
 
             if ( toSave ) {
@@ -2608,7 +2606,8 @@ console.log('changeStatus');
             errors: errors,
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave,
-            version: segment.attr('data-version')
+            version: segment.attr('data-version'),
+            propagate: propagate
         };
         if(isSplitted) {
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
