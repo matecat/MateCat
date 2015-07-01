@@ -148,7 +148,7 @@ function doSearchQuery( Array $queryParams ) {
     return $vector;
 }
 
-function doReplaceAll( ArrayObject $queryParams ) {
+function doReplaceAll( Array $queryParams ) {
 
     $db          = Database::obtain();
     $trg         = $queryParams[ 'trg' ];
