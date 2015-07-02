@@ -253,7 +253,11 @@ class ProjectManager {
 
             if( !$result ){
                 Log::doLog( "Failed to store the Zip file $zipHash - \n" );
-                throw new Exception( "Failed to store the original Zip $zipHash ", -10 );
+                $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                        "code" => -10, "message" => "Failed to store the original Zip $zipHash "
+                );
+                return false;
+                //Exit
             }
 
         }
@@ -577,22 +581,6 @@ class ProjectManager {
                 Log::doLog( "Segment Search: No segments in this project - \n" );
                 $isEmptyProject = true;
             }
-
-            foreach( $linkFiles[ 'zipHashes' ] as $zipHash ){
-
-                $result = $fs->linkZipToProject(
-                        $this->projectStructure['create_date'],
-                        $zipHash,
-                        $this->projectStructure['id_project']
-                );
-
-                if( !$result ){
-                    Log::doLog( "Failed to store the original Zip $zipHash - \n" );
-                    throw new Exception( "Failed to store the original Zip $zipHash ", -10 );
-                }
-
-            }
-
 
         } catch ( Exception $ex ) {
             $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(

@@ -32,7 +32,7 @@ class FilesStorage {
     private $cacheDir;
     private $zipDir;
 
-    public function __construct( $files = false, $cache = false, $zip = false ) {
+    public function __construct( $files = null, $cache = null, $zip = null ) {
 
         //override default config
         if ( $files ) {
@@ -208,7 +208,7 @@ class FilesStorage {
 
         if ( !$outcome2 ) {
             //Original directory deleted!!!
-            //CLEAR ALL CACHE
+            //CLEAR ALL CACHE - FATAL
             Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
             return $outcome2;
         }
@@ -289,6 +289,15 @@ class FilesStorage {
         Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
 
         return true;
+
+    }
+
+    public function getOriginalZipPath( $projectDate, $projectID, $zipName ){
+
+        $datePath = date_create( $projectDate )->format('Ymd');
+        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+
+        return $zipDir;
 
     }
 
@@ -437,7 +446,7 @@ class FilesStorage {
         if ( !empty( $id_file ) ) {
             $where_id_file = " and fj.id_file=$id_file";
         }
-        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file from files_job fj
+        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file, create_date from files_job fj
 			inner join files f on f.id=fj.id_file
 			inner join jobs j on j.id=fj.id_job
 			where fj.id_job=$id_job $where_id_file and j.password='$password'";
@@ -510,7 +519,6 @@ class FilesStorage {
         return $results;
     }
 
-    //TODO FIX
     /**
      * Backwards compatibility method and forward
      *
