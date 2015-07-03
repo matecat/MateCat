@@ -507,18 +507,16 @@ function insertHtmlAfterSelection(html) {
 }
 
 function setBrowserHistoryBehavior() {
-
-	window.onpopstate = function() {
-		segmentId = location.hash.substr(1);
-
-		if (UI.segmentIsLoaded(segmentId)) {
-			$(".editarea", $('#segment-' + segmentId)).click();
-		} else {
-			if ($('section').length)
-				UI.pointBackToSegment(segmentId);
-		}
-	};
-
+    window.onpopstate = function() {
+        segmentId = location.hash.substr(1);
+        var segment = UI.getSegmentById( segmentId );
+        if ( segment.length ) {
+            UI.focusSegment( segment );
+        } else {
+            if ($('section').length)
+                UI.pointBackToSegment(segmentId);
+        }
+    };
 }
 
 function goodbye(e) {
