@@ -4,8 +4,7 @@
 
 function htmlEncode(value) {
 	if (value) {
-		a = jQuery('<div />').text(value).html();
-		return a;
+		return jQuery('<div />').text(value).html();
 	} else {
 		return '';
 	}
