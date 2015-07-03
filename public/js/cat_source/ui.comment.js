@@ -729,7 +729,8 @@ if ( MBC.enabled() )
         updateHistoryWithLoadedSegments();
         renderCommentIconLinks();
 
-        refreshSegmentContent( $('#segment-' + data.id_segment ));
+        // FIXME: use a function to find sections by segmentIds
+        refreshSegmentContent( $('#segment-' + data.id_segment ) );
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
