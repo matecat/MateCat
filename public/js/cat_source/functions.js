@@ -1,5 +1,5 @@
 /*
-	Component: functions 
+	Component: functions
  */
 
 function htmlEncode(value) {
@@ -80,7 +80,7 @@ function processpaste(elem, savedcontent) {
 
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
-	
+
 	// Do whatever with gathered data;
 	$('#placeHolder').before(pasteddata);
 	focusOnPlaceholder();
@@ -136,7 +136,7 @@ function insertNodeAtCursor(node) {
 
 function setCursorAfterNode(range, node) {
 	range.setStartAfter(node);
-	range.setEndAfter(node); 
+	range.setEndAfter(node);
 	window.getSelection().removeAllRanges();
 	window.getSelection().addRange(range);
 }
@@ -197,7 +197,7 @@ function setCursorPosition(el, pos) {
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
-	if(typeof el[0] != 'undefined') el.focus();	
+	if(typeof el[0] != 'undefined') el.focus();
 }
 
 function removeSelectedText() {
@@ -388,7 +388,7 @@ function view2rawxliff(segment) {
 	// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
 	// output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
 
-	// caso controverso <g id="4" x="&lt; dfsd &gt;"> 
+	// caso controverso <g id="4" x="&lt; dfsd &gt;">
 	//segment=htmlDecode(segment);
 	segment = placehold_xliff_tags(segment);
 	segment = htmlEncode(segment);
@@ -447,7 +447,7 @@ function restoreSelection() {
 	}
 }
 
-function selectText(element) { 
+function selectText(element) {
 	var doc = document, text = element, range, selection;
 	if (doc.body.createTextRange) {
 		range = document.body.createTextRange();
@@ -510,6 +510,7 @@ function setBrowserHistoryBehavior() {
 
 	window.onpopstate = function() {
 		segmentId = location.hash.substr(1);
+
 		if (UI.segmentIsLoaded(segmentId)) {
 			$(".editarea", $('#segment-' + segmentId)).click();
 		} else {
@@ -522,7 +523,7 @@ function setBrowserHistoryBehavior() {
 
 function goodbye(e) {
 
-    UI.clearStorage('contribution'); 
+    UI.clearStorage('contribution');
 
     if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
         return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
@@ -554,7 +555,7 @@ function goodbye(e) {
 
     }
 
-}   
+}
 
 $.fn.isOnScreen = function() {
 
