@@ -273,6 +273,11 @@ if ( MBC.enabled() )
         }
     }
 
+    var limitNum = function(num) {
+        if ( Number(num) > 99 ) return '+99';
+        else return num ;
+    }
+
     var buildFirstCommentHeader = function() {
         return $(tpls.firstCommentHeader).append($(tpls.insertCommentHeader));
     }
@@ -468,7 +473,7 @@ if ( MBC.enabled() )
         $('.mbc-history-balloon-has-no-comments').hide();
 
         $('.mbc-history-balloon-outer').append(root);
-        $('.mbc-comment-highlight-history').text( count ).addClass( 'visible' );
+        $('.mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'visible' );
     }
 
     var updateHistoryWithLoadedSegments = function() {
@@ -760,10 +765,10 @@ if ( MBC.enabled() )
         var d = db.getCommentsCountBySegment(s) ;
         var highlight = $(el).find('.mbc-comment-link .mbc-comment-highlight') ;
 
-        highlight.text(d.active);
+        highlight.text( limitNum( d.active ) );
 
         if (d.total > 0) {
-            $(el).find('.mbc-comment-link .mbc-comment-total').text(d.total);
+            $(el).find('.mbc-comment-link .mbc-comment-total').text( limitNum( d.total ) );
         }
 
         if (d.active > 0) {
