@@ -729,9 +729,7 @@ if ( MBC.enabled() )
         updateHistoryWithLoadedSegments();
         renderCommentIconLinks();
 
-        if (UI.currentSegmentId == Number(data.id_segment)) {
-            refreshSegmentContent(UI.currentSegment);
-        }
+        refreshSegmentContent( $('#segment-' + data.id_segment ));
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
