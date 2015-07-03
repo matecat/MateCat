@@ -173,7 +173,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   }
 
   static function formattedDate($time) {
-      return strftime('%l:%M %p %e %b %Y', strtotime( $time ) ) ;
+      return strftime('%l:%M %p %e %b %Y UTC', strtotime( $time ) ) ;
   }
 
   public function sanitize( $input ) {
