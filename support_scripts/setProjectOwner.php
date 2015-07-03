@@ -31,8 +31,6 @@ if($matches === null){
 $id = $matches[2];
 $pass = $matches[3];
 
-var_dump( $postInput, $id, $pass );
-
 $query = "update jobs set owner = '%s' where id = %d and password = '%s'";
 
 $db->query(
@@ -44,4 +42,4 @@ $db->query(
         )
 );
 
-var_dump($db->affected_rows);
+if($db->affected_rows > 0 ) echo "<h1> Success! </h1>";
