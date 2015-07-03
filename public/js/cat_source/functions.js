@@ -505,15 +505,52 @@ function insertHtmlAfterSelection(html) {
     }
 }
 
+function ParsedHash( hash ) {
+    var split ;
+
+    if (hash.indexOf('#') == 0) hash = hash.substr(1);
+
+    if (hash.indexOf(',') != -1) {
+        split = hash.split(',');
+
+        this.segmentId = split[0];
+        this.action = split[1];
+    } else {
+        this.segmentId = hash ;
+        this.action = null;
+    }
+
+    // parse chunk
+    if (this.segmentId.indexOf('-') != -1) {
+        split = hash.split('-');
+
+        this.splittedSegmentId = split[0];
+        this.chunkId = split[1];
+    }
+
+    this.isComment = function() {
+        return this.action == 'comment';
+    }
+}
+
 function setBrowserHistoryBehavior() {
     window.onpopstate = function() {
-        segmentId = location.hash.substr(1);
-        var segment = UI.getSegmentById( segmentId );
+        segmentId = location.hash.substr(1); // TODO: check this global var is no longer used and remove it
+
+        var parsed_hash = new ParsedHash( window.location.hash );
+
+        if ( parsed_hash.isComment() ) {
+            MBC.enabled() && MBC.setLastCommentHash( parsed_hash );
+            window.location.hash = parsed_hash.segmentId ;
+            return ;
+        }
+
+        var segment = UI.getSegmentById( parsed_hash.segmentId );
         if ( segment.length ) {
             UI.focusSegment( segment );
         } else {
             if ($('section').length)
-                UI.pointBackToSegment(segmentId);
+                UI.pointBackToSegment(parsed_hash.segmentId);
         }
     };
 }

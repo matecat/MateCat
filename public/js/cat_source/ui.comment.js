@@ -20,6 +20,8 @@ if ( MBC.enabled() )
     var selectedForOpen = null ;
     var loggedUserName = null ;
     var customUserName = null ;
+    var lastFocusedSegment = null ;
+    var lastCommentHash = null;
 
     var db = {
         segments: {},
@@ -823,6 +825,10 @@ if ( MBC.enabled() )
             var s = clickedIconOnSegment ;
             clickedIconOnSegment = null ;
             return s ;
+        },
+        setLastCommentHash : function(value) {
+            lastCommentHash = value ;
+            console.log(lastCommentHash);
         }
     });
 
