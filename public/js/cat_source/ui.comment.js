@@ -565,16 +565,6 @@ if ( MBC.enabled() )
             openSegmentComment( section );
         });
 
-        $(delegate).on('click', '.mbc-show-comment-btn', function(e) {
-            e.preventDefault();
-            openCommentsOnSegmentOpen = true;
-            $('.mbc-history-balloon-outer').removeClass('visible');
-
-            selectedForOpen = selectedOnHistory = $(e.target).closest('div').data('id') ;
-
-            window.location.hash = selectedOnHistory ;
-        });
-
         $(delegate).on('click', '.mbc-history-balloon-outer .mbc-close-btn', function(e) {
             e.preventDefault();
             $(e.target).closest('.mbc-history-balloon-outer').toggleClass('visible');
@@ -678,6 +668,16 @@ if ( MBC.enabled() )
                 if (ev.which == 13) { action.call(ev.target); }
             }).focus();
         });
+    });
+
+    $(document).on('click', '.mbc-show-comment-btn', function(e) {
+        e.preventDefault();
+        openCommentsOnSegmentOpen = true;
+        $('.mbc-history-balloon-outer').removeClass('visible');
+
+        selectedForOpen = selectedOnHistory = $(e.target).closest('div').data('id') ;
+
+        window.location.hash = selectedOnHistory ;
     });
 
     $(document).on('getSegments_success', function(e) {
