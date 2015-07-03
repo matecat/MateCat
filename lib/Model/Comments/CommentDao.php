@@ -136,7 +136,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       return "SELECT " .
           " id_job, id_segment, create_date, full_name, resolve_date, " .
           " user_role, message_type, message, " .
-          " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) AS thread_id " .
+          " IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) ) AS thread_id " .
           " FROM " . self::TABLE ;
   }
 
