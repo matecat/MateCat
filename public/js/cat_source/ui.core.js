@@ -1679,14 +1679,6 @@ console.log('changeStatus');
 			UI.goingToNext = false;
         }, pointSpeed);
 	},
-	segmentIsLoaded: function(segmentId) {
-//        segmentId = segmentId.toString().split('-')[0];
-		if ($('#segment-' + segmentId).length) {
-			return true;
-		} else {
-			return false;
-		}
-	},
 	spellCheck: function(ed) {
 		if (!UI.customSpellcheck)
 			return false;
@@ -3699,3 +3691,25 @@ $(window).resize(function() {
 });
 
 
+(function($, UI) {
+    $.extend(UI, {
+        focusSegment: function(segment) {
+            var segment_id = UI.getSegmentId( segment ) ;
+            var editarea = segment.find('.editarea:not(.opened)');
+
+            if ( editarea.length )  editarea.click();
+            else UI.scrollSegment( segment );
+        },
+
+        getSegmentById: function(id) {
+            return $('#segment-' + id);
+        },
+        segmentIsLoaded: function(segmentId) {
+            if ( UI.getSegmentById(segmentId).length ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    });
+})(jQuery,UI);
