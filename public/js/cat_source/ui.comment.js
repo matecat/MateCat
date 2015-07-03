@@ -589,13 +589,14 @@ if ( MBC.enabled() )
         $(delegate).on('click', '.mbc-comment-resolve-btn', function(e) {
             e.preventDefault();
             clearGenericWarning();
+            var id_segment = UI.getSegmentId( (e.target).closest('section') );
 
             var data = {
                 action     : 'comment',
                 _sub       : 'resolve',
                 id_job     : config.job_id,
                 id_client  : config.id_client,
-                id_segment : UI.currentSegmentId,
+                id_segment : id_segment,
                 password   : config.password,
                 user_role  : getRole(),
                 username   : getUsername(),
