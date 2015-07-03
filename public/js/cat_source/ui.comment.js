@@ -404,7 +404,7 @@ if ( MBC.enabled() )
     }
 
     var renderCommentIconLinks = function() {
-        $('section:not(.readonly)').each(function(i, el) {
+        $('section').each(function(i, el) {
             $(el).append($(tpls.commentLink));
             $(document).trigger('mbc:segment:update', el);
         });
