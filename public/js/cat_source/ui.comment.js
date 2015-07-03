@@ -484,7 +484,7 @@ if ( MBC.enabled() )
     });
 
     $(document).on('click', '.mbc-comment-link .txt', function(e) {
-        e.preventDefault();
+        e.stopPropagation();
         var section = $(e.target).closest('section');
 
         // XXX: a comment balloon link was clicked
