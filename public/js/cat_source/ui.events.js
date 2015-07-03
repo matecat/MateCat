@@ -1,5 +1,5 @@
 /*
-	Component: ui.events 
+	Component: ui.events
  */
 $.extend(UI, {
 	bindShortcuts: function() {
@@ -78,7 +78,7 @@ $.extend(UI, {
 				tab = 'matches';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
 		}).on('keydown', null, 'ctrl+2', function(e) {
@@ -86,9 +86,9 @@ $.extend(UI, {
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');		
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
 		}).on('keydown', null, 'ctrl+3', function(e) {
@@ -96,9 +96,9 @@ $.extend(UI, {
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');		
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			} else if(active.hasClass('.tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
@@ -163,8 +163,8 @@ $.extend(UI, {
 //			e.preventDefault();
 //			$('body').removeClass('incomingMsg');
 //			var expireDate = new Date($('#messageBar').attr('data-expire'));
-//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });		
-					
+//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });
+
 //		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 //			console.log($(this).prop('checked'));
 //			if ($(this).prop('checked')) {
@@ -488,7 +488,7 @@ $.extend(UI, {
 			e.preventDefault();
 			$('#settings-shortcuts .list').remove();
 			UI.setShortcuts();
-			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');	
+			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -565,7 +565,7 @@ $.extend(UI, {
 					console.log('troppi tasti control: ', $('span', s).length);
 					return false;
 				}
-			
+
 				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
 				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
 			} else {
@@ -591,7 +591,7 @@ $.extend(UI, {
 //				$('.msg', c).remove();
 //				$('#settings-shortcuts.modifying').removeClass('modifying');
 //				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
-			}				
+			}
 		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
 			var c = $(this).parents('.combination');
@@ -616,7 +616,7 @@ $.extend(UI, {
                 newWindow.focus();
             }
         });
-		
+
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function() {
@@ -651,7 +651,7 @@ $.extend(UI, {
 			goodbye(e);
 		};
 
-	
+
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
@@ -876,7 +876,7 @@ $.extend(UI, {
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
-			e.stopPropagation();			
+			e.stopPropagation();
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
             if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
@@ -1072,7 +1072,7 @@ $.extend(UI, {
 			}
 */
 
-//			console.log(e.which); 
+//			console.log(e.which);
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
@@ -1192,14 +1192,14 @@ $.extend(UI, {
 
 					// insideMark management
 					if ((e.which == 8)&&(isInsideMark)) {
-						console.log('inside mark'); 
+						console.log('inside mark');
 					}
 
 
 
 				}
 			}
-			
+
 			if (e.which == 8) { // backspace
 				if($('.tag-autocomplete').length) {
 					UI.closeTagAutocompletePanel();
@@ -1207,7 +1207,7 @@ $.extend(UI, {
 						UI.openTagAutocompletePanel();
 						added = UI.getPartialTagAutocomplete();
 						if(added === '') UI.closeTagAutocompletePanel();
-					}, 10);		
+					}, 10);
 				}
 			}
 			if (e.which == 9) { // tab
@@ -1292,7 +1292,7 @@ $.extend(UI, {
 					if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
 						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
 						return false;
-					}	
+					}
 				}
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
@@ -1336,7 +1336,7 @@ $.extend(UI, {
 
 			if (e.which == 40) { // down arrow
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');	
+					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
 					return false;
 				}
 				selection = window.getSelection();
@@ -1526,11 +1526,11 @@ $.extend(UI, {
 			setTimeout(function() {
 				var strChunk = UI.editarea.html().replace(/(^.*?)&nbsp;(<span contenteditable\="false" class\="locked).*?$/gi, '$1');
 
-				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space). 
+				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space).
 				// In this case, we have to add it again because we are also deleting the &nbsp; added by the browser.
 				// We cannot detect if the user has dropped immediately before or after the space, so we decide where to put it according if it is an opening tag or a closing tag,
-				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {  
-					toAddBefore = (UI.draggingTagIsOpening)? ' ' : ''; 
+				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {
+					toAddBefore = (UI.draggingTagIsOpening)? ' ' : '';
 					toAddAfter = (UI.draggingTagIsOpening)? '' : ' ';
 				} else {
 					toAddBefore = toAddAfter = '';
@@ -1548,7 +1548,7 @@ $.extend(UI, {
 				if(nn > 0) {
 					setCursorPosition(uniqueEl[0].nextSibling, 0);
 				}
-				
+
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
@@ -1774,7 +1774,7 @@ $.extend(UI, {
 				}
 			}
 		}).on('input', '.sub-editor .gl-search .search-target', function() {
-			gl = $(this).parents('.gl-search').find('.set-glossary');	
+			gl = $(this).parents('.gl-search').find('.set-glossary');
 			if($(this).text() === '') {
 				gl.addClass('disabled');
 			} else {
@@ -1852,7 +1852,7 @@ $.extend(UI, {
 			if($(tab).hasClass('extended')) {
 				UI.setExtendedConcordances(false);
 
-/*				
+/*
 				$(tab).removeClass('extended')
 //				console.log(container.height());
 				$(container).removeAttr('style');
@@ -1861,7 +1861,7 @@ $.extend(UI, {
 */
 			} else {
 				UI.setExtendedConcordances(true);
-				
+
 //				$(container).css('height', $(tab).height() + 'px');
 //				$(tab).addClass('extended');
 //				$(this).text('Less');
@@ -1917,7 +1917,7 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function() {
 			UI.setNextWarnedSegment();
 		});
-		
+
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
@@ -2033,7 +2033,7 @@ $.extend(UI, {
 			}
 
 			if (UI.searchMode == 'onlyStatus') {
-				
+
 //			} else if (UI.searchMode == 'source&target') {
 
 			} else {
@@ -2103,7 +2103,7 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug)
 			console.log('Init time: ' + this.initTime);
-		
+
 	}
 });
 
