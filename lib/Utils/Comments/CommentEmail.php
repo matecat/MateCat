@@ -44,12 +44,13 @@ class Comments_CommentEmail {
     }
 
     private function buildHTMLMessage() {
+        $link = $this->buildLink() ;
         return "<p> Hi {$this->user->first_name}, <br /> " .
             $this->verbalizeAction() .
             "</p>" .
             "<p>{$this->comment->message}</p>" .
             "<br />" .
-            "<a href=\"{$this->buildLink()}\">Click here to see the whole thread.</a>" ;
+            "<a href=\"{$link}\">{$link}</a>" ;
     }
 
     private function buildLink() {
@@ -80,9 +81,9 @@ class Comments_CommentEmail {
 
     private function buildSubject() {
         if ( $this->comment->isComment() ) {
-            return "MateCAT - comment submitted";
+            return "MateCat - comment submitted";
         } else {
-            return "MateCAT - thread resolved" ;
+            return "MateCat - thread resolved" ;
         }
     }
 
