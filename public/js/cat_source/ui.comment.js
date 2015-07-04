@@ -15,9 +15,8 @@ if ( MBC.enabled() )
 
     var types = { sticky: 3, resolve: 2, comment: 1 };
     var roles = { revisor: 2, translator: 1 };
-    var openCommentsOnSegmentOpen = false;
     var selectedOnHistory = null ;
-    var selectedForOpen = null ;
+    var openCommentsOnFocus = null ;
     var loggedUserName = null ;
     var customUserName = null ;
     var lastFocusedSegment = null ;
@@ -465,10 +464,15 @@ if ( MBC.enabled() )
         for (var i in db.history) {
             if (isNaN(i)) { continue ; }
 
+            var sid = db.history[i][0].id_segment ;
+            var viewButton = $(tpls.historyViewButton);
+            viewButton.find('a').text('View ' + sid) ;
+            viewButton.data('id', sid);
+
             root.append(
                 $(tpls.threadWrap).append(
                     populateCommentTemplate( db.history[i][0] )
-                ).append( $(tpls.historyViewButton).data('id', db.history[i][0].id_segment ) )
+                ).append( viewButton )
             );
         }
         $('.mbc-history-balloon-has-comment').remove();
@@ -674,12 +678,11 @@ if ( MBC.enabled() )
 
     $(document).on('click', '.mbc-show-comment-btn', function(e) {
         e.preventDefault();
-        openCommentsOnSegmentOpen = true;
         $('.mbc-history-balloon-outer').removeClass('visible');
 
-        selectedForOpen = selectedOnHistory = $(e.target).closest('div').data('id') ;
+        openCommentsOnFocus = selectedOnHistory = $(e.target).closest('div').data('id') ;
 
-        window.location.hash = selectedOnHistory ;
+        window.location.hash = openCommentsOnFocus + ',comment';
     });
 
     $(document).on('getSegments_success', function(e) {
@@ -753,7 +756,7 @@ if ( MBC.enabled() )
 
     $(window).on('segmentOpened', function(e) {
         var sid = UI.getSegmentId($(e.segment));
-        if (sid == selectedForOpen) {
+        if (sid == openCommentsOnFocus) {
             openSegmentComment($(e.segment));
         }
     });
@@ -799,24 +802,33 @@ if ( MBC.enabled() )
         };
     });
 
-    $(document).on('review:unopenableSegment', function(e, segment) {
-        var segment = $(segment);
-        var sid = UI.getSegmentId( segment );
 
-        $('section .close').click() ;
-        UI.scrollSegment( segment, true );
-
-        if (sid == selectedForOpen) {
-            openSegmentComment( segment );
+    $(document).on('ui:segment:focus', function(e, sid) {
+        if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
+            openSegmentComment( UI.getSegmentById( sid ) );
+            lastCommentHash = null ;
         }
+        console.log( 'ui:segment:focus',  e.target, segment );
     });
+
+    // $(document).on('review:unopenableSegment', function(e, segment) {
+    //     var segment = $(segment);
+    //     var sid = UI.getSegmentId( segment );
+
+    //     $('section .close').click() ;
+    //     UI.scrollSegment( segment, true );
+
+    //     if (sid == openCommentsOnFocus) {
+    //         openSegmentComment( segment );
+    //     }
+    // });
 
     // Interfaces
     $.extend(MBC,  {
         hasComments : function(section) {
             return db.getCommentsCountBySegment( UI.getSegmentId(section) ) > 0 ;
         },
-        popLastSelectedOnHistory : function() {
+        popLastSelectedOnHistory : function() { // TODO: remove this, no longer needed since ParsedHash
             var s = selectedOnHistory ;
             selectedOnHistory = null ;
             return s ;
