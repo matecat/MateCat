@@ -520,7 +520,6 @@ function ParsedHash( hash ) {
         this.action = null;
     }
 
-    // parse chunk
     if (this.segmentId.indexOf('-') != -1) {
         split = hash.split('-');
 
@@ -537,20 +536,20 @@ function setBrowserHistoryBehavior() {
     window.onpopstate = function() {
         segmentId = location.hash.substr(1); // TODO: check this global var is no longer used and remove it
 
-        var parsed_hash = new ParsedHash( window.location.hash );
+        UI.parsedHash = new ParsedHash( window.location.hash );
 
-        if ( parsed_hash.isComment() ) {
-            MBC.enabled() && MBC.setLastCommentHash( parsed_hash );
-            window.location.hash = parsed_hash.segmentId ;
+        if ( UI.parsedHash.isComment() ) {
+            MBC.enabled() && MBC.setLastCommentHash( UI.parsedHash );
+            window.location.hash = UI.parsedHash.segmentId ;
             return ;
         }
 
-        var segment = UI.getSegmentById( parsed_hash.segmentId );
+        var segment = UI.getSegmentById( UI.parsedHash.segmentId );
         if ( segment.length ) {
-            UI.focusSegment( segment );
+            UI.gotoSegment( UI.parsedHash.segmentId );
         } else {
             if ($('section').length)
-                UI.pointBackToSegment(parsed_hash.segmentId);
+                UI.pointBackToSegment( UI.parsedHash.segmentId );
         }
     };
 }
