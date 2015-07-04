@@ -15,11 +15,8 @@ if ( MBC.enabled() )
 
     var types = { sticky: 3, resolve: 2, comment: 1 };
     var roles = { revisor: 2, translator: 1 };
-    var selectedOnHistory = null ;
-    var openCommentsOnFocus = null ;
     var loggedUserName = null ;
     var customUserName = null ;
-    var lastFocusedSegment = null ;
     var lastCommentHash = null;
 
     var db = {
@@ -680,9 +677,9 @@ if ( MBC.enabled() )
         e.preventDefault();
         $('.mbc-history-balloon-outer').removeClass('visible');
 
-        openCommentsOnFocus = selectedOnHistory = $(e.target).closest('div').data('id') ;
+        var sid = $(e.target).closest('div').data('id') ;
 
-        window.location.hash = openCommentsOnFocus + ',comment';
+        window.location.hash = sid + ',comment';
     });
 
     $(document).on('getSegments_success', function(e) {
@@ -756,8 +753,8 @@ if ( MBC.enabled() )
 
     $(window).on('segmentOpened', function(e) {
         var sid = UI.getSegmentId($(e.segment));
-        if (sid == openCommentsOnFocus) {
-            openSegmentComment($(e.segment));
+        if ( MBC.wasAskedByCommentHash(sid) ) {
+            openSegmentComment( $(e.segment) );
         }
     });
 
@@ -802,41 +799,22 @@ if ( MBC.enabled() )
         };
     });
 
-
     $(document).on('ui:segment:focus', function(e, sid) {
         if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
             openSegmentComment( UI.getSegmentById( sid ) );
             lastCommentHash = null ;
         }
-        console.log( 'ui:segment:focus',  e.target, segment );
     });
-
-    // $(document).on('review:unopenableSegment', function(e, segment) {
-    //     var segment = $(segment);
-    //     var sid = UI.getSegmentId( segment );
-
-    //     $('section .close').click() ;
-    //     UI.scrollSegment( segment, true );
-
-    //     if (sid == openCommentsOnFocus) {
-    //         openSegmentComment( segment );
-    //     }
-    // });
 
     // Interfaces
     $.extend(MBC,  {
-        hasComments : function(section) {
-            return db.getCommentsCountBySegment( UI.getSegmentId(section) ) > 0 ;
+        popLastCommentHash : function() { // TODO: remove this, no longer needed since ParsedHash
+            var l = lastCommentHash ;
+            lastCommentHash = null;
+            return l;
         },
-        popLastSelectedOnHistory : function() { // TODO: remove this, no longer needed since ParsedHash
-            var s = selectedOnHistory ;
-            selectedOnHistory = null ;
-            return s ;
-        },
-        popLastClickedSegmentIcon : function() {
-            var s = clickedIconOnSegment ;
-            clickedIconOnSegment = null ;
-            return s ;
+        wasAskedByCommentHash: function( sid ) {
+            return lastCommentHash && lastCommentHash.segmentId == sid;
         },
         setLastCommentHash : function(value) {
             lastCommentHash = value ;
