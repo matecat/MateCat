@@ -26,7 +26,7 @@ if ( Review.enabled() )
             if ( isTranslated(section) ) return true ;
             var sid = UI.getSegmentId( section );
             alertNotTranslatedYet( sid ) ;
-            // $(document).trigger('review:unopenableSegment', section);
+            $(document).trigger('review:unopenableSegment', section);
             return false ;
         },
     });
