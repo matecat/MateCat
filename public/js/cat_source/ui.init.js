@@ -78,7 +78,7 @@ $.extend(UI, {
 		 * Global Warnings array definition.
 		 */
 		this.globalWarnings = [];
-		
+
 		this.shortcuts = {
 			"translate": {
 				"label" : "Confirm translation",
