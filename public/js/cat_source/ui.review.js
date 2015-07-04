@@ -24,15 +24,9 @@ if ( Review.enabled() )
     $.extend(Review, {
         evalOpenableSegment : function(section) {
             if ( isTranslated(section) ) return true ;
-
             var sid = UI.getSegmentId( section );
-
-            if ( ! ( MBC.enabled() && MBC.popLastSelectedOnHistory() == sid ) ) {
-                alertNotTranslatedYet( sid ) ;
-            }
-
-            $(document).trigger('review:unopenableSegment', section);
-
+            alertNotTranslatedYet( sid ) ;
+            // $(document).trigger('review:unopenableSegment', section);
             return false ;
         },
     });

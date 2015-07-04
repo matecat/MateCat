@@ -3694,22 +3694,22 @@ $(window).resize(function() {
 (function($, UI) {
     $.extend(UI, {
         focusSegment: function(segment) {
-            var segment_id = UI.getSegmentId( segment ) ;
-            var editarea = segment.find('.editarea:not(.opened)');
-
-            if ( editarea.length )  editarea.click();
-            else UI.scrollSegment( segment );
+            var clickableEditArea = segment.find('.editarea:not(.opened)');
+            if ( clickableEditArea.length == 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
+                UI.scrollSegment( segment );
+            }
+            else {
+                clickableEditArea.trigger('click');
+            }
+            $(document).trigger('ui:segment:focus', UI.getSegmentId( segment ) );
         },
 
         getSegmentById: function(id) {
             return $('#segment-' + id);
         },
+
         segmentIsLoaded: function(segmentId) {
-            if ( UI.getSegmentById(segmentId).length ) {
-                return true;
-            } else {
-                return false;
-            }
+            return UI.getSegmentById(segmentId).length > 0 ;
         }
     });
 })(jQuery,UI);
