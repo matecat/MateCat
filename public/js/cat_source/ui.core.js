@@ -899,6 +899,7 @@ console.log('changeStatus');
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
+
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
@@ -1067,12 +1068,16 @@ console.log('changeStatus');
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
-        if((!this.segmentIsLoaded(id))&&(id.toString().split('-').length > 1)) {
-            id = id.toString().split('-')[0];
+        if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
+            id = UI.parsedHash.splittedSegmentId ;
         }
-        var el = $("#segment-" + id + "-target").find(".editarea");
-//        console.log('el: ', el);
-        $(el).click();
+        if (MBC.wasAskedByCommentHash( id )) {
+            UI.focusSegment( UI.getSegmentById( id ) ) ;
+        } else {
+            // TODO: question: why search for #segment-{id}-target instead of #segment-{id} as usual?
+            var el = $("#segment-" + id + "-target").find(".editarea");
+            $(el).click();
+        }
     },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
@@ -3706,6 +3711,10 @@ $(window).resize(function() {
 
         getSegmentById: function(id) {
             return $('#segment-' + id);
+        },
+
+        getEditAreaBySegmentId: function(id) {
+            return $('#segment-' + id + ' .editarea');
         },
 
         segmentIsLoaded: function(segmentId) {
