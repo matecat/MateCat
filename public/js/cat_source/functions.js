@@ -507,11 +507,14 @@ function insertHtmlAfterSelection(html) {
 
 function ParsedHash( hash ) {
     var split ;
+    var actionSep = ',' ;
+    var chunkSep = '-';
+    var that = this ;
 
     if (hash.indexOf('#') == 0) hash = hash.substr(1);
 
-    if (hash.indexOf(',') != -1) {
-        split = hash.split(',');
+    if (hash.indexOf( actionSep ) != -1) {
+        split = hash.split( actionSep );
 
         this.segmentId = split[0];
         this.action = split[1];
@@ -520,8 +523,8 @@ function ParsedHash( hash ) {
         this.action = null;
     }
 
-    if (this.segmentId.indexOf('-') != -1) {
-        split = hash.split('-');
+    if (this.segmentId.indexOf( chunkSep ) != -1) {
+        split = hash.split( chunkSep );
 
         this.splittedSegmentId = split[0];
         this.chunkId = split[1];
@@ -530,29 +533,76 @@ function ParsedHash( hash ) {
     this.isComment = function() {
         return this.action == 'comment';
     }
+
+    this.toString = function() {
+        var hash = '';
+        if ( this.splittedSegmentId ) {
+            hash = this.splittedSegmentId + chunkSep + this.chunkId ;
+        } else {
+            hash = this.segmentId ;
+        }
+        if ( this.action ) {
+            hash = hash + actionSep + this.action ;
+        }
+        return hash ;
+    }
+
+    this.onlyActionRemoved = function( hash ) {
+        var current = new ParsedHash( hash );
+        var diff = this.toString().split( current.toString() );
+        console.log(diff);
+        return diff[1] == ',comment' ;
+    }
+
+    this.hashCleanupRequired = function() {
+        return this.isComment();
+    }
+
+    this.cleanupHash = function() {
+        notifyModules();
+        console.log('@@ cleaning up hash');
+        window.location.hash = UI.parsedHash.segmentId ;
+    }
+
+    var notifyModules = function() {
+        that.isComment() && MBC.enabled() && MBC.setLastCommentHash( that );
+    }
 }
 
 function setBrowserHistoryBehavior() {
+
     window.onpopstate = function() {
         segmentId = location.hash.substr(1); // TODO: check this global var is no longer used and remove it
 
-        UI.parsedHash = new ParsedHash( window.location.hash );
-
-        if ( UI.parsedHash.isComment() ) {
-            MBC.enabled() && MBC.setLastCommentHash( UI.parsedHash );
-            window.location.hash = UI.parsedHash.segmentId ;
+        if ( UI.parsedHash.onlyActionRemoved( window.location.hash ) ) {
             return ;
         }
 
-        var segment = UI.getSegmentById( UI.parsedHash.segmentId );
-        if ( segment.length ) {
-            UI.gotoSegment( UI.parsedHash.segmentId );
-        } else {
-            if ($('section').length)
-                UI.pointBackToSegment( UI.parsedHash.segmentId );
+        console.log('@@ onpopsate');
+
+        UI.parsedHash = new ParsedHash( window.location.hash );
+
+        if ( UI.parsedHash.hashCleanupRequired() ) {
+            UI.parsedHash.cleanupHash();
         }
+
+        function updateAppByPopState() {
+            var segment = UI.getSegmentById( UI.parsedHash.segmentId );
+            if ( segment.length ) {
+                UI.gotoSegment( UI.parsedHash.segmentId );
+            } else {
+                if ($('section').length)
+                UI.pointBackToSegment( UI.parsedHash.segmentId );
+            }
+        }
+        updateAppByPopState();
+
     };
+
+    UI.parsedHash = new ParsedHash( window.location.hash );
+    UI.parsedHash.hashCleanupRequired() && UI.parsedHash.cleanupHash();
 }
+
 
 function goodbye(e) {
 

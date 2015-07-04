@@ -672,7 +672,7 @@ console.log('changeStatus');
 		if (this.segmentToScrollAtRender) {
 			this.startSegmentId = this.segmentToScrollAtRender;
 		} else {
-			var hash = window.location.hash.substr(1);
+			var hash = UI.parsedHash.segmentId;
 			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
 		}
 	},
@@ -1071,10 +1071,13 @@ console.log('changeStatus');
         if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
             id = UI.parsedHash.splittedSegmentId ;
         }
-        if (MBC.wasAskedByCommentHash( id )) {
+
+
+        if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
             UI.focusSegment( UI.getSegmentById( id ) ) ;
         } else {
-            // TODO: question: why search for #segment-{id}-target instead of #segment-{id} as usual?
+            // TODO: question: why search for #segment-{id}-target
+            // instead of #segment-{id} as usual?
             var el = $("#segment-" + id + "-target").find(".editarea");
             $(el).click();
         }
@@ -1745,8 +1748,6 @@ console.log('changeStatus');
 			setTimeout(function() {
 //				var hash_value = window.location.hash;
                 $(document).trigger('beforeHashChange', window.location.hash);
-                console.log('window.location.hash', window.location.hash);
-                console.log(UI.currentSegmentId);
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
