@@ -337,8 +337,8 @@ section:hover .mbc-comment-link {
 
 article.mbc-commenting-closed {
   width: 87.5%; /* add selector to article tag line 874 style.css */
-  -webkit-transition: width .1s ease-in-out;
-  transition: width .1s ease-in-out;
+  -webkit-transition: width .1s linear;
+  transition: width .1s linear;
 }
 
 article.mbc-commenting-closed .mbc-comment-balloon-outer {
