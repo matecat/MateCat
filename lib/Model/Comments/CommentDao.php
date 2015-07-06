@@ -160,7 +160,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
               'create_date'    => $item[ 'create_date' ],
               'full_name'      => $item[ 'full_name' ],
               'thread_id'      => $item[ 'thread_id' ],
-              'user_role'      => $item[ 'user_role' ],
+              'email'          => $item[ 'email' ],
               'message_type'   => $item[ 'message_type' ],
               'message'        => $item[ 'message' ],
               'formatted_date' => self::formattedDate($item[ 'create_date' ])

@@ -178,7 +178,7 @@ class commentController extends ajaxController {
     }
 
     private function getUid() {
-        if ( $this->userIsLogged) {
+        if ( $this->userIsLogged ) {
             return $this->current_user->uid;
         } else {
             return null;
