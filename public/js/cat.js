@@ -59,7 +59,7 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = this.editarea.text();
+        this.currentSegmentTranslation = this.editarea.text(); 
 	},
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -2606,7 +2606,7 @@ console.log('changeStatus');
             errors: errors,
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave,
-            version: segment.attr('data-version'),
+            version: segment.attr('data-version'), 
             propagate: propagate
         };
         if(isSplitted) {
@@ -6361,8 +6361,7 @@ $.extend(UI, {
 			if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
-                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Translation Matches are not available when the TM feature is disabled</li></ul>');
-
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
 		}
 	},
