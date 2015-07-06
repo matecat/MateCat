@@ -34,7 +34,7 @@ class INIT {
     public static $SMTP_HOSTNAME;
 
     public static $MAILER_FROM = 'cattool@matecat.com' ;
-    public static $MAILER_FROM_NAME = 'Matecat Tool';
+    public static $MAILER_FROM_NAME = 'MateCat';
     public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
     public static $LOG_REPOSITORY;
