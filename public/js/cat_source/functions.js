@@ -510,39 +510,57 @@ function ParsedHash( hash ) {
     var actionSep = ',' ;
     var chunkSep = '-';
     var that = this ;
+    var _obj = {};
 
-    if (hash.indexOf('#') == 0) hash = hash.substr(1);
+    var processObject = function( obj ) {
+        _obj = obj ;
+    }
 
-    if (hash.indexOf( actionSep ) != -1) {
-        split = hash.split( actionSep );
+    var processString = function( hash ) {
+        if ( hash.indexOf('#') == 0 ) hash = hash.substr(1);
 
-        this.segmentId = split[0];
-        this.action = split[1];
+        if ( hash.indexOf( actionSep ) != -1 ) {
+            split = hash.split( actionSep );
+
+            _obj.segmentId = split[0];
+            _obj.action = split[1];
+        } else {
+            _obj.segmentId = hash ;
+            _obj.action = null;
+        }
+
+        if ( _obj.segmentId.indexOf( chunkSep ) != -1 ) {
+            split = hash.split( chunkSep );
+
+            _obj.splittedSegmentId = split[0];
+            _obj.chunkId = split[1];
+        }
+    }
+
+    if (typeof hash === 'string') {
+        processString( hash );
     } else {
-        this.segmentId = hash ;
-        this.action = null;
+        processObject( hash );
     }
 
-    if (this.segmentId.indexOf( chunkSep ) != -1) {
-        split = hash.split( chunkSep );
-
-        this.splittedSegmentId = split[0];
-        this.chunkId = split[1];
-    }
+    this.segmentId = _obj.segmentId ;
+    this.action = _obj.action ;
+    this.splittedSegmentId = _obj.splittedSegmentId ;
+    this.chunkId = _obj.chunkId ;
 
     this.isComment = function() {
-        return this.action == 'comment';
+        return _obj.action == MBC.const.commentAction ;
     }
 
     this.toString = function() {
         var hash = '';
-        if ( this.splittedSegmentId ) {
-            hash = this.splittedSegmentId + chunkSep + this.chunkId ;
+        if ( _obj.splittedSegmentId ) {
+            hash = _obj.splittedSegmentId + chunkSep + _obj.chunkId ;
         } else {
-            hash = this.segmentId ;
+            hash = _obj.segmentId ;
         }
-        if ( this.action ) {
-            hash = hash + actionSep + this.action ;
+        if ( _obj.action ) {
+            hash = hash + actionSep + _obj.action ;
         }
         return hash ;
     }
@@ -551,7 +569,7 @@ function ParsedHash( hash ) {
         var current = new ParsedHash( hash );
         var diff = this.toString().split( current.toString() );
         console.log(diff);
-        return diff[1] == ',comment' ;
+        return diff[1] == actionSep + MBC.const.commentAction ;
     }
 
     this.hashCleanupRequired = function() {
