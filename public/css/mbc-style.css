@@ -337,8 +337,7 @@ section:hover .mbc-comment-link {
 
 article.mbc-commenting-closed {
   width: 87.5%; /* add selector to article tag line 874 style.css */
-  -webkit-transition: width .1s linear;
-  transition: width .1s linear;
+
 }
 
 article.mbc-commenting-closed .mbc-comment-balloon-outer {
@@ -353,6 +352,8 @@ article.mbc-commenting-opened {
   -webkit-transform: translate3d(0, 0, 0);
   -webkit-backface-visibility: hidden;
   -webkit-perspective: 1000;
+  -webkit-transition: width .1s linear;
+  transition: width .1s linear;
 }
 
 
