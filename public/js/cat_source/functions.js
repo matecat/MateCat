@@ -596,8 +596,6 @@ function setBrowserHistoryBehavior() {
             return ;
         }
 
-        console.log('@@ onpopsate');
-
         UI.parsedHash = new ParsedHash( window.location.hash );
 
         if ( UI.parsedHash.hashCleanupRequired() ) {
