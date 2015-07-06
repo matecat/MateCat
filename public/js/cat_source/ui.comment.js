@@ -13,6 +13,12 @@ if ( MBC.enabled() )
 
     SSE.init();
 
+    MBC.const = {
+        get commentAction() {
+            return 'mbcopen' ;
+        }
+    }
+
     var types = { sticky: 3, resolve: 2, comment: 1 };
     var roles = { revisor: 2, translator: 1 };
     var loggedUserName = null ;
@@ -678,7 +684,12 @@ if ( MBC.enabled() )
 
         var sid = $(e.target).closest('div').data('id') ;
 
-        window.location.hash = sid + ',comment';
+        var new_hash = new ParsedHash({
+            segmentId : sid,
+            action : MBC.const.commentAction
+        }).toString();
+
+        window.location.hash = new_hash ;
     });
 
     $(document).on('getSegments_success', function(e) {
