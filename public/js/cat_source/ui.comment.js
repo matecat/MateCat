@@ -347,7 +347,7 @@ if ( MBC.enabled() )
         }
         root.append(thread_wrap);
 
-        applyCollapsedThreadWrap(root);
+        // applyCollapsedThreadWrap(root);
 
         // add buttons
         if (comments[i-1].thread_id) {
