@@ -11,7 +11,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
   public $full_name;
   public $uid;
   public $resolve_date;
-  public $user_role;
+  public $source_page;
   public $message_type;
   public $message;
 
