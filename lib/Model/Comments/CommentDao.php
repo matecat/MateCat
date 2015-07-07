@@ -22,7 +22,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       $query = " INSERT INTO comments " .
           " ( " .
           " id_job, id_segment, create_date, email, full_name, uid, " .
-          " user_role, message_type, message ) " .
+          " source_page, message_type, message ) " .
           " VALUES " .
           " ( "  .
           implode(", ", array(
@@ -32,7 +32,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                $obj->email,
                $obj->full_name,
                $obj->uid,
-               $obj->user_role,
+               $obj->source_page,
                $obj->message_type,
                $obj->message
           ) ) . " ) ";
@@ -135,7 +135,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   private function finderQuery() {
       return "SELECT " .
           " id_job, id_segment, create_date, full_name, resolve_date, " .
-          " user_role, message_type, message, " .
+          " source_page, message_type, message, " .
           " IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) ) AS thread_id " .
           " FROM " . self::TABLE ;
   }
@@ -183,7 +183,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       $cloned->id_job       = self::intWithNull( $input->id_job );
       $cloned->id_segment   = self::intWithNull( $input->id_segment );
       $cloned->uid          = self::intWithNull( $input->uid );
-      $cloned->user_role    = self::intWithNull( $input->user_role );
+      $cloned->source_page    = self::intWithNull( $input->source_page );
       $cloned->message_type = self::intWithNull( $input->message_type );
 
       $cloned->first_segment = self::intWithNull( $input->first_segment );

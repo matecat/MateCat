@@ -28,7 +28,7 @@ class commentController extends ajaxController {
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'id_segment'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'username'    => array( 'filter' => FILTER_SANITIZE_STRING ),
-            'user_role'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'source_page'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'message'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'first_seg'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'last_seg'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -136,7 +136,7 @@ class commentController extends ajaxController {
         $this->struct->id_segment = $this->__postInput[ 'id_segment' ];
         $this->struct->id_job     = $this->__postInput[ 'id_job' ];
         $this->struct->full_name  = $this->__postInput[ 'username' ];
-        $this->struct->user_role  = $this->__postInput[ 'user_role' ];
+        $this->struct->source_page  = $this->__postInput[ 'source_page' ];
         $this->struct->message    = $this->__postInput[ 'message' ];
         $this->struct->email      = $this->getEmail();
         $this->struct->uid        = $this->getUid();
@@ -205,7 +205,7 @@ class commentController extends ajaxController {
             'message'        => $this->new_record->message,
             'id_segment'     => $this->new_record->id_segment,
             'full_name'      => $this->new_record->full_name,
-            'user_role'      => $this->new_record->user_role,
+            'source_page'      => $this->new_record->source_page,
             'formatted_date' => $this->new_record->getFormattedDate(),
             'thread_id'      => $this->new_record->thread_id,
         ) ;

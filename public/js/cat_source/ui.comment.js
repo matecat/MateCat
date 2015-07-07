@@ -20,7 +20,7 @@ if ( MBC.enabled() )
     }
 
     var types = { sticky: 3, resolve: 2, comment: 1 };
-    var roles = { revisor: 2, translator: 1 };
+    var source_pages = { revise: 2, translate: 1 };
     var loggedUserName = null ;
     var customUserName = null ;
     var lastCommentHash = null;
@@ -254,26 +254,18 @@ if ( MBC.enabled() )
         }
     }, false);
 
-    var decodeRole = function(role) {
-        if (Number(role) == roles.translator) {
-            return 'translator';
-        } else {
-            return 'revisor' ;
-        }
-    }
-
     var getUsername = function() {
         if ( customUserName ) return customUserName ;
         if ( loggedUserName ) return loggedUserName ;
         return 'Anonymous';
     }
 
-    var getRole = function() {
-        if (window.location.pathname.split('/')[1] == 'revise') {
-            return roles.revisor ;
+    var getSourcePage = function() {
+        if ( config.isReview ) {
+            return source_pages.revise ;
         }
         else {
-            return roles.translator ;
+            return source_pages.translate ;
         }
     }
 
@@ -427,7 +419,6 @@ if ( MBC.enabled() )
             var root = $(tpls.showComment) ;
             root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
             root.find('.mbc-comment-time').text( data.formatted_date );
-            root.find('.mbc-comment-role').text( decodeRole (data.user_role) );
             root.find('.mbc-comment-body').html( nl2br( data.message ) );
         }
         return root ;
@@ -520,7 +511,7 @@ if ( MBC.enabled() )
             id_segment : id_segment,
             username   : getUsername(),
             password   : config.password,
-            user_role  : getRole(),
+            source_page  : getSourcePage(),
             message    : el.find('.mbc-comment-textarea').val(),
         }
 
@@ -601,7 +592,7 @@ if ( MBC.enabled() )
                 id_client  : config.id_client,
                 id_segment : id_segment,
                 password   : config.password,
-                user_role  : getRole(),
+                source_page  : getSourcePage(),
                 username   : getUsername(),
             }
 
