@@ -191,7 +191,7 @@ if ( MBC.enabled() )
             ' </div>' ,
 
         inputForm : '' +
-            ' <div class="mbc-post-comment-outer mbc-thread-wrap">' +
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
@@ -205,11 +205,6 @@ if ( MBC.enabled() )
             ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
             ' </div>' +
             ' </div>' +
-            ' </div>',
-
-        inputFirstComment : '' +
-            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
-            '' + // insert inputForm here
             ' </div>',
 
         firstCommentWrap : '' +
@@ -284,7 +279,6 @@ if ( MBC.enabled() )
 
     var renderSegmentCommentsFirstInput = function(el) {
         var root = $(tpls.segmentThread);
-        var insertCommentHeader = $(tpls.inputFirstComment) ;
         var inputForm = $(tpls.inputForm);
 
         inputForm.find('.mbc-comment-username-label')
@@ -299,7 +293,7 @@ if ( MBC.enabled() )
                     .attr('title', 'Click to edit');
         }
 
-        root.append( buildFirstCommentHeader().append( inputForm ) );
+        root.append(  inputForm  );
 
         el.append( root.show() );
         startTextAreaFocusCheck();
@@ -343,7 +337,7 @@ if ( MBC.enabled() )
         }
 
         // add buttons
-        if ( threadIsResolved() ) {
+        if ( false ) { // threadIsResolved() ) {
             var button = $( tpls.reopenThread );
             var container = button.find( '.mbc-ask-comment-wrap' );
 
