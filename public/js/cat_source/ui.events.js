@@ -2035,7 +2035,8 @@ $.extend(UI, {
         $('#replace-target').on('focus', function() {
             if(!$('#enable-replace').prop('checked')) {
                 $('label[for=enable-replace]').trigger('click');
-                $('#replace-target').trigger('click');
+//                $('#replace-target').trigger('click');
+                $('#replace-target').focus();
             }
 //            console.log('aaa');
 //            console.log($('#enable-replace').prop('checked'));
