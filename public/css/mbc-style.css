@@ -14,7 +14,7 @@
 
 /* Wrap comments and fix height */
 .mbc-comments-wrap {
-  height: 300px;
+  max-height: 300px;
   overflow-y: scroll;
   width: 100%;
 }
@@ -373,7 +373,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   right: 0;
   text-align: left;
   width: 210px;
-  z-index: 9999;
+  z-index: 10001;
 }
 
 
