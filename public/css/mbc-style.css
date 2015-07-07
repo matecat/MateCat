@@ -163,7 +163,7 @@ a:active.mbc-comment-btn {
   border-radius: 0 0 2px 2px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   margin-top: 8px;
-  position: absolute;
+  /*position: absolute;*/
   right: -1px;
 }
 
