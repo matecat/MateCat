@@ -183,14 +183,15 @@ if ( MBC.enabled() )
             '<div class="mbc-show-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
+            ' <span class="mbc-comment-info mbc-comment-email">foo@example.org</span>' +
             ' <span class="mbc-comment-info mbc-comment-time"></span>' +
-            ' <span class="mbc-comment-info mbc-comment-role"></span>' +
             ' </div>' +
             ' <p class="mbc-comment-body"></p>' +
             ' <div class="divider"></div>' +
             ' </div>' ,
 
         inputForm : '' +
+            ' <div class="mbc-post-comment-outer">' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
@@ -202,6 +203,7 @@ if ( MBC.enabled() )
             ' </div>' +
             ' <div>' +
             ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
+            ' </div>' +
             ' </div>' +
             ' </div>',
 
@@ -219,8 +221,10 @@ if ( MBC.enabled() )
             ' <div class="mbc-comment-balloon-outer mbc-thread-active mbc-thread-active-first-comment">' +
             ' <div class="triangle triangle-topleft"></div>' +
             ' <a href="#" class="mbc-close-btn">&#10005;</a>' +
+            ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn">Resolve</a>' +
+            ' <div class="mbc-comments-wrap">' +
             ' ' +
-            ' ' +
+            ' </div>' +
             ' </div>',
 
         commentLink : '' +
@@ -317,6 +321,8 @@ if ( MBC.enabled() )
     }
 
     var populateWithComments = function(root, comments, panel) {
+        var comments_root = root.find('.mbc-comments-wrap');
+
         if (comments.length == 0) {
             return root;
         }
@@ -326,7 +332,7 @@ if ( MBC.enabled() )
             if ( comments[i].thread_id != thread_id ) {
                 // start a new thread
                 if (thread_wrap != null) {
-                    root.append(thread_wrap);
+                    comments_root.append(thread_wrap);
                     count = 0 ;
                 }
                 thread_wrap = $(tpls.threadWrap) ;
@@ -345,24 +351,26 @@ if ( MBC.enabled() )
 
             thread_id = comments[i].thread_id ;
         }
-        root.append(thread_wrap);
+        comments_root.append(thread_wrap);
 
         // applyCollapsedThreadWrap(root);
 
         // add buttons
         if (comments[i-1].thread_id) {
             // thread is resolved
-            var button = $(tpls.reopenThread);
-            var container = button.find('.mbc-ask-comment-wrap');
-            $(tpls.insertCommentHeader).appendTo(container);
-            $(tpls.inputForm).appendTo(container);
+            var button = $( tpls.reopenThread );
+            var container = button.find( '.mbc-ask-comment-wrap' );
+
+            // $( tpls.insertCommentHeader ).appendTo(container);
+            $( tpls.inputForm ).appendTo(container);
             root.append( button ) ;
         } else  {
             // thread is not resolved
-            root.find('.mbc-thread-wrap:last')
-                .append($(tpls.replyToComment))
-                .append($(tpls.inputForm).addClass('hide'))
-                .append($(tpls.resolveButton));
+            // root.find('.mbc-thread-wrap:last')
+                // .append( $(tpls.replyToComment) )
+                root.append( $(tpls.inputForm) )
+                .append( $(tpls.resolveButton) )
+                ;
         }
 
         // update outer balloon with proper style depending on resolved / active state
