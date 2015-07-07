@@ -5,12 +5,8 @@ class commentController extends ajaxController {
     protected $id_segment;
 
     private $__postInput = null;
-    private $id_job;
-    private $password = false;
-    private $username ;
-    private $id_client ;
-    private $role ;
-    private $message ;
+
+    private $job ;
 
     private $struct ;
     private $new_record ;
@@ -44,7 +40,7 @@ class commentController extends ajaxController {
     }
 
     public function doAction() {
-        $job_data = getJobData( $this->__postInput[ 'id_job' ] );
+        $this->job = getJobData( $this->__postInput[ 'id_job' ] );
 
         $this->checkLogin() ;
         if ( $this->userIsLogged ) {
@@ -52,7 +48,7 @@ class commentController extends ajaxController {
         }
 
         $pCheck = new AjaxPasswordCheck();
-        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->__postInput[ 'password' ] ) ){
+        if( !$pCheck->grantJobAccessByJobData( $this->job, $this->__postInput[ 'password' ] ) ){
             $this->result['errors'][] = array("code" => -10, "message" => "wrong password");
             return;
         }
