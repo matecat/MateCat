@@ -12,6 +12,13 @@
   margin-top: 4px;
 }
 
+/* Wrap comments and fix height */
+.mbc-comments-wrap {
+  height: 300px;
+  overflow-y: scroll;
+  width: 100%;
+}
+
 .mbc-thread-resolved {
   background: #efefef;
 }

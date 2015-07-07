@@ -191,7 +191,7 @@ if ( MBC.enabled() )
             ' </div>' ,
 
         inputForm : '' +
-            ' <div class="mbc-post-comment-outer">' +
+            ' <div class="mbc-post-comment-outer mbc-thread-wrap">' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
