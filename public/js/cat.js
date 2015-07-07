@@ -493,7 +493,7 @@ console.log('changeStatus');
         if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
             return;
         }
-		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
         if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
@@ -4768,11 +4768,34 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
+        $(document).click(function(e) {
+//            console.log('cliccato: ', e.target);
+//            console.log('a: ', !UI.currentSegment.is(e.target));
+//            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
+
+            var container = UI.currentSegment;
+            if (!container.is(e.target) // if the target of the click isn't the container...
+                && container.has(e.target).length === 0 // ... nor a descendant of the container
+                && !$(e.target).hasClass('translated') // has not clicked on a translated button
+                && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
+                )
+            {
+//                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
+                UI.closeSegment(UI.currentSegment, 1);
+            }
+
+        });
+
 		$('html').click(function() {
 			$(".menucolor").hide();
-		} ).on('click', '#quality-report', function(e){
+		}).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
+        }).on('keydown', function(e) {
+            if((e.which == '27')&&(UI.body.hasClass('editing'))) {
+                // close the current segment
+                UI.closeSegment(UI.currentSegment, 1);
+            };
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             $('#downloadProject').click();
@@ -6640,6 +6663,7 @@ $.extend(UI, {
 	},
     setContributionSourceDiff: function () {
         sourceText = '';
+//        console.log('eccoci: ', UI.body.hasClass('editing'));
         $.each($.parseHTML($('.editor .source').html()), function (index) {
             if(this.nodeName == '#text') {
                 sourceText += this.data;
