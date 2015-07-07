@@ -774,7 +774,7 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-        $(document).click(function(e) {
+        $('#outer').click(function(e) {
 //            console.log('cliccato: ', e.target);
 //            console.log('a: ', !UI.currentSegment.is(e.target));
 //            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
