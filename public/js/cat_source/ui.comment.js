@@ -212,7 +212,7 @@ if ( MBC.enabled() )
             '' + // insert inputForm here
             ' </div>',
 
-        firstCommentHeader : '' +
+        firstCommentWrap : '' +
             ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
             '' + // insertCommentHeader
             '</div>',
@@ -279,13 +279,15 @@ if ( MBC.enabled() )
     }
 
     var buildFirstCommentHeader = function() {
-        return $(tpls.firstCommentHeader).append($(tpls.insertCommentHeader));
+        return $(tpls.firstCommentWrap) ; // .append($(tpls.insertCommentHeader));
     }
 
     var renderSegmentCommentsFirstInput = function(el) {
         var root = $(tpls.segmentThread);
         var insertCommentHeader = $(tpls.inputFirstComment) ;
         var inputForm = $(tpls.inputForm);
+
+        debugger
 
         inputForm.find('.mbc-comment-username-label')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
@@ -353,6 +355,8 @@ if ( MBC.enabled() )
             root
                 .append( $(tpls.inputForm) )
                 .append( $(tpls.resolveButton) ) ;
+
+            enableInputForm( root );
         }
 
         // update outer balloon with proper style depending on resolved / active state
@@ -536,6 +540,15 @@ if ( MBC.enabled() )
         $('.mbc-warnings').hide();
     }
 
+    function enableInputForm( outer ) {
+        outer.find('.mbc-post-comment .mbc-comment-username-label')
+            .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
+            .text( getUsername() ) ;
+
+        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').hide();
+        else outer.find('.mbc-post-comment .mbc-login-link').show();
+    }
+
     // start event binding
 
     $(document).on('ready', function() {
@@ -602,11 +615,10 @@ if ( MBC.enabled() )
 
             outer.find('.mbc-post-comment').addClass('visible');
             outer.find('.mbc-ask-comment-wrap').addClass('visible');
-            outer.find('.mbc-post-comment .mbc-comment-username-label')
-            .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
-            .text( getUsername() ) ;
-            if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').hide();
-            else outer.find('.mbc-post-comment .mbc-login-link').show();
+
+
+
+            enableInputForm( outer );
 
             t.remove();
 
