@@ -550,6 +550,8 @@ function getJobTmKeys( $job_id, $job_password ) {
  * @param $tmKeysString string  A json_encoded array of TmKeyManagement_TmKeyStruct objects
  *
  * @return int|null Returns null if everything went ok, otherwise it returns the mysql error code
+ *
+ * @throws Exception
  */
 function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $query = "UPDATE jobs SET tm_keys = '%s' WHERE id = %d AND password = '%s'";

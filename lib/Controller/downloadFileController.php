@@ -101,7 +101,7 @@ class downloadFileController extends downloadController {
 
             $converter = new FileFormatConverter();
 
-            $files_buffer = array();
+            $files_to_be_converted = array();
 
             foreach ( $chunk as $file ) {
 
@@ -173,12 +173,12 @@ class downloadFileController extends downloadController {
 
                 $debug[ 'replace' ][ ] = time();
 
-                $output_content[ $fileID ][ 'documentContent' ] = file_get_contents( $outputPath );
-                $output_content[ $fileID ][ 'filename' ]        = $current_filename;
+                $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
+                $output_content[ $fileID ][ 'output_filename' ]        = $current_filename;
 
                 if ( $this->forceXliff ) {
-                    $file_info_details                       = pathinfo( $output_content[ $fileID ][ 'filename' ] );
-                    $output_content[ $fileID ][ 'filename' ] = basename( $outputPath );
+                    $file_info_details                              = pathinfo( $output_content[ $fileID ][ 'output_filename' ] );
+                    $output_content[ $fileID ][ 'output_filename' ] = basename( $outputPath );
                 }
 
                 /**
@@ -211,36 +211,36 @@ class downloadFileController extends downloadController {
                     $output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
                     $output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
 
-                    $files_buffer [ $fileID ] = $output_content[ $fileID ];
+                    $files_to_be_converted [ $fileID ] = $output_content[ $fileID ];
 
                 } elseif ( $this->forceXliff ) {
 
-                    $this->cleanFilePath( $output_content[ $fileID ][ 'documentContent' ] );
+                    $this->cleanFilePath( $output_content[ $fileID ][ 'document_content' ] );
 
                 }
 
             }
 
             $debug[ 'do_conversion' ][ ] = time();
-            $convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
+            $convertResult               = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
 
-            foreach ( array_keys( $files_buffer ) as $fileID ) {
+            foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
 
-                $output_content[ $fileID ][ 'documentContent' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
+                $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
 
                 //in case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
-                $extension = pathinfo( $output_content[ $fileID ][ 'filename' ], PATHINFO_EXTENSION );
+                $extension = pathinfo( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
                 if ( strtoupper( $extension ) == 'STRINGS' ) {
                     //use this function to convert stuff
-                    $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'documentContent' ] );
+                    $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'document_content' ] );
 
 
                     //strip previously added BOM
                     $encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
 
                     //store new content
-                    $output_content[ $fileID ][ 'documentContent' ] = $encodingConvertedFile[ 1 ];
+                    $output_content[ $fileID ][ 'document_content' ] = $encodingConvertedFile[ 1 ];
 
                     //trash temporary data
                     unset( $encodingConvertedFile );
@@ -248,18 +248,18 @@ class downloadFileController extends downloadController {
 
 
             }
-            //            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
+            //            $output_content[ $fileID ][ 'document_content' ] = $convertResult[ 'document_content' ];
             unset( $convertResult );
             $debug[ 'do_conversion' ][ ] = time();
         }
 
         foreach ( $output_content as $idFile => $fileInformations ) {
-            $zipPathInfo = ZipArchiveExtended::zipPathInfo( $output_content[ $idFile ][ 'filename' ] );
+            $zipPathInfo = ZipArchiveExtended::zipPathInfo( $output_content[ $idFile ][ 'output_filename' ] );
             if ( is_array( $zipPathInfo ) ) {
                 $thereIsAZipFile                                = true;
                 $output_content[ $idFile ][ 'zipfilename' ]     = $zipPathInfo[ 'zipfilename' ];
                 $output_content[ $idFile ][ 'zipinternalPath' ] = $zipPathInfo[ 'dirname' ];
-                $output_content[ $idFile ][ 'filename' ]        = $zipPathInfo[ 'basename' ];
+                $output_content[ $idFile ][ 'output_filename' ] = $zipPathInfo[ 'basename' ];
             }
         }
 
@@ -290,28 +290,28 @@ class downloadFileController extends downloadController {
             $tm_id                    = uniqid( 'tm' );
             $mt_id                    = uniqid( 'mt' );
             $output_content[ $tm_id ] = array(
-                    'documentContent' => '',
-                    'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_TM . tmx"
+                    'document_content' => '',
+                    'output_filename'  => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_TM . tmx"
             );
 
             foreach ( $tmFile as $lineNumber => $content ) {
-                $output_content[ $tm_id ][ 'documentContent' ] .= $content;
+                $output_content[ $tm_id ][ 'document_content' ] .= $content;
             }
 
             $output_content[ $mt_id ] = array(
-                    'documentContent' => '',
-                    'filename'        => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_MT . tmx"
+                    'document_content' => '',
+                    'output_filename'  => $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "_MT . tmx"
             );
 
             foreach ( $mtFile as $lineNumber => $content ) {
-                $output_content[ $mt_id ][ 'documentContent' ] .= $content;
+                $output_content[ $mt_id ][ 'document_content' ] .= $content;
             }
 
             $this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
 
         } else {
 
-            $output_content = self::getOutputContentsWithZipFiles( $output_content );
+            $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
             if ( count( $output_content ) > 1 ) {
 
@@ -343,58 +343,17 @@ class downloadFileController extends downloadController {
 
     }
 
-    protected function setContent( $output_content ) {
+    /**
+     * @param ZipContentObject $output_content
+     *
+     * @throws Exception
+     */
+    protected function setContent( ZipContentObject $output_content ) {
 
-        $this->_filename = self::sanitizeFileExtension( $output_content[ 'filename' ] );
-        $this->content   = $output_content[ 'document_content' ];
+        $this->_filename = self::sanitizeFileExtension( $output_content->output_filename );
+        $this->content   = $output_content->getContent();
 
     }
-
-
-//    protected function composeZip( $output_content, $sourceLang = null ) {
-//        $file = tempnam( "/tmp", "zipmatecat" );
-//        $zip  = new ZipArchive();
-//        $zip->open( $file, ZipArchive::OVERWRITE );
-//
-//        $rev_index_name = array();
-//
-//        // Staff with content
-//        foreach ( $output_content as $f ) {
-//
-//            $f[ 'filename' ] = self::sanitizeFileExtension( $f[ 'filename' ] );
-//
-//            //Php Zip bug, utf-8 not supported
-//            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§]/u', "_", $f[ 'filename' ] );
-//            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
-//            $fName = str_replace( '_.', ".", $fName );
-//
-//            $nFinfo = pathinfo( $fName );
-//            $_name  = $nFinfo[ 'filename' ];
-//            if ( strlen( $_name ) < 3 ) {
-//                $fName = substr( uniqid(), -5 ) . "_" . $fName;
-//            }
-//
-//            if ( array_key_exists( $fName, $rev_index_name ) ) {
-//                $fName = uniqid() . $fName;
-//            }
-//
-//            $rev_index_name[ $fName ] = $fName;
-//
-//            if ( isset ( $f[ 'documentContent' ] ) ) {
-//                $zip->addFromString( $fName, $f[ 'documentContent' ] );
-//            } elseif ( isset( $f[ 'contentPath' ] ) ) {
-//                $zip->addFile( $f[ 'contentPath' ], $f[ 'filename' ] );
-//            }
-//
-//        }
-//
-//        // Close and send to users
-//        $zip->close();
-//        $zip_content = file_get_contents( "$file" );
-//        unlink( $file );
-//
-//        $this->content = $zip_content;
-//    }
 
     protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {
         $file = tempnam( "/tmp", "zipmatecat" );
@@ -420,10 +379,10 @@ class downloadFileController extends downloadController {
         // Staff with content
         foreach ( $output_content as $key => $f ) {
 
-            $f[ 'filename' ] = self::sanitizeFileExtension( $f[ 'filename' ] );
+            $f[ 'output_filename' ] = self::sanitizeFileExtension( $f[ 'output_filename' ] );
 
             //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'filename' ] );
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'output_filename' ] );
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
             $fName = str_replace( '._', ".", $fName );
@@ -447,7 +406,7 @@ class downloadFileController extends downloadController {
                 $path = $zip_fileDir;
             }
 
-            $zip->addFromString( $path . $fName, $f[ 'documentContent' ] );
+            $zip->addFromString( $path . $fName, $f[ 'document_content' ] );
 
         }
 
@@ -633,32 +592,34 @@ class downloadFileController extends downloadController {
 
     }
 
-    private static function getOutputContentsWithZipFiles( $output_content ) {
+    private function getOutputContentsWithZipFiles( $output_content ) {
+
         $zipFiles         = array();
         $newOutputContent = array();
 
         //group files by zip archive
         foreach ( $output_content as $idFile => $fileInformations ) {
+
             //If this file comes from a ZIP, add it to $zipFiles
             if ( isset( $fileInformations[ 'zipfilename' ] ) ) {
                 $zipFileName = $fileInformations[ 'zipfilename' ];
 
                 $zipFiles[ $zipFileName ][ ] = $fileInformations;
                 unset( $output_content[ $idFile ] );
+
             }
+
         }
+
         unset( $idFile );
         unset( $fileInformations );
 
         //for each zip file index, compose zip again, save it to a temporary location and add it into output_content
         foreach ( $zipFiles as $zipFileName => $internalFile ) {
+
             foreach ( $internalFile as $__idx => $fileInformations ) {
-                $zipFiles[ $zipFileName ][ $__idx ][ 'output_filename' ] = $fileInformations[ 'zipinternalPath' ] . DIRECTORY_SEPARATOR . $fileInformations[ 'filename' ];
+                $zipFiles[ $zipFileName ][ $__idx ][ 'output_filename' ] = $fileInformations[ 'zipinternalPath' ] . DIRECTORY_SEPARATOR . $fileInformations[ 'output_filename' ];
 
-                $zipFiles[ $zipFileName ][ $__idx ][ 'document_content' ] = $internalFile[ $__idx ][ 'documentContent' ];
-
-                unset( $zipFiles[ $zipFileName ][ $__idx ][ 'documentContent' ] );
-                unset( $zipFiles[ $zipFileName ][ $__idx ][ 'filename' ] );
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'zipinternalPath' ] );
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'zipfilename' ] );
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'source' ] );
@@ -667,47 +628,67 @@ class downloadFileController extends downloadController {
             }
 
             $internalFile = $zipFiles[ $zipFileName ];
-            $internalFile = self::getOutputContentsWithZipFiles( $internalFile );
+            $internalFile = $this->getOutputContentsWithZipFiles( $internalFile );
 
             foreach ( $internalFile as $key => $iFile ) {
                 $internalFile[ $key ] = new ZipContentObject( $iFile );
             }
 
-            $zip = self::composeZip( $internalFile );
+            $zip = $this->reBuildZipContent( $zipFileName, $internalFile );
 
             $newOutputContent[ ] = array(
                     'output_filename'  => $zipFileName,
-                    'document_content' => $zip
+                    'document_content' => null,
+                    'input_filename'   => $zip,
             );
+        }
+
+        foreach ( $output_content as $idFile => $content ) {
+
+            //this is true only for files that are not inside a zip ( normal uploaded files )
+            if( isset( $output_content[ $idFile ][ 'out_xliff_name' ] ) ){
+                //rename the key to make this compatible with ZipContentObject
+                $output_content[ $idFile ]['input_filename'] = $output_content[ $idFile ][ 'out_xliff_name' ];
+                //remove the other invalid keys
+                unset( $output_content[ $idFile ][ 'out_xliff_name' ] );
+                unset( $output_content[ $idFile ][ 'source' ] );
+                unset( $output_content[ $idFile ][ 'target' ] );
+
+                $output_content[ $idFile ] = new ZipContentObject( $output_content[ $idFile ] );
+            }
+
         }
 
         $newOutputContent = array_merge( $newOutputContent, $output_content );
 
-        return self::getValidInputForZipContentObject($newOutputContent);
+        return $newOutputContent;
     }
 
-    private static function getValidInputForZipContentObject( $array_input ){
-        foreach ( $array_input as $key => $iFile ) {
-            $filteredArray = null;
+    public function reBuildZipContent( $zipFileName, $internalFiles ){
 
-            if(isset($iFile['documentContent']) && !isset($iFile['document_content'])){
-                $array_input[$key]['document_content'] = $array_input[$key]['documentContent'];
+        $fs = new FilesStorage();
+        $zipFile = $fs->getOriginalZipPath( $this->jobInfo[ 'create_date' ], $this->jobInfo[ 'id_project' ], $zipFileName );
 
-                unset($array_input[$key]['documentContent']);
+        $tmpFName = tempnam("/tmp", "ZIP");
+        copy( $zipFile, $tmpFName );
+
+        $zip = new ZipArchiveExtended();
+        if ( $zip->open( $tmpFName ) ){
+
+            foreach( $internalFiles as $index => $internalFile ){
+
+                $oldContent = $zip->getFromName( $internalFile->output_filename );
+                $zip->deleteName( $internalFile->output_filename );
+                $zip->addFromString( $internalFile->output_filename, $internalFile->document_content );
+
             }
-            if(isset($iFile['filename']) && !isset($iFile['output_filename'])){
-                $array_input[$key]['output_filename'] = $array_input[$key]['filename'];
-                unset($array_input[$key]['filename']);
-            }
 
-            $filteredArray = array(
-                    'output_filename' => $array_input[$key]['output_filename'],
-                    'document_content' => $array_input[$key]['document_content']
-            );
+            $zip->close();
 
-            $array_input[$key] = $filteredArray;
         }
 
-        return $array_input;
+        return $tmpFName;
+
     }
+
 }
