@@ -353,8 +353,7 @@ if ( MBC.enabled() )
             root.append( button ) ;
         } else  {
             root
-                .append( $(tpls.inputForm) )
-                .append( $(tpls.resolveButton) ) ;
+                .append( $(tpls.inputForm) ) ;
 
             enableInputForm( root );
         }
