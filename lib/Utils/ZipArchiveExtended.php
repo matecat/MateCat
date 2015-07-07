@@ -102,7 +102,7 @@ class ZipArchiveExtended extends ZipArchive {
     }
 
     /**
-     * @return array
+     * @throws Exception
      */
     public function createTree() {
         $Tree              = array();

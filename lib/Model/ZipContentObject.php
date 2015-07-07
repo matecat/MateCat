@@ -30,8 +30,36 @@ class ZipContentObject extends stdClass {
         return $this->document_content;
     }
 
-    public function __construct( Array $array_params = array() ) {
-        if ( $array_params != null ) {
+    /**
+     * @param array|ZipContentObject $_array_params
+     */
+    public function __construct( $_array_params = array() ) {
+
+        //This is a multidimensional array
+        if( array_key_exists( 0, $_array_params ) ){
+            foreach( $_array_params as $pos => $array_params ){
+                $this->build( $array_params );
+            }
+        } else {
+            $this->build( $_array_params );
+        }
+
+
+    }
+
+    public function build( $_array_params ){
+
+        //This is a multidimensional array
+        if( array_key_exists( 0, $_array_params ) ){
+            foreach( $_array_params as $pos => $array_params ){
+                $this->build( $array_params );
+            }
+        } else {
+            $this->build( $_array_params );
+        }
+
+        //this accept instance of SELF also
+        if ( !empty( $array_params ) ) {
             foreach ( $array_params as $property => $value ) {
                 $this->$property = $value;
             }
