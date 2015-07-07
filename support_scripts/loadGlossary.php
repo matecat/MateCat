@@ -6,7 +6,7 @@
 
     set_time_limit(0);
 
-	include '../inc/config.inc.php';
+	include '../inc/Bootstrap.php';
 
 	@Bootstrap::start();
 	include_once INIT::$MODEL_ROOT . '/queries.php';
@@ -288,7 +288,7 @@
 
 				try
 				{
-					$uploadFile = new Upload();
+ 					$uploadFile = new Upload();
 					$uploadResult = $uploadFile->uploadFiles( $_FILES );
 					$input[ "glossaryURI" ] = $uploadResult->glossary->file_path;
 				} 
@@ -335,7 +335,7 @@
 								printError($fObject->key() + 1);
 								continue;
 							}
-
+$test = true;
 							$config['segment'] = $row[0];
 							$config['translation'] = $row[1];
 							$config['tnote'] = $row[2];

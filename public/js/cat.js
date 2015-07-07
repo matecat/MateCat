@@ -6051,7 +6051,8 @@ $.extend(UI, {
         $('#replace-target').on('focus', function() {
             if(!$('#enable-replace').prop('checked')) {
                 $('label[for=enable-replace]').trigger('click');
-                $('#replace-target').trigger('click');
+//                $('#replace-target').trigger('click');
+                $('#replace-target').focus();
             }
 //            console.log('aaa');
 //            console.log($('#enable-replace').prop('checked'));
@@ -9299,7 +9300,8 @@ function capitaliseFirstLetter(string)
 }
 function toTitleCase(str)
 {
-    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    return str.replace(/[\wÀ-ÿ]\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+//    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
 function getRangeObject(selectionObject) {
@@ -9786,7 +9788,7 @@ if(config.enableReview && config.isReview) {
  Created by andreamartines on 02/10/14.
  Loaded by cattool and upload page.
  */
-
+ 
 
 $.extend(UI, {
     initTM: function() {
