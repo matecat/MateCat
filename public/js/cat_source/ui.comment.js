@@ -786,11 +786,23 @@ if ( MBC.enabled() )
     });
 
     $(document).on('keyup', '.mbc-comment-textarea', function(e) {
-        while($(this).outerHeight() < this.scrollHeight +
-        parseFloat($(this).css("borderTopWidth")) +
-        parseFloat($(this).css("borderBottomWidth"))) {
-            $(this).height($(this).height()+10);
-        };
+        var maxHeight = 100 ;
+        var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;
+        var borderBottomWidth = parseFloat( $(this).css("borderBottomWidth") ) ;
+        var maxOuterHeight = this.scrollHeight + borderTopWidth + borderBottomWidth ;
+
+        var minHeight = 34 ;
+
+        while( $(this).height() < maxHeight && $(this).outerHeight() <  maxOuterHeight ) {
+                $(this).height( $(this).height() + 10 );
+            };
+
+        if ( $(this).height() >= maxHeight ) {
+            $(this).css("overflow-y", "scroll");
+        } else {
+            $(this).css("overflow-y", "hidden");
+        }
+
     });
 
     $(document).on('ui:segment:focus', function(e, sid) {
