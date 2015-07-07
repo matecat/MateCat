@@ -305,21 +305,6 @@ if ( MBC.enabled() )
         startTextAreaFocusCheck();
     }
 
-    var applyCollapsedThreadWrap = function(root) {
-        root.find('.mbc-thread-wrap-resolved').each(function(i, el) {
-            var e = $(el), c = e.data('count') ;
-            if ( c > 1 ) {
-                e.find('.mbc-show-comment')
-                    .not(':first')
-                    .not(':last')
-                    .wrapAll($(tpls.threadCollapsedWrapper));
-                $(tpls.threadCollapsedControl)
-                    .insertAfter(e.find('.thread-collapsed'))
-                    .find('span.show-thread-number').text('(' + (c-1) + ')');
-            }
-        });
-    }
-
     var populateWithComments = function(root, comments, panel) {
         var comments_root = root.find('.mbc-comments-wrap');
 
@@ -353,24 +338,21 @@ if ( MBC.enabled() )
         }
         comments_root.append(thread_wrap);
 
-        // applyCollapsedThreadWrap(root);
+        function threadIsResolved() {
+            return comments[i-1].thread_id ;
+        }
 
         // add buttons
-        if (comments[i-1].thread_id) {
-            // thread is resolved
+        if ( threadIsResolved() ) {
             var button = $( tpls.reopenThread );
             var container = button.find( '.mbc-ask-comment-wrap' );
 
-            // $( tpls.insertCommentHeader ).appendTo(container);
             $( tpls.inputForm ).appendTo(container);
             root.append( button ) ;
         } else  {
-            // thread is not resolved
-            // root.find('.mbc-thread-wrap:last')
-                // .append( $(tpls.replyToComment) )
-                root.append( $(tpls.inputForm) )
-                .append( $(tpls.resolveButton) )
-                ;
+            root
+                .append( $(tpls.inputForm) )
+                .append( $(tpls.resolveButton) ) ;
         }
 
         // update outer balloon with proper style depending on resolved / active state
