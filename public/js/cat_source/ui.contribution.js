@@ -570,6 +570,7 @@ $.extend(UI, {
 	},
     setContributionSourceDiff: function () {
         sourceText = '';
+//        console.log('eccoci: ', UI.body.hasClass('editing'));
         $.each($.parseHTML($('.editor .source').html()), function (index) {
             if(this.nodeName == '#text') {
                 sourceText += this.data;

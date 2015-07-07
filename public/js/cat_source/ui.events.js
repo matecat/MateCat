@@ -774,11 +774,34 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
+        $(document).click(function(e) {
+//            console.log('cliccato: ', e.target);
+//            console.log('a: ', !UI.currentSegment.is(e.target));
+//            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
+
+            var container = UI.currentSegment;
+            if (!container.is(e.target) // if the target of the click isn't the container...
+                && container.has(e.target).length === 0 // ... nor a descendant of the container
+                && !$(e.target).hasClass('translated') // has not clicked on a translated button
+                && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
+                )
+            {
+//                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
+                UI.closeSegment(UI.currentSegment, 1);
+            }
+
+        });
+
 		$('html').click(function() {
 			$(".menucolor").hide();
-		} ).on('click', '#quality-report', function(e){
+		}).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
+        }).on('keydown', function(e) {
+            if((e.which == '27')&&(UI.body.hasClass('editing'))) {
+                // close the current segment
+                UI.closeSegment(UI.currentSegment, 1);
+            };
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             $('#downloadProject').click();
