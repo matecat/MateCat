@@ -25,6 +25,7 @@
 }
 .mbc-post-comment-wrap {
   background: #f7f7f7;
+  box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
 }
 
 .mbc-thread-resolved {
