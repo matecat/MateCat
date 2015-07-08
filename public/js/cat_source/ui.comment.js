@@ -149,10 +149,10 @@ if ( MBC.enabled() )
             ' </div> ',
 
         historyViewButton: '' +
-            ' <div><a href="javascript:;" class="mbc-comment-btn mbc-show-comment-btn">View</a></div>  ',
+            ' <div><a href="javascript:;" class="mbc-comment-btn mbc-show-comment-btn pull-right">View</a></div>  ',
 
         historyHasComments: '' +
-            ' <div class="mbc-history-balloon mbc-history-balloon-has-comment mbc-history-balloon-perfectscrollbar">' +
+            ' <div class="mbc-history-balloon mbc-history-balloon-has-comment">' +
             ' <a href="#" class="mbc-close-btn">&#10005;</a> ' +
             ' ' + // showComment loop here
             ' </div> ',
@@ -180,14 +180,13 @@ if ( MBC.enabled() )
             ' </div>',
 
         showComment : '' +
-            '<div class="mbc-show-comment">' +
+            '<div class="mbc-show-comment mbc-clearfix">' +
             ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
             ' <span class="mbc-comment-label mbc-comment-email-label">foo@example.org</span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             ' <span class="mbc-comment-info mbc-comment-time"></span>' +
             ' </div>' +
             ' <p class="mbc-comment-body"></p>' +
-            ' <div class="divider"></div>' +
             ' </div>' ,
 
         inputForm : '' +
@@ -453,8 +452,8 @@ if ( MBC.enabled() )
 
             root.append(
                 $(tpls.threadWrap).append(
-                    populateCommentTemplate( db.history[i][0] )
-                ).append( viewButton )
+                    populateCommentTemplate( db.history[i][0] ).append( viewButton )
+                )
             );
         }
         $('.mbc-history-balloon-has-comment').remove();

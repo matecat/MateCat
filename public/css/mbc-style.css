@@ -62,6 +62,11 @@
   margin: 0;
 }
 
+.mbc-comments-wrap .mbc-show-comment:not(:last-of-type),
+.mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
+  border-bottom: 1px solid #dadada;
+}
+
 .mbc-comment-input {
   border: 1px solid rgb(169, 169, 169);
   border-radius: 2px;
@@ -91,7 +96,7 @@
 
 /* Common selector for labels in speech balloon */
 .mbc-comment-label {
-  display: inline-block;
+  display: block;
   font-size: 14px;
 }
 
@@ -103,14 +108,7 @@
 .mbc-comment-username-label {
   color: #323232;
   font-weight: bold;
-}
-
-.mbc-show-comment .mbc-comment-username-label {
-  margin-bottom: 0;
-}
-
-.mbc-post-comment .mbc-comment-username-label {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .mbc-comment-anonymous-label {
@@ -210,7 +208,7 @@ a:active.mbc-comment-resolve-btn {
   float: right;
   font-size: 12px;
   font-weight: bold;
-  margin: 2px 2px 0 0;
+  margin: -19px 2px 0 0;
   text-transform: uppercase;
 }
 
