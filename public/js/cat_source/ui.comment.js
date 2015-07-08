@@ -150,7 +150,7 @@ if ( MBC.enabled() )
 
         historyViewButton: '' +
             ' <div class="mbc-clearfix mbc-view-comment-wrap">' +
-            ' <span class="mbc-comment-label mbc-comment-segment-number">33</span> ' +
+            '   <span class="mbc-comment-label mbc-comment-segment-number"></span> ' +
             '   <a href="javascript:;" class="mbc-comment-btn mbc-show-comment-btn pull-right">View</a>' +
             ' </div> ',
 
@@ -185,9 +185,9 @@ if ( MBC.enabled() )
         showComment : '' +
             '<div class="mbc-show-comment mbc-clearfix">' +
             ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
-            ' <span class="mbc-comment-label mbc-comment-email-label">foo@example.org</span>' +
+            ' <span class="mbc-comment-label mbc-comment-email-label"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
-            ' <span class="mbc-comment-info mbc-comment-time"></span>' +
+            '   <span class="mbc-comment-info mbc-comment-time"></span>' +
             ' </div>' +
             ' <p class="mbc-comment-body"></p>' +
             ' </div>' ,
@@ -408,6 +408,7 @@ if ( MBC.enabled() )
             root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
             root.find('.mbc-comment-time').text( data.formatted_date );
             root.find('.mbc-comment-body').html( nl2br( data.message ) );
+            root.find('.mbc-comment-email-label').text( data.email );
         }
         return root ;
     }
@@ -447,21 +448,29 @@ if ( MBC.enabled() )
             if (isNaN(i)) { continue ; }
 
             var sid = db.history[i][0].id_segment ;
-            var viewButton = $(tpls.historyViewButton);
-            viewButton.find('a').text('View ' + sid) ;
-            viewButton.data('id', sid);
+            var viewButton = $( tpls.historyViewButton );
+
+            viewButton.find('a').text('View') ;
+            viewButton.find('.mbc-comment-segment-number').text(sid);
+            viewButton.attr('data-id', sid);
+
+            var line = populateCommentTemplate( db.history[i][0] ) ;
+            var number = $('<span class="mbc-comment-highlight mbc-comment-highlight-history"></span>') ;
+            number.text( 22 );
+
+            line.find('.mbc-comment-info-wrap').append( number );
+            line.append( viewButton ) ;
 
             root.append(
-                $(tpls.threadWrap).append(
-                    populateCommentTemplate( db.history[i][0] ).append( viewButton )
-                )
+                $(tpls.threadWrap).append( line )
             );
         }
         $('.mbc-history-balloon-has-comment').remove();
         $('.mbc-history-balloon-has-no-comments').hide();
 
         $('.mbc-history-balloon-outer').append(root);
-        $('.mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'visible' );
+
+        $('#mbc-history .mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'visible' );
     }
 
     var updateHistoryWithLoadedSegments = function() {
