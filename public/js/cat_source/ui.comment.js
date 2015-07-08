@@ -182,8 +182,8 @@ if ( MBC.enabled() )
         showComment : '' +
             '<div class="mbc-show-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-email-label">foo@example.org</span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
-            ' <span class="mbc-comment-info mbc-comment-email">foo@example.org</span>' +
             ' <span class="mbc-comment-info mbc-comment-time"></span>' +
             ' </div>' +
             ' <p class="mbc-comment-body"></p>' +
