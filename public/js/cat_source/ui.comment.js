@@ -194,6 +194,7 @@ if ( MBC.enabled() )
             ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
+            ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
             ' <div>' +
             ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
@@ -202,7 +203,6 @@ if ( MBC.enabled() )
             ' <span class="mbc-warnings hide">Oops, something went wrong. Please try again later.</span>' +
             ' </div>' +
             ' <div>' +
-            ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
             ' </div>' +
             ' </div>' +
             ' </div>',
@@ -286,9 +286,9 @@ if ( MBC.enabled() )
             .text( getUsername() );
 
         if (loggedUserName) {
-            inputForm.find('.mbc-login-link').hide();
+            inputForm.find('.mbc-login-link').addClass('hide');
         } else {
-            inputForm.find('.mbc-login-link').show();
+            inputForm.find('.mbc-login-link').addClass('show');
             inputForm.find('.mbc-comment-username-label')
                     .attr('title', 'Click to edit');
         }
@@ -536,8 +536,8 @@ if ( MBC.enabled() )
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() ) ;
 
-        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').hide();
-        else outer.find('.mbc-post-comment .mbc-login-link').show();
+        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('hide');
+        else outer.find('.mbc-post-comment .mbc-login-link').addClass('show');
     }
 
     // start event binding
