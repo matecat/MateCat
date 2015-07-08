@@ -322,16 +322,8 @@ a:active.mbc-login-link {
   width: 80px;
 }
 
-.mbc-comment-total {
-  text-align: right;
-  width: 20px;
-  display: inline-block;
-  margin-right: 4px;
-}
-
 .mbc-comment-icon {
   font-size: 23px;
-  margin-right: 20px;
 }
 
 /* Common selector for notification highlighter of active comments */
@@ -349,8 +341,8 @@ a:active.mbc-login-link {
 
 /* Notification highlighter in segment */
 .mbc-comment-highlight-segment {
-  left: 50px;
-  top: 0px;
+  left: 44px;
+  top: 10px;
 }
 
 .editing .mbc-comment-link .txt {
