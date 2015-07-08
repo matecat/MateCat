@@ -140,7 +140,7 @@ if ( MBC.enabled() )
         historyIcon : '' +
             '  <li id="mbc-history" title="View notifications"> ' +
             '      <span class="icon-bubble2"></span> ' +
-            '      <span class="mbc-comment-highlight mbc-comment-highlight-history hide"></span> ' +
+            '      <span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-history hide"></span> ' +
             '  </li>',
 
         historyOuter : '' +
@@ -228,7 +228,7 @@ if ( MBC.enabled() )
             '<div class="mbc-comment-link">' +
             ' <div class="txt">' +
             ' <span class="mbc-comment-icon icon-bubble2"></span>' +
-            ' <span class="mbc-comment-highlight mbc-comment-highlight-segment hide"></span>' +
+            ' <span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment hide"></span>' +
             '</div>' +
             '</div>',
     }
