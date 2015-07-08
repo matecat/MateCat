@@ -119,7 +119,7 @@ if ( MBC.enabled() )
             ' </div>',
 
         reopenThread : ''+
-            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-clearfix">' +
             ' <a href="#" class="mbc-comment-btn mbc-ask-btn mbc-show-form-btn">Ask new question</a>' +
             ' <div class="mbc-ask-comment-wrap hide">' +
             '' + // insertCommentHeader
@@ -132,8 +132,8 @@ if ( MBC.enabled() )
 
         replyToComment : '' +
             ' <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">Reply</a></div>' +
-            ' <div class="mbc-ajax-message-wrap">' +
-            ' <span class="mbc-warnings hide">Oops, something went wrong. Please try again later.</span>' +
+            ' <div class="mbc-ajax-message-wrap hide">' +
+            ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +
             ' </div>' +
             '' , // insert inputForm here (with hide class)
 
@@ -145,7 +145,7 @@ if ( MBC.enabled() )
 
         historyOuter : '' +
             ' <div class="mbc-history-balloon-outer hide"> ' +
-            '     <div class="triangle triangle-top"></div> ' +
+            '     <div class="mbc-triangle mbc-triangle-top"></div> ' +
             ' </div> ',
 
         historyViewButton: '' +
@@ -160,7 +160,7 @@ if ( MBC.enabled() )
         historyNoComments : '' +
             '<div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
             '  <a href="#" class="mbc-close-btn">&#10005;</a> ' +
-            '    <div class="mbc-thread-wrap mbc-thread-number"> ' +
+            '    <div class="mbc-thread-wrap"> ' +
             '        <span class="mbc-comment-label">No notifications</span>'  +
             '    </div> ' +
             ' </div>',
@@ -175,7 +175,7 @@ if ( MBC.enabled() )
             ' </div>' ,
 
         threadWrap : '' +
-            ' <div class="mbc-thread-wrap mbc-thread-number">'  +
+            ' <div class="mbc-thread-wrap">'  +
             '' + // comments go here
             ' </div>',
 
@@ -191,16 +191,16 @@ if ( MBC.enabled() )
             ' </div>' ,
 
         inputForm : '' +
-            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            ' <div class="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix">' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
             ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
             ' <div>' +
-            ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn">Send</a>' +
+            ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn pull-right">Comment</a>' +
             ' </div>' +
-            ' <div class="mbc-ajax-message-wrap">' +
-            ' <span class="mbc-warnings hide">Oops, something went wrong. Please try again later.</span>' +
+            ' <div class="mbc-ajax-message-wrap hide">' +
+            ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +
             ' </div>' +
             ' <div>' +
             ' </div>' +
@@ -208,13 +208,13 @@ if ( MBC.enabled() )
             ' </div>',
 
         firstCommentWrap : '' +
-            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-thread-number">' +
+            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-clearfix">' +
             '' + // insertCommentHeader
             '</div>',
 
         segmentThread : '' +
-            ' <div class="mbc-comment-balloon-outer mbc-thread-active mbc-thread-active-first-comment">' +
-            ' <div class="triangle triangle-topleft"></div>' +
+            ' <div class="mbc-comment-balloon-outer mbc-thread-active">' +
+            ' <div class="mbc-triangle mbc-triangle-topleft"></div>' +
             ' <a href="#" class="mbc-close-btn">&#10005;</a>' +
             ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn">Resolve</a>' +
             ' <div class="mbc-comments-wrap">' +
@@ -524,11 +524,11 @@ if ( MBC.enabled() )
     }
 
     var showGenericWarning = function() {
-        $('.mbc-warnings').show();
+        $('.mbc-ajax-message-wrap').show();
     }
 
     var clearGenericWarning = function() {
-        $('.mbc-warnings').hide();
+        $('.mbc-ajax-message-wrap').hide();
     }
 
     function enableInputForm( outer ) {
