@@ -784,7 +784,7 @@ if ( MBC.enabled() )
 
     $(document).ready(function(){
         // load for history
-        $('.header-menu').append($(tpls.historyIcon));
+        $('.header-menu li:last-child').before($(tpls.historyIcon));
         $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
     });
 
