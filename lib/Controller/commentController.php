@@ -152,28 +152,41 @@ class commentController extends ajaxController {
         $url .= '#' . $this->struct->id_segment ;
         Log::doLog($url);
 
-        $commentDao = new Comments_CommentDao( Database::obtain() );
-        $result = $commentDao->getThreadContributorUids( $this->struct );
-
-        $userDao = new Users_UserDao( Database::obtain() );
-        $users = $userDao->getByUids( $result );
-
-        $owner = $userDao->getProjectOwner( $this->job['id_project'] );
-
-        if (!empty($owner)) {
-            array_push($users, $owner);
-            // check unique
-            $users = array_filter($users, function($item) {
-                Log::doLog( '@@@@@@');
-                Log::doLog( $item );
-
-            }, ARRAY_FILTER_USE_BOTH);
-        }
+        $users = $this->resolveUsers();
 
         foreach($users as $user) {
             $email = new Comments_CommentEmail($user, $this->struct, $url);
             $email->deliver();
         }
+    }
+
+    private function resolveUsers() {
+        $commentDao = new Comments_CommentDao( Database::obtain() );
+        $result = $commentDao->getThreadContributorUids( $this->struct );
+
+        $userDao = new Users_UserDao( Database::obtain() );
+        $users = $userDao->getByUids( $result );
+        $owner = $userDao->getProjectOwner( $this->job['id_project'] );
+
+        if ( !empty($owner) ) {
+            array_push($users, $owner[0]);
+        }
+
+        $users = array_filter($users, function($item) {
+            if ( $this->userIsLogged && $this->current_user->uid == $item->uid ) {
+                return false;
+            }
+
+            // FIXME: unoptimal way to find deep duplicates
+            foreach($users as $k => $v) {
+                if ( $item->uid == $v->uid ) {
+                    return false;
+                }
+            }
+            return true ;
+        });
+
+        return $users;
     }
 
     private function getEmail() {
