@@ -283,6 +283,8 @@ if ( MBC.enabled() )
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() );
 
+        inputForm.addClass('mbc-first-input');
+
         if (loggedUserName) {
             inputForm.find('.mbc-login-link').addClass('hide');
         } else {
@@ -339,11 +341,16 @@ if ( MBC.enabled() )
             var button = $( tpls.reopenThread );
             var container = button.find( '.mbc-ask-comment-wrap' );
 
-            $( tpls.inputForm ).appendTo(container);
+            var inputForm = $( tpls.inputForm )  ;
+            inputForm.addClass('mbc-reply-input');
+            inputForm.appendTo(container);
+
             root.append( button ) ;
         } else  {
-            root
-                .append( $(tpls.inputForm) ) ;
+            var inputForm = $( tpls.inputForm )  ;
+            inputForm.addClass('mbc-reply-input');
+
+            root.append( inputForm ) ;
 
             enableInputForm( root );
         }
