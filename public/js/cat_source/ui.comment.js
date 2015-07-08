@@ -128,7 +128,7 @@ if ( MBC.enabled() )
             ' </div>',
 
         resolveButton : ''+
-            ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn">Resolve</a>',
+            ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right">Resolve</a>',
 
         replyToComment : '' +
             ' <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">Reply</a></div>' +
@@ -178,7 +178,7 @@ if ( MBC.enabled() )
             ' </div>' ,
 
         threadWrap : '' +
-            ' <div class="mbc-thread-wrap">'  +
+            ' <div class="mbc-thread-wrap mbc-clearfix">'  +
             '' + // comments go here
             ' </div>',
 

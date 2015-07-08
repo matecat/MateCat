@@ -193,18 +193,13 @@ a:active.mbc-comment-btn {
 
 /* Resolve button bottom of thread */
 .mbc-comment-resolve-btn {
-  border: 0 none;
-  border-radius: 0 0 2px 2px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   margin-top: 8px;
-  /*position: absolute;*/
-  right: -1px;
 }
 
 a:hover.mbc-comment-resolve-btn,
 a:active.mbc-comment-resolve-btn {
   background: #7cc576;
-  border: 0 none;
+  border: 1px solid #7cc576;
   color: #fff;
 }
 /* Resolved label next to Username the thread was resolved by */
