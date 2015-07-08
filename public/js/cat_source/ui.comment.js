@@ -226,7 +226,7 @@ if ( MBC.enabled() )
             '<div class="mbc-comment-link">' +
             ' <div class="txt">' +
             ' <span class="mbc-comment-total"></span>' +
-            ' <span class="mbc-comment-icon icon-bubbles4"></span>' +
+            ' <span class="mbc-comment-icon icon-bubble2"></span>' +
             ' <span class="mbc-comment-highlight mbc-comment-highlight-segment hide"></span>' +
             '</div>' +
             '</div>',
