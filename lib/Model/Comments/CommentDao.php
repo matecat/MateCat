@@ -135,7 +135,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   private function finderQuery() {
       return "SELECT " .
           " id_job, id_segment, create_date, full_name, resolve_date, " .
-          " source_page, message_type, message, " .
+          " source_page, message_type, message, email, " .
           " IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) ) AS thread_id " .
           " FROM " . self::TABLE ;
   }
