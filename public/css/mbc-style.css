@@ -53,9 +53,8 @@
 
 /* Comment speech balloon style */
 
-.mbc-show-comment,
-.mbc-first-comment-header {
-  margin: 14px 0 0;
+.mbc-show-comment:not(:first-of-type) {
+  margin-top: 14px;
 }
 
 .mbc-post-comment {
@@ -91,6 +90,10 @@
   margin: 0 0 2px;
   height: 26px;
   padding: 4px;
+}
+
+.mbc-resolved-comment {
+  margin-top: 14px;
 }
 
 
@@ -139,12 +142,6 @@
 
 .mbc-comment-time {
   float: left;
-}
-
-.mbc-comment-role {
-  float: right;
-  text-transform: uppercase;
-  font-style: italic;
 }
 
 .mbc-comment-body {
@@ -208,7 +205,7 @@ a:active.mbc-comment-resolve-btn {
   float: right;
   font-size: 12px;
   font-weight: bold;
-  margin: -19px 2px 0 0;
+  margin: -18px 2px 0 0;
   text-transform: uppercase;
 }
 
@@ -441,7 +438,21 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   width: 300px;
 }
 
-.triangle-top {
+
+
+.mbc-view-comment-wrap {
+  margin-bottom: 10px;
+}
+
+.mbc-comment-segment-number {
+  float: left;
+  font-weight: bold;
+  margin-top: 16px;
+}
+
+
+
+.mbc-triangle-top {
   border-right-color: #fff;
   border-right-style: solid;
   border-right-width: 14px;
