@@ -88,6 +88,13 @@
   padding: 4px;
 }
 
+
+/* Common selector for labels in speech balloon */
+.mbc-comment-label {
+  display: inline-block;
+  font-size: 14px;
+}
+
 .mbc-first-comment-label {
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -95,7 +102,7 @@
 
 .mbc-comment-username-label {
   color: #323232;
-
+  font-weight: bold;
 }
 
 .mbc-show-comment .mbc-comment-username-label {
@@ -116,6 +123,7 @@
 
 .mbc-comment-info-wrap {
   clear: both;
+  margin: 4px 0;
 }
 
 .mbc-comment-info {
@@ -124,6 +132,11 @@
   font-size: 11px;
   font-weight: lighter;
   padding-bottom: 2px;
+}
+
+.mbc-comment-email-label {
+  color: #7f7f7f;
+  font-weight: normal;
 }
 
 .mbc-comment-time {
@@ -269,13 +282,6 @@ a:visited.mbc-login-link {
 a:hover.mbc-login-link,
 a:active.mbc-login-link {
   text-decoration: none;
-}
-
-/* Common selector for labels in speech balloon */
-.mbc-comment-label {
-  display: inline-block;
-  font-size: 14px;
-  font-weight: bold;
 }
 
 
