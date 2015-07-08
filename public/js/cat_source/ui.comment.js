@@ -362,7 +362,11 @@ if ( MBC.enabled() )
     var renderSegmentComments = function(el, comments) {
         var root = $(tpls.segmentThread);
         populateWithComments(root, comments, 'segment');
+
         el.append( root.show() );
+
+        var scrollableArea = root.find('.mbc-comments-wrap')[0] ;
+        scrollableArea.scrollTop = scrollableArea.scrollHeight ;
     }
 
     var refreshSegmentContent = function(el) {
@@ -731,7 +735,7 @@ if ( MBC.enabled() )
         renderCommentIconLinks();
 
         // FIXME: use a function to find sections by segmentIds
-        refreshSegmentContent( $('#segment-' + data.id_segment ) );
+        refreshSegmentContent( UI.getSegmentById( data.id_segment ) );
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
