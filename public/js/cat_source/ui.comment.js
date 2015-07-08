@@ -225,7 +225,6 @@ if ( MBC.enabled() )
         commentLink : '' +
             '<div class="mbc-comment-link">' +
             ' <div class="txt">' +
-            ' <span class="mbc-comment-total"></span>' +
             ' <span class="mbc-comment-icon icon-bubble2"></span>' +
             ' <span class="mbc-comment-highlight mbc-comment-highlight-segment hide"></span>' +
             '</div>' +
@@ -762,10 +761,6 @@ if ( MBC.enabled() )
         var highlight = $(el).find('.mbc-comment-link .mbc-comment-highlight') ;
 
         highlight.text( limitNum( d.active ) );
-
-        if (d.total > 0) {
-            $(el).find('.mbc-comment-link .mbc-comment-total').text( limitNum( d.total ) );
-        }
 
         if (d.active > 0) {
             highlight.removeClass('hide') ;
