@@ -166,7 +166,7 @@ class getWarningController extends ajaxController {
                 array( 'flags' => FILTER_FLAG_STRIP_LOW )
         );
 
-        return $glossaryWord;
+        return empty($glossaryWord) ? '' : $glossaryWord;
     }
 
 
