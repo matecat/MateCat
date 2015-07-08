@@ -218,7 +218,6 @@ if ( MBC.enabled() )
             ' <div class="mbc-comment-balloon-outer mbc-thread-active">' +
             ' <div class="mbc-triangle mbc-triangle-topleft"></div>' +
             ' <a href="#" class="mbc-close-btn">&#10005;</a>' +
-            ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn">Resolve</a>' +
             ' <div class="mbc-comments-wrap">' +
             ' ' +
             ' </div>' +
@@ -333,36 +332,28 @@ if ( MBC.enabled() )
 
             thread_id = comments[i].thread_id ;
         }
+
         comments_root.append(thread_wrap);
 
         function threadIsResolved() {
             return comments[i-1].thread_id ;
         }
 
-        // add buttons
-        if ( false ) { // threadIsResolved() ) {
-            var button = $( tpls.reopenThread );
-            var container = button.find( '.mbc-ask-comment-wrap' );
+        var inputForm = $( tpls.inputForm )  ;
+        inputForm.addClass('mbc-reply-input');
+        root.append( inputForm ) ;
 
-            var inputForm = $( tpls.inputForm )  ;
-            inputForm.addClass('mbc-reply-input');
-            inputForm.appendTo(container);
-
-            root.append( button ) ;
-        } else  {
-            var inputForm = $( tpls.inputForm )  ;
-            inputForm.addClass('mbc-reply-input');
-
-            root.append( inputForm ) ;
-
-            enableInputForm( root );
-        }
+        enableInputForm( root );
 
         // update outer balloon with proper style depending on resolved / active state
         if ( root.find('.mbc-thread-wrap:first').is('.mbc-thread-wrap-resolved') ) {
             root.addClass('mbc-thread-resolved');
             root.removeClass('mbc-thread-active');
-        } else {
+        }
+
+        // Append resolve button
+        if ( !threadIsResolved() ) {
+            root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
         }
 
         return root;
