@@ -159,6 +159,18 @@ class commentController extends ajaxController {
         $userDao = new Users_UserDao( Database::obtain() );
         $users = $userDao->getByUids( $result );
 
+        $owner = $userDao->getProjectOwner( $this->job['id_project'] );
+
+        if (!empty($owner)) {
+            array_push($users, $owner);
+            // check unique
+            $users = array_filter($users, function($item) {
+                Log::doLog( '@@@@@@');
+                Log::doLog( $item );
+
+            }, ARRAY_FILTER_USE_BOTH);
+        }
+
         foreach($users as $user) {
             $email = new Comments_CommentEmail($user, $this->struct, $url);
             $email->deliver();
