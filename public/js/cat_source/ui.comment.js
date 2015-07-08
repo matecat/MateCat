@@ -149,7 +149,10 @@ if ( MBC.enabled() )
             ' </div> ',
 
         historyViewButton: '' +
-            ' <div><a href="javascript:;" class="mbc-comment-btn mbc-show-comment-btn pull-right">View</a></div>  ',
+            ' <div class="mbc-clearfix mbc-view-comment-wrap">' +
+            ' <span class="mbc-comment-label mbc-comment-segment-number">33</span> ' +
+            '   <a href="javascript:;" class="mbc-comment-btn mbc-show-comment-btn pull-right">View</a>' +
+            ' </div> ',
 
         historyHasComments: '' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-comment">' +
@@ -169,7 +172,7 @@ if ( MBC.enabled() )
             '<div class="divider"></div>',
 
         showResolve : '' +
-            '<div class="mbc-show-comment">' +
+            '<div class="mbc-resolved-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-resolvedby mbc-truncate"></span>' +
             ' <span class="mbc-comment-resolved-label">resolved</span>' +
             ' </div>' ,
