@@ -441,7 +441,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
   margin-top: 56px;
   position: absolute;
-  right: 30px;
+  right: 80px;
   width: 300px;
 }
 
