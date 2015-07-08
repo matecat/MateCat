@@ -138,7 +138,7 @@ if ( MBC.enabled() )
             '' , // insert inputForm here (with hide class)
 
         historyIcon : '' +
-            '  <li id="mbc-history" title="View notifications"> ' +
+            '  <li id="mbc-history" title="View comments"> ' +
             '      <span class="icon-bubble2"></span> ' +
             '      <span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-history hide"></span> ' +
             '  </li>',
@@ -164,7 +164,7 @@ if ( MBC.enabled() )
             '<div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
             '  <a href="#" class="mbc-close-btn">&#10005;</a> ' +
             '    <div class="mbc-thread-wrap"> ' +
-            '        <span class="mbc-comment-label">No notifications</span>'  +
+            '        <span class="mbc-comment-label">No comments</span>'  +
             '    </div> ' +
             ' </div>',
 
