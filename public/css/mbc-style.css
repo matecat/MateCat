@@ -414,6 +414,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   font-size: 23px;
   height: 27px;
   padding-top: 10px;
+  position: relative;
   text-align: center;
   width: 60px;
 }
@@ -426,8 +427,8 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 /* Notification highlighter in header */
 .mbc-comment-highlight-history {
   color:#6d6e71;
-  right: 24px;
-  top: 11px;
+  right: 7px;
+  top: 10px;
 }
 
 .mbc-comment-highlight-history:hover {
