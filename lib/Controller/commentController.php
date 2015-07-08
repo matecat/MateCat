@@ -40,7 +40,8 @@ class commentController extends ajaxController {
     }
 
     public function doAction() {
-        $this->job = getJobData( $this->__postInput[ 'id_job' ] );
+        $this->job = getJobData( $this->__postInput[ 'id_job' ],
+            $this->__postInput['password'] );
 
         $this->checkLogin() ;
         if ( $this->userIsLogged ) {
@@ -154,8 +155,6 @@ class commentController extends ajaxController {
         $commentDao = new Comments_CommentDao( Database::obtain() );
         $result = $commentDao->getThreadContributorUids( $this->struct );
 
-        Log::doLog( $result );
-
         $userDao = new Users_UserDao( Database::obtain() );
         $users = $userDao->getByUids( $result );
 
@@ -191,6 +190,11 @@ class commentController extends ajaxController {
         } else {
             return null;
         }
+    }
+
+    private function isOwner() {
+        return $this->userIsLogged &&
+            $this->current_user->email == $this->job['owner'] ;
     }
 
     private function loadUser() {

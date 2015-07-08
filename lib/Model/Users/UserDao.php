@@ -47,6 +47,22 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $this->_buildResult( $arr_result );
     }
 
+    public function getProjectOwner( $job_id ) {
+        $job_id = (int) $job_id ;
+
+        $query = "SELECT * FROM users " .
+            " INNER JOIN jobs ON jobs.owner = users.email "  .
+            " WHERE jobs.id = $job_id " .
+            " LIMIT 1 " ;
+
+        Log::doLog($query);
+
+        $arr_result = $this->_fetch_array( $query );
+        $this->_checkForErrors();
+
+        return $this->_buildResult( $arr_result );
+    }
+
     public function getByUids( $uids_array ) {
         $sanitized_array = array();
         foreach($uids_array as $k => $v) {
