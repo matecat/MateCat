@@ -314,6 +314,8 @@ if ( MBC.enabled() )
         var root = $(tpls.segmentThread);
         var inputForm = $(tpls.inputForm);
 
+        inputForm.find('.mbc-new-message-notification').hide();
+
         inputForm.find('.mbc-comment-username-label')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() );
@@ -373,6 +375,8 @@ if ( MBC.enabled() )
         }
 
         var inputForm = $( tpls.inputForm )  ;
+        inputForm.find('.mbc-new-message-notification').hide();
+
         inputForm.addClass('mbc-reply-input');
         root.append( inputForm ) ;
 
@@ -764,8 +768,12 @@ if ( MBC.enabled() )
 
     $(document).on('sse:comment', function(ev, message) {
         db.pushSegment( message.data ) ;
-        updateHistoryWithLoadedSegments();
-        renderCommentIconLinks();
+
+        // updateHistoryWithLoadedSegments();
+        // renderCommentIconLinks();
+        $(document).trigger('mbc:comment:new', message.data);
+
+        //
     });
 
     $(document).on('click', '#filterSwitch', function(e) {
