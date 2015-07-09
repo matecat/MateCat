@@ -455,8 +455,8 @@ if ( MBC.enabled() )
             viewButton.attr('data-id', sid);
 
             var line = populateCommentTemplate( db.history[i][0] ) ;
-            var number = $('<span class="mbc-comment-highlight mbc-comment-highlight-history"></span>') ;
-            number.text( 22 );
+            var number = $('<span class="mbc-comment-highlight mbc-comment-highlight-balloon-history mbc-comment-notification"></span>') ;
+            number.text( 9 );
 
             line.find('.mbc-comment-info-wrap').append( number );
             line.append( viewButton ) ;

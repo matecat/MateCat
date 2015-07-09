@@ -338,19 +338,40 @@ a:active.mbc-login-link {
 
 .mbc-comment-highlight {
   background: #ffe400;
-  position: absolute;
 }
 
 .mbc-comment-invitation {
   background: #1451CC;
   color: #fff;
+  position: absolute;
 }
 
 /* Notification highlighter in segment */
 .mbc-comment-highlight-segment {
   left: 44px;
+  position: absolute;
   top: 10px;
 }
+
+/* Notification highlighter in header */
+.mbc-comment-highlight-history {
+  color:#6d6e71;
+  position: absolute;
+  right: 7px;
+  top: 10px;
+}
+
+.mbc-comment-highlight-history:hover {
+  color: #6d6e71;
+}
+
+/* Notification highlighter in history balloon */
+.mbc-comment-highlight-balloon-history {
+  color: #6d6e71;
+  float: right;
+}
+
+
 
 .editing .mbc-comment-link .txt {
   /* styles based on .sid 408 style.css */
@@ -430,16 +451,6 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   color:#ccc;
 }
 
-/* Notification highlighter in header */
-.mbc-comment-highlight-history {
-  color:#6d6e71;
-  right: 7px;
-  top: 10px;
-}
-
-.mbc-comment-highlight-history:hover {
-  color: #6d6e71;
-}
 
 /* History balloon */
 .mbc-history-balloon-outer {
