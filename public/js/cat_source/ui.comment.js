@@ -220,7 +220,7 @@ if ( MBC.enabled() )
             ' </div>',
 
         commentLink : '' +
-            '<div class="mbc-comment-link">' +
+            '<div class="mbc-comment-link vis-hidden">' +
             '   <div class="txt">' +
             '       <span class="mbc-comment-icon icon-bubble2"></span>' +
             '   </div>' +
@@ -296,7 +296,7 @@ if ( MBC.enabled() )
             $(el).find('.txt').remove('.mbc-comment-highlight');
         }
 
-        $(el).show();
+        $(el).addClass('vis-visible');
     }
 
     var renderSegmentCommentsFirstInput = function(el) {
@@ -416,7 +416,8 @@ if ( MBC.enabled() )
 
     var renderCommentIconLinks = function() {
         $('section').each(function(i, el) {
-            $(el).append( $(tpls.commentLink).hide() );
+            $(el).append( $(tpls.commentLink) );
+
             $(document).trigger('mbc:segment:update', el);
         });
     }
@@ -583,7 +584,7 @@ if ( MBC.enabled() )
         //
         var delegate = '#outer';
 
-        $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link', function(e) {
+        $(delegate).on('click', '.mbc-comment-balloon-outer, embc-comment-link', function(e) {
             e.stopPropagation();
         });
 
@@ -843,12 +844,27 @@ if ( MBC.enabled() )
     });
 
     $(document).on('mouseover', 'section', function(e) {
-        console.log(e.target);
-        $(e.target).closest('section').find('.mbc-comment-link:has(.mbc-comment-highlight-invite)').show();
+        $(e.relatedTarget).closest('section').find('.mbc-comment-link').stop();
+
+        $(e.target).closest('section')
+            .find('.mbc-comment-link:has(.mbc-comment-highlight-invite)')
+            .stop().delay( 300 ).queue(function(next) {
+                $(this).removeClass('vis-hidden');
+                $(this).addClass('vis-visible');
+                next();
+            });
     });
 
     $(document).on('mouseout', 'section', function(e) {
-        // $(e.target).closest('section').find('.mbc-comment-link:has(.mbc-comment-highlight-invite)').hide();
+        $(e.relatedTarget).closest('section').find('.mbc-comment-link').stop();
+
+        $(e.target).closest('section')
+            .find('.mbc-comment-link:has(.mbc-comment-highlight-invite)')
+            .stop().delay( 300 ).queue(function(next) {
+                $(this).removeClass('vis-visible');
+                $(this).addClass('vis-hidden');
+                next();
+            });
     });
 
     // Interfaces
