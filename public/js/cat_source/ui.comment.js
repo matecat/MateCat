@@ -161,6 +161,9 @@ if ( MBC.enabled() )
             '    </div> ' +
             ' </div>',
 
+        activeCommentsNumberInHistory : '' +
+            '<span class="mbc-comment-highlight mbc-comment-highlight-balloon-history mbc-comment-notification"></span>',
+
         divider : '' +
             '<div class="divider"></div>',
 
@@ -323,7 +326,7 @@ if ( MBC.enabled() )
                     .attr('title', 'Click to edit');
         }
 
-        root.append(  inputForm  );
+        root.append( inputForm );
 
         el.append( root.show() );
         startTextAreaFocusCheck();
@@ -482,8 +485,9 @@ if ( MBC.enabled() )
             viewButton.attr('data-id', sid);
 
             var line = populateCommentTemplate( db.history[i][0] ) ;
-            var number = $('<span class="mbc-comment-highlight mbc-comment-highlight-balloon-history mbc-comment-notification"></span>') ;
-            number.text( 9 );
+
+            var number = $( tpls.activeCommentsNumberInHistory);
+            number.text( db.history[i].length );
 
             line.find('.mbc-comment-info-wrap').append( number );
             line.append( viewButton ) ;
