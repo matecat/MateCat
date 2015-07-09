@@ -145,20 +145,21 @@ if ( MBC.enabled() )
             ' </div> ',
 
         historyViewButton: '' +
-            ' <div class="mbc-clearfix mbc-view-comment-wrap">' +
+            ' <div class="mbc-clearfix mbc-view-comment-wrap"> ' +
             '   <span class="mbc-comment-label mbc-comment-segment-number"></span> ' +
             '   <a href="javascript:;" class="mbc-comment-btn mbc-show-comment-btn pull-right">View</a>' +
             ' </div> ',
 
         historyHasComments: '' +
-            ' <div class="mbc-history-balloon mbc-history-balloon-has-comment">' +
-            ' <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
+            ' <div class="mbc-history-balloon mbc-history-balloon-has-comment"> ' +
             ' ' + // showComment loop here
             ' </div> ',
 
         historyNoComments : '' +
-            '<div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
-            '  <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
+            ' <div class="mbc-comment-balloon-header"> ' +
+            '   <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
+            ' </div> ' +
+            ' <div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
             '    <div class="mbc-thread-wrap"> ' +
             '        <span class="mbc-comment-label">No comments</span>'  +
             '    </div> ' +

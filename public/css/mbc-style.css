@@ -21,7 +21,7 @@
 .mbc-comments-wrap {
   max-height: 300px;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   position: relative;
   width: 100%;
 }
@@ -95,6 +95,11 @@ a:hover.mbc-new-message-link {
   box-shadow: 0px 3px 6px -5px rgba(0,0,0,0.3);
   height: 25px;
   position: relative;
+  z-index: 2;
+}
+
+.mbc-history-balloon-outer .mbc-comment-balloon-header {
+  margin-top: 10px;
 }
 
 .mbc-show-comment:not(:first-of-type) {
@@ -604,14 +609,14 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 
 .mbc-history-balloon {
   background-color: #fff;
-  margin-top: 12px;
+  /*margin-top: 12px;*/
   padding: 0 12px 12px 12px; /* Add padding for consistency with comment in thread layout */
   position: relative;
 }
 
 .mbc-history-balloon-has-comment {
   max-height: 400px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .mbc-history-balloon-has-no-comments {
