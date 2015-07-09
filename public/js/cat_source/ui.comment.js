@@ -189,7 +189,7 @@ if ( MBC.enabled() )
             ' <div class="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix">' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
-            ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
+            ' <a href="javascript:" class="mbc-login-link">Login to receive comments</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="TODO: Write a comment..."></textarea>' +
             ' <div>' +
             ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn pull-right hide">Comment</a>' +
@@ -403,7 +403,7 @@ if ( MBC.enabled() )
             root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
             root.find('.mbc-comment-time').text( data.formatted_date );
             root.find('.mbc-comment-body').html( nl2br( data.message ) );
-            root.find('.mbc-comment-email-label').text( data.email );
+            root.find('.mbc-comment-email-label').text( data.email ).attr( 'title', data.email );
         }
         return root ;
     }
