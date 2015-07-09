@@ -9,7 +9,7 @@
 
 .mbc-comment-balloon-outer {
   background: #f7f7f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 2px 0px rgba(0,0,0,0.3);
   margin-top: 4px;
 }
 
@@ -458,7 +458,6 @@ article.mbc-commenting-opened {
 
 
 article.mbc-commenting-opened section .mbc-comment-balloon-outer {
-  border: 1px solid #cdcdcd;
   float: right;
   margin-right: -230px;
   position: absolute;
@@ -597,8 +596,8 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   border-top-color: #f7f7f7;
   border-left: 12px solid transparent;
   margin-left: -12px;
-  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  -webkit-filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
+  filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
 }
 
 .mbc-clearfix {
