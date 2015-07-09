@@ -225,6 +225,25 @@ a:active.mbc-comment-btn {
   border: 1px solid #000; /* .btn:active line 643 style.css */
 }
 
+/* Comment button follows translated button common.css line 1188 */
+
+.mbc-comment-send-btn {
+  background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+  background: -moz-linear-gradient(top,  #09beec,  #119ec4);
+  background: linear-gradient(top,  #09beec,  #119ec4);
+  border: 1px solid #848689;
+  border-radius: 2px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 10px 0 0;
+  padding: 6px 12px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
 
 /* Resolve button bottom of thread */
 .mbc-comment-resolve-btn {
