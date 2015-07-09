@@ -498,15 +498,26 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   color:#ccc;
 }
 
-
 /* History balloon */
 .mbc-history-balloon-outer {
   background-color: #fff;
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
   margin-top: 56px;
   position: absolute;
-  right: 80px;
+  right: 90px;
   width: 300px;
+}
+
+@media screen and (max-width: 1380px) {
+  .mbc-history-balloon-outer {
+    right: 90px;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  .mbc-history-balloon-outer {
+    right: 90px;
+  }
 }
 
 
