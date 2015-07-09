@@ -282,7 +282,7 @@ if ( MBC.enabled() )
 
     var resolveCommentLinkIcon = function(el, comments_obj) {
         if ( comments_obj.total == 0 ) {
-            $(el).append( $( tpls.commentIconHighlightInvite ) );
+            $(el).find('.txt').append( $( tpls.commentIconHighlightInvite ) );
             return ;
         }
         $(el).find( '.mbc-comment-highlight-invite' ).remove();
@@ -848,7 +848,7 @@ if ( MBC.enabled() )
     });
 
     $(document).on('mouseout', 'section', function(e) {
-        $(e.target).closest('section').find('.mbc-comment-link:has(.mbc-comment-highlight-invite)').hide();
+        // $(e.target).closest('section').find('.mbc-comment-link:has(.mbc-comment-highlight-invite)').hide();
     });
 
     // Interfaces
