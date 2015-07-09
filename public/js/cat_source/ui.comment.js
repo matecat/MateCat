@@ -193,8 +193,9 @@ if ( MBC.enabled() )
 
         inputForm : '' +
             ' <div class="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix">' +
-            ' <div class="mbc-new-message-notification"><span class="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>' +
-            '   <a href="#" class="mbc-new-message-link">2 new messages</a> ' +
+            ' <div class="mbc-new-message-notification">' +
+            '    <span class="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>' +
+            '    <a href="javascript:" class="mbc-new-message-link"></a> ' +
             ' </div>' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
@@ -336,7 +337,7 @@ if ( MBC.enabled() )
         startTextAreaFocusCheck();
     }
 
-    var populateWithComments = function(root, comments, panel) {
+    var populateWithComments = function(root, comments) {
         var comments_root = root.find('.mbc-comments-wrap');
 
         if (comments.length == 0) {
@@ -396,31 +397,88 @@ if ( MBC.enabled() )
         return root;
     }
 
-    var renderSegmentComments = function(el, comments) {
-        var root = $(tpls.segmentThread);
-        populateWithComments(root, comments, 'segment');
+    window.Scrollable = function(el) {
+        this.el = el ;
+        var that = this ;
 
-        el.append( root.show() );
+        this.bottomVisible = function() {
+            return el.scrollTop + 30 >= el.scrollHeight - el.clientHeight ;
+        }
 
-        var scrollableArea = root.find('.mbc-comments-wrap')[0] ;
-        scrollableArea.scrollTop = scrollableArea.scrollHeight ;
+        var verbalize = function(count) {
+            if (count > 1) {
+                return '' + count + ' new messages';
+            } else {
+                return '1 new message';
+            }
+        }
+
+        this.notifyNewComments = function() {
+            var count = $(el).data('count') || 0 ;
+            $(el).data('count', count++);
+
+            var root = $(el).closest('.mbc-comment-balloon-outer').find('.mbc-new-message-notification');
+            root.find('a').text( verbalize(count) );
+            root.show();
+        }
+
+        this.scrollToBottom = function() {
+            $(this.el).scrollTop( this.el.scrollHeight );
+        }
     }
 
-    var refreshSegmentContent = function(el) {
-        var id_segment = UI.getSegmentId(el);
-        var coms = db.getCommentsBySegment( id_segment );
+    var renderSegmentComments = function(el) {
+        var comments = db.getCommentsBySegment( UI.getSegmentId(el) );
+        var root = $(tpls.segmentThread);
+
         $('.mbc-comment-balloon-outer').remove();
 
-        if (coms.length > 0) {
-            renderSegmentComments(el, coms);
+        populateWithComments(root, comments);
+
+        el.append( root.show() );
+    }
+
+    var appendReceivedMessage = function(el) {
+        var areaBefore = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
+        var scrollTop = areaBefore.el.scrollTop ;
+        var scrollableArea ;
+
+        if (! areaBefore.bottomVisible()) {
+            renderSegmentComments(el);
+            scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
+            el ;
+
+            $(scrollableArea.el).scrollTop(scrollTop);
+            scrollableArea.notifyNewComments();
         } else {
-            renderSegmentCommentsFirstInput(el, coms);
+            renderSegmentComments(el);
+            scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
+            scrollableArea.scrollToBottom() ;
+        }
+    }
+
+    var appendSubmittedMessage = function(el) {
+        renderSegmentComments(el);
+        var scrollableArea = new Scrollable( el.find('.mbc-comments-wrap')[0]);
+        scrollableArea.scrollToBottom();
+    }
+
+    var renderSegmentBalloon = function(el) {
+        if (! $(el).is(':visible') ) return ;
+
+        var comments = db.getCommentsBySegment( UI.getSegmentId(el) );
+        if (comments.length > 0) {
+            renderSegmentComments(el);
+            var scrollableArea = new Scrollable( el.find('.mbc-comments-wrap')[0]);
+            scrollableArea.scrollToBottom();
+        } else {
+            renderSegmentCommentsFirstInput(el);
         }
     }
 
     var openSegmentComment = function(el) {
         $('article').addClass('mbc-commenting-opened');
-        refreshSegmentContent(el);
+        renderSegmentBalloon(el);
         UI.scrollSegment(el);
     }
 
@@ -789,15 +847,24 @@ if ( MBC.enabled() )
 
     $(document).on('mbc:comment:new', function(ev, data) {
         updateHistoryWithLoadedSegments();
+        $(document).trigger('mbc:segment:update:links', data.id_segment);
 
-        $(document).trigger('mbc:segment:update', data.id_segment);
-        refreshSegmentContent( UI.getSegmentById( data.id_segment ) );
+        // TODO: show new message
+        var section = UI.getSegmentById( data.id_segment ) ;
+        if ( $('section .mbc-thread-wrap').is(':visible') ) {
+            appendReceivedMessage( section );
+        }
+
+        // check if segment is open, if so reRenderComments
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
         $(document).find('section .mbc-thread-wrap').remove();
         db.pushSegment(data); // TODO: move this in ajax success?
-        $(document).trigger('mbc:comment:new', data);
+        updateHistoryWithLoadedSegments();
+
+        $(document).trigger('mbc:segment:update:links', data.id_segment);
+        appendSubmittedMessage( UI.getSegmentById( data.id_segment ) );
     });
 
     $(window).on('segmentClosed', function(e) {
@@ -815,9 +882,8 @@ if ( MBC.enabled() )
         startTextAreaFocusCheck();
     });
 
-    $(document).on('mbc:segment:update', function(ev, id_segment) {
+    $(document).on('mbc:segment:update:links', function(ev, id_segment) {
         var comments_obj = db.getCommentsCountBySegment( id_segment ) ;
-
         var el = UI.getSegmentById(id_segment) ;
         resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
     });
