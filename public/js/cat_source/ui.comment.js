@@ -215,7 +215,7 @@ if ( MBC.enabled() )
             '</div>',
 
         segmentThread : '' +
-            ' <div class="mbc-comment-balloon-outer mbc-thread-active">' +
+            ' <div class="mbc-comment-balloon-outer">' +
             ' <div class="mbc-triangle mbc-triangle-topleft"></div>' +
             ' <div class="mbc-comment-balloon-header"> ' +
             '   <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a>' +
@@ -348,10 +348,10 @@ if ( MBC.enabled() )
         enableInputForm( root );
 
         // update outer balloon with proper style depending on resolved / active state
-        if ( root.find('.mbc-thread-wrap:first').is('.mbc-thread-wrap-resolved') ) {
-            root.addClass('mbc-thread-resolved');
-            root.removeClass('mbc-thread-active');
-        }
+        // if ( root.find('.mbc-thread-wrap:first').is('.mbc-thread-wrap-resolved') ) {
+        //     root.addClass('mbc-thread-resolved');
+        //     root.removeClass('mbc-thread-active');
+        // }
 
         // Append resolve button
         if ( !threadIsResolved() ) {
