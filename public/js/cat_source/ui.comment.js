@@ -187,7 +187,9 @@ if ( MBC.enabled() )
 
         inputForm : '' +
             ' <div class="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix">' +
-            ' <div class="mbc-new-message-notification"><span class="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span> 2 new messages</div>' +
+            ' <div class="mbc-new-message-notification"><span class="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>' +
+            '   <a href="#" class="mbc-new-message-link">2 new messages</a> ' +
+            ' </div>' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
             ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +

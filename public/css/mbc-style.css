@@ -47,6 +47,16 @@
   padding: 0 6px 0 0;
 }
 
+a:link.mbc-new-message-link,
+a:visited.mbc-new-message-link {
+  color: #6d6e71;
+  text-decoration: underline;
+}
+
+a:hover.mbc-new-message-link {
+  text-decoration: none;
+}
+
 /* Wrap input post comment */
 .mbc-reply-input {
   border-top: 1px solid #dadada;
