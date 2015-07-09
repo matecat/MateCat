@@ -13,6 +13,10 @@
   margin-top: 4px;
 }
 
+.mbc-comment-balloon-outer:last-of-type {
+  margin-bottom: 100px;
+}
+
 /* Wrap comments and fix height */
 .mbc-comments-wrap {
   max-height: 300px;
