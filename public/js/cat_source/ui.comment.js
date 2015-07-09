@@ -222,7 +222,7 @@ if ( MBC.enabled() )
             ' </div>',
 
         commentLink : '' +
-            '<div class="mbc-comment-link vis-hidden">' +
+            '<div class="mbc-comment-link">' +
             '   <div class="txt">' +
             '       <span class="mbc-comment-icon icon-bubble2"></span>' +
             '   </div>' +
@@ -283,22 +283,26 @@ if ( MBC.enabled() )
     }
 
     var resolveCommentLinkIcon = function(el, comments_obj) {
+        var root = $(el).find('.txt') ;
+        root.hide();
+
         if ( comments_obj.total == 0 ) {
-            $(el).find('.txt').append( $( tpls.commentIconHighlightInvite ) );
+            root.append( $( tpls.commentIconHighlightInvite ) );
             return ;
         }
-        $(el).find( '.mbc-comment-highlight-invite' ).remove();
+
+        root.find( '.mbc-comment-highlight-invite' ).remove();
 
         var highlight = $(tpls.commentIconHighlightNumber) ;
 
         if ( comments_obj.active > 0 ) {
-            $(el).find('.txt').append( highlight );
+            root.append( highlight );
             highlight.text( comments_obj.active );
         } else {
-            $(el).find('.txt').remove('.mbc-comment-highlight');
+            root.remove('.mbc-comment-highlight');
         }
 
-        $(el).addClass('vis-visible');
+        root.show();
     }
 
     var renderSegmentCommentsFirstInput = function(el) {
@@ -586,7 +590,7 @@ if ( MBC.enabled() )
         //
         var delegate = '#outer';
 
-        $(delegate).on('click', '.mbc-comment-balloon-outer, embc-comment-link', function(e) {
+        $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link', function(e) {
             e.stopPropagation();
         });
 
@@ -796,6 +800,7 @@ if ( MBC.enabled() )
     $(document).on('mbc:segment:update', function(ev, el) {
         var s = UI.getSegmentId(el);
         var comments_obj = db.getCommentsCountBySegment(s) ;
+
         resolveCommentLinkIcon( $(el).find('.mbc-comment-link'), comments_obj );
     });
 
@@ -846,27 +851,20 @@ if ( MBC.enabled() )
     });
 
     $(document).on('mouseover', 'section', function(e) {
-        $(e.relatedTarget).closest('section').find('.mbc-comment-link').stop();
+        $(e.relatedTarget).closest('section').find('.mbc-comment-link .txt').stop();
+        // console.log('mouseover', e.target);
 
         $(e.target).closest('section')
-            .find('.mbc-comment-link:has(.mbc-comment-highlight-invite)')
-            .stop().delay( 300 ).queue(function(next) {
-                $(this).removeClass('vis-hidden');
-                $(this).addClass('vis-visible');
-                next();
-            });
+            .find('.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)')
+            .stop().delay( 300 ).fadeIn( 100 );
     });
 
     $(document).on('mouseout', 'section', function(e) {
-        $(e.relatedTarget).closest('section').find('.mbc-comment-link').stop();
+        $(e.relatedTarget).closest('section').find('.mbc-comment-link .txt').stop();
 
         $(e.target).closest('section')
-            .find('.mbc-comment-link:has(.mbc-comment-highlight-invite)')
-            .stop().delay( 300 ).queue(function(next) {
-                $(this).removeClass('vis-visible');
-                $(this).addClass('vis-hidden');
-                next();
-            });
+            .find('.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)')
+            .stop().delay( 150 ).fadeOut(  );
     });
 
     // Interfaces
