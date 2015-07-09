@@ -2832,6 +2832,9 @@ a.resume-project:after,
 #filterSwitch:before,
 .more.minus:before,
 .close:before,
+/* mbc chat */
+.mbc-close-icon:before,
+/* mbc chat */
 .notific.error:before,
 .breadcrumbs #pname:before,
 .delete button:before,
@@ -2843,7 +2846,9 @@ a.resume-project:after,
 #point2seg:after,
 .error-symbol:before,
 .warnings:before,
+/* mbc chat */
 .mbc-warnings:before,
+/* mbc chat */
 .tab-switcher-al a:before,
 .error-message p:before,
 .text .alternatives:before,
