@@ -27,17 +27,24 @@
 }
 
 .mbc-new-message-notification {
+  color: #6d6e71;
   position: absolute;
   top: -31px;
   height: 30px;
   width: 100%;
-  background-color: #fff;
+  background-color: #FFF7B5;
   margin: 0;
   padding: 0;
   left: 0;
   text-align: center;
   font-size: 14px;
   line-height: 2.2;
+}
+
+.mbc-new-message-icon {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 6px 0 0;
 }
 
 /* Wrap input post comment */
