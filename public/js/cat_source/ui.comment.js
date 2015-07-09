@@ -63,7 +63,8 @@ if ( MBC.enabled() )
         },
 
         pushSegment : function(data) {
-            var s = data.id_segment ;
+            var s = Number(data.id_segment);
+
             if (typeof db.segments[s] === 'undefined') {
                 db.segments[s] = [ data ];
             }
@@ -80,6 +81,8 @@ if ( MBC.enabled() )
         },
 
         getCommentsBySegment : function(s) {
+            var s = Number(s) ;
+
             if (typeof this.segments[s] === 'undefined') {
                 return [];
             } else {
@@ -295,14 +298,13 @@ if ( MBC.enabled() )
         }
 
         root.find( '.mbc-comment-highlight-invite' ).remove();
+        root.find('.mbc-comment-highlight').remove();
 
         var highlight = $(tpls.commentIconHighlightNumber) ;
 
         if ( comments_obj.active > 0 ) {
             root.append( highlight );
             highlight.text( comments_obj.active );
-        } else {
-            root.remove('.mbc-comment-highlight');
         }
 
         root.show();
@@ -402,7 +404,7 @@ if ( MBC.enabled() )
 
     var refreshSegmentContent = function(el) {
         var id_segment = UI.getSegmentId(el);
-        var coms = db.getCommentsBySegment(id_segment);
+        var coms = db.getCommentsBySegment( id_segment );
         $('.mbc-comment-balloon-outer').remove();
 
         if (coms.length > 0) {
@@ -425,7 +427,7 @@ if ( MBC.enabled() )
 
     var renderCommentIconLinks = function() {
         $('section').each(function(i, el) {
-            $(document).trigger('mbc:segment:update', el);
+            $(document).trigger('mbc:segment:update', UI.getSegmentId(el) );
         });
     }
 
@@ -553,7 +555,6 @@ if ( MBC.enabled() )
                 if (resp.errors.length) {
                     showGenericWarning();
                 } else {
-                    console.log(resp.data.entries[0]);
                     $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
                 }
             },
@@ -777,11 +778,11 @@ if ( MBC.enabled() )
             UI.toggleSearch(ev) ;
         }
     });
+
     $(document).on('mbc:comment:new', function(ev, data) {
         updateHistoryWithLoadedSegments();
-        renderCommentIconLinks();
 
-        // FIXME: use a function to find sections by segmentIds
+        $(document).trigger('mbc:segment:update', data.id_segment);
         refreshSegmentContent( UI.getSegmentById( data.id_segment ) );
     });
 
@@ -806,11 +807,11 @@ if ( MBC.enabled() )
         startTextAreaFocusCheck();
     });
 
-    $(document).on('mbc:segment:update', function(ev, el) {
-        var s = UI.getSegmentId(el);
-        var comments_obj = db.getCommentsCountBySegment(s) ;
+    $(document).on('mbc:segment:update', function(ev, id_segment) {
+        var comments_obj = db.getCommentsCountBySegment( id_segment ) ;
 
-        resolveCommentLinkIcon( $(el).find('.mbc-comment-link'), comments_obj );
+        var el = UI.getSegmentById(id_segment) ;
+        resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
     });
 
     $(document).ready(function(){
