@@ -16,8 +16,24 @@
 /* Wrap comments and fix height */
 .mbc-comments-wrap {
   max-height: 300px;
+  height: 100%;
   overflow-y: scroll;
+  position: relative;
   width: 100%;
+}
+
+.mbc-new-message-notification {
+  position: absolute;
+  top: -31px;
+  height: 30px;
+  width: 100%;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  left: 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 2.2;
 }
 
 /* Wrap input post comment */
@@ -25,6 +41,7 @@
   border-top: 1px solid #dadada;
   background: #f7f7f7;
   box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
+  position: relative;
 }
 
 .mbc-thread-resolved {
