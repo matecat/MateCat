@@ -130,13 +130,6 @@ if ( MBC.enabled() )
         resolveButton : ''+
             ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right">Resolve</a>',
 
-        replyToComment : '' +
-            ' <div><a href="#" class="mbc-comment-btn mbc-show-form-btn">Reply</a></div>' +
-            ' <div class="mbc-ajax-message-wrap hide">' +
-            ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +
-            ' </div>' +
-            '' , // insert inputForm here (with hide class)
-
         historyIcon : '' +
             '  <li id="mbc-history" title="View comments"> ' +
             '      <span class="icon-bubble2"></span> ' +
@@ -197,9 +190,9 @@ if ( MBC.enabled() )
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
             ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
-            ' <textarea class="mbc-comment-input mbc-comment-textarea"></textarea>' +
+            ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="TODO: Write a comment..."></textarea>' +
             ' <div>' +
-            ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn pull-right">Comment</a>' +
+            ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn pull-right hide">Comment</a>' +
             ' </div>' +
             ' <div class="mbc-ajax-message-wrap hide">' +
             ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +
@@ -813,6 +806,14 @@ if ( MBC.enabled() )
             $(this).css("overflow-y", "hidden");
         }
 
+    });
+
+    $(document).on('focus', '.mbc-comment-input', function(e) {
+        $(e.target).closest('div').find('.mbc-comment-btn').show();
+    });
+
+    $(document).on('click', function(e) {
+        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').hide();
     });
 
     $(document).on('ui:segment:focus', function(e, sid) {
