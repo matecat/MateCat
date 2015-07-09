@@ -230,7 +230,7 @@ if ( MBC.enabled() )
             '<span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment"></span>',
 
         commentIconHighlightInvite : '' +
-            '<span class="mbc-comment-highlight mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>'
+            '<span class="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>'
 
 
     }
