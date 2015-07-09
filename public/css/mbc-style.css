@@ -22,7 +22,7 @@
 /* Wrap input post comment */
 .mbc-reply-input {
   border-top: 1px solid #dadada;
-  background: #fff;
+  background: #f7f7f7;
   box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
 }
 
@@ -50,6 +50,14 @@
 }
 
 /* Comment speech balloon style */
+
+.mbc-comment-balloon-header {
+  border-bottom: 1px solid #dadada;
+  box-shadow: 0px 3px 6px -5px rgba(0,0,0,0.3);
+  height: 24px;
+  position: relative;
+}
+
 .mbc-show-comment:not(:first-of-type) {
   margin-top: 14px;
 }
@@ -129,6 +137,10 @@
 
 .mbc-comment-anonymous-label:hover {
   text-decoration: underline;
+}
+
+.mbc-comment-resolvedby {
+  width: 110px;
 }
 
 .mbc-comment-info-wrap {
@@ -283,7 +295,42 @@ a:active.mbc-login-link {
   text-decoration: none;
 }
 
+/* style.css line 1612 */
+a:link.mbc-close-icon,
+a:visited.mbc-close-icon {
+  /*float: right;*/
+  font-size: 10px;
+  margin-right: 0;
+  padding: 4px;
+  width: 14px;
+  height: 14px;
+  padding-top: 0px;
+  padding-left: 0px;
+  vertical-align: middle;
+  display: block;
+  position: absolute;
+  right: 7px;
+  top: 0;
+  text-decoration: none;
+  font-size: 15px;
+  border-radius: 20px;
+  background: #fff;
+  color: #AEAEAE;
+}
 
+a:hover.mbc-close-icon {  background: red;
+  color: #fff;
+  text-align: center;}
+
+
+.mbc-close-icon:before {
+  content: "\ea0d";
+  text-align: center;
+  margin-top: 0px;
+  margin-left: -1px;
+  display: block;
+  vertical-align: middle;
+}
 
 /* Comment icon in layout */
 .mbc-comment-link {
@@ -516,7 +563,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 }
 
 .mbc-truncate {
-  width: 110px;
+  width: 90%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -156,13 +156,13 @@ if ( MBC.enabled() )
 
         historyHasComments: '' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-comment">' +
-            ' <a href="#" class="mbc-close-btn">&#10005;</a> ' +
+            ' <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
             ' ' + // showComment loop here
             ' </div> ',
 
         historyNoComments : '' +
             '<div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
-            '  <a href="#" class="mbc-close-btn">&#10005;</a> ' +
+            '  <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
             '    <div class="mbc-thread-wrap"> ' +
             '        <span class="mbc-comment-label">No comments</span>'  +
             '    </div> ' +
@@ -185,7 +185,7 @@ if ( MBC.enabled() )
         showComment : '' +
             '<div class="mbc-show-comment mbc-clearfix">' +
             ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
-            ' <span class="mbc-comment-label mbc-comment-email-label"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-email-label mbc-truncate"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             '   <span class="mbc-comment-info mbc-comment-time"></span>' +
             ' </div>' +
@@ -217,7 +217,9 @@ if ( MBC.enabled() )
         segmentThread : '' +
             ' <div class="mbc-comment-balloon-outer mbc-thread-active">' +
             ' <div class="mbc-triangle mbc-triangle-topleft"></div>' +
-            ' <a href="#" class="mbc-close-btn">&#10005;</a>' +
+            ' <div class="mbc-comment-balloon-header"> ' +
+            '   <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a>' +
+            ' </div>' +
             ' <div class="mbc-comments-wrap">' +
             ' ' +
             ' </div>' +
