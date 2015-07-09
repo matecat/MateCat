@@ -489,7 +489,7 @@ if ( MBC.enabled() )
 
     var renderCommentIconLinks = function() {
         $('section').each(function(i, el) {
-            $(document).trigger('mbc:segment:update', UI.getSegmentId(el) );
+            $(document).trigger('mbc:segment:update:links', UI.getSegmentId(el) );
         });
     }
 
