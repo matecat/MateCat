@@ -280,6 +280,25 @@ if ( MBC.enabled() )
         return $(tpls.firstCommentWrap) ; // .append($(tpls.insertCommentHeader));
     }
 
+    var resolveCommentLinkIcon = function(el, comments_obj) {
+        if ( comments_obj.total == 0 ) {
+            $(el).append( $( tpls.commentIconHighlightInvite ) );
+            return ;
+        }
+        $(el).find( '.mbc-comment-highlight-invite' ).remove();
+
+        var highlight = $(tpls.commentIconHighlightNumber) ;
+
+        if ( comments_obj.active > 0 ) {
+            $(el).find('.txt').append( highlight );
+            highlight.text( comments_obj.active );
+        } else {
+            $(el).find('.txt').remove('.mbc-comment-highlight');
+        }
+
+        $(el).show();
+    }
+
     var renderSegmentCommentsFirstInput = function(el) {
         var root = $(tpls.segmentThread);
         var inputForm = $(tpls.inputForm);
@@ -771,27 +790,6 @@ if ( MBC.enabled() )
         startTextAreaFocusCheck();
     });
 
-    var resolveCommentLinkIcon = function(el, comments_obj) {
-
-        if ( comments_obj.total == 0 ) {
-            $(el).append( $( tpls.commentIconHighlightInvite ) );
-            return ;
-        }
-
-        $(el).find( '.mbc-comment-highlight-invite' ).remove();
-
-        var highlight = $(tpls.commentIconHighlightNumber) ;
-
-        if ( comments_obj.active > 0 ) {
-            $(el).find('.txt').append( highlight );
-            highlight.text( comments_obj.active );
-        } else {
-            $(el).find('.txt').remove('.mbc-comment-highlight');
-        }
-
-        $(el).show();
-    }
-
     $(document).on('mbc:segment:update', function(ev, el) {
         var s = UI.getSegmentId(el);
         var comments_obj = db.getCommentsCountBySegment(s) ;
@@ -842,6 +840,15 @@ if ( MBC.enabled() )
             openSegmentComment( UI.getSegmentById( sid ) );
             lastCommentHash = null ;
         }
+    });
+
+    $(document).on('mouseover', 'section', function(e) {
+        console.log(e.target);
+        $(e.target).closest('section').find('.mbc-comment-link:has(.mbc-comment-highlight-invite)').show();
+    });
+
+    $(document).on('mouseout', 'section', function(e) {
+        $(e.target).closest('section').find('.mbc-comment-link:has(.mbc-comment-highlight-invite)').hide();
     });
 
     // Interfaces
