@@ -4,8 +4,12 @@
 */
 
 /*
-/* Thread style
-*/
+ ******
+ ******
+ Balloon basic layout
+ ******
+ ******
+ */
 
 .mbc-comment-balloon-outer {
   background: #f7f7f7;
@@ -13,11 +17,28 @@
   margin-top: 4px;
 }
 
+/* Give breathing space to the last comment ballon in page */
 .mbc-comment-balloon-outer:last-of-type {
   margin-bottom: 100px;
 }
 
-/* Wrap comments and fix height */
+/* Comment speech balloon style */
+.mbc-comment-balloon-header {
+  border-bottom: 1px solid #dadada;
+  box-shadow: 0px 3px 6px -5px rgba(0,0,0,0.3);
+  height: 25px;
+  position: relative;
+  z-index: 2; /* Allow box-shadow to shine */
+}
+
+/*
+ ******
+ ******
+ Past comments wrap
+ ******
+ ******
+ */
+
 .mbc-comments-wrap {
   max-height: 300px;
   height: 100%;
@@ -26,27 +47,27 @@
   width: 100%;
 }
 
+/*
+ ******
+ ******
+ New incoming message notification
+ ******
+ ******
+ */
+
 .mbc-new-message-notification {
-  color: #6d6e71;
-  position: absolute;
-  top: -31px;
-  height: 30px;
-  width: 100%;
   background-color: #FFF9CC;
-  margin: 0;
-  padding: 0;
+  color: #6d6e71;
+  font-size: 14px;
   left: 0;
-  text-align: center;
-  font-size: 14px;
   line-height: 2.2;
+  position: absolute;
+  text-align: center;
+  top: -31px;
+  width: 100%;
 }
 
-.mbc-new-message-icon {
-  font-size: 14px;
-  font-weight: bold;
-  padding: 0 6px 0 0;
-}
-
+/* New message link  */
 a:link.mbc-new-message-link,
 a:visited.mbc-new-message-link {
   color: #6d6e71;
@@ -57,22 +78,22 @@ a:hover.mbc-new-message-link {
   text-decoration: none;
 }
 
+.mbc-new-message-icon {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 6px 0 0;
+}
+
+
 /* Wrap input post comment */
 .mbc-reply-input {
-  border-top: 1px solid #dadada;
   background: #f7f7f7;
+  border-top: 1px solid #dadada;
   box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
   position: relative;
 }
 
-.mbc-thread-resolved {
-  background: #efefef;
-}
-
-.mbc-thread-active {
-  background: #f7f7f7;
-}
-
+/* Thread common */
 .mbc-thread-wrap {
   padding: 14px 12px;
 }
@@ -88,20 +109,6 @@ a:hover.mbc-new-message-link {
   border-bottom: 2px solid rgba(124,197,118,.4); /* #7cc576 */
 }
 
-/* Comment speech balloon style */
-
-.mbc-comment-balloon-header {
-  border-bottom: 1px solid #dadada;
-  box-shadow: 0px 3px 6px -5px rgba(0,0,0,0.3);
-  height: 25px;
-  position: relative;
-  z-index: 2;
-}
-
-.mbc-history-balloon-outer .mbc-comment-balloon-header {
-  margin-top: 10px;
-}
-
 .mbc-show-comment:not(:first-of-type) {
   margin-top: 14px;
 }
@@ -115,6 +122,15 @@ a:hover.mbc-new-message-link {
   border-bottom: 1px solid #dadada;
 }
 
+
+/*
+ ******
+ ******
+ Comment input
+ ******
+ ******
+ */
+
 .mbc-comment-input {
   border-radius: 2px;
   float: left;
@@ -124,32 +140,31 @@ a:hover.mbc-new-message-link {
 }
 
 .mbc-comment-textarea {
+  box-shadow: inset 0 1px 2px #ccc;
+  -webkit-box-shadow: inset 0 1px 2px #ccc;
+  border: 1px solid #999;
   font-size: 16px;
-  overflow-x: hidden;
-  overflow-y: hidden;
+  overflow: hidden;
   margin: 0;
   padding: 4px;
   resize: none;
-  box-shadow: inset 0 1px 2px #ccc;
-  border: 1px solid #999;
-  -webkit-box-shadow: inset 0 1px 2px #ccc;
   word-break: normal;
 }
 
 .mbc-comment-textinput {
   background: #fff;
-  font-size: 14px;
-  margin: 0 0 2px;
-  padding: 2px 5px;
-  border-radius: 2px;
   border: 1px solid #999;
-  height: auto;
-  outline: 0;
+  border-radius: 2px;
   box-shadow: inset 0 1px 2px #ddd;
   -webkit-box-shadow: inset 0 1px 2px #ddd;
-  white-space: initial;
+  font-size: 14px;
+  height: auto;
+  margin: 0 0 2px;
+  outline: 0;
   overflow: initial;
+  padding: 2px 5px;
   text-overflow: initial;
+  white-space: initial;
 }
 
 .mbc-comment-textinput:hover {
@@ -157,20 +172,23 @@ a:hover.mbc-new-message-link {
   cursor: text;
 }
 
+/*
+ ******
+ ******
+ Labels
+ ******
+ ******
+ */
+
+
 .mbc-resolved-comment {
   margin-top: 14px;
 }
-
 
 /* Common selector for labels in speech balloon */
 .mbc-comment-label {
   display: block;
   font-size: 14px;
-}
-
-.mbc-first-comment-label {
-  text-transform: uppercase;
-  margin-bottom: 10px;
 }
 
 .mbc-comment-username-label {
@@ -210,10 +228,6 @@ a:hover.mbc-new-message-link {
   font-weight: normal;
 }
 
-.mbc-comment-time {
-  float: left;
-}
-
 .mbc-comment-body {
   color: #323232;
   font-size: 14px;
@@ -221,6 +235,23 @@ a:hover.mbc-new-message-link {
   word-wrap: break-word;
 }
 
+/* Resolved label next to Username the thread was resolved by */
+.mbc-comment-resolved-label {
+  color: #7cc576; /* per-green line 2350 style.css */
+  float: right;
+  font-size: 12px;
+  font-weight: bold;
+  margin: -18px 2px 0 0;
+  text-transform: uppercase;
+}
+
+/*
+ ******
+ ******
+ Buttons
+ ******
+ ******
+ */
 
 /* Common selector for buttons in speech balloon */
 .mbc-comment-btn {
@@ -252,7 +283,6 @@ a:active.mbc-comment-btn {
 }
 
 /* Comment button follows translated button common.css line 1188 */
-
 .mbc-comment-send-btn {
   background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
   background: -moz-linear-gradient(top,  #09beec,  #119ec4);
@@ -282,16 +312,8 @@ a:active.mbc-comment-resolve-btn {
   border: 1px solid #7cc576;
   color: #fff;
 }
-/* Resolved label next to Username the thread was resolved by */
 
-.mbc-comment-resolved-label {
-  color: #7cc576; /* per-green line 2350 style.css */
-  float: right;
-  font-size: 12px;
-  font-weight: bold;
-  margin: -18px 2px 0 0;
-  text-transform: uppercase;
-}
+
 
 .mbc-ask-btn {
   display: block;
@@ -318,32 +340,6 @@ a:hover.mbc-close-btn,
 a:active.mbc-close-btn {
   color: #999;
 }
-
-.show-thread-btn {
-  display: inline-block;
-  font-size: 13px;
-  margin-left: 4px;
-  padding: 8px 0;
-  text-decoration: none;
-  width: 100%;
-}
-
-a:link.show-thread-btn,
-a:visited.show-thread-btn {
-  color: #aeaeae;
-}
-
-a:hover.show-thread-btn,
-a:active.show-thread-btn {
-  color: #999;
-}
-
-.show-toggle-icon {
-  float: right;
-  font-weight: bold;
-  margin-right: 4px;
-}
-
 
 .mbc-login-link {
   display: inline-block;
@@ -400,6 +396,15 @@ a:hover.mbc-close-icon {  background: red;
   vertical-align: middle;
 }
 
+
+/*
+ ******
+ ******
+ Comment icon next to each segment
+ ******
+ ******
+ */
+
 /* Comment icon in layout */
 .mbc-comment-link {
   /* styles based on .sid line 376 style.css */
@@ -412,23 +417,13 @@ a:hover.mbc-close-icon {  background: red;
   position: absolute;
   text-align: center;
   text-decoration: none;
+  right: -8%;
   width: 8%;
   z-index: 999;
 }
 
-/* Comment icon position with commenting area not visible */
-.mbc-commenting-closed .mbc-comment-link {
-  right: -8%;
-}
-
-/* Comment icon position with commenting area visible */
-.mbc-commenting-opened .mbc-comment-link {
-  right: -8%;
-}
-
 .mbc-comment-link .txt {
   /* styles based on .sid 401 style.css */
-  background: transparent;
   cursor: pointer;
   margin:20px auto 0;
   padding: 10px 0;
@@ -487,12 +482,6 @@ a:hover.mbc-close-icon {  background: red;
 }
 
 
-
-.editing .mbc-comment-link .txt {
-  /* styles based on .sid 408 style.css */
-  background: transparent;
-}
-
 section:hover .mbc-comment-link {
   /* styles based on .sid line 460 style.css */
   color:#6d6e71
@@ -522,8 +511,6 @@ article.mbc-commenting-opened {
   transition: width .2s ease;
 }
 
-
-
 article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   float: right;
   margin-right: -230px;
@@ -545,9 +532,15 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   font-size:14px;
 }
 
-/* History balloon */
 
-/* list item in header */
+/*
+ ******
+ ******
+ Header list item history balloon icon
+ ******
+ ******
+ */
+
 #mbc-history {
   /* #filterSwitch line 71 style.css */
   color: #fff;
@@ -565,11 +558,21 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   color:#ccc;
 }
 
+
+
+/*
+ ******
+ ******
+ History ballon
+ ******
+ ******
+ */
 /* History balloon */
 .mbc-history-balloon-outer {
   background-color: #fff;
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
   margin-top: 56px;
+  padding-top: 10px;
   position: absolute;
   right: 86px;
   width: 300px;
@@ -580,8 +583,6 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
     right: 70px;
   }
 }
-
-
 
 .mbc-view-comment-wrap {
   margin-bottom: 10px;
@@ -594,7 +595,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 }
 
 
-
+/* TODO: organise triangle */
 .mbc-triangle-top {
   border-right-color: #fff;
   border-right-style: solid;
@@ -602,7 +603,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   border-top: 14px solid transparent;
   float: right;
   margin-right: 20px;
-  margin-top: -14px;
+  margin-top: -24px;
   -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
   filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
 }
