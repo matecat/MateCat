@@ -187,7 +187,7 @@ if ( MBC.enabled() )
             ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
             ' <span class="mbc-comment-label mbc-comment-email-label mbc-truncate"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
-            '   <span class="mbc-comment-info mbc-comment-time"></span>' +
+            '   <span class="mbc-comment-info mbc-comment-time pull-left"></span>' +
             ' </div>' +
             ' <p class="mbc-comment-body"></p>' +
             ' </div>' ,
@@ -924,7 +924,7 @@ if ( MBC.enabled() )
             };
 
         if ( $(this).height() >= maxHeight ) {
-            $(this).css("overflow-y", "scroll");
+            $(this).css("overflow-y", "auto");
         } else {
             $(this).css("overflow-y", "hidden");
         }
