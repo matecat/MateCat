@@ -32,7 +32,7 @@
   top: -31px;
   height: 30px;
   width: 100%;
-  background-color: #FFF7B5;
+  background-color: #FFF9CC;
   margin: 0;
   padding: 0;
   left: 0;
@@ -566,19 +566,13 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
   margin-top: 56px;
   position: absolute;
-  right: 90px;
+  right: 86px;
   width: 300px;
 }
 
-@media screen and (max-width: 1380px) {
+@media screen and (max-width: 1180px) {
   .mbc-history-balloon-outer {
-    right: 90px;
-  }
-}
-
-@media screen and (max-width: 1280px) {
-  .mbc-history-balloon-outer {
-    right: 90px;
+    right: 70px;
   }
 }
 
