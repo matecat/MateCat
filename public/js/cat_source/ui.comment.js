@@ -221,11 +221,18 @@ if ( MBC.enabled() )
 
         commentLink : '' +
             '<div class="mbc-comment-link">' +
-            ' <div class="txt">' +
-            ' <span class="mbc-comment-icon icon-bubble2"></span>' +
-            ' <span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment hide"></span>' +
-            '</div>' +
+            '   <div class="txt">' +
+            '       <span class="mbc-comment-icon icon-bubble2"></span>' +
+            '   </div>' +
             '</div>',
+
+        commentIconHighlightNumber : '' +
+            '<span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment"></span>',
+
+        commentIconHighlightInvite : '' +
+            '<span class="mbc-comment-highlight mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>'
+
+
     }
 
     var source = SSE.getSource('comments');
@@ -390,7 +397,7 @@ if ( MBC.enabled() )
 
     var renderCommentIconLinks = function() {
         $('section').each(function(i, el) {
-            $(el).append($(tpls.commentLink));
+            $(el).append( $(tpls.commentLink).hide() );
             $(document).trigger('mbc:segment:update', el);
         });
     }
@@ -764,18 +771,31 @@ if ( MBC.enabled() )
         startTextAreaFocusCheck();
     });
 
+    var resolveCommentLinkIcon = function(el, comments_obj) {
+
+        if ( comments_obj.total == 0 ) {
+            $(el).append( $( tpls.commentIconHighlightInvite ) );
+            return ;
+        }
+
+        $(el).find( '.mbc-comment-highlight-invite' ).remove();
+
+        var highlight = $(tpls.commentIconHighlightNumber) ;
+
+        if ( comments_obj.active > 0 ) {
+            $(el).find('.txt').append( highlight );
+            highlight.text( comments_obj.active );
+        } else {
+            $(el).find('.txt').remove('.mbc-comment-highlight');
+        }
+
+        $(el).show();
+    }
+
     $(document).on('mbc:segment:update', function(ev, el) {
         var s = UI.getSegmentId(el);
-        var d = db.getCommentsCountBySegment(s) ;
-        var highlight = $(el).find('.mbc-comment-link .mbc-comment-highlight') ;
-
-        highlight.text( limitNum( d.active ) );
-
-        if (d.active > 0) {
-            highlight.removeClass('hide') ;
-        } else {
-            highlight.addClass('hide') ;
-        }
+        var comments_obj = db.getCommentsCountBySegment(s) ;
+        resolveCommentLinkIcon( $(el).find('.mbc-comment-link'), comments_obj );
     });
 
     $(document).ready(function(){
