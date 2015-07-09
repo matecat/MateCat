@@ -422,8 +422,6 @@ if ( MBC.enabled() )
 
     var renderCommentIconLinks = function() {
         $('section').each(function(i, el) {
-            $(el).append( $(tpls.commentLink) );
-
             $(document).trigger('mbc:segment:update', el);
         });
     }
@@ -743,7 +741,14 @@ if ( MBC.enabled() )
         });
     });
 
+    var initCommentLinks = function(el) {
+        $('section').each(function(i, el) {
+            $(el).append( $(tpls.commentLink) );
+        });
+    }
+
     $(document).on('mbc:ready', function(ev) {
+        initCommentLinks();
         renderCommentIconLinks();
         updateHistoryWithLoadedSegments();
     });
