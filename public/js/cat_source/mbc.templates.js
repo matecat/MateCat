@@ -19,15 +19,6 @@ if ( MBC.enabled() )
             ' <div class="divider"></div>' +
             ' </div>',
 
-        reopenThread : ''+
-            ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-clearfix">' +
-            ' <a href="#" class="mbc-comment-btn mbc-ask-btn mbc-show-form-btn">Ask new question</a>' +
-            ' <div class="mbc-ask-comment-wrap hide">' +
-            '' + // insertCommentHeader
-            '' + // insert inputForm here
-            ' </div>' +
-            ' </div>',
-
         resolveButton : ''+
             ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right">Resolve</a>',
 
