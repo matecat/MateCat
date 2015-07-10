@@ -369,7 +369,9 @@ if ( MBC.enabled() )
             root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
             root.find('.mbc-comment-time').text( data.formatted_date );
             root.find('.mbc-comment-body').html( nl2br( data.message ) );
-            root.find('.mbc-comment-email-label').text( data.email );
+            if ( data.email != null ) {
+                root.find('.mbc-comment-email-label').text( data.email );
+            }
         }
         return root ;
     }
