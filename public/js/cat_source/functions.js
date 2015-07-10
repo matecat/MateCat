@@ -572,7 +572,7 @@ function ParsedHash( hash ) {
     }
 
     this.hashCleanupRequired = function() {
-        return this.isComment();
+        return MBC.enabled() && this.isComment();
     }
 
     this.cleanupHash = function() {
@@ -581,7 +581,7 @@ function ParsedHash( hash ) {
     }
 
     var notifyModules = function() {
-        that.isComment() && MBC.enabled() && MBC.setLastCommentHash( that );
+        MBC.enabled() && that.isComment() && MBC.setLastCommentHash( that );
     }
 }
 
