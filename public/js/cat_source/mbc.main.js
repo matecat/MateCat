@@ -526,7 +526,8 @@ if ( MBC.enabled() )
         //
         var delegate = '#outer';
 
-        $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link', function(e) {
+
+        $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link div', function(e) {
             e.stopPropagation();
         });
 
