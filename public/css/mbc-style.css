@@ -359,7 +359,6 @@ a.mbc-comment-send-btn:active {
  Resolve button in comment balloon
  ******
  */
-
 a.mbc-comment-resolve-btn:link,
 a.mbc-comment-resolve-btn:visited {
   background: #dcdedf;
@@ -381,7 +380,6 @@ a.mbc-comment-resolve-btn:active {
  ******
  ******
  */
-
 a.mbc-comment-link-btn:link,
 a.mbc-comment-link-btn:visited {
   color: #7f7f7f;
@@ -400,7 +398,6 @@ a.mbc-comment-link-btn:active {
  Login invitation link in comment balloon
  ******
  */
-
 a.mbc-login-link:link,
 a.mbc-login-link:visited {
   padding: 0 4px 10px 0;
@@ -408,12 +405,9 @@ a.mbc-login-link:visited {
 
 /*
  ******
- ******
  View link in history balloon
  ******
- ******
  */
-
 a.mbc-view-link:link,
 a.mbc-view-link:visited {
   margin-top: 16px;
