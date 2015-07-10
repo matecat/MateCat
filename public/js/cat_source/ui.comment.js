@@ -400,6 +400,8 @@ if ( MBC.enabled() )
     window.Scrollable = function(el) {
         this.el = el ;
         var that = this ;
+        var root = $(el).closest('.mbc-comment-balloon-outer') ;
+        var notificationArea = $(root).find('.mbc-new-message-notification');
 
         this.bottomVisible = function() {
             return el.scrollTop + 30 >= el.scrollHeight - el.clientHeight ;
@@ -414,16 +416,18 @@ if ( MBC.enabled() )
         }
 
         this.notifyNewComments = function() {
-            var count = $(el).data('count') || 0 ;
-            $(el).data('count', count++);
+            var dataRoot = root.closest('section');
+            var count = dataRoot.data('mbc-new-comments-count') || 0 ;
 
-            var root = $(el).closest('.mbc-comment-balloon-outer').find('.mbc-new-message-notification');
-            root.find('a').text( verbalize(count) );
-            root.show();
+            dataRoot.data( 'mbc-new-comments-count', ++ count );
+
+            notificationArea.find('a').text( verbalize(count) );
+            notificationArea.show();
         }
 
         this.scrollToBottom = function() {
             $(this.el).scrollTop( this.el.scrollHeight );
+            notificationArea.hide();
         }
     }
 
@@ -446,8 +450,7 @@ if ( MBC.enabled() )
         if (! areaBefore.bottomVisible()) {
             renderSegmentComments(el);
             scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
-            el ;
-
+            el ; /// XXX seems to be required to get actual scrollTop number
             $(scrollableArea.el).scrollTop(scrollTop);
             scrollableArea.notifyNewComments();
         } else {
@@ -766,6 +769,13 @@ if ( MBC.enabled() )
                 if (ev.which == 13) { action.call(ev.target); }
             }).focus();
         });
+
+        $(delegate).on('click', '.mbc-new-message-link', function(e) {
+            e.preventDefault();
+            var root = $(e.target).closest('.mbc-comment-balloon-outer') ;
+            var scrollableArea = new Scrollable(root.find('.mbc-comments-wrap')[0]);
+            scrollableArea.scrollToBottom();
+        });
     });
 
     $(document).on('click', '.mbc-show-comment-btn', function(e) {
@@ -781,6 +791,7 @@ if ( MBC.enabled() )
 
         window.location.hash = new_hash ;
     });
+
 
     $(document).on('getSegments_success', function(e) {
         var data = {
