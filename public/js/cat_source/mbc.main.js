@@ -15,7 +15,7 @@ if ( MBC.enabled() )
 
     MBC.const = {
         get commentAction() {
-            return 'mbcopen' ;
+            return 'comment' ;
         }
     }
 
