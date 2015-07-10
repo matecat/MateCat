@@ -830,12 +830,7 @@ if ( MBC.enabled() )
 
     $(document).on('sse:comment', function(ev, message) {
         db.pushSegment( message.data ) ;
-
-        // updateHistoryWithLoadedSegments();
-        // renderCommentIconLinks();
         $(document).trigger('mbc:comment:new', message.data);
-
-        //
     });
 
     $(document).on('click', '#filterSwitch', function(e) {
