@@ -1,5 +1,5 @@
 /*
- Component: ui.comment
+ Component: mbc.main
  */
 
 MBC = {
