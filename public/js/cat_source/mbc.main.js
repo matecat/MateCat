@@ -109,7 +109,6 @@ if ( MBC.enabled() )
         }
     };
 
-
     var source = SSE.getSource('comments');
 
     source.addEventListener('message', function(e) {
