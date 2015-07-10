@@ -767,11 +767,6 @@ if ( MBC.enabled() )
         // load for history
     });
 
-
-    $(document).on('beforeHashChange', function(ev, hash) {
-        // TODO: check if this is still useful
-    });
-
     $(document).on('keyup', '.mbc-comment-textarea', function(e) {
         var maxHeight = 100 ;
         var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;

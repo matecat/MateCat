@@ -1747,7 +1747,6 @@ console.log('changeStatus');
 		} else {
 			setTimeout(function() {
 //				var hash_value = window.location.hash;
-                $(document).trigger('beforeHashChange', window.location.hash);
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
