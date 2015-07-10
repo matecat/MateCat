@@ -255,14 +255,12 @@ if ( MBC.enabled() )
     }, false);
 
     source.addEventListener('open', function(e) {
-        console.log('SSE connection open');
+        // TODO: handle event
     }, false);
 
     source.addEventListener('error', function(e) {
-        console.log(e.readyState);
-
         if (e.readyState == EventSource.CLOSED) {
-            console.log('SSE connection closed');
+            // TODO: handle event
         }
     }, false);
 
@@ -942,7 +940,6 @@ if ( MBC.enabled() )
 
     $(document).on('mouseover', 'section', function(e) {
         $(e.relatedTarget).closest('section').find('.mbc-comment-link .txt').stop();
-        // console.log('mouseover', e.target);
 
         $(e.target).closest('section')
             .find('.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)')
@@ -969,7 +966,6 @@ if ( MBC.enabled() )
         },
         setLastCommentHash : function(value) {
             lastCommentHash = value ;
-            console.log(lastCommentHash);
         }
     });
 
