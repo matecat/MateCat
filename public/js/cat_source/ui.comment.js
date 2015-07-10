@@ -384,12 +384,6 @@ if ( MBC.enabled() )
 
         enableInputForm( root );
 
-        // update outer balloon with proper style depending on resolved / active state
-        // if ( root.find('.mbc-thread-wrap:first').is('.mbc-thread-wrap-resolved') ) {
-        //     root.addClass('mbc-thread-resolved');
-        //     root.removeClass('mbc-thread-active');
-        // }
-
         // Append resolve button
         if ( !threadIsResolved() ) {
             root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
