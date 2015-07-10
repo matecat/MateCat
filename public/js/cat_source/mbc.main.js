@@ -452,17 +452,6 @@ if ( MBC.enabled() )
         }
     }
 
-    var startTextAreaFocusCheck = function() {
-        if ($('article').hasClass('mbc-commenting-opened')) {
-            var f = setInterval(function() {
-                if ( $('.mbc-comment-textarea').is(':visible')) {
-                    clearInterval(f);
-                    $('.mbc-comment-textarea:visible').focus();
-                }
-            }, 500);
-        }
-    };
-
     var submitComment = function(el) {
         if ( nothingToSubmit() ) return;
 
@@ -574,21 +563,6 @@ if ( MBC.enabled() )
                     showGenericWarning();
                 }
             });
-        });
-
-        $(delegate).on('click', '.mbc-show-form-btn', function(e) {
-            e.preventDefault();
-            var t = $(e.target);
-            var outer = t.closest('.mbc-comment-balloon-outer');
-
-            outer.find('.mbc-post-comment').addClass('visible');
-            outer.find('.mbc-ask-comment-wrap').addClass('visible');
-
-            enableInputForm( outer );
-
-            t.remove();
-
-            startTextAreaFocusCheck();
         });
 
         $(delegate).on('click', '.show-thread-btn', function(e) {
@@ -758,10 +732,6 @@ if ( MBC.enabled() )
         if ( MBC.wasAskedByCommentHash( segment.absoluteId ) ) {
             openSegmentComment( $(e.segment) );
         }
-    });
-
-    $(document).on('EditAreaFocused', function(e) {
-        startTextAreaFocusCheck();
     });
 
     $(document).on('mbc:segment:update:links', function(ev, id_segment) {
