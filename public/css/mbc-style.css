@@ -1,9 +1,4 @@
 /*
-.mbc-layout = selector added to article for chat integration
-.mbc-comment-link = comment icon element
-*/
-
-/*
  ******
  ******
  Balloon basic layout
@@ -68,13 +63,13 @@
 }
 
 /* New message link  */
-a:link.mbc-new-message-link,
-a:visited.mbc-new-message-link {
+a.mbc-new-message-link:link,
+a.mbc-new-message-link:visited {
   color: #6d6e71;
   text-decoration: underline;
 }
 
-a:hover.mbc-new-message-link {
+a.mbc-new-message-link:hover {
   text-decoration: none;
 }
 
@@ -179,7 +174,6 @@ a:hover.mbc-new-message-link {
  ******
  ******
  */
-
 
 .mbc-resolved-comment {
   margin-top: 14px;
@@ -306,93 +300,75 @@ a:active.mbc-comment-btn {
   margin-top: 8px;
 }
 
-a:hover.mbc-comment-resolve-btn,
-a:active.mbc-comment-resolve-btn {
+a.mbc-comment-resolve-btn:hover,
+a.mbc-comment-resolve-btn:active {
   background: #7cc576;
   border: 1px solid #7cc576;
   color: #fff;
 }
 
+/*
+ ******
+ ******
+ Login invitation link in comment balloon
+ ******
+ ******
+ */
 
-
-.mbc-ask-btn {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  width: 96%;
-}
-
-.mbc-close-btn {
-  float: right;
-  font-size: 10px;
-  margin-right: 10px;
-  padding: 4px;
-  text-decoration: none;
-}
-
-a:link.mbc-close-btn,
-a:visited.mbc-close-btn {
-  color: #aeaeae;
-}
-
-a:hover.mbc-close-btn,
-a:active.mbc-close-btn {
-  color: #999;
-}
-
-.mbc-login-link {
-  display: inline-block;
-
-}
-
-a:link.mbc-login-link,
-a:visited.mbc-login-link {
+a.mbc-login-link:link,
+a.mbc-login-link:visited {
   color: #7f7f7f;
+  display: inline-block;
   font-size: 14px;
   padding: 0 4px 6px 0;
   text-decoration: underline;
 }
 
-a:hover.mbc-login-link,
-a:active.mbc-login-link {
+a.mbc-login-link:hover,
+a.mbc-login-link:active {
   text-decoration: none;
 }
+
+
+/*
+ ******
+ ******
+ Close icon duplicate
+ ******
+ ******
+ */
 
 /* style.css line 1612 */
-a:link.mbc-close-icon,
-a:visited.mbc-close-icon {
-  /*float: right;*/
-  font-size: 10px;
-  margin-right: 0;
-  padding: 4px;
-  width: 14px;
-  height: 14px;
-  padding-top: 0px;
-  padding-left: 0px;
-  vertical-align: middle;
-  display: block;
-  position: absolute;
-  right: 7px;
-  top: 0;
-  text-decoration: none;
-  font-size: 15px;
-  border-radius: 20px;
+a.mbc-close-icon:link,
+a.mbc-close-icon:visited {
   background: #fff;
+  border-radius: 20px;
   color: #AEAEAE;
+  display: block;
+  font-size: 15px;
+  height: 14px;
+  padding: 0;
+  position: absolute;
+  right: 8px;
+  text-decoration: none;
+  top: 0;
+  vertical-align: middle;
+  width: 14px;
 }
 
-a:hover.mbc-close-icon {  background: red;
+a.mbc-close-icon:hover {
+  background: red;
   color: #fff;
-  text-align: center;}
+  text-align: center;
+}
 
 
 .mbc-close-icon:before {
   content: "\ea0d";
-  text-align: center;
-  margin-top: 0px;
-  margin-left: -1px;
   display: block;
+  margin-left: -1px;
+  margin-top: 0px;
+  text-align: center;
   vertical-align: middle;
 }
 
@@ -420,6 +396,11 @@ a:hover.mbc-close-icon {  background: red;
   right: -8%;
   width: 8%;
   z-index: 999;
+}
+
+section:hover .mbc-comment-link {
+  /* styles based on .sid line 460 style.css */
+  color:#6d6e71
 }
 
 .mbc-comment-link .txt {
@@ -482,12 +463,6 @@ a:hover.mbc-close-icon {  background: red;
 }
 
 
-section:hover .mbc-comment-link {
-  /* styles based on .sid line 460 style.css */
-  color:#6d6e71
-}
-
-
 /* Dev Commento visibile Chiuso */
 
 article.mbc-commenting-closed {
@@ -511,7 +486,7 @@ article.mbc-commenting-opened {
   transition: width .2s ease;
 }
 
-article.mbc-commenting-opened section .mbc-comment-balloon-outer {
+article.mbc-commenting-opened .mbc-comment-balloon-outer {
   float: right;
   margin-right: -230px;
   position: absolute;
@@ -521,8 +496,14 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
   z-index: 10001;
 }
 
+/*
+ ******
+ ******
+ Ajax error messages
+ ******
+ ******
+ */
 
-/* Error messages */
 .mbc-ajax-message-wrap {
   padding: 6px 4px;
 }
@@ -567,7 +548,6 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
  ******
  ******
  */
-/* History balloon */
 .mbc-history-balloon-outer {
   background-color: #fff;
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
@@ -579,6 +559,7 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 }
 
 @media screen and (max-width: 1180px) {
+  /* Position follows icons in header */
   .mbc-history-balloon-outer {
     right: 70px;
   }
@@ -610,7 +591,6 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 
 .mbc-history-balloon {
   background-color: #fff;
-  /*margin-top: 12px;*/
   padding: 0 12px 12px 12px; /* Add padding for consistency with comment in thread layout */
   position: relative;
 }
@@ -618,10 +598,6 @@ article.mbc-commenting-opened section .mbc-comment-balloon-outer {
 .mbc-history-balloon-has-comment {
   max-height: 400px;
   overflow-y: auto;
-}
-
-.mbc-history-balloon-has-no-comments {
-  height: auto;
 }
 
 
