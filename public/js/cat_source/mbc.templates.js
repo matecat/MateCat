@@ -98,8 +98,8 @@ if ( MBC.enabled() )
             ' </div>' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
-            ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive notification</a>' +
-            ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="TODO: Write a comment..."></textarea>' +
+            ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
+            ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="Write a comment..."></textarea>' +
             ' <div>' +
             ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn pull-right hide">Comment</a>' +
             ' </div>' +
