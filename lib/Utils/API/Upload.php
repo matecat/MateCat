@@ -133,25 +133,26 @@ class Upload {
 
         } else {
 
+            $out_filename = ZipArchiveExtended::getFileName($fileName);
             if ( !$this->_isRightExtension( $fileUp ) ) {
-                throw new Exception ( __METHOD__ . " -> File Extension Not Allowed. '$fileName'" );
+                throw new Exception ( __METHOD__ . " -> File Extension Not Allowed. '".$out_filename."'" );
             }
 
             if ( !$this->_isRightMime( $fileUp ) ) {
-                throw new Exception ( __METHOD__ . " -> File Mime Not Allowed. '$fileName'" );
+                throw new Exception ( __METHOD__ . " -> File Mime Not Allowed. '$out_filename'" );
             }
 
             // NOTE FOR ZIP FILES
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
             if ( $fileSize >= INIT::$MAX_UPLOAD_FILE_SIZE ) {
-                throw new Exception ( __METHOD__ . " -> File Dimensions Not Allowed. '$fileName'" );
+                throw new Exception ( __METHOD__ . " -> File Dimensions Not Allowed. '$out_filename'" );
             }
 
             //All Right!!! GO!!!
             $mod_name = self::_fixFileName( $fileName );
 
             if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name ) ) {
-                throw new Exception ( __METHOD__ . " -> Failed To Store File '$fileName' On Server." );
+                throw new Exception ( __METHOD__ . " -> Failed To Store File '$out_filename' On Server." );
             }
 
             //In Unix you can't rename or move between filesystems,
@@ -160,7 +161,7 @@ class Upload {
 
             // octal; changing mode
             if ( !chmod( $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name, 0664 ) ) {
-                throw new Exception ( __METHOD__ . " -> Failed To Set Permissions On File. '$fileName'" );
+                throw new Exception ( __METHOD__ . " -> Failed To Set Permissions On File. '$out_filename'" );
             }
 
         }
@@ -228,8 +229,12 @@ class Upload {
         //The message format is: __METHOD__ -> <message>.
         //The client output should be just <message>
         $msg = $errorArray['message'];
-        $msg = explode(" -> ", $msg);
-        $errorArray['message'] = $msg[1];
+        if(strpos($msg, " -> ") !== false) {
+            $msg                     = explode( " -> ", $msg );
+            $errorArray[ 'message' ] = $msg[ 1 ];
+        } else {
+            $errorArray['message'] = $msg;
+        }
         return $errorArray;
     }
 }
