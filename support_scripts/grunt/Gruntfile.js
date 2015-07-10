@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/sse.js',
-                    basePath + 'cat_source/ui.comment.js'
+                    basePath + 'cat_source/mbc.main.js'
 				],
 				dest: basePath + 'cat.js'
 			},
@@ -120,8 +120,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-text-replace');
 //	grunt.loadNpmTasks('grunt-contrib-jasmine');
-	
-	
+
+
   // Define your tasks here
 //	grunt.registerTask('default', ['concat']);
 //	grunt.registerTask('dev-watch', ['concat', 'uglify', 'removelogging']);

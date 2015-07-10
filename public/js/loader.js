@@ -10,7 +10,7 @@ Loader = {
 //		'cat'
 //	),
 	source_components: new Array (
-		'ui.core', 
+		'ui.core',
 		'ui.init',
 		'ui.render',
 		'ui.events',
@@ -25,7 +25,7 @@ Loader = {
         'ui.offline',
         'ui.split',
         'sse',
-        'ui.comment'
+        'mbc.main'
 	),
     other_components: new Array (
         'tm'
@@ -61,7 +61,7 @@ Loader = {
 		}
 		for (var j=0; j<vals.length; j++) {
 			if (vals[j].name==a) {return vals[j].value;}
-		
+
 		}
 		return;
 	},
@@ -79,7 +79,7 @@ Loader = {
 		} else {
 			this.include('cat.js', '', this.basePath);
 		}
-		
+
 //		for (var i = 0; i < c.length; i++) this.include(c[i] + '.js', '', this.basePath);
 
 //		if(this.detect('log')) {
