@@ -541,7 +541,6 @@ if ( MBC.enabled() )
         $(delegate).on('click', '.mbc-comment-send-btn', function(e) {
             e.preventDefault();
             submitComment( $(e.target).closest('section') );
-            // var id_segment = el.attr('id').split('-')[1];
         });
 
         $(delegate).on('click', '.mbc-comment-resolve-btn', function(e) {
@@ -576,8 +575,6 @@ if ( MBC.enabled() )
 
             outer.find('.mbc-post-comment').addClass('visible');
             outer.find('.mbc-ask-comment-wrap').addClass('visible');
-
-
 
             enableInputForm( outer );
 
