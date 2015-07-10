@@ -174,17 +174,12 @@ if ( MBC.enabled() )
         root.show();
     }
 
-    var renderSegmentCommentsFirstInput = function(el) {
-        var root = $(tpls.segmentThread);
-        var inputForm = $(tpls.inputForm);
-
+    var renderInputForm = function() {
+        var inputForm = $( tpls.inputForm );
         inputForm.find('.mbc-new-message-notification').hide();
-
         inputForm.find('.mbc-comment-username-label')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() );
-
-        inputForm.addClass('mbc-first-input');
 
         if (loggedUserName) {
             inputForm.find('.mbc-login-link').addClass('vis-hidden');
@@ -193,11 +188,21 @@ if ( MBC.enabled() )
             inputForm.find('.mbc-comment-username-label')
                     .attr('title', 'Click to edit');
         }
+        inputForm.find('.mbc-comment-send-btn').hide();
+        return inputForm ;
+    }
+
+    var renderSegmentCommentsFirstInput = function(el) {
+        $('.mbc-comment-balloon-outer').remove();
+
+        var root = $(tpls.segmentThread);
+        var inputForm = renderInputForm() ;
+        inputForm.addClass('mbc-first-input');
 
         root.append( inputForm );
-
         el.append( root.show() );
-        startTextAreaFocusCheck();
+
+        inputForm.find('textarea').focus();
     }
 
     var populateWithComments = function(root, comments) {
@@ -238,13 +243,12 @@ if ( MBC.enabled() )
             return comments[i-1].thread_id ;
         }
 
-        var inputForm = $( tpls.inputForm )  ;
-        inputForm.find('.mbc-new-message-notification').hide();
-
+        var inputForm = renderInputForm();
         inputForm.addClass('mbc-reply-input');
+
         root.append( inputForm ) ;
 
-        enableInputForm( root );
+        // enableInputForm( root );
 
         // Append resolve button
         if ( !threadIsResolved() ) {
@@ -289,11 +293,11 @@ if ( MBC.enabled() )
     }
 
     var renderSegmentComments = function(el) {
+        $('.mbc-comment-balloon-outer').remove();
+
         var segment = new UI.Segment(el) ;
         var comments = db.getCommentsBySegment( segment.absoluteId );
         var root = $(tpls.segmentThread);
-
-        $('.mbc-comment-balloon-outer').remove();
 
         populateWithComments(root, comments);
 
