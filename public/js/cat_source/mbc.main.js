@@ -187,9 +187,9 @@ if ( MBC.enabled() )
         inputForm.addClass('mbc-first-input');
 
         if (loggedUserName) {
-            inputForm.find('.mbc-login-link').addClass('hide');
+            inputForm.find('.mbc-login-link').addClass('vis-hidden');
         } else {
-            inputForm.find('.mbc-login-link').addClass('show');
+            inputForm.find('.mbc-login-link').addClass('vis-visible');
             inputForm.find('.mbc-comment-username-label')
                     .attr('title', 'Click to edit');
         }
@@ -511,8 +511,8 @@ if ( MBC.enabled() )
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() ) ;
 
-        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('hide');
-        else outer.find('.mbc-post-comment .mbc-login-link').addClass('show');
+        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('vis-hidden');
+        else outer.find('.mbc-post-comment .mbc-login-link').addClass('vis-visible');
     }
 
     // start event binding
