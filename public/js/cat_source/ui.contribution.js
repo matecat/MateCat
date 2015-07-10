@@ -82,7 +82,7 @@ $.extend(UI, {
 		if ((!n.length) && (next)) {
 			return false;
 		}
-		var id = n.attr('id'); 
+		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
@@ -283,7 +283,7 @@ $.extend(UI, {
 					UI.addWarningToSearchDisplay();
 				UI.setChosenSuggestion(1);
 				copySuggestionDone = true;
-			}						
+			}
 //			if (copySuggestionDone) {
 //				if (isActiveSegment) {
 //				}
@@ -563,7 +563,7 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.chooseSuggestion('6');
-		}); 
+		});
 	},
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
