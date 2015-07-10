@@ -536,11 +536,6 @@ if ( MBC.enabled() )
             openSegmentComment( section );
         });
 
-        $(delegate).on('click', '.mbc-history-balloon-outer .mbc-close-btn', function(e) {
-            e.preventDefault();
-            $(e.target).closest('.mbc-history-balloon-outer').toggleClass('visible');
-        });
-
         $(delegate).on('click', 'section .mbc-close-btn', function(e) {
             e.preventDefault();
             closeSegment( $(e.target).closest('section') );
@@ -643,6 +638,11 @@ if ( MBC.enabled() )
             var scrollableArea = new Scrollable(root.find('.mbc-comments-wrap')[0]);
             scrollableArea.scrollToBottom();
         });
+    });
+
+    $(document).on('click', '.mbc-history-balloon-outer .mbc-close-btn', function(e) {
+        e.preventDefault();
+        $(e.target).closest('.mbc-history-balloon-outer').toggleClass('visible');
     });
 
     $(document).on('click', '.mbc-show-comment-btn', function(e) {

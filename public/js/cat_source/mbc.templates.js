@@ -55,7 +55,7 @@ if ( MBC.enabled() )
 
         historyNoComments : '' +
             ' <div class="mbc-comment-balloon-header"> ' +
-            '   <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
+            '   <a href="javascript:;" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a> ' +
             ' </div> ' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
             '    <div class="mbc-thread-wrap"> ' +
@@ -120,7 +120,7 @@ if ( MBC.enabled() )
             ' <div class="mbc-comment-balloon-outer">' +
             ' <div class="mbc-triangle mbc-triangle-topleft"></div>' +
             ' <div class="mbc-comment-balloon-header"> ' +
-            '   <a href="#" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a>' +
+            '   <a href="javascript:;" class="mbc-close-btn mbc-close-icon mbc-close-comment-icon"></a>' +
             ' </div>' +
             ' <div class="mbc-comments-wrap">' +
             ' ' +
