@@ -28,9 +28,20 @@
 
 /*
  ******
+ Post new comment
+ ******
+ */
+.mbc-reply-input {
+  background: #f7f7f7;
+  border-top: 1px solid #dadada;
+  box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+
+/*
  ******
  Past comments wrap
- ******
  ******
  */
 
@@ -44,9 +55,87 @@
 
 /*
  ******
+ Past comment wrap common
+ ******
+ */
+.mbc-thread-wrap {
+  padding: 14px 12px;
+}
+
+/*
+ ******
+ Past comment thread wrap status active
+ ******
+ */
+.mbc-thread-wrap-active {
+  background: #f7f7f7;
+}
+
+/*
+ ******
+ Past comment thread wrap status resolved
+ ******
+ */
+.mbc-thread-wrap-resolved {
+  background: rgba(124,197,118,.05);
+  border-bottom: 2px solid rgba(124,197,118,.4); /* #7cc576 */
+}
+
+/*
+ ******
+ Show past comment
+ ******
+ */
+.mbc-show-comment:not(:first-of-type) {
+  margin-top: 14px;
+}
+
+.mbc-comments-wrap .mbc-show-comment:not(:last-of-type),
+.mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
+  border-bottom: 1px solid #dadada;
+}
+
+/*
+ ******
+ Past comment details
+ ******
+ */
+.mbc-comment-info-wrap {
+  clear: both;
+  margin: 4px 0;
+}
+
+.mbc-comment-info {
+  color: #7f7f7f;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: lighter;
+  padding-bottom: 2px;
+}
+
+/*
+ Email past comment details
+ */
+.mbc-comment-email-label {
+  color: #7f7f7f;
+  font-weight: normal;
+  width: 90%; /* set width below 100% and allow truncation */
+}
+
+/*
+ Message past comment details
+ */
+.mbc-comment-body {
+  color: #323232;
+  font-size: 14px;
+  margin: 12px 0 16px;
+  word-wrap: break-word;
+}
+
+
+/*
  ******
  New incoming message notification
- ******
  ******
  */
 
@@ -77,44 +166,6 @@ a.mbc-new-message-link:hover {
   font-size: 14px;
   font-weight: bold;
   padding: 0 6px 0 0;
-}
-
-
-/* Wrap input post comment */
-.mbc-reply-input {
-  background: #f7f7f7;
-  border-top: 1px solid #dadada;
-  box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
-  position: relative;
-}
-
-/* Thread common */
-.mbc-thread-wrap {
-  padding: 14px 12px;
-}
-
-/* Thread active */
-.mbc-thread-wrap-active {
-  background: #f7f7f7;
-}
-
-/* Thread active */
-.mbc-thread-wrap-resolved {
-  background: rgba(124,197,118,.05);
-  border-bottom: 2px solid rgba(124,197,118,.4); /* #7cc576 */
-}
-
-.mbc-show-comment:not(:first-of-type) {
-  margin-top: 14px;
-}
-
-.mbc-post-comment {
-  margin: 0;
-}
-
-.mbc-comments-wrap .mbc-show-comment:not(:last-of-type),
-.mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
-  border-bottom: 1px solid #dadada;
 }
 
 
@@ -175,22 +226,28 @@ a.mbc-new-message-link:hover {
  ******
  */
 
-.mbc-resolved-comment {
-  margin-top: 14px;
-}
-
-/* Common selector for labels in speech balloon */
+/*
+ ******
+ Common label
+ ******
+ */
 .mbc-comment-label {
   display: block;
   font-size: 14px;
 }
 
+/*
+ Username label
+ */
 .mbc-comment-username-label {
   color: #323232;
   font-weight: bold;
   margin-bottom: 4px;
 }
-
+/*
+ Anonymous label
+ Account for inline edit functionality and state
+ */
 .mbc-comment-anonymous-label {
   padding: 2px 5px 2px 0;
 }
@@ -200,37 +257,19 @@ a.mbc-new-message-link:hover {
   cursor: text;
 }
 
+/*
+ ******
+ Resolved labels
+ ******
+ */
+.mbc-resolved-comment {
+  margin-top: 14px;
+}
+
 .mbc-comment-resolvedby {
   width: 110px;
 }
 
-.mbc-comment-info-wrap {
-  clear: both;
-  margin: 4px 0;
-}
-
-.mbc-comment-info {
-  color: #7f7f7f;
-  display: inline-block;
-  font-size: 11px;
-  font-weight: lighter;
-  padding-bottom: 2px;
-}
-
-.mbc-comment-email-label {
-  color: #7f7f7f;
-  font-weight: normal;
-  width: 90%; /* set width below 100% and allow truncation */
-}
-
-.mbc-comment-body {
-  color: #323232;
-  font-size: 14px;
-  margin: 12px 0 16px;
-  word-wrap: break-word;
-}
-
-/* Resolved label next to Username the thread was resolved by */
 .mbc-comment-resolved-label {
   color: #7cc576; /* per-green line 2350 style.css */
   float: right;
@@ -248,12 +287,15 @@ a.mbc-new-message-link:hover {
  ******
  */
 
-/* Common selector for buttons in speech balloon */
-.mbc-comment-btn {
-  background: #dcdedf;
-  border: 1px solid #999;
+/*
+ ******
+ Common button
+ ******
+ */
+a:link.mbc-comment-btn,
+a:visited.mbc-comment-btn,
+a:hover.mbc-comment-btn {
   border-radius: 2px;
-  color: #333;
   cursor: pointer;
   display: inline-block;
   font-size: 14px;
@@ -264,16 +306,23 @@ a.mbc-new-message-link:hover {
   text-transform: uppercase;
 }
 
-a:link.mbc-comment-btn,
-a:visited.mbc-comment-btn {
-
+/*
+ ******
+ Button default
+ ******
+ */
+a:link.mbc-comment-default-btn,
+a:visited.mbc-comment-default-btn {
+  background: #dcdedf;
+  border: 1px solid #999;
+  color: #333;
 }
 
-a:hover.mbc-comment-btn {
+a:hover.mbc-comment-default-btn {
   border: 1px solid #666;
 }
 
-a:active.mbc-comment-btn {
+a:active.mbc-comment-default-btn {
   border: 1px solid #000; /* .btn:active line 643 style.css */
 }
 
@@ -283,37 +332,26 @@ a:active.mbc-comment-btn {
  Now follows translated button common.css line 1188
  ******
  */
-.mbc-comment-send-btn {
+a.mbc-comment-send-btn:link,
+a.mbc-comment-send-btn:visited {
   background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
   background: -moz-linear-gradient(top,  #09beec,  #119ec4);
   background: linear-gradient(top,  #09beec,  #119ec4);
   border: 1px solid #848689;
-  border-radius: 2px;
   color: #fff;
-  cursor: pointer;
-  display: inline-block;
-  font-size: 14px;
-  font-weight: bold;
-  margin: 10px 0 0;
-  padding: 6px 12px;
-  text-decoration: none;
-  text-transform: uppercase;
 }
 
-.mbc-comment-send-btn:hover {
+a.mbc-comment-send-btn:hover {
+  background: #12b4df;
   border: 1px solid #000;
   -webkit-box-shadow: 0 1px 2px #ccc;
   box-shadow: 0 1px 2px #ccc;
 }
 
-.mbc-comment-send-btn:active {
+a.mbc-comment-send-btn:active {
   -moz-box-shadow: inset 0 0 1px 1px #888;
   -webkit-box-shadow: inset 0 0 1px 1px #888;
   box-shadow: inset 0 0 1px 1px #888;
-}
-
-.mbc-comment-send-btn:hover {
-  background: #12b4df;
 }
 
 /*
@@ -321,8 +359,12 @@ a:active.mbc-comment-btn {
  Resolve button in comment balloon
  ******
  */
-.mbc-comment-resolve-btn {
-  margin-top: 8px;
+
+a.mbc-comment-resolve-btn:link,
+a.mbc-comment-resolve-btn:visited {
+  background: #dcdedf;
+  border: 1px solid #999;
+  color: #333;
 }
 
 a.mbc-comment-resolve-btn:hover,
