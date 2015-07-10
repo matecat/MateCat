@@ -568,7 +568,6 @@ function ParsedHash( hash ) {
     this.onlyActionRemoved = function( hash ) {
         var current = new ParsedHash( hash );
         var diff = this.toString().split( current.toString() );
-        console.log(diff);
         return diff[1] == actionSep + MBC.const.commentAction ;
     }
 
@@ -578,7 +577,6 @@ function ParsedHash( hash ) {
 
     this.cleanupHash = function() {
         notifyModules();
-        console.log('@@ cleaning up hash');
         window.location.hash = UI.parsedHash.segmentId ;
     }
 
