@@ -1135,7 +1135,6 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
         if ( $key == 'status' ) {
             if ( $propagateToTranslated ) {
-//                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
                 $q[ ]      = $key . " = '".$db->escape( $value )."' ";
                 $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated', '$st_approved', '$st_rejected' )";
             }
@@ -1147,6 +1146,31 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
             $q[ ] = $key . " = " . (float)$value;
         }
     }
+
+
+    //if the new status to set is TRANSLATED,
+    // sum the equivalent words of segments equals to me with the status different from MINE
+    $queryTotals = "
+           SELECT SUM(eq_word_count) as total, status
+           FROM segment_translations
+           WHERE id_job = {$params['id_job']}
+           AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+           AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
+           AND id_segment != $_idSegment
+           AND status != '{$params['status']}'
+           GROUP BY status
+           -- WITH ROLLUP
+    ";
+
+
+    $totals = $db->fetch_array( $queryTotals );
+    $err = $db->get_error();
+    if ( $err[ 'error_code' ] != 0 ) {
+        throw new Exception( "Error in counting total equivalent words for propagation: " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ]
+                . "\n" . $queryTotals . "\n" . var_export( $params, true ),
+                -$err[ 'error_code' ] );
+    }
+
 
     //the job password seems a better idea to search only the segments in the actual chunk,
     //but it needs an update in join on 2 tables.
@@ -1173,7 +1197,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
                 -$err[ 'error_code' ] );
     }
 
-    return $db->affected_rows;
+    return $totals;
 }
 
 /*
