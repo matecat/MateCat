@@ -54,7 +54,7 @@ class Comments_CommentEmail {
     }
 
     private function buildLink() {
-        return $this->url ;
+        return $this->url . ',comment' ; // TODO: constantize `comment`
     }
 
     private function verbalizeAction() {
