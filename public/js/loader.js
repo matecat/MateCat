@@ -11,6 +11,7 @@ Loader = {
 //	),
 	source_components: new Array (
 		'ui.core',
+    'ui.classes',
 		'ui.init',
 		'ui.render',
 		'ui.events',

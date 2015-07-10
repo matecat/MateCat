@@ -289,7 +289,8 @@ if ( MBC.enabled() )
     }
 
     var renderSegmentComments = function(el) {
-        var comments = db.getCommentsBySegment( UI.getSegmentId(el) );
+        var segment = new UI.Segment(el) ;
+        var comments = db.getCommentsBySegment( segment.absoluteId );
         var root = $(tpls.segmentThread);
 
         $('.mbc-comment-balloon-outer').remove();
@@ -326,7 +327,8 @@ if ( MBC.enabled() )
     var renderSegmentBalloon = function(el) {
         if (! $(el).is(':visible') ) return ;
 
-        var comments = db.getCommentsBySegment( UI.getSegmentId(el) );
+        var segment = new UI.Segment(el) ;
+        var comments = db.getCommentsBySegment( segment.absoluteId );
         if (comments.length > 0) {
             renderSegmentComments(el);
             var scrollableArea = new Scrollable( el.find('.mbc-comments-wrap')[0]);
@@ -348,10 +350,13 @@ if ( MBC.enabled() )
     }
 
     var renderCommentIconLinks = function() {
+        var segment ;
         $('section').each(function(i, el) {
-            console.log( UI.getSegmentId(el) );
+            segment = new UI.Segment( el ) ;
 
-            $(document).trigger('mbc:segment:update:links', UI.getSegmentId(el) );
+            if ( (! segment.isSplit()) || segment.isFirstOfSplit()) {
+                $(document).trigger('mbc:segment:update:links', segment.absoluteId );
+            }
         });
     }
 
@@ -455,14 +460,14 @@ if ( MBC.enabled() )
     var submitComment = function(el) {
         if ( nothingToSubmit() ) return;
 
-        var id_segment = el.attr('id').split('-')[1];
+        var segment = new UI.Segment( el );
 
         var data = {
             action     : 'comment',
             _sub       : 'create',
             id_client  : config.id_client,
             id_job     : config.job_id,
-            id_segment : id_segment,
+            id_segment : segment.absoluteId,
             username   : getUsername(),
             password   : config.password,
             source_page  : getSourcePage(),
@@ -546,17 +551,18 @@ if ( MBC.enabled() )
         $(delegate).on('click', '.mbc-comment-resolve-btn', function(e) {
             e.preventDefault();
             clearGenericWarning();
-            var id_segment = UI.getSegmentId( (e.target).closest('section') );
+
+            var segment = new UI.Segment( $(e.target).closest('section') );
 
             var data = {
-                action     : 'comment',
-                _sub       : 'resolve',
-                id_job     : config.job_id,
-                id_client  : config.id_client,
-                id_segment : id_segment,
-                password   : config.password,
-                source_page  : getSourcePage(),
-                username   : getUsername(),
+                action      : 'comment',
+                _sub        : 'resolve',
+                id_job      : config.job_id,
+                id_client   : config.id_client,
+                id_segment  : segment.absoluteId,
+                password    : config.password,
+                source_page : getSourcePage(),
+                username    : getUsername(),
             }
 
             APP.doRequest({
@@ -677,9 +683,13 @@ if ( MBC.enabled() )
         });
     });
 
-    var initCommentLinks = function(el) {
+    var initCommentLinks = function() {
+        var section ;
         $('section').each(function(i, el) {
-            $(el).append( $(tpls.commentLink) );
+            section = new UI.Segment( el ) ;
+            if ((! section.isSplit()) || section.isFirstOfSplit()) {
+                $(el).append( $(tpls.commentLink) );
+            }
         });
     }
 
@@ -716,13 +726,10 @@ if ( MBC.enabled() )
         updateHistoryWithLoadedSegments();
         $(document).trigger('mbc:segment:update:links', data.id_segment);
 
-        // TODO: show new message
-        var section = UI.getSegmentById( data.id_segment ) ;
+        var section = UI.Segment.findEl( data.id_segment ) ;
         if ( $('section .mbc-thread-wrap').is(':visible') ) {
             appendReceivedMessage( section );
         }
-
-        // check if segment is open, if so reRenderComments
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
@@ -731,7 +738,7 @@ if ( MBC.enabled() )
         updateHistoryWithLoadedSegments();
 
         $(document).trigger('mbc:segment:update:links', data.id_segment);
-        appendSubmittedMessage( UI.getSegmentById( data.id_segment ) );
+        appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
     });
 
     $(window).on('segmentClosed', function(e) {
@@ -739,8 +746,9 @@ if ( MBC.enabled() )
     });
 
     $(window).on('segmentOpened', function(e) {
-        var sid = UI.getSegmentId($(e.segment));
-        if ( MBC.wasAskedByCommentHash(sid) ) {
+        var segment = new UI.Segment($(e.segment)) ;
+
+        if ( MBC.wasAskedByCommentHash( segment.absoluteId ) ) {
             openSegmentComment( $(e.segment) );
         }
     });
@@ -751,7 +759,7 @@ if ( MBC.enabled() )
 
     $(document).on('mbc:segment:update:links', function(ev, id_segment) {
         var comments_obj = db.getCommentsCountBySegment( id_segment ) ;
-        var el = UI.getSegmentById(id_segment) ;
+        var el = UI.Segment.findEl(id_segment) ;
         resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
     });
 
@@ -781,7 +789,6 @@ if ( MBC.enabled() )
         } else {
             $(this).css("overflow-y", "hidden");
         }
-
     });
 
     $(document).on('focus', '.mbc-comment-input', function(e) {
@@ -794,7 +801,7 @@ if ( MBC.enabled() )
 
     $(document).on('ui:segment:focus', function(e, sid) {
         if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
-            openSegmentComment( UI.getSegmentById( sid ) );
+            openSegmentComment( UI.Segment.findEl( sid ) );
             lastCommentHash = null ;
         }
     });
