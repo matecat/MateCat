@@ -30,6 +30,22 @@ UI = {
         console.log( $.cookie( 'tmpanel-open' ) );
         if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
+    getPrintableFileSize: function(filesizeInBytes){
+        //var ext = " B";
+        //
+        //if(filesizeInBytes > 1024){
+            filesizeInBytes = filesizeInBytes / 1024;
+            ext = " KB";
+        //}
+
+        if( filesizeInBytes > 1024 ){
+            filesizeInBytes = filesizeInBytes / 1024;
+            ext = " MB";
+        }
+
+        return  Math.round(filesizeInBytes * 100 ,2)/100 + ext;
+
+    },
     enableAnalyze: function () {
         enableAnalyze();
     },
@@ -291,7 +307,7 @@ $( function () {
         console.log( data.files );
         $( '.progress', $( data.context[0] ) ).before( '<div class="operation">Uploading</div>' );
     } ).bind( 'fileuploadprogress', function ( e, data ) {
-//		console.log(data.loaded);
+		console.log(data.loaded);
     } ).bind( 'fileuploadstart', function ( e ) {
         console.log( 'FIRE fileuploadstart' );
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
@@ -741,7 +757,9 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         rowClone.addClass( 'ready' );
 
                         //change name to the file
-                        $( rowClone ).find( '.name' ).first().html( file );
+                        $( rowClone ).find( '.name' ).first().html( file['name'] );
+
+                        $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize(file['size']) );
 
                         var oldDataUrl = $( 'button[role="button"]', rowClone ).data("url");
 

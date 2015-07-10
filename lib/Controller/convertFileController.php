@@ -85,12 +85,25 @@ class convertFileController extends ajaxController {
                 $fileObjects = $conversionHandler->extractZipFile();
                 //call convertFileWrapper and start conversions for each file
 
-                $realFileObjectPaths = array_map(
+                $realFileObjectInfo = $fileObjects;
+                $realFileObjectNames = array_map(
                         array('ZipArchiveExtended', 'getFileName'),
                         $fileObjects
                 );
 
-                $this->result['data']['zipFiles'] = json_encode($realFileObjectPaths);
+                foreach($realFileObjectNames as $i => &$fileObject){
+                    $__fileName = $fileObject;
+                    $__realFileName = $realFileObjectInfo[$i];
+                    $filesize = filesize($this->intDir . DIRECTORY_SEPARATOR . $__realFileName);
+
+                    $fileObject = array(
+                        'name' => $__fileName,
+                        'size' => $filesize
+                    );
+                    $realFileObjectInfo[$i] = $fileObject;
+                }
+
+                $this->result['data']['zipFiles'] = json_encode($realFileObjectNames);
 
                 $stdFileObjects = array();
 
