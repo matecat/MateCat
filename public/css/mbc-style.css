@@ -220,6 +220,7 @@ a.mbc-new-message-link:hover {
 .mbc-comment-email-label {
   color: #7f7f7f;
   font-weight: normal;
+  width: 90%; /* set width below 100% and allow truncation */
 }
 
 .mbc-comment-body {
@@ -235,7 +236,7 @@ a.mbc-new-message-link:hover {
   float: right;
   font-size: 12px;
   font-weight: bold;
-  margin: -18px 2px 0 0;
+  margin: -17px 2px 0 0;
   text-transform: uppercase;
 }
 
@@ -276,7 +277,12 @@ a:active.mbc-comment-btn {
   border: 1px solid #000; /* .btn:active line 643 style.css */
 }
 
-/* Comment button follows translated button common.css line 1188 */
+/*
+ ******
+ Comment button in comment balloon
+ Now follows translated button common.css line 1188
+ ******
+ */
 .mbc-comment-send-btn {
   background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
   background: -moz-linear-gradient(top,  #09beec,  #119ec4);
@@ -294,8 +300,27 @@ a:active.mbc-comment-btn {
   text-transform: uppercase;
 }
 
+.mbc-comment-send-btn:hover {
+  border: 1px solid #000;
+  -webkit-box-shadow: 0 1px 2px #ccc;
+  box-shadow: 0 1px 2px #ccc;
+}
 
-/* Resolve button bottom of thread */
+.mbc-comment-send-btn:active {
+  -moz-box-shadow: inset 0 0 1px 1px #888;
+  -webkit-box-shadow: inset 0 0 1px 1px #888;
+  box-shadow: inset 0 0 1px 1px #888;
+}
+
+.mbc-comment-send-btn:hover {
+  background: #12b4df;
+}
+
+/*
+ ******
+ Resolve button in comment balloon
+ ******
+ */
 .mbc-comment-resolve-btn {
   margin-top: 8px;
 }
@@ -376,12 +401,16 @@ a.mbc-close-icon:hover {
 /*
  ******
  ******
- Comment icon next to each segment
+ Comment intent next to each segment
  ******
  ******
  */
 
-/* Comment icon in layout */
+/*
+ ******
+ Comment intent element
+ ******
+ */
 .mbc-comment-link {
   /* styles based on .sid line 376 style.css */
   color: #999;
@@ -403,6 +432,11 @@ section:hover .mbc-comment-link {
   color:#6d6e71
 }
 
+/*
+ ******
+ Txt in comment intent element
+ ******
+ */
 .mbc-comment-link .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
@@ -412,11 +446,28 @@ section:hover .mbc-comment-link {
   width: 80px;
 }
 
+/*
+ ******
+ Icon in comment intent element
+ ******
+ */
 .mbc-comment-icon {
   font-size: 23px;
 }
 
-/* Common selector for notification highlighter of active comments */
+/*
+ ******
+ ******
+ Notification elements
+ ******
+ ******
+ */
+
+/*
+ ******
+ Common highlight element properties
+ ******
+ */
 .mbc-comment-notification {
   border: 1px solid #fff;
   border-radius: 14px;
@@ -427,24 +478,34 @@ section:hover .mbc-comment-link {
   text-align: center;
 }
 
+/*
+ Highlight element unique properties
+ */
 .mbc-comment-highlight {
   background: #ffe400;
 }
 
+/*
+ Invitation element unique properties
+ */
 .mbc-comment-highlight-invite {
   background: #1451CC;
   color: #fff;
   position: absolute;
 }
 
-/* Notification highlighter in segment */
+/*
+ Highlight element in segment unique properties
+ */
 .mbc-comment-highlight-segment {
   left: 44px;
   position: absolute;
   top: 10px;
 }
 
-/* Notification highlighter in header */
+/*
+ Highlight element in header unique properties
+ */
 .mbc-comment-highlight-history {
   color:#6d6e71;
   position: absolute;
@@ -456,36 +517,61 @@ section:hover .mbc-comment-link {
   color: #6d6e71;
 }
 
-/* Notification highlighter in history balloon */
+/*
+ Highlight element in history balloon unique properties
+ */
 .mbc-comment-highlight-balloon-history {
   color: #6d6e71;
   float: right;
 }
 
 
-/* Dev Commento visibile Chiuso */
+/*
+ ******
+ ******
+ Article state follwing comment balloon activation
+ ******
+ ******
+ */
 
+
+/*
+ ******
+ Commenting closed. Article width back to default
+ ******
+ */
 article.mbc-commenting-closed {
   width: 87.5%; /* add selector to article tag line 874 style.css */
-
 }
 
+/*
+ ******
+ Commenting closed. Hide comment ballon
+ ******
+ */
 article.mbc-commenting-closed .mbc-comment-balloon-outer {
   display: none;
 }
 
-
-/* Dev Commento visibile Aperto */
-
+/*
+ ******
+ Commenting opened. Article width reduced and room made for comment ballon
+ ******
+ */
 article.mbc-commenting-opened {
-  width: 76.5%; /* add selector to article tag line 874 style.css */
   -webkit-transform: translate3d(0, 0, 0);
   -webkit-backface-visibility: hidden;
   -webkit-perspective: 1000;
   -webkit-transition: width .2s ease;
   transition: width .2s ease;
+  width: 76.5%;
 }
 
+/*
+ ******
+ Commenting opened. Draw comment ballon
+ ******
+ */
 article.mbc-commenting-opened .mbc-comment-balloon-outer {
   float: right;
   margin-right: -230px;
@@ -539,8 +625,6 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   color:#ccc;
 }
 
-
-
 /*
  ******
  ******
@@ -548,6 +632,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
  ******
  ******
  */
+
 .mbc-history-balloon-outer {
   background-color: #fff;
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
@@ -575,20 +660,6 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   margin-top: 16px;
 }
 
-
-/* TODO: organise triangle */
-.mbc-triangle-top {
-  border-right-color: #fff;
-  border-right-style: solid;
-  border-right-width: 14px;
-  border-top: 14px solid transparent;
-  float: right;
-  margin-right: 20px;
-  margin-top: -24px;
-  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-}
-
 .mbc-history-balloon {
   background-color: #fff;
   padding: 0 12px 12px 12px; /* Add padding for consistency with comment in thread layout */
@@ -601,7 +672,13 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 
 
-/* Helpers */
+/*
+ ******
+ ******
+ Helpers
+ ******
+ ******
+ */
 
 .pull-left {
   float: left;
@@ -611,13 +688,18 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   float: right;
 }
 
+/*
+  Truncate text in label
+ */
 .mbc-truncate {
-  width: 90%;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/*
+  Set box model to border and account for border's width
+ */
 .mbc-comment-balloon-outer *,
 .mbc-history-balloon-outer * {
   -webkit-box-sizing: border-box;
@@ -626,29 +708,54 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 
 .divider {
-  height: 1px;
-  width:100%;
+  background-color: #dadada;
   display:block; /* for use on default inline elements like span */
+  height: 1px;
   margin: 0;
   overflow: hidden;
-  background-color: #dadada;
+  width:100%;
 }
 
+/*
+ ******
+ Triangle in balloon
+ ******
+ */
 .mbc-triangle {
-  width: 0;
   height: 0;
+  width: 0;
 }
 
+/*
+ Triangle top top in history balloon
+ */
+.mbc-triangle-top {
+  border-right: 14px solid #fff;
+  border-top: 14px solid transparent;
+  float: right;
+  margin-right: 20px;
+  margin-top: -24px;
+  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+}
+
+/*
+ Triangle top left in comment balloon
+ */
 .mbc-triangle-topleft {
-  border-top-style: solid;
-  border-top-width: 10px;
-  border-top-color: #f7f7f7;
+  border-top: 10px solid #f7f7f7;
   border-left: 12px solid transparent;
   margin-left: -12px;
   -webkit-filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
   filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
 }
 
+
+/*
+ ******
+ Clearfix helpers
+ ******
+ */
 .mbc-clearfix {
   *zoom: 1;
 }
@@ -663,6 +770,11 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   clear: both;
 }
 
+/*
+ ******
+ Display and visibility helpers
+ ******
+ */
 .hide {
   display: none;
 }
