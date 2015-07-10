@@ -25,7 +25,8 @@ Loader = {
         'ui.offline',
         'ui.split',
         'sse',
-        'mbc.main'
+        'mbc.main',
+        'mbc.templates'
 	),
     other_components: new Array (
         'tm'
