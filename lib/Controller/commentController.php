@@ -93,13 +93,10 @@ class commentController extends ajaxController {
         $this->prepareCommentData();
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
-
         $this->new_record = $commentDao->resolveThread( $this->struct );
 
         $this->enqueueComment();
-
         $this->sendEmail();
-
         $this->result[ 'data' ][ 'entries' ] = array( $this->payload );
     }
 
@@ -115,15 +112,11 @@ class commentController extends ajaxController {
         $this->prepareCommentData();
 
         $commentDao = new Comments_CommentDao( Database::obtain() );
-
         $this->new_record = $commentDao->saveComment( $this->struct );
 
         $this->enqueueComment();
-
         $this->sendEmail();
-
         $this->result[ 'data' ][ 'entries' ] = array( $this->payload ) ;
-
         $this->appendUser();
     }
 
@@ -230,7 +223,8 @@ class commentController extends ajaxController {
             'message'        => $this->new_record->message,
             'id_segment'     => $this->new_record->id_segment,
             'full_name'      => $this->new_record->full_name,
-            'source_page'      => $this->new_record->source_page,
+            'email'          => $this->new_record->email,
+            'source_page'    => $this->new_record->source_page,
             'formatted_date' => $this->new_record->getFormattedDate(),
             'thread_id'      => $this->new_record->thread_id,
         ) ;
