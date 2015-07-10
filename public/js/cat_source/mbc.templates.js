@@ -45,7 +45,7 @@ if ( MBC.enabled() )
         historyViewButton: '' +
             ' <div class="mbc-clearfix mbc-view-comment-wrap"> ' +
             '   <span class="mbc-comment-label mbc-comment-segment-number"></span> ' +
-            '   <a href="javascript:;" class="mbc-comment-btn mbc-comment-default-btn mbc-show-comment-btn pull-right">View</a>' +
+            '   <a href="javascript:;" class="mbc-comment-link-btn mbc-view-link mbc-show-comment-btn pull-right">View</a>' +
             ' </div> ',
 
         historyHasComments: '' +
@@ -98,7 +98,7 @@ if ( MBC.enabled() )
             ' </div>' +
             ' <div class="mbc-post-comment">' +
             ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
-            ' <a href="javascript:" class="mbc-login-link">Login to receive notification</a>' +
+            ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive notification</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="TODO: Write a comment..."></textarea>' +
             ' <div>' +
             ' <a href="#" class="mbc-comment-btn mbc-comment-send-btn pull-right hide">Comment</a>' +

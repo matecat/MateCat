@@ -377,24 +377,49 @@ a.mbc-comment-resolve-btn:active {
 /*
  ******
  ******
- Login invitation link in comment balloon
+ Link in comment balloon
  ******
+ ******
+ */
+
+a.mbc-comment-link-btn:link,
+a.mbc-comment-link-btn:visited {
+  color: #7f7f7f;
+  display: inline-block;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+a.mbc-comment-link-btn:hover,
+a.mbc-comment-link-btn:active {
+  text-decoration: none;
+}
+
+/*
+ ******
+ Login invitation link in comment balloon
  ******
  */
 
 a.mbc-login-link:link,
 a.mbc-login-link:visited {
-  color: #7f7f7f;
-  display: inline-block;
-  font-size: 14px;
-  padding: 0 4px 6px 0;
-  text-decoration: underline;
+  padding: 0 4px 10px 0;
 }
 
-a.mbc-login-link:hover,
-a.mbc-login-link:active {
-  text-decoration: none;
+/*
+ ******
+ ******
+ View link in history balloon
+ ******
+ ******
+ */
+
+a.mbc-view-link:link,
+a.mbc-view-link:visited {
+  margin-top: 16px;
+  padding: 0 4px 6px 0;
 }
+
 
 
 /*
