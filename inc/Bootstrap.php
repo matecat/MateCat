@@ -273,6 +273,9 @@ class Bootstrap {
                 INIT::${$KEY} = $value;
             }
 
+            if ( property_exists(INIT, $KEY) ) {
+                INIT::${$KEY} = $value;
+            }
         }
 
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
