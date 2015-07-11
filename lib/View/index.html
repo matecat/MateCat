@@ -74,14 +74,12 @@
             config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
             /*]]>*/
         </script>
-		<script>
-            /*<![CDATA[*/
-				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
-				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
-            /*]]>*/
-		</script>
+
+        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/logout.js?build=${build_number}"></script>
+
     </head>
     <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
