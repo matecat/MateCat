@@ -12,5 +12,6 @@
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-jasmine-runner": "~0.6.0",
     "grunt-string-replace": "~0.2.7"
-  }
+    "grunt-text-replace": "^0.4.0"
+  },
 }
