@@ -51,7 +51,7 @@
                 overall_quality: '${overall_quality}',
                 offlineModeEnabled: true,
                 splitSegmentEnabled: true,
-                commentEnabled: true,
+                comments_enabled: ${ comments_enabled | 'false' },
                 sse_base_url: '${sse_base_url | null}'
             };
             var renderStart = new Date();
