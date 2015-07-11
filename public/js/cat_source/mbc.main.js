@@ -4,7 +4,7 @@
 
 MBC = {
     enabled : function() {
-        return ( config.commentEnabled && !!window.EventSource );
+        return ( config.comments_enabled && !!window.EventSource );
     }
 }
 
