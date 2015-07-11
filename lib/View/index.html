@@ -8,11 +8,6 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
-<!--
-        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
--->
         <script type="text/javascript">
             /*<![CDATA[*/
             var config = {
@@ -48,7 +43,6 @@
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
                 survey: false,
-                optimized: false,
                 isReview: ${isReview},
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
@@ -82,23 +76,12 @@
         </script>
 		<script>
             /*<![CDATA[*/
-			if(config.optimized) {
-				document.write("<link href=\"${basepath}public/css/app.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<script src=\"${basepath}public/js/app.js?build=${build_number}\"><\/script>");
-			} else {
 				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
 				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-//				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
 				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
 				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
-			}
             /*]]>*/
 		</script>
-
-
-<!--        <script src="${basepath}public/js/addtm.js?build=${build_number}"></script> -->
-<!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
-        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
     <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
