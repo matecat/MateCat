@@ -3,6 +3,7 @@
 
 class INIT {
 
+    public static $ENV;
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
