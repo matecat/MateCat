@@ -82,18 +82,17 @@
             /*]]>*/
         </script>
 
-        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/mbc-style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/app.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
-        <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 
-        <tal:block tal:condition="not:use_compiled_assets" >
-        <script type="text/javascript">/*<![CDATA[*/ Loader.concatSources = true; /*]]>*/</script>
+        <tal:block tal:condition="true:use_compiled_assets" >
+            <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
         </tal:block>
 
-        <script type="text/javascript">/*<![CDATA[*/ Loader.start(); /*]]>*/</script>
-        <script src="${basepath}public/js/logout.js?build=${build_number}"></script>
+        <tal:block tal:condition="not:use_compiled_assets" >
+            <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
+        </tal:block>
 
     </head>
     <body tal:condition="php:supportedBrowser EQ 0">
