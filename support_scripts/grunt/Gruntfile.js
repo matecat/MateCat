@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/sse.js',
-                    basePath + 'cat_source/mbc.main.js'
+                    basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js'
 				],
 				dest: basePath + 'cat.js'
