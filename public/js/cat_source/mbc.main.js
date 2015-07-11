@@ -726,6 +726,7 @@ if ( MBC.enabled() )
 
     $(document).on('mbc:comment:saved', function(ev, data) {
         $(document).find('section .mbc-thread-wrap').remove();
+
         db.pushSegment(data); // TODO: move this in ajax success?
         updateHistoryWithLoadedSegments();
 

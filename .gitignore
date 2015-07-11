@@ -8,9 +8,7 @@ lib/Utils/Analysis/.num_processes
 
 # Ignore artifacts
 public/css/app.css
-public/js/app.js
-public/js/cat.js
-public/js/cat.min.js
+public/js/build
 
 # NodeJs stuff
 nodejs/*.log

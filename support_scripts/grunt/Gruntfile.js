@@ -1,5 +1,6 @@
 module.exports = function(grunt) {
 	var basePath = '../../public/js/';
+    var buildPath = '../../public/js/build/';
 	var incPath = '../../inc/';
 
     var conf = grunt.file.read( incPath + 'version.ini' );
@@ -25,43 +26,40 @@ module.exports = function(grunt) {
 					basePath + 'cat_source/functions.js',
 					basePath + 'cat_source/ui.customization.js',
                     basePath + 'cat_source/ui.review.js',
-                    basePath + 'tm.js',
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/mbc.main.js',
-                    basePath + 'cat_source/mbc.templates.js'
+                    basePath + 'cat_source/mbc.templates.js',
+                    basePath + 'tm.js'
 				],
-				dest: basePath + 'cat.js'
+				dest: buildPath + 'cat.js'
 			},
 			libraries: {
 				src: [
 					basePath + 'lib/jquery-1.11.0.min.js',
-//					basePath + 'lib/jquery-migrate-1.2.1.js',
-					basePath + 'lib/jquery.cookie.js',
+                    basePath + 'lib/waypoints.min.js',
+                    basePath + 'lib/jquery-ui.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
-                    basePath + 'lib/jquery.dataTables.min.js',
+                    basePath + 'lib/jquery.cookie.js',
+                    basePath + 'lib/jquery.tablesorter-fork-mottie.js',
 					basePath + 'lib/diff_match_patch.js',
 					basePath + 'lib/rangy-core.js',
-					basePath + 'lib/rangy-selectionsaverestore.js',
-					basePath + 'lib/snapengage.js',
-					basePath + 'lib/waypoints.js'
+					basePath + 'lib/rangy-selectionsaverestore.js'
 				],
-				dest: basePath + 'libs.js'
+				dest: buildPath + 'libs.js'
 			},
 			app: {
 				src: [
-					basePath + 'libs.js',
 					basePath + 'common.js',
-					basePath + 'cat.min.js',
+					buildPath + 'cat.js',
 					basePath + 'logout.js'
 				],
-				dest: basePath + 'app.js'
+				dest: buildPath + 'app.js'
 			},
 			styles: {
 				src: [
 					basePath + '../css/common.css',
-//					basePath + '../css/jquery-ui.css',
 					basePath + '../css/style.css',
 					basePath + '../css/mbc-style.css'
 				],
@@ -71,7 +69,7 @@ module.exports = function(grunt) {
 		watch: {
 			scripts: {
 				files: [basePath + 'cat_source/*.js', basePath + 'tm.js'],
-				tasks: ['dev-watch'],
+				tasks: ['development'],
 				options: {
 					interrupt: true
 				}
@@ -82,7 +80,7 @@ module.exports = function(grunt) {
 			  force: true,
 			  smarttabs: true
 			},
-			all: [basePath + 'cat_source/*.js']
+			all: [basePath + 'cat_source/*.js'] // TODO: expand to other js files
 		},
 		uglify: {
 			options: {
@@ -91,20 +89,20 @@ module.exports = function(grunt) {
 				mangle: true
 			},
 			build: {
-				src: basePath + 'cat.js',
-				dest: basePath + 'cat.min.js'
+				src: buildPath + 'app.js',
+				dest: buildPath + 'app.min.js'
 			}
 		},
 		removelogging: {
 			dist: {
-				src: basePath + "cat.min.js",
-				dest: basePath + "cat.min.js"
+				src: buildPath + "app.js",
+				dest: buildPath + "app.js"
 			}
 		},
 		replace: {
-		  example: {
-			src: [basePath + 'cat.js'],             // source files array (supports minimatch)
-			dest: basePath + 'cat.js',             // destination directory or file
+		  version: {
+			src: [buildPath + 'cat.js'],             // source files array (supports minimatch)
+			dest: buildPath + 'cat.js',             // destination directory or file
 			replacements: [{
 			  from: /this\.version \= \"(.*?)\"/gi,      // regex replacement ('Fooo' to 'Mooo')
 			  to: 'this.version = "' + version + '"'
@@ -113,24 +111,32 @@ module.exports = function(grunt) {
 		}
 	});
 
-
-
-  // Load plugins here
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-remove-logging');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-text-replace');
-//	grunt.loadNpmTasks('grunt-contrib-jasmine');
+    //	grunt.loadNpmTasks('grunt-contrib-jasmine');
 
 
-  // Define your tasks here
-//	grunt.registerTask('default', ['concat']);
-//	grunt.registerTask('dev-watch', ['concat', 'uglify', 'removelogging']);
-//	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app']);
-//	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app', 'concat:styles']);
-	grunt.registerTask('dev-watch', ['jshint', 'concat:components', 'replace:example', 'uglify', 'concat:app', 'concat:styles']);
+    // Define your tasks here
+    grunt.registerTask('default', ['jshint']);
+    //	grunt.registerTask('dev-watch', ['concat', 'uglify', 'removelogging']);
+    //	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app']);
+    //	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app', 'concat:styles']);
+
+    grunt.registerTask('development', [
+        'jshint',
+        'concat:libraries', 'concat:components', 'replace:version',
+        'concat:app', 'concat:styles'
+    ]);
+
+    grunt.registerTask('deploy', [
+        'concat:libraries', 'concat:components', 'replace:version',
+        'concat:app', 'concat:styles',
+        'removelogging', 'uglify',
+    ]);
 };
 
 

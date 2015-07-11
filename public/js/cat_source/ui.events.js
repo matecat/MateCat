@@ -964,8 +964,7 @@ $.extend(UI, {
                 UI.checkTagProximity();
             }
 
-            if (UI.debug)
-				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
+            if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
@@ -2108,8 +2107,7 @@ $.extend(UI, {
 		});
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;
-		if (this.debug)
-			console.log('Init time: ' + this.initTime);
+		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
 	}
 });
