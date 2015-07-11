@@ -43,7 +43,6 @@
                 taglockEnabled: ${taglockEnabled | string:1},
                 alternativesEnabled: true,
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
-                //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
                 survey: false,
                 isReview: ${isReview},
                 enableReview: true,
@@ -51,12 +50,18 @@
                 overall_quality: '${overall_quality}',
                 offlineModeEnabled: true,
                 splitSegmentEnabled: true,
-                comments_enabled: ${ comments_enabled | 'false' },
-                sse_base_url: '${sse_base_url | null}'
             };
             var renderStart = new Date();
             /*]]>*/
         </script>
+
+        <script tal:condition="true:comments_enabled" type="text/javascript">
+          /*<![CDATA[*/
+          config.comments_enabled = true;
+          config.sse_base_url = '${sse_base_url}';
+          /*]]>*/
+        </script>
+
         <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
             /*<![CDATA[*/
             config.lfPlaceholder = '${lfPlaceholder | null}';
@@ -81,7 +86,15 @@
 
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/mbc-style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
+
+        <tal:block tal:condition="not:use_compiled_assets" >
+        <script type="text/javascript">/*<![CDATA[*/ Loader.concatSources = true; /*]]>*/</script>
+        </tal:block>
+
+        <script type="text/javascript">/*<![CDATA[*/ Loader.start(); /*]]>*/</script>
         <script src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     </head>

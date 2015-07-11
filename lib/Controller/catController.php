@@ -465,6 +465,8 @@ class catController extends viewController {
 
     public function setTemplateVars() {
 
+        $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS ;
+
         if ( $this->job_not_found || $this->job_cancelled ) {
             $this->template->pid                 = null;
             $this->template->target              = null;

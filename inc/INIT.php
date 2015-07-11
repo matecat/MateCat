@@ -3,7 +3,6 @@
 
 class INIT {
 
-    public static $ENV;
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
@@ -19,7 +18,7 @@ class INIT {
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
-
+    public static $USE_COMPILED_ASSETS = false;
 
     public static $QUEUE_NAME = "matecat_analysis_queue";
     //This queue will be used for dqf project creation
