@@ -12,6 +12,7 @@ module.exports = function(grunt) {
 			components: {
 				src: [
 					basePath + 'cat_source/ui.core.js',
+					basePath + 'cat_source/ui.scrollSegment.js',
 					basePath + 'cat_source/ui.classes.js',
 					basePath + 'cat_source/ui.init.js',
 					basePath + 'cat_source/ui.render.js',
