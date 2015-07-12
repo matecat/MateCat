@@ -2,6 +2,7 @@ Loader = {
     concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
     source_components: new Array (
         'ui.core',
+        'ui.scrollsegment',
         'ui.classes',
         'ui.init',
         'ui.render',
