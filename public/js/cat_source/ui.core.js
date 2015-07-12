@@ -2608,7 +2608,7 @@ console.log('changeStatus');
             errors: errors,
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave,
-            version: segment.attr('data-version'), 
+            version: segment.attr('data-version'),
             propagate: propagate
         };
         if(isSplitted) {
