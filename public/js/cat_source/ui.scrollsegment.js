@@ -1,91 +1,110 @@
-(function($, UI, config) {
+(function(window, $, UI) {
 
-    var scrollSegment = function(segment, highlight, quick) {
-        quick = quick || false;
-        highlight = highlight || false;
+    var segment ;
 
-        if ( !segment.length ) {
-            $('#outer').empty();
+    var tryToRenderAgain = function() {
+        $('#outer').empty();
 
-            this.render({
-                firstLoad: false,
-                segmentToScroll: segment.selector.split('-')[1],
-                highlight: highlight
-            });
+        UI.render({
+            firstLoad: false,
+            segmentToScroll: segment.selector.split('-')[1],
+            highlight: highlight
+        });
+    }
+
+    var someOpenSegmentOnPage = function() {
+        // XXX: This is also true when segment is closed, is it correct?
+        return $(UI.currentSegment).length ;
+    }
+
+    var getDestinationValues = function() {
+        var top_segment = segment.prev('section');
+        var destinationTop = 0;
+        var spread = 23 ;
+
+        if ( !top_segment.length ) {
+            top_segment = segment;
+            spread = 103;
         }
 
-        var spread = 23;
-        var current = this.currentSegment;
-        var previousSegment = $(segment).prev('section');
+        destinationTop =  $(top_segment).offset().top;
 
-        if ( !previousSegment.length ) {
-          previousSegment = $(segment);
-          spread = 103;
-        }
+        return { destinationTop : destinationTop, spread : spread };
+    }
 
-        if ( !previousSegment.length ) return false;
+    var scrollingBelowCurrent = function() {
+        return segment.offset().top > UI.currentSegment.offset().top ;
+    }
 
-        var destination = "#" + previousSegment.attr('id');
-        var destinationTop = $(destination).offset().top;
+    var scrollingRightBelowCurrent = function() {
+        return UI.currentSegment.is( segment.prev() );
+    }
 
-        if (this.firstScroll) {
-          destinationTop = destinationTop + 100;
-          this.firstScroll = false;
-        }
+    var getDestinationTop = function() {
+        var values         = getDestinationValues() ;
+        var destinationTop = values.destinationTop ;
+        var spread         = values.spread ;
 
-        // if there is an open segment
-        if ( $(current).length ) {
-
-            // if segment to open is below the current segment
-            //
-            if ( $(segment).offset().top > $(current).offset().top ) {
-
-                // if segment to open is not the immediate follower of the current segment
-                //
-                if ( !current.is($(segment).prev()) ) {
-
-                    var diff = (this.firstLoad) ? ($(current).height() - 200 + 120) : 20;
-
-                    destinationTop = destinationTop - diff;
-
-                } else { // if segment to open is the immediate follower of the current segment
-
-                    destinationTop = destinationTop - spread;
-                }
-
-            } else { // if segment to open is above the current segment
-                // if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
+        if ( someOpenSegmentOnPage() ) {
+            if ( scrollingRightBelowCurrent() ) {
                 destinationTop = destinationTop - spread;
-                UI.provaCoso = true;
+            } else if ( scrollingBelowCurrent() ) {
+                var diff = ( UI.firstLoad ) ? ( UI.currentSegment.height() - 200 + 120 ) : 20;
+               destinationTop = destinationTop - diff;
+            } else {
+                destinationTop = destinationTop - spread;
             }
-
-        } else { // if no segment is opened
+        } else {
             destinationTop = destinationTop - spread;
         }
 
-        $("html,body").stop();
+        return destinationTop ;
+    }
 
-        pointSpeed = (quick)? 0 : 500;
+    var scrollSegment = function(inputSegment, highlight, quick) {
+        segment = $(inputSegment);
 
-        if ( config.isReview ) {
-            setTimeout(function() {
-                $("html,body").animate({
-                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
-                }, 500);
-            }, 300);
-
-        } else {
-
-            $("html,body").animate({
-                scrollTop: destinationTop - 20
-                }, pointSpeed);
+        if ( !segment.length ) {
+            // TODO: check for this condition to be actually needed
+            // to limit responsiblity of this function we must enforce
+            // the segment to be present, raise otherwise.
+            tryToRenderAgain() ;
+            return ;
         }
 
+        quick = quick || false;
+        highlight = highlight || false;
+
+        var pointSpeed = (quick)? 0 : 500;
+
+        $("html,body").stop();
+
+        if ( config.isReview ) {
+            setTimeoutForReview() ;
+        } else {
+            scrollToDestination( getDestinationTop(), pointSpeed ) ;
+        }
+
+        // TODO check if this timeout can be avoided in some way
         setTimeout(function() { UI.goingToNext = false; }, pointSpeed);
     }
 
+    var setTimeoutForReview = function() {
+        setTimeout(function() {
+            $("html,body").animate({
+                scrollTop: segment.prev().offset().top - $('.header-menu').height()
+            }, 500);
+        }, 300);
+    }
+
+    var scrollToDestination = function( destinationTop, pointSpeed ) {
+        $("html,body").animate({
+            scrollTop: destinationTop - 20
+        }, pointSpeed);
+    }
+
     $.extend(UI, {
-        scrollSegment : scrollSegment
+        scrollSegment : scrollSegment,
     });
 
-})($, UI, config);
+})(window, $, UI, undefined);
