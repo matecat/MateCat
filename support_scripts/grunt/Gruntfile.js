@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 			components: {
 				src: [
 					basePath + 'cat_source/ui.core.js',
-					basePath + 'cat_source/ui.scrollSegment.js',
+					basePath + 'cat_source/ui.scrollsegment.js',
 					basePath + 'cat_source/ui.classes.js',
 					basePath + 'cat_source/ui.init.js',
 					basePath + 'cat_source/ui.render.js',
@@ -117,14 +117,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-text-replace');
-    //	grunt.loadNpmTasks('grunt-contrib-jasmine');
 
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
-    //	grunt.registerTask('dev-watch', ['concat', 'uglify', 'removelogging']);
-    //	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app']);
-    //	grunt.registerTask('dev-watch', ['jshint', 'concat:libraries', 'concat:components', 'uglify', 'concat:app', 'concat:styles']);
 
     grunt.registerTask('development', [
         'jshint',
@@ -135,7 +131,8 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy', [
         'concat:libraries', 'concat:components', 'replace:version',
         'concat:app', 'concat:styles',
-        'removelogging', 'uglify',
+        'removelogging',
+        // 'uglify',
     ]);
 };
 
