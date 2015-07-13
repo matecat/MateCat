@@ -258,7 +258,7 @@ if ( MBC.enabled() )
         return root;
     }
 
-    window.Scrollable = function(el) {
+    var Scrollable = function(el) {
         this.el = el ;
         var that = this ;
         var root = $(el).closest('.mbc-comment-balloon-outer') ;
@@ -266,9 +266,7 @@ if ( MBC.enabled() )
         var dataRoot = root.closest('section');
 
         $(this.el).on('scroll', function() {
-            if ( that.bottomVisible() ) {
-                notificationArea.hide();
-            }
+            if ( that.bottomVisible() ) hideNotificationAndResetCount() ;
         });
 
         this.bottomVisible = function() {
@@ -290,6 +288,10 @@ if ( MBC.enabled() )
 
         this.scrollToBottom = function() {
             $(this.el).scrollTop( this.el.scrollHeight );
+            hideNotificationAndResetCount();
+        }
+
+        var hideNotificationAndResetCount = function() {
             notificationArea.hide();
             dataRoot.data('mbc-new-comments-count', 0) ;
         }
