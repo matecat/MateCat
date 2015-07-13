@@ -54,6 +54,8 @@ apache::mod { 'rewrite': }
 apache::mod { 'filter': }
 apache::mod { 'headers': }
 apache::mod { 'expires': }
+apache::mod { 'proxy': }
+apache::mod { 'proxy_http': }
 
 class { 'apache':
   mpm_module    => 'prefork',

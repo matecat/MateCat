@@ -24,3 +24,16 @@
   ErrorLog /var/log/apache2/matecat.error.log
   CustomLog /var/log/apache2/matecat.log combined
   ServerSignature Off
+
+  # Configuration for Nodejs proxy
+  ProxyRequests off
+
+  <Proxy *>
+    Order deny,allow
+    Allow from all
+  </Proxy>
+
+  <Location /sse/ >
+    ProxyPass http://0.0.0.0:7788/
+    ProxyPassReverse http://0.0.0.0:7788/
+  </Location>
