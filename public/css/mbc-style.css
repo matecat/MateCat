@@ -7,6 +7,10 @@
  */
 
 .mbc-comment-balloon-outer {
+  padding-right: 15px
+}
+
+.mbc-comment-balloon-inner {
   background: #f7f7f7;
   box-shadow: 0 1px 2px 0px rgba(0,0,0,0.3);
   margin-top: 4px;
@@ -636,7 +640,7 @@ article.mbc-commenting-opened {
  */
 article.mbc-commenting-opened .mbc-comment-balloon-outer {
   float: right;
-  margin-right: -230px;
+  margin-right: -245px;
   position: absolute;
   right: 0;
   text-align: left;
