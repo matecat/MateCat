@@ -605,8 +605,9 @@ function setBrowserHistoryBehavior() {
             if ( segment.length ) {
                 UI.gotoSegment( UI.parsedHash.segmentId );
             } else {
-                if ($('section').length)
-                UI.pointBackToSegment( UI.parsedHash.segmentId );
+                if ($('section').length) {
+                    UI.pointBackToSegment( UI.parsedHash.segmentId );
+                }
             }
         }
         updateAppByPopState();
