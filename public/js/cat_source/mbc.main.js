@@ -265,6 +265,12 @@ if ( MBC.enabled() )
         var notificationArea = $(root).find('.mbc-new-message-notification');
         var dataRoot = root.closest('section');
 
+        $(this.el).on('scroll', function() {
+            if ( that.bottomVisible() ) {
+                notificationArea.hide();
+            }
+        });
+
         this.bottomVisible = function() {
             return el.scrollTop + 30 >= el.scrollHeight - el.clientHeight ;
         }
