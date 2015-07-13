@@ -7,7 +7,6 @@ CREATE TABLE `comments` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `id_job` bigint(20) NOT NULL,
     `id_segment` bigint(20) NOT NULL,
-    `id_chunk`   bigint(20) DEFAULT NULL,
     `create_date` datetime NOT NULL,
     `email` varchar(50) DEFAULT NULL,
     `full_name` varchar(100) NOT NULL,
