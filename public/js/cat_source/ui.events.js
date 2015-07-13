@@ -794,7 +794,7 @@ $.extend(UI, {
 //            console.log('a: ', !UI.currentSegment.is(e.target));
 //            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
 
-            var container = UI.currentSegment;
+            var container = $(UI.currentSegment);
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container
                 && !$(e.target).hasClass('translated') // has not clicked on a translated button
