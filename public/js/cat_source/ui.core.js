@@ -1073,9 +1073,8 @@ console.log('changeStatus');
             id = UI.parsedHash.splittedSegmentId ;
         }
 
-
         if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
-            UI.focusSegment( UI.getSegmentById( id ) ) ;
+            MBC.openSegmentComment( UI.getSegmentById( id ) ) ;
         } else {
             // TODO: question: why search for #segment-{id}-target
             // instead of #segment-{id} as usual?

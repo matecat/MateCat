@@ -349,10 +349,16 @@ if ( MBC.enabled() )
         }
     }
 
+    var scrollSegment = function(section) {
+        $("html,body").animate({
+            scrollTop: section.offset().top - $('.header-menu').height()
+        }, 500);
+    }
+
     var openSegmentComment = function(el) {
         $('article').addClass('mbc-commenting-opened');
         renderSegmentBalloon(el);
-        UI.scrollSegment(el);
+        scrollSegment(el);
     }
 
     var closeSegment = function(el) {
@@ -808,6 +814,8 @@ if ( MBC.enabled() )
 
     // Interfaces
     $.extend(MBC,  {
+        openSegmentComment : openSegmentComment,
+
         popLastCommentHash : function() { // TODO: remove this, no longer needed since ParsedHash
             var l = lastCommentHash ;
             lastCommentHash = null;
