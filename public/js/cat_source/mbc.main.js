@@ -524,9 +524,13 @@ if ( MBC.enabled() )
         //
         var delegate = '#outer';
 
-
         $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link div', function(e) {
             e.stopPropagation();
+            $('.mbc-history-balloon-outer').removeClass('visible');
+        });
+
+        $(delegate).on('click', function() {
+            $('.mbc-history-balloon-outer').removeClass('visible');
         });
 
         $(delegate).on('click', '.mbc-comment-link .txt', function(e) {
