@@ -199,7 +199,7 @@ if ( MBC.enabled() )
         var inputForm = renderInputForm() ;
         inputForm.addClass('mbc-first-input');
 
-        root.append( inputForm );
+        root.find('.mbc-comment-balloon-inner').append( inputForm );
         el.append( root.show() );
 
         inputForm.find('textarea').focus();
@@ -246,7 +246,7 @@ if ( MBC.enabled() )
         var inputForm = renderInputForm();
         inputForm.addClass('mbc-reply-input');
 
-        root.append( inputForm ) ;
+        root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
 
         // enableInputForm( root );
 
@@ -263,23 +263,19 @@ if ( MBC.enabled() )
         var that = this ;
         var root = $(el).closest('.mbc-comment-balloon-outer') ;
         var notificationArea = $(root).find('.mbc-new-message-notification');
+        var dataRoot = root.closest('section');
 
         this.bottomVisible = function() {
             return el.scrollTop + 30 >= el.scrollHeight - el.clientHeight ;
         }
 
         var verbalize = function(count) {
-            if (count > 1) {
-                return '' + count + ' new messages';
-            } else {
-                return '1 new message';
-            }
+            if (count > 1)  return '' + count + ' new messages';
+            else            return '1 new message';
         }
 
         this.notifyNewComments = function() {
-            var dataRoot = root.closest('section');
             var count = dataRoot.data('mbc-new-comments-count') || 0 ;
-
             dataRoot.data( 'mbc-new-comments-count', ++ count );
 
             notificationArea.find('a').text( verbalize(count) );
@@ -289,6 +285,7 @@ if ( MBC.enabled() )
         this.scrollToBottom = function() {
             $(this.el).scrollTop( this.el.scrollHeight );
             notificationArea.hide();
+            dataRoot.data('mbc-new-comments-count', 0) ;
         }
     }
 
