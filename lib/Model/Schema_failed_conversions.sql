@@ -22,7 +22,6 @@ DEFAULT CHARACTER SET = utf8
 COMMENT = 'Conversion Failure Log';
 
 GRANT ALL ON matecat_conversions_log.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-GRANT ALL ON matecat_conversions_log.* TO 'matecat'@'10.3%' IDENTIFIED BY 'matecat01';
 FLUSH PRIVILEGES;
 
 

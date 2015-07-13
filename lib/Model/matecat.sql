@@ -1,8 +1,3 @@
--- MySQL dump 10.13  Distrib 5.5.35, for debian-linux-gnu (x86_64)
---
--- Host: localhost    Database: matecat_sandbox
--- ------------------------------------------------------
--- Server version	5.5.35-0+wheezy1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -52,8 +47,17 @@ CREATE TABLE `converters` (
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `converters`
+--
+
+LOCK TABLES `converters` WRITE;
+/*!40000 ALTER TABLE `converters` DISABLE KEYS */;
+/*!40000 ALTER TABLE `converters` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `converters_log`
@@ -71,8 +75,17 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `converters_log`
+--
+
+LOCK TABLES `converters_log` WRITE;
+/*!40000 ALTER TABLE `converters_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `converters_log` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `engines`
@@ -101,17 +114,18 @@ CREATE TABLE `engines` (
   KEY `type` (`type`),
   KEY `active_idx` (`active`) USING BTREE,
   KEY `uid_idx` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `engines`
+--
 
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
-INSERT INTO `matecat`.`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('0', 'NONE', 'NONE', 'No MT', '', '', NULL, NULL, '{}', 'NONE', '', NULL, '100', '0', NULL);
-UPDATE `matecat`.`engines` SET `id` = '0' WHERE description = 'No MT';
-INSERT INTO `matecat`.`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('1', 'MyMemory (All Pairs)', 'TM', 'Machine translation from Google Translate and Microsoft Translator.', 'http://api.mymemory.translated.net', 'get', 'set', 'delete', '{\"gloss_get_relative_url\":\"glossary\\/get\",\"gloss_set_relative_url\":\"glossary\\/set\",\"gloss_update_relative_url\":\"glossary\\/update\",\"gloss_delete_relative_url\":\"glossary\\/delete\",\"tmx_import_relative_url\":\"tmx\\/import\",\"tmx_status_relative_url\":\"tmx\\/status\",\"tmx_export_create_url\":\"tmx\\/export\\/create\",\"tmx_export_check_url\":\"tmx\\/export\\/check\",\"tmx_export_download_url\":\"tmx\\/export\\/download\",\"tmx_export_list_url\":\"tmx\\/export\\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}', 'MyMemory', '', '1', '0', '1', NULL);
+INSERT INTO `engines` VALUES (0,'NONE','NONE','No MT','','',NULL,NULL,'{}','NONE','',NULL,100,0,NULL),(1,'MyMemory (All Pairs)','TM','Machine translation from Google Translate and Microsoft Translator.','http://api.mymemory.translated.net','get','set','delete','{\"gloss_get_relative_url\":\"glossary\\/get\",\"gloss_set_relative_url\":\"glossary\\/set\",\"gloss_update_relative_url\":\"glossary\\/update\",\"gloss_delete_relative_url\":\"glossary\\/delete\",\"tmx_import_relative_url\":\"tmx\\/import\",\"tmx_status_relative_url\":\"tmx\\/status\",\"tmx_export_create_url\":\"tmx\\/export\\/create\",\"tmx_export_check_url\":\"tmx\\/export\\/check\",\"tmx_export_download_url\":\"tmx\\/export\\/download\",\"tmx_export_list_url\":\"tmx\\/export\\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}','MyMemory','','1',0,1,NULL);
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `file_references`
@@ -129,8 +143,17 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `file_references`
+--
+
+LOCK TABLES `file_references` WRITE;
+/*!40000 ALTER TABLE `file_references` DISABLE KEYS */;
+/*!40000 ALTER TABLE `file_references` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `files`
@@ -153,8 +176,17 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `files`
+--
+
+LOCK TABLES `files` WRITE;
+/*!40000 ALTER TABLE `files` DISABLE KEYS */;
+/*!40000 ALTER TABLE `files` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `files_job`
@@ -176,6 +208,15 @@ CREATE TABLE `files_job` (
   KEY `id_file` (`id_file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `files_job`
+--
+
+LOCK TABLES `files_job` WRITE;
+/*!40000 ALTER TABLE `files_job` DISABLE KEYS */;
+/*!40000 ALTER TABLE `files_job` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `jobs`
@@ -240,8 +281,17 @@ CREATE TABLE `jobs` (
   KEY `status_owner_idx` (`status_owner`) USING BTREE,
   KEY `status_idx` (`status`) USING BTREE,
   KEY `create_date_idx` (`create_date`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `jobs`
+--
+
+LOCK TABLES `jobs` WRITE;
+/*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `memory_keys`
@@ -268,6 +318,15 @@ CREATE TABLE `memory_keys` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `memory_keys`
+--
+
+LOCK TABLES `memory_keys` WRITE;
+/*!40000 ALTER TABLE `memory_keys` DISABLE KEYS */;
+/*!40000 ALTER TABLE `memory_keys` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `notifications`
 --
 
@@ -283,6 +342,15 @@ CREATE TABLE `notifications` (
   KEY `id_comment` (`id_comment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `notifications`
+--
+
+LOCK TABLES `notifications` WRITE;
+/*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
+/*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `original_files_map`
@@ -302,6 +370,15 @@ CREATE TABLE `original_files_map` (
   PRIMARY KEY (`sha1`,`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `original_files_map`
+--
+
+LOCK TABLES `original_files_map` WRITE;
+/*!40000 ALTER TABLE `original_files_map` DISABLE KEYS */;
+/*!40000 ALTER TABLE `original_files_map` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `projects`
@@ -331,8 +408,17 @@ CREATE TABLE `projects` (
   KEY `for_debug` (`for_debug`),
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `projects`
+--
+
+LOCK TABLES `projects` WRITE;
+/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
+/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `segment_revisions`
@@ -354,6 +440,15 @@ CREATE TABLE `segment_revisions` (
   KEY `segm_key` (`id_segment`,`id_job`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `segment_revisions`
+--
+
+LOCK TABLES `segment_revisions` WRITE;
+/*!40000 ALTER TABLE `segment_revisions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `segment_revisions` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `segment_translations`
@@ -399,6 +494,15 @@ CREATE TABLE `segment_translations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `segment_translations`
+--
+
+LOCK TABLES `segment_translations` WRITE;
+/*!40000 ALTER TABLE `segment_translations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `segment_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `segment_translations_splits`
 --
 
@@ -415,6 +519,15 @@ CREATE TABLE `segment_translations_splits` (
   KEY `id_segment` (`id_segment`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `segment_translations_splits`
+--
+
+LOCK TABLES `segment_translations_splits` WRITE;
+/*!40000 ALTER TABLE `segment_translations_splits` DISABLE KEYS */;
+/*!40000 ALTER TABLE `segment_translations_splits` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `segments`
@@ -445,8 +558,17 @@ CREATE TABLE `segments` (
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `segments`
+--
+
+LOCK TABLES `segments` WRITE;
+/*!40000 ALTER TABLE `segments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `segments` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `segments_comments`
@@ -467,19 +589,13 @@ CREATE TABLE `segments_comments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Temporary table structure for view `show_clients`
+-- Dumping data for table `segments_comments`
 --
 
-DROP TABLE IF EXISTS `show_clients`;
-/*!50001 DROP VIEW IF EXISTS `show_clients`*/;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-/*!50001 CREATE TABLE `show_clients` (
-  `host_short` tinyint NOT NULL,
-  `users` tinyint NOT NULL,
-  `COUNT(*)` tinyint NOT NULL
-) ENGINE=MyISAM */;
-SET character_set_client = @saved_cs_client;
+LOCK TABLES `segments_comments` WRITE;
+/*!40000 ALTER TABLE `segments_comments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `segments_comments` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `translators`
@@ -501,6 +617,15 @@ CREATE TABLE `translators` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `translators`
+--
+
+LOCK TABLES `translators` WRITE;
+/*!40000 ALTER TABLE `translators` DISABLE KEYS */;
+/*!40000 ALTER TABLE `translators` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
 --
 
@@ -519,27 +644,22 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`) USING BTREE,
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Final view structure for view `show_clients`
+-- Dumping data for table `users`
 --
 
-/*!50001 DROP TABLE IF EXISTS `show_clients`*/;
-/*!50001 DROP VIEW IF EXISTS `show_clients`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8 */;
-/*!50001 SET character_set_results     = utf8 */;
-/*!50001 SET collation_connection      = utf8_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`matecat`@`10.3%` SQL SECURITY DEFINER */
-/*!50001 VIEW `show_clients` AS select substring_index(`information_schema`.`processlist`.`HOST`,':',1) AS `host_short`,group_concat(distinct `information_schema`.`processlist`.`USER` separator ',') AS `users`,count(0) AS `COUNT(*)` from `information_schema`.`processlist` group by substring_index(`information_schema`.`processlist`.`HOST`,':',1) order by count(0),substring_index(`information_schema`.`processlist`.`HOST`,':',1) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
+FLUSH PRIVILEGES;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -550,7 +670,3 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-06-05 18:43:05
-CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-FLUSH PRIVILEGES;
