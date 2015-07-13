@@ -79,7 +79,13 @@
 
         $("html,body").stop();
 
-        if ( config.isReview ) {
+        // if ( config.isReview ) {
+        if ( true ) {
+            // FIXME: experimentally keep the `review` behaviour the default
+            // for translate page too. We are not sure what the other block
+            // of code actually does, so we need to keep this code around for
+            // a while and do some user testing to be sure it is safe to
+            // remove it.
             setTimeoutForReview() ;
         } else {
             scrollToDestination( getDestinationTop(), pointSpeed ) ;
