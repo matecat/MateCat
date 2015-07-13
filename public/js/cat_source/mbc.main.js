@@ -719,7 +719,7 @@ if ( MBC.enabled() )
         $(document).trigger('mbc:segment:update:links', data.id_segment);
 
         var section = UI.Segment.findEl( data.id_segment ) ;
-        if ( $('section .mbc-thread-wrap').is(':visible') ) {
+        if ( section.find('.mbc-thread-wrap').is(':visible') ) {
             appendReceivedMessage( section );
         }
     });
