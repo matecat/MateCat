@@ -326,7 +326,7 @@ if ( MBC.enabled() )
             scrollableArea.scrollToBottom() ;
         }
 
-        el.find('.mbc-show-comment:last').effect('highlight', {}, 1000);
+        el.find('.mbc-thread-wrap-active .mbc-show-comment:last').effect('highlight', {}, 1000);
     }
 
     var appendSubmittedMessage = function(el) {
