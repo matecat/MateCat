@@ -323,6 +323,8 @@ if ( MBC.enabled() )
             scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
             scrollableArea.scrollToBottom() ;
         }
+
+        el.find('.mbc-show-comment:last').effect('highlight', {}, 1000);
     }
 
     var appendSubmittedMessage = function(el) {
