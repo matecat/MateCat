@@ -5,11 +5,16 @@ RewriteEngine On
 RewriteCond "%{HTTP_HOST}"   "!^www\.matecat\.com" [NC]
 RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
 
+
+#RewriteRule ^offline\.html$ /lib/View/offline.html [L]
 #RewriteCond %{REQUEST_URI} !/offline.html$
 #RewriteCond %{REQUEST_URI} !/public/css/common.css$
 #RewriteCond %{REQUEST_URI} !/public/img/logo.png$
-#RewriteCond %{REQUEST_URI} !/public/img/offline.jpg$
+#RewriteCond %{REQUEST_URI} !/public/img/offline.png
 #RewriteRule $ /offline.html [R=307,L]
+RewriteCond %{REQUEST_URI} /offline.html
+RewriteRule $ / [R=307,L]
+
 
 RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
