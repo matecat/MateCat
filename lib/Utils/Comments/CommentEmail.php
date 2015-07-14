@@ -8,7 +8,8 @@ class Comments_CommentEmail {
     private $comment ;
     private $url ;
 
-    public function __construct($user, $comment, $url) {
+    public function __construct( $user, $comment, $url, $project_name ) {
+        $this->project_name = $project_name ;
         $this->user = $user ;
         $this->comment = $comment ;
         $this->url = $url ;
@@ -81,9 +82,9 @@ class Comments_CommentEmail {
 
     private function buildSubject() {
         if ( $this->comment->isComment() ) {
-            return "MateCat - comment submitted";
+            return "MateCat - {$this->project_name} - comment submitted";
         } else {
-            return "MateCat - thread resolved" ;
+            return "MateCat - {$this->project_name} - thread resolved" ;
         }
     }
 
