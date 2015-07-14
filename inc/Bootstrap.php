@@ -171,7 +171,7 @@ class Bootstrap {
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
-                    if ( INIT::$DEBUG ) {
+                    if ( INIT::$EXCEPTION_DEBUG ) {
                         echo json_encode( array(
                                 "errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array()
                         ) );
@@ -186,7 +186,7 @@ class Bootstrap {
                         ) );
                     }
 
-                } elseif ( INIT::$DEBUG ) {
+                } elseif ( INIT::$EXCEPTION_DEBUG ) {
                     echo $output;
                 }
 
