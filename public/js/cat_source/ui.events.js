@@ -1986,14 +1986,11 @@ $.extend(UI, {
 			});
 		});
 		$("#exec-replace").click(function(e) {
-            console.log('ddd');
 			e.preventDefault();
-            console.log('a');
 			if ($('#search-target').val() == $('#replace-target').val()) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
-            console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
 				
@@ -2009,15 +2006,19 @@ $.extend(UI, {
                 status = UI.getStatus(segment);
                 byStatus = 0;
 
-                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+//                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
+                UI.setTranslation({
+                    id_segment: $(segment).attr('id').split('-')[1],
+                    status: status,
+                    caller: 'replace'
+                });
                 UI.setContribution(segment_id, status, byStatus);
 
                 UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
-				UI.gotoNextResultItem(true);
+                if(UI.numSearchResultsSegments > 1) UI.gotoNextResultItem(true);
 			}
-            console.log('c');
 
         });
 		$("#enable-replace").on('change', function() {
