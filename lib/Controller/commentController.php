@@ -147,8 +147,13 @@ class commentController extends ajaxController {
 
         $users = $this->resolveUsers();
 
+        // FIXME: this is not optimal, should make use of DAO and
+        // return just one record, not an array of records.
+        $project_data = getProjectData( $this->job[ 'id_project' ] );
+
         foreach($users as $user) {
-            $email = new Comments_CommentEmail($user, $this->struct, $url);
+            $email = new Comments_CommentEmail($user, $this->struct, $url,
+                $project_data[0]['name'] );
             $email->deliver();
         }
     }
@@ -171,7 +176,7 @@ class commentController extends ajaxController {
             }
 
             // FIXME: unoptimal way to find deep duplicates
-            foreach($users as $k => $v) {
+            foreach( $users as $k => $v ) {
                 if ( $item->uid == $v->uid ) {
                     return false;
                 }
