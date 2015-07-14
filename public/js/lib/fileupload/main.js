@@ -765,7 +765,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         $( rowClone ).find( '.operation' ).first().parent().first().html('');
 
-                        var newDataUrl = oldDataUrl.replace(/file=[^&]+/g, "file=" + encodeURI(file) );
+                        var newDataUrl = oldDataUrl.replace(/file=[^&]+/g, "file=" + encodeURI(file['name']) );
 
                         $( 'button[role="button"]', rowClone )
                                 .data("url" , newDataUrl)
