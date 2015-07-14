@@ -619,6 +619,8 @@ $.extend(UI, {
 		
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
+		}).on('cachedSegmentObjects', function() {
+            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function() {

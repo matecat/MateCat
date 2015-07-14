@@ -6718,7 +6718,8 @@ float: left;
 	background-size: 12px 12px;
 }
 
-.editarea span.softReturn
+.editarea span.softReturn,
+.source span.softReturn
 {
 	display: inline;
 	margin-left: 6px;

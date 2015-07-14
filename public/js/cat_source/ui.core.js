@@ -59,8 +59,9 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = this.editarea.text(); 
-	},
+        this.currentSegmentTranslation = this.editarea.text();
+        $(window).trigger('cachedSegmentObjects');
+    },
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);

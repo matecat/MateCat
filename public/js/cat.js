@@ -59,8 +59,9 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = this.editarea.text(); 
-	},
+        this.currentSegmentTranslation = this.editarea.text();
+        $(window).trigger('cachedSegmentObjects');
+    },
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
@@ -3775,7 +3776,7 @@ $.extend(UI, {
 		/**
 		 * Global Warnings array definition.
 		 */
-		this.globalWarnings = [];		
+//		this.globalWarnings = [];
 		
 		this.shortcuts = {
 			"translate": {
@@ -4612,6 +4613,8 @@ $.extend(UI, {
 		
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
+		}).on('cachedSegmentObjects', function() {
+            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function() {
