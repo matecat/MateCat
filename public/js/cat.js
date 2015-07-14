@@ -503,6 +503,7 @@ console.log('changeStatus');
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
+
 		$.each(config.firstSegmentOfFiles, function() {
 			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name + '</a></li>';
 		});

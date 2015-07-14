@@ -175,7 +175,10 @@ class FilesStorage {
             $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $xliffPath ) . @$force_extension;
         } else {
             //move original
-            $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $originalPath ) );
+            $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
+            $file_name = array_pop($raw_file_path);
+
+            $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name  );
 
             if( !$outcome1 ){
                 //Original directory deleted!!!
@@ -195,7 +198,7 @@ class FilesStorage {
             }
 
             //set naming for converted xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $originalPath ) . $file_extension;
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . $file_name . $file_extension;
         }
 
         //move converted xliff

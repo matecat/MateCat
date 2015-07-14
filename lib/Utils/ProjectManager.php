@@ -342,7 +342,8 @@ class ProjectManager {
 
             //get original file name
             $originalFilePathName = $fs->getOriginalFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
-            $fileName             = basename( $originalFilePathName );
+            $raw_originalFilePathName = explode(DIRECTORY_SEPARATOR,$originalFilePathName );
+            $fileName             = array_pop($raw_originalFilePathName);
 
             unset( $hashFile );
 
