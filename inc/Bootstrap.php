@@ -272,7 +272,7 @@ class Bootstrap {
                 INIT::${$KEY} = $value;
             }
 
-            if ( property_exists(INIT, $KEY) ) {
+            if ( property_exists('INIT', $KEY) ) {
                 INIT::${$KEY} = $value;
             }
         }
