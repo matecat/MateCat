@@ -163,6 +163,21 @@ class engineController extends ajaxController {
 
                 break;
 
+            case strtolower( Constants_Engines::LETSMT ):
+
+                /**
+                 * Create a record of type LetsMT
+                 */
+                $newEngine = EnginesModel_LetsMTStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
+                $newEngine->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ];
+                $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
+
+                break;
             default:
                 $validEngine = false;
         }
