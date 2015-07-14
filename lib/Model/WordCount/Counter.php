@@ -102,30 +102,60 @@ class WordCount_Counter {
     }
 
     /**
-     * @param WordCount_Struct $wordCount_Struct
+     * @param WordCount_Struct[] $_wordCount_Struct_Array
      *
      * @return WordCount_Struct
      * @throws Exception
      */
-    public function updateDB( WordCount_Struct $wordCount_Struct ){
+    public function updateDB( array $_wordCount_Struct_Array ){
 
-        $res = updateWordCount( $wordCount_Struct );
+        $differentialCountStruct = $this->sumDifferentials( $_wordCount_Struct_Array );
+
+        $res = updateWordCount( $differentialCountStruct );
 
         if( $res < 0 ){
             throw new Exception( "Failed to update counter", $res );
         }
 
+        $newTotalWCount = new WordCount_Struct();
+        $newTotalWCount->setNewWords( $this->oldWCount->getNewWords() + $differentialCountStruct->getNewWords() );
+        $newTotalWCount->setTranslatedWords( $this->oldWCount->getTranslatedWords() + $differentialCountStruct->getTranslatedWords() );
+        $newTotalWCount->setApprovedWords( $this->oldWCount->getApprovedWords() + $differentialCountStruct->getApprovedWords() );
+        $newTotalWCount->setRejectedWords( $this->oldWCount->getRejectedWords() + $differentialCountStruct->getRejectedWords() );
+        $newTotalWCount->setDraftWords( $this->oldWCount->getDraftWords() + $differentialCountStruct->getDraftWords() );
+        $newTotalWCount->setIdSegment( $this->oldWCount->getIdSegment() );
+        $newTotalWCount->setOldStatus( $this->oldStatus );
+        $newTotalWCount->setNewStatus( $this->newStatus );
+        $newTotalWCount->setIdJob( $this->oldWCount->getIdJob() );
+        $newTotalWCount->setJobPassword( $this->oldWCount->getJobPassword() );
+        return $newTotalWCount;
+
+    }
+
+    /**
+     * @param WordCount_Struct[] $wordCount_Struct
+     *
+     * @return WordCount_Struct
+     */
+    public function sumDifferentials( $wordCount_Struct ){
+
         $newWCount = new WordCount_Struct();
-        $newWCount->setNewWords( $this->oldWCount->getNewWords() + $wordCount_Struct->getNewWords() );
-        $newWCount->setTranslatedWords( $this->oldWCount->getTranslatedWords() + $wordCount_Struct->getTranslatedWords() );
-        $newWCount->setApprovedWords( $this->oldWCount->getApprovedWords() + $wordCount_Struct->getApprovedWords() );
-        $newWCount->setRejectedWords( $this->oldWCount->getRejectedWords() + $wordCount_Struct->getRejectedWords() );
-        $newWCount->setDraftWords( $this->oldWCount->getDraftWords() + $wordCount_Struct->getDraftWords() );
         $newWCount->setIdSegment( $this->oldWCount->getIdSegment() );
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
         $newWCount->setIdJob( $this->oldWCount->getIdJob() );
         $newWCount->setJobPassword( $this->oldWCount->getJobPassword() );
+        /**
+         * @var WordCount_Struct $count
+         */
+        foreach( $wordCount_Struct as $count ){
+            $newWCount->setNewWords( $newWCount->getNewWords() + $count->getNewWords() );
+            $newWCount->setTranslatedWords( $newWCount->getTranslatedWords() + $count->getTranslatedWords() );
+            $newWCount->setApprovedWords( $newWCount->getApprovedWords() + $count->getApprovedWords() );
+            $newWCount->setRejectedWords( $newWCount->getRejectedWords() + $count->getRejectedWords() );
+            $newWCount->setDraftWords( $newWCount->getDraftWords() + $count->getDraftWords() );
+        }
+
         return $newWCount;
 
     }

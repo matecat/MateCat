@@ -353,8 +353,9 @@ class setTranslationController extends ajaxController {
         //but to exclude current segment from auto-propagation
         $_idSegment = $this->id_segment;
 
+        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] =  $this->status : null /* NO OP */;
+
         $TPropagation[ 'id_job' ]                 = $this->id_job;
-        $TPropagation[ 'status' ]                 = ( $propagateToTranslated ) ? $this->status : Constants_TranslationStatus::STATUS_DRAFT;
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
@@ -362,28 +363,15 @@ class setTranslationController extends ajaxController {
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
-        $propagationMultiplier = 1;
-        if ( in_array( $this->status, array(
+        $propagationTotal = array();
+        if ( $propagateToTranslated && in_array( $this->status, array(
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
                 Constants_TranslationStatus::STATUS_REJECTED
         ) ) ) {
 
             try {
 
-//                $cookie_key = '_auto-propagation-' . $this->id_job . "-" . $this->password;
-//
-//                /**
-//                 * This set auto-propagation to all with status DRAFT, NEW, REJECTED
-//                 *
-//                 * This set also to status TRANSLATED if a cookie for Auto-propagate ALL is set on the client
-//                 *
-//                 */
-//                $propagateToTranslated = false;
-//                if ( isset( $_COOKIE[ $cookie_key ] ) ) {
-
-//                }
-
-                $propagationMultiplier += propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
+                $propagationTotal = propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
@@ -422,7 +410,15 @@ class setTranslationController extends ajaxController {
             $counter = new WordCount_Counter( $old_wStruct );
             $counter->setOldStatus( $old_status );
             $counter->setNewStatus( $this->status );
-            $newValues = $counter->getUpdatedValues( $old_count * $propagationMultiplier );
+
+            $newValues = array();
+            $newValues[] = $counter->getUpdatedValues( $old_count );
+
+            foreach( $propagationTotal as $__pos => $old_value ){
+                $counter->setOldStatus( $old_value['status'] );
+                $counter->setNewStatus( $this->status );
+                $newValues[] = $counter->getUpdatedValues( $old_value['total'] );
+            }
 
             try {
                 $newTotals = $counter->updateDB( $newValues );

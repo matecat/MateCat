@@ -137,7 +137,10 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
-        $QA->performGlossaryCheck( $this->__postInput->glossaryList );
+        
+        if(is_array($this->__postInput->glossaryList) && !empty($this->__postInput->glossaryList)) {
+            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
+        }
 
         if ( $QA->thereAreNotices() ) {
 //        if ( $QA->thereAreErrors() ) {
@@ -166,7 +169,7 @@ class getWarningController extends ajaxController {
                 array( 'flags' => FILTER_FLAG_STRIP_LOW )
         );
 
-        return $glossaryWord;
+        return empty($glossaryWord) ? '' : $glossaryWord;
     }
 
 
