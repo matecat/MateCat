@@ -429,7 +429,7 @@ $.extend(UI, {
 //			return false;
 //		}
 		var p = this.searchParams;
-
+console.log('gotoNextResultItem');
 		if (this.searchMode == 'onlyStatus') {
 			console.log('only status');
 			var status = (p.status == 'all') ? '' : '.status-' + p.status;
