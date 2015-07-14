@@ -1,6 +1,11 @@
+# IDE stuffs
+.settings
+.idea
+.project
+
 # Configuration files
+.num_processes
 inc/login_secret.dat
-inc/config.inc.php
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
@@ -17,3 +22,10 @@ node_modules
 # Development env config files
 .agignore
 .vagrant
+
+# More stuffs
+Test_Local/*
+unitTest/xhGui/
+unitTest/coverage/*
+internal_scripts
+local_storage
