@@ -1073,7 +1073,7 @@ console.log('changeStatus');
         }
 
         if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
-            MBC.openSegmentComment( UI.getSegmentById( id ) ) ;
+            MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
         } else {
             // TODO: question: why search for #segment-{id}-target
             // instead of #segment-{id} as usual?
