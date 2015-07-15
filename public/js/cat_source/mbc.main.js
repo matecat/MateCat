@@ -350,8 +350,11 @@ if ( MBC.enabled() )
     }
 
     var scrollSegment = function(section) {
+        var someMarginOnTop = 100 ;
+        var headerMenu = $('.header-menu').height() ;
+
         $("html,body").animate({
-            scrollTop: section.offset().top - $('.header-menu').height()
+            scrollTop: section.offset().top - headerMenu - someMarginOnTop
         }, 500);
     }
 
