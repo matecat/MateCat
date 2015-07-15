@@ -9,7 +9,7 @@ MBC = {
 }
 
 if ( MBC.enabled() )
-(function($,config,window,undefined,MBC) {
+(function($,config,window,MBC,undefined) {
 
     SSE.init();
 
@@ -151,6 +151,12 @@ if ( MBC.enabled() )
 
     var buildFirstCommentHeader = function() {
         return $(tpls.firstCommentWrap) ; // .append($(tpls.insertCommentHeader));
+    }
+
+    var popLastCommentHash = function() {
+        var l = lastCommentHash ;
+        lastCommentHash = null;
+        return l;
     }
 
     var resolveCommentLinkIcon = function(el, comments_obj) {
@@ -709,7 +715,15 @@ if ( MBC.enabled() )
 
         initCommentLinks();
         renderCommentIconLinks();
-        updateHistoryWithLoadedSegments();
+        updateHistoryWithLoadedSegments() ;
+
+        // open a comment if was asked by hash
+
+        var lastAsked = popLastCommentHash() ;
+        if ( lastAsked ) {
+            openSegmentComment( UI.Segment.findEl( lastAsked ) ) ;
+        }
+
     });
 
     $(document).on('sse:ack', function(ev, message) {
@@ -769,10 +783,6 @@ if ( MBC.enabled() )
         var comments_obj = db.getCommentsCountBySegment( id_segment ) ;
         var el = UI.Segment.findEl(id_segment) ;
         resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
-    });
-
-    $(document).ready(function(){
-        // load for history
     });
 
     $(document).on('keydown', '.mbc-comment-textarea', function(e) {
@@ -838,12 +848,8 @@ if ( MBC.enabled() )
     // Interfaces
     $.extend(MBC,  {
         openSegmentComment : openSegmentComment,
+        popLastCommentHash : popLastCommentHash,
 
-        popLastCommentHash : function() { // TODO: remove this, no longer needed since ParsedHash
-            var l = lastCommentHash ;
-            lastCommentHash = null;
-            return l;
-        },
         wasAskedByCommentHash: function( sid ) {
             return lastCommentHash && lastCommentHash.segmentId == sid;
         },
@@ -852,4 +858,4 @@ if ( MBC.enabled() )
         }
     });
 
-})(jQuery, config, window, undefined, MBC);
+})(jQuery, config, window, MBC);
