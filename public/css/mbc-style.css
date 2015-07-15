@@ -248,6 +248,7 @@ a.mbc-new-message-link:hover {
   color: #323232;
   font-weight: bold;
   margin-bottom: 4px;
+  padding: 2px 5px 2px 0;
 }
 /*
  Anonymous label
@@ -842,11 +843,11 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
  ******
  */
 .hide {
-  display: none;
+  display: none!important;
 }
 
 .visible {
-  display: block
+  display: block!important;
 }
 
 .vis-hidden {
