@@ -769,17 +769,21 @@ if ( MBC.enabled() )
         // load for history
     });
 
-    $(document).on('keyup', '.mbc-comment-textarea', function(e) {
+    $(document).on('keydown', '.mbc-comment-textarea', function(e) {
         var maxHeight = 100 ;
+        var minHeight = 34 ;
         var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;
         var borderBottomWidth = parseFloat( $(this).css("borderBottomWidth") ) ;
-        var maxOuterHeight = this.scrollHeight + borderTopWidth + borderBottomWidth ;
+        var borders = borderTopWidth + borderBottomWidth ;
+        var scrollHeightWithBorders = this.scrollHeight + borders ;
 
-        var minHeight = 34 ;
+        while( scrollHeightWithBorders > $(this).outerHeight() && $(this).height() < maxHeight ) {
+            $(this).height( $(this).height() + 10 );
+        };
 
-        while( $(this).height() < maxHeight && $(this).outerHeight() <  maxOuterHeight ) {
-                $(this).height( $(this).height() + 10 );
-            };
+        while ( scrollHeightWithBorders <= $(this).outerHeight() && $(this).height() > minHeight ) {
+            $(this).height( $(this).height() - 10 );
+        }
 
         if ( $(this).height() >= maxHeight ) {
             $(this).css("overflow-y", "auto");
