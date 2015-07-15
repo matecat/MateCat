@@ -92,12 +92,15 @@ module.exports = function(grunt) {
 			},
 			all: [basePath + 'cat_source/*.js'] // TODO: expand to other js files
 		},
-		removelogging: {
-			dist: {
-				src: buildPath + "app.js",
-				dest: buildPath + "app.js"
-			}
-		},
+        strip : {
+            app : {
+                src : buildPath + 'app.js',
+                options : {
+                    inline : true,
+                    nodes : ['console.log']
+                }
+            }
+        },
 		replace: {
 		  version: {
 			src: [buildPath + 'cat.js'],             // source files array (supports minimatch)
@@ -112,10 +115,9 @@ module.exports = function(grunt) {
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-remove-logging');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-text-replace');
-
+    grunt.loadNpmTasks('grunt-strip');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
@@ -129,7 +131,7 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy', [
         'concat:libraries', 'concat:components', 'replace:version',
         'concat:app', 'concat:styles',
-        'removelogging'
+        'strip'
     ]);
 };
 
