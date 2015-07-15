@@ -2,12 +2,16 @@ module.exports = function(grunt) {
     var basePath = '../../public/js/';
     var buildPath = '../../public/js/build/';
     var incPath = '../../inc/';
+    var appMinifiedPath = buildPath + 'app.min.js';
 
     var cssFiles = [
         basePath + '../css/common.css',
         basePath + '../css/style.css',
         basePath + '../css/mbc-style.css'
     ]
+
+    var uglifyFiles = {}
+    uglifyFiles[appMinifiedPath] = [buildPath + 'app.js'];
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
@@ -101,6 +105,14 @@ module.exports = function(grunt) {
                 }
             }
         },
+        uglify: {
+            options : {
+                sourceMap : true,
+            },
+            app: {
+                files: uglifyFiles
+            }
+        },
         comments: {
             app: {
                 // Target-specific file lists and/or options go here.
@@ -129,6 +141,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-strip');
     grunt.loadNpmTasks('grunt-stripcomments');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
@@ -143,7 +156,8 @@ module.exports = function(grunt) {
         'concat:libraries', 'concat:components', 'replace:version',
         'concat:app', 'concat:styles',
         'comments', // strips comments
-        'strip' // strips console.log
+        'strip', // strips console.log
+        'uglify:app'
     ]);
 };
 
