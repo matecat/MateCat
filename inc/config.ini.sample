@@ -69,7 +69,7 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-STORAGE_DIR = "/local_storage"
+STORAGE_DIR = "/home/matecat/local_storage"         ;provide an absolute path
 SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
 
 SMTP_HOST = 'localhost'
