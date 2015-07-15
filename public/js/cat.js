@@ -903,17 +903,21 @@ console.log('changeStatus');
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
-				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
+				console.log('AAA');
+                seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
 			if (options.segmentToScroll) {
+                console.log('BBB');
 //                seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
 				this.scrollSegment($('#segment-' + options.segmentToScroll));
 			}
 			if (options.segmentToOpen) {
+                console.log('CCC');
 				$('#segment-' + options.segmentToOpen + ' .editarea').click();
 			}
 			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
+                console.log('DDD');
 				UI.openSegment(UI.editarea);
 			}
 			if (options.caller == 'link2file') {
