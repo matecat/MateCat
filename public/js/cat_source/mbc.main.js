@@ -24,6 +24,7 @@ if ( MBC.enabled() )
     var loggedUserName = null ;
     var customUserName = null ;
     var lastCommentHash = null;
+    var lastInput = null;
 
     var tpls ;
 
@@ -407,6 +408,7 @@ if ( MBC.enabled() )
 
     var ajaxResolveSuccess = function(resp) {
         db.pushSegment(resp.data.entries[0]);
+        lastInput = $('.mbc-comment-input').val() ;
         $(document).trigger('mbc:comment:new', resp.data.entries[0]);
     }
 
@@ -495,6 +497,7 @@ if ( MBC.enabled() )
                 if (resp.errors.length) {
                     showGenericWarning();
                 } else {
+                    lastInput = null;
                     $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
                 }
             },
@@ -731,6 +734,7 @@ if ( MBC.enabled() )
         if ( section.find('.mbc-thread-wrap').is(':visible') ) {
             appendReceivedMessage( section );
         }
+        $('.mbc-comment-input').val(lastInput) ;
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
