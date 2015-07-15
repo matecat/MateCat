@@ -3,6 +3,12 @@ module.exports = function(grunt) {
     var buildPath = '../../public/js/build/';
 	var incPath = '../../inc/';
 
+    var cssFiles = [
+        basePath + '../css/common.css',
+        basePath + '../css/style.css',
+        basePath + '../css/mbc-style.css'
+    ]
+
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
     grunt.log.ok( 'Matecat Version: ' + version );
@@ -68,7 +74,11 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			scripts: {
-				files: [basePath + 'cat_source/*.js', basePath + 'tm.js'],
+                files: [
+                    basePath + 'cat_source/*.js',
+                    basePath + 'tm.js',
+                ].concat( cssFiles ) ,
+
 				tasks: ['development'],
 				options: {
 					interrupt: true
