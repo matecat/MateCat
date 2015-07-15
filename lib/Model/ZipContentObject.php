@@ -54,14 +54,13 @@ class ZipContentObject extends stdClass {
             foreach( $_array_params as $pos => $array_params ){
                 $this->build( $array_params );
             }
-        } else {
-            $this->build( $_array_params );
         }
-
-        //this accept instance of SELF also
-        if ( !empty( $array_params ) ) {
-            foreach ( $array_params as $property => $value ) {
-                $this->$property = $value;
+        else {
+            //this accept instance of SELF also
+            if ( !empty( $_array_params ) ) {
+                foreach ( $_array_params as $property => $value ) {
+                    $this->$property = $value;
+                }
             }
         }
     }

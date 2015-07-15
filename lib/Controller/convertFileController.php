@@ -69,7 +69,7 @@ class convertFileController extends ajaxController {
             return false;
         }
 
-        $ext = pathinfo( $this->file_name, PATHINFO_EXTENSION );
+        $ext = FilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
 
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $this->file_name );
@@ -154,6 +154,7 @@ class convertFileController extends ajaxController {
 
         }
 
+        ( isset( $this->result['errors'] ) ) ? null : $this->result['errors'] = array();
 
         if(count($this->result['errors']) == 0) {
             $this->result['code'] = 1;

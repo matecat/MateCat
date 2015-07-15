@@ -11,12 +11,15 @@ class ZipArchiveExtended extends ZipArchive {
     const MAX_VISITED_DEPTH = 5;
     const MAX_VISITED_FOLDERS_PER_DEPTH = 10;
     const MAX_FOLDERS = 100;
+    const MAX_FILES = 100;
 
     const INTERNAL_SEPARATOR = "___SEP___";
     const ARRAY_FILES_PREFIX = "K_";
 
+
     public $tree;
     public $treeList;
+
 
     public function message( $code ) {
         switch ( $code ) {
@@ -141,7 +144,7 @@ class ZipArchiveExtended extends ZipArchive {
                 throw new Exception( "Max allowed depth exceeded.", -1 );
             }
 
-            if ( $numOfFiles > INIT::$MAX_NUM_FILES || $numOfFolders > self::MAX_FOLDERS ) {
+            if ( $numOfFiles > self::MAX_FILES || $numOfFolders > self::MAX_FOLDERS ) {
                 throw new Exception( "Max number of files or folders exceeded.", -2 );
             }
 
@@ -160,7 +163,7 @@ class ZipArchiveExtended extends ZipArchive {
             }
 
             if ( $fileName != "" && $fileName != "K_" ) {
-                $filePaths[ ] = $path;
+                $filePaths[] = $path;
             }
 
             $temp = &$Tree;
@@ -179,7 +182,7 @@ class ZipArchiveExtended extends ZipArchive {
             if ( $this->isDir( $path ) ) {
                 $temp[ $last_originalKey ] = array();
             } else {
-                $temp[ ] = $last_originalKey;
+                $temp[] = $last_originalKey;
             }
         }
 
@@ -193,7 +196,7 @@ class ZipArchiveExtended extends ZipArchive {
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ( $this->treeList as $filePath ) {
             $realPath = str_replace(
-                    array( self::INTERNAL_SEPARATOR, pathinfo( $this->filename, PATHINFO_BASENAME ) ),
+                    array( self::INTERNAL_SEPARATOR, FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ),
                     array( DIRECTORY_SEPARATOR, "" ),
                     $filePath );
             $realPath = ltrim( $realPath, "/" );
@@ -227,7 +230,7 @@ class ZipArchiveExtended extends ZipArchive {
     }
 
     private function prependZipFileName( $fName ) {
-        return pathinfo( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
+        return FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
     }
 
     /**

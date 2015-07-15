@@ -520,7 +520,7 @@ class UploadHandler {
 
         }
 
-        $file_info = pathinfo( $file_name );
+        $file_info = FilesStorage::pathinfo_fix( $file_name );
 
         //if it's a zip file, delete it and all its contained files.
         if ( $file_info[ 'extension' ] == 'zip' ) {
