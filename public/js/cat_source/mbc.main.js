@@ -150,7 +150,7 @@ if ( MBC.enabled() )
     }
 
     var buildFirstCommentHeader = function() {
-        return $(tpls.firstCommentWrap) ; // .append($(tpls.insertCommentHeader));
+        return $(tpls.firstCommentWrap) ;
     }
 
     var popLastCommentHash = function() {
@@ -255,9 +255,6 @@ if ( MBC.enabled() )
 
         root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
 
-        // enableInputForm( root );
-
-        // Append resolve button
         if ( !threadIsResolved() ) {
             root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
         }
