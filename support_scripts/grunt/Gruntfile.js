@@ -101,6 +101,16 @@ module.exports = function(grunt) {
                 }
             }
         },
+        comments: {
+            app: {
+                // Target-specific file lists and/or options go here.
+                options: {
+                    singleline: true,
+                    multiline: true
+                },
+                src: [ buildPath + 'app.js' ] // files to remove comments from
+            },
+        },
 		replace: {
 		  version: {
 			src: [buildPath + 'cat.js'],             // source files array (supports minimatch)
@@ -118,6 +128,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-strip');
+    grunt.loadNpmTasks('grunt-stripcomments');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
@@ -131,7 +142,8 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy', [
         'concat:libraries', 'concat:components', 'replace:version',
         'concat:app', 'concat:styles',
-        'strip'
+        'comments', // strips comments
+        'strip' // strips console.log
     ]);
 };
 
