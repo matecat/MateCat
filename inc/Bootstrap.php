@@ -267,14 +267,11 @@ class Bootstrap {
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
 
         foreach( $env as $KEY => $value ){
-            if( $KEY == 'STORAGE_DIR' ) {
-                INIT::$STORAGE_DIR = INIT::$ROOT . $value;
-                continue;
-            }
 
             if ( property_exists( 'INIT', $KEY ) ) {
                 INIT::${$KEY} = $value;
             }
+
         }
 
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
