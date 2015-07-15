@@ -74,7 +74,7 @@ abstract class downloadController extends controller {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
-            $nFinfo = pathinfo( $fName );
+            $nFinfo = FilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
             if ( strlen( $_name ) < 3 ) {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
@@ -102,7 +102,7 @@ abstract class downloadController extends controller {
 
     protected static function sanitizeFileExtension( $filename ) {
 
-        $pathinfo = pathinfo( $filename );
+        $pathinfo = FilesStorage::pathinfo_fix( $filename );
 
         if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
             $filename = $pathinfo[ 'basename' ] . ".docx";

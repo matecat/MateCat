@@ -91,7 +91,7 @@ class downloadOriginalController extends downloadController {
             if ( count( $output_content ) > 1 ) {
 
                 $this->_filename = $this->fname;
-                $pathInfo        = pathinfo( $this->fname );
+                $pathInfo        = FilesStorage::pathinfo_fix( $this->fname );
 
                 if ( $pathInfo[ 'extension' ] != 'zip' ) {
                     $this->_filename = $pathInfo[ 'basename' ] . ".zip";

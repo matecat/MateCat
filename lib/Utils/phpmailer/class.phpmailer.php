@@ -1778,7 +1778,7 @@ class PHPMailer {
         $type = self::filenameToType($path);
       }
 
-      $filename = basename($path);
+      $filename = FilesStorage::basename_fix($path);
       if ( $name == '' ) {
         $name = $filename;
       }
@@ -2182,7 +2182,7 @@ class PHPMailer {
     $this->attachment[] = array(
       0 => $string,
       1 => $filename,
-      2 => basename($filename),
+      2 => FilesStorage::basename_fix($filename),
       3 => $encoding,
       4 => $type,
       5 => true,  // isStringAttachment
@@ -2214,7 +2214,7 @@ class PHPMailer {
       $type = self::filenameToType($path);
     }
 
-    $filename = basename($path);
+    $filename = FilesStorage::basename_fix($path);
     if ( $name == '' ) {
       $name = $filename;
     }
@@ -2504,7 +2504,7 @@ class PHPMailer {
       foreach ($images[2] as $i => $url) {
         // do not change urls for absolute images (thanks to corvuscorax)
         if (!preg_match('#^[A-z]+://#', $url)) {
-          $filename = basename($url);
+          $filename = FilesStorage::basename_fix($url);
           $directory = dirname($url);
           if ($directory == '.') {
             $directory = '';

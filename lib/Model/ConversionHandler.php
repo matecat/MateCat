@@ -81,7 +81,7 @@ class ConversionHandler {
                     $this->result[ 'errors' ][ ] = array(
                             "code"    => -7,
                             "message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                            'debug'   => basename( $this->file_name )
+                            'debug'   => FilesStorage::basename_fix( $this->file_name )
                     );
 
                     return -1;
@@ -158,7 +158,7 @@ class ConversionHandler {
                     $this->result[ 'code' ]          = -110;
                     $this->result[ 'errors' ][ ]     = array(
                             "code"  => -110, "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => basename( $this->file_name )
+                            'debug' => FilesStorage::basename_fix( $this->file_name )
                     );
 
                     return false;
@@ -184,7 +184,7 @@ class ConversionHandler {
                     $this->result[ 'code' ]          = -103;
                     $this->result[ 'errors' ][ ]     = array(
                             "code"  => -103, "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => basename( $this->file_name )
+                            'debug' => FilesStorage::basename_fix( $this->file_name )
                     );
 
                     unset( $xliffPath );
@@ -194,7 +194,7 @@ class ConversionHandler {
 
             } else {
 
-                $file = pathinfo( $this->file_name );
+                $file = FilesStorage::pathinfo_fix( $this->file_name );
 
                 switch ( $file[ 'extension' ] ) {
                     case 'docx':

@@ -224,7 +224,7 @@ class ProjectManager {
         //sort files in order to process TMX first
         $sortedFiles = array();
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
-            if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
                 //found TMX, enable language checking routines
                 $this->checkTMX = 1;
                 array_unshift( $sortedFiles, $fileName );
@@ -272,7 +272,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
                 //load it into MyMemory; we'll check later on how it went
                 $file            = new stdClass();
                 $file->file_path = "$uploadDir/$fileName";
@@ -331,7 +331,7 @@ class ProjectManager {
         foreach ( $linkFiles[ 'conversionHashes' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = basename( $linkFile );
+            $hashFile = FilesStorage::basename_fix( $linkFile );
             $hashFile = explode( '|', $hashFile );
 
             //use hash and lang to fetch file from package
@@ -342,8 +342,7 @@ class ProjectManager {
 
             //get original file name
             $originalFilePathName = $fs->getOriginalFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
-            $raw_originalFilePathName = explode(DIRECTORY_SEPARATOR,$originalFilePathName );
-            $fileName             = array_pop($raw_originalFilePathName);
+            $fileName = FilesStorage::basename_fix($originalFilePathName);
 
             unset( $hashFile );
 
@@ -355,14 +354,14 @@ class ProjectManager {
 
             try {
 
-                $info = pathinfo( $xliffFilePathName );
+                $info = FilesStorage::pathinfo_fix( $xliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], array( 'xliff', 'sdlxliff', 'xlf' ) ) ) {
                     throw new Exception( "Failed to find Xliff - no segments found", -3 );
                 }
-                $mimeType = pathinfo( $fileName, PATHINFO_EXTENSION );
+                $mimeType = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
-                $yearMonthPath = date_create( $this->projectStructure[ 'date_create' ] )->format( 'Ymd' );
+                $yearMonthPath = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
                 $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
                 $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $fileDateSha1Path );
 
@@ -430,7 +429,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
 
                 $this->tmxServiceWrapper->setName( $fileName );
 

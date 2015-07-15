@@ -137,7 +137,9 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
-        $QA->performGlossaryCheck( $this->__postInput->glossaryList );
+        if(!empty($this->__postInput->glossaryList)) {
+            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
+        }
 
         if ( $QA->thereAreNotices() ) {
 //        if ( $QA->thereAreErrors() ) {

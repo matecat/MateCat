@@ -94,6 +94,9 @@ class Bootstrap {
         if ( !is_dir( INIT::$CONVERSIONERRORS_REPOSITORY ) ) {
             mkdir( INIT::$CONVERSIONERRORS_REPOSITORY, 0755, true );
         }
+        if ( !is_dir( INIT::$TMP_DOWNLOAD) ) {
+            mkdir( INIT::$TMP_DOWNLOAD, 0755, true );
+        }
 
         //auth sections
         INIT::$AUTHSECRET_PATH = INIT::$ROOT . '/inc/login_secret.dat';

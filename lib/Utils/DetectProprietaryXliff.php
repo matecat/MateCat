@@ -48,7 +48,7 @@ class DetectProprietaryXliff {
 			$stringData = substr( $stringData, 0, 1024 );
 
 		} elseif ( empty( $stringData ) && !empty( $fullPathToFile ) ) {
-			$info         = pathinfo( $fullPathToFile );
+			$info         = FilesStorage::pathinfo_fix( $fullPathToFile );
 			$file_pointer = fopen( "$fullPathToFile", 'r' );
 			// Checking Requirements (By specs, I know that xliff version is in the first 1KB)
 			$stringData = fread( $file_pointer, 1024 );
@@ -56,7 +56,7 @@ class DetectProprietaryXliff {
 
 		} elseif ( !empty( $stringData ) && !empty( $fullPathToFile ) ) {
 			//we want to check extension and content
-			$info = pathinfo( $fullPathToFile );
+			$info = FilesStorage::pathinfo_fix( $fullPathToFile );
 
 		}
 

@@ -172,7 +172,7 @@ class FilesStorage {
             }
 
             //use original xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $xliffPath ) . @$force_extension;
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $xliffPath ) . @$force_extension;
         } else {
             //move original
             $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
@@ -243,7 +243,7 @@ class FilesStorage {
         }
 
         //move original
-        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . basename( $zipPath ) );
+        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $zipPath ) );
 
         if( !$outcome1 ){
             //Original directory deleted!!!
@@ -265,7 +265,7 @@ class FilesStorage {
 
         $datePath = date_create( $create_date )->format( 'Ymd' );
 
-        $fileName = basename( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
+        $fileName = FilesStorage::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
 
         //destination dir
         $newZipDir  = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID ;
@@ -380,19 +380,19 @@ class FilesStorage {
         //orig, suppress error because of xliff files have not original one
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
         if( is_file( $filePath ) ){
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
         }
 
         //work
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
-        $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
 
         //check if manifest from a LongHorn conversion exists
         $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
         if ( file_exists( $manifestFile ) ) {
-            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . basename( $manifestFile ) );
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
         }
 
         if( !$res ){
@@ -629,6 +629,61 @@ class FilesStorage {
         $results = $db->fetch_array( $query );
 
         return $results[ 0 ][ 'xliff_file' ];
+    }
+
+    /**
+     * @param $path
+     *
+     * @return mixed
+     */
+    public static function basename_fix( $path ) {
+        $rawPath  = explode( DIRECTORY_SEPARATOR, $path );
+        $basename = array_pop( $rawPath );
+
+        return $basename;
+    }
+
+    /**
+     * @param     $path
+     * @param int $options
+     *
+     * @return array|mixed
+     */
+    public static function pathinfo_fix( $path, $options=15) {
+        $rawPath = explode( DIRECTORY_SEPARATOR, $path );
+
+        $basename = array_pop( $rawPath );
+        $dirname  = implode( DIRECTORY_SEPARATOR, $rawPath );
+
+        $explodedFileName = explode( ".", $basename );
+        $extension        = array_pop( $explodedFileName );
+        $filename         = implode( ".", $explodedFileName );
+
+        $return_array = array();
+
+        $flagMap = array(
+                'dirname'   => PATHINFO_DIRNAME,
+                'basename'  => PATHINFO_BASENAME,
+                'extension' => PATHINFO_EXTENSION,
+                'filename'  => PATHINFO_FILENAME
+        );
+
+        // foreach flag, add in $return_array the corresponding field,
+        // obtained by variable name correspondance
+        foreach ( $flagMap as $field => $i ) {
+            //binary AND
+            if ( ( $options & $i ) > 0 ) {
+                //variable substitution: $field can be one between 'dirname', 'basename', 'extension', 'filename'
+                // $$field gets the value of the variable named $field
+                $return_array[ $field ] = $$field;
+            }
+        }
+
+        if ( count( $return_array ) == 1 ) {
+            $return_array = array_pop( $return_array );
+        }
+
+        return $return_array;
     }
 }
 

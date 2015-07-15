@@ -583,7 +583,7 @@ class ConvertersMonitor {
             //get extension
             //PHP 5.2 LACK THIS METHOD .... ADDED IN PHP 5.3.6 ....
             //$ext = $fileInfo->getExtension();
-            $ext = pathinfo( $fileInfo->getFilename(), PATHINFO_EXTENSION );
+            $ext = FilesStorage::pathinfo_fix( $fileInfo->getFilename(), PATHINFO_EXTENSION );
 
             //get path
             $file_path = $fileInfo->getPathname();

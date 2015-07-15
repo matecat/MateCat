@@ -232,7 +232,7 @@ class createProjectController extends ajaxController {
         $linkFiles = scandir( $uploadDir );
 
         foreach($arFiles as $__fName){
-           if ( 'zip' == pathinfo( $__fName, PATHINFO_EXTENSION ) ) {
+           if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
                $fs = new FilesStorage();
                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
