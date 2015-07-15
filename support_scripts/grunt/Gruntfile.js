@@ -92,17 +92,6 @@ module.exports = function(grunt) {
 			},
 			all: [basePath + 'cat_source/*.js'] // TODO: expand to other js files
 		},
-		uglify: {
-			options: {
-				banner: "",
-				compress: {},
-				mangle: true
-			},
-			build: {
-				src: buildPath + 'app.js',
-				dest: buildPath + 'app.min.js'
-			}
-		},
 		removelogging: {
 			dist: {
 				src: buildPath + "app.js",
@@ -124,7 +113,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-remove-logging');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-text-replace');
 
@@ -141,8 +129,7 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy', [
         'concat:libraries', 'concat:components', 'replace:version',
         'concat:app', 'concat:styles',
-        'removelogging',
-        // 'uglify',
+        'removelogging'
     ]);
 };
 
