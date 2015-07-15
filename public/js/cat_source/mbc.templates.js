@@ -73,7 +73,7 @@ if ( MBC.enabled() )
 
         showComment : '' +
             '<div class="mbc-show-comment mbc-clearfix">' +
-            ' <span class="mbc-comment-label mbc-comment-username-label"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-username-label mbc-truncate"></span>' +
             ' <span class="mbc-comment-label mbc-comment-email-label mbc-truncate"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             '   <span class="mbc-comment-info mbc-comment-time pull-left"></span>' +
@@ -88,7 +88,7 @@ if ( MBC.enabled() )
             '    <a href="javascript:" class="mbc-new-message-link"></a> ' +
             ' </div>' +
             ' <div class="mbc-post-comment">' +
-            ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-anonymous-label"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label"></span>' +
             ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="Write a comment..."></textarea>' +
             ' <div>' +

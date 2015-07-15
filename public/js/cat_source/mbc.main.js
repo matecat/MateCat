@@ -182,9 +182,9 @@ if ( MBC.enabled() )
             .text( getUsername() );
 
         if (loggedUserName) {
-            inputForm.find('.mbc-login-link').addClass('vis-hidden');
+            inputForm.find('.mbc-login-link').addClass('hide');
         } else {
-            inputForm.find('.mbc-login-link').addClass('vis-visible');
+            inputForm.find('.mbc-login-link').addClass('visible');
             inputForm.find('.mbc-comment-username-label')
                     .attr('title', 'Click to edit');
         }
@@ -517,8 +517,8 @@ if ( MBC.enabled() )
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() ) ;
 
-        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('vis-hidden');
-        else outer.find('.mbc-post-comment .mbc-login-link').addClass('vis-visible');
+        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('hide');
+        else outer.find('.mbc-post-comment .mbc-login-link').addClass('visible');
     }
 
     // start event binding
@@ -782,11 +782,11 @@ if ( MBC.enabled() )
     });
 
     $(document).on('focus', '.mbc-comment-input', function(e) {
-        $(e.target).closest('div').find('.mbc-comment-btn').show();
+        $(e.target).closest('div').find('.mbc-comment-btn').addClass('visible');
     });
 
     $(document).on('click', function(e) {
-        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').hide();
+        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').addClass('hide');
     });
 
     $(document).on('ui:segment:focus', function(e, sid) {
