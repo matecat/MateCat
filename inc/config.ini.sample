@@ -3,7 +3,7 @@
 
 
 ;These two parameter are meant to check for a wrong configuration of the filesystems either
-;in development and production environment.
+;in development, staging and production environment.
 ENV = "production"    ; set to "production" for production environment
 
 ;In production environment it's supposed to have a filesystem of type nfs mounted
@@ -29,7 +29,33 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-STORAGE_DIR = "/local_storage"
+STORAGE_DIR = "/home/matecat/local_storage"         ;provide an absolute path
+SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
+
+SMTP_HOST = 'localhost'
+SMTP_PORT = '25'
+SMTP_SENDER = 'cattool@matecat.com'
+SMTP_HOSTNAME = 'localhost'
+
+;----------------------------------------
+[staging]
+DB_SERVER = "localhost"
+DB_DATABASE = "matecat"
+DB_USER = "matecat_user"
+DB_PASS = "matecat_user"
+
+MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
+REDIS_SERVERS = "tcp://localhost:6379"
+QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
+QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
+QUEUE_JMX_ADDRESS = "http://localhost:8161"
+STORAGE_DIR = "/home/matecat/local_storage"         ;provide an absolute path
+SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
+
+SMTP_HOST = 'localhost'
+SMTP_PORT = '25'
+SMTP_SENDER = 'cattool@matecat.com'
+SMTP_HOSTNAME = 'localhost'
 
 ;----------------------------------------
 [production]
@@ -43,6 +69,12 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-STORAGE_DIR = "/storage"
+STORAGE_DIR = "/home/matecat/storage"               ;provide an absolute path
+SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
+
+SMTP_HOST = 'localhost'
+SMTP_PORT = '25'
+SMTP_SENDER = 'cattool@matecat.com'
+SMTP_HOSTNAME = 'localhost'
 
 ;----------------------------------------
