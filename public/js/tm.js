@@ -1412,7 +1412,7 @@ $.extend(UI, {
                     $('#mt-provider-details .error').text(d.errors[0].message);
                 } else {
                     if(d.data.config && Object.keys(d.data.config).length) {
-                        UI.renderMTConfig(provider, d.data.config);
+                        UI.renderMTConfig(provider, d.name, d.data.config);
                     }
                     else {
                         console.log('success');
@@ -1556,7 +1556,7 @@ $.extend(UI, {
         this.initEvents();
     },
     
-    renderMTConfig: function(provider, data) {
+    renderMTConfig: function(provider, newEngineName, data) {
         // $('#add-mt-provider-cancel').hide();
         // $('#mt-provider-details .error').empty();
 
@@ -1574,6 +1574,8 @@ $.extend(UI, {
             $(".step3").show();
             $("#add-mt-provider-confirm").removeClass('hide');
         }
+        
+        $('#new-engine-name').val(newEngineName);
         
         var selectorBase = '.insert-tm .provider-data .provider-field';
         for (key in data){

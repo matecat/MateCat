@@ -170,7 +170,7 @@ class engineController extends ajaxController {
                  */
                 $newEngine = EnginesModel_LetsMTStruct::getStruct();
 
-                $newEngine->name                                = empty($this->name)? $this->engineData['new_engine_name'] : $this->name;
+                $newEngine->name                                = $this->name;
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
@@ -248,7 +248,6 @@ class engineController extends ajaxController {
             $systemsAndTerms = $temp_engine->getSystemsAndTerms($config);
             
             $uiConfig = array(
-                'new_engine_name' => $this->name,
                 'client_id' => $this->engineData['client_id'],
                 'system_id' => array(),
                 'terms_id' => array()
@@ -261,6 +260,7 @@ class engineController extends ajaxController {
             }
             
             $engineDAO->delete($result);
+            $this->result['name'] = $this->name;
             $this->result['data']['config'] = $uiConfig;
         }
         
