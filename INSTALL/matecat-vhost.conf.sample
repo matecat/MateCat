@@ -8,7 +8,14 @@
             Options All
             AllowOverride All
             Order allow,deny
-            allow from all
+
+           <IfVersion < 2.4>
+                   Order allow,deny
+                   Allow from all
+           </IfVersion>
+           <IfVersion >= 2.4>
+                   Require all granted
+           </IfVersion>
 
             ExpiresActive On
             ExpiresByType text/html "access plus 1 hour"
@@ -25,6 +32,9 @@
         php_flag register_globals off
         php_flag magic_quotes_gpc off
         php_admin_flag short_open_tag on
+        php_value memory_limit 1024M
+        php_value upload_max_filesize 200M
+        php_value post_max_size 200M
         LogLevel error
         ErrorLog /var/log/apache2/matecat.error.log
         CustomLog /var/log/apache2/matecat.log combined
