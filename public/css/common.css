@@ -3207,6 +3207,7 @@ background: rgba(187, 187, 187, 0.14);
 text-align: center;
 padding: 10px 4px;
 font-size: 80%;
+position: relative;
 }
 
 .error-type th:nth-child(2) {

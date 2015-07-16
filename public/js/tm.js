@@ -334,7 +334,7 @@ $.extend(UI, {
         }).on('change', 'tr.mine td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]', function() {
             if(this.files[0].size > config.maxTMXFileSize) {
                 numMb = config.maxTMXFileSize/(1024*1024);
-                APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
+                APP.alert('File is too big.<br/>The maximuxm size allowed is ' + numMb + 'MB.');
                 return false;
             };
             if($(this).val() == '') {

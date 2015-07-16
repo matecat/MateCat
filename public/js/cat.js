@@ -891,7 +891,7 @@ console.log('changeStatus');
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.errors.length)
+        if (d.errors.length)
 			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
@@ -903,7 +903,7 @@ console.log('changeStatus');
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
-				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
+                seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
 			if (options.segmentToScroll) {
@@ -949,7 +949,6 @@ console.log('changeStatus');
 		this.markTags();
 //		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
-
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -4610,7 +4609,6 @@ $.extend(UI, {
                 newWindow.focus();
             }
         });
-		
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('cachedSegmentObjects', function() {
@@ -5850,6 +5848,11 @@ $.extend(UI, {
 //            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
+        if(!$('#segment-' + this.startSegmentId).length) {
+            if($('#segment-' + this.startSegmentId + '-1').length) {
+                this.startSegmentId = this.startSegmentId + '-1';
+            };
+        }
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
 
@@ -10099,7 +10102,7 @@ $.extend(UI, {
         }).on('change', 'tr.mine td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]', function() {
             if(this.files[0].size > config.maxTMXFileSize) {
                 numMb = config.maxTMXFileSize/(1024*1024);
-                APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
+                APP.alert('File is too big.<br/>The maximuxm size allowed is ' + numMb + 'MB.');
                 return false;
             };
             if($(this).val() == '') {

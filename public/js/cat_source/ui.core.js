@@ -891,7 +891,7 @@ console.log('changeStatus');
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.errors.length)
+        if (d.errors.length)
 			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
@@ -903,7 +903,7 @@ console.log('changeStatus');
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
-				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
+                seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
 			if (options.segmentToScroll) {
@@ -949,7 +949,6 @@ console.log('changeStatus');
 		this.markTags();
 //		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
-
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;

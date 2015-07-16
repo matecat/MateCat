@@ -122,7 +122,11 @@ body.searchActive #filterSwitch
 
 .error a{display:block !important;}
 
-
+.error {font-size:16px;}
+.error-type a.tooltip {
+left: -5px;
+  top: 10px;
+}
 
 .tag-mismatch{float:left !important}
 
