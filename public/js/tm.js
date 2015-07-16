@@ -1384,7 +1384,7 @@ $.extend(UI, {
     addMTEngine: function (provider, providerName) {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
-            field = $(this).find('input').first();
+            field = $(this).find('input, select').first();
             providerData[field.attr('data-field-name')] = field.val();
         })
 //        console.log(providerData);
@@ -1411,15 +1411,20 @@ $.extend(UI, {
                     console.log('error');
                     $('#mt-provider-details .error').text(d.errors[0].message);
                 } else {
-                    console.log('success');
-                    UI.renderNewMT(this, d.data.id);
-                    if(!APP.isCattool) {
-                        UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
-                        $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
-                        $('#mt_engine option:selected').removeAttr('selected');
-                        $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                    if(d.data.config && Object.keys(d.data.config).length) {
+                        UI.renderMTConfig(provider, d.data.config);
                     }
-                    $('#mt_engine_int').val('none').trigger('change');
+                    else {
+                        console.log('success');
+                        UI.renderNewMT(this, d.data.id);
+                        if(!APP.isCattool) {
+                            UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
+                            $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                            $('#mt_engine option:selected').removeAttr('selected');
+                            $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                        }
+                        $('#mt_engine_int').val('none').trigger('change');
+                    }
                 }
 
             }
@@ -1549,5 +1554,43 @@ $.extend(UI, {
         };
         this.dd = el;
         this.initEvents();
+    },
+    
+    renderMTConfig: function(provider, data) {
+        // $('#add-mt-provider-cancel').hide();
+        // $('#mt-provider-details .error').empty();
+
+        // $(".insert-tm").show();
+        
+        if(provider == 'none') {
+            $('.step2 .fields').html('');
+            $(".step2").hide();
+            $(".step3").hide();
+            $('#add-mt-provider-cancel').show();
+        } else {
+            $('.step2 .fields').html($('#mt-provider-' + provider + '-config-fields').html());
+            $('.step3 .text-left').html($('#mt-provider-' + provider + '-config-msg').html());
+            $(".step2").show();
+            $(".step3").show();
+            $("#add-mt-provider-confirm").removeClass('hide');
+        }
+        
+        var selectorBase = '.insert-tm .provider-data .provider-field';
+        for (key in data){
+            var field = $(selectorBase + " [data-field-name='" + key +"']");
+            var tagName = field.prop('tagName');
+            if (tagName == 'INPUT'){
+                field.val(data[key]);
+            } else if (tagName == 'SELECT'){
+                for (subkey in data[key]) {
+                    field.append("<option value='" + subkey + "'>" + data[key][subkey] + "</option>");
+                }
+            }
+        }
+        
+        $('.insert-tm .provider-data .provider-field').each(function () {
+            field = $(this).find('input').first();
+            providerData[field.attr('data-field-name')] = field.val();
+        })
     }
 });

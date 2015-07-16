@@ -32,6 +32,12 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
      */
     public $contribute_relative_url = "UpdateTranslation";
 
+    /**
+     * @var array
+     */
+    public $others = array(
+            'system_list_relative_url' => 'GetSystemList'
+    );
 
     /**
      * @var string

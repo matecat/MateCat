@@ -170,12 +170,22 @@ class engineController extends ajaxController {
                  */
                 $newEngine = EnginesModel_LetsMTStruct::getStruct();
 
-                $newEngine->name                                = $this->name;
+                $newEngine->name                                = empty($this->name)? $this->engineData['new_engine_name'] : $this->name;
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
                 $newEngine->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ];
                 $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
+                
+                /*$config = array(
+                    'new_engine_name' => $this->name,
+                    'client_id' => $this->engineData['client_id'],
+                    'system_id' => array('someid1' => 'System 1', 'someid2' => 'System 2', 'someid3' => 'System 3', 'someid4' => 'System 4'),
+                    'terms_id' => array('someidterms1' => 'Terms 1', 'sometermsid2' => 'Terms 2', 'sometermsid3' => 'Terms 3')
+                    );
+                
+                $this->result['data']['config'] = $config;
+                return;*/
 
                 break;
             default:
@@ -230,8 +240,30 @@ class engineController extends ajaxController {
                 return;
             }
 
+        } elseif ( $newEngine instanceof EnginesModel_LetsMTStruct && empty($this->engineData[ 'system_id' ])){
+            $temp_engine = Engine::getInstance( $result->id );
+            $config = $temp_engine->getConfigStruct();
+            $config[ 'source' ]  = "en-US"; // TODO replace with values from the project being currently created
+            $config[ 'target' ]  = "lv-LV";
+            $systemsAndTerms = $temp_engine->getSystemsAndTerms($config);
+            
+            $uiConfig = array(
+                'new_engine_name' => $this->name,
+                'client_id' => $this->engineData['client_id'],
+                'system_id' => array(),
+                'terms_id' => array()
+            );
+            foreach ($systemsAndTerms['systems'] as $systemID => $systemName){
+                $uiConfig['system_id'][$systemID] = $systemName;
+            }
+            foreach ($systemsAndTerms['terms'] as $termID => $termName){
+                $uiConfig['terms_id'][$termID] = $termName;
+            }
+            
+            $engineDAO->delete($result);
+            $this->result['data']['config'] = $uiConfig;
         }
-
+        
         $this->result['data']['id'] = $result->id;
 
     }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author Rihards Krislauks rihards.krislauks@tilde.lv
+ * @author Rihards Krislauks rihards.krislauks@tilde.lv / rihards.krislauks@gmail.com
  */
 
 /**
@@ -48,39 +48,54 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
         if( is_string( $rawValue ) ) {
             $parsed = json_decode( $rawValue, true );
-            $decoded = array(
-                        'data' => array(
-                                "translations" => array(
-                                        array( 'translatedText' => $this->_resetSpecialStrings( $parsed['translation'] ) )
-                                )
-                        )
+            if(!empty($parsed['translation'])){
+                // this is a response from a translate request
+                
+                $decoded = array(
+                            'data' => array(
+                                    "translations" => array(
+                                            array( 'translatedText' => $this->_resetSpecialStrings( $parsed['translation'] ) )
+                                    )
+                            )
+                    );
+                
+                $mt_result = new Engines_Results_MT( $decoded );
+
+                if ( $mt_result->error->code < 0 ) {
+                    $mt_result = $mt_result->get_as_array();
+                    $mt_result['error'] = (array)$mt_result['error'];
+                    return $mt_result;
+                }
+
+                $mt_match_res = new Engines_Results_MyMemory_Matches(
+                        $this->_resetSpecialStrings( $all_args[ 1 ][ 'text' ] ),
+                        $mt_result->translatedText,
+                        100 - $this->getPenalty() . "%",
+                        "MT-" . $this->getName(),
+                        date( "Y-m-d" )
                 );
+
+                $mt_res                          = $mt_match_res->get_as_array();
+                $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
+
+                return $mt_res;
+            } elseif (!empty($parsed['System'])){
+                // this is a response from a getSystemList request
+                
+                $decoded = array();
+                foreach($parsed['System'] as $systemData){
+                    $decoded[$systemData['ID']] = $systemData['Title']['Text'];
+                }
+                
+                return $decoded;
+            }
         } else {
             $decoded = array(
                     'error' => array( "message" => $error['h1'] . ": " . $error['p'][2], 'code' => -1 ) // TODO taken from MicrosoftHub. check if works
                 );
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result = $mt_result->get_as_array();
-            $mt_result['error'] = (array)$mt_result['error'];
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_resetSpecialStrings( $all_args[ 1 ][ 'text' ] ),
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
-
-        $mt_res                          = $mt_match_res->get_as_array();
-        $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
-
-        return $mt_res;
+        return $decoded;
 
     }
 
@@ -145,6 +160,23 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             return true;
         }
     }
+    
+    public function getSystemsAndTerms($_config) {
+        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
+        $parameters = array();
+                $parameters['appID'] = ""; // not used for now
+                $parameters['clientID'] = $this->client_id;
+                //$parameters['options'] = "termCorpusId=" . $this->terms_id;
+		//$parameters['source'] = $_config[ 'source' ];
+		//$parameters['target'] = $_config[ 'target' ];
 
+	$this->call( 'system_list_relative_url', $parameters );
+
+        $systemList = $this->result;
+        
+        return array('systems' => $systemList);
+        
+    }
 }

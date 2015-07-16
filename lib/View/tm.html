@@ -485,14 +485,6 @@
                 <label>Client ID<sup>*</sup></label>
                 <input class="required" data-field-name="client_id" placeholder="here" />
             </div>
-            <div class="provider-field">
-                <label>System ID<sup>*</sup></label>
-                <input class="required" data-field-name="system_id" placeholder="here" />
-            </div>
-            <div class="provider-field">
-                <label>Terms ID</label>
-                <input data-field-name="terms_id" placeholder="here" />
-            </div>
         </div>
     </template>
 
@@ -501,6 +493,34 @@
         <p>In order to boost translation quality and accuracy, our MT systems can fully integrate your domain-specific terminology in the right inflectional forms.</p>
         <p>Contact Tilde MT to get a custom MT system for your language pair and domain.</p>
         <a href="https://www.letsmt.eu" target="_blank" class="continuebtn btn-ok">Tilde MT</a>
+    </template>
+    
+    <template id="mt-provider-letsmt-config-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <div class="provider-data">
+            <div class="provider-field hide">
+                <label>Engine name<sup>*</sup></label>
+                <input class="required" data-field-name="new_engine_name" placeholder="here" />
+            </div>
+            <div class="provider-field hide">
+                <label>Client ID<sup>*</sup></label>
+                <input class="required" data-field-name="client_id" placeholder="here" />
+            </div>
+            <div class="provider-field">
+                <label>Translation system<sup>*</sup></label>
+                <select class="required" data-field-name="system_id" />
+            </div>
+            <div class="provider-field">
+                <label>Terms corpora</label>
+                <select class="required" data-field-name="terms_id" />
+            </div>
+        </div>
+    </template>
+
+    <template id="mt-provider-letsmt-config-msg">
+        <p>Please select a translation system from the provided list.</p>
     </template>
     <!-- beidzam letsmt bloku -->
 
