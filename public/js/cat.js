@@ -59,7 +59,7 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = this.editarea.text(); 
+        this.currentSegmentTranslation = this.editarea.text();
 	},
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -620,6 +620,7 @@ console.log('changeStatus');
 				(ext == 'sgml')?	'extsgl' :
 				(ext == 'sgm')?		'extsgm' :
 				(ext == 'properties')? 'extpro' :
+                (ext == 'zip')? 'extzip' :
 								'extxif';
 		return c;
 	},
@@ -2607,7 +2608,7 @@ console.log('changeStatus');
             errors: errors,
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave,
-            version: segment.attr('data-version'), 
+            version: segment.attr('data-version'),
             propagate: propagate
         };
         if(isSplitted) {
@@ -3776,8 +3777,8 @@ $.extend(UI, {
 		/**
 		 * Global Warnings array definition.
 		 */
-		this.globalWarnings = [];		
-		
+		this.globalWarnings = [];
+
 		this.shortcuts = {
 			"translate": {
 				"label" : "Confirm translation",
@@ -3879,7 +3880,7 @@ $.extend(UI, {
 
 
 /*
-	Component: ui.render 
+	Component: ui.render
  */
 $.extend(UI, {
 	render: function(options) {
@@ -3913,7 +3914,7 @@ $.extend(UI, {
 		this.maxMinutesBeforeRerendering = 60;
 		setTimeout(function() {
 			UI.hasToBeRerendered = true;
-		}, this.maxMinutesBeforeRerendering*60000);	
+		}, this.maxMinutesBeforeRerendering*60000);
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
@@ -3974,7 +3975,7 @@ $.extend(UI, {
 //		this.checkTutorialNeed();
         this.findCommonPartInSegmentIds();
 //        console.log(UI.commonPartInSegmentIds);
-		UI.detectStartSegment(); 
+		UI.detectStartSegment();
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
 //		if(highlight) {
@@ -3993,7 +3994,7 @@ $.extend(UI, {
 
 
 /*
-	Component: ui.events 
+	Component: ui.events
  */
 $.extend(UI, {
 	bindShortcuts: function() {
@@ -4072,7 +4073,7 @@ $.extend(UI, {
 				tab = 'matches';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
 		}).on('keydown', null, 'ctrl+2', function(e) {
@@ -4080,9 +4081,9 @@ $.extend(UI, {
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');		
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
 		}).on('keydown', null, 'ctrl+3', function(e) {
@@ -4090,9 +4091,9 @@ $.extend(UI, {
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');		
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			} else if(active.hasClass('.tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
@@ -4157,8 +4158,8 @@ $.extend(UI, {
 //			e.preventDefault();
 //			$('body').removeClass('incomingMsg');
 //			var expireDate = new Date($('#messageBar').attr('data-expire'));
-//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });		
-					
+//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });
+
 //		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 //			console.log($(this).prop('checked'));
 //			if ($(this).prop('checked')) {
@@ -4482,7 +4483,7 @@ $.extend(UI, {
 			e.preventDefault();
 			$('#settings-shortcuts .list').remove();
 			UI.setShortcuts();
-			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');	
+			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -4559,7 +4560,7 @@ $.extend(UI, {
 					console.log('troppi tasti control: ', $('span', s).length);
 					return false;
 				}
-			
+
 				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
 				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
 			} else {
@@ -4585,7 +4586,7 @@ $.extend(UI, {
 //				$('.msg', c).remove();
 //				$('#settings-shortcuts.modifying').removeClass('modifying');
 //				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
-			}				
+			}
 		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
 			var c = $(this).parents('.combination');
@@ -4610,7 +4611,7 @@ $.extend(UI, {
                 newWindow.focus();
             }
         });
-		
+
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function() {
@@ -4642,7 +4643,7 @@ $.extend(UI, {
 			goodbye(e);
 		};
 
-	
+
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
@@ -4832,7 +4833,7 @@ $.extend(UI, {
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
-			e.stopPropagation();			
+			e.stopPropagation();
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
             if(!UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
@@ -5026,7 +5027,7 @@ $.extend(UI, {
 			}
 */
 
-//			console.log(e.which); 
+//			console.log(e.which);
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
@@ -5146,14 +5147,14 @@ $.extend(UI, {
 
 					// insideMark management
 					if ((e.which == 8)&&(isInsideMark)) {
-						console.log('inside mark'); 
+						console.log('inside mark');
 					}
 
 
 
 				}
 			}
-			
+
 			if (e.which == 8) { // backspace
 				if($('.tag-autocomplete').length) {
 					UI.closeTagAutocompletePanel();
@@ -5161,7 +5162,7 @@ $.extend(UI, {
 						UI.openTagAutocompletePanel();
 						added = UI.getPartialTagAutocomplete();
 						if(added === '') UI.closeTagAutocompletePanel();
-					}, 10);		
+					}, 10);
 				}
 			}
 			if (e.which == 9) { // tab
@@ -5246,7 +5247,7 @@ $.extend(UI, {
 					if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
 						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
 						return false;
-					}	
+					}
 				}
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
@@ -5290,7 +5291,7 @@ $.extend(UI, {
 
 			if (e.which == 40) { // down arrow
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');	
+					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
 					return false;
 				}
 				selection = window.getSelection();
@@ -5480,11 +5481,11 @@ $.extend(UI, {
 			setTimeout(function() {
 				var strChunk = UI.editarea.html().replace(/(^.*?)&nbsp;(<span contenteditable\="false" class\="locked).*?$/gi, '$1');
 
-				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space). 
+				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space).
 				// In this case, we have to add it again because we are also deleting the &nbsp; added by the browser.
 				// We cannot detect if the user has dropped immediately before or after the space, so we decide where to put it according if it is an opening tag or a closing tag,
-				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {  
-					toAddBefore = (UI.draggingTagIsOpening)? ' ' : ''; 
+				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {
+					toAddBefore = (UI.draggingTagIsOpening)? ' ' : '';
 					toAddAfter = (UI.draggingTagIsOpening)? '' : ' ';
 				} else {
 					toAddBefore = toAddAfter = '';
@@ -5502,7 +5503,7 @@ $.extend(UI, {
 				if(nn > 0) {
 					setCursorPosition(uniqueEl[0].nextSibling, 0);
 				}
-				
+
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
@@ -5728,7 +5729,7 @@ $.extend(UI, {
 				}
 			}
 		}).on('input', '.sub-editor .gl-search .search-target', function() {
-			gl = $(this).parents('.gl-search').find('.set-glossary');	
+			gl = $(this).parents('.gl-search').find('.set-glossary');
 			if($(this).text() === '') {
 				gl.addClass('disabled');
 			} else {
@@ -5806,7 +5807,7 @@ $.extend(UI, {
 			if($(tab).hasClass('extended')) {
 				UI.setExtendedConcordances(false);
 
-/*				
+/*
 				$(tab).removeClass('extended')
 //				console.log(container.height());
 				$(container).removeAttr('style');
@@ -5815,7 +5816,7 @@ $.extend(UI, {
 */
 			} else {
 				UI.setExtendedConcordances(true);
-				
+
 //				$(container).css('height', $(tab).height() + 'px');
 //				$(tab).addClass('extended');
 //				$(this).text('Less');
@@ -5871,7 +5872,7 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function() {
 			UI.setNextWarnedSegment();
 		});
-		
+
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
@@ -5990,7 +5991,7 @@ $.extend(UI, {
             console.log('b');
 
 			if (UI.searchMode == 'onlyStatus') {
-				
+
 //			} else if (UI.searchMode == 'source&target') {
 
 			} else {
@@ -6055,7 +6056,7 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug)
 			console.log('Init time: ' + this.initTime);
-		
+
 	}
 });
 
@@ -6145,7 +6146,7 @@ $.extend(UI, {
 		if ((!n.length) && (next)) {
 			return false;
 		}
-		var id = n.attr('id'); 
+		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
@@ -6346,7 +6347,7 @@ $.extend(UI, {
 					UI.addWarningToSearchDisplay();
 				UI.setChosenSuggestion(1);
 				copySuggestionDone = true;
-			}						
+			}
 //			if (copySuggestionDone) {
 //				if (isActiveSegment) {
 //				}
@@ -6626,7 +6627,7 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.chooseSuggestion('6');
-		}); 
+		});
 	},
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
@@ -6805,7 +6806,7 @@ $.extend(UI, {
     },
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
-//		UI.checkHeaviness(); 
+//		UI.checkHeaviness();
 
 		if(this.noTagsInSegment({
             area: false,
@@ -6971,7 +6972,7 @@ $.extend(UI, {
 			var cloneEl = area;
 			// encode br before textification
 			$('br', cloneEl).each(function() {
-				$(this).replaceWith('[**[br class="' + this.className + '"]**]');				
+				$(this).replaceWith('[**[br class="' + this.className + '"]**]');
 			});
 			newText = cloneEl.text().replace(draggedText, newTag);
 			cloneEl = null;
@@ -7009,7 +7010,7 @@ $.extend(UI, {
 			area.text(newText);
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();
-			area.html(area.html().replace(this.cursorPlaceholder, ''));			
+			area.html(area.html().replace(this.cursorPlaceholder, ''));
 		}
 */
 	},
@@ -7289,7 +7290,7 @@ $.extend(UI, {
             }).addClass('order-error');
         }
 
-	},	
+	},
 
 	// TAG AUTOCOMPLETE
 	checkAutocompleteTags: function() {//console.log('checkAutocompleteTags');
@@ -7304,7 +7305,7 @@ $.extend(UI, {
 			if( str.substring(0, added.length) === added ) {
 				$(this).removeClass('hidden');
 			} else {
-				$(this).addClass('hidden');	
+				$(this).addClass('hidden');
 			}
 		});
 //		console.log('bb: ', UI.editarea.html());
@@ -7313,7 +7314,7 @@ $.extend(UI, {
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
 				UI.closeTagAutocompletePanel();
-				return false;				
+				return false;
 			}
 			UI.preCloseTagAutocomplete = true;
 		} else {
@@ -7321,7 +7322,7 @@ $.extend(UI, {
 
 			$('.tag-autocomplete li.current').removeClass('current');
 			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
-			$('.tag-autocomplete').removeClass('empty');		
+			$('.tag-autocomplete').removeClass('empty');
 //			console.log('ee: ', UI.editarea.html());
 			UI.preCloseTagAutocomplete = false;
 		}
@@ -7366,7 +7367,7 @@ $.extend(UI, {
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
-		
+
 		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();
@@ -7451,11 +7452,11 @@ $.extend(UI, {
 	setExtendedConcordances: function(extended) {
 		if(!extended) {
 			$('.sub-editor.concordances').removeClass('extended');
-			$('.sub-editor.concordances .overflow').removeAttr('style');	
+			$('.sub-editor.concordances .overflow').removeAttr('style');
 			if($('.sub-editor.concordances .more').length) {
 				$('.sub-editor.concordances .more').text('More');
 			} else {
-				$('.sub-editor.concordances', segment).append('<br class="clear"><a href="#" class="more">More</a>');				
+				$('.sub-editor.concordances', segment).append('<br class="clear"><a href="#" class="more">More</a>');
 			}
 			this.custom.extended_concordance = false;
 			this.saveCustomization();
@@ -7499,7 +7500,7 @@ $.extend(UI, {
                 $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });
 			if(UI.custom.extended_concordance) {
-				UI.setExtendedConcordances(true);			
+				UI.setExtendedConcordances(true);
 			} else {
 				UI.setExtendedConcordances(false);
 			}
@@ -7554,8 +7555,8 @@ $.extend(UI, {
 				$(numLabel).text('(' + num + ')').attr('data-num', num);
 			} else {
 //				console.log('finiti');
-				$(numLabel).text('').attr('data-num', 0);	
-			}					
+				$(numLabel).text('').attr('data-num', 0);
+			}
 		}
 	},
 	getGlossary: function(segment, entireSegment, next) {
@@ -7573,16 +7574,16 @@ $.extend(UI, {
 		$('.gl-search', n).addClass('loading');
 		if(config.tms_enabled) {
 			$('.sub-editor.glossary .overflow .results', n).empty();
-			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();			
+			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();
 		}
 		txt = (entireSegment)? htmlDecode($('.text .source', n).attr('data-original')) : view2rawxliff($('.gl-search .search-source', n).text());
 //        console.log('txt: ', txt);
         if((typeof txt == 'undefined')||(txt == '')) return false;
 //		console.log('typeof n: ', typeof $(n).attr('id'));
 //		console.log('n: ', $(n).attr('id').split('-')[1]);
-//		if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 1: ', $('.source', n).html()); 
+//		if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 1: ', $('.source', n).html());
 //		if($(n).attr('id').split('-')[1] == '13735228') {
-//			console.log('QUI 1: ', $('.source', n).html()); 
+//			console.log('QUI 1: ', $('.source', n).html());
 //		}
 
 		APP.doRequest({
@@ -7614,15 +7615,15 @@ $.extend(UI, {
 					}
 				}
 				n = this[0];
-//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 2: ', $('.source', n).html()); 
-//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 2: ', $('.source', n).html()); 
+//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 2: ', $('.source', n).html());
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 2: ', $('.source', n).html());
 
 				UI.processLoadedGlossary(d, this);
-//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html()); 
-//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html()); 
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html());
+//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html());
 //				console.log('next?: ', this[1]);
 				if(!this[1]) UI.markGlossaryItemsInSource(d, this);
-//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html()); 
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html());
 			},
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('loading');
@@ -7636,7 +7637,7 @@ $.extend(UI, {
 			if(!$('.footer .submenu', segment).length) { // footer has not yet been created
 				setTimeout(function() { // wait for creation
 					UI.processLoadedGlossary(d, context);
-				}, 200);	
+				}, 200);
 			}
 		}
 		numMatches = Object.size(d.data.matches);
@@ -7644,12 +7645,12 @@ $.extend(UI, {
 			UI.renderGlossary(d, segment);
 			$('.tab-switcher-gl a .number', segment).text('(' + numMatches + ')').attr('data-num', numMatches);
 		} else {
-			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);	
-		}		
+			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);
+		}
 	},
 	markGlossaryItemsInSource: function(d) {
 		if (Object.size(d.data.matches)) {
-			i = 0;	
+			i = 0;
 			cleanString = $('.source', UI.currentSegment).html();
 			var intervals = [];
             matches = [];
@@ -7682,7 +7683,7 @@ $.extend(UI, {
 
                 if(coso.indexOf('<mark>') == -1) return;
 				int = {
-					x: coso.indexOf('<mark>'), 
+					x: coso.indexOf('<mark>'),
 					y: coso.indexOf('</mark>') - 6
 				};
 				intervals.push(int);
@@ -7697,7 +7698,7 @@ $.extend(UI, {
 
             $.each(UI.intervalsUnion, function(index) {
 				added = markLength * index;
-				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
+				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
 //                console.log('source 1: ', $('.editor .source').html());
 				$('.editor .source').html(sourceString);
@@ -7760,7 +7761,7 @@ $.extend(UI, {
 
 	smallestInterval: function(ar) {
 		smallest = {
-					x: 1000000, 
+					x: 1000000,
 					y: 2000000
 				};
 		$.each(ar, function() {
@@ -8031,7 +8032,7 @@ $.extend(UI, {
 				exactmatch: p['exact-match'],
 				replace: replace
 			},
-			success: function(d) {				
+			success: function(d) {
 				if(d.errors.length) {
 					APP.alert({msg: d.errors[0].message});
 					return false;
@@ -8348,7 +8349,7 @@ $.extend(UI, {
 					el: 'segment-' + $(seg).attr('id').split('-')[1]
 				});
 			}
-*/			
+*/
 		} else {
 			m = $("mark.currSearchItem");
 //            console.log($(m).nextAll('mark.searchMarker').length);
@@ -8445,7 +8446,7 @@ $.extend(UI, {
 						return false;
 					}
 				}
-			});			
+			});
 			if (!found) {
 				// load new segments
 				if (!this.searchResultsSegments) {
@@ -8467,7 +8468,7 @@ $.extend(UI, {
 /*
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			destination = (($('#' + el + ":has(mark.searchMarker)").length) && (!$('#' + el).hasClass('currSearchSegment'))) ? $('#' + el) : $('#' + el).nextAll(status + ":has(mark.searchMarker)").first();
-//            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();            
+//            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();
 //            console.log(destination);
 			if ($(destination).length) {
 				$('section.currSearchSegment').removeClass('currSearchSegment');
@@ -8549,7 +8550,7 @@ $.extend(UI, {
 	},
 });
 /*
-	Component: functions 
+	Component: functions
  */
 
 function htmlEncode(value) {
@@ -8630,7 +8631,7 @@ function processpaste(elem, savedcontent) {
 
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
-	
+
 	// Do whatever with gathered data;
 	$('#placeHolder').before(pasteddata);
 	focusOnPlaceholder();
@@ -8686,7 +8687,7 @@ function insertNodeAtCursor(node) {
 
 function setCursorAfterNode(range, node) {
 	range.setStartAfter(node);
-	range.setEndAfter(node); 
+	range.setEndAfter(node);
 	window.getSelection().removeAllRanges();
 	window.getSelection().addRange(range);
 }
@@ -8747,7 +8748,7 @@ function setCursorPosition(el, pos) {
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
-	if(typeof el[0] != 'undefined') el.focus();	
+	if(typeof el[0] != 'undefined') el.focus();
 }
 
 function removeSelectedText() {
@@ -8938,7 +8939,7 @@ function view2rawxliff(segment) {
 	// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
 	// output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
 
-	// caso controverso <g id="4" x="&lt; dfsd &gt;"> 
+	// caso controverso <g id="4" x="&lt; dfsd &gt;">
 	//segment=htmlDecode(segment);
 	segment = placehold_xliff_tags(segment);
 	segment = htmlEncode(segment);
@@ -8997,7 +8998,7 @@ function restoreSelection() {
 	}
 }
 
-function selectText(element) { 
+function selectText(element) {
 	var doc = document, text = element, range, selection;
 	if (doc.body.createTextRange) {
 		range = document.body.createTextRange();
@@ -9072,7 +9073,7 @@ function setBrowserHistoryBehavior() {
 
 function goodbye(e) {
 
-    UI.clearStorage('contribution'); 
+    UI.clearStorage('contribution');
 
     if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
         return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
@@ -9104,7 +9105,7 @@ function goodbye(e) {
 
     }
 
-}   
+}
 
 $.fn.isOnScreen = function() {
 
@@ -9770,9 +9771,9 @@ $.extend(UI, {
 //        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
-        
+
         UI.setDropDown();
-        
+
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
             UI.closeTMPanel();
@@ -9798,7 +9799,7 @@ $.extend(UI, {
             $(".mgmt-table-mt").show();
         });
 
-        
+
 
         $(".mgmt-mt").click(function(e) {
             e.preventDefault();
@@ -10212,7 +10213,7 @@ $.extend(UI, {
             $(".loginpopup").show();
         });
 
-       
+
 
 //    	$('#sort td:first').addClass('index');
 
@@ -11650,7 +11651,7 @@ if(config.splitSegmentEnabled) {
                 console.log('b');
                 UI.updateSplitNumber($(segment).find('.splitArea'));
                 console.log('c');
-        
+
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');

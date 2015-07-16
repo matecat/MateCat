@@ -756,12 +756,24 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         rowClone.removeClass( 'converting' );
                         rowClone.addClass( 'ready' );
 
-                        //change name to the file
-                        $( rowClone ).find( '.name' ).first().html( file['name'] );
+                        var rawPath = file['name'].split("/");
+                        var zipFile = rawPath[0];
 
+                        var fileExt = file['name'].split(".").pop();
+                        ;
+
+                        //change name to the file
+                        $( rowClone ).find( '.name' ).first()
+                                .data("zipfile" , zipFile)
+                                .attr("data-zipfile" , zipFile )
+                                .html( "<span class=\"zip_internal_file\">" + file['name'] + "</span>" );
                         $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize(file['size']) );
 
                         var oldDataUrl = $( 'button[role="button"]', rowClone ).data("url");
+
+
+                        var newExtClass = getIconClass(fileExt);
+                        $( rowClone ).find( '.preview span' ).first().attr("class",newExtClass);;
 
                         $( rowClone ).find( '.operation' ).first().parent().first().html('');
 
@@ -771,12 +783,11 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                                 .data("url" , newDataUrl)
                                 .attr("data-url" , newDataUrl);
 
-                        $( rowParent ).append( rowClone );
+                        //$( rowParent ).append( rowClone );
+                        $( filerow ).after( rowClone );
 
                     } );
                     //END editing by Roberto Tucci <roberto@translated.net>
-
-
 
                 }
 
@@ -1018,6 +1029,63 @@ function goodbye( e ) {
 
         return leave_message;
     }
+}
+
+getIconClass= function(ext) {
+    c =		(
+            (ext == 'doc')||
+            (ext == 'dot')||
+            (ext == 'docx')||
+            (ext == 'dotx')||
+            (ext == 'docm')||
+            (ext == 'dotm')||
+            (ext == 'odt')||
+            (ext == 'sxw')
+    )?				'extdoc' :
+            (
+                    (ext == 'pot')||
+                    (ext == 'pps')||
+                    (ext == 'ppt')||
+                    (ext == 'potm')||
+                    (ext == 'potx')||
+                    (ext == 'ppsm')||
+                    (ext == 'ppsx')||
+                    (ext == 'pptm')||
+                    (ext == 'pptx')||
+                    (ext == 'odp')||
+                    (ext == 'sxi')
+            )?				'extppt' :
+            (
+            (ext == 'htm')||
+            (ext == 'html')
+            )?				'exthtm' :
+            (ext == 'pdf')?		'extpdf' :
+        (
+                (ext == 'xls')||
+                (ext == 'xlt')||
+                (ext == 'xlsm')||
+                (ext == 'xlsx')||
+                (ext == 'xltx')||
+                (ext == 'ods')||
+                (ext == 'sxc')||
+                (ext == 'csv')
+        )?				'extxls' :
+        (ext == 'txt')?		'exttxt' :
+        (ext == 'ttx')?		'extttx' :
+        (ext == 'itd')?		'extitd' :
+        (ext == 'xlf')?		'extxlf' :
+        (ext == 'mif')?		'extmif' :
+        (ext == 'idml')?	'extidd' :
+        (ext == 'xtg')?		'extqxp' :
+        (ext == 'xml')?		'extxml' :
+        (ext == 'rc')?		'extrcc' :
+        (ext == 'resx')?		'extres' :
+        (ext == 'sgml')?	'extsgl' :
+        (ext == 'sgm')?		'extsgm' :
+        (ext == 'properties')? 'extpro' :
+        (ext == 'zip')? 'extzip' :
+        'extxif';
+return c;
 }
 
 window.onbeforeunload = function ( e ) {
