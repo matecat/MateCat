@@ -633,6 +633,10 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extdoc"></span>
            
             {% mimeok=1 } %}
+
+            {% if (o.files[i].type == "application/zip") { %}
+             <span class="extzip"></span>
+             {% mimeok=1 } %}
 			
 			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
             <span class="extppt"></span>

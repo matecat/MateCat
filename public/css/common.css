@@ -2578,6 +2578,8 @@ font-weight: normal !important;
 .exttag {background: url(../img/matecat_file_icons.png) 6px -686px no-repeat !important;} /* .tag */
 .exttmx {background: url(../img/matecat_file_icons.png) 6px -722px no-repeat !important;} /* .tmx */
 .extstr {background: url(../img/matecat_file_icons.png) 6px -758px no-repeat !important;} /* .str */
+.extzip {background: url(../img/matecat_file_icons.png) 6px -792px no-repeat !important;} /* .zip */
+
 
 #jobMenu span {height: 25px;
 	padding: 5px;

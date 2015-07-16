@@ -536,8 +536,8 @@
         },
 
         _renderPreviews: function ( files, nodes ) {
-            var that = this,
-                    options = this.options;
+            var that = this;
+            var options = this.options;
             nodes.find( '.preview span' ).each( function ( index, element ) {
                 var file = files[index];
                 if ( options.previewSourceFileTypes.test( file.type ) &&
