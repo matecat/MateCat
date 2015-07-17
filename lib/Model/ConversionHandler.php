@@ -56,8 +56,8 @@ class ConversionHandler {
                         //we take it as is
                         if ( !$fileType[ 'proprietary' ] || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
                             $this->result[ 'code' ]      = 1; // OK for client
-                            $this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
 
+                            //This file has to be linked to cache!
                             return 0; //ok don't convert a standard sdlxliff
                         }
 
@@ -316,7 +316,7 @@ class ConversionHandler {
                 );
             }
 
-            // The true flag makes Upload get the upload directory from the cookie.
+            // TODO The true flag makes Upload get the upload directory from the cookie.
             // In this way it'll find the unzipped files
             $uploadFile = new Upload( $this->cookieDir );
 
