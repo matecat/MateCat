@@ -7,7 +7,6 @@
         <Directory @@@path@@@/>
             Options All
             AllowOverride All
-            Order allow,deny
 
            <IfVersion < 2.4>
                    Order allow,deny
