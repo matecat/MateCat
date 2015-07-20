@@ -72,7 +72,11 @@ class ajaxUtilsController extends ajaxController {
 
                 break;
             case 'clearNotCompletedUploads':
-                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
+                try {
+                    Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
+                } catch ( Exception $e ) {
+                    Log::doLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() ); 
+                }
                 setcookie( "upload_session", null, -1, '/' );
                 unset( $_COOKIE[ 'upload_session' ] );
                 break;
