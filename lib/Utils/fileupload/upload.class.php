@@ -454,12 +454,12 @@ class UploadHandler {
             $file->name = $this->trim_file_name( $matches[1], trim( $matches[2] ), null );
             $file->size = null;
             $file->type = trim( $matches[2] );
-            $file->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max header post size value.\"";
+            $file->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max header post size value in php.ini.\"";
 
             $info = array( $file );
 
         } elseif( $_SERVER['CONTENT_LENGTH'] >= $uploadParams->getUploadMaxFilesize() ){
-            $info[0]->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max file upload value.\"";
+            $info[0]->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max file upload value in php.ini.\"";
         }
         //check for server misconfiguration
 

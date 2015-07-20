@@ -616,9 +616,10 @@ $.extend(UI, {
                 newWindow.focus();
             }
         });
-
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
+		}).on('cachedSegmentObjects', function() {
+            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function() {
@@ -1893,6 +1894,11 @@ $.extend(UI, {
 //            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
+        if(!$('#segment-' + this.startSegmentId).length) {
+            if($('#segment-' + this.startSegmentId + '-1').length) {
+                this.startSegmentId = this.startSegmentId + '-1';
+            };
+        }
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
 

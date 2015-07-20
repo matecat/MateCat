@@ -60,7 +60,8 @@ UI = {
 		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
         this.currentSegmentTranslation = this.editarea.text();
-	},
+        $(window).trigger('cachedSegmentObjects');
+    },
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
@@ -890,7 +891,7 @@ console.log('changeStatus');
 		});
 	},
 	getSegments_success: function(d, options) {
-		if (d.errors.length)
+        if (d.errors.length)
 			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
 		$.each(d.data.files, function() {
@@ -903,7 +904,7 @@ console.log('changeStatus');
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
-				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
+                seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
 			if (options.segmentToScroll) {
