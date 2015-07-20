@@ -180,7 +180,9 @@ class engineController extends ajaxController {
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
-                $newEngine->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ];
+                $newEngine->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
+                                                                                                    // return the newly added system's id or the list of available systems
+                                                                                                    // for the user to choose from. the check happens later on
                 $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
                 
                 /*$config = array(
@@ -247,11 +249,21 @@ class engineController extends ajaxController {
             }
 
         } elseif ( $newEngine instanceof EnginesModel_LetsMTStruct && empty($this->engineData[ 'system_id' ])){
+            // the user has not selected a translation system. only the User ID and the engine's name has been entered
+            // get the list of available systems and return it to the user
+            
             $temp_engine = Engine::getInstance( $result->id );
             $config = $temp_engine->getConfigStruct();
             $config[ 'source' ]  = "en-US"; // TODO replace with values from the project being currently created
             $config[ 'target' ]  = "lv-LV";
             $systemsAndTerms = $temp_engine->getSystemsAndTerms($config);
+            
+            $engineDAO->delete($result); // delete the newly added engine. this is the first time in engineController::add()
+                                         // and the user has not yet selected a translation system
+            if ( isset( $systemsAndTerms['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $systemsAndTerms['error'];
+                return;
+            }
             
             $uiConfig = array(
                 'client_id' => $this->engineData['client_id'],
@@ -265,7 +277,6 @@ class engineController extends ajaxController {
                 $uiConfig['terms_id'][$termID] = $termName;
             }
             
-            $engineDAO->delete($result);
             $this->result['name'] = $this->name;
             $this->result['data']['config'] = $uiConfig;
         }

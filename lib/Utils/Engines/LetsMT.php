@@ -97,9 +97,12 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 }
             }
         } else {
-            $decoded = array(
-                    'error' => array( "message" => $error['h1'] . ": " . $error['p'][2], 'code' => -1 ) // TODO taken from MicrosoftHub. check if works
-                );
+            $decoded = $rawValue;
+            // in case of an invalid user id http status 401 is returned.
+            // display a more user friendly message
+            if (strpos($decoded['error'], 'http status 401') !== false) {
+                $decoded['error']['message'] = 'Invalid Client ID.';
+            }
         }
 
         return $decoded;
@@ -178,7 +181,10 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( 'system_list_relative_url', $parameters );
-
+        
+        if (isset($this->result['error']['code'])) {
+            return $this->result;
+        }
         $systemList = $this->result;
         
         return array('systems' => $systemList);
