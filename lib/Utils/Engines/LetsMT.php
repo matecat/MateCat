@@ -84,8 +84,47 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 
                 $decoded = array();
                 foreach($parsed['System'] as $systemData){
-                    $decoded[$systemData['ID']] = $systemData['Title']['Text'];
+                    $status = "";
+                    foreach ($systemData['Metadata'] as $value){
+                        if ($value['Key'] === 'status'){
+                            switch ($value['Value'])
+                            {
+                                case "running":
+                                    $status = "Running";
+                                    break;
+                                case "queuingtransl":
+                                    $status = "Queuing";
+                                    break;
+                                case "notstarted":
+                                    $status = "Not Started";
+                                    break;
+                                case "nottrained":
+                                    $status = "Not Trained";
+                                    break;
+                                case "error":
+                                    $status = "Not Trained";
+                                    break;
+                                case "training":
+                                    $status = "Training";
+                                    break;
+                                case "standby":
+                                    $status = "Standby";
+                                    break;
+                                default:
+                                    $status = $value['Value'];
+                                    break;
+                            }
+                            //strSysOnlineStatus = prop.Value;
+                            break;
+                        }
+                    }
+                    $decoded[$systemData['ID']] = sprintf('%s-%s %s (%s)',
+                                                            $systemData['SourceLanguage']['Code'],
+                                                            $systemData['TargetLanguage']['Code'],
+                                                            $systemData['Title']['Text'],
+                                                            $status);
                 }
+                asort($decoded);
                 
                 return $decoded;
             } elseif (!empty($parsed[0]) && !empty($parsed[0]['CorpusId'])){
