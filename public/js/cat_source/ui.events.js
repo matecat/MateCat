@@ -250,15 +250,6 @@ $.extend(UI, {
                 }, 500);
             }
 */
-/*
-        }).on('click', '.addtm-tr-key .btn-ok', function() {
-            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
-                return false;
-            } else {
-                $('.addtm-tr-key .error-message').text('').hide();
-            }
-            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
-*/
         }).on('click', '#addtm-select-file', function() {
             $('.addtm-select-file').click();
         }).on('change', '.addtm-select-file', function() {
@@ -275,14 +266,6 @@ $.extend(UI, {
             UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function() {
             UI.checkAddTMEnable();
-/*
-        }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
-            UI.checkAddTMEnable($('#addtm-add'));
-        }).on('change', '#addtm-tr-key-key', function(e) {
-            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
-        }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
-            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
-*/
         }).on('click', '#uploadTMX .delete', function(e) {
             e.preventDefault();
             $('#uploadTMX').html('');

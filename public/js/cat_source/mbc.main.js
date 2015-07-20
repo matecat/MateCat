@@ -9,7 +9,7 @@ MBC = {
 }
 
 if ( MBC.enabled() )
-(function($,config,window,undefined,MBC) {
+(function($,config,window,MBC,undefined) {
 
     SSE.init();
 
@@ -150,7 +150,13 @@ if ( MBC.enabled() )
     }
 
     var buildFirstCommentHeader = function() {
-        return $(tpls.firstCommentWrap) ; // .append($(tpls.insertCommentHeader));
+        return $(tpls.firstCommentWrap) ;
+    }
+
+    var popLastCommentHash = function() {
+        var l = lastCommentHash ;
+        lastCommentHash = null;
+        return l;
     }
 
     var resolveCommentLinkIcon = function(el, comments_obj) {
@@ -249,9 +255,6 @@ if ( MBC.enabled() )
 
         root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
 
-        // enableInputForm( root );
-
-        // Append resolve button
         if ( !threadIsResolved() ) {
             root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
         }
@@ -370,14 +373,17 @@ if ( MBC.enabled() )
         $('article').removeClass('mbc-commenting-opened');
     }
 
-    var renderCommentIconLinks = function() {
-        var segment ;
-        $('section').each(function(i, el) {
-            segment = new UI.Segment( el ) ;
+    var renderCommentIconLink = function(el) {
+        var segment= new UI.Segment( el ) ;
 
-            if ( (! segment.isSplit()) || segment.isFirstOfSplit()) {
-                $(document).trigger('mbc:segment:update:links', segment.absoluteId );
-            }
+        if ( (! segment.isSplit()) || segment.isFirstOfSplit()) {
+            $(document).trigger('mbc:segment:update:links', segment.absoluteId );
+        }
+    }
+
+    var renderCommentIconLinks = function() {
+        $('section').each(function(i, el) {
+            renderCommentIconLink( el );
         });
     }
 
@@ -687,13 +693,16 @@ if ( MBC.enabled() )
         });
     });
 
+    var initCommentLink = function(el) {
+        var section = new UI.Segment( el ) ;
+        if ((! section.isSplit()) || section.isFirstOfSplit()) {
+            $(el).append( $(tpls.commentLink) );
+        }
+    }
+
     var initCommentLinks = function() {
-        var section ;
         $('section').each(function(i, el) {
-            section = new UI.Segment( el ) ;
-            if ((! section.isSplit()) || section.isFirstOfSplit()) {
-                $(el).append( $(tpls.commentLink) );
-            }
+            initCommentLink(el);
         });
     }
 
@@ -703,7 +712,15 @@ if ( MBC.enabled() )
 
         initCommentLinks();
         renderCommentIconLinks();
-        updateHistoryWithLoadedSegments();
+        updateHistoryWithLoadedSegments() ;
+
+        // open a comment if was asked by hash
+
+        var lastAsked = popLastCommentHash() ;
+        if ( lastAsked ) {
+            openSegmentComment( UI.Segment.findEl( lastAsked ) ) ;
+        }
+
     });
 
     $(document).on('sse:ack', function(ev, message) {
@@ -765,10 +782,6 @@ if ( MBC.enabled() )
         resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
     });
 
-    $(document).ready(function(){
-        // load for history
-    });
-
     $(document).on('keydown', '.mbc-comment-textarea', function(e) {
         var maxHeight = 100 ;
         var minHeight = 34 ;
@@ -790,6 +803,12 @@ if ( MBC.enabled() )
         } else {
             $(this).css("overflow-y", "hidden");
         }
+    });
+
+    $(document).on('split:segment:complete', function(e, sid) {
+        var segment = UI.Segment.find( sid ) ;
+        initCommentLink( segment.el );
+        renderCommentIconLink( segment.el );
     });
 
     $(document).on('focus', '.mbc-comment-input', function(e) {
@@ -826,12 +845,8 @@ if ( MBC.enabled() )
     // Interfaces
     $.extend(MBC,  {
         openSegmentComment : openSegmentComment,
+        popLastCommentHash : popLastCommentHash,
 
-        popLastCommentHash : function() { // TODO: remove this, no longer needed since ParsedHash
-            var l = lastCommentHash ;
-            lastCommentHash = null;
-            return l;
-        },
         wasAskedByCommentHash: function( sid ) {
             return lastCommentHash && lastCommentHash.segmentId == sid;
         },
@@ -840,4 +855,4 @@ if ( MBC.enabled() )
         }
     });
 
-})(jQuery, config, window, undefined, MBC);
+})(jQuery, config, window, MBC);
