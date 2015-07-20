@@ -14,7 +14,10 @@ class engineController extends ajaxController {
     private $name;
     private $engineData;
     private static $allowed_actions = array(
-            'add', 'delete'
+            'add', 'delete', 'execute'
+    );
+    private static $allowed_execute_functions = array(
+        'letsmt' => array('getTermList')
     );
 
     public function __construct() {
@@ -89,6 +92,9 @@ class engineController extends ajaxController {
                 break;
             case 'delete':
                 $this->disable();
+                break;
+            case 'execute':
+                $this->execute();
                 break;
             default:
                 break;
@@ -293,5 +299,59 @@ class engineController extends ajaxController {
         $this->result['data']['id'] = $result->id;
 
     }
+    
+    /**
+     * This method creates a temporary engine and executes one of it's methods
+     */
+    private function execute() {
 
-} 
+        $tempEngine = null;
+        $validEngine = true;
+
+        switch ( strtolower( $this->provider ) ) {
+            case strtolower( Constants_Engines::LETSMT ):
+
+                /**
+                 * Create a record of type LetsMT
+                 */
+                $tempEngineRecord = EnginesModel_LetsMTStruct::getStruct();
+
+                $tempEngineRecord->name                                = $this->name;
+                $tempEngineRecord->uid                                 = $this->uid;
+                $tempEngineRecord->type                                = Constants_Engines::MT;
+                $tempEngineRecord->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
+                $tempEngineRecord->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ];
+                //$tempEngineRecord->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
+                
+                break;
+            default:
+                $validEngine = false;
+        }
+
+        if( !$validEngine ){
+            $this->result[ 'errors' ][ ] = array( 'code' => -4, 'message' => "Engine not allowed" );
+            return;
+        }
+        
+        $tempEngine = Engine::createTempInstance($tempEngineRecord);
+        if(! $tempEngine instanceof Engines_AbstractEngine){
+            $this->result[ 'errors' ][ ] = array( 'code' => -12, 'message' => "Creating engine failed. Generic error" );
+            return;
+        }
+        $functionParams = $this->engineData['functionParams'];
+
+        $function = $this->engineData[ 'function' ];
+        if(empty($function)){
+            $this->result[ 'errors' ][ ] = array( 'code' => -10, 'message' => "No function specified" );
+            return;
+        } elseif (empty(self::$allowed_execute_functions[strtolower($this->provider)])
+                || !in_array($function, self::$allowed_execute_functions[strtolower($this->provider)])){
+            $this->result[ 'errors' ][ ] = array( 'code' => -11, 'message' => "Function not allowed" );
+            return;
+        }
+
+        $executeResult = $tempEngine->$function($functionParams);
+        $this->result['data']['result'] = $executeResult;
+    }
+
+}

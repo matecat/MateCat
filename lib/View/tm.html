@@ -496,6 +496,62 @@
     </template>
     
     <template id="mt-provider-letsmt-config-fields">
+        <script>
+        <![CDATA[
+            // for some reason the javascript gets escaped without the CDATA tag. TODO: find out why
+            function fetchTerms() {
+                var termsFieldSelector = '.insert-tm .provider-data .provider-field [data-field-name="terms_id"]';
+                $(termsFieldSelector).html("");
+                
+                var providerData = {};
+                $('.insert-tm .provider-data .provider-field').each(function () {
+                    field = $(this).find('input, select').first();
+                    providerData[field.attr('data-field-name')] = field.val();
+                });
+                
+                providerData['function'] = 'getTermList';
+
+                var provider = 'letsmt';
+                var name = 'temp engine';
+                var providerName = 'Tilde MT';
+                data = {
+                    action: 'engine',
+                    exec: 'execute',
+                    name: name,
+                    provider: provider,
+                    data: JSON.stringify(providerData)
+                };
+                context = data;
+                context.providerName = providerName;
+
+                APP.doRequest({
+                    data: data,
+                    context: context,
+                    error: function() {
+                        console.log('error');
+                    },
+                    success: function(d) {
+                        console.log('AJAX response received.');
+                        debugger;
+                        if(d.errors.length) {
+                            console.log('error');
+                            $('#mt-provider-details .error').text(d.errors[0].message);
+                        } else {
+                            if(d.data.result && d.data.result.terms && Object.keys(d.data.result.terms).length) {
+                                $(termsFieldSelector).append("<option value=''></option>");
+                                $terms = d.data.result.terms;
+                                console.log('success');
+                                for (var key in $terms){
+                                    $(termsFieldSelector).append("<option value='" + key + "'>" + $terms[key] + "</option>");
+                                }
+                            }
+                        }
+
+                    }
+                });
+            }
+        ]]>
+        </script>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
@@ -508,7 +564,7 @@
             </div>
             <div class="provider-field">
                 <label>Translation system<sup>*</sup></label>
-                <select class="required" data-field-name="system_id" />
+                <select class="required" data-field-name="system_id" onchange="fetchTerms()"/>
             </div>
             <div class="provider-field">
                 <label>Terms corpora</label>

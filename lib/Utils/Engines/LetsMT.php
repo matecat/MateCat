@@ -88,6 +88,13 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 }
                 
                 return $decoded;
+            } elseif (!empty($parsed[0]) && !empty($parsed[0]['CorpusId'])){
+                // this is a response from getSystemTermCorpora request
+                
+                $decoded = array();
+                foreach($parsed as $termData){
+                    $decoded[$termData['CorpusId']] = $termData['Title'];
+                }
             }
         } else {
             $decoded = array(
@@ -162,8 +169,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     }
     
     public function getSystemsAndTerms($_config) {
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
                 $parameters['appID'] = ""; // not used for now
@@ -178,5 +183,22 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         
         return array('systems' => $systemList);
         
+    }
+    
+    public function getTermList() {
+
+        $parameters = array();
+                $parameters['appID'] = ""; // not used for now
+                $parameters['clientID'] = $this->client_id;
+                $parameters['systemID'] = $this->system_id;
+                //$parameters['options'] = "termCorpusId=" . $this->terms_id;
+		//$parameters['source'] = $_config[ 'source' ];
+		//$parameters['target'] = $_config[ 'target' ];
+
+	$this->call( 'term_list_relative_url', $parameters );
+
+        $termList = $this->result;
+        
+        return array('terms' => $termList);
     }
 }
