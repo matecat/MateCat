@@ -171,7 +171,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         }
     }
     
-    public function getSystemsAndTerms($_config) {
+    public function getSystemList($_config) {
 
         $parameters = array();
                 $parameters['appID'] = ""; // not used for now

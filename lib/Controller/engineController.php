@@ -256,7 +256,7 @@ class engineController extends ajaxController {
             $config = $temp_engine->getConfigStruct();
             $config[ 'source' ]  = "en-US"; // TODO replace with values from the project being currently created
             $config[ 'target' ]  = "lv-LV";
-            $systemsAndTerms = $temp_engine->getSystemsAndTerms($config);
+            $systemsAndTerms = $temp_engine->getSystemList($config);
             
             $engineDAO->delete($result); // delete the newly added engine. this is the first time in engineController::add()
                                          // and the user has not yet selected a translation system
