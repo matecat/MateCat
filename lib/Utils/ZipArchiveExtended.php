@@ -193,6 +193,8 @@ class ZipArchiveExtended extends ZipArchive {
     }
 
     public function extractFilesInTmp( $tmp_folder ) {
+        $fileErrors = array();
+
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ( $this->treeList as $filePath ) {
             $realPath = str_replace(
@@ -206,23 +208,31 @@ class ZipArchiveExtended extends ZipArchive {
             $tmpFp = fopen( $tmp_folder . $filePath, "w" );
 
             if ( !$fp ) {
-                throw new Exception( 'Unable to extract the file.' );
+                $fileErrors[ $filePath ] = "Unable to extract the file.";
+                break;
             }
 
-            $fileSize = 0;
-            while ( !feof( $fp ) ) {
+            $sizeExceeded = false;
+            $fileSize     = 0;
+            while ( !feof( $fp ) && !$sizeExceeded ) {
                 fwrite( $tmpFp, fread( $fp, 8192 ) );
                 $fileSize += 8192;
 
                 if ( $fileSize > INIT::$MAX_UPLOAD_FILE_SIZE ) {
-                    throw new Exception( __METHOD__ . ' -> Max upload file size exceeded.' );
+                    $sizeExceeded = true;
+                    continue;
                 }
+            }
+
+            if ( $sizeExceeded ) {
+                $fileErrors[ $filePath ] = 'Max upload file size exceeded.';
             }
 
             fclose( $fp );
             fclose( $tmpFp );
         }
 
+        return $fileErrors;
     }
 
     private function treeKey( $key ) {

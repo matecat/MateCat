@@ -217,7 +217,6 @@ class NewController extends ajaxController {
         $response_stack = array();
 
         foreach ( $arFiles as $file_name ) {
-            usleep( 1 );
             $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
 
 
@@ -232,8 +231,39 @@ class NewController extends ajaxController {
             $status = array();
 
             if ( $ext == "zip" ) {
+                // this makes the conversionhandler accumulate eventual errors on files and continue
+                $conversionHandler->setStopOnFileException( false );
+
                 $fileObjects = $conversionHandler->extractZipFile();
                 //call convertFileWrapper and start conversions for each file
+
+                if ( $conversionHandler->uploadError ) {
+                    $fileErrors = $conversionHandler->getUploadedFiles();
+
+                    foreach ( $fileErrors as $fileError ) {
+                        if ( count( $fileError->error ) == 0 ) {
+                            continue;
+                        }
+
+                        $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
+
+                        /*
+                         * TODO
+                         * return error code is 2 because
+                         *      <=0 is for errors
+                         *      1   is OK
+                         *
+                         * In this case, we raise warnings, hence the return code must be a new code
+                         */
+                        $this->result[ 'code' ]                      = 2;
+                        $this->result[ 'errors' ][ $brokenFileName ] = array(
+                                'code'    => $fileError->error[ 'code' ],
+                                'message' => $fileError->error[ 'message' ],
+                                'debug'   => $brokenFileName
+                        );
+                    }
+
+                }
 
                 $realFileObjectInfo  = $fileObjects;
                 $realFileObjectNames = array_map(
@@ -260,6 +290,13 @@ class NewController extends ajaxController {
                 if ( $fileObjects !== null ) {
                     foreach ( $fileObjects as $fName ) {
 
+                        if ( isset( $fileErrors ) &&
+                                isset( $fileErrors->{$fName} ) &&
+                                !empty( $fileErrors->{$fName}->error )
+                        ) {
+                            continue;
+                        }
+
                         $newStdFile       = new stdClass();
                         $newStdFile->name = $fName;
                         $stdFileObjects[] = $newStdFile;
@@ -269,7 +306,9 @@ class NewController extends ajaxController {
                     $errors = $conversionHandler->getResult();
                     $errors = array_map( array( 'Upload', 'formatExceptionMessage' ), $errors[ 'errors' ] );
 
-                    $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
+                    $this->result[ 'errors' ]      = array_merge( $this->result[ 'errors' ], $errors );
+                    $this->api_output[ 'message' ] = "Zip Error";
+                    $this->api_output[ 'debug' ]   = $this->result[ 'errors' ];
 
                     return false;
                 }
@@ -285,7 +324,19 @@ class NewController extends ajaxController {
 
                 $status = $errors = $converter->checkResult();
                 if ( count( $errors ) > 0 ) {
-                    $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
+//                    $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
+                    $this->result[ 'code' ] = 2;
+                    foreach ( $errors as $__err ) {
+                        $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
+
+                        if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
+                            $this->result[ 'errors' ][ $brokenFileName ] = array(
+                                    'code'    => $__err[ 'code' ],
+                                    'message' => $__err[ 'message' ],
+                                    'debug'   => $brokenFileName
+                            );
+                        }
+                    }
                 }
             } else {
                 $conversionHandler->doAction();
@@ -308,6 +359,7 @@ class NewController extends ajaxController {
 //        $converter->target_lang = $this->target_lang;
 //        $converter->doAction();
 
+        $status = array_values( $status );
 
         if ( !empty( $status ) ) {
             $this->api_output[ 'message' ] = 'Project Conversion Failure';
@@ -321,7 +373,7 @@ class NewController extends ajaxController {
 
         if ( isset( $this->result[ 'data' ] ) && !empty( $this->result[ 'data' ] ) ) {
             foreach ( $this->result[ 'data' ] as $zipFileName => $zipFiles ) {
-                $zipFiles  = json_decode( $zipFiles, true );
+                $zipFiles = json_decode( $zipFiles, true );
 
 
                 $fileNames = array_column( $zipFiles, 'name' );
@@ -330,9 +382,9 @@ class NewController extends ajaxController {
         }
 
         $newArFiles = array();
-        $linkFiles = scandir( $intDir );
+        $linkFiles  = scandir( $intDir );
 
-        foreach($arFiles as $__fName){
+        foreach ( $arFiles as $__fName ) {
             if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
                 $fs = new FilesStorage();
@@ -344,8 +396,9 @@ class NewController extends ajaxController {
                 foreach ( $linkFiles as $storedFileName ) {
                     //check if file begins with the name of the zip file.
                     // If so, then it was stored in the zip file.
-                    if(strpos($storedFileName, $__fName) !== false &&
-                            substr($storedFileName,0, strlen($__fName)) == $__fName ){
+                    if ( strpos( $storedFileName, $__fName ) !== false &&
+                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
+                    ) {
                         //add file name to the files array
                         $newArFiles[] = $storedFileName;
                     }
@@ -353,8 +406,8 @@ class NewController extends ajaxController {
 
             } else { //this file was not in a zip. Add it normally
 
-                if( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ){
-                    $newArFiles[ ] = $__fName;
+                if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
+                    $newArFiles[] = $__fName;
                 }
 
             }
@@ -387,7 +440,7 @@ class NewController extends ajaxController {
         if ( !empty( $projectStructure[ 'result' ][ 'errors' ] ) ) {
             //errors already logged
             $this->api_output[ 'message' ] = 'Project Creation Failure';
-            $this->api_output[ 'debug' ]   = $projectStructure[ 'result' ][ 'errors' ];
+            $this->api_output[ 'debug' ]   = array_values( $projectStructure[ 'result' ][ 'errors' ] );
 
         } else {
 

@@ -21,6 +21,8 @@ class Upload {
 
     protected $uploadToken;
 
+    protected $raiseException = true;
+
     public function getDirUploadToken() {
         return $this->uploadToken;
     }
@@ -28,6 +30,14 @@ class Upload {
     public function getUploadPath() {
         return $this->dirUpload;
     }
+
+    /**
+     * @param boolean $raiseException
+     */
+    public function setRaiseException( $raiseException ) {
+        $this->raiseException = $raiseException;
+    }
+
 
     public function __construct( $uploadToken = null ) {
 
@@ -65,22 +75,24 @@ class Upload {
 
         $result = new stdClass();
 
-        if ( empty($filesToUpload) ) throw new Exception ( "No files received." );
+        if ( empty( $filesToUpload ) ) {
+            throw new Exception ( "No files received." );
+        }
 
-        foreach( $filesToUpload as $inputName => $file ) {
-            $result->$inputName = $this->_uploadFile($file);
+        foreach ( $filesToUpload as $inputName => $file ) {
+            $result->$inputName = $this->_uploadFile( $file );
         }
 
         return $result;
     }
 
     /**
-     *
      * Upload File from $_FILES
      * $RegistryKeyIndex MUST BE form name Element
      *
      * @param $fileUp
-     * @return string|null
+     *
+     * @return object
      * @throws Exception
      */
     protected function _uploadFile( $fileUp ) {
@@ -99,66 +111,107 @@ class Upload {
 
         $fileUp = (object)$fileUp;
 
+
         if ( !empty ( $fileError ) ) {
 
             switch ( $fileError ) {
                 case 1 : //UPLOAD_ERR_INI_SIZE
-                    throw new Exception ( __METHOD__ . " -> The file '$fileName' is bigger than this PHP installation allows." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> The file '$fileName' is bigger than this PHP installation allows." )
+                    );
                     break;
                 case 2 : //UPLOAD_ERR_FORM_SIZE
-                    throw new Exception ( __METHOD__ . " -> The file '$fileName' is bigger than this form allows." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> The file '$fileName' is bigger than this form allows." )
+                    );
                     break;
                 case 3 : //UPLOAD_ERR_PARTIAL
-                    throw new Exception ( __METHOD__ . " -> Only part of the file '$fileName'  was uploaded." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> Only part of the file '$fileName'  was uploaded." )
+                    );
                     break;
                 case 4 : //UPLOAD_ERR_NO_FILE
-                    throw new Exception ( __METHOD__ . " -> No file was uploaded." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> No file was uploaded." )
+                    );
                     break;
                 case 6 : //UPLOAD_ERR_NO_TMP_DIR
-                    throw new Exception ( __METHOD__ . " -> Missing a temporary folder. " );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> Missing a temporary folder. " )
+                    );
                     break;
                 case 7 : //UPLOAD_ERR_CANT_WRITE
-                    throw new Exception ( __METHOD__ . " -> Failed to write file to disk." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> Failed to write file to disk." )
+                    );
                     break;
                 case 8 : //UPLOAD_ERR_EXTENSION
-                    throw new Exception ( __METHOD__ . " -> A PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> A PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help." )
+                    );
                     break;
                 default:
-                    throw new Exception ( __METHOD__ . " -> Unknown Error." );
+                    $this->setObjectErrorOrThrowException(
+                            $fileUp,
+                            new Exception ( __METHOD__ . " -> Unknown Error: $fileError" )
+                    );
                     break;
             }
 
         } else {
 
-            $out_filename = ZipArchiveExtended::getFileName($fileName);
-            if ( !$this->_isRightExtension( $fileUp ) ) {
-                throw new Exception ( __METHOD__ . " -> File Extension Not Allowed. '".$out_filename."'" );
+            $out_filename = ZipArchiveExtended::getFileName( $fileName );
+            if ( !$this->_isRightExtension( $fileUp ) && (!isset($fileUp->error) || empty($fileUp->error) ) ) {
+                $this->setObjectErrorOrThrowException(
+                        $fileUp,
+                        new Exception ( __METHOD__ . " -> File Extension Not Allowed. '" . $out_filename . "'" )
+                );
+
             }
 
-            if ( !$this->_isRightMime( $fileUp ) ) {
-                throw new Exception ( __METHOD__ . " -> File Mime Not Allowed. '$out_filename'" );
+            if ( !$this->_isRightMime( $fileUp ) && (!isset($fileUp->error) || empty($fileUp->error) ) ) {
+                $this->setObjectErrorOrThrowException(
+                        $fileUp,
+                        new Exception ( __METHOD__ . " -> File Mime Not Allowed. '$out_filename'" )
+                );
             }
 
             // NOTE FOR ZIP FILES
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
-            if ( $fileSize >= INIT::$MAX_UPLOAD_FILE_SIZE ) {
-                throw new Exception ( __METHOD__ . " -> File Dimensions Not Allowed. '$out_filename'" );
+            if ( $fileSize >= INIT::$MAX_UPLOAD_FILE_SIZE && (!isset($fileUp->error) || empty($fileUp->error) )) {
+                $this->setObjectErrorOrThrowException(
+                        $fileUp,
+                        new Exception ( __METHOD__ . " -> File Dimensions Not Allowed. '$out_filename'" )
+                );
             }
 
             //All Right!!! GO!!!
             $mod_name = self::_fixFileName( $fileName );
 
-            if ( !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name ) ) {
-                throw new Exception ( __METHOD__ . " -> Failed To Store File '$out_filename' On Server." );
+            if ( (!isset($fileUp->error) || empty($fileUp->error) ) && !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name )) {
+                $this->setObjectErrorOrThrowException(
+                        $fileUp,
+                        new Exception ( __METHOD__ . " -> Failed To Store File '$out_filename' On Server." )
+                );
             }
 
             //In Unix you can't rename or move between filesystems,
             //Instead you must copy the file from one source location to the destination location, then delete the source.
-            unlink( $fileTmpName );
+            @unlink( $fileTmpName );
 
             // octal; changing mode
-            if ( !chmod( $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name, 0664 ) ) {
-                throw new Exception ( __METHOD__ . " -> Failed To Set Permissions On File. '$out_filename'" );
+            if ( (!isset($fileUp->error) || empty($fileUp->error) ) && !chmod( $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name, 0664 ) ) {
+                $this->setObjectErrorOrThrowException(
+                        $fileUp,
+                        new Exception ( __METHOD__ . " -> Failed To Set Permissions On File. '$out_filename'" )
+                );
             }
 
         }
@@ -223,17 +276,29 @@ class Upload {
         return true;
     }
 
-    public static function formatExceptionMessage($errorArray){
+    public static function formatExceptionMessage( $errorArray ) {
         //The message format is: __METHOD__ -> <message>.
         //The client output should be just <message>
-        $msg = $errorArray['message'];
-        if(strpos($msg, " -> ") !== false) {
+        $msg = $errorArray[ 'message' ];
+        if ( strpos( $msg, " -> " ) !== false ) {
             $msg                     = explode( " -> ", $msg );
             $errorArray[ 'message' ] = $msg[ 1 ];
         } else {
-            $errorArray['message'] = $msg;
+            $errorArray[ 'message' ] = $msg;
         }
+
         return $errorArray;
+    }
+
+    private function setObjectErrorOrThrowException( $fileUp, Exception $exn ) {
+        if ( $this->raiseException ) {
+            throw $exn;
+        } else {
+            $fileUp->error = array(
+                    'code'    => $exn->getCode(),
+                    'message' => $exn->getMessage()
+            );
+        }
     }
 }
 
