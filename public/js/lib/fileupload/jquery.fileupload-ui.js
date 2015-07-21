@@ -305,7 +305,10 @@
 
                 /* START Editing by Roberto Tucci <roberto@translated.net> */
                 var regex = /file=([^&]*)/;
+                var internalFileRegex = new RegExp("^([^.]*\\.zip\\/.*)");
+
                 var match = regex.exec( data.url );
+
 
                 if ( match.length < 1 ) {
                     console.log( error );
@@ -313,6 +316,8 @@
                 }
 
                 match[1] = decodeURIComponent(match[1]);
+
+                var internalMatch = internalFileRegex.exec(match[1]);
 
                 var ext = match[1].split( "." );
                 ext = ext[ext.length - 1];
@@ -328,6 +333,24 @@
                         if ( filenameRegex.exec( $( rows[k] ).html() ) ) {
                             rowsToBeDeleted.push( $(rows[k]).parent() );
                         }
+                    }
+                }
+                else if(internalMatch.length > 1){
+                    var _zipFileName = internalMatch[1].split("/")[0];
+
+                    var rows = $( '.name:contains(' + _zipFileName + ')' );
+
+                    if(rows.length == 2){ //the row to be deleted and the parent zip file
+
+                        for ( var k = 0; k < rows.length; k++ ) {
+
+                            if ( filenameRegex.exec( $( rows[k] ).html() ) ) {
+                                rowsToBeDeleted.push( $(rows[k]).parent() );
+                            }
+                        }
+                    }
+                    else{
+                        rowsToBeDeleted = $.merge( rowsToBeDeleted, data.context );
                     }
                 }
                 else {

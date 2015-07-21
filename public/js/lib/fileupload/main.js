@@ -1074,48 +1074,48 @@ getIconClass = function ( ext ) {
             (ext == 'sxw')
     ) ? 'extdoc' :
             (
-                    (ext == 'pot') ||
-                    (ext == 'pps') ||
-                    (ext == 'ppt') ||
-                    (ext == 'potm') ||
-                    (ext == 'potx') ||
-                    (ext == 'ppsm') ||
-                    (ext == 'ppsx') ||
-                    (ext == 'pptm') ||
-                    (ext == 'pptx') ||
-                    (ext == 'odp') ||
-                    (ext == 'sxi')
-            ) ? 'extppt' :
-                    (
-                            (ext == 'htm') ||
-                            (ext == 'html')
-                    ) ? 'exthtm' :
-                            (ext == 'pdf') ? 'extpdf' :
-                                    (
-                                            (ext == 'xls') ||
-                                            (ext == 'xlt') ||
-                                            (ext == 'xlsm') ||
-                                            (ext == 'xlsx') ||
-                                            (ext == 'xltx') ||
-                                            (ext == 'ods') ||
-                                            (ext == 'sxc') ||
-                                            (ext == 'csv')
-                                    ) ? 'extxls' :
-                                            (ext == 'txt') ? 'exttxt' :
-                                                    (ext == 'ttx') ? 'extttx' :
-                                                            (ext == 'itd') ? 'extitd' :
-                                                                    (ext == 'xlf') ? 'extxlf' :
-                                                                            (ext == 'mif') ? 'extmif' :
-                                                                                    (ext == 'idml') ? 'extidd' :
-                                                                                            (ext == 'xtg') ? 'extqxp' :
-                                                                                                    (ext == 'xml') ? 'extxml' :
-                                                                                                            (ext == 'rc') ? 'extrcc' :
-                                                                                                                    (ext == 'resx') ? 'extres' :
-                                                                                                                            (ext == 'sgml') ? 'extsgl' :
-                                                                                                                                    (ext == 'sgm') ? 'extsgm' :
-                                                                                                                                            (ext == 'properties') ? 'extpro' :
-                                                                                                                                                    (ext == 'zip') ? 'extzip' :
-                                                                                                                                                            'extxif';
+            (ext == 'pot') ||
+            (ext == 'pps') ||
+            (ext == 'ppt') ||
+            (ext == 'potm') ||
+            (ext == 'potx') ||
+            (ext == 'ppsm') ||
+            (ext == 'ppsx') ||
+            (ext == 'pptm') ||
+            (ext == 'pptx') ||
+            (ext == 'odp') ||
+            (ext == 'sxi')
+    ) ? 'extppt' :
+            (
+                    (ext == 'htm') ||
+                    (ext == 'html')
+            ) ? 'exthtm' :
+                    (ext == 'pdf') ? 'extpdf' :
+                            (
+            (ext == 'xls') ||
+            (ext == 'xlt') ||
+            (ext == 'xlsm') ||
+            (ext == 'xlsx') ||
+            (ext == 'xltx') ||
+            (ext == 'ods') ||
+            (ext == 'sxc') ||
+            (ext == 'csv')
+            ) ? 'extxls' :
+            (ext == 'txt') ? 'exttxt' :
+            (ext == 'ttx') ? 'extttx' :
+            (ext == 'itd') ? 'extitd' :
+            (ext == 'xlf') ? 'extxlf' :
+            (ext == 'mif') ? 'extmif' :
+            (ext == 'idml') ? 'extidd' :
+            (ext == 'xtg') ? 'extqxp' :
+            (ext == 'xml') ? 'extxml' :
+            (ext == 'rc') ? 'extrcc' :
+            (ext == 'resx') ? 'extres' :
+            (ext == 'sgml') ? 'extsgl' :
+            (ext == 'sgm') ? 'extsgm' :
+            (ext == 'properties') ? 'extpro' :
+            (ext == 'zip') ? 'extzip' :
+            'extxif';
     return c;
 }
 
