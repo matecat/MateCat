@@ -52,7 +52,9 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
     public $extra_parameters = array(
             'client_id'     => "",
             'system_id'     => "",
-            'terms_id'      => ""
+            'terms_id'      => "",
+            'use_qe'        => false,
+            'minimum_qe'    => 0
     );
 
     /**

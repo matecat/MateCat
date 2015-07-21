@@ -54,7 +54,9 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $decoded = array(
                             'data' => array(
                                     "translations" => array(
-                                            array( 'translatedText' => $this->_resetSpecialStrings( $parsed['translation'] ) )
+                                            array( 'translatedText' =>
+                                                $this->use_qe && floatval($parsed['qualityEstimate']) < $this->minimum_qe ?
+                                                    "" : $this->_resetSpecialStrings($parsed['translation']))
                                     )
                             )
                     );
@@ -159,7 +161,8 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['appID'] = ""; // not used for now
                 $parameters['systemID'] = $this->system_id;
                 $parameters['clientID'] = $this->client_id;
-                $parameters['options'] = "termCorpusId=" . $this->terms_id;
+                $qeParam = $this->use_qe ? ",qe" : "";
+                $parameters['options'] = "termCorpusId=" . $this->terms_id . $qeParam;
 		//$parameters['source'] = $_config[ 'source' ];
 		//$parameters['target'] = $_config[ 'target' ];
 

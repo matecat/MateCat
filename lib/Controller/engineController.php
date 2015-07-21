@@ -184,6 +184,21 @@ class engineController extends ajaxController {
                                                                                                     // return the newly added system's id or the list of available systems
                                                                                                     // for the user to choose from. the check happens later on
                 $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
+                $newEngine->extra_parameters[ 'use_qe' ]        = $this->engineData[ 'use_qe' ];
+                if ($newEngine->extra_parameters[ 'use_qe' ]) {
+                    $minQEString = $this->engineData[ 'minimum_qe' ];
+                    if (!is_numeric($minQEString)) {
+                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
+                        return;
+                    }
+                    $minimumQEScore = floatval($minQEString);
+                    if ($minimumQEScore < 0 || $minimumQEScore > 1) {
+                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
+                        return;
+                    }
+                    $newEngine->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
+                }
+                
                 
                 /*$config = array(
                     'new_engine_name' => $this->name,

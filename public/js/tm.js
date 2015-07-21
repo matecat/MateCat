@@ -1385,7 +1385,11 @@ $.extend(UI, {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
             field = $(this).find('input, select').first();
-            providerData[field.attr('data-field-name')] = field.val();
+            if (field.prop('type') === 'checkbox') {
+                providerData[field.attr('data-field-name')] = field.prop('checked');
+            } else {
+                providerData[field.attr('data-field-name')] = field.val();
+            }
         })
 //        console.log(providerData);
         name = $('#new-engine-name').val();

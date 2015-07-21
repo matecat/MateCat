@@ -1929,6 +1929,10 @@ margin-bottom: -7px;
 tr.disabled td {
 background: #F3F3F3!important;
 }
+.provider-field.disabled, .provider-field.disabled:hover {
+    border: initial;
+    background: initial;
+}
 
 .mgmt-add-gl input {
 		width: 225px;
@@ -2202,6 +2206,11 @@ body.filterOpen .searchbox
     height: 25px;
     padding: 2px 5px;
     border-radius: 2px;
+}
+
+.insert-tm input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
 }
 
 .insert-tm {
