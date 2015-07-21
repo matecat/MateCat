@@ -30,19 +30,29 @@ class FilesStorage {
 
     private $filesDir;
     private $cacheDir;
+    private $zipDir;
 
-    public function __construct( $files = false, $cache = false ) {
+    public function __construct( $files = null, $cache = null, $zip = null ) {
+
         //override default config
         if ( $files ) {
             $this->filesDir = $files;
         } else {
             $this->filesDir = INIT::$FILES_REPOSITORY;
         }
+
         if ( $cache ) {
             $this->cacheDir = $cache;
         } else {
             $this->cacheDir = INIT::$CACHE_REPOSITORY;
         }
+
+        if( $zip ){
+            $this->zipDir = $zip;
+        } else {
+            $this->zipDir = INIT::$ZIP_REPOSITORY;
+        }
+
     }
 
     /**
@@ -153,16 +163,16 @@ class FilesStorage {
         //if it's not an xliff as original
         if ( !$originalPath ) {
 
-            //set original moval as successful
-            $outcome1 = true;
-
+            //if there is not an original path this is an unconverted file,
+            // the original does not exists
+            // detect which type of xliff
             $fileType = DetectProprietaryXliff::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] ) {
                 $force_extension = '.sdlxliff';
             }
 
             //use original xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $xliffPath ) . @$force_extension;
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $xliffPath ) . @$force_extension;
         } else {
             //move original
             $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
@@ -195,16 +205,123 @@ class FilesStorage {
         //In Unix you can't rename or move between filesystems,
         //Instead you must copy the file from one source location to the destination location, then delete the source.
         $outcome2 = copy( $xliffPath, $xliffDestination );
-        unlink( $xliffPath );
 
         if ( !$outcome2 ) {
             //Original directory deleted!!!
-            //CLEAR ALL CACHE
+            //CLEAR ALL CACHE - FATAL
             Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
             return $outcome2;
         }
 
+        unlink( $xliffPath );
         return true;
+
+    }
+
+    /**
+     * Make a temporary cache copy for the original zip file
+     *
+     * @param $hash
+     * @param $zipPath
+     *
+     * @return bool
+     */
+    public function cacheZipArchive( $hash, $zipPath ){
+
+        $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . "__##originalZip##";
+
+        //ensure old stuff is overwritten
+        if ( is_dir( $thisZipDir ) ) {
+            Utils::deleteDir( $thisZipDir );
+        }
+
+        //create cache dir structure
+        $created = mkdir( $thisZipDir, 0755, true );
+
+        if( !$created ){
+            return $created;
+        }
+
+        //move original
+        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $zipPath ) );
+
+        if( !$outcome1 ){
+            //Original directory deleted!!!
+            //CLEAR ALL CACHE
+            Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . "__##originalZip##" );
+            return $outcome1;
+        }
+
+        unlink( $zipPath );
+
+        //link this zip to the upload directory by creating a file name as the ash of the zip file
+        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . "__##originalZip##" );
+
+        return true;
+
+    }
+
+    public function linkZipToProject( $create_date, $zipHash, $projectID ){
+
+        $datePath = date_create( $create_date )->format( 'Ymd' );
+
+        $fileName = FilesStorage::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
+
+        //destination dir
+        $newZipDir  = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID ;
+
+        //check if doesn't exist
+        if ( !is_dir( $newZipDir ) ) {
+            //make files' directory structure
+            if( ! mkdir( $newZipDir, 0755, true ) ) {
+                return false;
+            }
+        }
+
+        //link original
+        $outcome1 = link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
+
+        if( !$outcome1 ){
+            //Failed to copy the original file zip
+            return $outcome1;
+        }
+
+        Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
+
+        return true;
+
+    }
+
+    public function getOriginalZipPath( $projectDate, $projectID, $zipName ){
+
+        $datePath = date_create( $projectDate )->format('Ymd');
+        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+
+        return $zipDir;
+
+    }
+
+    public function getHashesFromDir( $dirToScan ){
+
+        //fetch cache links, created by converter, from a directory
+        $linkFiles = scandir( $dirToScan );
+        $zipFilesHash = array();
+        //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
+        foreach ( $linkFiles as $k => $linkFile ) {
+
+            if( strpos( $linkFile, "__##originalZip##" ) !== false ){
+                $zipFilesHash[ ] = $linkFile;
+                unset( $linkFiles[ $k ] );
+            } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
+                unset( $linkFiles[ $k ] );
+            }
+
+        }
+
+        return array(
+                'conversionHashes' => $linkFiles,
+                'zipHashes'        => $zipFilesHash
+        );
 
     }
 
@@ -260,24 +377,22 @@ class FilesStorage {
 
         //make links from cache to files
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
-        //FIX: we could check in advance and, in case, use copy instead of links
-
         //orig, suppress error because of xliff files have not original one
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
         if( is_file( $filePath ) ){
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
         }
 
         //work
         $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
-        $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+        $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
 
         //check if manifest from a LongHorn conversion exists
         $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
         if ( file_exists( $manifestFile ) ) {
-            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . basename( $manifestFile ) );
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . basename( $filePath ) );
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . basename( $filePath ) );
+            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
+            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
         }
 
         if( !$res ){
@@ -331,7 +446,7 @@ class FilesStorage {
         if ( !empty( $id_file ) ) {
             $where_id_file = " and fj.id_file=$id_file";
         }
-        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file from files_job fj
+        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file, create_date from files_job fj
 			inner join files f on f.id=fj.id_file
 			inner join jobs j on j.id=fj.id_job
 			where fj.id_job=$id_job $where_id_file and j.password='$password'";
@@ -404,7 +519,6 @@ class FilesStorage {
         return $results;
     }
 
-    //TODO FIX
     /**
      * Backwards compatibility method and forward
      *
@@ -515,6 +629,61 @@ class FilesStorage {
         $results = $db->fetch_array( $query );
 
         return $results[ 0 ][ 'xliff_file' ];
+    }
+
+    /**
+     * @param $path
+     *
+     * @return mixed
+     */
+    public static function basename_fix( $path ) {
+        $rawPath  = explode( DIRECTORY_SEPARATOR, $path );
+        $basename = array_pop( $rawPath );
+
+        return $basename;
+    }
+
+    /**
+     * @param     $path
+     * @param int $options
+     *
+     * @return array|mixed
+     */
+    public static function pathinfo_fix( $path, $options=15) {
+        $rawPath = explode( DIRECTORY_SEPARATOR, $path );
+
+        $basename = array_pop( $rawPath );
+        $dirname  = implode( DIRECTORY_SEPARATOR, $rawPath );
+
+        $explodedFileName = explode( ".", $basename );
+        $extension        = array_pop( $explodedFileName );
+        $filename         = implode( ".", $explodedFileName );
+
+        $return_array = array();
+
+        $flagMap = array(
+                'dirname'   => PATHINFO_DIRNAME,
+                'basename'  => PATHINFO_BASENAME,
+                'extension' => PATHINFO_EXTENSION,
+                'filename'  => PATHINFO_FILENAME
+        );
+
+        // foreach flag, add in $return_array the corresponding field,
+        // obtained by variable name correspondance
+        foreach ( $flagMap as $field => $i ) {
+            //binary AND
+            if ( ( $options & $i ) > 0 ) {
+                //variable substitution: $field can be one between 'dirname', 'basename', 'extension', 'filename'
+                // $$field gets the value of the variable named $field
+                $return_array[ $field ] = $$field;
+            }
+        }
+
+        if ( count( $return_array ) == 1 ) {
+            $return_array = array_pop( $return_array );
+        }
+
+        return $return_array;
     }
 }
 

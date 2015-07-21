@@ -62,6 +62,7 @@ class Bootstrap {
         INIT::$UPLOAD_REPOSITORY               = INIT::$STORAGE_DIR . "/upload";
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
         INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
+        INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
         INIT::$CONVERSIONERRORS_REPOSITORY_WEB = INIT::$BASEURL . "storage/conversion_errors";
         INIT::$TMP_DOWNLOAD                    = INIT::$STORAGE_DIR . "/tmp_download";
@@ -87,8 +88,14 @@ class Bootstrap {
         if ( !is_dir( INIT::$CACHE_REPOSITORY ) ) {
             mkdir( INIT::$CACHE_REPOSITORY, 0755, true );
         }
+        if ( !is_dir( INIT::$ZIP_REPOSITORY ) ) {
+            mkdir( INIT::$ZIP_REPOSITORY, 0755, true );
+        }
         if ( !is_dir( INIT::$CONVERSIONERRORS_REPOSITORY ) ) {
             mkdir( INIT::$CONVERSIONERRORS_REPOSITORY, 0755, true );
+        }
+        if ( !is_dir( INIT::$TMP_DOWNLOAD) ) {
+            mkdir( INIT::$TMP_DOWNLOAD, 0755, true );
         }
 
         //auth sections

@@ -98,6 +98,8 @@ class analyzeController extends viewController {
 
         foreach ( $project_by_jobs_data as &$p_jdata ) {
 
+            $p_jdata['filename'] = ZipArchiveExtended::getFileName($p_jdata['filename']);
+
             //json_decode payable rates
             $p_jdata[ 'payable_rates' ] = json_decode( $p_jdata[ 'payable_rates' ], true );
 

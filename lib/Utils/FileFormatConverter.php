@@ -258,8 +258,10 @@ class FileFormatConverter {
 
         }
 
+        //get the binary result from converter and set the right ( EXTERNAL TO THIS CLASS ) key for content
         if ( array_key_exists( "documentContent", $res ) ) {
-            $res[ 'documentContent' ] = base64_decode( $res[ 'documentContent' ] );
+            $res[ 'document_content' ] = base64_decode( $res[ 'documentContent' ] );
+            unset( $res[ 'documentContent' ] );
         }
 
         /**
@@ -331,8 +333,8 @@ class FileFormatConverter {
             throw new Exception( "Conversion Error : the file <$file_path> not exists" );
         }
         $fileContent = file_get_contents( $file_path );
-        $extension   = pathinfo( $file_path, PATHINFO_EXTENSION );
-        $filename    = pathinfo( $file_path, PATHINFO_FILENAME );
+        $extension   = FilesStorage::pathinfo_fix( $file_path, PATHINFO_EXTENSION );
+        $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
         if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
             $encoding = mb_detect_encoding( $fileContent );
 
@@ -475,7 +477,7 @@ class FileFormatConverter {
         $this->conversionObject->ip_machine      = $this->ip;
         $this->conversionObject->ip_client       = Utils::getRealIpAddr();
         $this->conversionObject->path_name       = $xliffVector[ 'out_xliff_name' ];
-        $this->conversionObject->file_name       = pathinfo( $xliffVector[ 'out_xliff_name' ], PATHINFO_BASENAME );
+        $this->conversionObject->file_name       = FilesStorage::pathinfo_fix( $xliffVector[ 'out_xliff_name' ], PATHINFO_BASENAME );
         $this->conversionObject->direction       = 'bw';
         $this->conversionObject->src_lang        = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
         $this->conversionObject->trg_lang        = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
@@ -509,7 +511,7 @@ class FileFormatConverter {
         //For each file prepare a curl resource
         foreach ( $xliffVector_array as $id_file => $xliffVector ) {
 
-            $xliffContent = $xliffVector[ 'documentContent' ];
+            $xliffContent = $xliffVector[ 'document_content' ];
 
             //assign converter
             if ( !$chosen_by_user_machine ) {
@@ -542,7 +544,7 @@ class FileFormatConverter {
             $this->conversionObject->ip_machine = $this->ip;
             $this->conversionObject->ip_client  = Utils::getRealIpAddr();
             $this->conversionObject->path_name  = $xliffVector[ 'out_xliff_name' ];
-            $this->conversionObject->file_name  = pathinfo( $xliffName, PATHINFO_BASENAME );
+            $this->conversionObject->file_name  = FilesStorage::pathinfo_fix( $xliffName, PATHINFO_BASENAME );
             $this->conversionObject->direction  = 'bw';
             $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
             $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );

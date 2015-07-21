@@ -284,7 +284,9 @@ class catController extends viewController {
          */
         $fileInfo     = getFirstSegmentOfFilesInJob( $this->jid );
         $TotalPayable = array();
-        foreach ( $fileInfo as $file ) {
+        foreach ( $fileInfo as &$file ) {
+            $file['file_name'] = ZipArchiveExtended::getFileName( $file['file_name'] );
+
             $TotalPayable[ $file[ 'id_file' ] ][ 'TOTAL_FORMATTED' ] = $file[ 'TOTAL_FORMATTED' ];
         }
         $this->firstSegmentOfFiles = json_encode( $fileInfo );

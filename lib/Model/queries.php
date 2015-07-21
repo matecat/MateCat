@@ -550,6 +550,8 @@ function getJobTmKeys( $job_id, $job_password ) {
  * @param $tmKeysString string  A json_encoded array of TmKeyManagement_TmKeyStruct objects
  *
  * @return int|null Returns null if everything went ok, otherwise it returns the mysql error code
+ *
+ * @throws Exception
  */
 function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $query = "UPDATE jobs SET tm_keys = '%s' WHERE id = %d AND password = '%s'";
@@ -1678,7 +1680,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
-    $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
+    $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];

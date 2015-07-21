@@ -4,318 +4,211 @@ set_time_limit( 0 );
 
 class convertFileController extends ajaxController {
 
-	protected $file_name;
-	protected $source_lang;
-	protected $target_lang;
-	protected $segmentation_rule;
+    protected $file_name;
+    protected $source_lang;
+    protected $target_lang;
+    protected $segmentation_rule;
 
-	protected $cache_days = 10;
+    protected $cache_days = 10;
 
-	protected $intDir;
-	protected $errDir;
+    protected $intDir;
+    protected $errDir;
 
     protected $cookieDir;
 
-	public function __construct() {
+    //this will prevent recursion loop when ConvertFileWrapper will call the doAction()
+    protected $convertZipFile = true;
 
-		parent::__construct();
+    public function __construct() {
 
-		$filterArgs = array(
-			'file_name'         => array(
-				'filter' => FILTER_SANITIZE_STRING,
-				'flags' => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH 
-			),
-			'source_lang'       => array(
-				'filter' => FILTER_SANITIZE_STRING,
-				'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
-			),
-			'target_lang'       => array(
-				'filter' => FILTER_SANITIZE_STRING,
-				'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
-			),
-			'segmentation_rule' => array(
-				'filter' => FILTER_SANITIZE_STRING,
-				'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH 
-			)
-		);
+        parent::__construct();
 
-		$postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $filterArgs = array(
+                'file_name'         => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW // | FILTER_FLAG_STRIP_HIGH
+                ),
+                'source_lang'       => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'target_lang'       => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'segmentation_rule' => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
+        );
 
-		$this->file_name   = $postInput[ 'file_name' ];
-		$this->source_lang = $postInput[ "source_lang" ];
-		$this->target_lang = $postInput[ "target_lang" ];
-		$this->segmentation_rule = $postInput[ "segmentation_rule" ];
+        $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-		if( $this->segmentation_rule == "") $this->segmentation_rule = null;
+        $this->file_name         = $postInput[ 'file_name' ];
+        $this->source_lang       = $postInput[ "source_lang" ];
+        $this->target_lang       = $postInput[ "target_lang" ];
+        $this->segmentation_rule = $postInput[ "segmentation_rule" ];
+
+        if ( $this->segmentation_rule == "" ) {
+            $this->segmentation_rule = null;
+        }
 
         $this->cookieDir = $_COOKIE[ 'upload_session' ];
-		$this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
-		$this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
+        $this->intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+        $this->errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
-	}
+    }
 
-	public function doAction() {
+    public function doAction() {
 
-		$this->result[ 'code' ]      = 0; // No Good, Default
+        $this->result[ 'code' ] = 0; // No Good, Default
 
-		if ( empty( $this->file_name ) ) {
-			$this->result[ 'code' ]      = -1; // No Good, Default
-			$this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Error: missing file name." );
+        if ( empty( $this->file_name ) ) {
+            $this->result[ 'code' ]     = -1; // No Good, Default
+            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Error: missing file name." );
 
-			return false;
-		}
+            return false;
+        }
 
-		$this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-		$file_path = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+        $ext = FilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
 
-		if ( !file_exists( $file_path ) ) {
-			$this->result[ 'code' ]      = -6; // No Good, Default
-			$this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Error during upload. Please retry." );
+        $conversionHandler = new ConversionHandler();
+        $conversionHandler->setFileName( $this->file_name );
+        $conversionHandler->setSourceLang( $this->source_lang );
+        $conversionHandler->setTargetLang( $this->target_lang );
+        $conversionHandler->setSegmentationRule( $this->segmentation_rule );
+        $conversionHandler->setCookieDir( $this->cookieDir );
+        $conversionHandler->setIntDir( $this->intDir );
+        $conversionHandler->setErrDir( $this->errDir );
 
-			return -1;
-		}
+        if ( $ext == "zip" ) {
+            if ( $this->convertZipFile ) {
+                // this makes the conversionhandler accumulate eventual errors on files and continue
+                $conversionHandler->setStopOnFileException( false );
 
-		//XLIFF Conversion management
-		//cyclomatic complexity 9999999 ..... but it works, for now.
-		try {
+                $fileObjects = $conversionHandler->extractZipFile();
+                //call convertFileWrapper and start conversions for each file
 
-			$fileType = DetectProprietaryXliff::getInfo( $file_path );
+                if ( $conversionHandler->uploadError ) {
+                    $fileErrors = $conversionHandler->getUploadedFiles();
 
-			if ( DetectProprietaryXliff::isXliffExtension() ) {
+                    foreach ( $fileErrors as $fileError ) {
+                        if ( count( $fileError->error ) == 0 ) {
+                            continue;
+                        }
 
-				if ( INIT::$CONVERSION_ENABLED ) {
+                        $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
-					//conversion enforce
-					if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
+                        /*
+                         * TODO
+                         * return error code is 2 because
+                         *      <=0 is for errors
+                         *      1   is OK
+                         *
+                         * In this case, we raise warnings, hence the return code must be a new code
+                         */
+                        $this->result[ 'code' ]                      = 2;
+                        $this->result[ 'errors' ][ $brokenFileName ] = array(
+                                'code'    => $fileError->error[ 'code' ],
+                                'message' => $fileError->error[ 'message' ],
+                                'debug' => $brokenFileName
+                        );
+                    }
 
-						//ONLY IDIOM is forced to be converted
-						//if file is not proprietary like idiom AND Enforce is disabled
-						//we take it as is
-						if ( !$fileType[ 'proprietary' ] || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
-							$this->result[ 'code' ]      = 1; // OK for client
-							$this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
+                }
 
-							return 0; //ok don't convert a standard sdlxliff
-						}
 
-					} else {
 
-						//if conversion enforce is active
-						//we force all xliff files but not files produced by SDL Studio because we can handle them
-						if ( $fileType[ 'proprietary_short_name' ] == 'trados' || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
-							$this->result[ 'code' ]      = 1; // OK for client
-							$this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
+                $realFileObjectInfo  = $fileObjects;
+                $realFileObjectNames = array_map(
+                        array( 'ZipArchiveExtended', 'getFileName' ),
+                        $fileObjects
+                );
 
-							return 0; //ok don't convert a standard sdlxliff
-						}
+                foreach ( $realFileObjectNames as $i => &$fileObject ) {
+                    $__fileName     = $fileObject;
+                    $__realFileName = $realFileObjectInfo[ $i ];
+                    $filesize       = filesize( $this->intDir . DIRECTORY_SEPARATOR . $__realFileName );
 
-					}
+                    $fileObject               = array(
+                            'name' => $__fileName,
+                            'size' => $filesize
+                    );
+                    $realFileObjectInfo[ $i ] = $fileObject;
+                }
 
-				} elseif ( $fileType[ 'proprietary' ] ) {
+                $this->result[ 'data' ][ 'zipFiles' ] = json_encode( $realFileObjectNames );
 
-					unlink( $file_path );
-					$this->result[ 'code' ]      = -7; // No Good, Default
-					$this->result[ 'errors' ][ ] = array(
-						"code"    => -7,
-						"message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-						'debug'   => basename( $this->file_name )
-					);
+                $stdFileObjects = array();
 
-					return -1;
+                if ( $fileObjects !== null ) {
+                    foreach ( $fileObjects as $fName ) {
 
-				} elseif ( !$fileType[ 'proprietary' ] ) {
+                        $newStdFile       = new stdClass();
+                        $newStdFile->name = $fName;
+                        $stdFileObjects[] = $newStdFile;
 
-					$this->result[ 'code' ]      = 1; // OK for client
-					$this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
-
-					return 0; //ok don't convert a standard sdlxliff
-
-				}
-
-			}
-
-		} catch ( Exception $e ) { //try catch not used because of exception no more raised
-			$this->result[ 'code' ]      = -8; // No Good, Default
-			$this->result[ 'errors' ][ ] = array( "code" => -8, "message" => $e->getMessage() );
-			Log::doLog( $e->getMessage() );
-
-			return -1;
-		}
-
-		//compute hash to locate the file in the cache
-		$sha1=sha1(file_get_contents($file_path));
-
-		//initialize path variable
-		$xliffPath=false;
-
-		//get storage object
-		$fs= new FilesStorage();
-
-		//if already present in database cache get the converted without convert it again
-		if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
-
-			//move the file in the right directory from the packages to the file dir
-			$xliffPath=$fs->getXliffFromCache($sha1, $this->source_lang);
-
-			if (!$xliffPath) {
-				Log::doLog("Failed to fetch xliff for $sha1 from disk cache (is file there?)");
-			}
-		}
-
-		//if invalid or no cached version
-		if (!isset($xliffPath) or empty($xliffPath)){
-			//we have to convert it
-
-			$converter = new FileFormatConverter( $this->segmentation_rule );
-
-			if ( strpos( $this->target_lang, ',' ) !== false ) {
-				$single_language = explode( ',', $this->target_lang );
-				$single_language = $single_language[ 0 ];
-			} else {
-				$single_language = $this->target_lang;
-			}
-
-			$convertResult=$converter->convertToSdlxliff($file_path, $this->source_lang, $single_language, false, $this->segmentation_rule);
-
-			if ( $convertResult[ 'isSuccess' ] == 1 ) {
-
-				/* try to back convert the file */
-				$output_content                     = array();
-				$output_content[ 'out_xliff_name' ] = $file_path . '.out.sdlxliff';
-				$output_content[ 'source' ]         = $this->source_lang;
-				$output_content[ 'target' ]         = $single_language;
-				$output_content[ 'content' ]        = $convertResult[ 'xliffContent' ];
-				$output_content[ 'filename' ]       = $this->file_name;
-				$back_convertResult                 = $converter->convertToOriginal( $output_content );
-				/* try to back convert the file */
-
-				if ( $back_convertResult[ 'isSuccess' ] == false ) {
-					//custom error message passed directly to javascript client and displayed as is
-					$convertResult[ 'errorMessage' ] = "Error: there is a problem with this file, it cannot be converted back to the original one.";
-					$this->result[ 'code' ]          = -110;
-					$this->result[ 'errors' ][ ]     = array(
-						"code" => -110, "message" => $convertResult[ 'errorMessage' ],
-						'debug' => basename( $this->file_name )
-					);
-
-					return false;
-				}
-
-				//store converted content on a temporary path on disk (and off RAM)
-				$xliffPath = tempnam( "/tmp", "MAT_XLF" );
-				file_put_contents($xliffPath,$convertResult[ 'xliffContent' ]);
-				unset($convertResult[ 'xliffContent' ]);
-
-			/*
-			   store the converted file in the cache
-			   put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
-			   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
-			 */
-
-				//save in cache
-				$res_insert=$fs->makeCachePackage($sha1, $this->source_lang, $file_path, $xliffPath);
-
-				if (!$res_insert) {
-					//custom error message passed directly to javascript client and displayed as is
-					$convertResult[ 'errorMessage' ] = "Error: failed to save file, you can not open more than one MateCAT.";
-					$this->result[ 'code' ]          = -103;
-					$this->result[ 'errors' ][ ]     = array(
-						"code" => -103, "message" => $convertResult[ 'errorMessage' ],
-						'debug' => basename( $this->file_name )
-					);
-
-					unset($xliffPath);
-					return false;
-				}
-
-			} else {
-
-				$file = pathinfo( $this->file_name );
-
-				switch ( $file[ 'extension' ] ) {
-				case 'docx':
-					$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-					break;
-				case 'doc':
-				case 'rtf':
-					$defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
-					break;
-				case 'inx':
-					$defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
-					break;
-				case 'idml':
-					$defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to a previous one.";
-					break;
-				default:
-					$defaultError = "Importing error. Try opening and saving the document with a new name.";
-					break;
-				}
-
-				if (
-					stripos( $convertResult[ 'errorMessage' ], "failed to create SDLXLIFF." ) !== false ||
-					stripos( $convertResult[ 'errorMessage' ], "COM target does not implement IDispatch" ) !== false
-				) {
-					$convertResult[ 'errorMessage' ] = "Error: failed importing file.";
-
-				} elseif ( stripos( $convertResult[ 'errorMessage' ], "Unable to open Excel file - it may be password protected" ) !== false ) {
-					$convertResult[ 'errorMessage' ] = $convertResult[ 'errorMessage' ] . " Try to remove protection using the Unprotect Sheet command on Windows Excel.";
-
-				} elseif ( stripos( $convertResult[ 'errorMessage' ], "The document contains unaccepted changes" ) !== false ) {
-					$convertResult[ 'errorMessage' ] = "The document contains track changes. Accept all changes before uploading it.";
-
-				} elseif ( stripos( $convertResult[ 'errorMessage' ], "Error: Could not find file" ) !== false ||
-					stripos( $convertResult[ 'errorMessage' ], "tw4winMark" ) !== false
-				) {
-					$convertResult[ 'errorMessage' ] = $defaultError;
-
-				} elseif ( stripos( $convertResult[ 'errorMessage' ], "Attempted to read or write protected memory" ) !== false ) {
-					$convertResult[ 'errorMessage' ] = $defaultError;
-
-				} elseif ( stripos( $convertResult[ 'errorMessage' ], "The document was created in Microsoft Word 97 or earlier" ) ) {
-					$convertResult[ 'errorMessage' ] = $defaultError;
-
-				} elseif ( $file[ 'extension' ] == 'csv' && empty( $convertResult[ 'errorMessage' ] ) ) {
-					$convertResult[ 'errorMessage' ] = "This CSV file is not eligible to be imported due internal wrong format. Try to convert in TXT using UTF8 encoding";
-
-				} elseif ( empty( $convertResult[ 'errorMessage' ] ) ) {
-					$convertResult[ 'errorMessage' ] = "Failed to convert file. Internal error. Please Try again.";
-
-				} elseif ( stripos( $convertResult[ 'errorMessage' ], "DocumentFormat.OpenXml.dll") !==false ) {
-					//this error is triggered on DOCX when converter's parser can't decode some regions of the file
-					$convertResult[ 'errorMessage' ] = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-				} elseif ( $file[ 'extension' ] == 'idml' ) {
-					$convertResult[ 'errorMessage' ] = $defaultError;
-				} elseif( stripos( $convertResult[ 'errorMessage' ], "Error: The source language of the file" ) !== false ){
-                    //Error: The source language of the file (English (United States)) is different from the project source language.
-                    //we take the error, is good
+                    }
                 } else {
-					$convertResult[ 'errorMessage' ] = "Import error. Try converting it to a compatible file format (e.g. doc > docx, xlsx > xls)";
-				}
+                    $errors = $conversionHandler->getResult();
+                    $errors = array_map( array( 'Upload', 'formatExceptionMessage' ), $errors[ 'errors' ] );
 
-				//custom error message passed directly to javascript client and displayed as is
-				$this->result[ 'code' ]      = -100;
-				$this->result[ 'errors' ][ ] = array(
-					"code" => -100, "message" => $convertResult[ 'errorMessage' ], "debug" => $file[ 'basename' ]
-				);
-			}
+                    $this->result[ 'errors' ] = array_merge( $this->result[ 'errors' ], $errors );
 
-		}
+                    return false;
+                }
 
-        //if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
-        if ( isset( $xliffPath ) and !empty( $xliffPath ) ) {
+                /* Do conversions here */
+                $converter              = new ConvertFileWrapper( $stdFileObjects, false );
+                $converter->intDir      = $this->intDir;
+                $converter->errDir      = $this->errDir;
+                $converter->cookieDir   = $this->cookieDir;
+                $converter->source_lang = $this->source_lang;
+                $converter->target_lang = $this->target_lang;
+                $converter->doAction();
 
-            //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR .  $this->cookieDir;
-            $fs->deleteHashFromUploadDir( $uploadDir, $sha1 );
+                $errors = $converter->checkResult();
+                if ( count( $errors ) > 0 ) {
+                    $this->result[ 'code' ] = 2;
+                    foreach ( $errors as $__err ) {
+                        $brokenFileName = ZipArchiveExtended::getFileName( $__err[ 'debug' ] );
 
-            //put reference to cache in upload dir to link cache to session
-            $fs->linkSessionToCache( $sha1, $this->source_lang, $this->cookieDir );
-            //a usable package is available, give positive feedback
-            $this->result[ 'code' ] = 1;
+                        if ( !isset( $this->result[ 'errors' ][ $brokenFileName ] ) ) {
+                            $this->result[ 'errors' ][ $brokenFileName ] = array(
+                                    'code'    => $__err[ 'code' ],
+                                    'message' => $__err[ 'message' ],
+                                    'debug'   => $brokenFileName
+                            );
+                        }
+                    }
+                }
+
+            } else {
+                $this->result[ 'errors' ][] = array(
+                        "code"    => -2,
+                        "message" => "Nested zip files are not allowed"
+                );
+
+                return false;
+            }
+        } else {
+            $conversionHandler->doAction();
+
+            $this->result = $conversionHandler->getResult();
+
+            if ( $this->result[ 'code' ] < 0 ) {
+                $this->result;
+            }
 
         }
 
-	}
+        ( isset( $this->result[ 'errors' ] ) ) ? null : $this->result[ 'errors' ] = array();
 
+        if ( count( $this->result[ 'errors' ] ) == 0 ) {
+            $this->result[ 'code' ] = 1;
+        } else {
+            $this->result[ 'errors' ] = array_values( $this->result[ 'errors' ] );
+        }
+    }
 
 }

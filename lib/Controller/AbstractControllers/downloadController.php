@@ -51,4 +51,65 @@ abstract class downloadController extends controller {
         }
     }
 
+    /**
+     * @param ZipContentObject[] $output_content
+     * @param string $outputFile
+     *
+     * @return string The zip binary
+     */
+    protected static function composeZip( Array $output_content, $outputFile=null ) {
+        if(empty($outputFile)){
+            $outputFile = tempnam("/tmp", "zipmatecat");
+        }
+
+        $zip  = new ZipArchive();
+        $zip->open( $outputFile, ZipArchive::OVERWRITE );
+
+        $rev_index_name = array();
+
+        foreach ( $output_content as $f ) {
+
+            //Php Zip bug, utf-8 not supported
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§]/u', "_", $f->output_filename );
+            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
+            $fName = str_replace( '_.', ".", $fName );
+
+            $nFinfo = FilesStorage::pathinfo_fix( $fName );
+            $_name  = $nFinfo[ 'filename' ];
+            if ( strlen( $_name ) < 3 ) {
+                $fName = substr( uniqid(), -5 ) . "_" . $fName;
+            }
+
+            if ( array_key_exists( $fName, $rev_index_name ) ) {
+                $fName = uniqid() . $fName;
+            }
+
+            $rev_index_name[ $fName ] = $fName;
+
+            $content = $f->getContent();
+            if( !empty( $content ) ){
+                $zip->addFromString($f->output_filename, $content);
+            }
+        }
+
+        // Close and send to users
+        $zip->close();
+        $zip_content = file_get_contents( $outputFile );
+        unlink( $outputFile );
+
+        return $zip_content;
+    }
+
+    protected static function sanitizeFileExtension( $filename ) {
+
+        $pathinfo = FilesStorage::pathinfo_fix( $filename );
+
+        if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
+            $filename = $pathinfo[ 'basename' ] . ".docx";
+        }
+
+        return $filename;
+
+    }
+
 }
