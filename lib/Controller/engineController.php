@@ -271,25 +271,24 @@ class engineController extends ajaxController {
             $config = $temp_engine->getConfigStruct();
             $config[ 'source' ]  = "en-US"; // TODO replace with values from the project being currently created
             $config[ 'target' ]  = "lv-LV";
-            $systemsAndTerms = $temp_engine->getSystemList($config);
+            $systemList = $temp_engine->getSystemList($config);
             
             $engineDAO->delete($result); // delete the newly added engine. this is the first time in engineController::add()
                                          // and the user has not yet selected a translation system
-            if ( isset( $systemsAndTerms['error']['code'] ) ) {
-                $this->result[ 'errors' ][ ] = $systemsAndTerms['error'];
+            if ( isset( $systemList['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $systemList['error'];
                 return;
             }
             
             $uiConfig = array(
-                'client_id' => $this->engineData['client_id'],
+                'client_id' => array('value' => $this->engineData['client_id']),
                 'system_id' => array(),
                 'terms_id' => array()
             );
-            foreach ($systemsAndTerms['systems'] as $systemID => $systemName){
-                $uiConfig['system_id'][$systemID] = $systemName;
-            }
-            foreach ($systemsAndTerms['terms'] as $termID => $termName){
-                $uiConfig['terms_id'][$termID] = $termName;
+            foreach ($systemList as $systemID => $systemInfo){
+                $uiConfig['system_id'][$systemID] = array('value' => $systemInfo['name'],
+                                                          'data'  => $systemInfo['metadata']
+                                                    );
             }
             
             $this->result['name'] = $this->name;

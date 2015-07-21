@@ -1560,7 +1560,7 @@ $.extend(UI, {
         this.initEvents();
     },
     
-    renderMTConfig: function(provider, newEngineName, data) {
+    renderMTConfig: function(provider, newEngineName, configData) {
         // $('#add-mt-provider-cancel').hide();
         // $('#mt-provider-details .error').empty();
 
@@ -1581,15 +1581,30 @@ $.extend(UI, {
         
         $('#new-engine-name').val(newEngineName);
         
+        // Populate the template fields with given values and store extra data within their data attributes
         var selectorBase = '.insert-tm .provider-data .provider-field';
-        for (key in data){
-            var field = $(selectorBase + " [data-field-name='" + key +"']");
+        for (var fieldName in configData){
+            var field = $(selectorBase + " [data-field-name='" + fieldName +"']");
             var tagName = field.prop('tagName');
             if (tagName == 'INPUT'){
-                field.val(data[key]);
+                var fieldContents = configData[fieldName]['value'];
+                field.val(fieldContents);
+
+                var fieldData = configData[fieldName]['data'];
+                for (var dataKey in fieldData) {
+                    field.attr("data-" + dataKey, fieldData[dataKey]);
+                }
             } else if (tagName == 'SELECT'){
-                for (subkey in data[key]) {
-                    field.append("<option value='" + subkey + "'>" + data[key][subkey] + "</option>");
+                for (var optionKey in configData[fieldName]) {
+                    var optionName = configData[fieldName][optionKey]['value'];
+                    var option = $("<option value='" + optionKey + "'>" + optionName + "</option>");
+
+                    var optionData = configData[fieldName][optionKey]['data'];
+                    for (var dataKey in optionData) {
+                        option.attr("data-" + dataKey, optionData[dataKey]);
+                    }
+
+                    field.append(option);
                 }
             }
         }

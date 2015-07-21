@@ -120,11 +120,18 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                             break;
                         }
                     }
-                    $decoded[$systemData['ID']] = sprintf('%s-%s %s (%s)',
-                                                            $systemData['SourceLanguage']['Code'],
-                                                            $systemData['TargetLanguage']['Code'],
-                                                            $systemData['Title']['Text'],
-                                                            $status);
+                    $systemName = sprintf('%s-%s %s (%s)',
+                                            $systemData['SourceLanguage']['Code'],
+                                            $systemData['TargetLanguage']['Code'],
+                                            $systemData['Title']['Text'],
+                                            $status);
+                    $systemMetadata = array('source-language-code' => $systemData['SourceLanguage']['Code'],
+                                            'target-language-code' => $systemData['TargetLanguage']['Code'],
+                                            'status'               => $status
+                        );
+                    $decoded[$systemData['ID']] = array('name'     => $systemName,
+                                                        'metadata' => $systemMetadata
+                        );
                 }
                 asort($decoded);
                 
@@ -229,7 +236,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         }
         $systemList = $this->result;
         
-        return array('systems' => $systemList);
+        return $systemList;
         
     }
     
