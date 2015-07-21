@@ -486,6 +486,9 @@
                 <input class="required" data-field-name="client_id" placeholder="here" />
             </div>
         </div>
+        <script>
+            $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Continue');
+        </script>
     </template>
 
     <template id="mt-provider-letsmt-msg">
@@ -498,6 +501,9 @@
     <template id="mt-provider-letsmt-config-fields">
         <script>
         <![CDATA[
+            // The first template set this text to "Continue". Set it back now.
+            $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Confirm');
+
             // for some reason the javascript gets escaped without the CDATA tag. TODO: find out why
             function fetchTerms() {
                 var termsFieldSelector = '.insert-tm .provider-data .provider-field [data-field-name="terms_id"]';
