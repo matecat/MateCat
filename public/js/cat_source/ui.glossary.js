@@ -247,7 +247,7 @@ $.extend(UI, {
 	renderGlossary: function(d, seg) {
 		segment = seg;
 		segment_id = segment.attr('id');
-		$('.sub-editor.glossary .overflow .results', segment).empty();
+//		$('.sub-editor.glossary .overflow .results', segment).empty();
 		$('.sub-editor.glossary .overflow .message', segment).remove();
 		numRes = 0;
 
