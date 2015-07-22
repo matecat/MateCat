@@ -1137,9 +1137,17 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
         if ( $key == 'status' ) {
             if ( $propagateToTranslated ) {
-                $q[ ]      = $key . " = '".$db->escape( $value )."' ";
-                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated', '$st_approved', '$st_rejected' )";
+                $q[ ]       = $key . " = '" . $db->escape( $value ) . "' ";
+                $andStatus = "AND status IN (
+                    '$st_draft',
+                    '$st_new',
+                    '$st_translated',
+                    '$st_approved',
+                    '$st_rejected'
+                )";
             }
+        } elseif( $key == 'segment_hash' ){
+            continue; // i don't want overwrite the segment_hash
         } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value, true );
         } elseif ( !is_numeric( $value ) || $key == 'translation' ) {
@@ -1148,7 +1156,6 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
             $q[ ] = $key . " = " . (float)$value;
         }
     }
-
 
     //if the new status to set is TRANSLATED,
     // sum the equivalent words of segments equals to me with the status different from MINE
