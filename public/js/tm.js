@@ -1609,9 +1609,9 @@ $.extend(UI, {
             }
         }
         
-        $('.insert-tm .provider-data .provider-field').each(function () {
-            field = $(this).find('input').first();
-            providerData[field.attr('data-field-name')] = field.val();
-        })
+        // notify the template's javascript that the template has been populated
+        if (typeof renderMTConfigCallback == 'function') {
+            renderMTConfigCallback();
+        }
     }
 });
