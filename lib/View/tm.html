@@ -573,7 +573,7 @@
             }
             
             function createFilters() {
-//                debugger;
+                debugger;
                 var sourceSelect = $('#source_lang_field select');
                 var targetSelect = $('#target_lang_field select');
                 var systemSelect = $('#system_field select');
@@ -596,7 +596,14 @@
                    directions[sourceCode].target[targetCode] = targetName;
                 });
                 
+                var sortedSourceCodes = [];
                 for (var sourceCode in directions) {
+                    sortedSourceCodes.push(sourceCode);
+                }
+                sortedSourceCodes.sort();
+
+                for (var i=0; i<sortedSourceCodes.length; i++) {
+                    var sourceCode = sortedSourceCodes[i];
                     var option = $('<option value="' + sourceCode + '">' + directions[sourceCode].name + '</option>');
                     sourceSelect.append(option);
                 }
@@ -608,14 +615,14 @@
                     systemOptions.each(function () {
                        var systemSourceCode = $(this).data('source-language-code');
                        var systemTargetCode = $(this).data('target-language-code');
-                   
+
                        if (systemSourceCode == selectedSourceCode && systemTargetCode == selectedTargetCode) {
                            $(this).show();
                        } else {
                            $(this).hide();
                        }
                     });
-                    
+
                     var firstAvailableTargetCode = $(systemSelect.find('option').not(function() { return $(this).css("display") == "none" })[0]).val();
                     systemSelect.val(firstAvailableTargetCode).change();
                 }
@@ -624,7 +631,15 @@
                     targetSelect.empty();
                     var selectedSourceCode = sourceSelect.val();
                     var targetChoices = directions[selectedSourceCode].target
+
+                    var sortedTargetCodes = [];
                     for (var targetCode in targetChoices) {
+                        sortedTargetCodes.push(targetCode);
+                    }
+                    sortedTargetCodes.sort();
+
+                    for (var i=0; i<sortedTargetCodes.length; i++) {
+                        var targetCode = sortedTargetCodes[i];
                         var option = $('<option value="' + targetCode + '">' + targetChoices[targetCode] + '</option>');
                         targetSelect.append(option);
                     }
