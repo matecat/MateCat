@@ -164,7 +164,7 @@ class commentController extends ajaxController {
 
         $userDao = new Users_UserDao( Database::obtain() );
         $users = $userDao->getByUids( $result );
-        $owner = $userDao->getProjectOwner( $this->job['id_project'] );
+        $owner = $userDao->getProjectOwner( $this->job['id'] );
 
         if ( !empty($owner) ) {
             array_push($users, $owner[0]);
