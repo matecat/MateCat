@@ -120,9 +120,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                             break;
                         }
                     }
-                    $systemName = sprintf('%s-%s %s (%s)',
-                                            $systemData['SourceLanguage']['Code'],
-                                            $systemData['TargetLanguage']['Code'],
+                    $systemName = sprintf('%s (%s)',
                                             $systemData['Title']['Text'],
                                             $status);
                     $systemMetadata = array('source-language-code' => $systemData['SourceLanguage']['Code'],
