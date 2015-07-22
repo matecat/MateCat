@@ -166,23 +166,19 @@ class commentController extends ajaxController {
         $users = $userDao->getByUids( $result );
         $owner = $userDao->getProjectOwner( $this->job['id_project'] );
 
+        // add project owner if not already in the array
         if ( !empty($owner) ) {
-            array_push($users, $owner[0]);
-        }
-
-        $users = array_filter($users, function($item) {
-            if ( $this->userIsLogged && $this->current_user->uid == $item->uid ) {
-                return false;
-            }
-
-            // FIXME: unoptimal way to find deep duplicates
-            foreach( $users as $k => $v ) {
-                if ( $item->uid == $v->uid ) {
-                    return false;
+            $found = false;
+            foreach($users as $k => $v) {
+                if ($v->uid == $owner[0]->uid) {
+                    $found  = true ;
                 }
             }
-            return true ;
-        });
+
+            if ( !$found ) {
+                array_push($users, $owner[0]);
+            }
+        }
 
         return $users;
     }
