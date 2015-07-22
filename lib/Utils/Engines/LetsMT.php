@@ -127,6 +127,8 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                                             $status);
                     $systemMetadata = array('source-language-code' => $systemData['SourceLanguage']['Code'],
                                             'target-language-code' => $systemData['TargetLanguage']['Code'],
+                                            'source-language-name' => $systemData['SourceLanguage']['Name']['Text'],
+                                            'target-language-name' => $systemData['TargetLanguage']['Name']['Text'],
                                             'status'               => $status
                         );
                     $decoded[$systemData['ID']] = array('name'     => $systemName,

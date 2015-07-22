@@ -548,7 +548,7 @@
                             $('#mt-provider-details .error').text(d.errors[0].message);
                         } else {
                             if(d.data.result && d.data.result.terms && Object.keys(d.data.result.terms).length) {
-                                $(termsFieldSelector).append("<option value=''></option>");
+                                $(termsFieldSelector).append("<option value=''>--</option>");
                                 $terms = d.data.result.terms;
                                 console.log('success');
                                 for (var key in $terms){
@@ -571,6 +571,71 @@
                     $('#minimum_qe_field').removeClass('disabled');
                 }
             }
+            
+            function createFilters() {
+//                debugger;
+                var sourceSelect = $('#source_lang_field select');
+                var targetSelect = $('#target_lang_field select');
+                var systemSelect = $('#system_field select');
+                var systemOptions = $('#system_field select option');
+                sourceSelect.empty();
+                
+                // a mapping from available source languages to respective target languages
+                var directions = [];
+                systemOptions.each(function (){
+                   var sourceCode = $(this).data('source-language-code');
+                   var targetCode = $(this).data('target-language-code');
+                   var sourceName = $(this).data('source-language-name');
+                   var targetName = $(this).data('target-language-name');
+                   
+                   if(!(sourceCode in directions)){
+                       directions[sourceCode] = {};
+                       directions[sourceCode].name = sourceName;
+                       directions[sourceCode].target = {};
+                   }
+                   directions[sourceCode].target[targetCode] = targetName;
+                });
+                
+                for (var sourceCode in directions) {
+                    var option = $('<option value="' + sourceCode + '">' + directions[sourceCode].name + '</option>');
+                    sourceSelect.append(option);
+                }
+                
+                var filterSystems = function() {
+                    var selectedSourceCode = sourceSelect.val();
+                    var selectedTargetCode = targetSelect.val();
+                    
+                    systemOptions.each(function () {
+                       var systemSourceCode = $(this).data('source-language-code');
+                       var systemTargetCode = $(this).data('target-language-code');
+                   
+                       if (systemSourceCode == selectedSourceCode && systemTargetCode == selectedTargetCode) {
+                           $(this).show();
+                       } else {
+                           $(this).hide();
+                       }
+                    });
+                    
+                    var firstAvailableTargetCode = $(systemSelect.find('option').not(function() { return $(this).css("display") == "none" })[0]).val();
+                    systemSelect.val(firstAvailableTargetCode).change();
+                }
+                
+                var fillTargetLanguages = function () {
+                    targetSelect.empty();
+                    var selectedSourceCode = sourceSelect.val();
+                    var targetChoices = directions[selectedSourceCode].target
+                    for (var targetCode in targetChoices) {
+                        var option = $('<option value="' + targetCode + '">' + targetChoices[targetCode] + '</option>');
+                        targetSelect.append(option);
+                    }
+                    
+                    targetSelect.val(targetSelect.find("option:first").val()).change();
+                }
+                
+                sourceSelect.change(fillTargetLanguages);
+                targetSelect.change(filterSystems);
+                sourceSelect.val(sourceSelect.find("option:first").val()).change();
+            }
         ]]>
         </script>
         <style>
@@ -591,7 +656,15 @@
                 <label>Client ID<sup>*</sup></label>
                 <input class="required" data-field-name="client_id" placeholder="here" />
             </div>
-            <div class="provider-field">
+            <div id="source_lang_field" class="provider-field">
+                <label>Source language</label>
+                <select class="required" data-field-name="source_lang"/>
+            </div>
+            <div id="target_lang_field" class="provider-field">
+                <label>Target language</label>
+                <select class="required" data-field-name="target_lang"/>
+            </div>
+            <div id="system_field" class="provider-field">
                 <label>Translation system<sup>*</sup></label>
                 <select class="required" data-field-name="system_id" onchange="fetchTerms()"/>
             </div>
@@ -608,6 +681,9 @@
                 <input type="number" step="0.01" min="0" max="1" data-field-name="minimum_qe" disabled="true"/>
             </div>
         </div>
+        <script>
+            createFilters();
+        </script>
     </template>
 
     <template id="mt-provider-letsmt-config-msg">
