@@ -52,7 +52,7 @@ interface IDatabase {
     /**
      * Executes SQL query to an open connection
      * @param string $sql Query to execute
-     * @return PDOStatement Query result
+     * @return integer Number of affected rows
      */
     public function query($sql);
 
@@ -78,7 +78,7 @@ interface IDatabase {
      * @param string $table Table to update
      * @param array $data Data to update, with the form (keyToUpdate => newValue)
      * @param string $where Condition
-     * @return PDOStatement Update result
+     * @return integer Number of affected rows
      */
     public function update($table, $data, $where='1');
 

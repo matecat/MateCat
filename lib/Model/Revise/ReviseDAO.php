@@ -42,8 +42,6 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
         //return the inserted object on success, null otherwise
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
@@ -85,8 +83,6 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
         $query = sprintf( $query, $where_string );
 
         $arr_result = $this->con->fetch_array( $query );
-
-        $this->_checkForErrors();
 
         return $this->_buildResult( $arr_result );
     }
@@ -144,11 +140,9 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $affectedRows = $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $affectedRows > 0 ) {
             return $obj;
         }
 

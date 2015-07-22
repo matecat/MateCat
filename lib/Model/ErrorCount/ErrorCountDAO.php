@@ -47,8 +47,6 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
-        $this->_checkForErrors();
-
         return $this->_buildResult( $arr_result );
     }
 
@@ -145,11 +143,9 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $affectedRows = $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ($affectedRows > 0 ) {
             return $obj;
         }
 

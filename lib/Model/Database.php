@@ -25,6 +25,9 @@ class Database implements IDatabase {
     private $password = ""; //database login password
     private $database = ""; //database name
 
+    // Affected rows TODO: remove, it's not thread safe. Just kept for legacy support
+    public $affected_rows;
+
 
     /**
      * Instantiate the database (singleton design pattern)
@@ -126,7 +129,10 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function query($sql) {
-        return $this->connection->query($sql);
+        $result = $this->connection->query($sql);
+        $affected = $result->rowCount();
+        $this->affected_rows = $affected;
+        return $affected;
     }
 
 
@@ -174,7 +180,10 @@ class Database implements IDatabase {
         $preparedStatement = $this->connection->prepare($query);
 
         // Execute it
-        return $preparedStatement->execute($valuesToBind);
+        $preparedStatement->execute($valuesToBind);
+        $affected = $preparedStatement->rowCount();
+        $this->affected_rows = $affected;
+        return $affected;
     }
 
 
@@ -202,6 +211,7 @@ class Database implements IDatabase {
 
         // Execute it
         $preparedStatement->execute($valuesToBind);
+        $this->affected_rows = $preparedStatement->rowCount();
         return $this->connection->lastInsertId();
     }
 
@@ -222,7 +232,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function escape($string) {
-        return $this->connection->quote($string);
+        return $string; //$this->connection->quote($string); // TODO
     }
 
 }

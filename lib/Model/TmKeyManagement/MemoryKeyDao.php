@@ -40,12 +40,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 ( $obj->tm_key->glos == null ) ? 1 : $this->con->escape( $obj->tm_key->glos )
         );
 
-        $this->con->query( $query );
-
-        $this->_checkForErrors();
+        $affectedRows = $this->con->query( $query );
 
         //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
+        if ($affectedRows > 0 ) {
             return $obj;
         }
 
@@ -108,8 +106,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
-        $this->_checkForErrors();
-
         return $this->_buildResult( $arr_result );
     }
 
@@ -161,11 +157,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $affectedRows = $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ($affectedRows > 0 ) {
             return $obj;
         }
 
@@ -186,11 +180,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $obj->tm_key->key
                 );
 
-        $this->con->query( $query );
+        $affectedRows = $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ($affectedRows > 0 ) {
             return $obj;
         }
 
@@ -211,11 +203,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $obj->tm_key->key
         );
 
-        $this->con->query( $query );
+        $affectedRows = $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $affectedRows > 0 ) {
             return $obj;
         }
 
@@ -273,8 +263,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         //commit transaction
         $this->con->commit();
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;
@@ -364,11 +352,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $affectedRows = $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $affectedRows > 0 ) {
             return $obj;
         }
 
@@ -437,8 +423,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         //commit transaction
         $this->con->commit();
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;
