@@ -293,7 +293,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 .meter > a {
 	display: block;
 	height: 100%;
-
+    max-width: 100%;
 	float:left;
 	position: relative;
 	overflow: hidden;
