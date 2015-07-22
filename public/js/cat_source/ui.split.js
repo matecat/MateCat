@@ -20,6 +20,7 @@ if(config.splitSegmentEnabled) {
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea(segment);
+//        UI.lastSplitAreaContent = segment.find('.splitArea').html();
     })
     /*.on('click', '.outersource .actions .split.cancel', function(e) {
         e.preventDefault();
@@ -41,8 +42,9 @@ if(config.splitSegmentEnabled) {
         UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
-        UI.createSplitArea($(this).parents('section'));
-
+        segment = $(this).parents('section');
+        UI.createSplitArea(segment);
+//        UI.lastSplitAreaContent = segment.find('.splitArea').html();
     }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
         e.preventDefault();
     }).on('click', '.sid .actions .split.cancel', function(e) {
@@ -187,8 +189,12 @@ if(config.splitSegmentEnabled) {
                 },
                 error: function(d){
                     // temp
-                    UI.setSegmentSplitSuccess(this);
+ //                   UI.setSegmentSplitSuccess(this);
                     console.log('error');
+                    UI.showMessage({
+                        msg: d.errors[0].message
+                    });
+
                 },
                 success: function(d){
                     UI.setSegmentSplitSuccess(this);
