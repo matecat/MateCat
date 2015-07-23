@@ -687,18 +687,22 @@
             .clear {
                 clear: both;
             }
-            #minimum_qe_field label {
-                font-size: small!important;
-            }
             #filter_running_field {
                 margin-top: -10px!important;
+                height: 40px!important;
             }
             #filter_running_field label:last-of-type {
                 width: 273px!important;
                 text-align: left!important;
                 margin-left: 10px!important;
                 /* font-weight: normal!important; */
+                position: relative!important;
+                top: -10px!important;
+            }
+            .lighttext {
                 font-size: small!important;
+                color: #999!important;
+                font-weight: normal!important;
             }
         </style>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
@@ -727,7 +731,7 @@
             <div id="filter_running_field">
                 <label></label>
                 <input type="checkbox" checked="checked" onchange="createFilters()"/>
-                <label>Show running systems only</label>
+                <label class="lighttext">Show running systems only</label>
             </div>
             <div class="provider-field">
                 <label>Terms corpora</label>
@@ -738,7 +742,7 @@
                 <input type="checkbox" data-field-name="use_qe" onchange="toggleQEEnabled(this)" />
             </div>
             <div id="minimum_qe_field" class="provider-field pull-right disabled">
-                <label>Don't show translation if its QE score is below</label>
+                <label class="lighttext">Don't show translation if its QE score is below</label>
                 <input type="number" step="0.01" min="0" max="1" value="0" data-field-name="minimum_qe" disabled="true"/>
             </div>
             <div class="clear"></div>
