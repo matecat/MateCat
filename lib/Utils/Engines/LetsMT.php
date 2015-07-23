@@ -86,34 +86,36 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 
                 $decoded = array();
                 foreach($parsed['System'] as $systemData){
+                    $statusName = "";
                     $status = "";
                     foreach ($systemData['Metadata'] as $value){
                         if ($value['Key'] === 'status'){
-                            switch ($value['Value'])
+                            $status = $value['Value'];
+                            switch ($status)
                             {
                                 case "running":
-                                    $status = "Running";
+                                    $statusName = "Running";
                                     break;
                                 case "queuingtransl":
-                                    $status = "Queuing";
+                                    $statusName = "Queuing";
                                     break;
                                 case "notstarted":
-                                    $status = "Not Started";
+                                    $statusName = "Not Started";
                                     break;
                                 case "nottrained":
-                                    $status = "Not Trained";
+                                    $statusName = "Not Trained";
                                     break;
                                 case "error":
-                                    $status = "Not Trained";
+                                    $statusName = "Not Trained";
                                     break;
                                 case "training":
-                                    $status = "Training";
+                                    $statusName = "Training";
                                     break;
                                 case "standby":
-                                    $status = "Standby";
+                                    $statusName = "Standby";
                                     break;
                                 default:
-                                    $status = $value['Value'];
+                                    $statusName = $value['Value'];
                                     break;
                             }
                             //strSysOnlineStatus = prop.Value;
@@ -122,7 +124,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                     }
                     $systemName = sprintf('%s (%s)',
                                             $systemData['Title']['Text'],
-                                            $status);
+                                            $statusName);
                     $systemMetadata = array('source-language-code' => $systemData['SourceLanguage']['Code'],
                                             'target-language-code' => $systemData['TargetLanguage']['Code'],
                                             'source-language-name' => $systemData['SourceLanguage']['Name']['Text'],

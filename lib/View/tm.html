@@ -579,22 +579,29 @@
                 var targetSelect = $('#target_lang_field select');
                 var systemSelect = $('#system_field select');
                 var systemOptions = $('#system_field select option');
+                var showOnlyRunningCheckbox = $('#filter_running_field input');
+                var showOnlyRunning = showOnlyRunningCheckbox.prop('checked');
+                var runningStatuses = { running: true, standby: true };
                 sourceSelect.empty();
                 
                 // a mapping from available source languages to respective target languages
                 var directions = [];
                 systemOptions.each(function (){
-                   var sourceCode = $(this).data('source-language-code');
-                   var targetCode = $(this).data('target-language-code');
-                   var sourceName = $(this).data('source-language-name');
-                   var targetName = $(this).data('target-language-name');
+                    var systemStatus = $(this).data('status');
+                    if(!(systemStatus in runningStatuses) && showOnlyRunning) {
+                        return;
+                    }
+                    var sourceCode = $(this).data('source-language-code');
+                    var targetCode = $(this).data('target-language-code');
+                    var sourceName = $(this).data('source-language-name');
+                    var targetName = $(this).data('target-language-name');
                    
-                   if(!(sourceCode in directions)){
-                       directions[sourceCode] = {};
-                       directions[sourceCode].name = sourceName;
-                       directions[sourceCode].target = {};
-                   }
-                   directions[sourceCode].target[targetCode] = targetName;
+                    if(!(sourceCode in directions)){
+                        directions[sourceCode] = {};
+                        directions[sourceCode].name = sourceName;
+                        directions[sourceCode].target = {};
+                    }
+                    directions[sourceCode].target[targetCode] = targetName;
                 });
                 
                 var sortedSourceCodes = [];
@@ -616,8 +623,11 @@
                     systemOptions.each(function () {
                        var systemSourceCode = $(this).data('source-language-code');
                        var systemTargetCode = $(this).data('target-language-code');
+                       var systemStatus = $(this).data('status');
 
-                       if (systemSourceCode == selectedSourceCode && systemTargetCode == selectedTargetCode) {
+                       if (systemSourceCode == selectedSourceCode
+                        && systemTargetCode == selectedTargetCode
+                        &&((systemStatus in runningStatuses) || !showOnlyRunning)) {
                            $(this).show();
                        } else {
                            $(this).hide();
@@ -648,6 +658,9 @@
                     targetSelect.val(targetSelect.find("option:first").val()).change();
                 }
                 
+                // this method can get called multiple times. remove previously added event handlers
+                sourceSelect.off('change');
+                targetSelect.off('change');
                 sourceSelect.change(fillTargetLanguages);
                 targetSelect.change(filterSystems);
                 sourceSelect.val(sourceSelect.find("option:first").val()).change();
@@ -677,6 +690,16 @@
             #minimum_qe_field label {
                 font-size: small!important;
             }
+            #filter_running_field {
+                margin-top: -10px!important;
+            }
+            #filter_running_field label:last-of-type {
+                width: 273px!important;
+                text-align: left!important;
+                margin-left: 10px!important;
+                /* font-weight: normal!important; */
+                font-size: small!important;
+            }
         </style>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
@@ -700,6 +723,11 @@
             <div id="system_field" class="provider-field">
                 <label>Translation system<sup>*</sup></label>
                 <select class="required" data-field-name="system_id" onchange="fetchTerms()"/>
+            </div>
+            <div id="filter_running_field">
+                <label></label>
+                <input type="checkbox" checked="checked" onchange="createFilters()"/>
+                <label>Show running systems only</label>
             </div>
             <div class="provider-field">
                 <label>Terms corpora</label>
