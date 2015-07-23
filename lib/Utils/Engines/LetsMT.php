@@ -253,6 +253,9 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 	$this->call( 'term_list_relative_url', $parameters );
 
         $termList = $this->result;
+        if ( isset( $termList['error']['code'] ) ) {
+            return array('error' => $termList['error']);
+        }
         
         return array('terms' => $termList);
     }

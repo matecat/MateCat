@@ -376,6 +376,10 @@ class engineController extends ajaxController {
         }
 
         $executeResult = $tempEngine->$function($functionParams);
+        if ( isset( $executeResult['error']['code'] ) ) {
+                $this->result[ 'errors' ][ ] = $executeResult['error'];
+                return;
+        }
         $this->result['data']['result'] = $executeResult;
     }
 

@@ -547,6 +547,7 @@
                             console.log('error');
                             $('#mt-provider-details .error').text(d.errors[0].message);
                         } else {
+                            $('#mt-provider-details .error').text("");
                             if(d.data.result && d.data.result.terms && Object.keys(d.data.result.terms).length) {
                                 $(termsFieldSelector).append("<option value=''>--</option>");
                                 $terms = d.data.result.terms;
