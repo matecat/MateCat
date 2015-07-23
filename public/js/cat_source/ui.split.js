@@ -197,10 +197,13 @@ if(config.splitSegmentEnabled) {
 
                 },
                 success: function(d){
-                    UI.setSegmentSplitSuccess(this);
                     console.log('success');
-                    if(d.data == 'OK') {
-
+                    if(d.errors.length) {
+                        UI.showMessage({
+                            msg: d.errors[0].message
+                        });
+                    } else {
+                        UI.setSegmentSplitSuccess(this);
                     }
                 }
             });
