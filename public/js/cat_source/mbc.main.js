@@ -666,8 +666,7 @@ if ( MBC.enabled() )
         window.location.hash = new_hash ;
     });
 
-
-    $(document).on('getSegments_success', function(e) {
+    var loadCommentData = function( success ) {
         var data = {
             action    : 'comment',
             _sub      : 'getRange',
@@ -679,17 +678,31 @@ if ( MBC.enabled() )
 
         APP.doRequest({
             data: data,
-            success : function(resp) {
-                db.resetSegments();
-                db.storeSegments( resp.data.entries.current_comments );
-                db.storeSegments( resp.data.entries.open_comments );
-                refreshUserInfo( resp.data.user ) ;
-
-                $(document).trigger('mbc:ready');
-            },
+            success : success,
             error : function() {
                 // TODO: handle error on comments fetch
             }
+        });
+    }
+
+    var resetDatabase = function( resp ) {
+        db.resetSegments();
+        db.storeSegments( resp.data.entries.current_comments );
+        db.storeSegments( resp.data.entries.open_comments );
+        refreshUserInfo( resp.data.user ) ;
+    }
+
+    $(window).on('segmentsAdded', function(e) {
+        loadCommentData(function( resp ) {
+            resetDatabase( resp );
+            refreshElements();
+        });
+    });
+
+    $(document).on('getSegments_success', function(e) {
+        loadCommentData(function( resp ) {
+            resetDatabase( resp );
+            $(document).trigger('mbc:ready');
         });
     });
 
@@ -706,21 +719,24 @@ if ( MBC.enabled() )
         });
     }
 
-    $(document).on('mbc:ready', function(ev) {
-        $('.header-menu li:last-child').before($(tpls.historyIcon));
-        $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
-
+    var refreshElements = function() {
         initCommentLinks();
         renderCommentIconLinks();
         updateHistoryWithLoadedSegments() ;
+    }
+
+    $(document).on('mbc:ready', function(ev) {
+        $('.mbc-history-balloon-outer').remove();
+        $('.header-menu li#filterSwitch').before($( tpls.historyIcon ));
+        $('.header-menu').append($(tpls.historyOuter).append( $(tpls.historyNoComments) ));
+
+        refreshElements();
 
         // open a comment if was asked by hash
-
         var lastAsked = popLastCommentHash() ;
         if ( lastAsked ) {
             openSegmentComment( UI.Segment.findEl( lastAsked ) ) ;
         }
-
     });
 
     $(document).on('sse:ack', function(ev, message) {
