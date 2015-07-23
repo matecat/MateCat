@@ -511,7 +511,7 @@
                 
                 var providerData = {};
                 $('.insert-tm .provider-data .provider-field').each(function () {
-                    field = $(this).find('input, select').first();
+                    var field = $(this).find('input, select').first();
                     if (field.prop('type') === 'checkbox') {
                         providerData[field.attr('data-field-name')] = field.prop('checked');
                     } else {
@@ -519,6 +519,10 @@
                     }
                 });
                 
+                if (!providerData['system_id']) {
+                    return;
+                }
+
                 providerData['function'] = 'getTermList';
 
                 var provider = 'letsmt';
