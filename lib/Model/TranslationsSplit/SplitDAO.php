@@ -99,9 +99,9 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $inserting_keys_string, $values_string, $update_string );
 
-        $affectedRows = $this->con->query( $query );
+        $this->con->query( $query );
 
-        if ( $affectedRows > 0 ) {
+        if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
 

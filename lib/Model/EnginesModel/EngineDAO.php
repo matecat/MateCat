@@ -198,9 +198,9 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $affectedRows = $this->con->query( $query );
+        $this->con->query( $query );
 
-        if ( $affectedRows > 0 ) {
+        if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
 

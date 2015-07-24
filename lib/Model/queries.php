@@ -1065,13 +1065,13 @@ function addTranslation( array $_Translation ) {
 
     Log::doLog( $query );
     try {
-        $affectedRows = $db->query($query);
+        $db->query($query);
     }
     catch(PDOException $e) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
-    return $affectedRows;
+    return $db->affected_rows;
 }
 
 /**
@@ -2301,14 +2301,14 @@ function updateWordCount( WordCount_Struct $wStruct ) {
                   AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
 
     try {
-        $affectedRows = $db->query($query);
+        $db->query($query);
     }
     catch(PDOException $e) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
+    $affectedRows = $db->affected_rows;
     Log::doLog( "Affected: " . $affectedRows . "\n" );
-
     return $affectedRows;
 }
 
@@ -2538,8 +2538,8 @@ function getNextSegmentAndLock() {
         $query = sprintf( $query, $res[ 'id_segment' ], $res[ 'id_job' ] );
 
         try {
-            $affectedRows = $db->query($query);
-            if ($affectedRows == 0) {
+            $db->query($query);
+            if ($db->affected_rows == 0) {
                 $db->query("ROLLBACK");
                 $res = null;
             }

@@ -52,7 +52,7 @@ interface IDatabase {
     /**
      * Executes SQL query to an open connection
      * @param string $sql Query to execute
-     * @return integer Number of affected rows
+     * @return PDOStatement Query result
      */
     public function query($sql);
 

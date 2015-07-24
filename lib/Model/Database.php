@@ -130,9 +130,8 @@ class Database implements IDatabase {
      */
     public function query($sql) {
         $result = $this->connection->query($sql);
-        $affected = $result->rowCount();
-        $this->affected_rows = $affected;
-        return $affected;
+        $this->affected_rows = $result->rowCount();
+        return $result;
     }
 
 
