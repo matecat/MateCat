@@ -708,6 +708,14 @@
                 color: #999!important;
                 font-weight: normal!important;
             }
+            .info{
+                background: url(../../public/img/info.png) no-repeat center;
+                background-size: 24px 24px;
+                display: inline-block;
+                width: 22px;
+                height: 22px;
+                margin: 0;
+            }
         </style>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
@@ -744,6 +752,7 @@
             <div id="use_qe_field" class="provider-field pull-left">
                 <label>QE beta</label>
                 <input type="checkbox" data-field-name="use_qe" onchange="toggleQEEnabled(this)" />
+                <a href="http://letsmt.eu" target="_blank"  class="info" title="You will see a translation only for segments with a QE (Quality Estimation) beta score above the selected figure."> </a>
             </div>
             <div id="minimum_qe_field" class="provider-field pull-right disabled">
                 <label class="lighttext">Don't show translation if its QE score is below</label>
