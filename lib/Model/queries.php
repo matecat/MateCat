@@ -2837,13 +2837,13 @@ function setJobCompleteness( $jid, $is_completed ) {
     $db    = Database::obtain();
     $query = "update jobs set completed=$is_completed where id=$jid";
     try {
-        $affectedRows = $db->query_first($query);
+        $result = $db->query_first($query);
     }
     catch(PDOException $e) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
-    return $affectedRows;
+    return $result;
 }
 
 /**
