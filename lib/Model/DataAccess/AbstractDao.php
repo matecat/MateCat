@@ -134,17 +134,6 @@ abstract class DataAccess_AbstractDao {
         return $input;
     }
 
-    /**
-     * Check for MySql errors and eventually throw exception
-     * @throws Exception
-     */
-    protected function _checkForErrors() {
-        $err = $this->con->get_error();
-
-        if ( $err[ 'error_code' ] != 0 ) {
-            throw new Exception( __METHOD__ . " -> " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ] );
-        }
-    }
 
     /**
      * This method validates the primary key of a single object to be used in persistency.

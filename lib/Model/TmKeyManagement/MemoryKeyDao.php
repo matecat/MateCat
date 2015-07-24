@@ -42,10 +42,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
         //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
+        if ($this->con->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -108,8 +106,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
-        $this->_checkForErrors();
-
         return $this->_buildResult( $arr_result );
     }
 
@@ -163,9 +159,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ($this->con->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -188,9 +182,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ($this->con->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -212,8 +204,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         );
 
         $this->con->query( $query );
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
@@ -273,8 +263,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         //commit transaction
         $this->con->commit();
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;
@@ -366,8 +354,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
@@ -437,8 +423,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         //commit transaction
         $this->con->commit();
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;

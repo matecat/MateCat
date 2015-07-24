@@ -569,10 +569,11 @@ class ProjectManager {
             $string_file_list       = implode( ",", $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
 
-            $rows = $this->dbHandler->fetch_array( $query_visible_segments );
-
-            if ( !$rows ) {
-                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . var_export( $this->dbHandler->get_error(), true ) . " - \n" );
+            try {
+                $rows = $this->dbHandler->fetch_array($query_visible_segments);
+            }
+            catch(PDOException $e) {
+                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: {$e->getMessage()} - \n" );
                 throw new Exception( "Segment Search: Failed Retrieve min_segment/max_segment for job", -5 );
             }
 
@@ -724,10 +725,15 @@ class ProjectManager {
             $string_file_list    = implode( ",", $projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $last_segments_query = sprintf( $query_min_max, $string_file_list );
 
-            $rows = $this->dbHandler->fetch_array( $last_segments_query );
-
+            try {
+                $rows = $this->dbHandler->fetch_array($last_segments_query);
+            }
+            catch(PDOException $e) {
+                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: {$e->getMessage()} - \n" );
+                throw new Exception( "Files not found.", -5 );
+            }
             if ( !$rows || count( $rows ) == 0 ) {
-                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . var_export( $this->dbHandler->get_error(), true ) . " - \n" );
+                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error - \n" );
                 throw new Exception( "Files not found.", -5 );
             }
 
@@ -1406,12 +1412,13 @@ class ProjectManager {
 
         foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
 
-            $this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
-
-            Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
-            if ( $this->dbHandler->get_error_number() ) {
-                Log::doLog( "Segment import - DB Error: " . mysql_error() . " - \n" );
-                throw new Exception( "Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
+            try {
+                $this->dbHandler->query($baseQuery . join(",\n", $chunk));
+                Log::doLog("Segments: Executed Query " . ($i + 1));
+            }
+            catch(PDOException $e) {
+                Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
             }
 
         }
@@ -1470,12 +1477,13 @@ class ProjectManager {
 
             foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
 
-                $this->dbHandler->query( $baseQuery . join( ",\n", $chunk ) );
-
-                Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
-                if ( $this->dbHandler->get_error_number() ) {
-                    Log::doLog( "Segment import - DB Error: " . mysql_error() . " - \n" );
-                    throw new Exception( "Translations Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
+                try {
+                    $this->dbHandler->query($baseQuery . join(",\n", $chunk));
+                    Log::doLog("Pre-Translations: Executed Query " . ($i + 1));
+                }
+                catch(PDOException $e) {
+                    Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                    throw new Exception( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
                 }
 
             }

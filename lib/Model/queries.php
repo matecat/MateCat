@@ -105,19 +105,14 @@ function doSearchQuery( Array $queryParams ) {
     }
 
 //	Log::doLog($query);
-
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-
-//    Log::doLog($results);
-
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+//    Log::doLog($results);
 
     if ( $key != 'coupled' && $key != 'status_only' ) { //there is the ROLLUP
         $rollup = array_pop( $results );
@@ -529,18 +524,15 @@ function getJobTmKeys( $job_id, $job_password ) {
     $query = "SELECT tm_keys FROM jobs WHERE id = %d AND password = '%s' ";
 
     $db      = Database::obtain();
-    $results = $db->fetch_array(
-            sprintf( $query, $job_id, $job_password )
-    );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array(
+            sprintf($query, $job_id, $job_password)
+        );
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results[ 0 ][ 'tm_keys' ];
 }
 
@@ -557,13 +549,12 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $query = "UPDATE jobs SET tm_keys = '%s' WHERE id = %d AND password = '%s'";
 
     $db = Database::obtain();
-    $db->query( sprintf( $query, $db->escape( $tmKeysString ), (int)$job_id, $job_password ) );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-        throw new Exception( $err, -$errno );
+    try {
+        $db->query(sprintf($query, $db->escape($tmKeysString), (int)$job_id, $job_password));
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        throw new Exception( $e->getMessage(), -$e->getCode() );
     }
 }
 
@@ -690,16 +681,12 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
             AND show_in_cattool = 1
 ";
 
-
-    $results = $db->fetch_array( $sql );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($sql);
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
     }
 
     return $results;
@@ -723,16 +710,12 @@ function getMTForTMXExport( $jid, $jPassword ) {
             AND show_in_cattool = 1
             AND suggestion_source in ('MT','MT-')
 ";
-
-    $results = $db->fetch_array( $sql );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($sql);
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
     }
 
     return $results;
@@ -757,16 +740,12 @@ function getTMForTMXExport( $jid, $jPassword ) {
             AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
 ";
 
-
-    $results = $db->fetch_array( $sql );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($sql);
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
     }
 
     return $results;
@@ -795,14 +774,12 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 
 			";
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
     }
 
     return $results;
@@ -828,16 +805,13 @@ function getSegmentsInfo( $jid, $password ) {
 			where j.id=$jid and j.password='$password' ";
 
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -906,14 +880,13 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 			LIMIT 0, $step ";
 
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
 
-    $err = $db->get_error();
-
-    if ( $err[ 'error_code' ] != 0 ) {
-        throw new Exception( __METHOD__ . " -> " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ] );
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        throw new Exception( __METHOD__ . " -> " . $e->getCode() . ": " . $e->getMessage() );
+    }
     return $results;
 }
 
@@ -1093,21 +1066,13 @@ function addTranslation( array $_Translation ) {
     }
 
     Log::doLog( $query );
-
-    $db->query( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-//    Log::doLog( $err );
-//    Log::doLog( $db->affected_rows );
-
-    if ( $errno != 0 ) {
-        Log::doLog( "$errno: " . var_export( $err, true ) );
-
-        return $errno * -1;
+    try {
+        $db->query($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $db->affected_rows;
 }
 
@@ -1172,12 +1137,13 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     ";
 
 
-    $totals = $db->fetch_array( $queryTotals );
-    $err = $db->get_error();
-    if ( $err[ 'error_code' ] != 0 ) {
-        throw new Exception( "Error in counting total equivalent words for propagation: " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ]
+    try {
+        $totals = $db->fetch_array($queryTotals);
+    }
+    catch(PDOException $e) {
+        throw new Exception( "Error in counting total equivalent words for propagation: " . $e->getCode() . ": " . $e->getMessage()
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
-                -$err[ 'error_code' ] );
+                -$e->getCode() );
     }
 
 
@@ -1196,16 +1162,14 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
 //    Log::doLog( $TranslationPropagate );
 
-    $db->query( $TranslationPropagate );
-
-    $err = $db->get_error();
-
-    if ( $err[ 'error_code' ] != 0 ) {
-        throw new Exception( "Error in propagating Translation: " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ]
-                . "\n" . $TranslationPropagate . "\n" . var_export( $params, true ),
-                -$err[ 'error_code' ] );
+    try {
+        $db->query($TranslationPropagate);
     }
-
+    catch(PDOException $e) {
+        throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
+            . "\n" . $TranslationPropagate . "\n" . var_export( $params, true ),
+            -$e->getCode() );
+    }
     return $totals;
 }
 
@@ -1297,16 +1261,14 @@ function setSuggestionUpdate( $data ) {
     $where = " id_segment=$id_segment and id_job=$id_job";
 
     $db = Database::obtain();
-    $db->update( 'segment_translations', $data, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $affectedRows = $db->update('segment_translations', $data, $where);
     }
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    return $affectedRows;
 }
 
 function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe, $segment_status = 'NEW' ) {
@@ -1330,18 +1292,14 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'mt_qe' ] = $mt_qe;
 
     $db = Database::obtain();
-    $db->insert( 'segment_translations', $data );
 
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        if ( $errno != 1062 ) {
-            Log::doLog( $err );
-        }
-
-        return $errno * -1;
+    try {
+        $db->insert('segment_translations', $data);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $db->affected_rows;
 }
 
@@ -1352,16 +1310,14 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     $where = "id = $id_job AND password = '$password'";
 
     $db = Database::obtain();
-    $db->update( 'jobs', $data, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $affectedRows = $db->update('jobs', $data, $where);
     }
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    return $affectedRows;
 }
 
 
@@ -1792,28 +1748,29 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
 
     $db = Database::obtain();
 
-    $db->insert( 'files', $data );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno == 1153 ) {
-        Log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
-
-        throw new Exception( "Database insert Large file error: $errno ", -$errno );
-    } elseif ( $errno > 0 ) {
-        Log::doLog( "Database insert error: $errno " );
-        throw new Exception( "Database insert file error: $errno ", -$errno );
+    try {
+        $db->insert('files', $data);
     }
-
+    catch (PDOException $e) {
+        $errno = $e->getCode();
+        if ( $errno == 1153 ) {
+            Log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
+            throw new Exception( "Database insert Large file error: $errno ", -$errno );
+        }
+        else {
+            Log::doLog( "Database insert error: $errno " );
+            throw new Exception( "Database insert file error: $errno ", -$errno );
+        }
+    }
     $query   = "SELECT LAST_INSERT_ID() FROM files";
-    $results = $db->query_first( $query );
 
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno > 0 ) {
-        Log::doLog( "Database failure, failed to get last index. $err: $errno ", -$errno );
-        throw new Exception( "Database failure, failed to get last index. $err: $errno ", -$errno );
+    try {
+        $results = $db->query_first($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
+        throw new Exception( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
+    }
     $idFile = $results[ 'LAST_INSERT_ID()' ];
 
     return $idFile;
@@ -2211,15 +2168,13 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			";
 
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2242,17 +2197,13 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 		order by id $query_limit
 		";
     $db    = Database::obtain();
-
-    $results = $db->fetch_array( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2272,15 +2223,13 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
 		group by s.id
 		order by s.id";
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2302,16 +2251,13 @@ function getSegmentsForTMVolumeAnalysys( $jid ) {
 		limit 100";
 
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2327,17 +2273,13 @@ function initializeWordCount( WordCount_Struct $wStruct ) {
     $data[ 'rejected_words' ]   = $wStruct->getRejectedWords();
 
     $where = " id = " . (int)$wStruct->getIdJob() . " AND password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
-
-    $db->update( 'jobs', $data, $where );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $db->update('jobs', $data, $where);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $db->affected_rows;
 }
 
@@ -2368,21 +2310,16 @@ function updateWordCount( WordCount_Struct $wStruct ) {
                   WHERE j.id = " . (int)$wStruct->getIdJob() . "
                   AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
 
-    $db->query( $query );
-
-    //	Log::doLog( $query . "\n" );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $db->query($query);
     }
-
-    Log::doLog( "Affected: " . $db->affected_rows . "\n" );
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    $affectedRows = $db->affected_rows;
+    Log::doLog( "Affected: " . $affectedRows . "\n" );
+    return $affectedRows;
 }
 
 function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
@@ -2392,16 +2329,14 @@ function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     $data[ 'tm_analysis_wc' ]       = $pid_eq_words;
     $data[ 'standard_analysis_wc' ] = $pid_standard_words;
     $where                          = " id =$pid";
-    $db->update( 'projects', $data, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $affectedRows = $db->update('projects', $data, $where);
     }
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    return $affectedRows;
 }
 
 function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
@@ -2416,17 +2351,14 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
             $where .= " and status_analysis <> '" . $db->escape( $v ) . "' ";
         }
     }
-
-    $db->update( 'projects', $data, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $affectedRows = $db->update('projects', $data, $where);
     }
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    return $affectedRows;
 }
 
 function changePassword( $res, $id, $password, $new_password ) {
@@ -2452,16 +2384,13 @@ function changePassword( $res, $id, $password, $new_password ) {
 
         $query = sprintf( $query, 'jobs', $db->escape( $new_password ), $id, $db->escape( $password ) );
     }
-
-    $res   = $db->query( $query );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $res = $db->query($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return ( $db->affected_rows | $row_exists );
 }
 
@@ -2577,16 +2506,14 @@ function setSegmentTranslationError( $sid, $jid ) {
     $where                        = " id_segment=$sid and id_job=$jid ";
 
     $db = Database::obtain();
-    $db->update( 'segment_translations', $data, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $affectedRows = $db->update('segment_translations', $data, $where);
     }
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    return $affectedRows;
 }
 
 // tm analysis threaded
@@ -2620,21 +2547,24 @@ function getNextSegmentAndLock() {
         $query = "DELETE FROM matecat_analysis.segment_translations_analysis_queue WHERE id_segment = %u AND id_job = %u";
         $query = sprintf( $query, $res[ 'id_segment' ], $res[ 'id_job' ] );
 
-        $db->query( $query );
-        $err = $db->get_error();
-
-        $errno = $err[ 'error_code' ];
-
-        if ( $errno != 0 || $db->affected_rows == 0 ) {
-            Log::doLog( $err );
+        try {
+            $db->query($query);
+            if ($db->affected_rows == 0) {
+                $db->query("ROLLBACK");
+                $res = null;
+            }
+            else {
+                $db->query("COMMIT");
+            }
+        }
+        catch(PDOException $e) {
+            Log::doLog( $e->getMessage() );
             $db->query( "ROLLBACK" );
             //return error code
             $res = null;
-        } else {
-            //if everything went well, commit
-            $db->query( "COMMIT" );
         }
     }
+
     //release locks and end transaction
     $db->query( "SET autocommit=1" );
 
@@ -2647,16 +2577,13 @@ function getNextSegmentAndLock() {
 function resetLockSegment() {
     $db = Database::obtain();
     $db->useDb( 'matecat_analysis' );
-    $db->query( "UPDATE matecat_analysis.segment_translations_analysis_queue SET locked = 0 WHERE locked = 1" );
-    $err = $db->get_error();
-    $db->useDb( INIT::$DB_DATABASE );
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
+    try {
+        $db->query("UPDATE matecat_analysis.segment_translations_analysis_queue SET locked = 0 WHERE locked = 1");
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
         return -1;
     }
-
     return 0;
 }
 
@@ -2674,13 +2601,13 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
         $db->query( "COMMIT" );
         $db->query( "SET autocommit=1" );
     }
-    $db->query( $q );
-    $err = $db->get_error();
-    $db->useDb( INIT::$DB_DATABASE );
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
+    try {
+        $db->query($q);
+        $db->useDb( INIT::$DB_DATABASE );
+    }
+    catch(PDOException $e) {
+        $db->useDb( INIT::$DB_DATABASE );
+        Log::doLog( $e->getMessage() );
         return -1;
     }
 
@@ -2702,16 +2629,13 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
 			limit 1";
 
     $db      = Database::obtain();
-    $results = $db->query_first( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->query_first($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2727,15 +2651,14 @@ function getNumSegmentsInQueue( $currentPid ) {
 
     $db = Database::obtain();
     $db->useDb( 'matecat_analysis' );
-    $results = $db->query_first( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    $db->useDb( INIT::$DB_DATABASE );
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->query_first($query);
+        $db->useDb( INIT::$DB_DATABASE );
+    }
+    catch(PDOException $e) {
+        $db->useDb( INIT::$DB_DATABASE );
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
     }
     $num_segments = 0;
     if ( (int)$results[ 'num_segments' ] > 0 ) {
@@ -2768,17 +2691,13 @@ function getNextSegmentForTMVolumeAnalysys() {
 			LIMIT 1";
 
     $db      = Database::obtain();
-    $results = $db->query_first( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->query_first($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2789,17 +2708,13 @@ function lockUnlockTable( $table, $lock_unlock = "unlock", $mode = "READ" ) {
     } else {
         $query = "UNLOCK TABLES";
     }
-
-    $results = $db->query( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->query($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2809,15 +2724,13 @@ function lockUnlockSegment( $sid, $jid, $value ) {
     $where            = "id_segment=$sid and id_job=$jid ";
 
     $db = Database::obtain();
-    $db->update( 'segment_translations', $data, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $db->update('segment_translations', $data, $where);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $db->affected_rows;
 }
 
@@ -2838,18 +2751,13 @@ function countSegments( $pid ) {
 		";
 
     //-- and raw_word_count>0 -- removed, count ALL segments
-
-    $results = $db->query_first( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( $err );
-
-        return $errno * -1;
+    try {
+        $results = $db->query_first($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results[ 'num_segments' ];
 }
 
@@ -2892,18 +2800,13 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         WHERE j.id_project = $pid
         AND st.locked = 0
         GROUP BY id_job WITH ROLLUP";
-
-    $results = $db->fetch_array( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( "$errno: " . var_export( $err, true ) );
-
-        return $errno * -1;
+    try {
+        $results = $db->fetch_array($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
@@ -2930,36 +2833,27 @@ function countSegmentsTranslationAnalyzed( $pid ) {
             JOIN segment_translations st ON s.id = st.id_segment
             INNER JOIN jobs j ON j.id = st.id_job
             WHERE j.id_project = $pid";
-
-    $results = $db->query_first( $query );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( "$errno: " . var_export( $err, true ) );
-
-        return $errno * -1;
+    try {
+        $results = $db->query_first($query);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $results;
 }
 
 function setJobCompleteness( $jid, $is_completed ) {
     $db    = Database::obtain();
     $query = "update jobs set completed=$is_completed where id=$jid";
-
-    $results = $db->query_first( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( "$errno: " . var_export( $err, true ) );
-
-        return $errno * -1;
+    try {
+        $result = $db->query_first($query);
     }
-
-    return $db->affected_rows;
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    return $result;
 }
 
 /**
@@ -2991,20 +2885,17 @@ function getArchivableJobs( $jobs = array() ) {
                 AND j.status = '" . Constants_JobStatus::STATUS_ACTIVE . "'
            GROUP BY j.id, j.password";
 
-    $results = $db->fetch_array(
+    try {
+        $results = $db->fetch_array(
             sprintf(
-                    $query,
-                    implode( ", ", $jobs )
+                $query,
+                implode(", ", $jobs)
             )
-    );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( "$errno: " . var_export( $err, true ) );
-
-        return $errno * -1;
+        );
+    }
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
     }
 
     return $results;
@@ -3057,17 +2948,12 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
     );
 
     $db = Database::obtain();
-    $db->query( $q_archive );
-
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno != 0 ) {
-        Log::doLog( "$errno: " . var_export( $err, true ) );
-
-        return $errno * -1;
+    try {
+        $db->query($q_archive);
     }
-
+    catch(PDOException $e) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
     return $db->affected_rows;
 }
-

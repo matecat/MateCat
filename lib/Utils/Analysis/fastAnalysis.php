@@ -337,15 +337,13 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
                        standard_word_count = VALUES( standard_word_count )
                            ";
 
-        $db->query( $query_st );
-
-        _TimeStampMsg( "Executed " . ( $k + 1 )  );
-
-        $err = $db->get_error();
-        if ( $err[ 'error_code' ] != 0 ) {
-            _TimeStampMsg( $err );
-
-            return $err[ 'error_code' ] * -1;
+        try {
+            _TimeStampMsg( "Executed " . ( $k + 1 )  );
+            $db->query($query_st);
+        }
+        catch(PDOException $e) {
+            _TimeStampMsg( $e->getMessage() );
+            return $e->getCode() * -1;
         }
     }
 
@@ -378,22 +376,18 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     $data2     = array( 'fast_analysis_wc' => $total_eq_wc );
 
     $where = " id = $pid";
-    $db->update( 'projects', $data2, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-
+    try {
+        $db->update('projects', $data2, $where);
+    }
+    catch(PDOException $e) {
         $db->query( 'ROLLBACK' );
         $db->query( 'SET autocommit=1' );
-        _TimeStampMsg( $err );
-
-        return $errno * -1;
+        _TimeStampMsg( $e->getMessage() );
+        return $e->getCode() * -1;
     }
-
     $db->query( 'COMMIT' );
     $db->query( 'SET autocommit=1' );
-
-
+    
     if ( count( $fastReport ) ) {
 
 //        $chunks_st_queue = array_chunk( $fastReport, 10 );
