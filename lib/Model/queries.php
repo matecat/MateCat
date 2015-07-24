@@ -1128,12 +1128,13 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     ";
 
 
-    $totals = $db->fetch_array( $queryTotals );
-    $err = $db->get_error();
-    if ( $err[ 'error_code' ] != 0 ) {
-        throw new Exception( "Error in counting total equivalent words for propagation: " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ]
+    try {
+        $totals = $db->fetch_array($queryTotals);
+    }
+    catch(PDOException $e) {
+        throw new Exception( "Error in counting total equivalent words for propagation: " . $e->getCode() . ": " . $e->getMessage()
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
-                -$err[ 'error_code' ] );
+                -$e->getCode() );
     }
 
 

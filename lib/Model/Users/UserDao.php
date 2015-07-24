@@ -76,8 +76,6 @@ class Users_UserDao extends DataAccess_AbstractDao {
         Log::doLog($query);
         $arr_result = $this->con->fetch_array( $query );
 
-        $this->_checkForErrors();
-
         return $this->_buildResult( $arr_result );
     }
 
