@@ -3,6 +3,7 @@
         "phpunit/phpunit": "^4.8"
     },
     "require": {
-        "robmorgan/phinx": "^0.4.6"
+        "robmorgan/phinx": "^0.4.6",
+        "klein/klein": "^2.1"
     }
 }

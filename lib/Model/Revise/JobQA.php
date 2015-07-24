@@ -11,6 +11,7 @@ class Revise_JobQA {
     private $job_id;
     private $job_password;
     private $job_words;
+    private $job_vote;
 
     /**
      * @var ErrorCount_Struct
@@ -166,12 +167,17 @@ class Revise_JobQA {
 
         $avgMark = $avgMark / count( self::$error_info );
 
-        return array(
+        $this->job_vote = array(
                 'avg'              => $avgMark,
                 'minText'          => self::vote2text( $avgMark ),
                 'equivalent_class' => self::vote2EquivalentScore( $avgMark )
         );
 
+        return $this->job_vote;
+    }
+
+    public function getJobVote() {
+        return $this->job_vote;
     }
 
     private static function vote2text( $vote ) {
@@ -208,4 +214,4 @@ class Revise_JobQA {
         return null;
     }
 
-} 
+}

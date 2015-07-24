@@ -465,40 +465,36 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
     return $results[ 'suggestions_array' ];
 }
 
-/**
- * Get job data structure,
- * this can return a list of jobs if the job is split into chunks and
- * no password is provided for search
- *
- * <pre>
- * $jobData = array(
- *      'source'            => 'it-IT',
- *      'target'            => 'en-US',
- *      'id_mt_engine'      => 1,
- *      'id_tms'            => 1,
- *      'id_translator'     => '',
- *      'status'            => 'active',
- *      'password'          => 'UnDvBUXMiSBGNjSV',
- *      'job_first_segment' => '1234',
- *      'job_last_segment'  => '1456',
- * );
- * </pre>
- *
- * @param int         $id_job
- * @param null|string $password
- *
- * @return array $jobData
- */
 function getJobData( $id_job, $password = null ) {
 
-    $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
-		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key, payable_rates
-			FROM jobs
-			WHERE id = %u";
+    $fields = array(
+        'id',
+        'id_project',
+        'source',
+        'target',
+        'id_mt_engine',
+        'id_tms',
+        'id_translator',
+        'tm_keys',
+        'status_owner AS status',
+        'password',
+        'job_first_segment',
+        'job_last_segment',
+        'create_date',
+        'owner',
+        'new_words',
+        'draft_words',
+        'translated_words',
+        'approved_words',
+        'rejected_words',
+        'subject',
+        'dqf_key'
+    );
+
+    $query = "SELECT " . implode(', ', $fields) . " FROM jobs WHERE id = %u";
 
     if ( !empty( $password ) ) {
-        $query .= " and password = '%s' ";
+        $query .= " AND password = '%s' ";
     }
 
     $query   = sprintf( $query, $id_job, $password );
