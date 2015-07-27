@@ -731,6 +731,8 @@ if ( MBC.enabled() )
     }
 
     $(document).on('mbc:ready', function(ev) {
+
+        $('#mbc-history').remove();
         $('.mbc-history-balloon-outer').remove();
         $('.header-menu li#filterSwitch').before($( tpls.historyIcon ));
         $('.header-menu').append($(tpls.historyOuter).append( $(tpls.historyNoComments) ));
