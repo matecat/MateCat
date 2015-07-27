@@ -1443,7 +1443,11 @@ function getLastSegmentIDs( $id_job ) {
 		";
 
     $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
+    try {
+        //sometimes we can have broken projects in our Database that are not related to a job id
+        //the query that extract the projects info returns a null job id for these projects, so skip the exception
+        $results = $db->fetch_array( $query );
+    } catch( Exception $e ){ $results = null; }
 
     return $results;
 }
