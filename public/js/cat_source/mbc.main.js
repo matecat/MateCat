@@ -719,6 +719,7 @@ if ( MBC.enabled() )
     }
 
     var initCommentLinks = function() {
+        $('.mbc-comment-link').remove();
         $('section').each(function(i, el) {
             initCommentLink(el);
         });
