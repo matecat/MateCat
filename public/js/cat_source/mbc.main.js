@@ -189,9 +189,9 @@ if ( MBC.enabled() )
             .text( getUsername() );
 
         if (loggedUserName) {
-            inputForm.find('.mbc-login-link').addClass('hide');
+            inputForm.find('.mbc-login-link').addClass('mbc-hide');
         } else {
-            inputForm.find('.mbc-login-link').addClass('visible');
+            inputForm.find('.mbc-login-link').addClass('mbc-visible');
             inputForm.find('.mbc-comment-username-label')
                     .attr('title', 'Click to edit');
         }
@@ -433,7 +433,7 @@ if ( MBC.enabled() )
     var renderHistoryWithNoComments = function() {
         $('.mbc-history-balloon-has-comment').remove();
         $('.mbc-history-balloon-has-no-comments').show();
-        $('.mbc-comment-highlight-history').removeClass('visible');
+        $('.mbc-comment-highlight-history').removeClass('mbc-visible');
     }
 
     var renderHistoryWithComments = function( count ) {
@@ -466,7 +466,7 @@ if ( MBC.enabled() )
 
         $('.mbc-history-balloon-outer').append(root);
 
-        $('#mbc-history .mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'visible' );
+        $('#mbc-history .mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'mbc-visible' );
     }
 
     var updateHistoryWithLoadedSegments = function() {
@@ -533,8 +533,8 @@ if ( MBC.enabled() )
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() ) ;
 
-        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('hide');
-        else outer.find('.mbc-post-comment .mbc-login-link').addClass('visible');
+        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('mbc-hide');
+        else outer.find('.mbc-post-comment .mbc-login-link').addClass('mbc-visible');
     }
 
     // start event binding
@@ -550,11 +550,11 @@ if ( MBC.enabled() )
 
         $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link div', function(e) {
             e.stopPropagation();
-            $('.mbc-history-balloon-outer').removeClass('visible');
+            $('.mbc-history-balloon-outer').removeClass('mbc-visible');
         });
 
         $(delegate).on('click', function() {
-            $('.mbc-history-balloon-outer').removeClass('visible');
+            $('.mbc-history-balloon-outer').removeClass('mbc-visible');
         });
 
         $(delegate).on('click', '.mbc-comment-link .txt', function(e) {
@@ -654,12 +654,12 @@ if ( MBC.enabled() )
 
     $(document).on('click', '.mbc-history-balloon-outer .mbc-close-btn', function(e) {
         e.preventDefault();
-        $(e.target).closest('.mbc-history-balloon-outer').toggleClass('visible');
+        $(e.target).closest('.mbc-history-balloon-outer').toggleClass('mbc-visible');
     });
 
     $(document).on('click', '.mbc-show-comment-btn', function(e) {
         e.preventDefault();
-        $('.mbc-history-balloon-outer').removeClass('visible');
+        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
 
         var sid = $(e.target).closest('div').data('id') ;
 
@@ -757,11 +757,11 @@ if ( MBC.enabled() )
     });
 
     $(document).on('click', '#filterSwitch', function(e) {
-        $('.mbc-history-balloon-outer').removeClass('visible');
+        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
     });
 
     $(document).on('click', '#mbc-history', function(ev) {
-        $('.mbc-history-balloon-outer').toggleClass('visible');
+        $('.mbc-history-balloon-outer').toggleClass('mbc-visible');
         if ($('.searchbox').is(':visible')) {
             UI.toggleSearch(ev) ;
         }
@@ -843,11 +843,11 @@ if ( MBC.enabled() )
     });
 
     $(document).on('focus', '.mbc-comment-input', function(e) {
-        $(e.target).closest('div').find('.mbc-comment-btn').addClass('visible');
+        $(e.target).closest('div').find('.mbc-comment-btn').addClass('mbc-visible');
     });
 
     $(document).on('click', function(e) {
-        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').addClass('hide');
+        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').addClass('mbc-hide');
     });
 
     $(document).on('ui:segment:focus', function(e, sid) {

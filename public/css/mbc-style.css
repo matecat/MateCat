@@ -842,18 +842,11 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
  Display and visibility helpers
  ******
  */
-.hide {
+.mbc-hide {
   display: none!important;
 }
 
-.visible {
+.mbc-visible {
   display: block!important;
 }
 
-.vis-hidden {
-  visibility: hidden;
-}
-
-.vis-visible {
-  visibility: visible;
-}
