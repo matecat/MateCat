@@ -740,7 +740,7 @@ if ( MBC.enabled() )
         // open a comment if was asked by hash
         var lastAsked = popLastCommentHash() ;
         if ( lastAsked ) {
-            openSegmentComment( UI.Segment.findEl( lastAsked ) ) ;
+            openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) ) ;
         }
     });
 
