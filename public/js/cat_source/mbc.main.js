@@ -372,6 +372,11 @@ if ( MBC.enabled() )
         scrollSegment(el);
     }
 
+    var openSegmentCommentNoScroll = function(el) {
+        $('article').addClass('mbc-commenting-opened');
+        renderSegmentBalloon(el);
+    }
+
     var closeSegment = function(el) {
         $('.mbc-comment-balloon-outer').remove();
         $('article').removeClass('mbc-commenting-opened');
@@ -559,7 +564,7 @@ if ( MBC.enabled() )
 
         $(delegate).on('click', '.mbc-comment-link .txt', function(e) {
             var section = $(e.target).closest('section');
-            openSegmentComment( section );
+            openSegmentCommentNoScroll( section );
         });
 
         $(delegate).on('click', 'section .mbc-close-btn', function(e) {
