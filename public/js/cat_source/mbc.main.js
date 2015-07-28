@@ -257,7 +257,6 @@ if ( MBC.enabled() )
         if ( !threadIsResolved() ) {
             root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
         }
-
         return root;
     }
 
@@ -579,6 +578,7 @@ if ( MBC.enabled() )
     var initCommentLink = function(el) {
         var section = new UI.Segment( el ) ;
         if ((! section.isSplit()) || section.isFirstOfSplit()) {
+            $(el).find('.mbc-comment-link').remove();
             $(el).append( $(tpls.commentLink) );
         }
     }
