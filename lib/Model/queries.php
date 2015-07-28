@@ -847,16 +847,18 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 ";
 
     $queryBefore = "
-                    SELECT  segments.id AS __sid
-                    FROM segments
-                    JOIN segment_translations ON id = id_segment
-                    JOIN jobs ON jobs.id =  id_job
-                    WHERE id_job = $jid
-                        AND password = '$password'
-                        AND show_in_cattool = 1
-                        AND segments.id < $ref_segment
-                    ORDER BY __sid DESC
-                    LIMIT %u
+                    SELECT * from(
+                        SELECT  segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id =  id_job
+                        WHERE id_job = $jid
+                            AND password = '$password'
+                            AND show_in_cattool = 1
+                            AND segments.id < $ref_segment
+                        ORDER BY __sid DESC
+                        LIMIT %u
+                    ) as TT
                 ";
 
     switch ( $where ) {
