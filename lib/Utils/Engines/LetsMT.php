@@ -147,11 +147,18 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 }
             }
         } else {
-            $decoded = $rawValue;
-            // in case of an invalid user id http status 401 is returned.
-            // display a more user friendly message
-            if (strpos($decoded['error'], 'http status 401') !== false) {
-                $decoded['error']['message'] = 'Invalid Client ID.';
+            $parsed = json_decode( $rawValue['result'], true );
+            if (!empty($parsed['ErrorMessage'])) {
+                $message = sprintf("%s (%s)", $parsed['ErrorMessage'], $parsed['ErrorCode']);
+                $code = int_val($parsed['ErrorCode']);
+                $decoded = array(
+                    'error' => array(
+                            'code'    $code,
+                            'message' => $message
+                    )
+            }
+            else{
+                $decoded = array( 'error' => $rawValue['error']);
             }
         }
 
