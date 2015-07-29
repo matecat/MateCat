@@ -456,9 +456,8 @@ if ( MBC.enabled() )
         for (var i in db.history) {
             if (isNaN(i)) { continue ; }
 
-            var sid = db.history[i][0].id_segment ;
             var viewButton = $( tpls.historyViewButton );
-
+            var sid = db.history[i][0].id_segment ;
             viewButton.find('a').text('View') ;
             viewButton.find('.mbc-comment-segment-number').text(sid);
             viewButton.attr('data-id', sid);
@@ -466,9 +465,15 @@ if ( MBC.enabled() )
             var line = populateCommentTemplate( db.history[i][0] ) ;
             line.append( viewButton ) ;
 
-            root.append(
-                $(tpls.threadWrap).append( line )
-            );
+            var wrap = $(tpls.threadWrap).append( line ) ;
+
+            if (db.history[i][0].thread_id == null) {
+                wrap.addClass('mbc-thread-wrap-active');
+            } else {
+                wrap.addClass('mbc-thread-wrap-resolved');
+            }
+
+            root.append( wrap );
         }
         $('.mbc-history-balloon-has-comment').remove();
         $('.mbc-history-balloon-has-no-comments').hide();
