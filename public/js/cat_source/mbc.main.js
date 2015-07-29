@@ -390,19 +390,32 @@ if ( MBC.enabled() )
         }, 500);
     }
 
+    function hackSnapEngage(on) {
+        var button = $(document).find('#SnapABug_Button');
+        if (on) {
+            button.data('mbc-zindex', button.css('z-index'));
+            button.css('z-index', -1);
+        } else {
+            button.css('z-index', button.data('mbc-zindex'));
+        }
+    }
+
     var openSegmentComment = function(el) {
         $('article').addClass('mbc-commenting-opened');
+        hackSnapEngage( true );
         renderSegmentBalloon(el);
         scrollSegment(el);
     }
 
     var openSegmentCommentNoScroll = function(el) {
         $('article').addClass('mbc-commenting-opened');
+        hackSnapEngage( true );
         renderSegmentBalloon(el);
     }
 
     var closeSegment = function(el) {
         $('.mbc-comment-balloon-outer').remove();
+        hackSnapEngage( false );
         $('article').removeClass('mbc-commenting-opened');
     }
 
