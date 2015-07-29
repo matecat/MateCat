@@ -34,11 +34,11 @@ if ( MBC.enabled() )
 
         historyViewButton: '' +
             ' <div class="mbc-clearfix mbc-view-comment-wrap"> ' +
-            '   <a href="javascript:;" class="mbc-comment-link-btn mbc-view-link mbc-show-comment-btn pull-right">View</a>' +
+            '   <a href="javascript:;" class="mbc-comment-link-btn mbc-view-link mbc-show-comment-btn">View thread</a>' +
             ' </div> ',
 
         historySegmentLabel: '' +
-            ' <span class="mbc-nth-comment"></span><span class="mbc-comment-segment-number-label">Segment <span class="mbc-comment-segment-number"></span></span> ',
+            ' <span class="mbc-nth-comment mbc-nth-comment-label"></span><span class="mbc-comment-segment-number-label">Segment <span class="mbc-comment-segment-number"></span></span> ',
 
         historyHasComments: '' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-comment"> ' +

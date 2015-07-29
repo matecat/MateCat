@@ -459,7 +459,7 @@ if ( MBC.enabled() )
 
             var viewButton = $( tpls.historyViewButton );
             var sid = db.history[i][0].id_segment ;
-            viewButton.find('a').text('View') ;
+            viewButton.find('a').text('View thread') ;
             viewButton.attr('data-id', sid);
 
             var segmentLabel = $( tpls.historySegmentLabel );

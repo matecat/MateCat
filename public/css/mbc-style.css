@@ -50,8 +50,8 @@
  */
 
 .mbc-comments-wrap {
-  max-height: 300px;
   height: 100%;
+  max-height: 300px;
   overflow-y: auto;
   position: relative;
   width: 100%;
@@ -72,7 +72,8 @@
  ******
  */
 .mbc-thread-wrap-active {
-  background: #f7f7f7;
+  background: rgba(247,247,247,1); /* #F7F7F7 */
+  border-bottom: 2px solid #dadada;
 }
 
 /*
@@ -189,8 +190,8 @@ a.mbc-new-message-link:hover {
 }
 
 .mbc-comment-textarea {
-  box-shadow: inset 0 1px 2px #ccc;
   -webkit-box-shadow: inset 0 1px 2px #ccc;
+  box-shadow: inset 0 1px 2px #ccc;
   border: 1px solid #999;
   font-size: 16px;
   margin: 0;
@@ -205,8 +206,8 @@ a.mbc-new-message-link:hover {
   background: #fff;
   border: 1px solid #999;
   border-radius: 2px;
-  box-shadow: inset 0 1px 2px #ddd;
   -webkit-box-shadow: inset 0 1px 2px #ddd;
+  box-shadow: inset 0 1px 2px #ddd;
   font-size: 14px;
   height: auto;
   margin: 0 0 2px;
@@ -415,10 +416,23 @@ a.mbc-login-link:visited {
  */
 a.mbc-view-link:link,
 a.mbc-view-link:visited {
-  margin-top: 16px;
+  color: #0798bc;
   padding: 0 4px 6px 0;
 }
 
+/*
+ ******
+ View comment ordinal number
+ ******
+ */
+.mbc-nth-comment-label {
+  display: block;
+  border-bottom: 1px solid #CCCCCC;
+  font-size: 16px;
+  color: #9A9A9A;
+  line-height: 1.8;
+  margin-bottom: 6px;  
+}
 
 
 /*
@@ -700,7 +714,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
  */
 
 .mbc-history-balloon-outer {
-  background-color: #fff;
+  background-color: rgba(247,247,247,1); /* #f7f77f */
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
   margin-top: 56px;
   padding-top: 10px;
@@ -721,17 +735,16 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 
 .mbc-comment-segment-number-label {
-  float: left;
+  display: block;
   font-size: 12px;
   font-weight: bold;
-  margin-top: 16px;
+  margin-bottom: 16px;
   text-transform: uppercase;
 }
 
 .mbc-history-balloon {
-  background-color: #fff;
-  /*padding: 0 12px 12px 12px;*/ /* Add padding for consistency with comment in thread layout */
-  padding: 0 0 12px; /* Add padding for consistency with comment in thread layout */
+  background-color: rgba(247,247,247,1); /* #f7f77f */
+  padding: 0;
   position: relative;
 }
 
@@ -744,7 +757,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 
 .mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
-  border-bottom: 1px solid #dadada;
+  /*border-bottom: 1px solid #dadada;*/
 }
 
 .mbc-history-balloon-has-comment {
@@ -811,24 +824,25 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
  Triangle top top in history balloon
  */
 .mbc-triangle-top {
-  border-right: 14px solid #fff;
+  border-right: 14px solid rgba(247,247,247,1); /* #f7f77f */
   border-top: 14px solid transparent;
+  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
   float: right;
   margin-right: 20px;
   margin-top: -24px;
-  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
-  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+
 }
 
 /*
  Triangle top left in comment balloon
  */
 .mbc-triangle-topleft {
-  border-top: 10px solid #f7f7f7;
+  border-top: 10px solid rgba(247,247,247,1); /* #f7f77f */
   border-left: 12px solid transparent;
-  margin-left: -12px;
   -webkit-filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
   filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
+  margin-left: -12px;
 }
 
 
