@@ -452,6 +452,7 @@ if ( MBC.enabled() )
 
     var renderHistoryWithComments = function( ) {
         var root = $(tpls.historyHasComments);
+        var count = 0 ;
 
         for (var i in db.history) {
             if (isNaN(i)) { continue ; }
@@ -459,11 +460,16 @@ if ( MBC.enabled() )
             var viewButton = $( tpls.historyViewButton );
             var sid = db.history[i][0].id_segment ;
             viewButton.find('a').text('View') ;
-            viewButton.find('.mbc-comment-segment-number').text(sid);
             viewButton.attr('data-id', sid);
 
+            var segmentLabel = $( tpls.historySegmentLabel );
+            segmentLabel.find('.mbc-comment-segment-number').text( sid );
+            segmentLabel.closest('.mbc-nth-comment').text( count++ );
+
             var line = populateCommentTemplate( db.history[i][0] ) ;
+
             line.append( viewButton ) ;
+            line.prepend( segmentLabel );
 
             var wrap = $(tpls.threadWrap).append( line ) ;
 
