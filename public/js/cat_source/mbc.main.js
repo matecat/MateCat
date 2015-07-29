@@ -507,8 +507,14 @@ if ( MBC.enabled() )
     var updateHistoryWithLoadedSegments = function() {
         db.refreshHistory();
         if (db.history_count == 0) {
+            $('#mbc-history')
+                .addClass('mbc-history-balloon-icon-has-no-comments')
+                .removeClass('mbc-history-balloon-icon-has-comment');
             renderHistoryWithNoComments();
         } else {
+            $('#mbc-history')
+                .removeClass('mbc-history-balloon-icon-has-no-comments')
+                .addClass('mbc-history-balloon-icon-has-comment');
             renderHistoryWithComments();
         }
     }
