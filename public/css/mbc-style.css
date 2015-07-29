@@ -94,8 +94,7 @@
   margin-top: 14px;
 }
 
-.mbc-comments-wrap .mbc-show-comment:not(:last-of-type),
-.mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
+.mbc-comments-wrap .mbc-show-comment:not(:last-of-type) {
   border-bottom: 1px solid #dadada;
 }
 
@@ -729,8 +728,21 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 
 .mbc-history-balloon {
   background-color: #fff;
-  padding: 0 12px 12px 12px; /* Add padding for consistency with comment in thread layout */
+  /*padding: 0 12px 12px 12px;*/ /* Add padding for consistency with comment in thread layout */
+  padding: 0 0 12px; /* Add padding for consistency with comment in thread layout */
   position: relative;
+}
+
+.mbc-history-balloon .mbc-thread-wrap {
+  padding: 14px 0;
+}
+
+.mbc-history-balloon .mbc-show-comment {
+  padding: 0 24px;
+}
+
+.mbc-history-balloon .mbc-thread-wrap:not(:last-of-type) .mbc-show-comment {
+  border-bottom: 1px solid #dadada;
 }
 
 .mbc-history-balloon-has-comment {
