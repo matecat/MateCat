@@ -51,7 +51,9 @@ if ( MBC.enabled() )
             ' </div> ' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
             '    <div class="mbc-thread-wrap"> ' +
-            '        <span class="mbc-comment-label">No comments</span>'  +
+            '       <div class="mbc-show-comment"> ' +
+            '           <span class="mbc-comment-label">No comments</span>'  +
+            '       </div> ' +
             '    </div> ' +
             ' </div>',
 

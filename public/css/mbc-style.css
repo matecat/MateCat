@@ -690,7 +690,6 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 
 #mbc-history {
   /* #filterSwitch line 71 style.css */
-  color: #fff;
   cursor: pointer;
   font-size: 23px;
   height: 27px;
@@ -703,6 +702,21 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 #mbc-history:hover {
   /* #filterSwitch:hover line 86 style.css */
   color:#ccc;
+}
+
+/*
+ No comments icon in header
+ */
+.mbc-history-balloon-icon-has-no-comments {
+  color: #777; /* style.css line 40 #notifbox */
+}
+
+/*
+ Comments icon in header
+ */
+.mbc-history-balloon-icon-has-comment {
+  color: #fff; /* style.css line 40 #notifbox */
+  opacity: .9;
 }
 
 /*
