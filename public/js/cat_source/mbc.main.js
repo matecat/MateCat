@@ -452,7 +452,7 @@ if ( MBC.enabled() )
 
     var renderHistoryWithComments = function( ) {
         var root = $(tpls.historyHasComments);
-        var count = 0 ;
+        var count = 1 ;
 
         for (var i in db.history) {
             if (isNaN(i)) { continue ; }
