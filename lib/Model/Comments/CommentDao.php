@@ -99,14 +99,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       return $arr_result ;
   }
 
-  public function getOpenCommentsInJob( $input ) {
+  public function getCommentsInJob( $input ) {
       $obj = $this->sanitize( $input );
 
       $query = $this->finderQuery() .
           " WHERE id_job = $obj->id_job " .
-          // " AND resolve_date IS NULL " .
-          // " AND ( id_segment < $obj->first_segment OR id_segment > $obj->last_segment ) " .
-          " ORDER BY id_segment ASC, create_date ASC ";
+          " ORDER BY create_date DESC ";
 
       $this->con->query( $query );
 
@@ -116,27 +114,13 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       return $this->_buildResult( $arr_result );
   }
 
-  // public function getCommentsBySegmentsRange( $input ) {
-  //     $obj = $this->sanitize( $input );
-
-  //     $query = $this->finderQuery() .
-  //         " WHERE id_job = $obj->id_job " .
-  //         " AND id_segment >= $obj->first_segment AND id_segment <= $obj->last_segment " .
-  //         " ORDER BY id_segment ASC, create_date ASC ";
-
-  //     $this->con->query( $query );
-
-  //     $arr_result = $this->_fetch_array( $query );
-
-  //     $this->_checkForErrors();
-  //     return $this->_buildResult( $arr_result );
-  // }
-
   private function finderQuery() {
       return "SELECT " .
           " id_job, id_segment, create_date, full_name, resolve_date, " .
           " source_page, message_type, message, email, " .
-          " IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) ) AS thread_id " .
+          " IF ( resolve_date IS NULL, NULL,  " .
+          " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) " .
+          " ) AS thread_id " .
           " FROM " . self::TABLE ;
   }
 

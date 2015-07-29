@@ -35,8 +35,9 @@ if ( MBC.enabled() )
         segments: {},
         history: {},
         refreshHistory : function() {
-            var count = 0,
-                comment ;
+            this.history = {};
+            this.history_count = 0;
+            var comment ;
 
             for (var i in this.segments) {
                 if (isNaN(i)) { continue; }
@@ -45,7 +46,7 @@ if ( MBC.enabled() )
                     comment = this.segments[i][ii] ;
 
                     if ( Number(comment.message_type) == types.comment ) {
-                        count++ ;
+                        this.history_count++ ;
 
                         if (! this.history.hasOwnProperty(i) ) {
                             this.history[i] = [];
@@ -56,8 +57,6 @@ if ( MBC.enabled() )
                     }
                 }
             }
-
-            return count;
         },
 
         resetSegments : function() {
@@ -451,7 +450,7 @@ if ( MBC.enabled() )
         $('.mbc-comment-highlight-history').removeClass('mbc-visible');
     }
 
-    var renderHistoryWithComments = function( count ) {
+    var renderHistoryWithComments = function( ) {
         var root = $(tpls.historyHasComments);
 
         for (var i in db.history) {
@@ -465,11 +464,6 @@ if ( MBC.enabled() )
             viewButton.attr('data-id', sid);
 
             var line = populateCommentTemplate( db.history[i][0] ) ;
-
-            // var number = $( tpls.activeCommentsNumberInHistory);
-            // number.text( db.history[i].length );
-            // line.find('.mbc-comment-info-wrap').append( number );
-
             line.append( viewButton ) ;
 
             root.append(
@@ -480,18 +474,14 @@ if ( MBC.enabled() )
         $('.mbc-history-balloon-has-no-comments').hide();
 
         $('.mbc-history-balloon-outer').append(root);
-
-        $('#mbc-history .mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'mbc-visible' );
     }
 
     var updateHistoryWithLoadedSegments = function() {
-        db.history = {};
-        var count = db.refreshHistory();
-
-        if (count == 0) {
+        db.refreshHistory();
+        if (db.history_count == 0) {
             renderHistoryWithNoComments();
         } else {
-            renderHistoryWithComments( count );
+            renderHistoryWithComments();
         }
     }
 
