@@ -35,28 +35,45 @@ if ( MBC.enabled() )
         segments: {},
         history: {},
         refreshHistory : function() {
-            this.history = {};
+            this.history = [] ;
             this.history_count = 0;
             var comment ;
+            var temp_history = [];
+            var sids = [] ;
 
-            for (var i in this.segments) {
-                if (isNaN(i)) { continue; }
+            for  (var i in this.segments) {
+                if (isNaN(i)) { continue; } // all non-number keys are not segments
 
-                for (var ii = this.segments[i].length - 1; ii >= 0 ; ii--) {
-                    comment = this.segments[i][ii] ;
-
-                    if ( Number(comment.message_type) == types.comment ) {
-                        this.history_count++ ;
-
-                        if (! this.history.hasOwnProperty(i) ) {
-                            this.history[i] = [];
-                            this.history[i].push( comment );
-                        } else {
-                            break ;
-                        }
-                    }
+                for (var ii in this.segments[i]) {
+                    temp_history.push( this.segments[i][ii] );
                 }
             }
+
+            temp_history.sort(function(a, b) {
+                var aDate = a.timestamp ;
+                var bDate = b.timestamp ;
+                return ((aDate > bDate) ? -1 : ((aDate < bDate) ? 1 : 0));
+            });
+
+            function includeInHistory() {
+                return Number( comment.message_type ) == types.comment &&
+                sids.indexOf( comment.id_segment ) === -1
+            }
+
+            for (var i in temp_history) {
+                comment = temp_history[i] ;
+                if ( includeInHistory() ) {
+                    this.history_count++ ;
+                    this.history.push( comment );
+                    sids.push( comment.id_segment );
+                }
+            }
+
+            this.history.sort(function(a, b) {
+                var aDate = a.timestamp ;
+                var bDate = b.timestamp ;
+                return ((aDate > bDate) ? -1 : ((aDate < bDate) ? 1 : 0));
+            });
         },
 
         resetSegments : function() {
@@ -453,27 +470,27 @@ if ( MBC.enabled() )
     var renderHistoryWithComments = function( ) {
         var root = $(tpls.historyHasComments);
         var count = 1 ;
+        var comment ;
 
         for (var i in db.history) {
-            if (isNaN(i)) { continue ; }
+            comment = db.history[i];
 
             var viewButton = $( tpls.historyViewButton );
-            var sid = db.history[i][0].id_segment ;
             viewButton.find('a').text('View thread') ;
-            viewButton.attr('data-id', sid);
+            viewButton.attr('data-id', comment.id_segment);
 
             var segmentLabel = $( tpls.historySegmentLabel );
-            segmentLabel.find('.mbc-comment-segment-number').text( sid );
+            segmentLabel.find('.mbc-comment-segment-number').text( comment.id_segment );
             segmentLabel.closest('.mbc-nth-comment').text( count++ );
 
-            var line = populateCommentTemplate( db.history[i][0] ) ;
+            var line = populateCommentTemplate( comment ) ;
 
             line.append( viewButton ) ;
             line.prepend( segmentLabel );
 
             var wrap = $(tpls.threadWrap).append( line ) ;
 
-            if (db.history[i][0].thread_id == null) {
+            if (comment.thread_id == null) {
                 wrap.addClass('mbc-thread-wrap-active');
             } else {
                 wrap.addClass('mbc-thread-wrap-resolved');

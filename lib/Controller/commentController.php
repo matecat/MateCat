@@ -231,6 +231,7 @@ class commentController extends ajaxController {
             'source_page'    => $this->new_record->source_page,
             'formatted_date' => $this->new_record->getFormattedDate(),
             'thread_id'      => $this->new_record->thread_id,
+            'timestamp'      => (int) $this->new_record->timestamp,
         ) ;
 
         $message = json_encode( array(

@@ -14,6 +14,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
   public $source_page;
   public $message_type;
   public $message;
+  public $timestamp ;
 
   // returned values
   public $formatted_date;
@@ -30,7 +31,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
   }
 
   public function getFormattedDate() {
-    return strftime( '%l:%M %p %e %b %Y', strtotime($this->create_date) );
+    return strftime( '%l:%M %p %e %b %Y UTC', strtotime($this->create_date) );
   }
 
   public function getThreadId() {
