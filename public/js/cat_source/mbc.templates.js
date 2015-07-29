@@ -34,7 +34,7 @@ if ( MBC.enabled() )
 
         historyViewButton: '' +
             ' <div class="mbc-clearfix mbc-view-comment-wrap"> ' +
-            '   Segment <span class="mbc-comment-label mbc-comment-segment-number"></span> ' +
+            '    <span class="mbc-comment-segment-number-label">Segment <span class="mbc-comment-segment-number"></span></span> ' +
             '   <a href="javascript:;" class="mbc-comment-link-btn mbc-view-link mbc-show-comment-btn pull-right">View</a>' +
             ' </div> ',
 

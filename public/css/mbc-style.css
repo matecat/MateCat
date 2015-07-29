@@ -720,10 +720,12 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   margin-bottom: 10px;
 }
 
-.mbc-comment-segment-number {
+.mbc-comment-segment-number-label {
   float: left;
+  font-size: 12px;
   font-weight: bold;
   margin-top: 16px;
+  text-transform: uppercase;
 }
 
 .mbc-history-balloon {
