@@ -49,11 +49,12 @@ if ( MBC.enabled() )
                 }
             }
 
-            temp_history.sort(function(a, b) {
-                var aDate = a.timestamp ;
-                var bDate = b.timestamp ;
-                return ((aDate > bDate) ? -1 : ((aDate < bDate) ? 1 : 0));
-            });
+            function sortByTimestamp(a,b) {
+                if ( ! a.timestamp && b.timestamp ) { throw 'timestamp must be set'; }
+                return ((a.timestamp > b.timestamp) ? -1 : ((a.timestamp < b.timestamp) ? 1 : 0));
+            }
+
+            temp_history.sort( sortByTimestamp );
 
             function includeInHistory() {
                 return Number( comment.message_type ) == types.comment &&
@@ -69,11 +70,7 @@ if ( MBC.enabled() )
                 }
             }
 
-            this.history.sort(function(a, b) {
-                var aDate = a.timestamp ;
-                var bDate = b.timestamp ;
-                return ((aDate > bDate) ? -1 : ((aDate < bDate) ? 1 : 0));
-            });
+            this.history.sort( sortByTimestamp );
         },
 
         resetSegments : function() {
