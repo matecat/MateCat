@@ -104,8 +104,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
       $query = $this->finderQuery() .
           " WHERE id_job = $obj->id_job " .
-          " AND resolve_date IS NULL " .
-          " AND ( id_segment < $obj->first_segment OR id_segment > $obj->last_segment ) " .
+          // " AND resolve_date IS NULL " .
+          // " AND ( id_segment < $obj->first_segment OR id_segment > $obj->last_segment ) " .
           " ORDER BY id_segment ASC, create_date ASC ";
 
       $this->con->query( $query );
@@ -116,21 +116,21 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       return $this->_buildResult( $arr_result );
   }
 
-  public function getCommentsBySegmentsRange( $input ) {
-      $obj = $this->sanitize( $input );
+  // public function getCommentsBySegmentsRange( $input ) {
+  //     $obj = $this->sanitize( $input );
 
-      $query = $this->finderQuery() .
-          " WHERE id_job = $obj->id_job " .
-          " AND id_segment >= $obj->first_segment AND id_segment <= $obj->last_segment " .
-          " ORDER BY id_segment ASC, create_date ASC ";
+  //     $query = $this->finderQuery() .
+  //         " WHERE id_job = $obj->id_job " .
+  //         " AND id_segment >= $obj->first_segment AND id_segment <= $obj->last_segment " .
+  //         " ORDER BY id_segment ASC, create_date ASC ";
 
-      $this->con->query( $query );
+  //     $this->con->query( $query );
 
-      $arr_result = $this->_fetch_array( $query );
+  //     $arr_result = $this->_fetch_array( $query );
 
-      $this->_checkForErrors();
-      return $this->_buildResult( $arr_result );
-  }
+  //     $this->_checkForErrors();
+  //     return $this->_buildResult( $arr_result );
+  // }
 
   private function finderQuery() {
       return "SELECT " .

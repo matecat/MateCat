@@ -31,30 +31,32 @@ if ( MBC.enabled() )
         tpls = MBC.const.tpls ;
     }
 
-    var db = {
+    window.db = {
         segments: {},
         history: {},
         refreshHistory : function() {
             var count = 0,
                 comment ;
+
             for (var i in this.segments) {
                 if (isNaN(i)) { continue; }
 
                 for (var ii = this.segments[i].length - 1; ii >= 0 ; ii--) {
                     comment = this.segments[i][ii] ;
 
-                    if (comment.thread_id == null) {
+                    if ( Number(comment.message_type) == types.comment ) {
+                        count++ ;
+
                         if (! this.history.hasOwnProperty(i) ) {
                             this.history[i] = [];
-                        }
-                        this.history[i].push( comment );
-                        if (Number(comment.message_type) == types.comment) {
-                            count++ ;
+                            this.history[i].push( comment );
+                        } else {
+                            break ;
                         }
                     }
-                    else { break; }
                 }
             }
+
             return count;
         },
 
@@ -464,10 +466,10 @@ if ( MBC.enabled() )
 
             var line = populateCommentTemplate( db.history[i][0] ) ;
 
-            var number = $( tpls.activeCommentsNumberInHistory);
-            number.text( db.history[i].length );
+            // var number = $( tpls.activeCommentsNumberInHistory);
+            // number.text( db.history[i].length );
+            // line.find('.mbc-comment-info-wrap').append( number );
 
-            line.find('.mbc-comment-info-wrap').append( number );
             line.append( viewButton ) ;
 
             root.append(
@@ -570,8 +572,8 @@ if ( MBC.enabled() )
 
     var resetDatabase = function( resp ) {
         db.resetSegments();
-        db.storeSegments( resp.data.entries.current_comments );
-        db.storeSegments( resp.data.entries.open_comments );
+        db.storeSegments( resp.data.entries.comments );
+        // db.storeSegments( resp.data.entries.open_comments );
         refreshUserInfo( resp.data.user ) ;
     }
 

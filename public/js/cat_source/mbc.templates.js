@@ -25,7 +25,6 @@ if ( MBC.enabled() )
         historyIcon : '' +
             '  <li id="mbc-history" title="View comments"> ' +
             '      <span class="icon-bubble2"></span> ' +
-            '      <span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-history hide"></span> ' +
             '  </li>',
 
         historyOuter : '' +

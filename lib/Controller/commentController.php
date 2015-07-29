@@ -83,8 +83,7 @@ class commentController extends ajaxController {
         $commentDao = new Comments_CommentDao( Database::obtain() );
 
         $this->result[ 'data' ][ 'entries' ] = array(
-            'open_comments'    => $commentDao->getOpenCommentsInJob( $this->struct ),
-            'current_comments' => $commentDao->getCommentsBySegmentsRange( $this->struct )
+            'comments'    => $commentDao->getOpenCommentsInJob( $this->struct )
         );
         $this->appendUser();
     }
