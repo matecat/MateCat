@@ -68,11 +68,10 @@
 
 /*
  ******
- Past comment thread wrap status active
+ Past comment thread wrap status active in history balloon
  ******
  */
-.mbc-thread-wrap-active {
-  background: rgba(247,247,247,1); /* #F7F7F7 */
+.mbc-history-balloon .mbc-thread-wrap-active {
   border-bottom: 2px solid #dadada;
 }
 
@@ -82,8 +81,8 @@
  ******
  */
 .mbc-thread-wrap-resolved {
-  background: rgba(124,197,118,.05);
-  border-bottom: 2px solid rgba(124,197,118,.4); /* #7cc576 */
+  background: rgba(124,197,118,.15);
+  border-bottom: 2px solid rgba(124,197,118,.6); /* #7cc576 */
 }
 
 /*
@@ -757,7 +756,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 
 .mbc-history-balloon {
-  background-color: rgba(247,247,247,1); /* #f7f77f */
+  background-color: rgba(247,247,247,1); /* #ffffff */
   padding: 0;
   position: relative;
 }
