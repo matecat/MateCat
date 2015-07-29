@@ -31,10 +31,22 @@ if ( MBC.enabled() )
         tpls = MBC.const.tpls ;
     }
 
-    window.db = {
+    var db = {
         segments: {},
         history: {},
         refreshHistory : function() {
+
+            function sortByTimestamp(a,b) {
+                if ( ! a.timestamp && b.timestamp ) { throw 'timestamp must be set'; }
+                return ((a.timestamp > b.timestamp) ? -1 : ((a.timestamp < b.timestamp) ? 1 : 0));
+            }
+
+            function includeInHistory() {
+                return Number( comment.message_type ) == types.comment &&
+                sids.indexOf( comment.id_segment ) === -1
+            }
+
+
             this.history = [] ;
             this.history_count = 0;
             var comment ;
@@ -49,17 +61,7 @@ if ( MBC.enabled() )
                 }
             }
 
-            function sortByTimestamp(a,b) {
-                if ( ! a.timestamp && b.timestamp ) { throw 'timestamp must be set'; }
-                return ((a.timestamp > b.timestamp) ? -1 : ((a.timestamp < b.timestamp) ? 1 : 0));
-            }
-
             temp_history.sort( sortByTimestamp );
-
-            function includeInHistory() {
-                return Number( comment.message_type ) == types.comment &&
-                sids.indexOf( comment.id_segment ) === -1
-            }
 
             for (var i in temp_history) {
                 comment = temp_history[i] ;
@@ -164,7 +166,7 @@ if ( MBC.enabled() )
     }
 
     var buildFirstCommentHeader = function() {
-        return $(tpls.firstCommentWrap) ; // .append($(tpls.insertCommentHeader));
+        return $(tpls.firstCommentWrap) ;
     }
 
     var popLastCommentHash = function() {
@@ -189,7 +191,7 @@ if ( MBC.enabled() )
 
         if ( comments_obj.active > 0 ) {
             root.append( highlight );
-            highlight.text( comments_obj.active );
+            highlight.text( limitNum( comments_obj.active ) );
         }
 
         root.show();
