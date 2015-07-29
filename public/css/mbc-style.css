@@ -775,7 +775,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 }
 
 .mbc-history-balloon-has-comment {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
 }
 
