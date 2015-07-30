@@ -71,7 +71,6 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-
         $first_seg = $job_data[ 'job_first_segment' ];
         $last_seg  = $job_data[ 'job_last_segment' ];
 
