@@ -36,43 +36,36 @@ if ( MBC.enabled() )
         history: {},
         refreshHistory : function() {
 
-            function sortByTimestamp(a,b) {
-                if ( ! a.timestamp && b.timestamp ) { throw 'timestamp must be set'; }
-                return ((a.timestamp > b.timestamp) ? -1 : ((a.timestamp < b.timestamp) ? 1 : 0));
-            }
-
-            function includeInHistory() {
+            function includeInHistory(comment) {
                 return Number( comment.message_type ) == types.comment &&
                 sids.indexOf( comment.id_segment ) === -1
             }
 
-
             this.history = [] ;
             this.history_count = 0;
             var comment ;
-            var temp_history = [];
             var sids = [] ;
 
             for  (var i in this.segments) {
-                if (isNaN(i)) { continue; } // all non-number keys are not segments
+                if (isNaN(i)) { continue; }
 
-                for (var ii in this.segments[i]) {
-                    temp_history.push( this.segments[i][ii] );
+                var new_array = this.segments[i].slice(); // quick clone
+                new_array.reverse();
+
+                for (var ii in new_array) {
+                    comment = new_array[ii];
+
+                    if ( includeInHistory(comment) ) {
+                        this.history_count++ ;
+                        this.history.push( comment );
+                        sids.push( comment.id_segment );
+                    }
                 }
             }
 
-            temp_history.sort( sortByTimestamp );
-
-            for (var i in temp_history) {
-                comment = temp_history[i] ;
-                if ( includeInHistory() ) {
-                    this.history_count++ ;
-                    this.history.push( comment );
-                    sids.push( comment.id_segment );
-                }
-            }
-
-            this.history.sort( sortByTimestamp );
+            this.history.sort(function(x,y) {
+                return x.timestamp - y.timestamp ;
+            });
         },
 
         resetSegments : function() {
