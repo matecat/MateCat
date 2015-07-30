@@ -521,7 +521,7 @@ class catController extends viewController {
         $this->template->mt_enabled             = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
         $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
         $this->template->build_number           = INIT::$BUILD_NUMBER;
-        $this->template->downloadFileName       = $this->downloadFileName;
+        $this->template->downloadFileName       = urlencode( $this->downloadFileName );
         $this->template->job_not_found          = $this->job_not_found;
         $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
