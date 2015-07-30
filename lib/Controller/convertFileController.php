@@ -46,13 +46,11 @@ class convertFileController extends ajaxController {
 		$this->target_lang = $postInput[ "target_lang" ];
 		$this->segmentation_rule = $postInput[ "segmentation_rule" ];
 
-        if ( $this->segmentation_rule == "" ) {
-            $this->segmentation_rule = null;
-        }
+		if( $this->segmentation_rule == "") $this->segmentation_rule = null;
 
         $this->cookieDir = $_COOKIE[ 'upload_session' ];
-        $this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
-        $this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+		$this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+		$this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
 
 	}
 
