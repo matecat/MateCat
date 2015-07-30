@@ -46,11 +46,13 @@ class convertFileController extends ajaxController {
 		$this->target_lang = $postInput[ "target_lang" ];
 		$this->segmentation_rule = $postInput[ "segmentation_rule" ];
 
-		if( $this->segmentation_rule == "") $this->segmentation_rule = null;
+        if ( $this->segmentation_rule == "" ) {
+            $this->segmentation_rule = null;
+        }
 
         $this->cookieDir = $_COOKIE[ 'upload_session' ];
-		$this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
-		$this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $this->cookieDir;
+        $this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
 
 	}
 
@@ -184,7 +186,7 @@ class convertFileController extends ajaxController {
 				$output_content[ 'out_xliff_name' ] = $file_path . '.out.sdlxliff';
 				$output_content[ 'source' ]         = $this->source_lang;
 				$output_content[ 'target' ]         = $single_language;
-				$output_content[ 'content' ]        = $convertResult[ 'xliffContent' ];
+				$output_content[ 'content' ]        = $convertResult[ 'documentContent' ];
 				$output_content[ 'filename' ]       = $this->file_name;
 				$back_convertResult                 = $converter->convertToOriginal( $output_content );
 				/* try to back convert the file */
@@ -203,8 +205,8 @@ class convertFileController extends ajaxController {
 
 				//store converted content on a temporary path on disk (and off RAM)
 				$xliffPath = tempnam( "/tmp", "MAT_XLF" );
-				file_put_contents($xliffPath,$convertResult[ 'xliffContent' ]);
-				unset($convertResult[ 'xliffContent' ]);
+				file_put_contents($xliffPath,$convertResult[ 'documentContent' ]);
+				unset($convertResult[ 'documentContent' ]);
 
 			/*
 			   store the converted file in the cache

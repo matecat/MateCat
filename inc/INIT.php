@@ -50,17 +50,6 @@ class INIT {
     public static $REFERENCE_REPOSITORY;
     public static $DQF_ENABLED = false;
 
-
-    public static $LONGHORN_SERVER = false;
-    public static $LONGHORN_OFFICE_SERVER_URL;
-    public static $LONGHORN_OFFICE_SERVER_PORT;
-    public static $LONGHORN_ANT_PATH;
-
-    public static $LONGHORN_PIPELINE_PATH;
-    public static $LONGHORN_SEGMENTATION_PATH;
-    public static $LONGHORN_CONFIGURATION_PATH;
-
-
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
@@ -108,7 +97,7 @@ class INIT {
      *  b) Set $CONVERSION_ENABLED to true and implement your own converter
      *
      */
-    public static $CONVERSION_ENABLED = false;
+    public static $CONVERSION_ENABLED = true;
 
     /**
      * The MateCat Version
@@ -170,18 +159,6 @@ class INIT {
 
     }
 
-    public static $LONGHORN_CONVERTIBLE_EXTENSIONS = array(
-            "doc"  => "docx",
-            "dot"  => "docx",
-            "xls"  => "xlsx",
-            "xlt"  => "xlsx",
-            "xlsb" => "xlsx",
-            "xlw"  => "xlsx",
-            "ppt"  => "pptx",
-            "pot"  => "pptx",
-            "pps"  => "pptx"
-    );
-
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
     public static $SUPPORTED_FILE_TYPES = array(
@@ -225,6 +202,12 @@ class INIT {
                     'xhtml' => array( '', '', 'exthtm' ),
                     'xml'   => array( '', '', 'extxml' )
             ),
+            'Scanned Files'                 => array(
+                    'pdf'   => array( '', '', 'extpdf' ),
+                    'jpg'   => array( '', '', 'extimg' ),
+                    'png'   => array( '', '', 'extimg' ),
+                    'tiff'  => array( '', '', 'extimg' )
+            ),
             "Interchange Formats" => array(
                     'xliff'    => array( 'default', '', 'extxif' ),
                     'sdlxliff' => array( 'default', '', 'extxif' ),
@@ -243,7 +226,8 @@ class INIT {
                     'xtg'  => array( '', '', 'extqxp' ),
                     'tag'  => array( '', '', 'exttag' ),
                     'xml'  => array( '', '', 'extxml' ),
-                    'dita' => array( '', '', 'extdit' )
+                    'dita' => array( '', '', 'extdit' ),
+                    'idml' => array( '', '', 'extidml' )
             ),
             "Localization"        => array(
                     'properties'  => array( '', '', 'extpro' ),
