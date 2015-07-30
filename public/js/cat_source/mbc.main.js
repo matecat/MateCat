@@ -198,7 +198,7 @@ if ( MBC.enabled() )
     var renderInputForm = function() {
         var inputForm = $( tpls.inputForm );
         inputForm.find('.mbc-new-message-notification').hide();
-        inputForm.find('.mbc-comment-username-label')
+        inputForm.find('.mbc-comment-username')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() );
 
@@ -206,7 +206,7 @@ if ( MBC.enabled() )
             inputForm.find('.mbc-login-link').addClass('mbc-hide');
         } else {
             inputForm.find('.mbc-login-link').addClass('mbc-visible');
-            inputForm.find('.mbc-comment-username-label')
+            inputForm.find('.mbc-comment-username')
                     .attr('title', 'Click to edit');
         }
         inputForm.find('.mbc-comment-send-btn').hide();
@@ -436,10 +436,10 @@ if ( MBC.enabled() )
     var populateCommentTemplate = function(data) {
         if (Number(data.message_type) == types.resolve) {
             var root = $(tpls.showResolve)
-            root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
+            root.find('.mbc-comment-username').text( htmlDecode(data.full_name) );
         } else {
             var root = $(tpls.showComment) ;
-            root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
+            root.find('.mbc-comment-username').text( htmlDecode(data.full_name) );
             root.find('.mbc-comment-time').text( data.formatted_date );
             root.find('.mbc-comment-body').html( nl2br( data.message ) );
             if ( data.email != null ) {
@@ -577,7 +577,7 @@ if ( MBC.enabled() )
     }
 
     function enableInputForm( outer ) {
-        outer.find('.mbc-post-comment .mbc-comment-username-label')
+        outer.find('.mbc-post-comment .mbc-comment-username')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() ) ;
 

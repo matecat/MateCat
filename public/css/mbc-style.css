@@ -268,20 +268,17 @@ a.mbc-new-message-link:hover {
  ******
  */
 .mbc-resolved-comment {
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .mbc-comment-resolvedby {
-  width: 110px;
+  /*width: 110px;*/
 }
 
 .mbc-comment-resolved-label {
   color: #7cc576; /* per-green line 2350 style.css */
-  float: right;
   font-size: 12px;
   font-weight: bold;
-  margin: -17px 2px 0 0;
-  text-transform: uppercase;
 }
 
 /*
