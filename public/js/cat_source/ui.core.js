@@ -390,26 +390,33 @@ console.log('changeStatus');
             data: {
                 action: 'copyAllSource2Target',
                 id_job: config.job_id,
-                password: config.password
+                pass: config.password
             },
             error: function() {
                 console.log('error');
                 UI.showMessage({
-                    msg: d.errors[0].message
+                    msg: 'Error copying all sources to target. Try again!'
                 });
             },
             success: function(d) {
-                $.cookie('source_copied_to_target-' + config.job_id, '1', { expires: 7 });
-                UI.render({
-                    firstLoad: false,
-                    segmentToOpen: UI.currentSegmentId
-                });
+                if(d.errors.length) {
+                    UI.showMessage({
+                        msg: d.errors[0].message
+                    });
+                } else {
+                    $.cookie('source_copied_to_target-' + config.job_id, '1', { expires: 1 });
+                    UI.render({
+                        firstLoad: false,
+                        segmentToOpen: UI.currentSegmentId
+                    });
+                }
+
             }
         });
     },
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = 0;
-        $.cookie('source_copied_to_target-' + config.job_id, '1', { expires: 7 });
+        $.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
     },
 
     clearMarks: function (str) {
