@@ -65,6 +65,7 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
+        this.consecutiveCopySourceNum = 0;
         var options = {
             segment_id: segment_id,
             status: status,
@@ -363,7 +364,54 @@ console.log('changeStatus');
 
         this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
+        this.consecutiveCopySourceNum++;
+        if(this.consecutiveCopySourceNum > 2) {
+            this.copyAllSources();
+        }
     },
+    copyAllSources: function() {
+        console.log('copy all sources');
+        if(typeof $.cookie('source_copied_to_target-' + config.job_id) == 'undefined') {
+            APP.confirm({
+                name: 'confirmCopyAllSources',
+                okTxt: 'Yes',
+                cancelTxt: 'No',
+                callback: 'continueCopyAllSources',
+                onCancel: 'abortCopyAllSources',
+                msg: "Do you want to copy the source segment into translation for all untranslated segments?"
+            });
+        } else {
+            this.consecutiveCopySourceNum = 0;
+        }
+
+    },
+    continueCopyAllSources: function () {
+        APP.doRequest({
+            data: {
+                action: 'copyAllSource2Target',
+                id_job: config.job_id,
+                password: config.password
+            },
+            error: function() {
+                console.log('error');
+                UI.showMessage({
+                    msg: d.errors[0].message
+                });
+            },
+            success: function(d) {
+                $.cookie('source_copied_to_target-' + config.job_id, '1', { expires: 7 });
+                UI.render({
+                    firstLoad: false,
+                    segmentToOpen: UI.currentSegmentId
+                });
+            }
+        });
+    },
+    abortCopyAllSources: function () {
+        this.consecutiveCopySourceNum = 0;
+        $.cookie('source_copied_to_target-' + config.job_id, '1', { expires: 7 });
+    },
+
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
         return str;
