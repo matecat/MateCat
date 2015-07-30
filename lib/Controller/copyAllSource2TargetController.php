@@ -72,24 +72,34 @@ class copyAllSource2TargetController extends ajaxController {
         $first_seg = $job_data[ 'job_first_segment' ];
         $last_seg  = $job_data[ 'job_last_segment' ];
 
-        $affected_rows = self::copySegmentInTranslation( $first_seg, $last_seg );
+        try {
+            $affected_rows = $this->copySegmentInTranslation( $first_seg, $last_seg );
+        } catch ( Exception $e ) {
 
-        $this->result['data'] = array(
-            'code' => 1,
-            'segments_modified' => $affected_rows
+            Log::doLog( __CLASS__ . " --> Error in copySegmentInTranslation: " . $e->getMessage() );
+            $this->result[ 'errors' ] = array(
+                    'code'    => -4,
+                    'message' => "Error while copying sources in targets."
+            );
+
+            return;
+        }
+        $this->result[ 'data' ] = array(
+                'code'              => 1,
+                'segments_modified' => $affected_rows
         );
     }
 
 
     /**
      * Copies the segments.segment field into segment_translations.translation
-     * and sets the segment status to DRAFT.
-     * This operation is made only for the segments in NEW status
+     * and sets the segment status to <b>DRAFT</b>.
+     * This operation is made only for the segments in <b>NEW</b> status
      *
      * @param $first_seg int
      * @param $last_seg  int
      */
-    private static function copySegmentInTranslation( $first_seg, $last_seg ) {
+    private function copySegmentInTranslation( $first_seg, $last_seg ) {
 
         $query = "update segment_translations st
                     join segments s on st.id_segment = s.id
@@ -101,15 +111,15 @@ class copyAllSource2TargetController extends ajaxController {
         $db = Database::obtain();
 
         $result = $db->query(
-            sprintf(
-                    $query,
-                    $first_seg,
-                    $last_seg
-            )
+                sprintf(
+                        $query,
+                        $first_seg,
+                        $last_seg
+                )
         );
 
-        if( $result !== true){
-            return 0;
+        if ( $result !== true ) {
+            throw new Exception( $db->error, -1 );
         }
 
         return $db->affected_rows;
