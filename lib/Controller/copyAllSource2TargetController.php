@@ -29,8 +29,10 @@ class copyAllSource2TargetController extends ajaxController {
         $this->id_job = $postInput[ 'id_job' ];
         $this->pass   = $postInput[ 'pass' ];
 
+        Log::doLog( "Requested massive copy-source-to-target for job $this->id_job." );
+
         if ( empty( $this->id_job ) ) {
-            Log::doLog( __CLASS__ . " --> Empty id job" );
+            Log::doLog( "Empty id job" );
             $this->result[ 'errors' ] = array(
                     'code'    => -1,
                     'message' => "Empty id job."
@@ -38,7 +40,7 @@ class copyAllSource2TargetController extends ajaxController {
 
         }
         if ( empty( $this->pass ) ) {
-            Log::doLog( __CLASS__ . " --> Empty job password" );
+            Log::doLog( "Empty job password" );
             $this->result[ 'errors' ] = array(
                     'code'    => -2,
                     'message' => "Empty job password."
@@ -60,7 +62,7 @@ class copyAllSource2TargetController extends ajaxController {
         $job_data = getJobData( $this->id_job, $this->pass );
 
         if ( empty( $job_data ) ) {
-            Log::doLog( __CLASS__ . " --> Wrong id_job-password couple. Job not found." );
+            Log::doLog( "Wrong id_job-password couple. Job not found." );
             $this->result[ 'errors' ] = array(
                     'code'    => -3,
                     'message' => "Wrong id_job-password couple. Job not found."
@@ -69,14 +71,18 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
+
         $first_seg = $job_data[ 'job_first_segment' ];
         $last_seg  = $job_data[ 'job_last_segment' ];
 
         try {
+            $segments = $this->getNewSegments( $first_seg, $last_seg );
+            Log::doLog( "SEGS: " . implode( ",", $segments ) );
+
             $affected_rows = $this->copySegmentInTranslation( $first_seg, $last_seg );
         } catch ( Exception $e ) {
 
-            Log::doLog( __CLASS__ . " --> Error in copySegmentInTranslation: " . $e->getMessage() );
+            Log::doLog( "Error in copySegmentInTranslation: " . $e->getMessage() );
             $this->result[ 'errors' ] = array(
                     'code'    => -4,
                     'message' => "Error while copying sources in targets."
@@ -88,6 +94,7 @@ class copyAllSource2TargetController extends ajaxController {
                 'code'              => 1,
                 'segments_modified' => $affected_rows
         );
+        Log::doLog( $this->result[ 'data' ] );
     }
 
 
@@ -104,7 +111,8 @@ class copyAllSource2TargetController extends ajaxController {
         $query = "update segment_translations st
                     join segments s on st.id_segment = s.id
                     set st.translation = s.segment,
-                    st.status = 'DRAFT'
+                    st.status = 'DRAFT',
+                    st.translation_date = now()
                     where st.status = 'NEW'
                     and st.id_segment between %d and %d";
 
@@ -123,6 +131,36 @@ class copyAllSource2TargetController extends ajaxController {
         }
 
         return $db->affected_rows;
+    }
+
+    /**
+     * Copies the segments.segment field into segment_translations.translation
+     * and sets the segment status to <b>DRAFT</b>.
+     * This operation is made only for the segments in <b>NEW</b> status
+     *
+     * @param $first_seg int
+     * @param $last_seg  int
+     */
+    private function getNewSegments( $first_seg, $last_seg ) {
+
+        $query = "select s.id from segment_translations st
+                    join segments s on st.id_segment = s.id
+                    where st.status = 'NEW'
+                    and st.id_segment between %d and %d";
+
+        $db = Database::obtain();
+
+        $result = $db->fetch_array(
+                sprintf(
+                        $query,
+                        $first_seg,
+                        $last_seg
+                )
+        );
+
+        $result = array_column($result, 'id');
+
+        return $result;
     }
 
 }
