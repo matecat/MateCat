@@ -150,15 +150,19 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             $parsed = json_decode( $rawValue['result'], true );
             if (!empty($parsed['ErrorMessage'])) {
                 $message = sprintf("%s (%s)", $parsed['ErrorMessage'], $parsed['ErrorCode']);
-                $code = int_val($parsed['ErrorCode']);
+                $code = intval($parsed['ErrorCode']);
                 $decoded = array(
                     'error' => array(
-                            'code'    $code,
+                            'code' => $code,
                             'message' => $message
                     )
+                );
             }
             else{
                 $decoded = array( 'error' => $rawValue['error']);
+                if (strpos($decoded['error'], 'Server Not Available (http status 401)') !== false) {
+-                   $decoded['error']['message'] = 'Invalid Client ID.';
+                }
             }
         }
 
