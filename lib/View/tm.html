@@ -492,10 +492,36 @@
     </template>
 
     <template id="mt-provider-letsmt-msg">
+        <style>
+            .msg-button-container .continuebtn {
+                width: 122px!important;
+                display: inline-block!important;
+            }
+            .msg-button-container {
+                text-align: center!important;
+            }
+            @media screen and (min-width: 901px) {
+                .push-left {
+                    margin-left: 15px!important;
+                }
+                .push-right {
+                    margin-right: 15px!important;
+                }
+            }
+
+            @media screen and (max-width: 900px) {
+                .push-left, .push-right {
+                    margin: 0px 0px 10px 0px!important;
+                }
+            }
+        </style>
         <p><strong>Tilde</strong> specializes in developing custom MT systems for complex languages like the Nordic, Baltic, Russian, and Central and Eastern European languages.</p>
         <p>In order to boost translation quality and accuracy, our MT systems can fully integrate your domain-specific terminology in the right inflectional forms.</p>
         <p>Contact Tilde MT to get a custom MT system for your language pair and domain.</p>
-        <a href="https://www.letsmt.eu" target="_blank" class="continuebtn btn-ok">Tilde MT</a>
+        <div class="msg-button-container">
+            <a href="https://www.letsmt.eu" target="_blank" class="continuebtn btn-ok push-right">Tilde MT</a>
+            <a href="https://readymtdevlogic.tilde.lv/Account/LoginApp?Client=matecat" target="_blank" class="continuebtn btn-ok push-left">Get my Client ID</a>
+        </div>
     </template>
     
     <template id="mt-provider-letsmt-config-fields">
