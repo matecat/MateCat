@@ -97,7 +97,7 @@ APP = {
             onConfirm: options.callback,
 			caller: options.caller,
             onCancel: options.onCancel,
-            title: 'Confirmation required',
+            title: (options.title || 'Confirmation required'),
             cancelTxt: options.cancelTxt,
             okTxt: options.okTxt,
             content: options.msg,
