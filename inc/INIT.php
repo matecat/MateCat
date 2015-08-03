@@ -50,6 +50,9 @@ class INIT {
     public static $REFERENCE_REPOSITORY;
     public static $DQF_ENABLED = false;
 
+    public static $CONVERTER_SERVER_ADDRESS;
+    public static $CONVERTER_SERVER_PORT;
+
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
@@ -97,7 +100,7 @@ class INIT {
      *  b) Set $CONVERSION_ENABLED to true and implement your own converter
      *
      */
-    public static $CONVERSION_ENABLED = true;
+    public static $CONVERSION_ENABLED = false;
 
     /**
      * The MateCat Version
@@ -226,8 +229,7 @@ class INIT {
                     'xtg'  => array( '', '', 'extqxp' ),
                     'tag'  => array( '', '', 'exttag' ),
                     'xml'  => array( '', '', 'extxml' ),
-                    'dita' => array( '', '', 'extdit' ),
-                    'idml' => array( '', '', 'extidml' )
+                    'dita' => array( '', '', 'extdit' )
             ),
             "Localization"        => array(
                     'properties'  => array( '', '', 'extpro' ),

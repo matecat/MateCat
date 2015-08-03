@@ -77,6 +77,10 @@ class FileFormatConverter {
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
+        // Load matecat converter IP and port
+        $this->ip = INIT::$CONVERTER_SERVER_ADDRESS;
+        $this->port = INIT::$CONVERTER_SERVER_PORT;
+
     }
 
     /*
@@ -344,9 +348,6 @@ class FileFormatConverter {
         //    $this->ip = $chosen_by_user_machine;
         //}
 
-        $this->ip = "10.3.15.189";
-        $this->port = "8082";
-
         $sourceLocale = $this->lang_handler->getLangRegionCode( $source_lang );
         $targetLocale = $this->lang_handler->getLangRegionCode( $target_lang );
 
@@ -417,9 +418,6 @@ class FileFormatConverter {
             $this->ip = $chosen_by_user_machine;
         }
         */
-
-        $this->ip = "10.3.15.189";
-        $this->port = "8082";
 
         $url = "http://{$this->ip}:{$this->port}/".self::fromXliffFunction;
 
@@ -496,9 +494,6 @@ class FileFormatConverter {
             //} else {
             //    $this->ip = $chosen_by_user_machine;
             //}
-
-            $this->ip = "10.3.15.189";
-            $this->port = "8082";
 
             $url = "http://{$this->ip}:{$this->port}/".self::fromXliffFunction;
 
