@@ -203,7 +203,10 @@ class INIT {
                     'htm'   => array( '', '', 'exthtm' ),
                     'html'  => array( '', '', 'exthtm' ),
                     'xhtml' => array( '', '', 'exthtm' ),
-                    'xml'   => array( '', '', 'extxml' )
+                    'xml'   => array( '', '', 'extxml' ),
+                    'php'   => array( '', '', 'extphp' ),
+                    'json'  => array( '', '', 'extjson'),
+                    'yml'   => array( '', '', 'extyml' )
             ),
             'Scanned Files'                 => array(
                     'pdf'   => array( '', '', 'extpdf' ),
@@ -236,6 +239,7 @@ class INIT {
                     'rc'          => array( '', '', 'extrcc' ),
                     'resx'        => array( '', '', 'extres' ),
                     'xml'         => array( '', '', 'extxml' ),
+                    'txml'        => array( '', '', 'extxml' ),
                     'dita'        => array( '', '', 'extdit' ),
                     'sgm'         => array( '', '', 'extsgm' ),
                     'sgml'        => array( '', '', 'extsgm' ),
