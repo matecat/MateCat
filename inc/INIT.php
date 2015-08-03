@@ -89,6 +89,14 @@ class INIT {
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
 
     /**
+     * This interval is needed for massive copy-source-to-target feature. <br>
+     * If user triggers that feature 3 times within this interval (in seconds),
+     * a popup appears asking him if he wants to trigger the massive function.
+     * @var int Interval in seconds
+     */
+    public static $COPY_SOURCE_INTERVAL = 300;
+
+    /**
      * Default Matecat user agent string
      */
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
