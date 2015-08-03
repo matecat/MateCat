@@ -378,6 +378,7 @@ console.log('changeStatus');
                 cancelTxt: 'No',
                 callback: 'continueCopyAllSources',
                 onCancel: 'abortCopyAllSources',
+                closeOnSuccess: true,
                 msg: "Do you want to copy the source segment into translation for all untranslated segments?"
             });
         } else {
@@ -386,6 +387,9 @@ console.log('changeStatus');
 
     },
     continueCopyAllSources: function () {
+        var mod = $('.modal .popup');
+        mod.find('.btn-ok, .btn-cancel').remove();
+        mod.find('p').text('Copying...');
         APP.doRequest({
             data: {
                 action: 'copyAllSource2Target',
@@ -394,17 +398,20 @@ console.log('changeStatus');
             },
             error: function() {
                 console.log('error');
+                APP.closePopup();
                 UI.showMessage({
                     msg: 'Error copying all sources to target. Try again!'
                 });
             },
             success: function(d) {
                 if(d.errors.length) {
+                    APP.closePopup();
                     UI.showMessage({
                         msg: d.errors[0].message
                     });
                 } else {
                     $.cookie('source_copied_to_target-' + config.job_id, '1', { expires: 1 });
+                    APP.closePopup();
                     UI.render({
                         firstLoad: false,
                         segmentToOpen: UI.currentSegmentId
