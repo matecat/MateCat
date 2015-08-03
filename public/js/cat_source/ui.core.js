@@ -389,7 +389,7 @@ console.log('changeStatus');
     continueCopyAllSources: function () {
         var mod = $('.modal .popup');
         mod.find('.btn-ok, .btn-cancel').remove();
-        mod.find('p').text('Copying...');
+        mod.find('p').addClass('waiting').text('Copying...');
         APP.doRequest({
             data: {
                 action: 'copyAllSource2Target',

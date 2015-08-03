@@ -870,6 +870,10 @@ color:#333;}
 	    background-color: #fff;
 }
 
+    .modal .popup p.waiting {
+        background: url(../img/loading.gif) 38% 3px no-repeat !important;
+        background-size: 24px !important;
+    }
 
 .slide-panel {
     height: 100%!important;
