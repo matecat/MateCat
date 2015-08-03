@@ -65,7 +65,7 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
-        this.consecutiveCopySourceNum = 0;
+//        this.consecutiveCopySourceNum = [];
         var options = {
             segment_id: segment_id,
             status: status,
@@ -364,8 +364,15 @@ console.log('changeStatus');
 
         this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
-        this.consecutiveCopySourceNum++;
-        if(this.consecutiveCopySourceNum > 2) {
+        var alreadyCopied = false;
+        $.each(UI.consecutiveCopySourceNum, function (index) {
+            if(this == UI.currentSegmentId) alreadyCopied = true;
+        });
+        if(!alreadyCopied) {
+            this.consecutiveCopySourceNum.push(this.currentSegmentId);
+        }
+//        this.consecutiveCopySourceNum++;
+        if(this.consecutiveCopySourceNum.length > 2) {
             this.copyAllSources();
         }
     },
@@ -382,7 +389,7 @@ console.log('changeStatus');
                 msg: "Do you want to copy the source segment into translation for all untranslated segments?"
             });
         } else {
-            this.consecutiveCopySourceNum = 0;
+            this.consecutiveCopySourceNum = [];
         }
 
     },
@@ -422,7 +429,7 @@ console.log('changeStatus');
         });
     },
     abortCopyAllSources: function () {
-        this.consecutiveCopySourceNum = 0;
+        this.consecutiveCopySourceNum = [];
         $.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
     },
 

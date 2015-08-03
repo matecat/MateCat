@@ -71,7 +71,10 @@ $.extend(UI, {
         this.executingSetContributionMT = false;
         this.localStorageArray = [];
         this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
-        this.consecutiveCopySourceNum = 0;
+        this.consecutiveCopySourceNum = [];
+        setInterval(function() {
+            UI.consecutiveCopySourceNum = [];
+        }, config.copySourceInterval*1000);
 
         if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
