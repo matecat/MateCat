@@ -240,7 +240,8 @@ class INIT {
                     'sgm'         => array( '', '', 'extsgm' ),
                     'sgml'        => array( '', '', 'extsgm' ),
                     'Android xml' => array( '', '', 'extxml' ),
-                    'strings'     => array( '', '', 'extstr' )
+                    'strings'     => array( '', '', 'extstr' ),
+                    'po'          => array( '', '', 'extpo'  )
             )
     );
 
