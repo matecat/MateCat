@@ -157,7 +157,14 @@ class copyAllSource2TargetController extends ajaxController {
                 )
         );
 
-        $result = array_column($result, 'id');
+
+        //Array_column() is not supported on PHP 5.4, so i'll rewrite it
+        if ( !function_exists( 'array_column' ) ) {
+            $result = Utils::array_column( $result, 'id' );
+        }
+        else {
+            $result = array_column( $result, 'id' );
+        }
 
         return $result;
     }
