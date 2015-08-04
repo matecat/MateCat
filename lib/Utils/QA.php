@@ -935,14 +935,8 @@ class QA {
      *
      */
     protected function _resetDOMMaps() {
-        $this->srcDomMap = array(
-                'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(),
-                'DOMText'   => array()
-        );
-        $this->trgDomMap = array(
-                'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(),
-                'DOMText'   => array()
-        );
+        $this->srcDomMap = array( 'elemCount' => 0, 'x' => array(), 'bx' => array(), 'ex' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
+        $this->trgDomMap = array( 'elemCount' => 0, 'x' => array(), 'bx' => array(), 'ex' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
     }
 
     /**
@@ -1294,12 +1288,14 @@ class QA {
         $targetNumDiff = count( $this->trgDomMap[ 'DOMElement' ] ) - count( $this->srcDomMap[ 'DOMElement' ] );
         $diffTagG      = count( @$this->trgDomMap[ 'g' ] ) - count( @$this->srcDomMap[ 'g' ] );
         $diffTagX      = count( @$this->trgDomMap[ 'x' ] ) - count( @$this->srcDomMap[ 'x' ] );
+		$diffTagBX     = count(@$this->trgDomMap['bx']) - count(@$this->srcDomMap['bx']);
+		$diffTagEX     = count(@$this->trgDomMap['ex']) - count(@$this->srcDomMap['ex']);
 
         //there are the same number of tags in source and target
         if ( $targetNumDiff == 0 && !empty( $this->srcDomMap[ 'refID' ] ) ) {
 
             //if tags are in exact number
-            if ( $diffTagG == 0 && $diffTagX == 0 ) {
+            if( $diffTagG == 0 && $diffTagX == 0 && $diffTagBX == 0 && $diffTagEX == 0 ){
 
                 //Steps:
 
@@ -1313,6 +1309,16 @@ class QA {
                     $pattern[]     = '|<x id=["\']{1}(' . $tagID . ')["\']{1} />|ui';
                     $replacement[] = '<x id="###' . $this->srcDomMap[ 'x' ][ $pos ] . '###" />';
                 }
+
+				foreach( $this->trgDomMap['bx'] as $pos => $tagID ){
+					$pattern[] = '|<bx id=["\']{1}(' . $tagID . ')["\']{1} />|ui';
+					$replacement[] = '<bx id="###' . $this->srcDomMap['bx'][$pos] . '###" />';
+				}
+
+				foreach( $this->trgDomMap['ex'] as $pos => $tagID ){
+					$pattern[] = '|<ex id=["\']{1}(' . $tagID . ')["\']{1} />|ui';
+					$replacement[] = '<ex id="###' . $this->srcDomMap['ex'][$pos] . '###" />';
+				}
 
                 $result = preg_replace( $pattern, $replacement, $this->target_seg, 1 );
 
@@ -1390,7 +1396,7 @@ class QA {
 
         foreach ( $this->srcDomMap[ 'DOMElement' ] as $srcTagReference ) {
 
-            if ( $srcTagReference[ 'name' ] == 'x' ) {
+            if( $srcTagReference['name'] == 'x' || $srcTagReference['name'] == 'bx' || $srcTagReference['name'] == 'ex' ){
                 continue;
             }
 
