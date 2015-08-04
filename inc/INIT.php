@@ -196,7 +196,7 @@ class INIT {
                     'pptx' => array( '', '', 'extppt' ),
                     'odp'  => array( '', '', 'extppt' ),
                     'sxi'  => array( '', '', 'extppt' ),
-                    'xml'  => array( '', '', 'extxml' ),
+                    'xml'  => array( '', '', 'extxml' )
                 //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
