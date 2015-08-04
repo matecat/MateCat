@@ -331,7 +331,8 @@ if ( MBC.enabled() )
         var comments = db.getCommentsBySegment( segment.absoluteId );
         var root = $('.mbc-comment-balloon-outer');
         $(root).find('.mbc-comments-wrap').empty();
-        populateCommentsWrap(root, comments);
+        populateWithComments(root, comments);
+        //populateCommentsWrap(root, comments);
     }
 
     var appendReceivedMessage = function(el) {
