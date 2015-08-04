@@ -2162,6 +2162,20 @@ textarea, input, .editarea, .search-editarea, select  {
 .addline-suggestion{display:none;float:left;height:50px;background:#fff}
 .add-ul{background:#efefef !important}
 
+/*engine errror messages*/
+.engine-errrors summary {
+    text-align: left;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.engine-errrors summary:focus {
+    outline: 0;
+}
+
+.engine-errrors .error {
+    color: red;
+}
 
 /*status*/
 .status-container .status{width:11px;display:block;position:absolute;height:100%;padding:0;background:#dddedf;right:0;border-left:1px solid #ccc;	margin:0px 0px 0px 0 !Important;z-index:99;border-bottom:1px solid #ccc	}

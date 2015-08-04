@@ -225,6 +225,8 @@ class getContributionController extends ajaxController {
             $mt_result = $mt->get( $config );
 
             if ( isset( $mt_result['error']['code'] ) ) {
+                $mt_result['error']['created_by_type'] = 'MT';
+                $this->result[ 'errors' ][] = $mt_result['error'];
                 $mt_result = false;
             }
 
@@ -333,7 +335,6 @@ class getContributionController extends ajaxController {
         }
 
         $this->result[ 'data' ][ 'matches' ] = $matches;
-
     }
 
     private function setSuggestionReport( $matches ) {

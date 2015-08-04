@@ -440,6 +440,7 @@ console.log('changeStatus');
 					'</ul>' +
 					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
+                                        '       <details class="engine-errrors"><summary>Errors</summary></details>' +
 					'</div>' +
 					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
 					'	<div class="overflow">' +
@@ -3221,13 +3222,13 @@ console.log('changeStatus');
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
 				console.log('operation: ', operation);
-                UI.blockUIForNoConnection();
-//				UI.failedConnection(0, 'no');
+                                UI.blockUIForNoConnection();
+        //				UI.failedConnection(0, 'no');
 			}
-            if (this.code == '-101') {
-                console.log('ERROR -101');
-                UI.blockUIForNoConnection();
-            }
+                        if (this.code == '-101') {
+                            console.log('ERROR -101');
+                            UI.blockUIForNoConnection();
+                        }
 		});
 	},
 	reloadPage: function() {
@@ -6245,6 +6246,7 @@ $.extend(UI, {
 		} else {
 			$(".sbm > .matches", segment).hide();
 		}
+                this.renderContributionErrors(d.errors, segment);
 
     },
 	renderContributions: function(d, segment) {
@@ -6373,6 +6375,37 @@ $.extend(UI, {
             }
 		}
 	},
+        renderContributionErrors: function(errors, segment) {
+            $('.tab.sub-editor.matches details', segment).children(':not(summary)').remove();
+            $('.tab.sub-editor.matches details', segment).hide();
+            $.each(errors, function(){
+                var percentClass = "";
+                var messageClass = "";
+                if(this.code == '-1001') {
+                    console.log('ERROR -1001');
+                    percentClass = "per-red";
+                    messageClass = 'error'
+                }
+                else if (this.code == '-1002') {
+                    console.log('WARNING -1002');
+                    percentClass = "per-orange";
+                    messageClass = 'warning'
+                }
+                else {
+                    return;
+                }
+                debugger;
+                $('.tab.sub-editor.matches details', segment).show();
+                var percentText = this.created_by_type;
+                var suggestion_info = '';
+                var cb = this.created_by;
+
+                $('.tab.sub-editor.matches details', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
+                        '<span class="engine-error-message ' + messageClass + '">' + this.message +
+                        '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText +
+                        '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
+        },
 	setContribution: function(segment_id, status, byStatus) {
 //        console.log('setContribution');
         this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
