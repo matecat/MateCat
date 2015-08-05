@@ -6382,17 +6382,20 @@ $.extend(UI, {
                 var percentClass = "";
                 var messageClass = "";
                 var imgClass = "";
+                var  messageTypeText = '';
                 if(this.code == '-1001') {
                     console.log('ERROR -1001');
                     percentClass = "per-red";
                     messageClass = 'error';
                     imgClass = 'error-img';
+                    messageTypeText = 'Error: ';
                 }
                 else if (this.code == '-1002') {
                     console.log('WARNING -1002');
                     percentClass = "per-orange";
                     messageClass = 'warning';
                     imgClass = 'warning-img';
+                    messageTypeText = 'Warning: ';
                 }
                 else {
                     return;
@@ -6404,7 +6407,7 @@ $.extend(UI, {
                 var cb = this.created_by;
 
                 $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
-                        '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + this.message +
+                        '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
                         '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText +
                         '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });

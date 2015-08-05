@@ -151,8 +151,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             if (!empty($parsed['ErrorMessage'])) {
                 $mt_code = intval($parsed['ErrorCode']);
                 $code = $mt_code == 21 ? '-1002' : '-1001'; // if engine is waking up render message as a warning (code -1002) else as error (code -1001).
-                $msg_type = $mt_code == 21 ? 'Warning' : 'Error';
-                $message = sprintf("%s (%s): %s", $msg_type, $parsed['ErrorCode'], $parsed['ErrorMessage']);
+                $message = sprintf("(%s) %s", $parsed['ErrorCode'], $parsed['ErrorMessage']);
                 $decoded = array(
                     'error' => array(
                             'code' => $code,
