@@ -440,7 +440,7 @@ console.log('changeStatus');
 					'</ul>' +
 					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
-                                        '       <details class="engine-errrors"><summary>Errors</summary></details>' +
+                                        '       <div class="engine-errors"></div>' +
 					'</div>' +
 					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
 					'	<div class="overflow">' +
@@ -6376,8 +6376,8 @@ $.extend(UI, {
 		}
 	},
         renderContributionErrors: function(errors, segment) {
-            $('.tab.sub-editor.matches details', segment).children(':not(summary)').remove();
-            $('.tab.sub-editor.matches details', segment).hide();
+            $('.tab.sub-editor.matches .engine-errors', segment).empty();
+            $('.tab.sub-editor.matches .engine-errors', segment).hide();
             $.each(errors, function(){
                 var percentClass = "";
                 var messageClass = "";
@@ -6395,12 +6395,12 @@ $.extend(UI, {
                     return;
                 }
                 debugger;
-                $('.tab.sub-editor.matches details', segment).show();
+                $('.tab.sub-editor.matches .engine-errors', segment).show();
                 var percentText = this.created_by_type;
                 var suggestion_info = '';
                 var cb = this.created_by;
 
-                $('.tab.sub-editor.matches details', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
+                $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
                         '<span class="engine-error-message ' + messageClass + '">' + this.message +
                         '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText +
                         '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
