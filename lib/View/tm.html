@@ -475,6 +475,12 @@
     <!-- fine blocco moses -->
     <!-- sakam letsmt bloku -->
     <template id="mt-provider-letsmt-fields">
+        <style>
+            .clientid-link {
+                float: right;
+                margin-top: -10px;
+            }
+        </style>
         <p class="required pull-left"><sup>*</sup> Required fields.</p>
         <br class="clear" />
         <span class="mt-error-key">Error message</span>
@@ -485,6 +491,8 @@
                 <label>Client ID<sup>*</sup></label>
                 <input class="required" data-field-name="client_id" placeholder="here" />
             </div>
+            <a href="https://readymtdevlogic.tilde.lv/Account/LoginApp?Client=matecat" target="_blank" class="clientid-link">Get my Client ID</a>
+            <br class="clear" />
         </div>
         <script>
             $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Continue');
@@ -519,8 +527,7 @@
         <p>In order to boost translation quality and accuracy, our MT systems can fully integrate your domain-specific terminology in the right inflectional forms.</p>
         <p>Contact Tilde MT to get a custom MT system for your language pair and domain.</p>
         <div class="msg-button-container">
-            <a href="https://www.letsmt.eu" target="_blank" class="continuebtn btn-ok push-right">Tilde MT</a>
-            <a href="https://readymtdevlogic.tilde.lv/Account/LoginApp?Client=matecat" target="_blank" class="continuebtn btn-ok push-left">Get my Client ID</a>
+            <a href="https://www.letsmt.eu" target="_blank" class="continuebtn btn-ok">Tilde MT</a>
         </div>
     </template>
     
@@ -778,7 +785,7 @@
             <div id="use_qe_field" class="provider-field pull-left">
                 <label>QE beta</label>
                 <input type="checkbox" data-field-name="use_qe" onchange="toggleQEEnabled(this)" />
-                <a href="http://letsmt.eu" target="_blank"  class="info" title="You will see a translation only for segments with a QE (Quality Estimation) beta score above the selected figure."> </a>
+                <a href="http://www.tilde.com/mt/tools/matecat" target="_blank"  class="info" title="You will see a translation only for segments with a QE (Quality Estimation) beta score above the selected figure."> </a>
             </div>
             <div id="minimum_qe_field" class="provider-field pull-right disabled">
                 <label class="lighttext">Don't show translation if its QE score is below</label>
