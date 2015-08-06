@@ -1124,6 +1124,12 @@ text-align: right;
 margin-left: 10px;
 }
 
+.modal .popup-confirm p,
+.modal .popup-alert p
+{
+    padding: 0 20px;
+}
+
 .popup .outer:hover
 {
 	background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
