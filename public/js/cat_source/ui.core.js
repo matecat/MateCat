@@ -387,7 +387,7 @@ console.log('changeStatus');
                 callback: 'continueCopyAllSources',
                 onCancel: 'abortCopyAllSources',
                 closeOnSuccess: true,
-                msg: "Would you like to copy source to target <br />for all new segments?<br/><br/>This action cannot be undone."
+                msg: "Copy source to target for all new segments?<br/>This action cannot be undone."
             });
         } else {
             this.consecutiveCopySourceNum = [];
