@@ -139,7 +139,10 @@ class getWarningController extends ajaxController {
         $QA->performConsistencyCheck();
         
         if(is_array($this->__postInput->glossaryList) && !empty($this->__postInput->glossaryList)) {
-            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
+            /**
+             * FIXME: temporarily disabled due to a bug.
+             */
+//            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
         }
 
         if ( $QA->thereAreNotices() ) {
