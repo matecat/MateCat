@@ -364,17 +364,20 @@ console.log('changeStatus');
 
         this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
-        var alreadyCopied = false;
-        $.each(UI.consecutiveCopySourceNum, function (index) {
-            if(this == UI.currentSegmentId) alreadyCopied = true;
-        });
-        if(!alreadyCopied) {
-            this.consecutiveCopySourceNum.push(this.currentSegmentId);
-        }
+        if(!config.isReview) {
+            var alreadyCopied = false;
+            $.each(UI.consecutiveCopySourceNum, function (index) {
+                if(this == UI.currentSegmentId) alreadyCopied = true;
+            });
+            if(!alreadyCopied) {
+                this.consecutiveCopySourceNum.push(this.currentSegmentId);
+            }
 //        this.consecutiveCopySourceNum++;
-        if(this.consecutiveCopySourceNum.length > 2) {
-            this.copyAllSources();
+            if(this.consecutiveCopySourceNum.length > 2) {
+                this.copyAllSources();
+            }
         }
+
     },
     copyAllSources: function() {
         console.log('copy all sources');
