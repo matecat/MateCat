@@ -4,7 +4,7 @@
 UI = null;
 
 UI = {
-	toggleFileMenu: function() {console.log('ddd');
+	toggleFileMenu: function() {
         jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
 			return false;
@@ -387,7 +387,7 @@ console.log('changeStatus');
                 callback: 'continueCopyAllSources',
                 onCancel: 'abortCopyAllSources',
                 closeOnSuccess: true,
-                msg: "Do you want to copy the source into translation <br />for all new segments?"
+                msg: "Would you like to copy source to target <br />for all new segments?<br/><br/>This action cannot be undone."
             });
         } else {
             this.consecutiveCopySourceNum = [];
@@ -432,7 +432,7 @@ console.log('changeStatus');
     },
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
-        $.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
+        //$.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
     },
 
     clearMarks: function (str) {
