@@ -109,10 +109,13 @@ class copyAllSource2TargetController extends ajaxController {
 
         $query = "update segment_translations st
                     join segments s on st.id_segment = s.id
+                    join jobs j on st.id_job = j.id
                     set st.translation = s.segment,
                     st.status = 'DRAFT',
                     st.translation_date = now()
                     where st.status = 'NEW'
+                    and j.id = %d
+                    and j.password = '%s'
                     and st.id_segment between %d and %d";
 
         $db = Database::obtain();
@@ -120,6 +123,8 @@ class copyAllSource2TargetController extends ajaxController {
         $result = $db->query(
                 sprintf(
                         $query,
+                        $this->id_job,
+                        $this->pass,
                         $first_seg,
                         $last_seg
                 )
@@ -144,7 +149,10 @@ class copyAllSource2TargetController extends ajaxController {
 
         $query = "select s.id from segment_translations st
                     join segments s on st.id_segment = s.id
+                    join jobs j on st.id_job = j.id
                     where st.status = 'NEW'
+                    and j.id = %d
+                    and j.password = '%s'
                     and st.id_segment between %d and %d";
 
         $db = Database::obtain();
@@ -152,6 +160,8 @@ class copyAllSource2TargetController extends ajaxController {
         $result = $db->fetch_array(
                 sprintf(
                         $query,
+                        $this->id_job,
+                        $this->pass,
                         $first_seg,
                         $last_seg
                 )

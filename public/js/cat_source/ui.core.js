@@ -381,7 +381,8 @@ console.log('changeStatus');
     },
     copyAllSources: function() {
         console.log('copy all sources');
-        if(typeof $.cookie('source_copied_to_target-' + config.job_id) == 'undefined') {
+        debugger;
+        if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
             APP.confirm({
                 title: 'Copy all new segments',
                 name: 'confirmCopyAllSources',
@@ -421,7 +422,7 @@ console.log('changeStatus');
                         msg: d.errors[0].message
                     });
                 } else {
-                    $.cookie('source_copied_to_target-' + config.job_id, '1', { expires:1 });
+                    $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
                     $('#outer').empty();
                     UI.render({
