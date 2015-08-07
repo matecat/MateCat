@@ -486,8 +486,9 @@ if ( MBC.enabled() )
             viewButton.attr('data-id', comment.id_segment);
 
             var segmentLabel = $( tpls.historySegmentLabel );
+
             segmentLabel.find('.mbc-comment-segment-number').text( comment.id_segment );
-            segmentLabel.closest('.mbc-nth-comment').text( count++ );
+            //segmentLabel.closest('.mbc-nth-comment').text( count++ );
 
             var line = populateCommentTemplate( comment ) ;
 

@@ -38,7 +38,7 @@ if ( MBC.enabled() )
             ' </div> ',
 
         historySegmentLabel: '' +
-            ' <span class="mbc-nth-comment mbc-nth-comment-label"></span><span class="mbc-comment-segment-number-label">Segment <span class="mbc-comment-segment-number"></span></span> ',
+            ' <span class="mbc-nth-comment mbc-nth-comment-label">Segment <span class="mbc-comment-segment-number"></span></span> ',
 
         historyHasComments: '' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-comment"> ' +
