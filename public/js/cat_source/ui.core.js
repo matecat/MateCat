@@ -381,7 +381,6 @@ console.log('changeStatus');
     },
     copyAllSources: function() {
         console.log('copy all sources');
-        debugger;
         if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
             APP.confirm({
                 title: 'Copy all new segments',

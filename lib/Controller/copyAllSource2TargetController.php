@@ -11,8 +11,12 @@ class copyAllSource2TargetController extends ajaxController {
     private $id_job;
     private $pass;
 
+    private static $errorMap;
+
     protected function __construct() {
         parent::__construct();
+
+        $this->setErrorMap();
 
         $filterArgs = array(
                 'id_job' => array(
@@ -32,19 +36,13 @@ class copyAllSource2TargetController extends ajaxController {
         Log::doLog( "Requested massive copy-source-to-target for job $this->id_job." );
 
         if ( empty( $this->id_job ) ) {
-            Log::doLog( "Empty id job" );
-            $this->result[ 'errors' ][] = array(
-                    'code'    => -1,
-                    'message' => "Empty id job."
-            );
+            $errorCode = -1;
+            $this->addError( $errorCode );
 
         }
         if ( empty( $this->pass ) ) {
-            Log::doLog( "Empty job password" );
-            $this->result[ 'errors' ][] = array(
-                    'code'    => -2,
-                    'message' => "Empty job password."
-            );
+            $errorCode = -2;
+            $this->addError( $errorCode );
         }
     }
 
@@ -62,11 +60,8 @@ class copyAllSource2TargetController extends ajaxController {
         $job_data = getJobData( $this->id_job, $this->pass );
 
         if ( empty( $job_data ) ) {
-            Log::doLog( "Wrong id_job-password couple. Job not found." );
-            $this->result[ 'errors' ][] = array(
-                    'code'    => -3,
-                    'message' => "Wrong [id_job, password] couple. Job not found."
-            );
+            $errorCode = -3;
+            $this->addError( $errorCode );
 
             return;
         }
@@ -80,12 +75,11 @@ class copyAllSource2TargetController extends ajaxController {
 
             $affected_rows = $this->copySegmentInTranslation( $first_seg, $last_seg );
         } catch ( Exception $e ) {
+            $errorCode = -4;
 
-            Log::doLog( "Error in copySegmentInTranslation: " . $e->getMessage() );
-            $this->result[ 'errors' ][] = array(
-                    'code'    => -4,
-                    'message' => "Error while copying sources in targets."
-            );
+            self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
+
+            $this->addError( $errorCode );
 
             return;
         }
@@ -171,12 +165,70 @@ class copyAllSource2TargetController extends ajaxController {
         //Array_column() is not supported on PHP 5.4, so i'll rewrite it
         if ( !function_exists( 'array_column' ) ) {
             $result = Utils::array_column( $result, 'id' );
-        }
-        else {
+        } else {
             $result = array_column( $result, 'id' );
         }
 
         return $result;
     }
 
+    private function setErrorMap() {
+        $generalOutputError = "Error while copying sources to targets. Please contact support@matecat.com";
+
+        self::$errorMap = array(
+                "-1" => array(
+                        'internalMessage' => "Empty id job",
+                        'outputMessage'   => $generalOutputError
+                ),
+                "-2" => array(
+                        'internalMessage' => "Empty job password",
+                        'outputMessage'   => $generalOutputError
+                ),
+                "-3" => array(
+                        'internalMessage' => "Wrong id_job-password couple. Job not found",
+                        'outputMessage'   => $generalOutputError
+                ),
+                "-4" => array(
+                        'internalMessage' => "Error in copySegmentInTranslation: ",
+                        'outputMessage'   => $generalOutputError
+                )
+        );
+    }
+
+    /**
+     * @param $errorCode int
+     */
+    private function addError( $errorCode ) {
+        Log::doLog( $this->getErrorMessage( $errorCode ) );
+        $this->result[ 'errors' ][] = array(
+                'code'    => $errorCode,
+                'message' => $this->getOutputErrorMessage( $errorCode )
+        );
+    }
+
+    /**
+     * @param $errorCode int
+     *
+     * @return string
+     */
+    private function getErrorMessage( $errorCode ) {
+        if ( array_key_exists( $errorCode, self::$errorMap ) ) {
+            return self::$errorMap[ $errorCode ][ 'internalMessage' ];
+        }
+
+        return "";
+    }
+
+    /**
+     * @param $errorCode int
+     *
+     * @return string
+     */
+    private function getOutputErrorMessage( $errorCode ) {
+        if ( array_key_exists( $errorCode, self::$errorMap ) ) {
+            return self::$errorMap[ $errorCode ][ 'outputMessage' ];
+        }
+
+        return "";
+    }
 }
