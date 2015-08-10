@@ -294,6 +294,17 @@ class engineController extends ajaxController {
             
             $this->result['name'] = $this->name;
             $this->result['data']['config'] = $uiConfig;
+        } elseif ( $newEngine instanceof EnginesModel_LetsMTStruct){
+            // The user has added and configured the Lets MT engine (the System ID has been set)
+            // Do a simple translation request so that the system wakes up by the time the user needs it for translating
+            $engine_test = Engine::getInstance( $result->id );
+
+            $config = $engine_test->getConfigStruct();
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+            $config[ 'segment' ] = "wakeup";
+
+            $mt_result = $engine_test->get( $config );
         }
         
         $this->result['data']['id'] = $result->id;
