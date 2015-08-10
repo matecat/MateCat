@@ -24,7 +24,6 @@ if ( MBC.enabled() )
     var loggedUserName = null ;
     var customUserName = null ;
     var lastCommentHash = null;
-    var lastInput = null;
 
     var tpls ;
 
@@ -203,7 +202,8 @@ if ( MBC.enabled() )
         $('.mbc-comment-balloon-outer').remove();
 
         var root = $(tpls.segmentThread);
-        var inputForm = renderInputForm() ;
+        var inputForm = renderInputForm();
+
         inputForm.addClass('mbc-first-input');
 
         root.find('.mbc-comment-balloon-inner').append( inputForm );
@@ -212,7 +212,7 @@ if ( MBC.enabled() )
         inputForm.find('textarea').focus();
     }
 
-    var populateWithComments = function(root, comments) {
+    var populateCommentsWrap = function(root, comments) {
         var comments_root = root.find('.mbc-comments-wrap');
 
         if (comments.length == 0) {
@@ -245,19 +245,15 @@ if ( MBC.enabled() )
         }
 
         comments_root.append(thread_wrap);
+    }
+
+    var populateWithComments = function(root, comments) {
+        populateCommentsWrap(root, comments);
 
         function threadIsResolved() {
-            return comments[i-1].thread_id ;
+            return comments[comments.length-1].thread_id ;
         }
 
-        var inputForm = renderInputForm();
-        inputForm.addClass('mbc-reply-input');
-
-        root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
-
-        // enableInputForm( root );
-
-        // Append resolve button
         if ( !threadIsResolved() ) {
             root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
         }
@@ -314,7 +310,19 @@ if ( MBC.enabled() )
 
         populateWithComments(root, comments);
 
+        var inputForm = renderInputForm();
+        inputForm.addClass('mbc-reply-input');
+        root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
+
         el.append( root.show() );
+    }
+
+    var renderOnlySegmentsWrap = function(el) {
+        var segment = new UI.Segment(el) ;
+        var comments = db.getCommentsBySegment( segment.absoluteId );
+        var root = $('.mbc-comment-balloon-outer');
+        $(root).find('.mbc-comments-wrap').empty();
+        populateCommentsWrap(root, comments);
     }
 
     var appendReceivedMessage = function(el) {
@@ -323,13 +331,15 @@ if ( MBC.enabled() )
         var scrollableArea ;
 
         if (! areaBefore.bottomVisible()) {
-            renderSegmentComments(el);
+
+            renderOnlySegmentsWrap(el);
+
             scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
             el ; /// XXX seems to be required to get actual scrollTop number
             $(scrollableArea.el).scrollTop(scrollTop);
             scrollableArea.notifyNewComments();
         } else {
-            renderSegmentComments(el);
+            renderOnlySegmentsWrap( el );
             scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
             scrollableArea.scrollToBottom() ;
         }
@@ -423,7 +433,6 @@ if ( MBC.enabled() )
 
     var ajaxResolveSuccess = function(resp) {
         db.pushSegment(resp.data.entries[0]);
-        lastInput = $('.mbc-comment-input').val() ;
         $(document).trigger('mbc:comment:new', resp.data.entries[0]);
     }
 
@@ -512,7 +521,6 @@ if ( MBC.enabled() )
                 if (resp.errors.length) {
                     showGenericWarning();
                 } else {
-                    lastInput = null;
                     $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
                 }
             },
@@ -542,7 +550,73 @@ if ( MBC.enabled() )
         else outer.find('.mbc-post-comment .mbc-login-link').addClass('mbc-visible');
     }
 
-    // start event binding
+    var loadCommentData = function( success ) {
+        var data = {
+            action    : 'comment',
+            _sub      : 'getRange',
+            id_job    : config.job_id,
+            first_seg : UI.getSegmentId( UI.firstSegment ),
+            last_seg  : UI.getSegmentId( UI.lastSegment ),
+            password  : config.password
+        }
+
+        APP.doRequest({
+            data: data,
+            success : success,
+            error : function() {
+                // TODO: handle error on comments fetch
+            }
+        });
+    }
+
+    var resetDatabase = function( resp ) {
+        db.resetSegments();
+        db.storeSegments( resp.data.entries.current_comments );
+        db.storeSegments( resp.data.entries.open_comments );
+        refreshUserInfo( resp.data.user ) ;
+    }
+
+    var initCommentLink = function(el) {
+        var section = new UI.Segment( el ) ;
+        if ((! section.isSplit()) || section.isFirstOfSplit()) {
+            $(el).append( $(tpls.commentLink) );
+        }
+    }
+
+    var initCommentLinks = function() {
+        $('section').each(function(i, el) {
+            initCommentLink(el);
+        });
+    }
+
+    var refreshElements = function() {
+        initCommentLinks();
+        renderCommentIconLinks();
+        updateHistoryWithLoadedSegments() ;
+    }
+
+    var resetTextArea = function() {
+        var maxHeight = 100 ;
+        var minHeight = 34 ;
+        var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;
+        var borderBottomWidth = parseFloat( $(this).css("borderBottomWidth") ) ;
+        var borders = borderTopWidth + borderBottomWidth ;
+        var scrollHeightWithBorders = this.scrollHeight + borders ;
+
+        while( scrollHeightWithBorders > $(this).outerHeight() && $(this).height() < maxHeight ) {
+            $(this).height( $(this).height() + 10 );
+        };
+
+        while ( scrollHeightWithBorders <= $(this).outerHeight() && $(this).height() > minHeight ) {
+            $(this).height( $(this).height() - 10 );
+        }
+
+        if ( $(this).height() >= maxHeight ) {
+            $(this).css("overflow-y", "auto");
+        } else {
+            $(this).css("overflow-y", "hidden");
+        }
+    }
 
     $(document).on('ready', function() {
         initConstants();
@@ -676,32 +750,6 @@ if ( MBC.enabled() )
         window.location.hash = new_hash ;
     });
 
-    var loadCommentData = function( success ) {
-        var data = {
-            action    : 'comment',
-            _sub      : 'getRange',
-            id_job    : config.job_id,
-            first_seg : UI.getSegmentId( UI.firstSegment ),
-            last_seg  : UI.getSegmentId( UI.lastSegment ),
-            password  : config.password
-        }
-
-        APP.doRequest({
-            data: data,
-            success : success,
-            error : function() {
-                // TODO: handle error on comments fetch
-            }
-        });
-    }
-
-    var resetDatabase = function( resp ) {
-        db.resetSegments();
-        db.storeSegments( resp.data.entries.current_comments );
-        db.storeSegments( resp.data.entries.open_comments );
-        refreshUserInfo( resp.data.user ) ;
-    }
-
     $(window).on('segmentsAdded', function(e) {
         loadCommentData(function( resp ) {
             resetDatabase( resp );
@@ -715,26 +763,6 @@ if ( MBC.enabled() )
             $(document).trigger('mbc:ready');
         });
     });
-
-    var initCommentLink = function(el) {
-        var section = new UI.Segment( el ) ;
-        if ((! section.isSplit()) || section.isFirstOfSplit()) {
-            $(el).append( $(tpls.commentLink) );
-        }
-    }
-
-    var initCommentLinks = function() {
-        $('.mbc-comment-link').remove();
-        $('section').each(function(i, el) {
-            initCommentLink(el);
-        });
-    }
-
-    var refreshElements = function() {
-        initCommentLinks();
-        renderCommentIconLinks();
-        updateHistoryWithLoadedSegments() ;
-    }
 
     $(document).on('mbc:ready', function(ev) {
 
@@ -777,10 +805,10 @@ if ( MBC.enabled() )
         $(document).trigger('mbc:segment:update:links', data.id_segment);
 
         var section = UI.Segment.findEl( data.id_segment ) ;
+
         if ( section.find('.mbc-thread-wrap').is(':visible') ) {
             appendReceivedMessage( section );
         }
-        $('.mbc-comment-input').val(lastInput) ;
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
@@ -810,29 +838,6 @@ if ( MBC.enabled() )
         var el = UI.Segment.findEl(id_segment) ;
         resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
     });
-
-    var resetTextArea = function() {
-        var maxHeight = 100 ;
-        var minHeight = 34 ;
-        var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;
-        var borderBottomWidth = parseFloat( $(this).css("borderBottomWidth") ) ;
-        var borders = borderTopWidth + borderBottomWidth ;
-        var scrollHeightWithBorders = this.scrollHeight + borders ;
-
-        while( scrollHeightWithBorders > $(this).outerHeight() && $(this).height() < maxHeight ) {
-            $(this).height( $(this).height() + 10 );
-        };
-
-        while ( scrollHeightWithBorders <= $(this).outerHeight() && $(this).height() > minHeight ) {
-            $(this).height( $(this).height() - 10 );
-        }
-
-        if ( $(this).height() >= maxHeight ) {
-            $(this).css("overflow-y", "auto");
-        } else {
-            $(this).css("overflow-y", "hidden");
-        }
-    }
 
     $(document).on('keydown', '.mbc-comment-textarea', resetTextArea );
     $(document).on('paste', '.mbc-comment-input', function() {

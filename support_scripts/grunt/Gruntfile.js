@@ -78,20 +78,20 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
                 ].concat( cssFiles ) ,
-
-				tasks: ['development'],
-				options: {
-					interrupt: true
-				}
-			}
-		},
-		jshint: {
-			options: {
-			  force: true,
-			  smarttabs: true
-			},
-			all: [basePath + 'cat_source/*.js'] // TODO: expand to other js files
-		},
+                tasks: ['development'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            }
+        },
+        jshint: {
+            options: {
+              force: true,
+              smarttabs: true
+            },
+            all: [basePath + 'cat_source/*.js'] // TODO: expand to other js files
+        },
         strip : {
             app : {
                 src : buildPath + 'app.js',
@@ -123,7 +123,7 @@ module.exports = function(grunt) {
     grunt.registerTask('default', ['jshint']);
 
     grunt.registerTask('development', [
-        'jshint',
+        // 'jshint',
         'concat:libraries', 'concat:components', 'replace:version',
         'concat:app', 'concat:styles'
     ]);
