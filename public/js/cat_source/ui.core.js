@@ -2377,9 +2377,13 @@ console.log('changeStatus');
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = this.currentSegmentId + '-' + ts.toString();
+        var segment_status_regex = new RegExp("status-([a-z]*)");
+        var segment_status = this.currentSegment.attr('class' ).match(segment_status_regex);
+        if(segment_status.length > 0){
+            segment_status = segment_status[1];
+        }
 
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
-
 		if( config.brPlaceholdEnabled ){
 			src_content = this.postProcessEditarea(this.currentSegment, '.source');
 			trg_content = this.postProcessEditarea(this.currentSegment);
@@ -2395,6 +2399,7 @@ console.log('changeStatus');
         })
 //        console.log('glossarySourcesAr: ', glossarySourcesAr);
 //        console.log(JSON.stringify(glossarySourcesAr));
+
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2403,6 +2408,7 @@ console.log('changeStatus');
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
+                segment_status: segment_status,
                 glossaryList: glossarySourcesAr
 //                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
