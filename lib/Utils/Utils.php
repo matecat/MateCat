@@ -327,5 +327,15 @@ class Utils {
 
     }
 
+	public static function array_column( array $input, $column_key, $index_key = null ) {
+
+		$result = array();
+		foreach ( $input as $k => $v ) {
+			$result[ $index_key ? $v[ $index_key ] : $k ] = $v[ $column_key ];
+		}
+
+		return $result;
+	}
+
 }
 

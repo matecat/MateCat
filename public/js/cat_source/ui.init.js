@@ -71,6 +71,10 @@ $.extend(UI, {
         this.executingSetContributionMT = false;
         this.localStorageArray = [];
         this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
+        this.consecutiveCopySourceNum = [];
+        setInterval(function() {
+            UI.consecutiveCopySourceNum = [];
+        }, config.copySourceInterval*1000);
 
         if(config.isAnonymousUser) this.body.addClass('isAnonymous');
 
@@ -78,7 +82,7 @@ $.extend(UI, {
 		 * Global Warnings array definition.
 		 */
 		this.globalWarnings = [];
-		
+
 		this.shortcuts = {
 			"translate": {
 				"label" : "Confirm translation",

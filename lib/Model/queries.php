@@ -127,7 +127,7 @@ function doSearchQuery( Array $queryParams ) {
 
     $vector = array( 'sidlist' => array(), 'count' => '0' );
     foreach ( $results as $occurrence ) {
-        $vector[ 'sidlist' ][ ] = $occurrence[ 'id' ];
+        $vector[ 'sidlist' ][] = $occurrence[ 'id' ];
     }
 
     $vector[ 'count' ] = @$rollup[ 'count' ]; //can be null, suppress warning
@@ -232,8 +232,8 @@ function doReplaceAll( Array $queryParams ) {
         /**
          * Escape for database
          */
-        $trMod       = $db->escape( $trMod );
-        $sqlBatch[ ] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
+        $trMod      = $db->escape( $trMod );
+        $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
     }
 
     //MySQL default max_allowed_packet is 16MB, this system surely need more
@@ -783,13 +783,13 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 		s.xliff_mrk_ext_prec_tags as mrk_prev_tags, s.xliff_mrk_ext_succ_tags as mrk_succ_tags,
 		$select_translation, st.status, st.locked
 
-			from jobs j 
+			from jobs j
 			inner join projects p on p.id=j.id_project
 			inner join files_job fj on fj.id_job=j.id
 			inner join files f on f.id=fj.id_file
 			inner join segments s on s.id_file=f.id
-			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id 
-			where j.id=$jid and j.password='$password' and f.id=$id_file 
+			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
+			where j.id=$jid and j.password='$password' and f.id=$id_file
 
 			";
     $db      = Database::obtain();
@@ -819,7 +819,7 @@ function getSegmentsInfo( $jid, $password ) {
 		p.name as pname, p.create_date , fj.id_file, p.status_analysis,
 		f.filename, f.mime_type
 
-			from jobs j 
+			from jobs j
 			inner join projects p on p.id=j.id_project
 			inner join files_job fj on fj.id_job=j.id
 			inner join files f on f.id=fj.id_file
@@ -861,47 +861,49 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
     switch ( $where ) {
         case 'after':
             $ref_point = $ref_segment;
+//            $subQuery = sprintf( $queryAfter, $step * 2 );
             break;
         case 'before':
             $ref_point = $ref_segment - ( $step + 1 );
+//            $subQuery = sprintf( $queryBefore, $step * 2 );
             break;
         case 'center':
             $ref_point = ( (float)$ref_segment ) - (int)( $step / 2 );
+//            $subQuery = sprintf( $queryAfter . " UNION " . $queryBefore, $step, $step );
             break;
     }
 
-    //	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
+//  $ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
 
     $query = "SELECT j.id AS jid, j.id_project AS pid,j.source,j.target, j.last_opened_segment, j.id_translator AS tid,
-		p.id_customer AS cid, j.id_translator AS tid,
-		p.name AS pname, p.create_date , fj.id_file,
-		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
-		IF (st.status='NEW',NULL,st.translation) AS translation,
-		UNIX_TIMESTAMP( st.translation_date ) AS version,
-		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
-		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
-	    sts.source_chunk_lengths,
-	    sts.target_chunk_lengths,
+        p.id_customer AS cid, j.id_translator AS tid,
+        p.name AS pname, p.create_date , fj.id_file,
+        f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
+        IF (st.status='NEW',NULL,st.translation) AS translation,
+        UNIX_TIMESTAMP( st.translation_date ) AS version,
+        st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
+        s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
+        sts.source_chunk_lengths,
 
-		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
-		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
+        IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+        , COALESCE( autopropagated_from, 0 ) as autopropagated_from
 
         ,( SELECT COUNT( segment_hash ) FROM segment_translations WHERE segment_hash = s.segment_hash AND id_job =  j.id ) repetitions_in_chunk
 
         ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
-			FROM jobs j
-			INNER JOIN projects p ON p.id=j.id_project
-			INNER JOIN files_job fj ON fj.id_job=j.id
-			INNER JOIN files f ON f.id=fj.id_file
-			INNER JOIN segments s ON s.id_file=f.id
-			LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
-			LEFT JOIN segment_translations_splits sts  ON sts.id_segment = s.id AND sts.id_job = j.id
-			LEFT JOIN file_references fr ON s.id_file_part = fr.id
-			WHERE j.id = $jid
-			AND j.password = '$password'
-			AND s.id > $ref_point AND s.show_in_cattool = 1
-			LIMIT 0, $step ";
+            FROM jobs j
+            INNER JOIN projects p ON p.id=j.id_project
+            INNER JOIN files_job fj ON fj.id_job=j.id
+            INNER JOIN files f ON f.id=fj.id_file
+            INNER JOIN segments s ON s.id_file=f.id
+            LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+            LEFT JOIN segment_translations_splits sts  ON sts.id_segment = s.id AND sts.id_job = j.id
+            LEFT JOIN file_references fr ON s.id_file_part = fr.id
+            WHERE j.id = $jid
+            AND j.password = '$password'
+            AND s.id > $ref_point AND s.show_in_cattool = 1
+            LIMIT 0, $step ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -1024,13 +1026,13 @@ function getLastSegmentInNextFetchWindow( $jid, $password, $step = 50, $ref_segm
     //	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
 
     $query = "select max(id) as max_id
-		from (select s.id from  jobs j 
+		from (select s.id from  jobs j
 				inner join projects p on p.id=j.id_project
 				inner join files_job fj on fj.id_job=j.id
 				inner join files f on f.id=fj.id_file
 				inner join segments s on s.id_file=f.id
 				left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-				where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1 
+				where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1
 				limit 0,$step) as id
 		";
 
@@ -1135,15 +1137,15 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
         if ( $key == 'status' ) {
             if ( $propagateToTranslated ) {
-                $q[ ]      = $key . " = '".$db->escape( $value )."' ";
+                $q[]       = $key . " = '" . $db->escape( $value ) . "' ";
                 $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated', '$st_approved', '$st_rejected' )";
             }
         } elseif ( is_bool( $value ) ) {
-            $q[ ] = $key . " = " . var_export( (bool)$value, true );
+            $q[] = $key . " = " . var_export( (bool)$value, true );
         } elseif ( !is_numeric( $value ) || $key == 'translation' ) {
-            $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
+            $q[] = $key . " = '" . $db->escape( $value ) . "'";
         } else {
-            $q[ ] = $key . " = " . (float)$value;
+            $q[] = $key . " = " . (float)$value;
         }
     }
 
@@ -1164,7 +1166,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
 
     $totals = $db->fetch_array( $queryTotals );
-    $err = $db->get_error();
+    $err    = $db->get_error();
     if ( $err[ 'error_code' ] != 0 ) {
         throw new Exception( "Error in counting total equivalent words for propagation: " . $err[ 'error_code' ] . ": " . $err[ 'error_description' ]
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
@@ -1283,7 +1285,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 function setSuggestionUpdate( $data ) {
 
     $id_segment = (int)$data[ 'id_segment' ];
-    $id_job = (int)$data[ 'id_job' ];
+    $id_job     = (int)$data[ 'id_job' ];
 
     $where = " id_segment=$id_segment and id_job=$id_job";
 
@@ -1471,7 +1473,7 @@ function getLastSegmentIDs( $id_job ) {
     // Force Index guarantee that the optimizer will not choose translation_date and scan the full table for new jobs.
     $query = "
 		SELECT id_segment
-		FROM segment_translations FORCE INDEX (id_job) 
+		FROM segment_translations FORCE INDEX (id_job)
 		WHERE id_job = $id_job
 		AND `status` IN ( 'TRANSLATED', 'APPROVED' )
 		ORDER BY translation_date DESC LIMIT 10
@@ -1561,8 +1563,8 @@ function getEditLog( $jid, $pass ) {
 		s.raw_word_count rwc,
 		p.name as pname
 			FROM
-			jobs j 
-			INNER JOIN segment_translations st ON j.id=st.id_job 
+			jobs j
+			INNER JOIN segment_translations st ON j.id=st.id_job
 			INNER JOIN segments s ON s.id = st.id_segment
 			INNER JOIN projects p on p.id=j.id_project
 			WHERE
@@ -1760,8 +1762,8 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
     $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
-    $data[ 'payable_rates' ]     = json_encode($projectStructure[ 'payable_rates' ]);
-    $data[ 'dqf_key' ]           = $projectStructure['dqf_key'];
+    $data[ 'payable_rates' ]     = json_encode( $projectStructure[ 'payable_rates' ] );
+    $data[ 'dqf_key' ]           = $projectStructure[ 'dqf_key' ];
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1943,7 +1945,7 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
 		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
 		p.fast_analysis_wc,p.tm_analysis_wc, p.standard_analysis_wc
 
-			from projects p 
+			from projects p
 			inner join jobs j on p.id=j.id_project
 			inner join files f on p.id=f.id_project
 			inner join segments s on s.id_file=f.id
@@ -1982,37 +1984,37 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
     $projects_filter_query = array();
 
     if ( !is_null( $search_in_pname ) && !empty( $search_in_pname ) ) {
-        $projects_filter_query[ ] = "p.name like '%" . $search_in_pname . "%'";
+        $projects_filter_query[] = "p.name like '%" . $search_in_pname . "%'";
     }
 
     if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ]     = "j.source = '" . $search_source . "'";
-        $projects_filter_query[ ] = "j.source = '" . $search_source . "'";
+        $jobs_filter_query[]     = "j.source = '" . $search_source . "'";
+        $projects_filter_query[] = "j.source = '" . $search_source . "'";
     }
 
     if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ]     = "j.target = '" . $search_target . "'";
-        $projects_filter_query[ ] = "j.target = '" . $search_target . "'";
+        $jobs_filter_query[]     = "j.target = '" . $search_target . "'";
+        $projects_filter_query[] = "j.target = '" . $search_target . "'";
     }
 
     if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ]     = "j.status_owner = '" . $search_status . "'";
-        $projects_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
+        $jobs_filter_query[]     = "j.status_owner = '" . $search_status . "'";
+        $projects_filter_query[] = "j.status_owner = '" . $search_status . "'";
     }
 
     if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ]     = "j.completed = 1";
-        $projects_filter_query[ ] = "j.completed = 1";
+        $jobs_filter_query[]     = "j.completed = 1";
+        $projects_filter_query[] = "j.completed = 1";
     }
 
     if ( !is_null( $project_id ) && !empty( $project_id ) ) {
-        $jobs_filter_query[ ]     = "j.id_project = " . $project_id;
-        $projects_filter_query[ ] = "j.id_project = " . $project_id;
+        $jobs_filter_query[]     = "j.id_project = " . $project_id;
+        $projects_filter_query[] = "j.id_project = " . $project_id;
     }
 
     //FIXME: SESSION CALL SHOULD NOT BE THERE!!!
-    $jobs_filter_query [ ]    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
-    $projects_filter_query[ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
+    $jobs_filter_query []    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
+    $projects_filter_query[] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
 
     $projectsQuery =
             "SELECT p.id AS pid,
@@ -2050,29 +2052,29 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     $jobs_filter_query = array();
 
     if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ] = "j.source = '" . $search_source . "'";
+        $jobs_filter_query[] = "j.source = '" . $search_source . "'";
     }
 
     if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ] = "j.target = '" . $search_target . "'";
+        $jobs_filter_query[] = "j.target = '" . $search_target . "'";
     }
 
     if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
+        $jobs_filter_query[] = "j.status_owner = '" . $search_status . "'";
     }
 
     if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ] = "j.completed = 1";
+        $jobs_filter_query[] = "j.completed = 1";
     }
 
     //This will be always set. We don't need to check if array is empty.
-    $jobs_filter_query [ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
+    $jobs_filter_query [] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
 
     $where_query = implode( " and ", $jobs_filter_query );
     $ids         = implode( ", ", $projectIDs );
 
     if ( !count( $ids ) ) {
-        $ids[ ] = 0;
+        $ids[] = 0;
     }
 
     $jobsQuery = "SELECT
@@ -2164,6 +2166,7 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 
     return $results;
 }
+
 function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
@@ -3038,7 +3041,7 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
 
     $tuple_of_double_indexes = array();
     foreach ( $jobs as $job ) {
-        $tuple_of_double_indexes[ ] = sprintf( "( id = %u AND password = '%s' )", $job[ 'id' ], $job[ 'password' ] );
+        $tuple_of_double_indexes[] = sprintf( "( id = %u AND password = '%s' )", $job[ 'id' ], $job[ 'password' ] );
     }
 
     $q_archive = sprintf(
@@ -3061,3 +3064,4 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
 
     return $db->affected_rows;
 }
+

@@ -1782,12 +1782,17 @@ z-index: 10000;
 	-webkit-transition: all  50ms ease-in;
 }
 
-section.readonly,
+section.readonly
+{
+    background: transparent;
+}
+
 body.archived section
 {
     z-index: 9998;
     background: transparent;
 }
+
 
 section.readonly .text,
 body.archived section .text

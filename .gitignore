@@ -1,0 +1,31 @@
+# IDE stuffs
+.settings
+.idea
+.project
+
+# Configuration files
+.num_processes
+inc/login_secret.dat
+inc/oauth_config.ini
+inc/Error_Mail_List.ini
+inc/config.ini
+lib/Utils/Analysis/.num_processes
+
+# Ignore artifacts
+public/css/app.css
+public/js/build
+
+# NodeJs stuff
+nodejs/*.log
+node_modules
+
+# Development env config files
+.agignore
+.vagrant
+
+# More stuffs
+Test_Local/*
+unitTest/xhGui/
+unitTest/coverage/*
+internal_scripts
+local_storage

@@ -82,7 +82,7 @@ $.extend(UI, {
 		if ((!n.length) && (next)) {
 			return false;
 		}
-		var id = n.attr('id'); 
+		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
@@ -283,7 +283,7 @@ $.extend(UI, {
 					UI.addWarningToSearchDisplay();
 				UI.setChosenSuggestion(1);
 				copySuggestionDone = true;
-			}						
+			}
 //			if (copySuggestionDone) {
 //				if (isActiveSegment) {
 //				}
@@ -563,14 +563,19 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.chooseSuggestion('6');
-		}); 
+		});
 	},
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
     setContributionSourceDiff: function () {
         sourceText = '';
-        $.each($.parseHTML($('.editor .source').html()), function (index) {
+//        console.log('eccoci: ', UI.body.hasClass('editing'));
+
+        var parsed = $.parseHTML( $('.editor .source').html() ) ;
+        if ( parsed == null ) return;
+
+        $.each( parsed, function (index) {
             if(this.nodeName == '#text') {
                 sourceText += this.data;
             } else {

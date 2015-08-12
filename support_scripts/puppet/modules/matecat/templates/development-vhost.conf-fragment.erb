@@ -1,0 +1,39 @@
+  # vim ft=apache
+  <Directory /vagrant >
+    Options All
+    AllowOverride All
+    Order allow,deny
+    allow from all
+
+    ExpiresActive On
+    ExpiresByType text/html "access plus 1 hour"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+    ExpiresByType image/gif "access plus 1 week"
+    ExpiresByType image/jpeg "access plus 1 week"
+    ExpiresByType image/jpg "access plus 1 week"
+    ExpiresByType image/png "access plus 1 week"
+    ExpiresByType image/vnd.microsoft.icon "access plus 1 week"
+    ExpiresByType image/ico "access plus 1 week"
+    ExpiresByType application/x-shockwave-flash "access plus 1 week"
+  </Directory>
+
+  php_flag register_globals off
+  php_flag magic_quotes_gpc off
+  LogLevel error
+  ErrorLog /var/log/apache2/matecat.error.log
+  CustomLog /var/log/apache2/matecat.log combined
+  ServerSignature Off
+
+  # Configuration for Nodejs proxy
+  ProxyRequests off
+
+  <Proxy *>
+    Order deny,allow
+    Allow from all
+  </Proxy>
+
+  <Location /sse/ >
+    ProxyPass http://0.0.0.0:7788/
+    ProxyPassReverse http://0.0.0.0:7788/
+  </Location>

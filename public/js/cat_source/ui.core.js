@@ -4,7 +4,7 @@
 UI = null;
 
 UI = {
-	toggleFileMenu: function() {console.log('ddd');
+	toggleFileMenu: function() {
         jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
 			return false;
@@ -65,6 +65,7 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
+//        this.consecutiveCopySourceNum = [];
         var options = {
             segment_id: segment_id,
             status: status,
@@ -363,7 +364,80 @@ console.log('changeStatus');
 
         this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
+        if(!config.isReview) {
+            var alreadyCopied = false;
+            $.each(UI.consecutiveCopySourceNum, function (index) {
+                if(this == UI.currentSegmentId) alreadyCopied = true;
+            });
+            if(!alreadyCopied) {
+                this.consecutiveCopySourceNum.push(this.currentSegmentId);
+            }
+//        this.consecutiveCopySourceNum++;
+            if(this.consecutiveCopySourceNum.length > 2) {
+                this.copyAllSources();
+            }
+        }
+
     },
+    copyAllSources: function() {
+        console.log('copy all sources');
+        if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
+            APP.confirm({
+                title: 'Copy all new segments',
+                name: 'confirmCopyAllSources',
+                okTxt: 'Yes',
+                cancelTxt: 'No',
+                callback: 'continueCopyAllSources',
+                onCancel: 'abortCopyAllSources',
+                closeOnSuccess: true,
+                msg: "Copy source to target for all new segments?<br/>This action cannot be undone."
+            });
+        } else {
+            this.consecutiveCopySourceNum = [];
+        }
+
+    },
+    continueCopyAllSources: function () {
+        var mod = $('.modal .popup');
+        mod.find('.btn-ok, .btn-cancel').remove();
+        mod.find('p').addClass('waiting').text('Copying...');
+        APP.doRequest({
+            data: {
+                action: 'copyAllSource2Target',
+                id_job: config.job_id,
+                pass: config.password
+            },
+            error: function() {
+                console.log('error');
+                APP.closePopup();
+                UI.showMessage({
+                    msg: 'Error copying all sources to target. Try again!'
+                });
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    APP.closePopup();
+                    UI.showMessage({
+                        msg: d.errors[0].message
+                    });
+                } else {
+                    $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password, '1', { expires:1 });
+                    APP.closePopup();
+                    $('#outer').empty();
+                    UI.render({
+                        firstLoad: false,
+                        segmentToOpen: UI.currentSegmentId
+                    });
+                }
+
+            }
+        });
+    },
+    abortCopyAllSources: function () {
+        this.consecutiveCopySourceNum = [];
+        //$.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
+    },
+
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
         return str;
@@ -493,7 +567,7 @@ console.log('changeStatus');
         if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
             return;
         }
-		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
         if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
@@ -673,7 +747,7 @@ console.log('changeStatus');
 		if (this.segmentToScrollAtRender) {
 			this.startSegmentId = this.segmentToScrollAtRender;
 		} else {
-			var hash = window.location.hash.substr(1);
+			var hash = UI.parsedHash.segmentId;
 			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
 		}
 	},
@@ -900,6 +974,7 @@ console.log('changeStatus');
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
+
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
@@ -913,6 +988,7 @@ console.log('changeStatus');
 			if (options.segmentToOpen) {
 				$('#segment-' + options.segmentToOpen + ' .editarea').click();
 			}
+
 			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
 				UI.openSegment(UI.editarea);
 			}
@@ -949,6 +1025,8 @@ console.log('changeStatus');
 		this.markTags();
 //		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
+        $(document).trigger('getSegments_success');
+
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -1065,12 +1143,18 @@ console.log('changeStatus');
 			this.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
-        if((!this.segmentIsLoaded(id))&&(id.toString().split('-').length > 1)) {
-            id = id.toString().split('-')[0];
+        if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
+            id = UI.parsedHash.splittedSegmentId ;
         }
-        var el = $("#segment-" + id + "-target").find(".editarea");
-//        console.log('el: ', el);
-        $(el).click();
+
+        if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
+            MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
+        } else {
+            // TODO: question: why search for #segment-{id}-target
+            // instead of #segment-{id} as usual?
+            var el = $("#segment-" + id + "-target").find(".editarea");
+            $(el).click();
+        }
     },
 	initSegmentNavBar: function() {
 		if (config.firstSegmentOfFiles.length == 1) {
@@ -1115,17 +1199,14 @@ console.log('changeStatus');
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
-//        console.log('open segment - editarea: ', UI.currentSegmentId);
-//        console.log('operation: ', operation);
-//		if(UI.body.hasClass('archived')) return;
-
+        // TODO: check why this global var is needed
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
-        UI.openableSegment = true;
-        segment.trigger('just-open');
-//        console.log('UI.openableSegment: ', UI.openableSegment);
-        if(!UI.openableSegment) return false;
-        UI.openableSegment = false;
+
+        if (Review.enabled() && !Review.evalOpenableSegment( segment )) {
+            return false ;
+        }
+
         this.openSegmentStart = new Date();
 		if(UI.warningStopped) {
 			UI.warningStopped = false;
@@ -1136,16 +1217,11 @@ console.log('changeStatus');
 				return;
 		}
 
-
         this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
-        this.updateJobMenu();
-		$(window).trigger({
-			type: "segmentOpened",
-			segment: segment
-		});
+		this.updateJobMenu();
 
 		this.clearUndoStack();
 		this.saveInUndoStack('open');
@@ -1195,6 +1271,7 @@ console.log('changeStatus');
 		this.focusEditarea = setTimeout(function() {
 			UI.editarea.focus();
 			clearTimeout(UI.focusEditarea);
+            UI.currentSegment.trigger('EditAreaFocused');
 		}, 100);
 		this.currentIsLoaded = false;
 		this.nextIsLoaded = false;
@@ -1240,7 +1317,13 @@ console.log('changeStatus');
 		}
 		if (this.debug)
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
-	},
+
+        $(window).trigger({
+            type: "segmentOpened",
+            segment: segment
+        });
+    },
+
     reactivateJob: function() {
         APP.doRequest({
             data: {
@@ -1361,7 +1444,7 @@ console.log('changeStatus');
 
 			if (articleToAdd) {
 				filenametoshow = truncate_filename(this.filename, 40);
-				newFile += '<article id="file-' + fid + '" class="loading">' +
+				newFile += '<article id="file-' + fid + '" class="loading mbc-commenting-closed">' +
 						'	<ul class="projectbar" data-job="job-' + this.jid + '">' +
 						'		<li class="filename">' +
 						'			<form class="download" action="/" method="post">' +
@@ -1428,7 +1511,7 @@ console.log('changeStatus');
         newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-propagable="' + autoPropagable + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
 //            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
-            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
+            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#" title="Click to split segment"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
             ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
             ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
             '	<div class="body">' +
@@ -1615,77 +1698,7 @@ console.log('changeStatus');
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-	scrollSegment: function(segment, highlight, quick) {
-        quick = quick || false;
-		highlight = highlight || false;
-//		console.log(segment);
-//        segment = (noOpen)? $('#segment-'+segment) : segment;
-//        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
-		if (!segment.length) {
-			$('#outer').empty();
-			this.render({
-				firstLoad: false,
-				segmentToScroll: segment.selector.split('-')[1],
-				highlight: highlight
-			});
-		}
-		var spread = 23;
-		var current = this.currentSegment;
-		var previousSegment = $(segment).prev('section');
 
-		if (!previousSegment.length) {
-			previousSegment = $(segment);
-			spread = 103;
-		}
-        if(!previousSegment.length) return false;
-        var destination = "#" + previousSegment.attr('id');
-		var destinationTop = $(destination).offset().top;
-		if (this.firstScroll) {
-			destinationTop = destinationTop + 100;
-			this.firstScroll = false;
-		}
-		if ($(current).length) { // if there is an open segment
-			if ($(segment).offset().top > $(current).offset().top) { // if segment to open is below the current segment
-				if (!current.is($(segment).prev())) { // if segment to open is not the immediate follower of the current segment
-					var diff = (this.firstLoad) ? ($(current).height() - 200 + 120) : 20;
-					destinationTop = destinationTop - diff;
-				} else { // if segment to open is the immediate follower of the current segment
-					destinationTop = destinationTop - spread;
-				}
-			} else { // if segment to open is above the current segment
-//                if((typeof UI.provaCoso != 'undefined')&&(config.isReview)) spread = -17;
-				destinationTop = destinationTop - spread;
-                UI.provaCoso = true;
-			}
-		} else { // if no segment is opened
-			destinationTop = destinationTop - spread;
-		}
-
-		$("html,body").stop();
-        pointSpeed = (quick)? 0 : 500;
-        if(config.isReview) {
-            setTimeout(function() {
-                $("html,body").animate({
-                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
-                }, 500);
-            }, 300);
-        } else {
-            $("html,body").animate({
-                scrollTop: destinationTop - 20
-            }, pointSpeed);
-        }
-		setTimeout(function() {
-			UI.goingToNext = false;
-        }, pointSpeed);
-	},
-	segmentIsLoaded: function(segmentId) {
-//        segmentId = segmentId.toString().split('-')[0];
-		if ($('#segment-' + segmentId).length) {
-			return true;
-		} else {
-			return false;
-		}
-	},
 	spellCheck: function(ed) {
 		if (!UI.customSpellcheck)
 			return false;
@@ -2364,9 +2377,13 @@ console.log('changeStatus');
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = this.currentSegmentId + '-' + ts.toString();
+        var segment_status_regex = new RegExp("status-([a-z]*)");
+        var segment_status = this.currentSegment.attr('class' ).match(segment_status_regex);
+        if(segment_status.length > 0){
+            segment_status = segment_status[1];
+        }
 
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
-
 		if( config.brPlaceholdEnabled ){
 			src_content = this.postProcessEditarea(this.currentSegment, '.source');
 			trg_content = this.postProcessEditarea(this.currentSegment);
@@ -2382,6 +2399,7 @@ console.log('changeStatus');
         })
 //        console.log('glossarySourcesAr: ', glossarySourcesAr);
 //        console.log(JSON.stringify(glossarySourcesAr));
+
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2390,6 +2408,7 @@ console.log('changeStatus');
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
+                segment_status: segment_status,
                 glossaryList: glossarySourcesAr
 //                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
@@ -2606,7 +2625,7 @@ console.log('changeStatus');
             errors: errors,
             chosen_suggestion_index: chosen_suggestion,
             autosave: autosave,
-            version: segment.attr('data-version'), 
+            version: segment.attr('data-version'),
             propagate: propagate
         };
         if(isSplitted) {
@@ -3695,3 +3714,29 @@ $(window).resize(function() {
 });
 
 
+(function($, UI) {
+    $.extend(UI, {
+        focusSegment: function(segment) {
+            var clickableEditArea = segment.find('.editarea:not(.opened)');
+            if ( clickableEditArea.length == 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
+                UI.scrollSegment( segment );
+            }
+            else {
+                clickableEditArea.trigger('click');
+            }
+            $(document).trigger('ui:segment:focus', UI.getSegmentId( segment ) );
+        },
+
+        getSegmentById: function(id) {
+            return $('#segment-' + id);
+        },
+
+        getEditAreaBySegmentId: function(id) {
+            return $('#segment-' + id + ' .editarea');
+        },
+
+        segmentIsLoaded: function(segmentId) {
+            return UI.getSegmentById(segmentId).length > 0 ;
+        }
+    });
+})(jQuery,UI);

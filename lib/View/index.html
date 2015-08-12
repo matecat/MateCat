@@ -8,11 +8,6 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
-<!--
-        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
--->
         <script type="text/javascript">
             /*<![CDATA[*/
             var config = {
@@ -46,19 +41,26 @@
                 taglockEnabled: ${taglockEnabled | string:1},
                 alternativesEnabled: true,
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
-                //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
                 survey: false,
-                optimized: false,
                 isReview: ${isReview},
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
                 overall_quality: '${overall_quality}',
                 offlineModeEnabled: true,
-                splitSegmentEnabled: true
+                splitSegmentEnabled: true,
+                copySourceInterval: ${copySourceInterval}
             };
             var renderStart = new Date();
             /*]]>*/
         </script>
+
+        <script tal:condition="true:comments_enabled" type="text/javascript">
+          /*<![CDATA[*/
+          config.comments_enabled = true;
+          config.sse_base_url = '${sse_base_url}';
+          /*]]>*/
+        </script>
+
         <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
             /*<![CDATA[*/
             config.lfPlaceholder = '${lfPlaceholder | null}';
@@ -80,25 +82,19 @@
             config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
             /*]]>*/
         </script>
-		<script>
-            /*<![CDATA[*/
-			if(config.optimized) {
-				document.write("<link href=\"${basepath}public/css/app.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<script src=\"${basepath}public/js/app.js?build=${build_number}\"><\/script>");
-			} else {
-				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-//				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
-				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
-			}
-            /*]]>*/
-		</script>
 
+        <link href="${basepath}public/css/app.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
-<!--        <script src="${basepath}public/js/addtm.js?build=${build_number}"></script> -->
-<!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
-        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
+        <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+
+        <tal:block tal:condition="true:use_compiled_assets" >
+            <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
+        </tal:block>
+
+        <tal:block tal:condition="not:use_compiled_assets" >
+            <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
+        </tal:block>
+
     </head>
     <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
@@ -402,7 +398,6 @@ $(window).resize(function() {
 
 });
 		</script>
-
 
 
 

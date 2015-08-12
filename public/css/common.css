@@ -870,6 +870,10 @@ color:#333;}
 	    background-color: #fff;
 }
 
+    .modal .popup p.waiting {
+        background: url(../img/loading.gif) 38% 3px no-repeat !important;
+        background-size: 24px !important;
+    }
 
 .slide-panel {
     height: 100%!important;
@@ -1122,6 +1126,12 @@ text-align: right;
     /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
 /*float: left;*/
 margin-left: 10px;
+}
+
+.modal .popup-confirm p,
+.modal .popup-alert p
+{
+    padding: 0 20px;
 }
 
 .popup .outer:hover
@@ -2035,7 +2045,7 @@ header .searchbox {
     /* Hiding */
     max-height: 0;
     overflow: hidden;
-    z-index: 1;
+    z-index: 3;
 }
 
 .wrapper-dropdown-5:hover {
@@ -2753,6 +2763,41 @@ color: #000;
 }
 
 
+/*
+/* mbc extend iconmoon set with icons for matecat chat
+/* TODO: add icons to main set
+*/
+
+@font-face {
+    font-family: 'icomoon';
+    src:url('fonts/icomoon-mbc.eot?-75v12b');
+    src:url('fonts/icomoon-mbc.eot?#iefix-75v12b') format('embedded-opentype'),
+        url('fonts/icomoon-mbc.woff?-75v12b') format('woff'),
+        url('fonts/icomoon-mbc.ttf?-75v12b') format('truetype'),
+        url('fonts/icomoon-mbc.svg?-75v12b#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.icon-bubble:before {
+    content: "\e96b";
+}
+.icon-bubbles2:before {
+    content: "\e96d";
+}
+.icon-bubble2:before {
+    content: "\e96e";
+}
+.icon-bubbles4:before {
+    content: "\e970";
+}
+
+/*
+/* mbc extend iconmoon set with icons for matecat chat
+*/
+
+
+
 [class^="icon-"], [class*=" icon-"],
 .sorting_desc:after,
 .sorting_asc:after,
@@ -2797,6 +2842,9 @@ a.resume-project:after,
 #filterSwitch:before,
 .more.minus:before,
 .close:before,
+/* mbc chat */
+.mbc-close-icon:before,
+/* mbc chat */
 .notific.error:before,
 .breadcrumbs #pname:before,
 .delete button:before,
@@ -2808,6 +2856,9 @@ a.resume-project:after,
 #point2seg:after,
 .error-symbol:before,
 .warnings:before,
+/* mbc chat */
+.mbc-warnings:before,
+/* mbc chat */
 .tab-switcher-al a:before,
 .error-message p:before,
 .text .alternatives:before,
@@ -2974,7 +3025,8 @@ float: left;
 }
 
 .tab-switcher-al a:before,
-.warnings:before,    
+.warnings:before,
+.mbc-warnings:before,
 .error-symbol:before,
 .text .alternatives:before {
      content: "\f071";

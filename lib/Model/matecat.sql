@@ -571,33 +571,6 @@ LOCK TABLES `segments` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `segments_comments`
---
-
-DROP TABLE IF EXISTS `segments_comments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segments_comments` (
-  `id` int(11) NOT NULL,
-  `id_segment` int(11) NOT NULL,
-  `comment` text,
-  `create_date` datetime DEFAULT NULL,
-  `created_by` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_segment` (`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `segments_comments`
---
-
-LOCK TABLES `segments_comments` WRITE;
-/*!40000 ALTER TABLE `segments_comments` DISABLE KEYS */;
-/*!40000 ALTER TABLE `segments_comments` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `translators`
 --
 
@@ -647,6 +620,26 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+DROP TABLE IF EXISTS `comments`;
+
+CREATE TABLE `comments` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `id_job` bigint(20) NOT NULL,
+    `id_segment` bigint(20) NOT NULL,
+    `create_date` datetime NOT NULL,
+    `email` varchar(50) DEFAULT NULL,
+    `full_name` varchar(100) NOT NULL,
+    `uid` bigint(20) DEFAULT NULL,
+    `resolve_date` datetime DEFAULT NULL,
+    `source_page` tinyint(4) DEFAULT NULL,
+    `is_owner` tinyint(4) NOT NULL,
+    `message_type` tinyint(4) DEFAULT NULL,
+    `message` text,
+    PRIMARY KEY (`id`),
+    KEY `id_job` (`id_job`) USING BTREE,
+    KEY `id_segment` (`id_job`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 --
 -- Dumping data for table `users`
 --
@@ -670,3 +663,4 @@ FLUSH PRIVILEGES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+-- Dump completed on 2015-06-05 18:43:05

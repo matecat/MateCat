@@ -93,7 +93,7 @@ if(config.splitSegmentEnabled) {
                 console.log('b');
                 UI.updateSplitNumber($(segment).find('.splitArea'));
                 console.log('c');
-        
+
     }).on('click', '.splitBar .buttons .cancel', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
@@ -294,9 +294,8 @@ if(config.splitSegmentEnabled) {
                 this.gotoSegment(oldSid + '-1');
             }
 
-//            console.log('or ID: ', UI.currentSegment.attr('data-split-original-id'));
-//            console.log('oldSegment: ', oldSegment);
-//            $("section[data-split-original-id=" + UI.currentSegment.attr('data-split-original-id') + "]").remove();
+            $(document).trigger('split:segment:complete', oldSid);
+
         },
 
         createSplitArea: function (segment) {

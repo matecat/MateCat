@@ -1,25 +1,39 @@
 /*
  Component: ui.review
  */
-if(config.enableReview && config.isReview) {
 
-    $('html').on('just-open', 'section', function() {
-        if(($(this).hasClass('status-new'))||($(this).hasClass('status-draft'))) {
-//            APP.alert("This segment is not translated yet.<br /> Only translated segments can be revised.");
-            sid = $(this).attr('id').split('-')[1];
-            APP.confirm({
-                name: 'confirmNotYetTranslated',
-                cancelTxt: 'Close',
-//                onCancel: 'closeNotYetTranslated',
-                callback: 'openNextTranslated',
-                okTxt: 'Open next translated segment',
-                context: sid,
-                msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
-            });
-            UI.openableSegment = false;
-//            UI.openNextTranslated(sid);
-        }
-    }).on('open', 'section', function() {
+Review = {
+    enabled : function() {
+        return config.enableReview && config.isReview ;
+    },
+};
+
+if ( Review.enabled() )
+(function(Review, window) {
+    var alertNotTranslatedYet = function( sid ) {
+        APP.confirm({
+            name: 'confirmNotYetTranslated',
+            cancelTxt: 'Close',
+            callback: 'openNextTranslated',
+            okTxt: 'Open next translated segment',
+            context: sid,
+            msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
+        });
+    }
+
+    $.extend(Review, {
+        evalOpenableSegment : function(section) {
+            if ( isTranslated(section) ) return true ;
+            var sid = UI.getSegmentId( section );
+            alertNotTranslatedYet( sid ) ;
+            $(document).trigger('review:unopenableSegment', section);
+            return false ;
+        },
+    });
+})(Review, window);
+
+if ( Review.enabled() ) {
+    $('html').on('open', 'section', function() {
 //        console.log('new? ', $(this).hasClass('status-new'));
 //        console.log('draft? ', $(this).hasClass('status-draft'));
         if($(this).hasClass('opened')) {

@@ -18,7 +18,7 @@ class INIT {
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
-
+    public static $USE_COMPILED_ASSETS = false;
 
     public static $QUEUE_NAME = "matecat_analysis_queue";
     //This queue will be used for dqf project creation
@@ -26,6 +26,18 @@ class INIT {
     //This queue will be used for dqf project creation
     public static $DQF_SEGMENTS_QUEUE_NAME = "matecat_dqf_segment_queue";
 
+    public static $COMMENTS_ENABLED = true ;
+    public static $SSE_COMMENTS_QUEUE_NAME = "matecat_sse_comments";
+    public static $SSE_BASE_URL;
+
+    public static $SMTP_HOST;
+    public static $SMTP_PORT;
+    public static $SMTP_SENDER;
+    public static $SMTP_HOSTNAME;
+
+    public static $MAILER_FROM = 'cattool@matecat.com' ;
+    public static $MAILER_FROM_NAME = 'MateCat';
+    public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
     public static $LOG_REPOSITORY;
     public static $STORAGE_DIR;
@@ -67,6 +79,14 @@ class INIT {
     public static $MAX_NUM_FILES = 100;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
+
+    /**
+     * This interval is needed for massive copy-source-to-target feature. <br>
+     * If user triggers that feature 3 times within this interval (in seconds),
+     * a popup appears asking him if he wants to trigger the massive function.
+     * @var int Interval in seconds
+     */
+    public static $COPY_SOURCE_INTERVAL = 300;
 
     /**
      * Default Matecat user agent string

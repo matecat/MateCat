@@ -1,11 +1,10 @@
 /*
-	Component: functions 
+	Component: functions
  */
 
 function htmlEncode(value) {
 	if (value) {
-		a = jQuery('<div />').text(value).html();
-		return a;
+		return jQuery('<div />').text(value).html();
 	} else {
 		return '';
 	}
@@ -80,7 +79,7 @@ function processpaste(elem, savedcontent) {
 
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
-	
+
 	// Do whatever with gathered data;
 	$('#placeHolder').before(pasteddata);
 	focusOnPlaceholder();
@@ -136,7 +135,7 @@ function insertNodeAtCursor(node) {
 
 function setCursorAfterNode(range, node) {
 	range.setStartAfter(node);
-	range.setEndAfter(node); 
+	range.setEndAfter(node);
 	window.getSelection().removeAllRanges();
 	window.getSelection().addRange(range);
 }
@@ -197,7 +196,7 @@ function setCursorPosition(el, pos) {
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
-	if(typeof el[0] != 'undefined') el.focus();	
+	if(typeof el[0] != 'undefined') el.focus();
 }
 
 function removeSelectedText() {
@@ -388,7 +387,7 @@ function view2rawxliff(segment) {
 	// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
 	// output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
 
-	// caso controverso <g id="4" x="&lt; dfsd &gt;"> 
+	// caso controverso <g id="4" x="&lt; dfsd &gt;">
 	//segment=htmlDecode(segment);
 	segment = placehold_xliff_tags(segment);
 	segment = htmlEncode(segment);
@@ -447,7 +446,7 @@ function restoreSelection() {
 	}
 }
 
-function selectText(element) { 
+function selectText(element) {
 	var doc = document, text = element, range, selection;
 	if (doc.body.createTextRange) {
 		range = document.body.createTextRange();
@@ -506,23 +505,123 @@ function insertHtmlAfterSelection(html) {
     }
 }
 
+function ParsedHash( hash ) {
+    var split ;
+    var actionSep = ',' ;
+    var chunkSep = '-';
+    var that = this ;
+    var _obj = {};
+
+    var processObject = function( obj ) {
+        _obj = obj ;
+    }
+
+    var processString = function( hash ) {
+        if ( hash.indexOf('#') == 0 ) hash = hash.substr(1);
+
+        if ( hash.indexOf( actionSep ) != -1 ) {
+            split = hash.split( actionSep );
+
+            _obj.segmentId = split[0];
+            _obj.action = split[1];
+        } else {
+            _obj.segmentId = hash ;
+            _obj.action = null;
+        }
+
+        if ( _obj.segmentId.indexOf( chunkSep ) != -1 ) {
+            split = hash.split( chunkSep );
+
+            _obj.splittedSegmentId = split[0];
+            _obj.chunkId = split[1];
+        }
+    }
+
+    if (typeof hash === 'string') {
+        processString( hash );
+    } else {
+        processObject( hash );
+    }
+
+    this.segmentId = _obj.segmentId ;
+    this.action = _obj.action ;
+    this.splittedSegmentId = _obj.splittedSegmentId ;
+    this.chunkId = _obj.chunkId ;
+
+    this.isComment = function() {
+        return _obj.action == MBC.const.commentAction ;
+    }
+
+    this.toString = function() {
+        var hash = '';
+        if ( _obj.splittedSegmentId ) {
+            hash = _obj.splittedSegmentId + chunkSep + _obj.chunkId ;
+        } else {
+            hash = _obj.segmentId ;
+        }
+        if ( _obj.action ) {
+            hash = hash + actionSep + _obj.action ;
+        }
+        return hash ;
+    }
+
+    this.onlyActionRemoved = function( hash ) {
+        var current = new ParsedHash( hash );
+        var diff = this.toString().split( current.toString() );
+        return diff[1] == actionSep + MBC.const.commentAction ;
+    }
+
+    this.hashCleanupRequired = function() {
+        return MBC.enabled() && this.isComment();
+    }
+
+    this.cleanupHash = function() {
+        notifyModules();
+        window.location.hash = UI.parsedHash.segmentId ;
+    }
+
+    var notifyModules = function() {
+        MBC.enabled() && that.isComment() && MBC.setLastCommentHash( that );
+    }
+}
+
 function setBrowserHistoryBehavior() {
 
-	window.onpopstate = function() {
-		segmentId = location.hash.substr(1);
-		if (UI.segmentIsLoaded(segmentId)) {
-			$(".editarea", $('#segment-' + segmentId)).click();
-		} else {
-			if ($('section').length)
-				UI.pointBackToSegment(segmentId);
-		}
-	};
+    window.onpopstate = function() {
+        segmentId = location.hash.substr(1); // TODO: check this global var is no longer used and remove it
 
+        if ( UI.parsedHash.onlyActionRemoved( window.location.hash ) ) {
+            return ;
+        }
+
+        UI.parsedHash = new ParsedHash( window.location.hash );
+
+        if ( UI.parsedHash.hashCleanupRequired() ) {
+            UI.parsedHash.cleanupHash();
+        }
+
+        function updateAppByPopState() {
+            var segment = UI.getSegmentById( UI.parsedHash.segmentId );
+            if ( segment.length ) {
+                UI.gotoSegment( UI.parsedHash.segmentId );
+            } else {
+                if ($('section').length) {
+                    UI.pointBackToSegment( UI.parsedHash.segmentId );
+                }
+            }
+        }
+        updateAppByPopState();
+
+    };
+
+    UI.parsedHash = new ParsedHash( window.location.hash );
+    UI.parsedHash.hashCleanupRequired() && UI.parsedHash.cleanupHash();
 }
+
 
 function goodbye(e) {
 
-    UI.clearStorage('contribution'); 
+    UI.clearStorage('contribution');
 
     if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
         return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
@@ -554,7 +653,7 @@ function goodbye(e) {
 
     }
 
-}   
+}
 
 $.fn.isOnScreen = function() {
 
@@ -755,4 +854,11 @@ if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function(suffix) {
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
     };
+}
+
+function isTranslated(section) {
+    return ! (
+        section.hasClass('status-new') ||
+        section.hasClass('status-draft')
+    );
 }

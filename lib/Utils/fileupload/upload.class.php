@@ -370,8 +370,7 @@ class UploadHandler {
                 // FORMAT ERROR MESSAGE
                 switch ($file->error) {
                     case 'abort':
-                        $file->error = "Unable to upload the file.\n
-                        Please contact support@matecat.com";
+                        $file->error = "File upload failed. Refresh the page using CTRL+R (or CMD+R) and try again.";
                         break;
                     default: null;
                 }

@@ -13,20 +13,38 @@ class getWarningController extends ajaxController {
 
         $filterArgs = array(
 
-            'id'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'src_content' => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'trg_content' => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'token'       => array( 'filter' => FILTER_SANITIZE_STRING,
-                                    'flags'  => FILTER_FLAG_STRIP_LOW ),
-            'logs'        => array( 'filter' => FILTER_UNSAFE_RAW),
-            'glossaryList' => array( 'filter' => FILTER_CALLBACK, 'options' => array('self','filterString') )
+                'id'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'id_job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'src_content'    => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'trg_content'    => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'password'       => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'token'          => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ),
+                'logs'           => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'glossaryList'   => array( 'filter' => FILTER_CALLBACK, 'options' => array( 'self', 'filterString' ) ),
+                'segment_status' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
         );
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
 
-        if( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ){
+        /**
+         * Update 2015/08/11, roberto@translated.net
+         * getWarning needs the segment status too because of a bug:
+         *   sometimes the client calls getWarning and sends an empty trg_content
+         *   because the suggestion has not been loaded yet.
+         *   This happens only if segment is in status NEW
+         */
+        if( empty($this->__postInput->segment_status ) ){
+            $this->__postInput->segment_status = 'draft';
+        }
+
+        if ( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ) {
             Log::$fileName = 'clientLog.log';
             Log::doLog( json_decode( $this->__postInput->logs ) );
             Log::$fileName = 'log.txt';
@@ -57,6 +75,16 @@ class getWarningController extends ajaxController {
         if ( empty( $this->__postInput->id ) ) {
             $this->__globalWarningsCall();
         } else {
+            /**
+             * Update 2015/08/11, roberto@translated.net
+             * getWarning needs the segment status too because of a bug:
+             *   sometimes the client calls getWarning and sends an empty trg_content
+             *   because the suggestion has not been loaded yet.
+             *   This happens only if segment is in status NEW
+             */
+            if($this->__postInput->segment_status == 'new' &&
+                    empty($this->__postInput->trg_content)) return;
+
             $this->__postInput->src_content = CatUtils::view2rawxliff( $this->__postInput->src_content );
             $this->__postInput->trg_content = CatUtils::view2rawxliff( $this->__postInput->trg_content );
             $this->__segmentWarningsCall();
@@ -92,7 +120,7 @@ class getWarningController extends ajaxController {
 
         }
 
-        $this->result[ 'details' ] = array_values($result);
+        $this->result[ 'details' ] = array_values( $result );
         $this->result[ 'token' ]   = $this->__postInput->token;
 
 //        $msg = 'MateCat will be undergoing scheduled maintenance starting on Saturday, December 13 at 11:50 PM CEST. MateCat will be unavailable for approximately 4 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
@@ -105,14 +133,14 @@ class getWarningController extends ajaxController {
 
         $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );
 
-        foreach ( $tMismatch as $row ){
-            if( !empty( $row['first_of_my_job'] ) ){
-                $result['mine']++;
-                $result['list_in_my_job'][] = $row['first_of_my_job'];
+        foreach ( $tMismatch as $row ) {
+            if ( !empty( $row[ 'first_of_my_job' ] ) ) {
+                $result[ 'mine' ]++;
+                $result[ 'list_in_my_job' ][] = $row[ 'first_of_my_job' ];
 //                $result['list_in_my_job'][] = array_shift( explode( "," , $row['first_of_my_job'] ) );
 
                 //append to global list
-                $this->result[ 'details' ][] = $row['first_of_my_job'];
+                $this->result[ 'details' ][] = $row[ 'first_of_my_job' ];
 //                $this->result[ 'details' ] = array_merge( $this->result[ 'details' ], explode( "," , $row['first_of_my_job'] )  )
 
             }
@@ -120,10 +148,10 @@ class getWarningController extends ajaxController {
 
         //???? php maps internally numerical keys of array_unique as string so with json_encode
         //it become an object and not an array!!
-        $this->result[ 'details' ] = array_values( array_unique( $this->result[ 'details' ] ) );
+        $this->result[ 'details' ]                = array_values( array_unique( $this->result[ 'details' ] ) );
         $this->result[ 'translation_mismatches' ] = $result;
 
-	}
+    }
 
     /**
      * Performs a check on single segment
@@ -137,9 +165,12 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
-        
-        if(is_array($this->__postInput->glossaryList) && !empty($this->__postInput->glossaryList)) {
-            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
+
+        if ( is_array( $this->__postInput->glossaryList ) && !empty( $this->__postInput->glossaryList ) ) {
+            /**
+             * FIXME: temporarily disabled due to a bug.
+             */
+//            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
         }
 
         if ( $QA->thereAreNotices() ) {
@@ -153,7 +184,7 @@ class getWarningController extends ajaxController {
             $this->result[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $QA->getTargetTagPositionError();
             $this->result[ 'total' ]                                = count( $QA->getNotices() );
 //temp
-			
+
 //            Log::doLog($this->__postInput->trg_content);
 //            Log::doLog($this->result);
 
@@ -161,15 +192,15 @@ class getWarningController extends ajaxController {
 
     }
 
-    private static  function filterString($glossaryWord) {
-        $glossaryWord = (string) $glossaryWord;
+    private static function filterString( $glossaryWord ) {
+        $glossaryWord = (string)$glossaryWord;
         $glossaryWord = filter_var(
                 $glossaryWord,
                 FILTER_SANITIZE_STRING,
                 array( 'flags' => FILTER_FLAG_STRIP_LOW )
         );
 
-        return empty($glossaryWord) ? '' : $glossaryWord;
+        return empty( $glossaryWord ) ? '' : $glossaryWord;
     }
 
 

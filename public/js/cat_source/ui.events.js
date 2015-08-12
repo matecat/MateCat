@@ -1,5 +1,5 @@
 /*
-	Component: ui.events 
+	Component: ui.events
  */
 $.extend(UI, {
 	bindShortcuts: function() {
@@ -78,7 +78,7 @@ $.extend(UI, {
 				tab = 'matches';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
 		}).on('keydown', null, 'ctrl+2', function(e) {
@@ -86,9 +86,9 @@ $.extend(UI, {
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');		
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			} else if(active.hasClass('tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
 		}).on('keydown', null, 'ctrl+3', function(e) {
@@ -96,9 +96,9 @@ $.extend(UI, {
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');		
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			} else if(active.hasClass('.tab-switcher-al')) {
-				tab = 'alternatives';								
+				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
@@ -163,8 +163,8 @@ $.extend(UI, {
 //			e.preventDefault();
 //			$('body').removeClass('incomingMsg');
 //			var expireDate = new Date($('#messageBar').attr('data-expire'));
-//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });		
-					
+//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });
+
 //		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 //			console.log($(this).prop('checked'));
 //			if ($(this).prop('checked')) {
@@ -250,15 +250,6 @@ $.extend(UI, {
                 }, 500);
             }
 */
-/*
-        }).on('click', '.addtm-tr-key .btn-ok', function() {
-            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
-                return false;
-            } else {
-                $('.addtm-tr-key .error-message').text('').hide();
-            }
-            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
-*/
         }).on('click', '#addtm-select-file', function() {
             $('.addtm-select-file').click();
         }).on('change', '.addtm-select-file', function() {
@@ -275,14 +266,6 @@ $.extend(UI, {
             UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function() {
             UI.checkAddTMEnable();
-/*
-        }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
-            UI.checkAddTMEnable($('#addtm-add'));
-        }).on('change', '#addtm-tr-key-key', function(e) {
-            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
-        }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
-            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
-*/
         }).on('click', '#uploadTMX .delete', function(e) {
             e.preventDefault();
             $('#uploadTMX').html('');
@@ -488,7 +471,7 @@ $.extend(UI, {
 			e.preventDefault();
 			$('#settings-shortcuts .list').remove();
 			UI.setShortcuts();
-			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');	
+			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -565,7 +548,7 @@ $.extend(UI, {
 					console.log('troppi tasti control: ', $('span', s).length);
 					return false;
 				}
-			
+
 				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
 				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
 			} else {
@@ -591,7 +574,7 @@ $.extend(UI, {
 //				$('.msg', c).remove();
 //				$('#settings-shortcuts.modifying').removeClass('modifying');
 //				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
-			}				
+			}
 		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
 			var c = $(this).parents('.combination');
@@ -616,6 +599,7 @@ $.extend(UI, {
                 newWindow.focus();
             }
         });
+
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('cachedSegmentObjects', function() {
@@ -635,13 +619,16 @@ $.extend(UI, {
                 if(!UI.isSafari) saveSelection();
             }
             $('.editor .rangySelectionBoundary').addClass('focusOut');
-            hasFocusBefore = UI.editarea.is(":focus");
-            setTimeout(function() {
-                hasFocusAfter = UI.editarea.is(":focus");
-                if(hasFocusBefore && hasFocusAfter){
-                    $('.editor .rangySelectionBoundary.focusOut').remove();
-                }
-            }, 600);
+
+            if ( UI.editarea != '') {
+                hasFocusBefore = UI.editarea.is(":focus");
+                setTimeout(function() {
+                    hasFocusAfter = UI.editarea.is(":focus");
+                    if(hasFocusBefore && hasFocusAfter){
+                        $('.editor .rangySelectionBoundary.focusOut').remove();
+                    }
+                }, 600);
+            }
         });
 //		window.onbeforeunload = goodbye;
 
@@ -649,7 +636,7 @@ $.extend(UI, {
 			goodbye(e);
 		};
 
-	
+
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
@@ -712,16 +699,28 @@ $.extend(UI, {
 				UI.removeStatusMenu(statusMenu);
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
-			e.preventDefault();
-//            if(config.isReview) return false;
-			if (UI.justSelecting('readonly'))
-				return;
-			if (UI.someUserSelection)
-				return;
-			var msg = (UI.body.hasClass('archived'))? 'Job has been archived and cannot be edited.' : 'This part has not been assigned to you.';
-			UI.selectingReadonly = setTimeout(function() {
-				APP.alert({msg: msg});
-			}, 200);
+
+            e.preventDefault();
+
+            var section = $(e.target).closest('section');
+
+			if ( UI.justSelecting('readonly') )   return;
+			if ( UI.someUserSelection )           return;
+
+            var doShowAlert = function () {
+                return true ;
+                // return ! ( MBC.enabled() && MBC.popLastSelectedOnHistory() == sid ) ;
+            }
+
+            if ( doShowAlert() ) {
+                var msgArchived = 'Job has been archived and cannot be edited.' ;
+                var msgOther = 'This part has not been assigned to you.' ;
+                var msg = (UI.body.hasClass('archived'))? msgArchived : msgOther ;
+
+                UI.selectingReadonly = setTimeout(function() {
+                    APP.alert({msg: msg});
+                }, 200);
+            }
 
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
@@ -775,11 +774,34 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
+        $('#outer').click(function(e) {
+//            console.log('cliccato: ', e.target);
+//            console.log('a: ', !UI.currentSegment.is(e.target));
+//            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
+
+            var container = $(UI.currentSegment);
+            if (!container.is(e.target) // if the target of the click isn't the container...
+                && container.has(e.target).length === 0 // ... nor a descendant of the container
+                && !$(e.target).hasClass('translated') // has not clicked on a translated button
+                && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
+                )
+            {
+//                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
+                UI.closeSegment(UI.currentSegment, 1);
+            }
+
+        });
+
 		$('html').click(function() {
 			$(".menucolor").hide();
-		} ).on('click', '#quality-report', function(e){
+		}).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
+        }).on('keydown', function(e) {
+            if((e.which == '27')&&(UI.body.hasClass('editing'))) {
+                // close the current segment
+                UI.closeSegment(UI.currentSegment, 1);
+            };
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             $('#downloadProject').click();
@@ -839,9 +861,9 @@ $.extend(UI, {
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
-			e.stopPropagation();			
+			e.stopPropagation();
 		}).on('mouseup', '.editarea', function() { //mouseupeditarea
-            if(!UI.editarea.find('.locked.selected').length) {
+            if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     UI.showEditToolbar();
 //                    if(!UI.isFirefox) UI.showEditToolbar();
@@ -920,11 +942,12 @@ $.extend(UI, {
                 }
 			}
 
-            UI.lockTags(UI.editarea);
-            UI.checkTagProximity();
+            if (UI.editarea != '') {
+                UI.lockTags(UI.editarea);
+                UI.checkTagProximity();
+            }
 
-            if (UI.debug)
-				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
+            if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
@@ -1033,7 +1056,7 @@ $.extend(UI, {
 			}
 */
 
-//			console.log(e.which); 
+//			console.log(e.which);
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
 //                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
@@ -1153,14 +1176,14 @@ $.extend(UI, {
 
 					// insideMark management
 					if ((e.which == 8)&&(isInsideMark)) {
-						console.log('inside mark'); 
+						console.log('inside mark');
 					}
 
 
 
 				}
 			}
-			
+
 			if (e.which == 8) { // backspace
 				if($('.tag-autocomplete').length) {
 					UI.closeTagAutocompletePanel();
@@ -1168,7 +1191,7 @@ $.extend(UI, {
 						UI.openTagAutocompletePanel();
 						added = UI.getPartialTagAutocomplete();
 						if(added === '') UI.closeTagAutocompletePanel();
-					}, 10);		
+					}, 10);
 				}
 			}
 			if (e.which == 9) { // tab
@@ -1253,7 +1276,7 @@ $.extend(UI, {
 					if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
 						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
 						return false;
-					}	
+					}
 				}
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
@@ -1297,7 +1320,7 @@ $.extend(UI, {
 
 			if (e.which == 40) { // down arrow
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');	
+					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
 					return false;
 				}
 				selection = window.getSelection();
@@ -1487,11 +1510,11 @@ $.extend(UI, {
 			setTimeout(function() {
 				var strChunk = UI.editarea.html().replace(/(^.*?)&nbsp;(<span contenteditable\="false" class\="locked).*?$/gi, '$1');
 
-				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space). 
+				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space).
 				// In this case, we have to add it again because we are also deleting the &nbsp; added by the browser.
 				// We cannot detect if the user has dropped immediately before or after the space, so we decide where to put it according if it is an opening tag or a closing tag,
-				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {  
-					toAddBefore = (UI.draggingTagIsOpening)? ' ' : ''; 
+				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {
+					toAddBefore = (UI.draggingTagIsOpening)? ' ' : '';
 					toAddAfter = (UI.draggingTagIsOpening)? '' : ' ';
 				} else {
 					toAddBefore = toAddAfter = '';
@@ -1509,7 +1532,7 @@ $.extend(UI, {
 				if(nn > 0) {
 					setCursorPosition(uniqueEl[0].nextSibling, 0);
 				}
-				
+
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
@@ -1735,7 +1758,7 @@ $.extend(UI, {
 				}
 			}
 		}).on('input', '.sub-editor .gl-search .search-target', function() {
-			gl = $(this).parents('.gl-search').find('.set-glossary');	
+			gl = $(this).parents('.gl-search').find('.set-glossary');
 			if($(this).text() === '') {
 				gl.addClass('disabled');
 			} else {
@@ -1813,7 +1836,7 @@ $.extend(UI, {
 			if($(tab).hasClass('extended')) {
 				UI.setExtendedConcordances(false);
 
-/*				
+/*
 				$(tab).removeClass('extended')
 //				console.log(container.height());
 				$(container).removeAttr('style');
@@ -1822,7 +1845,7 @@ $.extend(UI, {
 */
 			} else {
 				UI.setExtendedConcordances(true);
-				
+
 //				$(container).css('height', $(tab).height() + 'px');
 //				$(tab).addClass('extended');
 //				$(this).text('Less');
@@ -1883,7 +1906,7 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function() {
 			UI.setNextWarnedSegment();
 		});
-		
+
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
@@ -1999,7 +2022,7 @@ $.extend(UI, {
 			}
 
 			if (UI.searchMode == 'onlyStatus') {
-				
+
 //			} else if (UI.searchMode == 'source&target') {
 
 			} else {
@@ -2067,9 +2090,8 @@ $.extend(UI, {
 		});
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;
-		if (this.debug)
-			console.log('Init time: ' + this.initTime);
-		
+		if (this.debug) { console.log('Init time: ' + this.initTime); }
+
 	}
 });
 

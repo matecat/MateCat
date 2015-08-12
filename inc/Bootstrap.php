@@ -267,6 +267,10 @@ class Bootstrap {
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
 
         foreach( $env as $KEY => $value ){
+            if( $KEY == 'STORAGE_DIR' ) {
+                INIT::$STORAGE_DIR = INIT::$ROOT . $value;
+                continue;
+            }
 
             if ( property_exists( 'INIT', $KEY ) ) {
                 INIT::${$KEY} = $value;
