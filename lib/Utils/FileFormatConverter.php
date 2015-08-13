@@ -9,6 +9,7 @@ class FileFormatConverter {
     private $port = "8732"; //port the convertrs listen to
     const toXliffFunction = "convert"; //action string for the converters to convert to XLIFF
     const fromXliffFunction = "derived"; //action string for the converters to convert to original
+    const testFunction = "test"; // action check connection
     private $opt = array(); //curl options
     private $lang_handler; //object that exposes language utilities
     private $storage_lookup_map;
@@ -288,8 +289,8 @@ class FileFormatConverter {
             throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
         }
 
-        // TODO: enable?
-        //if ( $this->checkOpenService( $url ) ) {
+
+        if ( $this->checkOpenService() ) {
 
             $ch = curl_init();
 
@@ -325,10 +326,10 @@ class FileFormatConverter {
             if ( $curl_errno > 0 ) {
                 $output = json_encode( array( "isSuccess" => false, "errorMessage" => $curl_error ) );
             }
-
-        //} else {
-        //    $output = json_encode( array( "isSuccess" => false, "errorMessage" => "Internal connection issue. Try converting it again." ) );
-        //}
+        }
+        else {
+            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "Internal connection issue. Try converting it again." ) );
+        }
 
         return $output;
     }
@@ -379,23 +380,17 @@ class FileFormatConverter {
         return $res;
     }
 
-    private function checkOpenService( $url ) {
-        //default is failure
-        $open = false;
-
-        //get address only
-        $url = substr( $url, 0, strpos( $url, ':' ) );
-
-        //attempt to connect
-        $connection = @fsockopen( $url, $this->port );
-        if ( $connection ) {
-            //success
-            $open = true;
-            //close port
-            fclose( $connection );
-        }
-
-        return $open;
+    private function checkOpenService() {
+        $url = "http://{$this->ip}:{$this->port}/".self::testFunction;
+        $cl = curl_init($url);
+        curl_setopt($cl,CURLOPT_CONNECTTIMEOUT,3);
+        curl_setopt($cl,CURLOPT_HEADER,true);
+        curl_setopt($cl,CURLOPT_NOBODY,true);
+        curl_setopt($cl,CURLOPT_RETURNTRANSFER,true);
+        curl_exec($cl);
+        $httpcode = curl_getinfo($cl, CURLINFO_HTTP_CODE);
+        curl_close($cl);
+        return $httpcode >= 200 && $httpcode < 300;
     }
 
     public function convertToOriginal( $xliffVector, $chosen_by_user_machine = false ) {
