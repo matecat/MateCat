@@ -17,9 +17,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
     protected $_config = array(
             'segment'     => null,
-            'translation' => null,
-            'source'      => null,
-            'target'      => null,
+            'translation' => null
     );
 
     public function __construct($engineRecord) {
@@ -155,8 +153,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
@@ -180,9 +176,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         if ( null == $this->contribute_relative_url ) {
             return true;
         }
-
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
        $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
