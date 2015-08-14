@@ -575,7 +575,6 @@
                     },
                     success: function(d) {
                         console.log('AJAX response received.');
-                        debugger;
                         if(d.errors.length) {
                             console.log('error');
                             $('#mt-provider-details .error').text(d.errors[0].message);
