@@ -17,9 +17,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
     protected $_config = array(
             'segment'     => null,
-            'translation' => null,
-            'source'      => null,
-            'target'      => null,
+            'translation' => null
     );
 
     public function __construct($engineRecord) {
@@ -143,7 +141,9 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 
                 $decoded = array();
                 foreach($parsed as $termData){
-                    $decoded[$termData['CorpusId']] = $termData['Title'];
+                    if ($termData['Status'] == 'Ready') {
+                        $decoded[$termData['CorpusId']] = $termData['Title'];
+                    }
                 }
             }
         } else {
@@ -162,8 +162,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
@@ -172,8 +170,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['clientID'] = $this->client_id;
                 $qeParam = $this->use_qe ? ",qe" : "";
                 $parameters['options'] = "termCorpusId=" . $this->terms_id . $qeParam;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( "translate_relative_url", $parameters );
 
@@ -188,9 +184,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             return true;
         }
 
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-
        $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
                 $parameters['appID'] = ""; // not used for now
@@ -198,8 +191,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['clientID'] = $this->client_id;
                 $parameters['options'] = "termCorpusId=" . $this->terms_id;
                 $parameters[ 'translation' ] = $_config[ 'translation' ];
-                //$parameters[ 'source' ]      = $_config[ 'source' ];
-                //$parameters[ 'target' ]      = $_config[ 'target' ];
 
         $this->call( "contribute_relative_url", $parameters );
 
@@ -227,9 +218,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         $parameters = array();
                 $parameters['appID'] = ""; // not used for now
                 $parameters['clientID'] = $this->client_id;
-                //$parameters['options'] = "termCorpusId=" . $this->terms_id;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( 'system_list_relative_url', $parameters );
         
@@ -248,9 +236,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['appID'] = ""; // not used for now
                 $parameters['clientID'] = $this->client_id;
                 $parameters['systemID'] = $this->system_id;
-                //$parameters['options'] = "termCorpusId=" . $this->terms_id;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( 'term_list_relative_url', $parameters );
 
@@ -260,5 +245,16 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         }
         
         return array('terms' => $termList);
+    }
+
+    public function wakeUp(){
+        $_config = $this->getConfigStruct();
+        $_config['segment'] = 'wakeup';
+
+        $this->_setAdditionalCurlParams( array(
+                       CURLOPT_TIMEOUT        => 1
+               ));
+
+        $this->get($_config);
     }
 }

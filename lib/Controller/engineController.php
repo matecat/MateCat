@@ -198,17 +198,6 @@ class engineController extends ajaxController {
                     }
                     $newEngine->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
                 }
-                
-                
-                /*$config = array(
-                    'new_engine_name' => $this->name,
-                    'client_id' => $this->engineData['client_id'],
-                    'system_id' => array('someid1' => 'System 1', 'someid2' => 'System 2', 'someid3' => 'System 3', 'someid4' => 'System 4'),
-                    'terms_id' => array('someidterms1' => 'Terms 1', 'sometermsid2' => 'Terms 2', 'sometermsid3' => 'Terms 3')
-                    );
-                
-                $this->result['data']['config'] = $config;
-                return;*/
 
                 break;
             default:
@@ -269,8 +258,6 @@ class engineController extends ajaxController {
             
             $temp_engine = Engine::getInstance( $result->id );
             $config = $temp_engine->getConfigStruct();
-            $config[ 'source' ]  = "en-US"; // TODO replace with values from the project being currently created
-            $config[ 'target' ]  = "lv-LV";
             $systemList = $temp_engine->getSystemList($config);
             
             $engineDAO->delete($result); // delete the newly added engine. this is the first time in engineController::add()
@@ -293,6 +280,11 @@ class engineController extends ajaxController {
             
             $this->result['name'] = $this->name;
             $this->result['data']['config'] = $uiConfig;
+        } elseif ( $newEngine instanceof EnginesModel_LetsMTStruct){
+            // The user has added and configured the Tilde MT engine (the System ID has been set)
+            // Do a simple translation request so that the system wakes up by the time the user needs it for translating
+            $engine_test = Engine::getInstance( $result->id );
+            $engine_test->wakeUp();
         }
         
         $this->result['data']['id'] = $result->id;

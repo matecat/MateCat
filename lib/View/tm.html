@@ -579,7 +579,6 @@
                     },
                     success: function(d) {
                         console.log('AJAX response received.');
-                        debugger;
                         if(d.errors.length) {
                             console.log('error');
                             $('#mt-provider-details .error').text(d.errors[0].message);
@@ -600,7 +599,6 @@
             }
             
             function toggleQEEnabled(checkbox) {
-                //var disabled = !$(checkbox).prop('checked');
                 var disabled = !checkbox.checked;
                 $('#minimum_qe_field input').prop('disabled', disabled);
                 if (disabled) {
