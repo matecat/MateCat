@@ -198,17 +198,6 @@ class engineController extends ajaxController {
                     }
                     $newEngine->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
                 }
-                
-                
-                /*$config = array(
-                    'new_engine_name' => $this->name,
-                    'client_id' => $this->engineData['client_id'],
-                    'system_id' => array('someid1' => 'System 1', 'someid2' => 'System 2', 'someid3' => 'System 3', 'someid4' => 'System 4'),
-                    'terms_id' => array('someidterms1' => 'Terms 1', 'sometermsid2' => 'Terms 2', 'sometermsid3' => 'Terms 3')
-                    );
-                
-                $this->result['data']['config'] = $config;
-                return;*/
 
                 break;
             default:

@@ -161,8 +161,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['clientID'] = $this->client_id;
                 $qeParam = $this->use_qe ? ",qe" : "";
                 $parameters['options'] = "termCorpusId=" . $this->terms_id . $qeParam;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( "translate_relative_url", $parameters );
 
@@ -184,8 +182,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['clientID'] = $this->client_id;
                 $parameters['options'] = "termCorpusId=" . $this->terms_id;
                 $parameters[ 'translation' ] = $_config[ 'translation' ];
-                //$parameters[ 'source' ]      = $_config[ 'source' ];
-                //$parameters[ 'target' ]      = $_config[ 'target' ];
 
         $this->call( "contribute_relative_url", $parameters );
 
@@ -213,9 +209,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         $parameters = array();
                 $parameters['appID'] = ""; // not used for now
                 $parameters['clientID'] = $this->client_id;
-                //$parameters['options'] = "termCorpusId=" . $this->terms_id;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( 'system_list_relative_url', $parameters );
         
@@ -234,9 +227,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['appID'] = ""; // not used for now
                 $parameters['clientID'] = $this->client_id;
                 $parameters['systemID'] = $this->system_id;
-                //$parameters['options'] = "termCorpusId=" . $this->terms_id;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
 
 	$this->call( 'term_list_relative_url', $parameters );
 
