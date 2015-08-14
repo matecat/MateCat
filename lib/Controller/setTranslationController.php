@@ -20,6 +20,18 @@ class setTranslationController extends ajaxController {
 
     protected $client_target_version;
 
+    /**
+     * This constant represent the job progress percentage over
+     * which the wordcount could be updated by a massive query.
+     */
+    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
+
+    /**
+     * The probability over which the wordcount massive query
+     * will be triggered
+     */
+    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
+
     public function __construct() {
 
         parent::__construct();
@@ -68,7 +80,7 @@ class setTranslationController extends ajaxController {
         $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
 
-        if(is_null($this->propagate) || !isset($this->propagate) ){
+        if ( is_null( $this->propagate ) || !isset( $this->propagate ) ) {
             $this->propagate = true;
         }
         Log::doLog( $this->__postInput );
@@ -82,7 +94,7 @@ class setTranslationController extends ajaxController {
 
         $this->parseIDSegment();
         if ( empty( $this->id_segment ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
+            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
 //        $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "prova" );
@@ -94,8 +106,7 @@ class setTranslationController extends ajaxController {
             if ( count( array_unique( $this->split_statuses ) ) == 1 ) {
                 //IF ALL translation chunks are in the same status, we take the status for the entire segment
                 $this->status = $this->split_statuses[ 0 ];
-            }
-            else {
+            } else {
                 $this->status = Constants_TranslationStatus::STATUS_DRAFT;
             }
 
@@ -103,17 +114,15 @@ class setTranslationController extends ajaxController {
                 $this->_checkForStatus( $value );
             }
 
-        }
-        else {
+        } else {
 
             $this->_checkForStatus( $this->status );
 
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing id_job" );
-        }
-        else {
+            $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
+        } else {
 
 //            $this->result[ 'error' ][ ] = array( "code" => -1000, "message" => "test 1" );
 //            throw new Exception( 'prova', -1 );
@@ -131,21 +140,21 @@ class setTranslationController extends ajaxController {
             $errno = $err[ 'error_code' ];
 
             if ( $errno != 0 ) {
-                $msg                         = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+                $msg                        = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
+                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
 
                 throw new Exception( $msg, -1 );
             }
 
             //add check for job status archived.
             if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "job archived" );
+                $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
             }
 
             //check for Password correctness ( remove segment split )
             $pCheck = new AjaxPasswordCheck();
             if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
+                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
 
         }
@@ -215,8 +224,7 @@ class setTranslationController extends ajaxController {
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
             $translation = $this->translation;
-        }
-        else {
+        } else {
             $err_json    = '';
             $translation = $check->getTrgNormalized();
 
@@ -260,7 +268,7 @@ class setTranslationController extends ajaxController {
             $res                                      = addTranslation( $_Translation );
 
             if ( $res < 0 ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
                 $db->rollback();
 
                 return $res;
@@ -314,8 +322,7 @@ class setTranslationController extends ajaxController {
             if ( $old_translation[ 'suggestion' ] == null ) {
                 $dqfSegmentStruct->target_segment = "";
                 $dqfSegmentStruct->tm_match       = 0;
-            }
-            else {
+            } else {
                 $dqfSegmentStruct->target_segment = $old_translation[ 'suggestion' ];
                 $dqfSegmentStruct->tm_match       = $old_translation[ 'suggestion_match' ];
             }
@@ -353,7 +360,8 @@ class setTranslationController extends ajaxController {
         //but to exclude current segment from auto-propagation
         $_idSegment = $this->id_segment;
 
-        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] =  $this->status : null /* NO OP */;
+        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] = $this->status : null /* NO OP */
+        ;
 
         $TPropagation[ 'id_job' ]                 = $this->id_job;
         $TPropagation[ 'translation' ]            = $translation;
@@ -365,9 +373,10 @@ class setTranslationController extends ajaxController {
 
         $propagationTotal = array();
         if ( $propagateToTranslated && in_array( $this->status, array(
-                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
-                Constants_TranslationStatus::STATUS_REJECTED
-        ) ) ) {
+                        Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
+                        Constants_TranslationStatus::STATUS_REJECTED
+                ) )
+        ) {
 
             try {
 
@@ -411,19 +420,44 @@ class setTranslationController extends ajaxController {
             $counter->setOldStatus( $old_status );
             $counter->setNewStatus( $this->status );
 
-            $newValues = array();
+            $newValues   = array();
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
-            foreach( $propagationTotal as $__pos => $old_value ){
-                $counter->setOldStatus( $old_value['status'] );
+            foreach ( $propagationTotal as $__pos => $old_value ) {
+                $counter->setOldStatus( $old_value[ 'status' ] );
                 $counter->setNewStatus( $this->status );
-                $newValues[] = $counter->getUpdatedValues( $old_value['total'] );
+                $newValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
             }
 
             try {
-                $newTotals = $counter->updateDB( $newValues );
+                $updateJobCountersWithQuery = false;
+                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
+                $totalWords                 = array_sum( array(
+                        $this->jobData[ 'new_words' ],
+                        $this->jobData[ 'draft_words' ],
+                        $this->jobData[ 'translated_words' ],
+                        $this->jobData[ 'approved_words' ],
+                        $this->jobData[ 'rejected_words' ]
+                ) );
+
+                // if job progress is above 90%, then toss a d100.
+                // If the result is above 90, then manually update counters
+                // with a query (super slow, but executed few times)
+                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
+                    $d100Result = rand( 1, 100 );
+                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
+                        $updateJobCountersWithQuery = true;
+                    }
+                }
+
+                if ( $updateJobCountersWithQuery ) {
+                    $newTotals = $counter->updateDB_countAll( $newValues );
+                } else {
+                    $newTotals = $counter->updateDB( $newValues );
+                }
+
             } catch ( Exception $e ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
 //                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
 //                $x1 = explode( "\n" , var_export( $old_translation, true) );
 //                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
@@ -432,8 +466,7 @@ class setTranslationController extends ajaxController {
                 return $e->getCode();
             }
 
-        }
-        else {
+        } else {
             $newTotals = $old_wStruct;
         }
 
@@ -441,9 +474,8 @@ class setTranslationController extends ajaxController {
         $project   = getProject( $this->jobData[ 'id_project' ] );
         $project   = array_pop( $project );
 
-        $job_stats[ 'ANALYSIS_COMPLETE' ] = (
-
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+        $job_stats[ 'ANALYSIS_COMPLETE' ] = ( $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
         $file_stats = array();
@@ -462,8 +494,7 @@ class setTranslationController extends ajaxController {
         $this->result[ 'warning' ][ 'cod' ] = $warning->outcome;
         if ( $warning->outcome > 0 ) {
             $this->result[ 'warning' ][ 'id' ] = $this->id_segment;
-        }
-        else {
+        } else {
             $this->result[ 'warning' ][ 'id' ] = 0;
         }
 
@@ -496,5 +527,7 @@ class setTranslationController extends ajaxController {
         }
 
     }
+
+
 
 }
