@@ -251,4 +251,15 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         
         return array('terms' => $termList);
     }
+
+    public function wakeUp(){
+        $_config = $this->getConfigStruct();
+        $_config['segment'] = 'wakeup';
+
+        $this->_setAdditionalCurlParams( array(
+                       CURLOPT_TIMEOUT        => 1
+               ));
+
+        $this->get($_config);
+    }
 }
