@@ -57,7 +57,7 @@ class Bootstrap {
 
         //get the environment configuration
         self::getEnvConfig();
-
+file_put_contents ("aaa.txt",INIT::$STORAGE_DIR);
         INIT::$LOG_REPOSITORY                  = INIT::$STORAGE_DIR . "/log_archive";
         INIT::$UPLOAD_REPOSITORY               = INIT::$STORAGE_DIR . "/upload";
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
@@ -267,11 +267,11 @@ class Bootstrap {
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
 
         foreach( $env as $KEY => $value ){
-            if( $KEY == 'STORAGE_DIR' ) {
+/*            if( $KEY == 'STORAGE_DIR' ) {
                 INIT::$STORAGE_DIR = INIT::$ROOT . $value;
                 continue;
             }
-
+*/
             if ( property_exists( 'INIT', $KEY ) ) {
                 INIT::${$KEY} = $value;
             }
@@ -279,7 +279,7 @@ class Bootstrap {
         }
 
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
-
+file_put_contents("bbb.txt", INIT::$STORAGE_DIR);
         if ( self::$CONFIG['ENV'] == 'production' ) {
             if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
                 die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
