@@ -6400,7 +6400,6 @@ $.extend(UI, {
                 else {
                     return;
                 }
-                debugger;
                 $('.tab.sub-editor.matches .engine-errors', segment).show();
                 var percentText = this.created_by_type;
                 var suggestion_info = '';
