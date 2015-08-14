@@ -134,7 +134,9 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 
                 $decoded = array();
                 foreach($parsed as $termData){
-                    $decoded[$termData['CorpusId']] = $termData['Title'];
+                    if ($termData['Status'] == 'Ready') {
+                        $decoded[$termData['CorpusId']] = $termData['Title'];
+                    }
                 }
             }
         } else {
