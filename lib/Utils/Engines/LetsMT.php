@@ -116,7 +116,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                                     $statusName = $value['Value'];
                                     break;
                             }
-                            //strSysOnlineStatus = prop.Value;
                             break;
                         }
                     }
