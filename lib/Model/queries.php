@@ -834,50 +834,95 @@ function getFirstSegmentId( $jid, $password ) {
 
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
 
+    $queryAfter = "
+                    SELECT segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id = id_job
+                    WHERE id_job = $jid
+                        AND password = '$password'
+                        AND show_in_cattool = 1
+                        AND segments.id >= $ref_segment
+                    LIMIT %u
+                ";
+
+    $queryBefore = "
+                    SELECT * from(
+                        SELECT  segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id =  id_job
+                        WHERE id_job = $jid
+                            AND password = '$password'
+                            AND show_in_cattool = 1
+                            AND segments.id < $ref_segment
+                        ORDER BY __sid DESC
+                        LIMIT %u
+                    ) as TT
+                ";
+
     switch ( $where ) {
         case 'after':
-            $ref_point = $ref_segment;
+            $subQuery = sprintf( $queryAfter , $step * 2 );
             break;
         case 'before':
-            $ref_point = $ref_segment - ( $step + 1 );
+            $subQuery = sprintf( $queryBefore, $step * 2 );
             break;
         case 'center':
-            $ref_point = ( (float)$ref_segment ) - (int)( $step / 2 );
+            $subQuery = sprintf( $queryAfter . " UNION " . $queryBefore, $step, $step );
             break;
     }
 
-    //	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
+    $query = "SELECT j.id AS jid,
+                j.id_project AS pid,
+                j.source,
+                j.target,
+                j.last_opened_segment,
+                p.id_customer AS cid,
+                j.id_translator AS tid,
+                p.NAME AS pname,
+                p.create_date,
+                fj.id_file,
+                f.filename,
+                f.mime_type,
+                s.id AS sid,
+                s.segment,
+                s.segment_hash,
+                s.raw_word_count,
+                s.internal_id,
+                IF (st.status='NEW',NULL,st.translation) AS translation,
+                UNIX_TIMESTAMP(st.translation_date) AS version,
+                st.STATUS,
+                COALESCE(time_to_edit, 0) AS time_to_edit,
+                s.xliff_ext_prec_tags,
+                s.xliff_ext_succ_tags,
+                st.serialized_errors_list,
+                st.warning,
+                sts.source_chunk_lengths,
+                sts.target_chunk_lengths,
+                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+                , COALESCE( autopropagated_from, 0 ) as autopropagated_from
+                ,( SELECT COUNT( segment_hash )
+                          FROM segment_translations
+                          WHERE segment_hash = s.segment_hash
+                          AND id_job =  j.id
+                ) repetitions_in_chunk
+                ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
+                FROM jobs j
+                JOIN projects p ON p.id = j.id_project
+                JOIN files_job fj ON fj.id_job = j.id
+                JOIN files f ON f.id = fj.id_file
+                JOIN segments s ON s.id_file = f.id
+                LEFT JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
+                LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = j.id
+                LEFT JOIN file_references fr ON s.id_file_part = fr.id
+                JOIN (
 
-    $query = "SELECT j.id AS jid, j.id_project AS pid,j.source,j.target, j.last_opened_segment, j.id_translator AS tid,
-		p.id_customer AS cid, j.id_translator AS tid,
-		p.name AS pname, p.create_date , fj.id_file,
-		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
-		IF (st.status='NEW',NULL,st.translation) AS translation,
-		UNIX_TIMESTAMP( st.translation_date ) AS version,
-		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
-		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
-	    sts.source_chunk_lengths,
-	    sts.target_chunk_lengths,
+                  $subQuery
 
-		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
-		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
-
-        ,( SELECT COUNT( segment_hash ) FROM segment_translations WHERE segment_hash = s.segment_hash AND id_job =  j.id ) repetitions_in_chunk
-
-        ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
-
-			FROM jobs j
-			INNER JOIN projects p ON p.id=j.id_project
-			INNER JOIN files_job fj ON fj.id_job=j.id
-			INNER JOIN files f ON f.id=fj.id_file
-			INNER JOIN segments s ON s.id_file=f.id
-			LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
-			LEFT JOIN segment_translations_splits sts  ON sts.id_segment = s.id AND sts.id_job = j.id
-			LEFT JOIN file_references fr ON s.id_file_part = fr.id
-			WHERE j.id = $jid
-			AND j.password = '$password'
-			AND s.id > $ref_point AND s.show_in_cattool = 1
-			LIMIT 0, $step ";
+                ) AS TEMP ON TEMP.__sid = s.id
+            ORDER BY sid ASC
+            ";
 
     $db      = Database::obtain();
 
