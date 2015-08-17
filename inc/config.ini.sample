@@ -15,7 +15,7 @@ CHECK_FS = no
 ; Check in new config.ini.sample:
 ; There could be new params to configure.
 ;----------------------------------------
-BUILD_NUMBER = "0.5.7b"
+BUILD_NUMBER = "0.5.8"
 
 ;----------------------------------------
 [development]
@@ -34,7 +34,27 @@ SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
-SMTP_SENDER = 'cattool@matecat.com'
+SMTP_SENDER = 'no-reply@matecat.com'
+SMTP_HOSTNAME = 'localhost'
+
+;----------------------------------------
+[staging]
+DB_SERVER = "localhost"
+DB_DATABASE = "matecat"
+DB_USER = "matecat_user"
+DB_PASS = "matecat_user"
+
+MEMCACHE_SERVERS = ""                           ;array( /* "localhost:11211" => 1 */ ); //Not Used
+REDIS_SERVERS = "tcp://localhost:6379"
+QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
+QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
+QUEUE_JMX_ADDRESS = "http://localhost:8161"
+STORAGE_DIR = "/home/matecat/local_storage"         ;provide an absolute path
+SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
+
+SMTP_HOST = 'localhost'
+SMTP_PORT = '25'
+SMTP_SENDER = 'no-reply@matecat.com'
 SMTP_HOSTNAME = 'localhost'
 
 ;----------------------------------------
@@ -74,7 +94,7 @@ SSE_BASE_URL = "http://localhost:8080/sse"          ;no trailing slash here
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
-SMTP_SENDER = 'cattool@matecat.com'
+SMTP_SENDER = 'no-reply@matecat.com'
 SMTP_HOSTNAME = 'localhost'
 
 ;----------------------------------------

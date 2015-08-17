@@ -36,20 +36,14 @@ package {'grunt-cli':
   target => '/usr/local/node/node-default/bin/grunt'
 }
 
-
-# Those packages are to be installed after writing the sources.list.d file
-#
-
-class matecat::php {
-  package {[
-    'php5', 'libapache2-mod-php5',
-    'php5-curl', 'php5-mysql',
-    'php-pear'
-    ]:
-    ensure  => installed
-  }
+# runtime required packages
+package {[
+  'php5', 'libapache2-mod-php5',
+  'php5-curl', 'php5-mysql',
+  'php-pear'
+  ]:
+  ensure  => installed
 }
-class {'matecat::php': }
 
 package {['redis-server', 'screen', 'postfix']:
   ensure => installed

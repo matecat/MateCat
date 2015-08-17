@@ -13,7 +13,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           $input->message_type = self::TYPE_COMMENT ;
       }
 
-      $input->create_date = date( 'Y-m-d H:i:s' ) ;
+      $input->timestamp = time();
+      $input->create_date = date( 'Y-m-d H:i:s', $input->timestamp ) ;
 
       $obj = $this->sanitize( $input );
 
@@ -50,7 +51,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       $this->con->begin();
 
       try {
-          $this->saveComment( $input );
+          $comment = $this->saveComment( $input );
 
           $obj = $this->sanitize( $input );
 
@@ -64,12 +65,15 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           $this->con->query( $update );
 
           $this->con->commit();
-      } catch ( PDOException $e ) {
-          Log::doLog( "Error: " . var_export( $e, true ) );
+      } catch ( Exception $e ) {
+          $err = $this->con->get_error();
+          Log::doLog( "Error: " . var_export( $err, true ) );
           $this->con->rollback();
       }
 
       $input->thread_id = $input->getThreadId() ;
+      $input->create_date = $comment->create_date ;
+      $input->timestamp = $comment->timestamp ;
 
       return $input ;
   }
@@ -100,23 +104,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
       $query = $this->finderQuery() .
           " WHERE id_job = $obj->id_job " .
-          " AND resolve_date IS NULL " .
-          " AND ( id_segment < $obj->first_segment OR id_segment > $obj->last_segment ) " .
-          " ORDER BY id_segment ASC, create_date ASC ";
-
-      $this->con->query( $query );
-
-      $arr_result = $this->_fetch_array( $query );
-
-      return $this->_buildResult( $arr_result );
-  }
-
-  public function getCommentsBySegmentsRange( $input ) {
-      $obj = $this->sanitize( $input );
-
-      $query = $this->finderQuery() .
-          " WHERE id_job = $obj->id_job " .
-          " AND id_segment >= $obj->first_segment AND id_segment <= $obj->last_segment " .
           " ORDER BY id_segment ASC, create_date ASC ";
 
       $this->con->query( $query );
@@ -130,7 +117,10 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       return "SELECT " .
           " id_job, id_segment, create_date, full_name, resolve_date, " .
           " source_page, message_type, message, email, " .
-          " IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) ) AS thread_id " .
+          " UNIX_TIMESTAMP( create_date ) AS timestamp, " .
+          " IF ( resolve_date IS NULL, NULL,  " .
+          " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) " .
+          " ) AS thread_id " .
           " FROM " . self::TABLE ;
   }
 
@@ -157,7 +147,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
               'email'          => $item[ 'email' ],
               'message_type'   => $item[ 'message_type' ],
               'message'        => $item[ 'message' ],
-              'formatted_date' => self::formattedDate($item[ 'create_date' ])
+              'formatted_date' => self::formattedDate($item[ 'create_date' ]),
+              'timestamp'      => (int) $item[ 'timestamp' ]
           );
 
           $result[] = $build_arr ;

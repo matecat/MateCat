@@ -599,6 +599,7 @@ $.extend(UI, {
                 newWindow.focus();
             }
         });
+
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('cachedSegmentObjects', function() {

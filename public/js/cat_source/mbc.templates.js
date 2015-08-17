@@ -25,7 +25,6 @@ if ( MBC.enabled() )
         historyIcon : '' +
             '  <li id="mbc-history" title="View comments"> ' +
             '      <span class="icon-bubble2"></span> ' +
-            '      <span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-history hide"></span> ' +
             '  </li>',
 
         historyOuter : '' +
@@ -35,9 +34,11 @@ if ( MBC.enabled() )
 
         historyViewButton: '' +
             ' <div class="mbc-clearfix mbc-view-comment-wrap"> ' +
-            '   <span class="mbc-comment-label mbc-comment-segment-number"></span> ' +
-            '   <a href="javascript:;" class="mbc-comment-link-btn mbc-view-link mbc-show-comment-btn pull-right">View</a>' +
+            '   <a href="javascript:;" class="mbc-comment-link-btn mbc-view-link mbc-show-comment-btn">View thread</a>' +
             ' </div> ',
+
+        historySegmentLabel: '' +
+            ' <span class="mbc-nth-comment mbc-nth-comment-label">Segment <span class="mbc-comment-segment-number"></span></span> ',
 
         historyHasComments: '' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-comment"> ' +
@@ -50,7 +51,9 @@ if ( MBC.enabled() )
             ' </div> ' +
             ' <div class="mbc-history-balloon mbc-history-balloon-has-no-comments" style="display: block;">' +
             '    <div class="mbc-thread-wrap"> ' +
-            '        <span class="mbc-comment-label">No comments</span>'  +
+            '       <div class="mbc-show-comment"> ' +
+            '           <span class="mbc-comment-label">No comments</span>'  +
+            '       </div> ' +
             '    </div> ' +
             ' </div>',
 
@@ -62,9 +65,11 @@ if ( MBC.enabled() )
 
         showResolve : '' +
             '<div class="mbc-resolved-comment">' +
-            ' <span class="mbc-comment-label mbc-comment-username-label mbc-comment-resolvedby mbc-truncate"></span>' +
-            ' <span class="mbc-comment-resolved-label">resolved</span>' +
-            ' </div>' ,
+            ' <span class="mbc-comment-resolved-label">' +
+            '   <span class="mbc-comment-username mbc-comment-resolvedby"></span>' +
+            '   <span class="">marked as resolved</span>' +
+            ' </span>' +
+            '</div>' ,
 
         threadWrap : '' +
             ' <div class="mbc-thread-wrap mbc-clearfix">'  +
@@ -73,7 +78,7 @@ if ( MBC.enabled() )
 
         showComment : '' +
             '<div class="mbc-show-comment mbc-clearfix">' +
-            ' <span class="mbc-comment-label mbc-comment-username-label mbc-truncate"></span>' +
+            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate"></span>' +
             ' <span class="mbc-comment-label mbc-comment-email-label mbc-truncate"></span>' +
             ' <div class="mbc-comment-info-wrap mbc-clearfix">' +
             '   <span class="mbc-comment-info mbc-comment-time pull-left"></span>' +
@@ -88,8 +93,8 @@ if ( MBC.enabled() )
             '    <a href="javascript:" class="mbc-new-message-link"></a> ' +
             ' </div>' +
             ' <div class="mbc-post-comment">' +
-            ' <span class="mbc-comment-label mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label"></span>' +
-            ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive notifications</a>' +
+            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label"></span>' +
+            ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
             ' <textarea class="mbc-comment-input mbc-comment-textarea" placeholder="Write a comment..."></textarea>' +
             ' <div>' +
             ' <a href="javascript:;" class="mbc-comment-btn mbc-comment-send-btn pull-right hide">Comment</a>' +

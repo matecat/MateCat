@@ -339,8 +339,12 @@ class downloadFileController extends downloadController {
 
         $debug[ 'total' ][] = time();
 
-        Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
-
+        try {
+            Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+        }
+        catch(Exception $e){
+            Log::doLog('Failed to delete dir:'.$e->getMessage());
+        }
     }
 
     /**

@@ -6,7 +6,6 @@
  * Date: 15/10/14
  * Time: 15.44
  */
-
 class userKeysController extends ajaxController {
 
     private $key;
@@ -31,15 +30,15 @@ class userKeysController extends ajaxController {
         $filterArgs = array(
                 'exec'        => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'key'         => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'description' => array(
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
         );
 
@@ -48,20 +47,20 @@ class userKeysController extends ajaxController {
 
         //assign variables
         $this->exec        = $_postInput[ 'exec' ];
-        $this->key         = $_postInput[ 'key' ];
+        $this->key         = trim( $_postInput[ 'key' ] );
         $this->description = $_postInput[ 'description' ];
 
         //check for eventual errors on the input passed
         $this->result[ 'errors' ] = array();
         if ( empty( $this->key ) ) {
-            $this->result[ 'errors' ][ ] = array(
+            $this->result[ 'errors' ][] = array(
                     'code'    => -2,
                     'message' => "Key missing"
             );
         }
 
         if ( array_search( $this->exec, self::$allowed_exec ) === false ) {
-            $this->result[ 'errors' ][ ] = array(
+            $this->result[ 'errors' ][] = array(
                     'code'    => -5,
                     'message' => "No method $this->exec allowed."
             );
@@ -69,7 +68,7 @@ class userKeysController extends ajaxController {
 
         //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS
         if ( !$this->userIsLogged ) {
-            $this->result[ 'errors' ][ ] = array(
+            $this->result[ 'errors' ][] = array(
                     'code'    => -1,
                     'message' => "Login is required to perform this action"
             );
@@ -95,12 +94,12 @@ class userKeysController extends ajaxController {
             //validate the key
             try {
                 $keyExists = $tmService->checkCorrectKey();
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
                 /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
                 Log::doLog( $e->getMessage() );
             }
 
-            if ( !isset($keyExists) || $keyExists === false ) {
+            if ( !isset( $keyExists ) || $keyExists === false ) {
                 Log::doLog( __METHOD__ . " -> TM key is not valid." );
                 throw new Exception( "TM key is not valid.", -4 );
             }
@@ -120,7 +119,7 @@ class userKeysController extends ajaxController {
 
             switch ( $this->exec ) {
                 case 'delete':
-                    $userMemoryKeys = $mkDao->disable($memoryKeyToUpdate);
+                    $userMemoryKeys = $mkDao->disable( $memoryKeyToUpdate );
                     break;
                 case 'update':
                     $userMemoryKeys = $mkDao->update( $memoryKeyToUpdate );
@@ -138,8 +137,8 @@ class userKeysController extends ajaxController {
 
 
         } catch ( Exception $e ) {
-            $this->result[ 'data' ]      = 'KO';
-            $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+            $this->result[ 'data' ]     = 'KO';
+            $this->result[ 'errors' ][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
 
     }

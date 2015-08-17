@@ -83,8 +83,7 @@ class commentController extends ajaxController {
         $commentDao = new Comments_CommentDao( Database::obtain() );
 
         $this->result[ 'data' ][ 'entries' ] = array(
-            'open_comments'    => $commentDao->getOpenCommentsInJob( $this->struct ),
-            'current_comments' => $commentDao->getCommentsBySegmentsRange( $this->struct )
+            'comments'    => $commentDao->getCommentsInJob( $this->struct )
         );
         $this->appendUser();
     }
@@ -166,19 +165,23 @@ class commentController extends ajaxController {
         $users = $userDao->getByUids( $result );
         $owner = $userDao->getProjectOwner( $this->job['id'] );
 
-        // add project owner if not already in the array
         if ( !empty($owner) ) {
-            $found = false;
-            foreach($users as $k => $v) {
-                if ($v->uid == $owner[0]->uid) {
-                    $found  = true ;
-                }
+            array_push($users, $owner[0]);
+        }
+
+        $users = array_filter($users, function($item) {
+            if ( $this->userIsLogged && $this->current_user->uid == $item->uid ) {
+                return false;
             }
 
-            if ( !$found ) {
-                array_push($users, $owner[0]);
+            // FIXME: unoptimal way to find deep duplicates
+            foreach( $users as $k => $v ) {
+                if ( $item->uid == $v->uid ) {
+                    return false;
+                }
             }
-        }
+            return true ;
+        });
 
         return $users;
     }
@@ -228,6 +231,7 @@ class commentController extends ajaxController {
             'source_page'    => $this->new_record->source_page,
             'formatted_date' => $this->new_record->getFormattedDate(),
             'thread_id'      => $this->new_record->thread_id,
+            'timestamp'      => (int) $this->new_record->timestamp,
         ) ;
 
         $message = json_encode( array(

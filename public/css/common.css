@@ -870,6 +870,10 @@ color:#333;}
 	    background-color: #fff;
 }
 
+    .modal .popup p.waiting {
+        background: url(../img/loading.gif) 38% 3px no-repeat !important;
+        background-size: 24px !important;
+    }
 
 .slide-panel {
     height: 100%!important;
@@ -1122,6 +1126,12 @@ text-align: right;
     /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
 /*float: left;*/
 margin-left: 10px;
+}
+
+.modal .popup-confirm p,
+.modal .popup-alert p
+{
+    padding: 0 20px;
 }
 
 .popup .outer:hover

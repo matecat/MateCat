@@ -19,7 +19,8 @@ APP = {
             }
 	    }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
             e.preventDefault();
-            APP.closePopup();
+            if(!$('.modal[data-type=confirm]').hasClass('closeOnSuccess')) APP.closePopup();
+//            APP.closePopup();
             if($(this).attr('data-callback')) {
                 if( typeof UI[$(this).attr('data-callback')] === 'function' ){
                     var context = $(this).attr('data-context') || '';
@@ -96,11 +97,12 @@ APP = {
             onConfirm: options.callback,
 			caller: options.caller,
             onCancel: options.onCancel,
-            title: 'Confirmation required',
+            title: (options.title || 'Confirmation required'),
             cancelTxt: options.cancelTxt,
             okTxt: options.okTxt,
             content: options.msg,
-            context: options.context
+            context: options.context,
+            closeOnSuccess: (options.closeOnSuccess || false)
         });
         this.checkConfirmation();
         return APP.confirmValue;
@@ -185,7 +187,7 @@ APP = {
         return '&time=' + t.getTime();
     },
     popup: function(conf) {
-
+console.log('closeOnSuccess: ', conf.closeOnSuccess);
 /*
         // 
         {
@@ -211,7 +213,7 @@ APP = {
         this.closePopup();
 //        console.log('conf: ', conf);
 
-        newPopup = '<div class="modal" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
+        newPopup = '<div class="modal' + ((conf.closeOnSuccess)? ' closeOnSuccess' : '') + '" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
                     '   <div class="popup-outer"></div>' +
                     '   <div class="popup' + ((conf.type == 'alert')? ' popup-alert' : (conf.type == 'confirm')? ' popup-confirm' : '') + '">' +
                     '       <a href="#" class="x-popup remove"></a>' +

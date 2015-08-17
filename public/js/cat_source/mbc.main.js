@@ -24,7 +24,6 @@ if ( MBC.enabled() )
     var loggedUserName = null ;
     var customUserName = null ;
     var lastCommentHash = null;
-    var lastInput = null;
 
     var tpls ;
 
@@ -36,27 +35,37 @@ if ( MBC.enabled() )
         segments: {},
         history: {},
         refreshHistory : function() {
-            var count = 0,
-                comment ;
-            for (var i in this.segments) {
+
+            function includeInHistory(comment) {
+                return Number( comment.message_type ) == types.comment &&
+                sids.indexOf( comment.id_segment ) === -1
+            }
+
+            this.history = [] ;
+            this.history_count = 0;
+            var comment ;
+            var sids = [] ;
+
+            for  (var i in this.segments) {
                 if (isNaN(i)) { continue; }
 
-                for (var ii = this.segments[i].length - 1; ii >= 0 ; ii--) {
-                    comment = this.segments[i][ii] ;
+                var new_array = this.segments[i].slice(); // quick clone
+                new_array.reverse();
 
-                    if (comment.thread_id == null) {
-                        if (! this.history.hasOwnProperty(i) ) {
-                            this.history[i] = [];
-                        }
-                        this.history[i].push( comment );
-                        if (Number(comment.message_type) == types.comment) {
-                            count++ ;
-                        }
+                for (var ii in new_array) {
+                    comment = new_array[ii];
+
+                    if ( includeInHistory(comment) ) {
+                        this.history_count++ ;
+                        this.history.push( comment );
+                        sids.push( comment.id_segment );
                     }
-                    else { break; }
                 }
             }
-            return count;
+
+            this.history.sort(function(x,y) {
+                return x.timestamp - y.timestamp ;
+            });
         },
 
         resetSegments : function() {
@@ -175,7 +184,7 @@ if ( MBC.enabled() )
 
         if ( comments_obj.active > 0 ) {
             root.append( highlight );
-            highlight.text( comments_obj.active );
+            highlight.text( limitNum( comments_obj.active ) );
         }
 
         root.show();
@@ -184,15 +193,15 @@ if ( MBC.enabled() )
     var renderInputForm = function() {
         var inputForm = $( tpls.inputForm );
         inputForm.find('.mbc-new-message-notification').hide();
-        inputForm.find('.mbc-comment-username-label')
+        inputForm.find('.mbc-comment-username')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() );
 
         if (loggedUserName) {
-            inputForm.find('.mbc-login-link').addClass('hide');
+            inputForm.find('.mbc-login-link').addClass('mbc-hide');
         } else {
-            inputForm.find('.mbc-login-link').addClass('visible');
-            inputForm.find('.mbc-comment-username-label')
+            inputForm.find('.mbc-login-link').addClass('mbc-visible');
+            inputForm.find('.mbc-comment-username')
                     .attr('title', 'Click to edit');
         }
         inputForm.find('.mbc-comment-send-btn').hide();
@@ -203,7 +212,8 @@ if ( MBC.enabled() )
         $('.mbc-comment-balloon-outer').remove();
 
         var root = $(tpls.segmentThread);
-        var inputForm = renderInputForm() ;
+        var inputForm = renderInputForm();
+
         inputForm.addClass('mbc-first-input');
 
         root.find('.mbc-comment-balloon-inner').append( inputForm );
@@ -212,7 +222,7 @@ if ( MBC.enabled() )
         inputForm.find('textarea').focus();
     }
 
-    var populateWithComments = function(root, comments) {
+    var populateCommentsWrap = function(root, comments) {
         var comments_root = root.find('.mbc-comments-wrap');
 
         if (comments.length == 0) {
@@ -245,20 +255,18 @@ if ( MBC.enabled() )
         }
 
         comments_root.append(thread_wrap);
+    }
+
+    var populateWithComments = function(root, comments) {
+        populateCommentsWrap(root, comments);
 
         function threadIsResolved() {
-            return comments[i-1].thread_id ;
+            return comments[comments.length-1].thread_id ;
         }
-
-        var inputForm = renderInputForm();
-        inputForm.addClass('mbc-reply-input');
-
-        root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
 
         if ( !threadIsResolved() ) {
             root.find('.mbc-thread-wrap-active').append( $(tpls.resolveButton) );
         }
-
         return root;
     }
 
@@ -311,7 +319,20 @@ if ( MBC.enabled() )
 
         populateWithComments(root, comments);
 
+        var inputForm = renderInputForm();
+        inputForm.addClass('mbc-reply-input');
+        root.find('.mbc-comment-balloon-inner').append( inputForm ) ;
+
         el.append( root.show() );
+    }
+
+    var renderOnlySegmentsWrap = function(el) {
+        var segment = new UI.Segment(el) ;
+        var comments = db.getCommentsBySegment( segment.absoluteId );
+        var root = $('.mbc-comment-balloon-outer');
+        $(root).find('.mbc-comments-wrap').empty();
+        populateWithComments(root, comments);
+        //populateCommentsWrap(root, comments);
     }
 
     var appendReceivedMessage = function(el) {
@@ -320,13 +341,15 @@ if ( MBC.enabled() )
         var scrollableArea ;
 
         if (! areaBefore.bottomVisible()) {
-            renderSegmentComments(el);
+
+            renderOnlySegmentsWrap(el);
+
             scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
             el ; /// XXX seems to be required to get actual scrollTop number
             $(scrollableArea.el).scrollTop(scrollTop);
             scrollableArea.notifyNewComments();
         } else {
-            renderSegmentComments(el);
+            renderOnlySegmentsWrap( el );
             scrollableArea = new Scrollable( $(el).find('.mbc-comments-wrap')[0]);
             scrollableArea.scrollToBottom() ;
         }
@@ -363,14 +386,32 @@ if ( MBC.enabled() )
         }, 500);
     }
 
+    function hackSnapEngage(on) {
+        var button = $(document).find('#SnapABug_Button');
+        if (on) {
+            button.data('mbc-zindex', button.css('z-index'));
+            button.css('z-index', -1);
+        } else {
+            button.css('z-index', button.data('mbc-zindex'));
+        }
+    }
+
     var openSegmentComment = function(el) {
         $('article').addClass('mbc-commenting-opened');
+        hackSnapEngage( true );
         renderSegmentBalloon(el);
         scrollSegment(el);
     }
 
+    var openSegmentCommentNoScroll = function(el) {
+        $('article').addClass('mbc-commenting-opened');
+        hackSnapEngage( true );
+        renderSegmentBalloon(el);
+    }
+
     var closeSegment = function(el) {
         $('.mbc-comment-balloon-outer').remove();
+        hackSnapEngage( false );
         $('article').removeClass('mbc-commenting-opened');
     }
 
@@ -391,10 +432,10 @@ if ( MBC.enabled() )
     var populateCommentTemplate = function(data) {
         if (Number(data.message_type) == types.resolve) {
             var root = $(tpls.showResolve)
-            root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
+            root.find('.mbc-comment-username').text( htmlDecode(data.full_name) );
         } else {
             var root = $(tpls.showComment) ;
-            root.find('.mbc-comment-username-label').text( htmlDecode(data.full_name) );
+            root.find('.mbc-comment-username').text( htmlDecode(data.full_name) );
             root.find('.mbc-comment-time').text( data.formatted_date );
             root.find('.mbc-comment-body').html( nl2br( data.message ) );
             if ( data.email != null ) {
@@ -415,7 +456,6 @@ if ( MBC.enabled() )
 
     var ajaxResolveSuccess = function(resp) {
         db.pushSegment(resp.data.entries[0]);
-        lastInput = $('.mbc-comment-input').val() ;
         $(document).trigger('mbc:comment:new', resp.data.entries[0]);
     }
 
@@ -430,50 +470,59 @@ if ( MBC.enabled() )
     var renderHistoryWithNoComments = function() {
         $('.mbc-history-balloon-has-comment').remove();
         $('.mbc-history-balloon-has-no-comments').show();
-        $('.mbc-comment-highlight-history').removeClass('visible');
+        $('.mbc-comment-highlight-history').removeClass('mbc-visible');
     }
 
-    var renderHistoryWithComments = function( count ) {
+    var renderHistoryWithComments = function( ) {
         var root = $(tpls.historyHasComments);
+        var count = 1 ;
+        var comment ;
 
         for (var i in db.history) {
-            if (isNaN(i)) { continue ; }
+            comment = db.history[i];
 
-            var sid = db.history[i][0].id_segment ;
             var viewButton = $( tpls.historyViewButton );
+            viewButton.find('a').text('View thread') ;
+            viewButton.attr('data-id', comment.id_segment);
 
-            viewButton.find('a').text('View') ;
-            viewButton.find('.mbc-comment-segment-number').text(sid);
-            viewButton.attr('data-id', sid);
+            var segmentLabel = $( tpls.historySegmentLabel );
 
-            var line = populateCommentTemplate( db.history[i][0] ) ;
+            segmentLabel.find('.mbc-comment-segment-number').text( comment.id_segment );
+            //segmentLabel.closest('.mbc-nth-comment').text( count++ );
 
-            var number = $( tpls.activeCommentsNumberInHistory);
-            number.text( db.history[i].length );
+            var line = populateCommentTemplate( comment ) ;
 
-            line.find('.mbc-comment-info-wrap').append( number );
             line.append( viewButton ) ;
+            line.prepend( segmentLabel );
 
-            root.append(
-                $(tpls.threadWrap).append( line )
-            );
+            var wrap = $(tpls.threadWrap).append( line ) ;
+
+            if (comment.thread_id == null) {
+                wrap.addClass('mbc-thread-wrap-active');
+            } else {
+                wrap.addClass('mbc-thread-wrap-resolved');
+            }
+
+            root.append( wrap );
         }
         $('.mbc-history-balloon-has-comment').remove();
         $('.mbc-history-balloon-has-no-comments').hide();
 
         $('.mbc-history-balloon-outer').append(root);
-
-        $('#mbc-history .mbc-comment-highlight-history').text( limitNum(count) ).addClass( 'visible' );
     }
 
     var updateHistoryWithLoadedSegments = function() {
-        db.history = {};
-        var count = db.refreshHistory();
-
-        if (count == 0) {
+        db.refreshHistory();
+        if (db.history_count == 0) {
+            $('#mbc-history')
+                .addClass('mbc-history-balloon-icon-has-no-comments')
+                .removeClass('mbc-history-balloon-icon-has-comment');
             renderHistoryWithNoComments();
         } else {
-            renderHistoryWithComments( count );
+            $('#mbc-history')
+                .removeClass('mbc-history-balloon-icon-has-no-comments')
+                .addClass('mbc-history-balloon-icon-has-comment');
+            renderHistoryWithComments();
         }
     }
 
@@ -504,7 +553,6 @@ if ( MBC.enabled() )
                 if (resp.errors.length) {
                     showGenericWarning();
                 } else {
-                    lastInput = null;
                     $(document).trigger('mbc:comment:saved', resp.data.entries[0]);
                 }
             },
@@ -526,15 +574,82 @@ if ( MBC.enabled() )
     }
 
     function enableInputForm( outer ) {
-        outer.find('.mbc-post-comment .mbc-comment-username-label')
+        outer.find('.mbc-post-comment .mbc-comment-username')
             .toggleClass('mbc-comment-anonymous-label', !loggedUserName)
             .text( getUsername() ) ;
 
-        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('hide');
-        else outer.find('.mbc-post-comment .mbc-login-link').addClass('visible');
+        if ( loggedUserName ) outer.find('.mbc-post-comment .mbc-login-link').addClass('mbc-hide');
+        else outer.find('.mbc-post-comment .mbc-login-link').addClass('mbc-visible');
     }
 
-    // start event binding
+    var loadCommentData = function( success ) {
+        var data = {
+            action    : 'comment',
+            _sub      : 'getRange',
+            id_job    : config.job_id,
+            first_seg : UI.getSegmentId( UI.firstSegment ),
+            last_seg  : UI.getSegmentId( UI.lastSegment ),
+            password  : config.password
+        }
+
+        APP.doRequest({
+            data: data,
+            success : success,
+            error : function() {
+                // TODO: handle error on comments fetch
+            }
+        });
+    }
+
+    var resetDatabase = function( resp ) {
+        db.resetSegments();
+        db.storeSegments( resp.data.entries.comments );
+        // db.storeSegments( resp.data.entries.open_comments );
+        refreshUserInfo( resp.data.user ) ;
+    }
+
+    var initCommentLink = function(el) {
+        var section = new UI.Segment( el ) ;
+        if ((! section.isSplit()) || section.isFirstOfSplit()) {
+            $(el).find('.mbc-comment-link').remove();
+            $(el).append( $(tpls.commentLink) );
+        }
+    }
+
+    var initCommentLinks = function() {
+        $('section').each(function(i, el) {
+            initCommentLink(el);
+        });
+    }
+
+    var refreshElements = function() {
+        initCommentLinks();
+        renderCommentIconLinks();
+        updateHistoryWithLoadedSegments() ;
+    }
+
+    var resetTextArea = function() {
+        var maxHeight = 100 ;
+        var minHeight = 34 ;
+        var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;
+        var borderBottomWidth = parseFloat( $(this).css("borderBottomWidth") ) ;
+        var borders = borderTopWidth + borderBottomWidth ;
+        var scrollHeightWithBorders = this.scrollHeight + borders ;
+
+        while( scrollHeightWithBorders > $(this).outerHeight() && $(this).height() < maxHeight ) {
+            $(this).height( $(this).height() + 10 );
+        };
+
+        while ( scrollHeightWithBorders <= $(this).outerHeight() && $(this).height() > minHeight ) {
+            $(this).height( $(this).height() - 10 );
+        }
+
+        if ( $(this).height() >= maxHeight ) {
+            $(this).css("overflow-y", "auto");
+        } else {
+            $(this).css("overflow-y", "hidden");
+        }
+    }
 
     $(document).on('ready', function() {
         initConstants();
@@ -547,16 +662,16 @@ if ( MBC.enabled() )
 
         $(delegate).on('click', '.mbc-comment-balloon-outer, .mbc-comment-link div', function(e) {
             e.stopPropagation();
-            $('.mbc-history-balloon-outer').removeClass('visible');
+            $('.mbc-history-balloon-outer').removeClass('mbc-visible');
         });
 
         $(delegate).on('click', function() {
-            $('.mbc-history-balloon-outer').removeClass('visible');
+            $('.mbc-history-balloon-outer').removeClass('mbc-visible');
         });
 
         $(delegate).on('click', '.mbc-comment-link .txt', function(e) {
             var section = $(e.target).closest('section');
-            openSegmentComment( section );
+            openSegmentCommentNoScroll( section );
         });
 
         $(delegate).on('click', 'section .mbc-close-btn', function(e) {
@@ -651,12 +766,12 @@ if ( MBC.enabled() )
 
     $(document).on('click', '.mbc-history-balloon-outer .mbc-close-btn', function(e) {
         e.preventDefault();
-        $(e.target).closest('.mbc-history-balloon-outer').toggleClass('visible');
+        $(e.target).closest('.mbc-history-balloon-outer').toggleClass('mbc-visible');
     });
 
     $(document).on('click', '.mbc-show-comment-btn', function(e) {
         e.preventDefault();
-        $('.mbc-history-balloon-outer').removeClass('visible');
+        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
 
         var sid = $(e.target).closest('div').data('id') ;
 
@@ -667,32 +782,6 @@ if ( MBC.enabled() )
 
         window.location.hash = new_hash ;
     });
-
-    var loadCommentData = function( success ) {
-        var data = {
-            action    : 'comment',
-            _sub      : 'getRange',
-            id_job    : config.job_id,
-            first_seg : UI.getSegmentId( UI.firstSegment ),
-            last_seg  : UI.getSegmentId( UI.lastSegment ),
-            password  : config.password
-        }
-
-        APP.doRequest({
-            data: data,
-            success : success,
-            error : function() {
-                // TODO: handle error on comments fetch
-            }
-        });
-    }
-
-    var resetDatabase = function( resp ) {
-        db.resetSegments();
-        db.storeSegments( resp.data.entries.current_comments );
-        db.storeSegments( resp.data.entries.open_comments );
-        refreshUserInfo( resp.data.user ) ;
-    }
 
     $(window).on('segmentsAdded', function(e) {
         loadCommentData(function( resp ) {
@@ -708,26 +797,9 @@ if ( MBC.enabled() )
         });
     });
 
-    var initCommentLink = function(el) {
-        var section = new UI.Segment( el ) ;
-        if ((! section.isSplit()) || section.isFirstOfSplit()) {
-            $(el).append( $(tpls.commentLink) );
-        }
-    }
-
-    var initCommentLinks = function() {
-        $('section').each(function(i, el) {
-            initCommentLink(el);
-        });
-    }
-
-    var refreshElements = function() {
-        initCommentLinks();
-        renderCommentIconLinks();
-        updateHistoryWithLoadedSegments() ;
-    }
-
     $(document).on('mbc:ready', function(ev) {
+
+        $('#mbc-history').remove();
         $('.mbc-history-balloon-outer').remove();
         $('.header-menu li#filterSwitch').before($( tpls.historyIcon ));
         $('.header-menu').append($(tpls.historyOuter).append( $(tpls.historyNoComments) ));
@@ -737,7 +809,7 @@ if ( MBC.enabled() )
         // open a comment if was asked by hash
         var lastAsked = popLastCommentHash() ;
         if ( lastAsked ) {
-            openSegmentComment( UI.Segment.findEl( lastAsked ) ) ;
+            openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) ) ;
         }
     });
 
@@ -751,11 +823,11 @@ if ( MBC.enabled() )
     });
 
     $(document).on('click', '#filterSwitch', function(e) {
-        $('.mbc-history-balloon-outer').removeClass('visible');
+        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
     });
 
     $(document).on('click', '#mbc-history', function(ev) {
-        $('.mbc-history-balloon-outer').toggleClass('visible');
+        $('.mbc-history-balloon-outer').toggleClass('mbc-visible');
         if ($('.searchbox').is(':visible')) {
             UI.toggleSearch(ev) ;
         }
@@ -766,10 +838,10 @@ if ( MBC.enabled() )
         $(document).trigger('mbc:segment:update:links', data.id_segment);
 
         var section = UI.Segment.findEl( data.id_segment ) ;
+
         if ( section.find('.mbc-thread-wrap').is(':visible') ) {
             appendReceivedMessage( section );
         }
-        $('.mbc-comment-input').val(lastInput) ;
     });
 
     $(document).on('mbc:comment:saved', function(ev, data) {
@@ -800,29 +872,6 @@ if ( MBC.enabled() )
         resolveCommentLinkIcon( el.find('.mbc-comment-link'), comments_obj );
     });
 
-    var resetTextArea = function() {
-        var maxHeight = 100 ;
-        var minHeight = 34 ;
-        var borderTopWidth = parseFloat( $(this).css("borderTopWidth") ) ;
-        var borderBottomWidth = parseFloat( $(this).css("borderBottomWidth") ) ;
-        var borders = borderTopWidth + borderBottomWidth ;
-        var scrollHeightWithBorders = this.scrollHeight + borders ;
-
-        while( scrollHeightWithBorders > $(this).outerHeight() && $(this).height() < maxHeight ) {
-            $(this).height( $(this).height() + 10 );
-        };
-
-        while ( scrollHeightWithBorders <= $(this).outerHeight() && $(this).height() > minHeight ) {
-            $(this).height( $(this).height() - 10 );
-        }
-
-        if ( $(this).height() >= maxHeight ) {
-            $(this).css("overflow-y", "auto");
-        } else {
-            $(this).css("overflow-y", "hidden");
-        }
-    }
-
     $(document).on('keydown', '.mbc-comment-textarea', resetTextArea );
     $(document).on('paste', '.mbc-comment-input', function() {
         setTimeout(function(el) {
@@ -837,11 +886,11 @@ if ( MBC.enabled() )
     });
 
     $(document).on('focus', '.mbc-comment-input', function(e) {
-        $(e.target).closest('div').find('.mbc-comment-btn').addClass('visible');
+        $(e.target).closest('div').find('.mbc-comment-btn').addClass('mbc-visible');
     });
 
     $(document).on('click', function(e) {
-        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').addClass('hide');
+        $('.mbc-comment-balloon-outer').find('.mbc-comment-send-btn').addClass('mbc-hide');
     });
 
     $(document).on('ui:segment:focus', function(e, sid) {

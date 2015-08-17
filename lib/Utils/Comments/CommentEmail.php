@@ -24,7 +24,7 @@ class Comments_CommentEmail {
         $mail->Sender     = INIT::$SMTP_SENDER ;
         $mail->Hostname   = INIT::$SMTP_HOSTNAME ;
 
-        $mail->From       = INIT::$MAILER_FROM ;
+        $mail->From       = INIT::$SMTP_SENDER ;
         $mail->FromName   = INIT::$MAILER_FROM_NAME ;
         $mail->ReturnPath = INIT::$MAILER_RETURN_PATH ;
 

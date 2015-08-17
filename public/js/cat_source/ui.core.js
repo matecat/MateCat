@@ -4,7 +4,7 @@
 UI = null;
 
 UI = {
-	toggleFileMenu: function() {console.log('ddd');
+	toggleFileMenu: function() {
         jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
 			return false;
@@ -65,6 +65,7 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
+//        this.consecutiveCopySourceNum = [];
         var options = {
             segment_id: segment_id,
             status: status,
@@ -363,7 +364,80 @@ console.log('changeStatus');
 
         this.currentSegmentQA();
         $(this.currentSegment).trigger('copySourceToTarget');
+        if(!config.isReview) {
+            var alreadyCopied = false;
+            $.each(UI.consecutiveCopySourceNum, function (index) {
+                if(this == UI.currentSegmentId) alreadyCopied = true;
+            });
+            if(!alreadyCopied) {
+                this.consecutiveCopySourceNum.push(this.currentSegmentId);
+            }
+//        this.consecutiveCopySourceNum++;
+            if(this.consecutiveCopySourceNum.length > 2) {
+                this.copyAllSources();
+            }
+        }
+
     },
+    copyAllSources: function() {
+        console.log('copy all sources');
+        if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
+            APP.confirm({
+                title: 'Copy all new segments',
+                name: 'confirmCopyAllSources',
+                okTxt: 'Yes',
+                cancelTxt: 'No',
+                callback: 'continueCopyAllSources',
+                onCancel: 'abortCopyAllSources',
+                closeOnSuccess: true,
+                msg: "Copy source to target for all new segments?<br/>This action cannot be undone."
+            });
+        } else {
+            this.consecutiveCopySourceNum = [];
+        }
+
+    },
+    continueCopyAllSources: function () {
+        var mod = $('.modal .popup');
+        mod.find('.btn-ok, .btn-cancel').remove();
+        mod.find('p').addClass('waiting').text('Copying...');
+        APP.doRequest({
+            data: {
+                action: 'copyAllSource2Target',
+                id_job: config.job_id,
+                pass: config.password
+            },
+            error: function() {
+                console.log('error');
+                APP.closePopup();
+                UI.showMessage({
+                    msg: 'Error copying all sources to target. Try again!'
+                });
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    APP.closePopup();
+                    UI.showMessage({
+                        msg: d.errors[0].message
+                    });
+                } else {
+                    $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password, '1', { expires:1 });
+                    APP.closePopup();
+                    $('#outer').empty();
+                    UI.render({
+                        firstLoad: false,
+                        segmentToOpen: UI.currentSegmentId
+                    });
+                }
+
+            }
+        });
+    },
+    abortCopyAllSources: function () {
+        this.consecutiveCopySourceNum = [];
+        //$.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
+    },
+
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
         return str;
@@ -2304,9 +2378,13 @@ console.log('changeStatus');
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = this.currentSegmentId + '-' + ts.toString();
+        var segment_status_regex = new RegExp("status-([a-z]*)");
+        var segment_status = this.currentSegment.attr('class' ).match(segment_status_regex);
+        if(segment_status.length > 0){
+            segment_status = segment_status[1];
+        }
 
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
-
 		if( config.brPlaceholdEnabled ){
 			src_content = this.postProcessEditarea(this.currentSegment, '.source');
 			trg_content = this.postProcessEditarea(this.currentSegment);
@@ -2322,6 +2400,7 @@ console.log('changeStatus');
         })
 //        console.log('glossarySourcesAr: ', glossarySourcesAr);
 //        console.log(JSON.stringify(glossarySourcesAr));
+
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2330,6 +2409,7 @@ console.log('changeStatus');
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
+                segment_status: segment_status,
                 glossaryList: glossarySourcesAr
 //                glossaryList: JSON.stringify(glossarySourcesAr)
 			},

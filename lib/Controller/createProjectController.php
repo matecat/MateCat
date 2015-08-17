@@ -65,7 +65,7 @@ class createProjectController extends ajaxController {
         if ( !empty( $__postInput[ 'private_tm_key' ] ) ) {
             $__postInput[ 'private_tm_key' ] = array(
                     array(
-                            'key'  => $__postInput[ 'private_tm_key' ],
+                            'key'  => trim($__postInput[ 'private_tm_key' ]),
                             'name' => null,
                             'r'    => true,
                             'w'    => true

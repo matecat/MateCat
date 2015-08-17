@@ -127,7 +127,7 @@ var startStompConnection = function()   {
 
     if (typeof client === 'undefined') {
       setTimeout(startStompConnection, 10000);
-      winston.debug("** client error, restarting connection in 10 seconds");
+      winston.debug("** client error, restarting connection in 10 seconds", error);
       return;
     }
 

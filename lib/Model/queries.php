@@ -107,8 +107,7 @@ function doSearchQuery( Array $queryParams ) {
 //	Log::doLog($query);
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -227,8 +226,8 @@ function doReplaceAll( Array $queryParams ) {
         /**
          * Escape for database
          */
-        $trMod       = $db->escape( $trMod );
-        $sqlBatch[ ] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
+        $trMod      = $db->escape( $trMod );
+        $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
     }
 
     //MySQL default max_allowed_packet is 16MB, this system surely need more
@@ -494,7 +493,7 @@ function getJobData( $id_job, $password = null ) {
 
     $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key
+		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key, payable_rates
 			FROM jobs
 			WHERE id = %u";
 
@@ -528,8 +527,7 @@ function getJobTmKeys( $job_id, $job_password ) {
         $results = $db->fetch_array(
             sprintf($query, $job_id, $job_password)
         );
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -551,8 +549,7 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $db = Database::obtain();
     try {
         $db->query(sprintf($query, $db->escape($tmKeysString), (int)$job_id, $job_password));
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         throw new Exception( $e->getMessage(), -$e->getCode() );
     }
@@ -683,8 +680,7 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
 
     try {
         $results = $db->fetch_array($sql);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -712,8 +708,7 @@ function getMTForTMXExport( $jid, $jPassword ) {
 ";
     try {
         $results = $db->fetch_array($sql);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -742,8 +737,7 @@ function getTMForTMXExport( $jid, $jPassword ) {
 
     try {
         $results = $db->fetch_array($sql);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -776,8 +770,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
     $db      = Database::obtain();
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -807,8 +800,7 @@ function getSegmentsInfo( $jid, $password ) {
     $db      = Database::obtain();
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -921,9 +913,6 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                   $subQuery
 
                 ) AS TEMP ON TEMP.__sid = s.id
-
-            WHERE j.id = $jid
-			AND j.password = '$password'
             ORDER BY sid ASC
             ";
 
@@ -931,8 +920,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         throw new Exception( __METHOD__ . " -> " . $e->getCode() . ": " . $e->getMessage() );
     }
     return $results;
@@ -1116,8 +1104,7 @@ function addTranslation( array $_Translation ) {
     Log::doLog( $query );
     try {
         $db->query($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1187,8 +1174,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     try {
         $totals = $db->fetch_array($queryTotals);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         throw new Exception( "Error in counting total equivalent words for propagation: " . $e->getCode() . ": " . $e->getMessage()
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
                 -$e->getCode() );
@@ -1212,8 +1198,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     try {
         $db->query($TranslationPropagate);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
             . "\n" . $TranslationPropagate . "\n" . var_export( $params, true ),
             -$e->getCode() );
@@ -1304,15 +1289,14 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 function setSuggestionUpdate( $data ) {
 
     $id_segment = (int)$data[ 'id_segment' ];
-    $id_job = (int)$data[ 'id_job' ];
+    $id_job     = (int)$data[ 'id_job' ];
 
     $where = " id_segment=$id_segment and id_job=$id_job";
 
     $db = Database::obtain();
     try {
         $affectedRows = $db->update('segment_translations', $data, $where);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1343,8 +1327,7 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
 
     try {
         $db->insert('segment_translations', $data);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1360,8 +1343,7 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     $db = Database::obtain();
     try {
         $affectedRows = $db->update('jobs', $data, $where);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -1777,8 +1759,8 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
     $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
-    $data[ 'payable_rates' ]     = json_encode($projectStructure[ 'payable_rates' ]);
-    $data[ 'dqf_key' ]           = $projectStructure['dqf_key'];
+    $data[ 'payable_rates' ]     = json_encode( $projectStructure[ 'payable_rates' ] );
+    $data[ 'dqf_key' ]           = $projectStructure[ 'dqf_key' ];
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1818,8 +1800,7 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
 
     try {
         $results = $db->query_first($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
         throw new Exception( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
     }
@@ -2182,6 +2163,7 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 
     return $results;
 }
+
 function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
@@ -2222,8 +2204,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
     $db      = Database::obtain();
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2251,8 +2232,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     $db    = Database::obtain();
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2277,8 +2257,7 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
     $db      = Database::obtain();
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2305,8 +2284,7 @@ function getSegmentsForTMVolumeAnalysys( $jid ) {
     $db      = Database::obtain();
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2327,8 +2305,7 @@ function initializeWordCount( WordCount_Struct $wStruct ) {
     $where = " id = " . (int)$wStruct->getIdJob() . " AND password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
     try {
         $db->update('jobs', $data, $where);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2364,8 +2341,7 @@ function updateWordCount( WordCount_Struct $wStruct ) {
 
     try {
         $db->query($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2383,8 +2359,7 @@ function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     $where                          = " id =$pid";
     try {
         $affectedRows = $db->update('projects', $data, $where);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2405,8 +2380,7 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
     }
     try {
         $affectedRows = $db->update('projects', $data, $where);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2438,8 +2412,7 @@ function changePassword( $res, $id, $password, $new_password ) {
     }
     try {
         $res = $db->query($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2560,8 +2533,7 @@ function setSegmentTranslationError( $sid, $jid ) {
     $db = Database::obtain();
     try {
         $affectedRows = $db->update('segment_translations', $data, $where);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2631,8 +2603,7 @@ function resetLockSegment() {
     $db->useDb( 'matecat_analysis' );
     try {
         $db->query("UPDATE matecat_analysis.segment_translations_analysis_queue SET locked = 0 WHERE locked = 1");
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return -1;
     }
@@ -2656,8 +2627,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
     try {
         $db->query($q);
         $db->useDb( INIT::$DB_DATABASE );
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         $db->useDb( INIT::$DB_DATABASE );
         Log::doLog( $e->getMessage() );
         return -1;
@@ -2683,8 +2653,7 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $db      = Database::obtain();
     try {
         $results = $db->query_first($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2706,8 +2675,7 @@ function getNumSegmentsInQueue( $currentPid ) {
     try {
         $results = $db->query_first($query);
         $db->useDb( INIT::$DB_DATABASE );
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         $db->useDb( INIT::$DB_DATABASE );
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
@@ -2745,45 +2713,11 @@ function getNextSegmentForTMVolumeAnalysys() {
     $db      = Database::obtain();
     try {
         $results = $db->query_first($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
     return $results;
-}
-
-function lockUnlockTable( $table, $lock_unlock = "unlock", $mode = "READ" ) {
-    $db = Database::obtain();
-    if ( $lock_unlock == "lock" ) {
-        $query = "LOCK TABLES $table $mode";
-    } else {
-        $query = "UNLOCK TABLES";
-    }
-    try {
-        $results = $db->query($query);
-    }
-    catch(PDOException $e) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
-}
-
-function lockUnlockSegment( $sid, $jid, $value ) {
-
-    $data[ 'locked' ] = $value;
-    $where            = "id_segment=$sid and id_job=$jid ";
-
-    $db = Database::obtain();
-    try {
-        $db->update('segment_translations', $data, $where);
-    }
-    catch(PDOException $e) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $db->affected_rows;
 }
 
 /**
@@ -2805,8 +2739,7 @@ function countSegments( $pid ) {
     //-- and raw_word_count>0 -- removed, count ALL segments
     try {
         $results = $db->query_first($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2854,8 +2787,7 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         GROUP BY id_job WITH ROLLUP";
     try {
         $results = $db->fetch_array($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2887,8 +2819,7 @@ function countSegmentsTranslationAnalyzed( $pid ) {
             WHERE j.id_project = $pid";
     try {
         $results = $db->query_first($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2900,8 +2831,7 @@ function setJobCompleteness( $jid, $is_completed ) {
     $query = "update jobs set completed=$is_completed where id=$jid";
     try {
         $result = $db->query_first($query);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -2944,8 +2874,7 @@ function getArchivableJobs( $jobs = array() ) {
                 implode(", ", $jobs)
             )
         );
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
@@ -3002,8 +2931,7 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
     $db = Database::obtain();
     try {
         $db->query($q_archive);
-    }
-    catch(PDOException $e) {
+    } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
