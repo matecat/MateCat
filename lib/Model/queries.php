@@ -913,8 +913,11 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                   $subQuery
 
                 ) AS TEMP ON TEMP.__sid = s.id
+
+            WHERE j.id = $jid
+            AND j.password = '$password'
             ORDER BY sid ASC
-            ";
+";
 
     $db      = Database::obtain();
 
