@@ -658,8 +658,9 @@ class downloadFileController extends downloadController {
                 unset( $output_content[ $idFile ][ 'source' ] );
                 unset( $output_content[ $idFile ][ 'target' ] );
 
-                $output_content[ $idFile ] = new ZipContentObject( $output_content[ $idFile ] );
             }
+
+            $output_content[ $idFile ] = new ZipContentObject( $output_content[ $idFile ] );
 
         }
 

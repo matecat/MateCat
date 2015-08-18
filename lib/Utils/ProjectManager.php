@@ -1066,7 +1066,7 @@ class ProjectManager {
             $jobInfo[ 'job_last_segment' ]    = $contents[ 'segment_end' ];
 
             $query = "INSERT INTO jobs ( " . implode( ", ", array_keys( $jobInfo ) ) . " )
-                VALUES ( '" . implode( "', '", array_values( $jobInfo ) ) . "' )
+                VALUES ( '" . implode( "', '", array_values( array_map( array( $this->dbHandler, 'escape' ), $jobInfo ) ) ) . "' )
                 ON DUPLICATE KEY UPDATE
                 last_opened_segment = {$jobInfo['last_opened_segment']},
                 job_first_segment = '{$jobInfo['job_first_segment']}',
@@ -1093,7 +1093,7 @@ class ProjectManager {
             $wCountManager = new WordCount_Counter();
             $wCountManager->initializeJobWordCount( $jobs[ $position ][ 'id' ], $jobs[ $position ][ 'password' ] );
 
-            if ( $res !== true ) {
+            if ( $this->dbHandler->affected_rows == 0 ) {
                 $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $data, true ) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
@@ -1166,7 +1166,7 @@ class ProjectManager {
 
         $_data = array();
         foreach ( $first_job as $field => $value ) {
-            $_data[ ] = "`$field`='$value'";
+            $_data[ ] = "`$field`='" . $this->dbHandler->escape( $value ) . "'";
         }
 
         //----------------------------------------------------
@@ -1182,7 +1182,7 @@ class ProjectManager {
 
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
-            if ( $res !== true ) {
+            if ( $this->dbHandler->affected_rows == 0 ) {
                 $msg = "Failed to merge job  " . $rows[ 0 ][ 'id' ] . " from " . count( $rows ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $queries, true ) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";

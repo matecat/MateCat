@@ -633,7 +633,6 @@ function getTranslatorKey( $id_translator ) {
     $id_translator = $db->escape( $id_translator );
     $query         = "select mymemory_api_key from translators where username='$id_translator'";
 
-    $db->query_first( $query );
     $results = $db->query_first( $query );
 
     $res = null;
@@ -872,7 +871,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 j.last_opened_segment,
                 p.id_customer AS cid,
                 j.id_translator AS tid,
-                p.NAME AS pname,
+                p.name AS pname,
                 p.create_date,
                 fj.id_file,
                 f.filename,
@@ -884,7 +883,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 s.internal_id,
                 IF (st.status='NEW',NULL,st.translation) AS translation,
                 UNIX_TIMESTAMP(st.translation_date) AS version,
-                st.STATUS,
+                st.status,
                 COALESCE(time_to_edit, 0) AS time_to_edit,
                 s.xliff_ext_prec_tags,
                 s.xliff_ext_succ_tags,

@@ -134,7 +134,6 @@ class Database implements IDatabase {
         return $result;
     }
 
-
     /**
      * @Override
      * {@inheritdoc}
@@ -227,11 +226,12 @@ class Database implements IDatabase {
 
 
     /**
+     * TODO this trim should be removed and ALL codebase migrated from $db->escape() to prepared Statements
      * @Override
      * {@inheritdoc}
      */
-    public function escape($string) {
-        return $string; //$this->connection->quote($string); // TODO
+    public function escape( $string ) {
+        return substr( $this->connection->quote( $string ), 1, -1 );
     }
 
 }

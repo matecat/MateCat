@@ -99,7 +99,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
       return $arr_result ;
   }
 
-  public function getOpenCommentsInJob( $input ) {
+  public function getCommentsInJob( $input ) {
       $obj = $this->sanitize( $input );
 
       $query = $this->finderQuery() .
