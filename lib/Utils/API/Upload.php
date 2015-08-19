@@ -193,7 +193,7 @@ class Upload {
             }
 
             //All Right!!! GO!!!
-            $mod_name = self::_fixFileName( $fileName );
+            $mod_name = self::fixFileName( $fileName );
 
             if ( (!isset($fileUp->error) || empty($fileUp->error) ) && !copy( $fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $mod_name )) {
                 $this->setObjectErrorOrThrowException(
@@ -233,7 +233,7 @@ class Upload {
      *
      * @return string
      */
-    protected static function _fixFileName( $string ) {
+    public static function fixFileName( $string ) {
         //Roberto: removed STRIP_HIGH flag. Non-latin filenames are supported.
         $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
         $string = preg_replace( '/[^\pL0-9\040\.\-\=_()]/u', '', $string ); //strips whitespace and odd chars

@@ -688,6 +688,26 @@ class downloadFileController extends downloadController {
 
             foreach ( $internalFiles as $index => $internalFile ) {
 
+                $zip->createTree();
+
+                //rebuild the real name of files in the zip archive
+                foreach ( $zip->treeList as $filePath ) {
+                    $realPath = str_replace(
+                            array(
+                                    ZipArchiveExtended::INTERNAL_SEPARATOR,
+                                    FilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
+                            ),
+                            array( DIRECTORY_SEPARATOR, "" ),
+                            $filePath );
+                    $realPath = ltrim( $realPath, "/" );
+
+                    //remove the tmx from the original zip ( we want not to be exported as preview )
+                    if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                        $zip->deleteName( $realPath );
+                    }
+
+                }
+
                 $oldContent = $zip->getFromName( $internalFile->output_filename );
                 $zip->deleteName( $internalFile->output_filename );
                 $zip->addFromString( $internalFile->output_filename, $internalFile->getContent() );

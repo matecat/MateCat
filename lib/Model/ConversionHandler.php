@@ -39,7 +39,11 @@ class ConversionHandler {
 
         if ( !file_exists( $file_path ) ) {
             $this->result[ 'code' ]     = -6; // No Good, Default
-            $this->result[ 'errors' ][] = array( "code" => -6, "message" => "Error during upload. Please retry." );
+            $this->result[ 'errors' ][] = array(
+                    "code"    => -6,
+                    "message" => "Error during upload. Please retry.",
+                    'debug'   => FilesStorage::basename_fix( $this->file_name )
+            );
 
             return -1;
         }
@@ -356,7 +360,7 @@ class ConversionHandler {
                 return null;
             }
 
-            return $za->treeList;
+            return array_map( "Upload::fixFileName", $za->treeList );
 
         } catch ( Exception $e ) {
 
