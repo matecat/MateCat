@@ -740,7 +740,8 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     // Animation complete.
                 } );
 
-                if ( typeof d.data['zipFiles'] !== 'undefined' ) {
+                //if this conversion is related to a Zip File
+                if ( typeof d.data != 'undefined' && typeof d.data['zipFiles'] !== 'undefined' ) {
                     //zip files has been loaded
                     //print internal file list
 

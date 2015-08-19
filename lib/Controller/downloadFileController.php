@@ -640,11 +640,11 @@ class downloadFileController extends downloadController {
 
             $zip = $this->reBuildZipContent( $zipFileName, $internalFile );
 
-            $newOutputContent[] = array(
+            $newOutputContent[] = new ZipContentObject( array(
                     'output_filename'  => $zipFileName,
                     'document_content' => null,
                     'input_filename'   => $zip,
-            );
+            ) );
         }
 
         foreach ( $output_content as $idFile => $content ) {
@@ -669,6 +669,12 @@ class downloadFileController extends downloadController {
         return $newOutputContent;
     }
 
+    /**
+     * @param $zipFileName
+     * @param $internalFiles ZipContentObject[]
+     *
+     * @return string
+     */
     public function reBuildZipContent( $zipFileName, $internalFiles ) {
 
         $fs      = new FilesStorage();
@@ -684,7 +690,7 @@ class downloadFileController extends downloadController {
 
                 $oldContent = $zip->getFromName( $internalFile->output_filename );
                 $zip->deleteName( $internalFile->output_filename );
-                $zip->addFromString( $internalFile->output_filename, $internalFile->document_content );
+                $zip->addFromString( $internalFile->output_filename, $internalFile->getContent() );
 
             }
 
