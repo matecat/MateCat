@@ -20,7 +20,7 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "https://mtdevlogic.tilde.lv/ws/service.svc/json"; // TODO change to the production version
+    public $base_url = "https://www.letsmt.eu/ws/service.svc/json";
     
     /**
      * @var string
