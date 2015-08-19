@@ -196,10 +196,6 @@ class convertFileController extends ajaxController {
 
             $this->result = $conversionHandler->getResult();
 
-            if ( $this->result[ 'code' ] < 0 ) {
-                $this->result;
-            }
-
         }
 
         ( isset( $this->result[ 'errors' ] ) ) ? null : $this->result[ 'errors' ] = array();
