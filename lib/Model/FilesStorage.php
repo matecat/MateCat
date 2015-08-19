@@ -166,8 +166,9 @@ class FilesStorage {
             //if there is not an original path this is an unconverted file,
             // the original does not exists
             // detect which type of xliff
+            //check also for the extension, if already present do not force
             $fileType = DetectProprietaryXliff::getInfo( $xliffPath );
-            if ( !$fileType[ 'proprietary' ] ) {
+            if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }
 
@@ -192,7 +193,7 @@ class FilesStorage {
             if ( file_exists( $manifestFile ) ) {
                 Log::doLog( "Alternative Conversion detected" );
                 $file_extension = '.xlf';
-            } else{
+            } else {
                 Log::doLog( "Normal Conversion detected" );
                 $file_extension = '.sdlxliff';
             }

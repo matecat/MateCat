@@ -16,12 +16,6 @@ RewriteCond %{REQUEST_URI} /offline.html
 RewriteRule $ / [R=307,L]
 
 
-RewriteCond %{REQUEST_URI} /offline.html
-RewriteRule $ / [R=307,L]
-
-RewriteCond %{REQUEST_URI} /offline.html
-RewriteRule $ / [R=307,L]
-
 RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 

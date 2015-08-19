@@ -525,7 +525,7 @@ class UploadHandler {
         if ( $file_info[ 'extension' ] == 'zip' ) {
             $success = $this->zipFileDelete( $file_name );
         } //if it's a file in a zipped folder, delete it.
-        elseif ( preg_match( "#^[^\.]*\.zip/#", $_REQUEST[ 'file' ] ) ) {
+        elseif ( preg_match( '#^[^\.]*\.zip/#', $_REQUEST[ 'file' ] ) ) {
             $file_name = ZipArchiveExtended::getInternalFileName($_REQUEST[ 'file' ]);
 
             $success = $this->zipInternalFileDelete( $file_name );

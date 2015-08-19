@@ -285,12 +285,12 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
             $data[ 'segment_hash' ]        = $db->escape( $v[ 'segment_hash' ] );
             $data[ 'match_type' ]          = $db->escape( $v[ 'match_type' ] );
 
-            if( !empty( $v['segment_hash'] ) && ( empty($data[ 'segment_hash' ]) ) ) {
-                $data[ 'segment_hash' ] = $v[ 'segment_hash' ];
-                $msg = "mysql_real_escape_string failed!!! String was empty. Replaced with original {$v['segment_hash']}";
-                _TimeStampMsg( $msg );
-                Utils::sendErrMailReport( "<strong>$msg</strong>", "Fast Analysis mysql_real_escape_string failed." );
-            }
+//            if( !empty( $v['segment_hash'] ) && ( empty($data[ 'segment_hash' ]) ) ) {
+//                $data[ 'segment_hash' ] = $v[ 'segment_hash' ];
+//                $msg = "mysql_real_escape_string failed!!! String was empty. Replaced with original {$v['segment_hash']}";
+//                _TimeStampMsg( $msg );
+//                Utils::sendErrMailReport( "<strong>$msg</strong>", "Fast Analysis mysql_real_escape_string failed." );
+//            }
 
             $data[ 'eq_word_count' ]       = (float)$eq_word;
             $data[ 'standard_word_count' ] = (float)$standard_words;

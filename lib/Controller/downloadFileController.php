@@ -640,11 +640,11 @@ class downloadFileController extends downloadController {
 
             $zip = $this->reBuildZipContent( $zipFileName, $internalFile );
 
-            $newOutputContent[] = array(
+            $newOutputContent[] = new ZipContentObject( array(
                     'output_filename'  => $zipFileName,
                     'document_content' => null,
                     'input_filename'   => $zip,
-            );
+            ) );
         }
 
         foreach ( $output_content as $idFile => $content ) {
@@ -658,8 +658,9 @@ class downloadFileController extends downloadController {
                 unset( $output_content[ $idFile ][ 'source' ] );
                 unset( $output_content[ $idFile ][ 'target' ] );
 
-                $output_content[ $idFile ] = new ZipContentObject( $output_content[ $idFile ] );
             }
+
+            $output_content[ $idFile ] = new ZipContentObject( $output_content[ $idFile ] );
 
         }
 
@@ -668,6 +669,12 @@ class downloadFileController extends downloadController {
         return $newOutputContent;
     }
 
+    /**
+     * @param $zipFileName
+     * @param $internalFiles ZipContentObject[]
+     *
+     * @return string
+     */
     public function reBuildZipContent( $zipFileName, $internalFiles ) {
 
         $fs      = new FilesStorage();
@@ -681,9 +688,29 @@ class downloadFileController extends downloadController {
 
             foreach ( $internalFiles as $index => $internalFile ) {
 
+                $zip->createTree();
+
+                //rebuild the real name of files in the zip archive
+                foreach ( $zip->treeList as $filePath ) {
+                    $realPath = str_replace(
+                            array(
+                                    ZipArchiveExtended::INTERNAL_SEPARATOR,
+                                    FilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
+                            ),
+                            array( DIRECTORY_SEPARATOR, "" ),
+                            $filePath );
+                    $realPath = ltrim( $realPath, "/" );
+
+                    //remove the tmx from the original zip ( we want not to be exported as preview )
+                    if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                        $zip->deleteName( $realPath );
+                    }
+
+                }
+
                 $oldContent = $zip->getFromName( $internalFile->output_filename );
                 $zip->deleteName( $internalFile->output_filename );
-                $zip->addFromString( $internalFile->output_filename, $internalFile->document_content );
+                $zip->addFromString( $internalFile->output_filename, $internalFile->getContent() );
 
             }
 

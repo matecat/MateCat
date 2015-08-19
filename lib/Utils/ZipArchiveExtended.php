@@ -116,7 +116,8 @@ class ZipArchiveExtended extends ZipArchive {
         $numOfFiles   = 0;
 
         for ( $i = 0; $i < $this->numFiles; $i++ ) {
-            $path = $this->getNameIndex( $i );
+
+            $path = $this->getNameIndex( $i ) ;
 
             $pathBySlash = array_values( explode( '/', $path ) );
 
@@ -131,7 +132,7 @@ class ZipArchiveExtended extends ZipArchive {
                 $path2numOfFolders[ $pathWithoutFile ] = 0;
             }
 
-            if ( $pathWithoutFile != "" && $fileName == "K_" ) {    //this is the path of a directory: add directory count
+            if ( $pathWithoutFile != "" && $fileName == self::ARRAY_FILES_PREFIX ) {    //this is the path of a directory: add directory count
                 $path2numOfFolders[ $pathWithoutFile ]++;
                 $numOfFolders++;
             } else {
@@ -162,14 +163,14 @@ class ZipArchiveExtended extends ZipArchive {
                 throw new Exception( "Max number of folders per depth exceeded.", -3 );
             }
 
-            if ( $fileName != "" && $fileName != "K_" ) {
+            if ( $fileName != "" && $fileName != self::ARRAY_FILES_PREFIX ) {
                 $filePaths[] = $path;
             }
 
             $temp = &$Tree;
             for ( $j = 0; $j < $c - 1; $j++ ) {
                 $count       = 1;
-                $originalKey = str_replace( "K_", "", $pathBySlash[ $j ], $count );
+                $originalKey = str_replace( self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $j ], $count );
                 if ( isset( $temp[ $originalKey ] ) ) {
                     $temp = &$temp[ $originalKey ];
                 } else {
@@ -178,7 +179,7 @@ class ZipArchiveExtended extends ZipArchive {
                 }
             }
 
-            $last_originalKey = str_replace( "K_", "", $pathBySlash[ $c - 1 ], $count );
+            $last_originalKey = str_replace( self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $c - 1 ], $count );
             if ( $this->isDir( $path ) ) {
                 $temp[ $last_originalKey ] = array();
             } else {

@@ -159,13 +159,12 @@ UI = {
 
     createKeyByTMX: function () {
         if ( !isTMXAllowed() ) return false;
+        if ( $( '#create_private_tm_btn' ).hasClass( 'disabled' ) ) return false; //ajax call already running
         if ( $( '#create_private_tm_btn[data-key]' ).length || $( '#private-tm-key' ).val().length ) { // a key has already been created
-            console.log( 'già cliccato' );
             if ( $( '#private-tm-key' ).val() == '' ) {
                 $( '#private-tm-key' ).val( $( '#create_private_tm_btn' ).attr( 'data-key' ) );
             }
         } else {
-            console.log( 'questo' );
             if ( !$( ".more" ).hasClass( 'minus' ) ) $( ".more" ).trigger( 'click' );
             $( '#create_private_tm_btn' ).trigger( 'click' );
             $( '.warning-message' ).html( '<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>' ).show();
@@ -740,7 +739,8 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     // Animation complete.
                 } );
 
-                if ( typeof d.data['zipFiles'] !== 'undefined' ) {
+                //if this conversion is related to a Zip File
+                if ( typeof d.data != 'undefined' && typeof d.data['zipFiles'] !== 'undefined' ) {
                     //zip files has been loaded
                     //print internal file list
 
@@ -808,6 +808,13 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         }
 
+                        var thisIsATMXFile       = file['name'].split( "." ).pop().toLowerCase() == 'tmx';
+                        var thereIsAKeyInTmPanel = $( '#activetm' ).find( 'tr.mine' ).length;
+
+                        /* c'è almeno un file tmx e non ho già generato la chiave => genera la chiave */
+                        if( thisIsATMXFile && !thereIsAKeyInTmPanel ){
+                            UI.createKeyByTMX();
+                        }
 
                         $( filerow ).after( rowClone );
 
