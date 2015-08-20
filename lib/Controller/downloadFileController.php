@@ -680,7 +680,7 @@ class downloadFileController extends downloadController {
         $fs      = new FilesStorage();
         $zipFile = $fs->getOriginalZipPath( $this->jobInfo[ 'create_date' ], $this->jobInfo[ 'id_project' ], $zipFileName );
 
-        $tmpFName = tempnam( "/tmp", "ZIP" );
+        $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
         copy( $zipFile, $tmpFName );
 
         $zip = new ZipArchiveExtended();
