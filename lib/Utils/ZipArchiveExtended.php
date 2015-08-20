@@ -14,7 +14,7 @@ class ZipArchiveExtended extends ZipArchive {
     const MAX_FILES = 100;
 
     const INTERNAL_SEPARATOR = "___SEP___";
-    const ARRAY_FILES_PREFIX = "K_";
+    const ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
 
     public $tree;
