@@ -781,7 +781,8 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 
                         $( 'button[role="button"]', rowClone )
                                 .data( "url", newDataUrl )
-                                .attr( "data-url", newDataUrl );
+                                .attr( "data-url", newDataUrl )
+                                .removeClass( 'zip_row' );
 
                         //$( rowParent ).append( rowClone );
 
@@ -817,6 +818,9 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         }
 
                         $( filerow ).after( rowClone );
+
+                        $( 'button[role="button"]', filerow ).addClass( "zip_row" );
+
 
                     } );
 

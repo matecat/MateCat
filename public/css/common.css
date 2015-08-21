@@ -3103,6 +3103,12 @@ float: left;
       vertical-align: top;
 }
 
+.delete button.zip_row:before{
+    content: "Clear Archive";
+    font-size: 12px;
+    font-weight: bold;
+}
+
 .more.minus:before {
     content: "\f147";
 }
