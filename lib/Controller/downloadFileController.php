@@ -721,9 +721,6 @@ class downloadFileController extends downloadController {
 
             }
 
-
-
-
             $zip->close();
 
         }

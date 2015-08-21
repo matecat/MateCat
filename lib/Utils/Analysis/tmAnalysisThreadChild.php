@@ -95,16 +95,16 @@ do {
     try {
 
         // PROCESS CONTROL FUNCTIONS
-        if ( !myProcessExists( $my_pid ) ) {
-            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
-            cleanShutDown();
-        }
-
-        // control if parent is still running
-        if ( !isParentRunning( $parent_pid ) ) {
-            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
-            cleanShutDown();
-        }
+//        if ( !myProcessExists( $my_pid ) ) {
+//            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
+//            cleanShutDown();
+//        }
+//
+//        // control if parent is still running
+//        if ( !isParentRunning( $parent_pid ) ) {
+//            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
+//            cleanShutDown();
+//        }
         // PROCESS CONTROL FUNCTIONS
 
     } catch( Exception $e ){

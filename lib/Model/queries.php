@@ -2242,6 +2242,13 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
+
+    //with this query we decide what segments
+    //must be inserted in segment_translations table
+
+    //we want segments that we decided to show in cattool
+    //and segments that are NOT locked ( already translated )
+
     $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
 
 		s.raw_word_count,
@@ -2254,6 +2261,7 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
 		left join segment_translations as st on st.id_segment = s.id
 		where j.id_project='$pid'
 		and IFNULL( st.locked, 0 ) = 0
+		and show_in_cattool != 0
 		group by s.id
 		order by s.id";
     $db      = Database::obtain();

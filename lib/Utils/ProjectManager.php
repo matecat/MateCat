@@ -1256,7 +1256,7 @@ class ProjectManager {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
                             $tempSeg = strip_tags( $seg_source[ 'raw-content' ] );
-                            $tempSeg = preg_replace( '#\p{P}+#u', "", $tempSeg );
+                            $tempSeg = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
                             $tempSeg = trim( $tempSeg );
 
                             //init tags
@@ -1328,7 +1328,7 @@ class ProjectManager {
                     } else {
 
                         $tempSeg = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
-                        $tempSeg = preg_replace( '#\p{P}+#u', "", $tempSeg );
+                        $tempSeg = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
                         $tempSeg = trim( $tempSeg );
                         $prec_tags = null;
                         $succ_tags = null;

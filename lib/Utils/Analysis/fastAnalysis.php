@@ -252,28 +252,27 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
     foreach ( $fastReport as $k => $v ) {
 
-        $jid_fid    = explode( "-", $k );
+        $jid_pass    = explode( "-", $k );
 
-        $id_segment = $jid_fid[ 0 ];
-        $list_id_jobs_password    = $jid_fid[ 1 ];
+        // only to remember the meaning of $k
+        // EX: 21529088-42593:b433193493c6,42594:b4331aacf3d4
+        //$id_segment = $jid_fid[ 0 ];
+
+        $list_id_jobs_password    = $jid_pass[ 1 ];
 
         if ( array_key_exists( $v[ 'match_type' ], $equivalentWordMapping ) ) {
             $eq_word = ( $v[ 'wc' ] * $equivalentWordMapping[ $v[ 'match_type' ] ] / 100 );
-            if ( $v[ 'match_type' ] == "INTERNAL" ) {
-            }
         } else {
             $eq_word = $v[ 'wc' ];
         }
 
-        $total_eq_wc += $eq_word;
         $standard_words = $eq_word;
-
         if ( $v[ 'match_type' ] == "INTERNAL" or $v[ 'match_type' ] == "MT" ) {
             $standard_words = $v[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
         }
 
+        $total_eq_wc       += $eq_word;
         $total_standard_wc += $standard_words;
-        unset( $fastReport[ $k ]['wc'] );
 
         $list_id_jobs_password = explode( ',', $list_id_jobs_password );
         foreach ( $list_id_jobs_password as $id_job ) {
@@ -285,19 +284,16 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
             $data[ 'segment_hash' ]        = $db->escape( $v[ 'segment_hash' ] );
             $data[ 'match_type' ]          = $db->escape( $v[ 'match_type' ] );
 
-//            if( !empty( $v['segment_hash'] ) && ( empty($data[ 'segment_hash' ]) ) ) {
-//                $data[ 'segment_hash' ] = $v[ 'segment_hash' ];
-//                $msg = "mysql_real_escape_string failed!!! String was empty. Replaced with original {$v['segment_hash']}";
-//                _TimeStampMsg( $msg );
-//                Utils::sendErrMailReport( "<strong>$msg</strong>", "Fast Analysis mysql_real_escape_string failed." );
-//            }
-
             $data[ 'eq_word_count' ]       = (float)$eq_word;
             $data[ 'standard_word_count' ] = (float)$standard_words;
 
             $st_values[ ] = " ( '" . implode( "', '", array_values( $data ) ) . "' )";
 
-            if ( $data[ 'eq_word_count' ] > 0 && $perform_Tms_Analysis ) {
+            //WE TRUST ON THE FAST ANALYSIS RESULTS FOR THE WORD COUNT
+            //here we are pruning the segments that must not be sent to the engines for the TM analysis
+            //because we multiply the word_count with the equivalentWordMapping ( and this can be 0 for some values )
+            //we must check if the value of $fastReport[ $k ]['wc'] and not $data[ 'eq_word_count' ]
+            if ( $fastReport[ $k ]['wc'] > 0 && $perform_Tms_Analysis ) {
 
                 /**
                  *
@@ -311,8 +307,13 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
             } else {
 //                Log::doLog( 'Skipped Fast Segment: ' . var_export( $fastReport[ $k ], true ) );
+                // this segment must not be sent to the TM analysis queue
                 unset( $fastReport[ $k ] );
             }
+
+            //anyway this key must be removed because he is no more needed and we want not to send it to the queue
+            unset( $fastReport[ $k ]['wc'] );
+
         }
     }
 
@@ -332,16 +333,15 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
         $query_st = $segment_translations . implode( ", ", $chunk ) .
                 " ON DUPLICATE KEY UPDATE
-            match_type = VALUES( match_type ),
-                       eq_word_count = VALUES( eq_word_count ),
-                       standard_word_count = VALUES( standard_word_count )
-                           ";
+                        match_type = VALUES( match_type ),
+                        eq_word_count = VALUES( eq_word_count ),
+                        standard_word_count = VALUES( standard_word_count )
+                ";
 
         try {
             _TimeStampMsg( "Executed " . ( $k + 1 )  );
             $db->query($query_st);
-        }
-        catch(PDOException $e) {
+        } catch(PDOException $e) {
             _TimeStampMsg( $e->getMessage() );
             return $e->getCode() * -1;
         }
