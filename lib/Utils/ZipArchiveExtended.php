@@ -121,6 +121,8 @@ class ZipArchiveExtended extends ZipArchive {
 
             $pathBySlash = array_values( explode( '/', $path ) );
 
+            if( $pathBySlash[ 0 ] == '__MACOSX' ) continue;
+
             $pathBySlash = array_map( array( 'ZipArchiveExtended', 'treeKey' ), $pathBySlash );
 
             $pathWithoutFile = $pathBySlash;

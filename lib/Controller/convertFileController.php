@@ -86,7 +86,7 @@ class convertFileController extends ajaxController {
                 // this makes the conversionhandler accumulate eventual errors on files and continue
                 $conversionHandler->setStopOnFileException( false );
 
-                $fileObjects = $conversionHandler->extractZipFile();
+                $internalZipFileNames = $conversionHandler->extractZipFile();
                 //call convertFileWrapper and start conversions for each file
 
                 if ( $conversionHandler->uploadError ) {
@@ -117,32 +117,24 @@ class convertFileController extends ajaxController {
 
                 }
 
-
-
-                $realFileObjectInfo  = $fileObjects;
-                $realFileObjectNames = array_map(
+                $realFileNames = array_map(
                         array( 'ZipArchiveExtended', 'getFileName' ),
-                        $fileObjects
+                        $internalZipFileNames
                 );
 
-                foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                    $__fileName     = $fileObject;
-                    $__realFileName = $realFileObjectInfo[ $i ];
-                    $filesize       = filesize( $this->intDir . DIRECTORY_SEPARATOR . $__realFileName );
-
+                foreach ( $realFileNames as $i => &$fileObject ) {
                     $fileObject               = array(
-                            'name' => $__fileName,
-                            'size' => $filesize
+                            'name' => $fileObject,
+                            'size' => filesize( $this->intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
                     );
-                    $realFileObjectInfo[ $i ] = $fileObject;
                 }
 
-                $this->result[ 'data' ][ 'zipFiles' ] = json_encode( $realFileObjectNames );
+                $this->result[ 'data' ][ 'zipFiles' ] = json_encode( $realFileNames );
 
                 $stdFileObjects = array();
 
-                if ( $fileObjects !== null ) {
-                    foreach ( $fileObjects as $fName ) {
+                if ( $internalZipFileNames !== null ) {
+                    foreach ( $internalZipFileNames as $fName ) {
 
                         $newStdFile       = new stdClass();
                         $newStdFile->name = $fName;

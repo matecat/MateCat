@@ -657,7 +657,7 @@ class FilesStorage {
         $dirname  = implode( DIRECTORY_SEPARATOR, $rawPath );
 
         $explodedFileName = explode( ".", $basename );
-        $extension        = array_pop( $explodedFileName );
+        $extension        = strtolower( array_pop( $explodedFileName ) );
         $filename         = implode( ".", $explodedFileName );
 
         $return_array = array();
