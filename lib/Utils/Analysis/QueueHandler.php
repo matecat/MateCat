@@ -422,8 +422,8 @@ class Analysis_QueueHandler extends Stomp {
      * @param $standard_words
      */
     public function incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
-        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)$eq_words * 1000 );
-        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)$standard_words * 1000 );
+        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
+        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)( $standard_words * 1000 ) );
         $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
     }
 
