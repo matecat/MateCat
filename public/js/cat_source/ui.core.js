@@ -2243,8 +2243,17 @@ console.log('changeStatus');
 		var actualWarnings = segment.find('p.warnings');
 
 		$.each(warnings, function(key, value) {
+
+            var warningMessage = '<p class="warnings">' + value.debug;
 			//console.log(warnings[key]);
-			parentTag.before(actualWarnings).append('<p class="warnings">' + value.debug + '</p>');
+
+
+            if(value.tip != "") {
+                warningMessage += '<span class="tip">' + value.tip + '</span>' ;
+            }
+            warningMessage += '</p>' ;
+
+            parentTag.before(actualWarnings).append( warningMessage );
 		});
 		actualWarnings.remove();
 
