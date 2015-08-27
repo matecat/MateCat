@@ -877,13 +877,13 @@ width: 100%;
 margin: 0;
 /* padding-left: 10px; */
 }
-/*supported formats*/
-.supported-formats .popup
-    {
-    top: 35%;
-    left: 36%;
-    width: auto;
-    }
+.supported-formats .popup {
+    margin: auto;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    width: 1045px;
+    height: 600px;
+}
 .popup-languages .popup
     {
     width: 90% !important;
