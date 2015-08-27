@@ -1255,6 +1255,10 @@ class ProjectManager {
 
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
+                            //rest flag because if the first mrk of the seg-source is not translatable the rest of
+                            //mrk in the list will not be too!!!
+                            $show_in_cattool = 1;
+
                             $tempSeg = strip_tags( $seg_source[ 'raw-content' ] );
                             $tempSeg = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
                             $tempSeg = trim( $tempSeg );

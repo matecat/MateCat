@@ -856,6 +856,15 @@ class CatUtils {
         $string = preg_replace( "#<.*?" . ">#si", "", $string );
         $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
 
+        /*
+         * Remove Unicode:
+         * P -> Punctuation
+         * Z -> Separator
+         * C -> Other
+         */
+        $string = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $string );
+
+        //these could be superfluous
         $string = str_replace( ":", "", $string );
         $string = str_replace( ";", "", $string );
         $string = str_replace( "[", "", $string );
