@@ -761,7 +761,7 @@ testProgress = function(filerow,filesize,session,progress) {
 	var ob = $('.ui-progressbar-value', filerow);
 	if (ob.hasClass('completed')) return;
 
-    var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/50;
+    var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/30;
 
 	progress++;
 
