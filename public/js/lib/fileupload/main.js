@@ -755,32 +755,24 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 }
 
 testProgress = function(filerow,filesize,session,progress) {
-//    console.log('session: ' + session);
-//    console.log('data-session: ' + $(filerow).data('session'));
     if(session != $(filerow).data('session')) return;
 
 	if(typeof filesize == 'undefined') filesize = 1000000;
-//	console.log('filesize: ' + filesize);
 	var ob = $('.ui-progressbar-value', filerow);
-	if(ob.hasClass('completed')) return;
-//	var step = 50000/filesize;
-	var step = 1;
-	var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/10;
+	if (ob.hasClass('completed')) return;
 
-	stepWait *= 2;
+    var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/50;
 
-	progress = progress+step;
-//	console.log(progress);
+	progress++;
 
 	ob.css('width', progress+'%');
-	if(progress > 98) {
+	if (progress > 98) {
 		return;
 	}
 
 	setTimeout(function(){
         testProgress(filerow,filesize,session,progress);
-//        console.log()
-    },Math.round(stepWait*1000));
+    }, Math.round(stepWait*1000));
 }
 
 checkInit = function() {
