@@ -61,14 +61,16 @@ function cleanShutDown( ){
 
 }
 
-function isParentRunning() {
+function isParentRunning( $parent_pid ) {
 
     /**
      * @var $amqHandlerSubscriber Analysis_QueueHandler
      */
     global $amqHandlerSubscriber;
 
-    return (bool)$amqHandlerSubscriber->getRedisClient()->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
+    $redis_parent = $amqHandlerSubscriber->getRedisClient()->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
+    if( !(bool)$redis_parent || $redis_parent != $parent_pid ) return false;
+    return true;
 
 }
 
@@ -95,16 +97,16 @@ do {
     try {
 
         // PROCESS CONTROL FUNCTIONS
-//        if ( !myProcessExists( $my_pid ) ) {
-//            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
-//            cleanShutDown();
-//        }
-//
-//        // control if parent is still running
-//        if ( !isParentRunning( $parent_pid ) ) {
-//            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
-//            cleanShutDown();
-//        }
+        if ( !myProcessExists( $my_pid ) ) {
+            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
+            cleanShutDown();
+        }
+
+        // control if parent is still running
+        if ( !isParentRunning( $parent_pid ) ) {
+            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
+            cleanShutDown();
+        }
         // PROCESS CONTROL FUNCTIONS
 
     } catch( Exception $e ){
@@ -115,6 +117,8 @@ do {
         continue;
 
     }
+
+//    _TimeStampMsg( $my_pid . ": i'm alive!" );
 
     $msg      = null;
     $objQueue = array();
