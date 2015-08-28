@@ -593,6 +593,8 @@ class UploadHandler {
     }
 
     private function deleteSha( $file_path ) {
+        if( !sha1_file( $file_path ) ) return;
+
         $file_sha = glob( $this->options[ 'upload_dir' ] . sha1_file( $file_path ) . "*" ); //delete sha1 also
         @unlink( @$file_sha[ 0 ] );
     }
