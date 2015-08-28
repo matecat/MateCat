@@ -382,7 +382,7 @@ console.log('changeStatus');
     copyAllSources: function() {
         console.log('copy all sources');
         if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
-            APP.confirm({
+            APP.confirmAndCheckbox({
                 title: 'Copy all new segments',
                 name: 'confirmCopyAllSources',
                 okTxt: 'Yes',
@@ -390,7 +390,9 @@ console.log('changeStatus');
                 callback: 'continueCopyAllSources',
                 onCancel: 'abortCopyAllSources',
                 closeOnSuccess: true,
-                msg: "Copy source to target for all new segments?<br/>This action cannot be undone."
+                msg: "Copy source to target for all new segments?<br/><b>This action cannot be undone.</b>",
+                'checkbox-label': "I want to fill all untranslated target segments with a copy "+
+                                    "of the corresponding source segments."
             });
         } else {
             this.consecutiveCopySourceNum = [];
