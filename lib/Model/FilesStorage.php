@@ -149,9 +149,11 @@ class FilesStorage {
         $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
 
         //ensure old stuff is overwritten
-        if ( is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
-            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
-        }
+        // ?? why ?? if we have more than once the same file we are not
+        // be benefiting from the advantages of hard links
+//        if ( is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+//            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+//        }
 
         //create cache dir structure
         mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
@@ -307,6 +309,7 @@ class FilesStorage {
         //fetch cache links, created by converter, from a directory
         $linkFiles = scandir( $dirToScan );
         $zipFilesHash = array();
+        $filesHashInfo    = array();
         //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
         foreach ( $linkFiles as $k => $linkFile ) {
 
@@ -315,23 +318,29 @@ class FilesStorage {
                 unset( $linkFiles[ $k ] );
             } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
                 unset( $linkFiles[ $k ] );
+            } else {
+                $filesHashInfo[ 'sha' ][] = $linkFiles[ $k ];
+                $filesHashInfo[ 'fileName' ][ $linkFiles[ $k ] ] = file(
+                        $dirToScan . DIRECTORY_SEPARATOR . $linkFiles[ $k ],
+                        FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+                );
             }
 
         }
 
         return array(
-                'conversionHashes' => $linkFiles,
+                'conversionHashes' => $filesHashInfo,
                 'zipHashes'        => $zipFilesHash
         );
 
     }
 
-    public function linkSessionToCache( $hash, $lang, $uid ) {
+    public function linkSessionToCache( $hash, $lang, $uid, $realFileName ) {
         //get upload dir
         $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, named after cache position on storage
-        return touch( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang );
+        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n" , FILE_APPEND | LOCK_EX );
     }
 
     /*
@@ -347,7 +356,12 @@ class FilesStorage {
             if ( $fileInfo->isDot() || $fileInfo->isDir() ) {
                 continue;
             }
-            if ( stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
+
+            //remove only the wrong languages, the same code|language must be
+            // retained because of the file name append
+            if ( $fileInfo->getFilename() != $linkFile &&
+                    stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
+
                 unlink( $fileInfo->getPathname() );
                 Log::doLog( "Deleted Hash " . $fileInfo->getPathname() );
             }
@@ -355,7 +369,7 @@ class FilesStorage {
 
     }
 
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile ) {
+    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
@@ -379,21 +393,40 @@ class FilesStorage {
         //make links from cache to files
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
-        $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
-        if( is_file( $filePath ) ){
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
+        $origFilePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
+        $tmpOrigFileName = $origFilePath;
+        if( is_file( $origFilePath ) ){
+
+            /*
+             * Force the new filename if it is provided
+             */
+            if ( !empty( $newFileName ) ){
+                $tmpOrigFileName = $newFileName;
+            }
+            $res &= link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
+
         }
 
         //work
-        $filePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
-        $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
+        /*
+         * Force the new filename if it is provided
+         */
+        $convertedFilePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
+        $tmpConvertedFilePath = $convertedFilePath;
+        if ( !empty( $newFileName ) ){
+            if( !DetectProprietaryXliff::isXliffExtension( FilesStorage::pathinfo_fix( $newFileName ) ) ){
+                $convertedExtension = FilesStorage::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
+                $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
+            }
+        }
+        $res &= link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
 
         //check if manifest from a LongHorn conversion exists
         $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
         if ( file_exists( $manifestFile ) ) {
             $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
-            $res &= link( $filePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $filePath ) );
+            $res &= link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
+            $res &= link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
         }
 
         if( !$res ){

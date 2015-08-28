@@ -229,7 +229,6 @@ class createProjectController extends ajaxController {
 
         $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
         $newArFiles = array();
-        $linkFiles = scandir( $uploadDir );
 
         foreach($arFiles as $__fName){
            if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {

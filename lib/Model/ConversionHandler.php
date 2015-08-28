@@ -116,10 +116,10 @@ class ConversionHandler {
         }
 
         //compute hash to locate the file in the cache
-        $sha1 = sha1( file_get_contents( $file_path ) );
+        $sha1 = sha1_file( $file_path );
 
         //initialize path variable
-        $xliffPath = false;
+        $cachedXliffPath = false;
 
         //get storage object
         $fs = new FilesStorage();
@@ -128,15 +128,15 @@ class ConversionHandler {
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
             //move the file in the right directory from the packages to the file dir
-            $xliffPath = $fs->getXliffFromCache( $sha1, $this->source_lang );
+            $cachedXliffPath = $fs->getXliffFromCache( $sha1, $this->source_lang );
 
-            if ( !$xliffPath ) {
+            if ( !$cachedXliffPath ) {
                 Log::doLog( "Failed to fetch xliff for $sha1 from disk cache (is file there?)" );
             }
         }
 
         //if invalid or no cached version
-        if ( !isset( $xliffPath ) or empty( $xliffPath ) ) {
+        if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
             $converter = new FileFormatConverter( $this->segmentation_rule );
@@ -175,8 +175,8 @@ class ConversionHandler {
                 }
 
                 //store converted content on a temporary path on disk (and off RAM)
-                $xliffPath = tempnam( "/tmp", "MAT_XLF" );
-                file_put_contents( $xliffPath, $convertResult[ 'xliffContent' ] );
+                $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
+                file_put_contents( $cachedXliffPath, $convertResult[ 'xliffContent' ] );
                 unset( $convertResult[ 'xliffContent' ] );
 
                 /*
@@ -186,7 +186,7 @@ class ConversionHandler {
                  */
 
                 //save in cache
-                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $xliffPath );
+                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
 
                 if ( !$res_insert ) {
                     //custom error message passed directly to javascript client and displayed as is
@@ -197,7 +197,7 @@ class ConversionHandler {
                             'debug' => FilesStorage::basename_fix( $this->file_name )
                     );
 
-                    unset( $xliffPath );
+                    unset( $cachedXliffPath );
 
                     return false;
                 }
@@ -276,14 +276,19 @@ class ConversionHandler {
         }
 
         //if everything went well and we've obtained a path toward a valid package (original+xliff), either via cache or conversion
-        if ( isset( $xliffPath ) and !empty( $xliffPath ) ) {
+        if ( isset( $cachedXliffPath ) and !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
             $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
-            $fs->deleteHashFromUploadDir( $uploadDir, $sha1 );
+            $fs->deleteHashFromUploadDir( $uploadDir, $sha1 . "|" . $this->source_lang );
 
             //put reference to cache in upload dir to link cache to session
-            $fs->linkSessionToCache( $sha1, $this->source_lang, $this->cookieDir );
+            $fs->linkSessionToCache(
+                    $sha1,
+                    $this->source_lang,
+                    $this->cookieDir,
+                    FilesStorage::basename_fix( $file_path )
+            );
             //a usable package is available, give positive feedback
             $this->result[ 'code' ] = 1;
 

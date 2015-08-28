@@ -19,6 +19,13 @@ class ProjectManager {
 
     protected $tmxServiceWrapper;
 
+    /**
+     * @var FilesStorage
+     */
+    protected $fileStorage;
+
+    protected $uploadDir;
+
     protected $checkTMX;
     /*
        flag used to indicate TMX check status: 
@@ -237,30 +244,21 @@ class ProjectManager {
         unset( $sortedFiles );
 
 
-        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
+        $uploadDir = $this->uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
         //we are going to access the storage, get model object to manipulate it
-        $fs = new FilesStorage();
-        $linkFiles= $fs->getHashesFromDir( $uploadDir );
+        $this->fileStorage =  new FilesStorage();
+        $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
 
-        foreach( $linkFiles[ 'zipHashes' ] as $zipHash ){
+        //associate the hash to the right file in upload directory
 
-            $result = $fs->linkZipToProject(
-                    $this->projectStructure['create_date'],
-                    $zipHash,
-                    $this->projectStructure['id_project']
-            );
-
-            if( !$result ){
-                Log::doLog( "Failed to store the Zip file $zipHash - \n" );
-                $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                        "code" => -10, "message" => "Failed to store the original Zip $zipHash "
-                );
-                return false;
-                //Exit
-            }
-
+        try {
+            $this->_pushTMXToMyMemory();
+        } catch ( Exception $e ) {
+            //exit project creation
+            return false;
         }
+        //TMX Management
 
         /*
             loop through all input files to
@@ -271,82 +269,69 @@ class ProjectManager {
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
-                //load it into MyMemory; we'll check later on how it went
-                $file            = new stdClass();
-                $file->file_path = "$uploadDir/$fileName";
-                $this->tmxServiceWrapper->setName( $fileName );
-                $this->tmxServiceWrapper->setFile( array( $file ) );
-
-                try {
-                    $this->tmxServiceWrapper->addTmxInMyMemory();
-                } catch ( Exception $e ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    return false;
-                }
-
-                //in any case, skip the rest of the loop, go to the next file
-                continue;
-            }
-
             /*
                Conversion Enforce
                Checking Extension is no more sufficient, we want check content if this is an idiom xlf file type, conversion are enforced
                $enforcedConversion = true; //( if conversion is enabled )
              */
-            $isAnXliffToConvert = $this->isConversionToEnforce( $fileName );
+            $isAFileToConvert = $this->isConversionToEnforce( $fileName );
 
             //if it's one of the listed formats or conversion is not enabled in first place
-            if ( !$isAnXliffToConvert ) {
+            if ( !$isAFileToConvert ) {
                 /*
                    filename is already an xliff and it's in upload directory
                    we have to make a cache package from it to avoid altering the original path
                  */
                 //get file
-                $filePathName = "$uploadDir/$fileName";
+                $filePathName = "$this->uploadDir/$fileName";
 
                 //calculate hash + add the fileName, if i load 3 equal files with the same content
                 // they will be squashed to the last one
-                $sha1 = sha1( file_get_contents( $filePathName ) . $filePathName );
+                $sha1 = sha1_file( $filePathName );
 
                 //make a cache package (with work/ only, emtpy orig/)
-                $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                $this->fileStorage->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
 
                 //put reference to cache in upload dir to link cache to session
-                $fs->linkSessionToCache( $sha1, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'uploadToken' ] );
+                $this->fileStorage->linkSessionToCache(
+                        $sha1,
+                        $this->projectStructure[ 'source_language' ],
+                        $this->projectStructure[ 'uploadToken' ],
+                        $fileName
+                );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ ] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
+                //when the same sdlxliff is uploaded more than once with different names
+                $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
                 unset( $sha1 );
             }
         }
 
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
-        foreach ( $linkFiles[ 'conversionHashes' ] as $linkFile ) {
+        foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
             $hashFile = FilesStorage::basename_fix( $linkFile );
             $hashFile = explode( '|', $hashFile );
 
             //use hash and lang to fetch file from package
-            $xliffFilePathName = $fs->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
+            $cachedXliffFilePathName = $this->fileStorage->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
 
             //get sha
             $sha1_original = $hashFile[ 0 ];
 
-            //get original file name
-            $originalFilePathName = $fs->getOriginalFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
-            $fileName = FilesStorage::basename_fix($originalFilePathName);
+            //get original file name, to insert into DB and cp in storage
+            //PLEASE NOTE, this can be an array when the same file added more
+            // than once and with different names
+            $_originalFileName = $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $linkFile ];
 
             unset( $hashFile );
 
-            if ( !file_exists( $xliffFilePathName ) ) {
+            if ( !file_exists( $cachedXliffFilePathName ) ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                         "code" => -6, "message" => "File not found on server after upload."
                 );
@@ -354,44 +339,56 @@ class ProjectManager {
 
             try {
 
-                $info = FilesStorage::pathinfo_fix( $xliffFilePathName );
+                $info = FilesStorage::pathinfo_fix( $cachedXliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], array( 'xliff', 'sdlxliff', 'xlf' ) ) ) {
                     throw new Exception( "Failed to find Xliff - no segments found", -3 );
                 }
-                $mimeType = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
                 $yearMonthPath = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
                 $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
-                $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $fileDateSha1Path );
 
-                //move the file in the right directory from the packages to the file dir
-                $fs->moveFromCacheToFileDir( $fileDateSha1Path, $this->projectStructure[ 'source_language' ], $fid );
+                //PLEASE NOTE, this can be an array when the same file added more
+                // than once and with different names
+                foreach ( $_originalFileName as $originalFileName ) {
 
-                $this->projectStructure[ 'file_id_list' ]->append( $fid );
+                    $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+                    $fid = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
-                $this->_extractSegments( file_get_contents( $xliffFilePathName ), $fid );
+                    //move the file in the right directory from the packages to the file dir
+                    $this->fileStorage->moveFromCacheToFileDir(
+                            $fileDateSha1Path,
+                            $this->projectStructure[ 'source_language' ],
+                            $fid,
+                            $originalFileName
+                    );
+
+                    $this->projectStructure[ 'file_id_list' ]->append( $fid );
+
+                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid );
+
+                }
 
             }
             catch ( Exception $e ) {
 
                 if ( $e->getCode() == -1 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -1, "message" => "No text to translate in the file $fileName."
+                            "code" => -1, "message" => "No text to translate in the file $originalFileName."
                     );
-                    $fs->deleteHashFromUploadDir( $uploadDir, $linkFile );
+                    $this->fileStorage->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
                 } elseif ( $e->getCode() == -2 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -7, "message" => "Failed to store segments in database for $fileName"
+                            "code" => -7, "message" => "Failed to store segments in database for $originalFileName"
                     );
                 } elseif ( $e->getCode() == -3 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code"    => -7,
-                            "message" => "File $fileName not found. Failed to save XLIFF conversion on disk"
+                            "message" => "File $originalFileName not found. Failed to save XLIFF conversion on disk"
                     );
                 } elseif ( $e->getCode() == -4 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $fileName )"
+                            "code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $originalFileName )"
                     );
                 } elseif ( $e->getCode() == -11 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
@@ -410,136 +407,31 @@ class ProjectManager {
                 } else {
                     //mysql insert Blob Error
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -7, "message" => "Failed to create project. Database Error on $fileName. Please try again."
+                            "code" => -7, "message" => "Failed to create project. Database Error on $originalFileName. Please try again."
                     );
                 }
 
                 Log::doLog( $e->getMessage() );
+                Log::doLog( $e->getTraceAsString() );
 
             }
-        }//end of hash-link loop
+
+        } //end of conversion hash-link loop
+
+        try {
+            $this->_zipFileHandling( $linkFiles );
+        } catch( Exception $e ){
+            //exit project creation
+            return false;
+        }
 
         //check if the files language equals the source language. If not, set an error message.
         if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
             $this->validateFilesLanguages();
         }
 
-        /****************/
-        //loop again through files to check to check for TMX loading
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
-
-            //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
-
-                $this->tmxServiceWrapper->setName( $fileName );
-
-                $result = array();
-
-                //is the TM loaded?
-                //wait until current TMX is loaded
-                while ( true ) {
-
-                    try {
-
-                        $result = $this->tmxServiceWrapper->tmxUploadStatus();
-
-                        if ( $result[ 'completed' ] ) {
-
-                            //"$fileName" has been loaded into MyMemory"
-                            //exit the loop
-                            break;
-
-                        }
-
-                        //"waiting for "$fileName" to be loaded into MyMemory"
-                        sleep( 3 );
-
-                    } catch ( Exception $e ) {
-
-                        $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                "code" => $e->getCode(), "message" => $e->getMessage()
-                        );
-
-                        Log::doLog( $e->getMessage() . "\n" . $e->getTraceAsString() );
-
-                        //exit project creation
-                        return false;
-
-                    }
-
-                }
-
-                //once the language is loaded, check if language is compliant (unless something useful has already been found)
-                if ( 1 == $this->checkTMX ) {
-
-                    //get localized target languages of TM (in case it's a multilingual TM)
-                    $tmTargets = explode( ';', $result[ 'data' ][ 'target_lang' ] );
-
-                    //indicates if something has been found for current memory
-                    $found = false;
-
-                    //compare localized target languages array (in case it's a multilingual project) to the TM supplied
-                    //if nothing matches, then the TM supplied can't have matches for this project
-
-                    //create an empty var and add the source language too
-                    $project_languages = array_merge( (array)$this->projectStructure[ 'target_language' ], (array)$this->projectStructure[ 'source_language' ] );
-                    foreach ( $project_languages as $projectTarget ) {
-                        if ( in_array( $this->langService->getLocalizedName( $projectTarget ), $tmTargets ) ) {
-                            $found = true;
-                            break;
-                        }
-                    }
-
-                    //if this TM matches the project lagpair and something has been found
-                    if ( $found and $result[ 'data' ][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
-
-                        //the TMX is good to go
-                        $this->checkTMX = 0;
-
-                    } elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
-
-                        /*
-                         * This means that the TMX has a srclang as specification in the header. Warn the user.
-                         * Ex:
-                         * <header creationtool="SDL Language Platform"
-                         *      creationtoolversion="8.0"
-                         *      datatype="rtf"
-                         *      segtype="sentence"
-                         *      adminlang="DE-DE"
-                         *      srclang="DE-DE" />
-                         */
-                        $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                "code"    => -16,
-                                "message" => "The TMX you provided explicitly specifies {$result['data']['source_lang']} as source language. Check that the specified language source in the TMX file match the language source of your project or remove that specification in TMX file."
-                        );
-
-                        $this->checkTMX = 0;
-
-                        Log::doLog( $this->projectStructure[ 'result' ] );
-                    }
-
-                }
-
-            }
-
-        }
-
-        if ( 1 == $this->checkTMX ) {
-            //this means that noone of uploaded TMX were usable for this project. Warn the user.
-            $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                    "code"    => -16,
-                    "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
-            );
-
-            Log::doLog( $this->projectStructure[ 'result' ] );
-
-            return false;
-        }
-
-        if ( !empty( $this->projectStructure[ 'result' ][ 'errors' ] ) ) {
-            Log::doLog( "Project Creation Failed. Sent to Output all errors." );
-            Log::doLog( $this->projectStructure[ 'result' ][ 'errors' ] );
-
+        if( ! $this->_doCheckForErrors() ){
+            //exit project creation
             return false;
         }
 
@@ -592,9 +484,9 @@ class ProjectManager {
 
         try {
 
-            Utils::deleteDir( $uploadDir );
-            if ( is_dir( $uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $uploadDir . '_converted' );
+            Utils::deleteDir( $this->uploadDir );
+            if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                Utils::deleteDir( $this->uploadDir . '_converted' );
             }
 
         } catch ( Exception $e ) {
@@ -705,6 +597,205 @@ class ProjectManager {
 
         }
 
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function _pushTMXToMyMemory(){
+
+        //TMX Management
+        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+
+            //if TMX,
+            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+                //load it into MyMemory; we'll check later on how it went
+                $file            = new stdClass();
+                $file->file_path = "$this->uploadDir/$fileName";
+                $this->tmxServiceWrapper->setName( $fileName );
+                $this->tmxServiceWrapper->setFile( array( $file ) );
+
+                try {
+                    $this->tmxServiceWrapper->addTmxInMyMemory();
+                } catch ( Exception $e ) {
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
+                            "code" => $e->getCode(), "message" => $e->getMessage()
+                    );
+
+                    throw new Exception( $e );
+                }
+
+                //in any case, skip the rest of the loop, go to the next file
+                continue;
+            }
+
+        }
+
+        /**
+         * @throws Exception
+         */
+        $this->_loopForTMXLoadStatus();
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function _loopForTMXLoadStatus( ){
+
+        //TMX Management
+
+        /****************/
+        //loop again through files to check to check for TMX loading
+        foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
+
+            //if TMX,
+            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+
+                $this->tmxServiceWrapper->setName( $fileName );
+
+                $result = array();
+
+                //is the TM loaded?
+                //wait until current TMX is loaded
+                while ( true ) {
+
+                    try {
+
+                        $result = $this->tmxServiceWrapper->tmxUploadStatus();
+
+                        if ( $result[ 'completed' ] ) {
+
+                            //"$fileName" has been loaded into MyMemory"
+                            //exit the loop
+                            break;
+
+                        }
+
+                        //"waiting for "$fileName" to be loaded into MyMemory"
+                        sleep( 3 );
+
+                    } catch ( Exception $e ) {
+
+                        $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                                "code" => $e->getCode(), "message" => $e->getMessage()
+                        );
+
+                        Log::doLog( $e->getMessage() . "\n" . $e->getTraceAsString() );
+
+                        //exit project creation
+                        throw new Exception( $e );
+
+                    }
+
+                }
+
+                //once the language is loaded, check if language is compliant (unless something useful has already been found)
+                if ( 1 == $this->checkTMX ) {
+
+                    //get localized target languages of TM (in case it's a multilingual TM)
+                    $tmTargets = explode( ';', $result[ 'data' ][ 'target_lang' ] );
+
+                    //indicates if something has been found for current memory
+                    $found = false;
+
+                    //compare localized target languages array (in case it's a multilingual project) to the TM supplied
+                    //if nothing matches, then the TM supplied can't have matches for this project
+
+                    //create an empty var and add the source language too
+                    $project_languages = array_merge( (array)$this->projectStructure[ 'target_language' ], (array)$this->projectStructure[ 'source_language' ] );
+                    foreach ( $project_languages as $projectTarget ) {
+                        if ( in_array( $this->langService->getLocalizedName( $projectTarget ), $tmTargets ) ) {
+                            $found = true;
+                            break;
+                        }
+                    }
+
+                    //if this TM matches the project lagpair and something has been found
+                    if ( $found and $result[ 'data' ][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+
+                        //the TMX is good to go
+                        $this->checkTMX = 0;
+
+                    } elseif ( $found and $result[ 'data' ][ 'target_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+
+                        /*
+                         * This means that the TMX has a srclang as specification in the header. Warn the user.
+                         * Ex:
+                         * <header creationtool="SDL Language Platform"
+                         *      creationtoolversion="8.0"
+                         *      datatype="rtf"
+                         *      segtype="sentence"
+                         *      adminlang="DE-DE"
+                         *      srclang="DE-DE" />
+                         */
+                        $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                                "code"    => -16,
+                                "message" => "The TMX you provided explicitly specifies {$result['data']['source_lang']} as source language. Check that the specified language source in the TMX file match the language source of your project or remove that specification in TMX file."
+                        );
+
+                        $this->checkTMX = 0;
+
+                        Log::doLog( $this->projectStructure[ 'result' ] );
+                    }
+
+                }
+
+                unset( $this->projectStructure[ 'array_files' ][ $kname ] );
+
+            }
+
+        }
+
+        if ( 1 == $this->checkTMX ) {
+            //this means that noone of uploaded TMX were usable for this project. Warn the user.
+            $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                    "code"    => -16,
+                    "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
+            );
+
+            Log::doLog( $this->projectStructure[ 'result' ] );
+
+            throw new Exception( "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project." );
+        }
+
+    }
+
+    protected function _doCheckForErrors(){
+
+        if ( !empty( $this->projectStructure[ 'result' ][ 'errors' ] ) ) {
+            Log::doLog( "Project Creation Failed. Sent to Output all errors." );
+            Log::doLog( $this->projectStructure[ 'result' ][ 'errors' ] );
+
+            return false;
+        }
+
+        return true;
+
+    }
+
+    protected function _zipFileHandling( $linkFiles ){
+
+        //begin of zip hashes manipulation
+        foreach( $linkFiles[ 'zipHashes' ] as $zipHash ){
+
+            $result = $this->fileStorage->linkZipToProject(
+                    $this->projectStructure['create_date'],
+                    $zipHash,
+                    $this->projectStructure['id_project']
+            );
+
+            if( !$result ){
+                Log::doLog( "Failed to store the Zip file $zipHash - \n" );
+                $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                        "code" => -10, "message" => "Failed to store the original Zip $zipHash "
+                );
+                throw new Exception( "Failed to store the original Zip $zipHash " );
+                //Exit
+            }
+
+        } //end zip hashes manipulation
 
     }
 
