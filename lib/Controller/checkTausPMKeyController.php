@@ -5,21 +5,21 @@
  */
 class checkTausPMKeyController extends ajaxController {
 
-    protected $PM_KEY;
+    protected $DQF_PMANAGER_KEY;
 
     public function __construct() {
 
         parent::__construct();
 
         $filterArgs = array(
-                'PM_KEY' => array(
+                'DQF_PMANAGER_KEY' => array(
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 )
         );
 
         $postInput    = filter_input_array( INPUT_POST, $filterArgs );
-        $this->PM_KEY = $postInput[ 'PM_KEY' ];
+        $this->DQF_PMANAGER_KEY = $postInput[ 'DQF_PMANAGER_KEY' ];
 
     }
 
@@ -34,7 +34,7 @@ class checkTausPMKeyController extends ajaxController {
 
         try {
 
-            $projectManagerInfo     = $dqfQueue->checkProjectManagerKey( $this->PM_KEY );
+            $projectManagerInfo     = $dqfQueue->checkProjectManagerKey( $this->DQF_PMANAGER_KEY );
             $this->result[ 'data' ] = 'OK';
 
         } catch ( Exception $e ) {
