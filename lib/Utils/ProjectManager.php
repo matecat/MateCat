@@ -570,6 +570,9 @@ class ProjectManager {
             $dqfQueue = new Analysis_DqfQueueHandler();
 
             try {
+
+                $projectManagerInfo = $dqfQueue->checkProjectManagerKey( $this->projectStructure[ 'dqf_key' ] );
+
                 $dqfQueue->createProject( $dqfProjectStruct );
 
                 //for each job, push a task into AMQ's DQF queue
