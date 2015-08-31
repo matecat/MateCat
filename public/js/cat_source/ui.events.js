@@ -794,7 +794,11 @@ $.extend(UI, {
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-		}).on('click', '#quality-report', function(e){
+        }).on('click', 'section .sid, section .mbc-comment-link', function(e){
+            UI.closeSegment(UI.currentSegment, 1);
+        }).on('click', 'section .actions', function(e){
+            e.stopPropagation();
+        }).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
         }).on('keydown', function(e) {
