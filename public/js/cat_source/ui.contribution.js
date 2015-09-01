@@ -488,13 +488,16 @@ $.extend(UI, {
 		});
 	},
 	setDeleteSuggestion: function(segment) {
-		$('.sub-editor .overflow a.trash', segment).click(function(e) {
+
+        $('.sub-editor .overflow a.trash', segment).click(function(e) {
 			e.preventDefault();
+
 			var ul = $(this).parents('.graysmall');
 
             if( config.brPlaceholdEnabled ){
                 source = UI.postProcessEditarea( ul, '.suggestion_source' );
                 target = UI.postProcessEditarea( ul, '.translation' );
+
             } else {
                 source = $('.suggestion_source', ul).text();
                 target = $('.translation', ul).text();
@@ -502,8 +505,8 @@ $.extend(UI, {
 
             target = view2rawxliff(target);
             source = view2rawxliff(source);
-			ul.remove();
 
+            ul.remove();
 			APP.doRequest({
 				data: {
 					action: 'deleteContribution',

@@ -778,12 +778,13 @@ $.extend(UI, {
 //            console.log('cliccato: ', e.target);
 //            console.log('a: ', !UI.currentSegment.is(e.target));
 //            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
-
+console.log('e.target: ', e.target);
             var container = $(UI.currentSegment);
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container
                 && !$(e.target).hasClass('translated') // has not clicked on a translated button
                 && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
+                && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
                 )
             {
 //                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
