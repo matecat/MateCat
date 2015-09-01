@@ -190,7 +190,7 @@ class ConversionHandler {
 
                 if ( !$res_insert ) {
                     //custom error message passed directly to javascript client and displayed as is
-                    $convertResult[ 'errorMessage' ] = "Error: failed to save file on storage intermediate cache";
+                    $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
                     $this->result[ 'code' ]          = -103;
                     $this->result[ 'errors' ][]      = array(
                             "code"  => -103, "message" => $convertResult[ 'errorMessage' ],
