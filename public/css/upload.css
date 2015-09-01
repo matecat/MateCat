@@ -1096,6 +1096,13 @@ footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333
 footer a {color:#fff;text-shadow:none;}
 footer a:hover{text-decoration:none}
 
+.fb-like.fb_iframe_widget {
+    float: left;
+    margin-top: -1px;
+}
+
+
+
 #authentication
 	{
 	float:right; 

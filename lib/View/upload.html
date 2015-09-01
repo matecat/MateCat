@@ -896,8 +896,9 @@ Connect your TAUS DQF account to measure productivity.
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 <footer>
-    <div class="wrapper">
 
+    <div class="wrapper">
+<div class="fb-like" data-href="https://www.facebook.com/joinMateCat" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
         <nav>
 
             <ul>
@@ -1055,6 +1056,26 @@ Connect your TAUS DQF account to measure productivity.
     <img height="1" width="1" style="display:none;" alt="" src="https://analytics.twitter.com/i/adsct?txn_id=l5dle&p_id=Twitter"/>
     <img height="1" width="1" style="display:none;" alt="" src="//t.co/i/adsct?txn_id=l5dle&p_id=Twitter"/>
 </noscript>
+<!-- code for facebook like -->
+
+<div id="fb-root"></div>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '813588178762126',
+      xfbml      : true,
+      version    : 'v2.4'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
