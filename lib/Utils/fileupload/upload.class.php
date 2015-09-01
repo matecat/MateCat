@@ -557,8 +557,6 @@ class UploadHandler {
 
         $out_file_name = ZipArchiveExtended::getFileName( $file_name );
 
-        $this->deleteSha( $file_path );
-
         $success[ $out_file_name ] = is_file( $file_path ) && $file_name[ 0 ] !== '.' && unlink( $file_path );
         if ( $success[ $out_file_name ] ) {
 
@@ -592,11 +590,57 @@ class UploadHandler {
         return $success;
     }
 
+    /**
+     * Avoid race conditions by javascript multiple calls
+     *
+     * @param $file_path
+     */
     private function deleteSha( $file_path ) {
-        if( !sha1_file( $file_path ) ) return;
 
-        $file_sha = glob( $this->options[ 'upload_dir' ] . sha1_file( $file_path ) . "*" ); //delete sha1 also
-        @unlink( @$file_sha[ 0 ] );
+        $sha1 = sha1_file( $file_path );
+        if( !$sha1 ) return;
+
+        //can be present more than one file with the same sha
+        //so in the sha1 file there could be more than one row
+        $file_sha = glob( $this->options[ 'upload_dir' ] . $sha1 . "*" ); //delete sha1 also
+
+        $fp = fopen( $file_sha[0], "r+");
+
+        // no file found
+        if( !$fp ) return;
+
+        $i = 0;
+        while ( !flock( $fp, LOCK_EX | LOCK_NB ) ) {  // acquire an exclusive lock
+            $i++;
+            if( $i == 40 ) return; //exit the loop after 2 seconds, can not acquire the lock
+            usleep( 50000 );
+            continue;
+        }
+
+        $file_content = fread( $fp, filesize( $file_sha[0] ) );
+        $file_content_array = explode( "\n", $file_content );
+
+        //remove the last line ( is an empty string )
+        array_pop( $file_content_array );
+
+        $fileName = FilesStorage::basename_fix( $file_path );
+
+        $key = array_search( $fileName, $file_content_array );
+        unset( $file_content_array[ $key ] );
+
+        if ( !empty( $file_content_array ) ) {
+            fseek( $fp, 0 ); //rewind
+            ftruncate( $fp, 0 ); //truncate to zero bytes length
+            fwrite( $fp, implode( "\n", $file_content_array ) . "\n" );
+            fflush( $fp );
+            flock( $fp, LOCK_UN );    // release the lock
+            fclose( $fp );
+        } else {
+            flock( $fp, LOCK_UN );    // release the lock
+            fclose( $fp );
+            @unlink( @$file_sha[ 0 ] );
+        }
+
     }
 
     private function deleteThumbnails( $file_name ) {

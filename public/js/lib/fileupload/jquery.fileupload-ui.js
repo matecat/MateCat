@@ -297,6 +297,7 @@
             },
             // Callback for file deletion:
             destroy: function ( e, data ) {
+
                 var that = $( this ).data( 'fileupload' );
                 if ( data.url ) {
                     $.ajax( data );
@@ -304,68 +305,60 @@
                 }
 
                 /* START Editing by Roberto Tucci <roberto@translated.net> */
+                /* Revision by Domenico <domenico@translated.net> */
                 var regex = /file=([^&]*)/;
-                var internalFileRegex = new RegExp("^([^.]*\\.zip\\/.*)");
+                var match = regex.exec( data.url ); // take the file name from url to be deleted
 
-                var match = regex.exec( data.url );
-
-
-                if ( match.length < 1 ) {
+                if ( !match ) {
                     console.log( error );
                     return false;
                 }
 
-                match[1] = decodeURIComponent(match[1]);
+                var _deleteRow = function( rowToBeDeleted ){
 
-                var internalMatch = internalFileRegex.exec(match[1]);
-
-                var ext = match[1].split( "." );
-                ext = ext[ext.length - 1];
-
-                var filenameRegex = new RegExp( "^".match[1] );
-                var rowsToBeDeleted = [];
-
-                if ( ext == 'zip' ) {
-                    var rows = $( '.name:contains(' + match[1] + ')' );
-
-                    for ( var k = 0; k < rows.length; k++ ) {
-
-                        if ( filenameRegex.exec( $( rows[k] ).html() ) ) {
-                            rowsToBeDeleted.push( $(rows[k]).parent() );
+                    that._transition( $( rowToBeDeleted ) ).done(
+                        function () {
+                            $( this ).remove();
+                            that._trigger( 'destroyed', e, data );
                         }
-                    }
-                }
-                else if(internalMatch.length > 1){
-                    var _zipFileName = internalMatch[1].split("/")[0];
+                    );
 
+                };
+
+                match[1] = decodeURIComponent( match[1] ); //decode the requested filename ( taken from url )
+
+                /** begin zip handling code **/
+
+                //This is an internal zip file? Prepare the regular expression
+                //we want to be sure this is an internal file zip or a zip archive
+                var zipFileRegex = new RegExp( "^([^.]*\\.zip[/]{0,1}(.*)?)" );
+                var zipStruct = zipFileRegex.exec( match[1] );
+
+                //we deleted a zip file archive, we want to delete all child rows
+                //and the parent one
+                if ( zipStruct ) {
+
+                    var _zipFileName = zipStruct[1].split("/")[0];
+                    //we matched for the span in the td
                     var rows = $( '.name:contains(' + _zipFileName + ')' );
 
-                    if(rows.length == 2){ //the row to be deleted and the parent zip file
+                    //the row to be deleted and the parent zip file
+                    //   OR
+                    //ALL Zip archive content
+                    if( rows.length == 2 || !zipStruct[2] ){
 
                         for ( var k = 0; k < rows.length; k++ ) {
-
-                            if ( filenameRegex.exec( $( rows[k] ).html() ) ) {
-                                rowsToBeDeleted.push( $(rows[k]).parent() );
-                            }
+                            _deleteRow( $(rows[k]).parent() );
                         }
-                    }
-                    else{
-                        rowsToBeDeleted = $.merge( rowsToBeDeleted, data.context );
-                    }
-                }
-                else {
-                    rowsToBeDeleted = $.merge( rowsToBeDeleted, data.context );
-                }
 
-                for ( var i = 0; i < rowsToBeDeleted.length; i++ ) {
-                    that._transition( $(rowsToBeDeleted[i]) ).done(
-                            function () {
-                                $( this ).remove();
-                                that._trigger( 'destroyed', e, data );
-                            }
-                    );
+                    } else { // delete only one row
+                        _deleteRow( data.context );
+                    }
+
+                } else {
+                    _deleteRow( data.context );
                 }
-                /* END Editing by Roberto Tucci <roberto@translated.net> */
+                /* END Editing */
             }
         },
 
