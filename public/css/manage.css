@@ -1143,3 +1143,9 @@ width: 700px;
 .tablestats.revision th.issue {width:440px;}
 .tablestats.revision th.score {width:200px;}
 .tablestats.revision td, .tablestats.revision-info td {text-align: left;}
+
+
+/* snapengage button */
+#SnapABug_SB {
+	background: rgb(107, 172, 58)!important;
+}
