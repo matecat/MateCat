@@ -1587,7 +1587,7 @@ console.log('e.target: ', e.target);
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
-					$('#' + $(this).attr('data-segmentid') + '-close').click();
+//					$('#' + $(this).attr('data-segmentid') + '-close').click();
                 }
 
 			}
@@ -2007,8 +2007,9 @@ console.log('e.target: ', e.target);
 					segmentToOpen: UI.currentSegmentId
 				});
 			}
+            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
 
-		});
+        });
 		$("#exec-replaceall").click(function(e) {
 			e.preventDefault();
 			APP.confirm({
