@@ -178,7 +178,10 @@ class downloadFileController extends downloadController {
 
                 if ( $this->forceXliff ) {
                     $file_info_details                              = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ] );
-                    $output_content[ $fileID ][ 'output_filename' ] = FilesStorage::basename_fix( $outputPath );
+
+                    //clean the output filename by removing
+                    // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
+                    $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
                 }
 
                 /**

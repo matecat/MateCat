@@ -1386,7 +1386,10 @@ class ProjectManager {
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
-                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => $target ) ) );
+                                        if( !$this->projectStructure[ 'translations' ]->offsetExists( "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ) ){
+                                            $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( ) );
+                                        }
+                                        $this->projectStructure[ 'translations' ][ "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ]->offsetSet( $seg_source[ 'mid' ], new ArrayObject( array( 2 => $target ) ) );
 
                                         //seg-source and target translation can have different mrk id
                                         //override the seg-source surrounding mrk-id with them of target
@@ -1449,7 +1452,10 @@ class ProjectManager {
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
-                                    $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( array( 2 => $target ) ) );
+                                    if( !$this->projectStructure[ 'translations' ]->offsetExists( "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ) ){
+                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject( ) );
+                                    }
+                                    $this->projectStructure[ 'translations' ][ "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ]->append( new ArrayObject( array( 2 => $target ) ) );
 
                                 }
 
@@ -1525,17 +1531,60 @@ class ProjectManager {
 
         if ( !empty( $this->projectStructure[ 'translations' ] ) ) {
 
-            $last_segments_query = "SELECT id, internal_id, segment_hash from segments WHERE id_file = %u";
+            //natural order id ASC the same as the translations was inserted in the ArrayObject
+            $last_segments_query = "SELECT id, internal_id, segment_hash, xliff_mrk_id from segments WHERE id_file = %u";
             $last_segments_query = sprintf( $last_segments_query, $fid );
 
+            //internal counter for the segmented translations ( mrk in target )
+            $array_internal_segmentation_counter = array();
+
             $_last_segments = $this->dbHandler->fetch_array( $last_segments_query );
-            foreach ( $_last_segments as $row ) {
+            foreach ( $_last_segments as $k => $row ) {
 
                 if ( $this->projectStructure[ 'translations' ]->offsetExists( "" . $row[ 'internal_id' ] ) ) {
-                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 0, $row[ 'id' ] );
-                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 1, $row[ 'internal_id' ] );
+
+                    if( !array_key_exists( "" . $row[ 'internal_id' ], $array_internal_segmentation_counter ) ){
+
+                        //if we don't have segmentation, we have not mrk ID,
+                        // so work with positional indexes ( should be only one row )
+                        if( empty( $row[ 'xliff_mrk_id' ] ) ){
+                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ] = 0;
+                        } else {
+                            //we have the mark id use them
+                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ] = $row[ 'xliff_mrk_id' ];
+                        }
+
+                    } else {
+
+                        //if we don't have segmentation, we have not mrk ID,
+                        // so work with positional indexes
+                        // ( should be only one row but if we are here increment it )
+                        if( empty( $row[ 'xliff_mrk_id' ] ) ){
+                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ]++;
+                        } else {
+                            //we have the mark id use them
+                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ] = $row[ 'xliff_mrk_id' ];
+                        }
+
+                    }
+
+                    //set this var only for easy reading
+                    $short_var_counter = $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ];
+
+//                    Log::doLog( $row[ 'internal_id' ] );
+//                    Log::doLog( $short_var_counter );
+
+                    if( !$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetExists( $short_var_counter ) ){
+                        continue;
+                    }
+
+                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 0, $row[ 'id' ] );
+                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 1, $row[ 'internal_id' ] );
                     //WARNING offset 2 are the target translations
-                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetSet( 3, $row[ 'segment_hash' ] );
+                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
+
+//                    Log::doLog(  $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ] );
+
                 }
 
             }
@@ -1550,12 +1599,17 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
 
             if ( empty( $struct ) ) {
-                //            Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
+                //this should not be
+                //Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
                 continue;
             }
 
-            //id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
-            $this->projectStructure[ 'query_translations' ]->append( "( '{$struct[0]}', $jid, '{$struct[3]}', 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1, 'ICE' )" );
+            //array of segmented translations
+            foreach( $struct as $pos => $translation_row ){
+                //id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
+                $this->projectStructure[ 'query_translations' ]->append( "( '{$translation_row[0]}', $jid, '{$translation_row[3]}', 'TRANSLATED', '{$translation_row[2]}', NOW(), 'DONE', 1, 'ICE' )" );
+
+            }
 
         }
 
