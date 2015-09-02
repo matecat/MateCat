@@ -96,7 +96,8 @@ $.extend(UI, {
 //				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html()); 
 //				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html()); 
 //				console.log('next?: ', this[1]);
-				if(!this[1]) UI.markGlossaryItemsInSource(d, this);
+				UI.cachedGlossaryData = d;
+                if(!this[1] && (!UI.body.hasClass('searchActive'))) UI.markGlossaryItemsInSource(d);
 //				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html()); 
 			},
 			complete: function() {
@@ -190,7 +191,11 @@ $.extend(UI, {
 			$(this).replaceWith($(this).html());
 		});
 	},
-
+    removeGlossaryMarksFormAllSources: function() {
+        $('section mark.inGlossary').each(function() {
+            $(this).replaceWith($(this).html());
+        });
+    },
 	checkIntervalsUnions: function(intervals) {
 //		console.log('intervals: ', intervals);
 		UI.endedIntervalAnalysis = false;

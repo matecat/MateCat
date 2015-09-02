@@ -2007,8 +2007,9 @@ console.log('e.target: ', e.target);
 					segmentToOpen: UI.currentSegmentId
 				});
 			}
+            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
 
-		});
+        });
 		$("#exec-replaceall").click(function(e) {
 			e.preventDefault();
 			APP.confirm({
