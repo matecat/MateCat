@@ -311,10 +311,11 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
                 unset( $fastReport[ $k ] );
             }
 
-            //anyway this key must be removed because he is no more needed and we want not to send it to the queue
-            unset( $fastReport[ $k ]['wc'] );
-
         }
+
+        //anyway this key must be removed because he is no more needed and we want not to send it to the queue
+        unset( $fastReport[ $k ]['wc'] );
+
     }
 
     unset( $data );
