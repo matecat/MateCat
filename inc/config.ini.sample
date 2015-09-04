@@ -1,6 +1,6 @@
 ; MateCat configuration File
 ; more configurations in INIT.php
- 
+
 
 ;These two parameter are meant to check for a wrong configuration of the filesystems either
 ;in development, staging and production environment.
