@@ -833,7 +833,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                     WHERE id_job = $jid
                         AND password = '$password'
                         AND show_in_cattool = 1
-                        AND segments.id >= $ref_segment
+                        AND segments.id > $ref_segment
                     LIMIT %u
                 ";
 
@@ -852,6 +852,37 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                     ) as TT
                 ";
 
+    /*
+     * This query is an union of the last two queries with only one difference:
+     * the queryAfter parts differs for the equal sign.
+     * Here is needed
+     *
+     */
+    $queryCenter = "
+                    SELECT segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id = id_job
+                    WHERE id_job = $jid
+                        AND password = '$password'
+                        AND show_in_cattool = 1
+                        AND segments.id >= $ref_segment
+                    LIMIT %u
+                    UNION
+                    SELECT * from(
+                        SELECT  segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id =  id_job
+                        WHERE id_job = $jid
+                            AND password = '$password'
+                            AND show_in_cattool = 1
+                            AND segments.id < $ref_segment
+                        ORDER BY __sid DESC
+                        LIMIT %u
+                    ) as TT
+    ";
+
     switch ( $where ) {
         case 'after':
             $subQuery = sprintf( $queryAfter , $step * 2 );
@@ -860,7 +891,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
             $subQuery = sprintf( $queryBefore, $step * 2 );
             break;
         case 'center':
-            $subQuery = sprintf( $queryAfter . " UNION " . $queryBefore, $step, $step );
+            $subQuery = sprintf( $queryCenter, $step, $step );
             break;
     }
 
