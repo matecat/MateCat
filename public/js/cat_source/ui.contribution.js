@@ -575,7 +575,8 @@ $.extend(UI, {
         sourceText = '';
 //        console.log('eccoci: ', UI.body.hasClass('editing'));
 
-        var parsed = $.parseHTML( $('.editor .source').html() ) ;
+//        var parsed = $.parseHTML( $('.editor .source').html() ) ;
+        var parsed = $.parseHTML( $(segment).find('.source').html() ) ;
         if ( parsed == null ) return;
 
         $.each( parsed, function (index) {
@@ -597,7 +598,8 @@ $.extend(UI, {
                         suggestionSourceText += this.innerText;
                     }
                 });
-//                console.log("$(this).find('.suggestion_source').html(): ", $(this).find('.suggestion_source').html());
+//                console.log("sourceText", sourceText);
+//                console.log("suggestionSourceText", suggestionSourceText);
                 $(this).find('.suggestion_source').html(UI.dmp.diff_prettyHtml(UI.execDiff(sourceText, suggestionSourceText)));
             }
 
