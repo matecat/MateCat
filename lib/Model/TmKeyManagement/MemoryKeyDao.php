@@ -233,9 +233,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         //chunk array using MAX_INSERT_NUMBER
         $objects = array_chunk( $obj_arr, self::MAX_INSERT_NUMBER );
 
-        //begin transaction
-        $this->con->begin();
-
         //create an insert query for each chunk
         foreach ( $objects as $i => $chunk ) {
             foreach ( $chunk as $obj ) {
@@ -260,9 +257,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
             $values = array();
         }
-
-        //commit transaction
-        $this->con->commit();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;
