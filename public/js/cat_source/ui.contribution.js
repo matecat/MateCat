@@ -214,7 +214,7 @@ $.extend(UI, {
 			} else {
 			}
 */
-			$(segment).addClass('loaded');
+            $(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
 
 			$.each(d.data.matches, function(index) {
@@ -269,7 +269,7 @@ $.extend(UI, {
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
-            UI.setContributionSourceDiff();
+            UI.setContributionSourceDiff(segment);
 
 //            UI.setContributionSourceDiff_Old();
 			if (editareaLength === 0) {
@@ -571,11 +571,12 @@ $.extend(UI, {
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
-    setContributionSourceDiff: function () {
+    setContributionSourceDiff: function (segment) {
         sourceText = '';
 //        console.log('eccoci: ', UI.body.hasClass('editing'));
 
-        var parsed = $.parseHTML( $('.editor .source').html() ) ;
+//        var parsed = $.parseHTML( $('.editor .source').html() ) ;
+        var parsed = $.parseHTML( $(segment).find('.source').html() ) ;
         if ( parsed == null ) return;
 
         $.each( parsed, function (index) {
@@ -585,8 +586,7 @@ $.extend(UI, {
                 sourceText += this.innerText;
             }
         });
- //       console.log('sourceText: ', sourceText);
-        UI.currentSegment.find('.sub-editor.matches ul.suggestion-item').each(function () {
+        $(segment).find('.sub-editor.matches ul.suggestion-item').each(function () {
             percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
             if(percent > 74) {
                 ss = $(this).find('.suggestion_source');
@@ -598,8 +598,8 @@ $.extend(UI, {
                         suggestionSourceText += this.innerText;
                     }
                 });
-//            console.log('suggestionSourceText: ', suggestionSourceText);
-//            console.log('diff: ', UI.execDiff(sourceText, suggestionSourceText));
+//                console.log("sourceText", sourceText);
+//                console.log("suggestionSourceText", suggestionSourceText);
                 $(this).find('.suggestion_source').html(UI.dmp.diff_prettyHtml(UI.execDiff(sourceText, suggestionSourceText)));
             }
 
