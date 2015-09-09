@@ -20,10 +20,10 @@
     <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
     <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
 
-    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!"/>
     <meta name="viewport" content="width=device-width"/>
     <meta property="og:title" content="Translate a file with MateCat" />
-    <meta property="og:description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
     <!-- jQuery UI styles -->
@@ -112,44 +112,14 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     </div>
     <div class="cl"></div>
 </header>
-<div class="hide learnmore">
-    <span class="open-more pull-right">✕</span>
 
-    <h1>Post-editing and outsourcing made easy</h1>
-
-    <div class="col-3">
-        <h2>State-of-the-art MT <br/>and public TMs</h2>
-
-        <p>Translation and post-editing <br/>in 80 languages with zero <br/>start-up time</p>
-        <img src="${basepath}public/img/box1.jpg"/>
-
-    </div>
-    <div class="col-3">
-        <h2>Outsource your extra projects <br/>in one click</h2>
-
-        <p>Take on any projects,<br/>even in languages<br/>that you do not cover yourself</p>
-        <img src="${basepath}public/img/box2.jpg"/>
-
-    </div>
-    <div class="col-3">
-        <h2><strong>It’s free</strong><br/>and always will be</h2>
-
-        <p>A free CAT tool for LSPs, <br/> professional translators <br/>and customers</p>
-        <img src="${basepath}public/img/box3.jpg"/>
-
-    </div>
-    <div class="bottom-lm">
-        <p><a href="https://www.matecat.com/benefits/" target="_blank">Learn more about MateCat</a></p>
-    </div>
-
-</div>
 
 <div class="wrapper-claim">
     <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
     <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-    <h2 class="payoff">MateCat gives you more matches than any other CAT tool. <span class="hide-payoff"><a class="open-more">Learn more</a>.</span></h2>
+    <h2 class="payoff">MateCat gives you more matches than any other CAT tool.</h2>
 </div>
 <div class="wrapper-upload">
 
@@ -455,7 +425,7 @@ Connect your TAUS DQF account to measure productivity.
                 <span>Cancel upload</span>
             </button>
 -->
-<p tal:condition="true:conversion_enabled" class="supported-files">This hosted version of MateCat supports
+<p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
     <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>
 
 <div class="uploadbtn-box">
@@ -908,14 +878,17 @@ Connect your TAUS DQF account to measure productivity.
 <footer>
 
     <div class="wrapper">
-<div class="fb-like" data-href="https://www.facebook.com/joinMateCat" data-layout="button_count" data-action="like" data-show-faces="false" data-share="false"></div>
-        <nav>
 
-            <ul>
+            <ul class="external-links">
                 <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
 
                 <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
                 <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
+            </ul>
+
+        <nav>
+
+            <ul>
 
                 <tal:block tal:condition="php: !empty(logged_user)">
                     <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
