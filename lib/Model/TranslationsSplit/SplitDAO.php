@@ -48,8 +48,6 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
-        $this->_checkForErrors();
-
         return $this->_buildResult( $arr_result );
 
     }
@@ -102,8 +100,6 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
         $query = sprintf( $query, $inserting_keys_string, $values_string, $update_string );
 
         $this->con->query( $query );
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj;

@@ -261,7 +261,6 @@ function deletePid( $pid = "", $num = -1 ) {
         foreach( $files as $file ) { // iterate ids
 
             $queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0, $file  );
-            posix_kill( $pid, SIGTERM );
 
             if ( $num > 0 ) {
 

@@ -44,19 +44,6 @@ class getSegmentsController extends ajaxController {
 
     }
 
-    private function stripTagsFromSource($text) {
-        $pattern_g_o = '|(<.*?>)|';
-        $pattern_g_c = '|(</.*?>)|';
-        $pattern_x = '|(<.*?/>)|';
-
-        $text = preg_replace($pattern_x, "", $text);
-
-        $text = preg_replace($pattern_g_o, "", $text);
-        $text = preg_replace($pattern_g_c, "", $text);
-        $text = str_replace("&nbsp;", " ", $text);
-        return $text;
-    }
-
     public function doAction() {
 
         //get Job Infos
@@ -137,7 +124,7 @@ class getSegmentsController extends ajaxController {
 
 			if ( !isset($this->data["$id_file"]) ) {
                 $this->data["$id_file"]['jid'] = $seg['jid'];
-                $this->data["$id_file"]["filename"] = $seg['filename'];
+                $this->data["$id_file"]["filename"] = ZipArchiveExtended::getFileName($seg['filename']);
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
 //                $this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
 //                $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];

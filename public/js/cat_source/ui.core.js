@@ -296,7 +296,7 @@ console.log('changeStatus');
 		}
 	},
 */
-	closeSegment: function(segment, byButton, operation) {//console.log('CLOSE SEGMENT');
+	closeSegment: function(segment, byButton, operation) { console.log('CLOSE SEGMENT');
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
@@ -1091,11 +1091,12 @@ console.log('changeStatus');
 			$('.editarea', next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
-            console.log('next: ', next);
 			if (next.length) {
 				this.scrollSegment(next);
 				$('.editarea', next).trigger("click", "moving");
-			}
+			} else {
+                UI.closeSegment(UI.currentSegment, 1, 'save');
+            }
 		}
 	},
 	gotoNextUntranslatedSegment: function() {console.log('gotoNextUntranslatedSegment');
@@ -2242,8 +2243,17 @@ console.log('changeStatus');
 		var actualWarnings = segment.find('p.warnings');
 
 		$.each(warnings, function(key, value) {
+
+            var warningMessage = '<p class="warnings">' + value.debug;
 			//console.log(warnings[key]);
-			parentTag.before(actualWarnings).append('<p class="warnings">' + value.debug + '</p>');
+
+
+            if(value.tip != "") {
+                warningMessage += '<span class="tip">' + value.tip + '</span>' ;
+            }
+            warningMessage += '</p>' ;
+
+            parentTag.before(actualWarnings).append( warningMessage );
 		});
 		actualWarnings.remove();
 

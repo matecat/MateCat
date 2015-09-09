@@ -40,7 +40,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
 
       $this->con->query( $query );
-      $this->_checkForErrors();
 
       return $input ;
   }
@@ -64,7 +63,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
           Log::doLog( $update );
 
           $this->con->query( $update );
-          $this->_checkForErrors();
 
           $this->con->commit();
       } catch ( Exception $e ) {
@@ -98,7 +96,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
       $arr_result = $this->_fetch_array( $query );
 
-      $this->_checkForErrors();
       return $arr_result ;
   }
 
@@ -113,7 +110,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
       $arr_result = $this->_fetch_array( $query );
 
-      $this->_checkForErrors();
       return $this->_buildResult( $arr_result );
   }
 

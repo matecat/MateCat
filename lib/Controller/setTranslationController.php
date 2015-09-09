@@ -24,13 +24,13 @@ class setTranslationController extends ajaxController {
      * This constant represent the job progress percentage over
      * which the wordcount could be updated by a massive query.
      */
-    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
+//    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
 
     /**
      * The probability over which the wordcount massive query
      * will be triggered
      */
-    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
+//    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
 
     public function __construct() {
 
@@ -94,7 +94,7 @@ class setTranslationController extends ajaxController {
 
         $this->parseIDSegment();
         if ( empty( $this->id_segment ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
 //        $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "prova" );
@@ -121,7 +121,7 @@ class setTranslationController extends ajaxController {
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing id_job" );
         } else {
 
 //            $this->result[ 'error' ][ ] = array( "code" => -1000, "message" => "test 1" );
@@ -135,26 +135,15 @@ class setTranslationController extends ajaxController {
                 Utils::sendErrMailReport( $msg );
             }
 
-            $db    = Database::obtain();
-            $err   = $db->get_error();
-            $errno = $err[ 'error_code' ];
-
-            if ( $errno != 0 ) {
-                $msg                        = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
-
-                throw new Exception( $msg, -1 );
-            }
-
             //add check for job status archived.
             if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
-                $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
+                $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 
             //check for Password correctness ( remove segment split )
             $pCheck = new AjaxPasswordCheck();
             if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
-                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
+                $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
             }
 
         }
@@ -268,7 +257,7 @@ class setTranslationController extends ajaxController {
             $res                                      = addTranslation( $_Translation );
 
             if ( $res < 0 ) {
-                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
+                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
                 $db->rollback();
 
                 return $res;
@@ -360,8 +349,7 @@ class setTranslationController extends ajaxController {
         //but to exclude current segment from auto-propagation
         $_idSegment = $this->id_segment;
 
-        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] = $this->status : null /* NO OP */
-        ;
+        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] =  $this->status : null /* NO OP */;
 
         $TPropagation[ 'id_job' ]                 = $this->id_job;
         $TPropagation[ 'translation' ]            = $translation;
@@ -373,10 +361,9 @@ class setTranslationController extends ajaxController {
 
         $propagationTotal = array();
         if ( $propagateToTranslated && in_array( $this->status, array(
-                        Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
-                        Constants_TranslationStatus::STATUS_REJECTED
-                ) )
-        ) {
+                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
+                Constants_TranslationStatus::STATUS_REJECTED
+        ) ) ) {
 
             try {
 
@@ -386,6 +373,9 @@ class setTranslationController extends ajaxController {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );
+                $db->rollback();
+                return $e->getCode();
+
             }
 
         }
@@ -430,35 +420,40 @@ class setTranslationController extends ajaxController {
             }
 
             try {
-                $updateJobCountersWithQuery = false;
-                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
-                $totalWords                 = array_sum( array(
-                        $this->jobData[ 'new_words' ],
-                        $this->jobData[ 'draft_words' ],
-                        $this->jobData[ 'translated_words' ],
-                        $this->jobData[ 'approved_words' ],
-                        $this->jobData[ 'rejected_words' ]
-                ) );
+                
+                //THIS IS THE WORST SOLUTION
+                
+//                $updateJobCountersWithQuery = false;
+//                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
+//                $totalWords                 = array_sum( array(
+//                        $this->jobData[ 'new_words' ],
+//                        $this->jobData[ 'draft_words' ],
+//                        $this->jobData[ 'translated_words' ],
+//                        $this->jobData[ 'approved_words' ],
+//                        $this->jobData[ 'rejected_words' ]
+//                ) );
+//
+//                // if job progress is above 90%, then toss a d100.
+//                // If the result is above 90, then manually update counters
+//                // with a query (super slow, but executed few times)
+//                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
+//                    $d100Result = rand( 1, 100 );
+//                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
+//                        $updateJobCountersWithQuery = true;
+//                    }
+//                }
+//
+//                if ( $updateJobCountersWithQuery ) {
+//                    $newTotals = $counter->updateDB_countAll( $newValues );
+//                } else {
+//                    $newTotals = $counter->updateDB( $newValues );
+//                }
 
-                // if job progress is above 90%, then toss a d100.
-                // If the result is above 90, then manually update counters
-                // with a query (super slow, but executed few times)
-                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
-                    $d100Result = rand( 1, 100 );
-                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
-                        $updateJobCountersWithQuery = true;
-                    }
-                }
-
-                if ( $updateJobCountersWithQuery ) {
-                    $newTotals = $counter->updateDB_countAll( $newValues );
-                } else {
-                    $newTotals = $counter->updateDB( $newValues );
-                }
+                $newTotals = $counter->updateDB( $newValues );
 
             } catch ( Exception $e ) {
-                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
-//                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
 //                $x1 = explode( "\n" , var_export( $old_translation, true) );
 //                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
                 $db->rollback();
@@ -527,7 +522,5 @@ class setTranslationController extends ajaxController {
         }
 
     }
-
-
 
 }

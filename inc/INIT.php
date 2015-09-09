@@ -44,6 +44,7 @@ class INIT {
     public static $UPLOAD_REPOSITORY;
     public static $FILES_REPOSITORY;
     public static $CACHE_REPOSITORY;
+    public static $ZIP_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY_WEB;
     public static $TMP_DOWNLOAD;
@@ -237,6 +238,7 @@ class INIT {
                     'odp'  => array( '', '', 'extppt' ),
                     'sxi'  => array( '', '', 'extppt' ),
                     'xml'  => array( '', '', 'extxml' ),
+                    'zip'  => array( '', '', 'extzip' ),
                 //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(

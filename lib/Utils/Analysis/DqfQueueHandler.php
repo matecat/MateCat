@@ -80,4 +80,35 @@ class Analysis_DqfQueueHandler extends Analysis_QueueHandler {
         return $this->send( INIT::$DQF_SEGMENTS_QUEUE_NAME, $data, array( 'persistent' => $this->persistent ) );
     }
 
+    /**
+     * @param $PM_KEY
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function checkProjectManagerKey( $PM_KEY ){
+
+        $options = array(
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_HTTPHEADER     => array( "DQF_PMANAGER_KEY: $PM_KEY" )
+        );
+
+        $cHandler = new MultiCurlHandler();
+        $hash = $cHandler->createResource( "https://dqf.taus.net/api/v1/projectmanager/", $options );
+        $cHandler->setRequestHeader( $hash )->multiExec();
+
+        $result = json_decode( $cHandler->getSingleContent( $hash ) );
+
+        if( isset( $result->code ) && $result->code != 200 ){
+            throw new Exception( $result->message );
+        }
+
+        return $result;
+
+    }
+
 }

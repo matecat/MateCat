@@ -29,6 +29,10 @@ class ManageUtils {
             $projectIDs[ ] = $item[ 'pid' ];
         }
 
+        if( empty( $projectIDs ) ){
+            return array();
+        }
+
         //get job data using job IDs
         $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted );
 

@@ -25,8 +25,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     protected function _buildQueryForEngine( EnginesModel_EngineStruct $obj  ){
 
         $where_conditions = array();
-        $query            = "SELECT *
-                             FROM " . self::TABLE . " WHERE %s";
+        $query            = "SELECT * FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->id !== null ) {
             $where_conditions[ ] = "id = " . (int)$obj->id;
@@ -108,8 +107,6 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
         //return the inserted object on success, null otherwise
         if ( $this->con->affected_rows > 0 ) {
             $obj->id = $this->con->last_insert( self::TABLE );
@@ -134,7 +131,6 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
          */
         $query = $this->_buildQueryForEngine( $obj );
         $arr_result = $this->_fetch_array( $query );
-        $this->_checkForErrors();
         return $this->_buildResult( $arr_result );
 
     }
@@ -204,8 +200,6 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
@@ -229,8 +223,6 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->_checkForErrors();
-
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
         }
@@ -252,8 +244,6 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         );
 
         $this->con->query( $query );
-
-        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj;

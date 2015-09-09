@@ -57,11 +57,12 @@ class Bootstrap {
 
         //get the environment configuration
         self::getEnvConfig();
-file_put_contents ("aaa.txt",INIT::$STORAGE_DIR);
+
         INIT::$LOG_REPOSITORY                  = INIT::$STORAGE_DIR . "/log_archive";
         INIT::$UPLOAD_REPOSITORY               = INIT::$STORAGE_DIR . "/upload";
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
         INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
+        INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
         INIT::$CONVERSIONERRORS_REPOSITORY_WEB = INIT::$BASEURL . "storage/conversion_errors";
         INIT::$TMP_DOWNLOAD                    = INIT::$STORAGE_DIR . "/tmp_download";
@@ -87,8 +88,14 @@ file_put_contents ("aaa.txt",INIT::$STORAGE_DIR);
         if ( !is_dir( INIT::$CACHE_REPOSITORY ) ) {
             mkdir( INIT::$CACHE_REPOSITORY, 0755, true );
         }
+        if ( !is_dir( INIT::$ZIP_REPOSITORY ) ) {
+            mkdir( INIT::$ZIP_REPOSITORY, 0755, true );
+        }
         if ( !is_dir( INIT::$CONVERSIONERRORS_REPOSITORY ) ) {
             mkdir( INIT::$CONVERSIONERRORS_REPOSITORY, 0755, true );
+        }
+        if ( !is_dir( INIT::$TMP_DOWNLOAD) ) {
+            mkdir( INIT::$TMP_DOWNLOAD, 0755, true );
         }
 
         //auth sections
@@ -267,11 +274,7 @@ file_put_contents ("aaa.txt",INIT::$STORAGE_DIR);
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
 
         foreach( $env as $KEY => $value ){
-/*            if( $KEY == 'STORAGE_DIR' ) {
-                INIT::$STORAGE_DIR = INIT::$ROOT . $value;
-                continue;
-            }
-*/
+
             if ( property_exists( 'INIT', $KEY ) ) {
                 INIT::${$KEY} = $value;
             }
@@ -279,7 +282,7 @@ file_put_contents ("aaa.txt",INIT::$STORAGE_DIR);
         }
 
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
-file_put_contents("bbb.txt", INIT::$STORAGE_DIR);
+
         if ( self::$CONFIG['ENV'] == 'production' ) {
             if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
                 die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );

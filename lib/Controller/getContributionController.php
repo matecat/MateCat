@@ -364,24 +364,15 @@ class getContributionController extends ajaxController {
             $where = " id_segment= " . (int) $this->id_segment . " and id_job = " . (int) $this->id_job . " and status = 'NEW' ";
 
             $db = Database::obtain();
-            $db->update( 'segment_translations', $data, $where );
 
-//            Log::doLog($data);
-//            Log::doLog($where);
-
-            $err   = $db->get_error();
-            $errno = $err[ 'error_code' ];
-            if ( $errno != 0 ) {
-                log::doLog( $err );
-
-                return $errno * -1;
+            try {
+                $affectedRows = $db->update('segment_translations', $data, $where);
             }
-
-            $rows = $db->affected_rows;
-
-            //Log::doLog("Affected: " . $rows );
-
-            return $rows;
+            catch(PDOException $e) {
+                log::doLog( $e->getMessage() );
+                return $e->getCode() * -1;
+            }
+            return $affectedRows;
         }
 
         return 0;

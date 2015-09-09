@@ -1,6 +1,13 @@
 <?
 require_once '../../inc/Bootstrap.php';
 Bootstrap::start();
+
+$count = 0;
+foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
+    $count += count( $value );
+}
+
+$nr_supoported_files = $count;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -77,7 +84,7 @@ Bootstrap::start();
                         </p>
                 
                         <p>A complete list of accepted languages in the right format are available
-                            <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#supported-langs">here</a>
+                            <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#file-format">here</a>
                         </p>
                 
                         <p><strong>Sample JSON response</strong></p>
@@ -204,8 +211,8 @@ Bootstrap::start();
                     </dd>
                     <dt>Notes</dt>
                     <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
-                    <dd><p>Matecat PRO accept only 54 file formats. A list of all accepted file are available
-                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#accepted-files">here</a></p>
+                    <dd><p>Matecat PRO accept only <?= $nr_supoported_files ?> file formats. A list of all accepted file are available
+                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#file-format">here</a></p>
                     </dd>
                 </dl>
                 

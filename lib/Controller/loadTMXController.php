@@ -91,7 +91,7 @@ class loadTMXController extends ajaxController {
                 $this->file = $this->TMService->uploadFile();
 
                 foreach( $this->file as $fileInfo ){
-                    if ( pathinfo( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
+                    if ( FilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                         throw new Exception( "Please upload a TMX.", -8 );
                     }
 
