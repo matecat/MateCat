@@ -282,7 +282,7 @@ class FilesStorage {
         }
 
         //link original
-        $outcome1 = link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
+        $outcome1 = $this->link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
 
         if( !$outcome1 ){
             //Failed to copy the original file zip
@@ -403,7 +403,7 @@ class FilesStorage {
             if ( !empty( $newFileName ) ){
                 $tmpOrigFileName = $newFileName;
             }
-            $res &= link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
+            $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
 
         }
 
@@ -419,14 +419,14 @@ class FilesStorage {
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
-        $res &= link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
+        $res &= $this->link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
 
         //check if manifest from a LongHorn conversion exists
         $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
         if ( file_exists( $manifestFile ) ) {
-            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
-            $res &= link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
-            $res &= link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
+            $res &= $this->link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
+            $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
+            $res &= $this->link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
         }
 
         if( !$res ){
@@ -718,6 +718,10 @@ class FilesStorage {
         }
 
         return $return_array;
+    }
+
+    private function link($source, $destination) {
+        return EnvWrap::link($source, $destination);
     }
 }
 

@@ -46,6 +46,8 @@ class Bootstrap {
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
 
+        INIT::$ENV = self::$CONFIG['ENV'] ;
+
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
         INIT::obtain();
 
