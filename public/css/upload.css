@@ -1235,3 +1235,9 @@ z-index: -1000;
 }
 
 .text-center {text-align: center;}
+
+.zip_internal_file /*:before*/{
+    /*content: "\ea58";*/
+    margin-left: 15px;
+    /*color: #555;*/
+}

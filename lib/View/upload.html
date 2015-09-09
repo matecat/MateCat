@@ -102,12 +102,12 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
         <ul class="pull-right" id="menu-site">
-            <li><a href="http://www.matecat.com/features/">Features</a></li>
-            <li><a href="http://www.matecat.com/about/">About</a></li>
-            <li><a href="http://www.matecat.com/open-source/">Open source</a></li>
-            <li><a href="http://www.matecat.com/release-notes/">Release Notes</a></li>
-            <li><a href="http://www.matecat.com/support/">User Guide</a></li>
-            <li><a class="bigred" href="http://www.matecat.com/contacts">LSP? Request a demo</a></li>
+            <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
+            <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+            <li><a href="https://www.matecat.com/about/">About</a></li>
+            <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
+            <li><a href="https://www.matecat.com/support/">Support</a></li>
+            <li><a class="bigred" href="https://www.matecat.com/contacts">LSP? Request a demo</a></li>
         </ul>
     </div>
     <div class="cl"></div>
@@ -139,7 +139,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     </div>
     <div class="bottom-lm">
-        <p><a href="http://www.matecat.com/features/" target="_blank">Learn more about MateCat</a></p>
+        <p><a href="https://www.matecat.com/benefits/" target="_blank">Learn more about MateCat</a></p>
     </div>
 
 </div>
@@ -475,6 +475,12 @@ Connect your TAUS DQF account to measure productivity.
     <tr class="template-upload fade">
         <td class="preview">
              {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
+
+             {% if (o.files[i].type == "application/zip") { %}
+             <span class="extzip"></span>
+             {% mimeok=1 } %}
+
+
             {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
 			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 			
@@ -627,6 +633,10 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extdoc"></span>
            
             {% mimeok=1 } %}
+
+            {% if (o.files[i].type == "application/zip") { %}
+             <span class="extzip"></span>
+             {% mimeok=1 } %}
 			
 			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
             <span class="extppt"></span>
@@ -901,6 +911,11 @@ Connect your TAUS DQF account to measure productivity.
         <nav>
 
             <ul>
+                <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
+
+                <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
+                <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
+
                 <tal:block tal:condition="php: !empty(logged_user)">
                     <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                 </tal:block>
@@ -908,9 +923,6 @@ Connect your TAUS DQF account to measure productivity.
                 <tal:block tal:condition="php: empty(logged_user)">
                     <li><a href="${authURL}" class="authLink">Manage</a></li>
                 </tal:block>
-
-                <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
-                <li><a href="http://www.matecat.com/terms" target="_blank">Terms</a></li>
 
             </ul>
 
@@ -952,7 +964,7 @@ Connect your TAUS DQF account to measure productivity.
     </div>
     <div class="col-2 pull-left col-b">
         <h3>2 - Learn more about MateCat</h3>
-        <p><a class="button-learn" href="http://www.matecat.com/features/">Visit the website</a></p>
+        <p><a class="button-learn" href="https://www.matecat.com/benefits/">Visit the website</a></p>
     </div>
 </div>
 

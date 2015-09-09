@@ -847,15 +847,24 @@ class CatUtils {
             return '';
         }
 
-		if(strpos($source_lang,'-')!==FALSE){
-			$tmp_lang=explode('-',$source_lang);
-			$source_lang=$tmp_lang[0];
-			unset($tmp_lang);
-		}
+        if ( strpos( $source_lang, '-' ) !== false ) {
+            $tmp_lang    = explode( '-', $source_lang );
+            $source_lang = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        }
 
         $string = preg_replace( "#<.*?" . ">#si", "", $string );
         $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
 
+        /*
+         * Remove Unicode:
+         * P -> Punctuation
+         * Z -> Separator ( but not spaces )
+         * C -> Other
+         */
+        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', "", $string );
+
+        //these could be superfluous
         $string = str_replace( ":", "", $string );
         $string = str_replace( ";", "", $string );
         $string = str_replace( "[", "", $string );
@@ -886,13 +895,13 @@ class CatUtils {
             // 17/01/2014
             // sostituiamo i numeri con N nel CJK in modo da non alterare i rapporti carattere/parola
             // in modo che il conteggio
-            // parole consideri i segmenti che differiscono per soli numeri some ripetizioni (come TRADOS)
+            // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
             $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "N", $string );
 
         } else {
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
-            // parole consideri i segmenti che differiscono per soli numeri some ripetizioni (come TRADOS)
+            // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
             $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "TRANSLATED_NUMBER", $string );
 
         }
@@ -910,10 +919,10 @@ class CatUtils {
 			unset($tmp_lang);
 		}
 
-
         $string = self::clean_raw_string4fast_word_count( $string, $source_lang );
 
-        if ( $string == "" ) {
+        //check for a string made of spaces only, after the string was cleaned
+        if ( preg_replace( '#[\p{Z}]+#u', "", $string ) == "" ) {
             return 0;
         }
 
@@ -948,9 +957,7 @@ class CatUtils {
                 $a = trim( $a );
                 if ( $a != "" ) {
                     //voglio contare anche i numeri:
-                    //if(!is_number($a)) {
                     $temp[ ] = $a;
-                    //}
                 }
             }
 
@@ -1059,29 +1066,30 @@ class CatUtils {
      *
      * 2/3 times faster than the old implementation
      *
-     * @param $str string Unicode Multibyte Char String
-     * @return int
+     * @param $mb_char string Unicode Multibyte Char String
+     *
+*@return int
      *
      */
-    public static function fastUnicode2ord( $str ){
-        switch( strlen($str) ){
+    public static function fastUnicode2ord( $mb_char ){
+        switch( strlen( $mb_char) ){
             case 1:
-                return ord($str);
+                return ord( $mb_char);
                 break;
             case 2:
-                return ( ord( $str[0] ) - 0xC0 ) * 0x40 +
-                         ord( $str[1] ) - 0x80;
+                return ( ord( $mb_char[0] ) - 0xC0 ) * 0x40 +
+                         ord( $mb_char[1] ) - 0x80;
                 break;
             case 3:
-                return ( ord( $str[0] ) - 0xE0 ) * 0x1000 +
-                       ( ord( $str[1] ) - 0x80 ) * 0x40 +
-                         ord( $str[2] ) - 0x80;
+                return ( ord( $mb_char[0] ) - 0xE0 ) * 0x1000 +
+                       ( ord( $mb_char[1] ) - 0x80 ) * 0x40 +
+                         ord( $mb_char[2] ) - 0x80;
                 break;
             case 4:
-                return ( ord( $str[0] ) - 0xF0 ) * 0x40000 +
-                       ( ord( $str[1] ) - 0x80 ) * 0x1000 +
-                       ( ord( $str[2] ) - 0x80 ) * 0x40 +
-                         ord( $str[3] ) - 0x80;
+                return ( ord( $mb_char[0] ) - 0xF0 ) * 0x40000 +
+                       ( ord( $mb_char[1] ) - 0x80 ) * 0x1000 +
+                       ( ord( $mb_char[2] ) - 0x80 ) * 0x40 +
+                         ord( $mb_char[3] ) - 0x80;
                 break;
         }
     }

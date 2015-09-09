@@ -28,6 +28,13 @@ class MultiCurlHandler {
     protected $curl_handlers = array();
 
     /**
+     * Array to manage the requests for headers
+     *
+     * @var array
+     */
+    protected $curl_headers_requests = array();
+
+    /**
      * Container for the curl results
      *
      * @var array
@@ -123,8 +130,19 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ]               = curl_getinfo( $curl_resource, CURLINFO_EFFECTIVE_URL );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_upload' ]                 = curl_getinfo( $curl_resource, CURLINFO_SIZE_UPLOAD );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]               = curl_getinfo( $curl_resource, CURLINFO_SIZE_DOWNLOAD );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]                 = curl_getinfo( $curl_resource, CURLINFO_HEADER_SIZE );
             $this->multi_curl_info[ $tokenHash ][ 'http_code' ]                            = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
+
+            if ( isset( $this->curl_headers_requests[ $tokenHash ] ) ) {
+                $header = substr( $this->multi_curl_results[ $tokenHash ], 0, $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ] );
+                $header = explode( "\r\n", $header );
+                $this->multi_curl_results[ $tokenHash ] = substr(
+                        $this->multi_curl_results[ $tokenHash ],
+                        $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]
+                );
+                $this->curl_headers_requests[ $tokenHash ] = $header;
+            }
 
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
             $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
@@ -133,6 +151,41 @@ class MultiCurlHandler {
 
         }
 
+    }
+
+    /**
+     * Explicitly set that we want the response header for this token
+     *
+     * @param $tokenHash
+     *
+     * @return $this
+     */
+    public function setRequestHeader( $tokenHash ){
+
+        $resource = $this->curl_handlers[ $tokenHash ];
+        curl_setopt( $resource, CURLOPT_HEADER, true );
+        $this->curl_headers_requests[ $tokenHash ] = true;
+
+        return $this;
+    }
+
+    /**
+     * Get the response header for the requested token
+     * @param $tokenHash
+     *
+     * @return mixed
+     */
+    public function getSingleHeader( $tokenHash ){
+        return $this->curl_headers_requests[ $tokenHash ];
+    }
+
+    /**
+     * Get the response header for the requested token
+     *
+     * @return mixed
+     */
+    public function getAllHeaders(){
+        return $this->curl_headers_requests;
     }
 
     /**

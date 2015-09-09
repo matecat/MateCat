@@ -57,7 +57,7 @@ class downloadAnalysisReportController extends downloadController {
 
     }
 
-    protected function composeZip( $projectName , $outputContent ) {
+    protected static function composeZip( $projectName , $outputContent ) {
 
         $fileName = tempnam( "/tmp", "zipmat" );
         $zip  = new ZipArchive();

@@ -27,7 +27,7 @@ class Comments_CommentStruct extends DataAccess_AbstractDaoObjectStruct implemen
   public $last_segment;
 
   public static function getStruct() {
-    return new Comment_CommentStruct();
+    return new Comments_CommentStruct();
   }
 
   public function getFormattedDate() {

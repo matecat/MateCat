@@ -1,2 +1,2 @@
 config.ini
-log/*
+log/*.log*

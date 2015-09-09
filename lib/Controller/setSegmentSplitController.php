@@ -43,12 +43,12 @@ class setSegmentSplitController extends ajaxController {
         $this->target              = $postInput[ 'target' ];
         $this->exec                = $postInput[ 'exec' ];
 
-        if ( !$this->userIsLogged ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -2,
-                    'message' => "Login is required to perform this action"
-            );
-        }
+//        if ( !$this->userIsLogged ) {
+//            $this->result[ 'errors' ][ ] = array(
+//                    'code'    => -2,
+//                    'message' => "Login is required to perform this action"
+//            );
+//        }
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][ ] = array(

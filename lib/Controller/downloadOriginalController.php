@@ -1,103 +1,126 @@
 <?php
 
-set_time_limit(180);
+set_time_limit( 180 );
 
 class downloadOriginalController extends downloadController {
 
-	private $id_job;
-	private $password;
-	private $fname;
-	private $download_type;
-	private $id_file;
+    private $id_job;
+    private $password;
+    private $fname;
+    private $download_type;
+    private $id_file;
+    private $id_project;
+    private $project_date;
 
 
-	public function __construct() {
+    public function __construct() {
 
-		$filterArgs = array(
-				'filename'      => array(
-					'filter' => FILTER_SANITIZE_STRING,
-					'flags'  => FILTER_FLAG_STRIP_LOW
-					),
-				'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-				'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-				'download_type' => array(
-					'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-					),
-				'password'      => array(
-					'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-					)
-				);
+        $filterArgs = array(
+                'filename'      => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_LOW
+                ),
+                'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'download_type' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'password'      => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
+        );
 
-		$__postInput = filter_var_array( $_REQUEST, $filterArgs );
+        $__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
-		//NOTE: This is for debug purpose only,
-		//NOTE: Global $_POST Overriding from CLI Test scripts
-		//$__postInput = filter_var_array( $_POST, $filterArgs );
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-		$this->fname         = $__postInput[ 'filename' ];
-		$this->id_file       = $__postInput[ 'id_file' ];
-		$this->id_job        = $__postInput[ 'id_job' ];
-		$this->download_type = $__postInput[ 'download_type' ];
-		$this->password      = $__postInput[ 'password' ];
+        $this->fname         = $__postInput[ 'filename' ];
+        $this->id_file       = $__postInput[ 'id_file' ];
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->download_type = $__postInput[ 'download_type' ];
+        $this->password      = $__postInput[ 'password' ];
 
-	}
+    }
 
-	public function doAction() {
+    public function doAction() {
 
-		//get storage object
-		$fs= new FilesStorage();
-		$files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
+        //get storage object
+        $fs        = new FilesStorage();
+        $files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
 
-		$output_content = array();
-		foreach ( $files_job as $file ) {
-			$id_file                                  = $file[ 'id_file' ];
-			$output_content[ $id_file ][ 'filename' ] = $file[ 'filename' ];
-			$output_content[ $id_file ][ 'contentPath' ] = $file[ 'originalFilePath' ];
-		}
+        //take the project ID and creation date, array index zero is good, all id are equals
+        $this->id_project   = $files_job[0]['id_project'];
+        $this->project_date = $files_job[0]['create_date'];
 
-		if ( $this->download_type == 'all' ) {
-			if ( count( $output_content ) > 1 ) {
-				$this->_filename = $this->fname;
-				$pathinfo       = pathinfo( $this->fname );
-				if ( $pathinfo[ 'extension' ] != 'zip' ) {
-					$this->_filename = $pathinfo[ 'basename' ] . ".zip";
-				}
-				$this->content = $this->composeZip( $output_content ); //add zip archive content here;
-			} elseif ( count( $output_content ) == 1 ) {
-				$this->setContent( $output_content );
-			}
-		} else {
-			$this->setContent( $output_content );
-		}
-	}
+        $output_content  = array();
 
-	/**
-	 * There is a foreach, but this should be always one element
-	 *
-	 * @param $output_content
-	 */
-	private function setContent( $output_content ) {
-		foreach ( $output_content as $oc ) {
-			$this->_filename = $oc[ 'filename' ];
-			$this->content  = file_get_contents($oc[ 'contentPath' ]);
-		}
-	}
+        foreach ( $files_job as $file ) {
 
-	private function composeZip( $output_content ) {
-		$file = tempnam( "/tmp", "zipmatecat" );
-		$zip  = new ZipArchive();
-		$zip->open( $file, ZipArchive::OVERWRITE );
+            $id_file = $file[ 'id_file' ];
 
-		foreach ( $output_content as $f ) {
-			$zip->addFile($f[ 'contentPath' ], $f[ 'filename' ]);
-		}
+            $zipPathInfo = ZipArchiveExtended::zipPathInfo( $file[ 'filename' ] );
 
-		// Close and send to users
-		$zip->close();
-		$zip_content = file_get_contents($file);
-		unlink( $file );
+            if ( is_array( $zipPathInfo ) ) {
+                $output_content[ $id_file ][ 'output_filename' ] = $zipPathInfo[ 'zipfilename' ];
+                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath( $this->project_date, $this->id_project, $zipPathInfo[ 'zipfilename' ] );
+            } else {
+                $output_content[ $id_file ][ 'output_filename' ] = $file[ 'filename' ];
+                $output_content[ $id_file ][ 'input_filename' ]  = $file[ 'originalFilePath' ];
+            }
 
-		return $zip_content;
-	}
+        }
+
+        /*
+         * get Unique file zip because there are more than one file in the zip
+         * array_unique compares items using a string comparison.
+         *
+         * From the docs:
+         * Note: Two elements are considered equal if and only if (string) $elem1 === (string) $elem2.
+         * In words: when the string representation is the same. The first element will be used.
+         */
+        $output_content = array_map( 'unserialize', array_unique( array_map( 'serialize', $output_content ) ) );
+
+        foreach ( $output_content as $key => $iFile ) {
+            $output_content[ $key ] = new ZipContentObject( $iFile );
+        }
+
+        if ( $this->download_type == 'all' ) {
+
+            if ( count( $output_content ) > 1 ) {
+
+                $this->_filename = $this->fname;
+                $pathInfo        = FilesStorage::pathinfo_fix( $this->fname );
+
+                if ( $pathInfo[ 'extension' ] != 'zip' ) {
+                    $this->_filename = $pathInfo[ 'basename' ] . ".zip";
+                }
+
+                $this->content = self::composeZip( $output_content ); //add zip archive content here;
+
+            } elseif ( count( $output_content ) == 1 ) {
+                $this->setContent( $output_content );
+            }
+
+        } else {
+
+            $this->setContent( $output_content );
+
+        }
+
+    }
+
+    /**
+     * There is a foreach, but this should be always one element
+     *
+     * @param $output_content ZipContentObject[]
+     */
+    private function setContent( $output_content ) {
+        foreach ( $output_content as $oc ) {
+            $this->_filename = $oc->output_filename;
+            $this->content   = $oc->getContent();
+        }
+    }
 
 }

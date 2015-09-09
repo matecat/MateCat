@@ -96,7 +96,8 @@ $.extend(UI, {
 //				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html()); 
 //				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html()); 
 //				console.log('next?: ', this[1]);
-				if(!this[1]) UI.markGlossaryItemsInSource(d, this);
+				UI.cachedGlossaryData = d;
+                if(!this[1] && (!UI.body.hasClass('searchActive'))) UI.markGlossaryItemsInSource(d);
 //				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html()); 
 			},
 			complete: function() {
@@ -141,7 +142,6 @@ $.extend(UI, {
                     }
                 });
             });
-
 			$.each(d.data.matches, function(k) {
 				i++;
 				k1 = UI.decodePlaceholdersToText(k, true);
@@ -168,15 +168,12 @@ $.extend(UI, {
 			UI.endGlossaryMark = '</mark>';
 			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
 			sourceString = $('.editor .source').html();
-//            console.log('UI.intervalsUnion: ', UI.intervalsUnion);
 
             $.each(UI.intervalsUnion, function(index) {
 				added = markLength * index;
-				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
+				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
-//                console.log('source 1: ', $('.editor .source').html());
 				$('.editor .source').html(sourceString);
-//                console.log('source 2: ', $('.editor .source').html());
 			});
 
             $('.editor .source mark mark').each(function () {
@@ -190,12 +187,14 @@ $.extend(UI, {
 			$(this).replaceWith($(this).html());
 		});
 	},
-
+    removeGlossaryMarksFormAllSources: function() {
+        $('section mark.inGlossary').each(function() {
+            $(this).replaceWith($(this).html());
+        });
+    },
 	checkIntervalsUnions: function(intervals) {
-//		console.log('intervals: ', intervals);
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
-//		console.log('smallest: ', smallest);
 		$.each(intervals, function(indice) {
 			if(this === smallest) smallestIndex = indice;
 		});
@@ -204,7 +203,7 @@ $.extend(UI, {
 			if(i != smallestIndex )  {
 				if((smallest.x <= this.x)&&(smallest.y >= this.x)) { // this item is to be merged to the smallest
 					mod++;
-					smallest.y = this.y;
+//					smallest.y = this.y;
 					intervals.splice(i, 1);
 					UI.checkIntervalsUnions(intervals);
 				}
@@ -220,7 +219,13 @@ $.extend(UI, {
 			UI.checkIntervalsUnions(intervals);
 			return false;
 		}
-		if(smallest.x < 1000000) UI.intervalsUnion.push(smallest);
+		if(smallest.x < 1000000) {
+//            console.log('smallest: ', smallest);
+//            console.log('aa: ', UI.intervalsUnion[UI.intervalsUnion.length-1]);
+//            if(UI.intervalsUnion[UI.intervalsUnion.length-1] !== smallest) {
+                UI.intervalsUnion.push(smallest);
+//            }
+        }
 //			console.log('intervals 1: ', JSON.stringify(intervals));
 
         //throws exception when it is undefined

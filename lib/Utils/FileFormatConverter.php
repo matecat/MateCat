@@ -7,9 +7,8 @@ class FileFormatConverter {
 
     private $ip; //current converter chosen for this job
     private $port = "8732"; //port the convertrs listen to
-    const toXliffFunction = "convert"; //action string for the converters to convert to XLIFF
-    const fromXliffFunction = "derived"; //action string for the converters to convert to original
-    const testFunction = "test"; // action check connection
+    private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
+    private $fromXliffFunction = "AutomationService/xliff2original"; //action string for the converters to convert to original
     private $opt = array(); //curl options
     private $lang_handler; //object that exposes language utilities
     private $storage_lookup_map;
@@ -78,13 +77,8 @@ class FileFormatConverter {
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
-        // Load matecat converter IP and port
-        $this->ip = INIT::$CONVERTER_SERVER_ADDRESS;
-        $this->port = INIT::$CONVERTER_SERVER_PORT;
-
     }
 
-    /*
     //add UTF-8 BOM
     public function addBOM( $string ) {
         return BOM . $string;
@@ -113,7 +107,6 @@ class FileFormatConverter {
     public function hasBOM( $string ) {
         return ( substr( $string, 0, 3 ) == BOM );
     }
-    */
 
     //get a converter at random, weighted on number of CPUs per node
     private function pickRandConverter( $segm_rule = null ) {
@@ -265,8 +258,10 @@ class FileFormatConverter {
 
         }
 
+        //get the binary result from converter and set the right ( EXTERNAL TO THIS CLASS ) key for content
         if ( array_key_exists( "documentContent", $res ) ) {
-            $res[ 'documentContent' ] = base64_decode( $res[ 'documentContent' ] );
+            $res[ 'document_content' ] = base64_decode( $res[ 'documentContent' ] );
+            unset( $res[ 'documentContent' ] );
         }
 
         /**
@@ -289,8 +284,7 @@ class FileFormatConverter {
             throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
         }
 
-
-        if ( $this->checkOpenService() ) {
+        if ( $this->checkOpenService( $url ) ) {
 
             $ch = curl_init();
 
@@ -326,8 +320,8 @@ class FileFormatConverter {
             if ( $curl_errno > 0 ) {
                 $output = json_encode( array( "isSuccess" => false, "errorMessage" => $curl_error ) );
             }
-        }
-        else {
+
+        } else {
             $output = json_encode( array( "isSuccess" => false, "errorMessage" => "Internal connection issue. Try converting it again." ) );
         }
 
@@ -338,21 +332,55 @@ class FileFormatConverter {
         if ( !file_exists( $file_path ) ) {
             throw new Exception( "Conversion Error : the file <$file_path> not exists" );
         }
+        $fileContent = file_get_contents( $file_path );
+        $extension   = FilesStorage::pathinfo_fix( $file_path, PATHINFO_EXTENSION );
+        $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
+        if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
+            $encoding = mb_detect_encoding( $fileContent );
 
-        $filename    = pathinfo( $file_path, PATHINFO_FILENAME );
-        $data = array('file'=>"@$file_path");
+            //in case of .strings, they may be in UTF-16
+            if ( strtoupper( $extension ) == 'STRINGS' ) {
+                //use this function to convert stuff
+                $convertedFile = CatUtils::convertEncoding( 'UTF-8', $fileContent );
+
+                //retrieve new content
+                $fileContent = $convertedFile[ 1 ];
+            } else {
+                if ( $encoding != 'UTF-8' ) {
+                    $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+                }
+            }
+
+            if ( !$this->hasBOM( $fileContent ) ) {
+                $fileContent = $this->addBOM( $fileContent );
+            }
+        }
+
+        //get random name for temporary location
+        $tmp_name = tempnam( "/tmp", "MAT_FW" );
+
+        //write encoded file to temporary location
+        $fileSize = file_put_contents( $tmp_name, ( $fileContent ) );
+
+        //assign file pointer for POST
+        $data[ 'documentContent' ] = "@$tmp_name";
+
+        //flush memory
+        unset( $fileContent );
 
         //assign converter
-        //if ( !$chosen_by_user_machine ) {
-        //    $this->ip = $this->pickRandConverter();
-        //} else {
-        //    $this->ip = $chosen_by_user_machine;
-        //}
+        if ( !$chosen_by_user_machine ) {
+            $this->ip = $this->pickRandConverter( $segm_rule );
+        } else {
+            $this->ip = $chosen_by_user_machine;
+        }
 
-        $sourceLocale = $this->lang_handler->getLangRegionCode( $source_lang );
-        $targetLocale = $this->lang_handler->getLangRegionCode( $target_lang );
+        $url = "$this->ip:$this->port/$this->toXliffFunction";
 
-        $url = "http://{$this->ip}:{$this->port}/".self::toXliffFunction."/$sourceLocale/$targetLocale";
+        $data[ 'fileExtension' ] = $extension;
+        $data[ 'fileName' ]      = "$filename.$extension";
+        $data[ 'sourceLocale' ]  = $this->lang_handler->getLangRegionCode( $source_lang );
+        $data[ 'targetLocale' ]  = $this->lang_handler->getLangRegionCode( $target_lang );
 
         log::doLog( $this->ip . " start conversion to xliff of $file_path" );
 
@@ -366,41 +394,49 @@ class FileFormatConverter {
         $this->conversionObject->ip_machine      = $this->ip;
         $this->conversionObject->ip_client       = Utils::getRealIpAddr();
         $this->conversionObject->path_name       = $file_path;
-        $this->conversionObject->file_name       = $filename;
+        $this->conversionObject->file_name       = $data[ 'fileName' ];
         $this->conversionObject->direction       = 'fw';
-        $this->conversionObject->src_lang        = $sourceLocale;
-        $this->conversionObject->trg_lang        = $targetLocale;
-        $this->conversionObject->file_size       = filesize($file_path);
+        $this->conversionObject->src_lang        = $data[ 'sourceLocale' ];
+        $this->conversionObject->trg_lang        = $data[ 'targetLocale' ];
+        $this->conversionObject->file_size       = $fileSize;
         $this->conversionObject->conversion_time = $time_diff;
 
         $decode      = json_decode( $curl_result, true );
         $curl_result = null;
         $res         = $this->__parseOutput( $decode );
 
+        //remove temporary file
+        unlink( $tmp_name );
+
         return $res;
     }
 
-    private function checkOpenService() {
-        $url = "http://{$this->ip}:{$this->port}/".self::testFunction;
-        $cl = curl_init($url);
-        curl_setopt($cl,CURLOPT_CONNECTTIMEOUT,3);
-        curl_setopt($cl,CURLOPT_HEADER,true);
-        curl_setopt($cl,CURLOPT_NOBODY,true);
-        curl_setopt($cl,CURLOPT_RETURNTRANSFER,true);
-        curl_exec($cl);
-        $httpcode = curl_getinfo($cl, CURLINFO_HTTP_CODE);
-        curl_close($cl);
-        return $httpcode >= 200 && $httpcode < 300;
+    private function checkOpenService( $url ) {
+        //default is failure
+        $open = false;
+
+        //get address only
+        $url = substr( $url, 0, strpos( $url, ':' ) );
+
+        //attempt to connect
+        $connection = @fsockopen( $url, $this->port );
+        if ( $connection ) {
+            //success
+            $open = true;
+            //close port
+            fclose( $connection );
+        }
+
+        return $open;
     }
 
     public function convertToOriginal( $xliffVector, $chosen_by_user_machine = false ) {
 
         $xliffContent = $xliffVector[ 'content' ];
-        //$xliffName    = $xliffVector[ 'out_xliff_name' ];
+        $xliffName    = $xliffVector[ 'out_xliff_name' ];
 
         //        Log::dolog( $xliffName );
 
-        /*
         //assign converter
         if ( !$chosen_by_user_machine ) {
             $this->ip = $this->pickRandConverter();
@@ -412,12 +448,11 @@ class FileFormatConverter {
         } else {
             $this->ip = $chosen_by_user_machine;
         }
-        */
 
-        $url = "http://{$this->ip}:{$this->port}/".self::fromXliffFunction;
+        $url = "$this->ip:$this->port/$this->fromXliffFunction";
 
-        //$uid_ext       = $this->extractUidandExt( $xliffContent );
-        //$data[ 'uid' ] = $uid_ext[ 0 ];
+        $uid_ext       = $this->extractUidandExt( $xliffContent );
+        $data[ 'uid' ] = $uid_ext[ 0 ];
 
         //get random name for temporary location
         $tmp_name = tempnam( "/tmp", "MAT_BW" );
@@ -427,7 +462,7 @@ class FileFormatConverter {
 
 
         //$data['xliffContent'] = $xliffContent;
-        $data = array( 'file' => "@$tmp_name" );
+        $data[ 'xliffContent' ] = "@$tmp_name";
 
         log::doLog( $this->ip . " start conversion back to original" );
         $start_time = microtime( true );
@@ -442,7 +477,7 @@ class FileFormatConverter {
         $this->conversionObject->ip_machine      = $this->ip;
         $this->conversionObject->ip_client       = Utils::getRealIpAddr();
         $this->conversionObject->path_name       = $xliffVector[ 'out_xliff_name' ];
-        $this->conversionObject->file_name       = pathinfo( $xliffVector[ 'out_xliff_name' ], PATHINFO_BASENAME );
+        $this->conversionObject->file_name       = FilesStorage::pathinfo_fix( $xliffVector[ 'out_xliff_name' ], PATHINFO_BASENAME );
         $this->conversionObject->direction       = 'bw';
         $this->conversionObject->src_lang        = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
         $this->conversionObject->trg_lang        = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
@@ -476,24 +511,24 @@ class FileFormatConverter {
         //For each file prepare a curl resource
         foreach ( $xliffVector_array as $id_file => $xliffVector ) {
 
-            $xliffContent = $xliffVector[ 'documentContent' ];
+            $xliffContent = $xliffVector[ 'document_content' ];
 
             //assign converter
-            //if ( !$chosen_by_user_machine ) {
-            //    $this->ip = $this->pickRandConverter();
-            //    $storage  = $this->getValidStorage();
+            if ( !$chosen_by_user_machine ) {
+                $this->ip = $this->pickRandConverter();
+                $storage  = $this->getValidStorage();
 
                 //add replace/regexp pattern because we have more than 1 replacement
                 //http://stackoverflow.com/questions/2222643/php-preg-replace
-            //    $xliffContent = self::replacedAddress( $storage, $xliffContent );
-            //} else {
-            //    $this->ip = $chosen_by_user_machine;
-            //}
+                $xliffContent = self::replacedAddress( $storage, $xliffContent );
+            } else {
+                $this->ip = $chosen_by_user_machine;
+            }
 
-            $url = "http://{$this->ip}:{$this->port}/".self::fromXliffFunction;
+            $url = "$this->ip:$this->port/$this->fromXliffFunction";
 
-            //$uid_ext       = $this->extractUidandExt( $xliffContent );
-            //$data[ 'uid' ] = $uid_ext[ 0 ];
+            $uid_ext       = $this->extractUidandExt( $xliffContent );
+            $data[ 'uid' ] = $uid_ext[ 0 ];
 
             //get random name for temporary location
             $tmp_name           = tempnam( "/tmp", "MAT_BW" );
@@ -502,14 +537,14 @@ class FileFormatConverter {
             //write encoded file to temporary location
             $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
 
-            $data = array( 'file' => "@$tmp_name" );
+            $data[ 'xliffContent' ] = "@$tmp_name";
             $xliffName              = $xliffVector[ 'out_xliff_name' ];
 
             //prepare conversion object
             $this->conversionObject->ip_machine = $this->ip;
             $this->conversionObject->ip_client  = Utils::getRealIpAddr();
             $this->conversionObject->path_name  = $xliffVector[ 'out_xliff_name' ];
-            $this->conversionObject->file_name  = pathinfo( $xliffName, PATHINFO_BASENAME );
+            $this->conversionObject->file_name  = FilesStorage::pathinfo_fix( $xliffName, PATHINFO_BASENAME );
             $this->conversionObject->direction  = 'bw';
             $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
             $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );

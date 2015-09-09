@@ -12,6 +12,7 @@ class errObject {
 
     public $outcome;
     public $debug;
+    public $tip = "";
 
     protected $orig_debug;
 
@@ -21,6 +22,14 @@ class errObject {
      */
     public function getOrigDebug() {
         return $this->orig_debug;
+    }
+
+    /**
+     * Outputs externally the error tip
+     * @return string
+     */
+    public function getTip() {
+        return $this->tip;
     }
 
     /**
@@ -35,6 +44,8 @@ class errObject {
         $errObj->outcome    = $errors[ 'outcome' ];
         $errObj->orig_debug = $errors[ 'debug' ];
         $errObj->debug      = $errors[ 'debug' ];
+
+        (!empty($errors[ 'tip' ])) ? $errObj->tip        = $errors[ 'tip' ] : null;
 
         return $errObj;
     }
@@ -267,7 +278,7 @@ class QA {
              *  2 =>  'bad source xml',
              *  3 =>  'bad target xml',
              */
-            1000 => 'Tag mismatch',
+            1000 => 'Tag mismatch.',
 
             /*
              * grouping
@@ -295,6 +306,16 @@ class QA {
              * 25 => 'Star sign mismatch',
              */
             1200 => 'Symbol mismatch',
+    );
+
+    protected $_tipMap = array(
+        /*
+         * grouping
+         *  1 =>  'Tag count mismatch',
+         *  2 =>  'bad source xml',
+         *  3 =>  'bad target xml',
+         */
+        1000 => "Press the < key to add tags."
     );
 
     protected static $asciiPlaceHoldMap = array(
@@ -380,17 +401,23 @@ class QA {
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
-                        'outcome' => self::ERR_TAG_MISMATCH, 'debug' => $this->_errorMap[ self::ERR_TAG_MISMATCH ]
+                        'outcome' => self::ERR_TAG_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
+                        'tip'     => $this->_tipMap [ self::ERR_TAG_MISMATCH ]
                 ) );
                 break;
             case self::ERR_TAG_ID:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
-                        'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[ self::ERR_TAG_ID ]
+                        'outcome' => self::ERR_TAG_ID,
+                        'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
+                        'tip'     => $this->_tipMap [ self::ERR_TAG_ID ]
                 ) );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
-                        'outcome' => $errCode, 'debug' => $this->_errorMap[ $errCode ]
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ $errCode ],
+                        'tip'     => $this->_tipMap [ $errCode ]
                 ) );
                 break;
 
@@ -402,7 +429,9 @@ class QA {
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
-                        'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[ self::ERR_SPACE_MISMATCH ]
+                        'outcome' => self::ERR_SPACE_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
+                        'tip'     => $this->_tipMap [ self::ERR_SPACE_MISMATCH ]
                 ) );
                 break;
 
@@ -417,21 +446,26 @@ class QA {
             case self::ERR_STARSIGN_MISMATCH :
             case self::ERR_SPECIAL_ENTITY_MISMATCH :
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
-                        'outcome' => self::ERR_SYMBOL_MISMATCH, 'debug' => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ]
+                        'outcome' => self::ERR_SYMBOL_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
+                        'tip'     => $this->_tipMap [ self::ERR_SYMBOL_MISMATCH ]
                 ) );
                 break;
 
             case self::ERR_NEWLINE_MISMATCH:
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_NEWLINE_MISMATCH,
-                        'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ]
+                        'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
+                        'tip'     => $this->_tipMap [ self::ERR_NEWLINE_MISMATCH ]
                 ) );
                 break;
 
             case self::ERR_TAG_ORDER:
             default:
                 $this->exceptionList[ self::WARNING ][] = errObject::get( array(
-                        'outcome' => $errCode, 'debug' => $this->_errorMap[ $errCode ]
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ $errCode ],
+                        'tip'     => $this->_tipMap [ $errCode ]
                 ) );
                 break;
         }
@@ -608,10 +642,11 @@ class QA {
             $list = array_values( array_unique( $list ) );
 
             /**
-             * @param $errObj errObject
+             * @var $errObj errObject
              */
             foreach ( $list as $errObj ) {
-                $errObj->debug = $errObj->getOrigDebug() . " ( " . $errorCount[ $errObj->outcome ] . " )";
+                $errObj->debug = $errObj->getOrigDebug() .
+                            " ( " . $errorCount[ $errObj->outcome ] . " )" ;
             }
 
         }

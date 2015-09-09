@@ -4,7 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.7";
+		this.version = "0.5.9";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
