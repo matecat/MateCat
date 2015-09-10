@@ -7,4 +7,4 @@
  * 
  */
 
-return 180;
+return 20;
