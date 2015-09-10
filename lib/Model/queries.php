@@ -1549,13 +1549,10 @@ function getLastSegmentIDs( $id_job ) {
 
 function getEQWLastHour( $id_job, $estimation_seg_ids ) {
 
-    // Old raw-wordcount
-    /*
-       $query = "SELECT SUM(raw_word_count), MIN(translation_date), MAX(translation_date),
-       IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity,
-       ROUND(SUM(raw_word_count)/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour,
-       count(*) from segment_translations
-       INNER JOIN segments on id=segment_translations.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
+    /**
+     * If the translator translated the last ten segments in less than 1 hour
+     * In the cattool there will be the calculation of word per hour in the footer bar
+     *
      */
     $query = "
             SELECT SUM(IF(Ifnull(st.eq_word_count, 0) = 0, raw_word_count,
