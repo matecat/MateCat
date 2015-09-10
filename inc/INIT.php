@@ -136,6 +136,12 @@ class INIT {
      */
     public static $BUILD_NUMBER;
 
+    /**
+     * MyMemory Developer Email Key
+     * @var string
+     */
+    public static $MYMEMORY_API_KEY = 'demo@matecat.com' ;
+
 
     public static $ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
 

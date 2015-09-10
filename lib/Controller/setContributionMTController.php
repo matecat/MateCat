@@ -115,7 +115,7 @@ class setContributionMTController extends ajaxController {
         $config[ 'translation' ] = CatUtils::view2rawxliff( $this->translation );
         $config[ 'source' ]      = $this->source_lang;
         $config[ 'target' ]      = $this->target_lang;
-        $config[ 'email' ]       = "demo@matecat.com";
+        $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
         $config[ 'segid' ]       = $this->id_segment;
         $config[ 'extra' ]       = $extra;
         $config[ 'id_user' ]     = array("TESTKEY");
