@@ -137,10 +137,16 @@ class INIT {
     public static $BUILD_NUMBER;
 
     /**
-     * MyMemory Developer Email Key
+     * MyMemory Developer Email Key for the cattool
      * @var string
      */
     public static $MYMEMORY_API_KEY = 'demo@matecat.com' ;
+
+    /**
+     * MyMemory Developer Email Key for the analysis
+     * @var string
+     */
+    public static $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com' ;
 
 
     public static $ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
