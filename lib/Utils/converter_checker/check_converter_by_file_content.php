@@ -9,6 +9,17 @@
 
 set_time_limit( 0 );
 
+/*
+ * WARNING!!! (by Giuseppe Silvano)
+ * This class was not tested with the new converters (Okapi & co.).
+ * Looking at the code it seems performing some very specific tasks for the
+ * legacy converters, so I think that testing and adapting it to the new ones
+ * is expensive and useless.
+ * So this class just uses the legacy converters as it always did, I introduced
+ * no changes. This class uses a FileFormatConverter created without passing
+ * parameters to the constructor, so the new converters are not used.
+ */
+
 class ConvertersMonitor {
 
     //init params

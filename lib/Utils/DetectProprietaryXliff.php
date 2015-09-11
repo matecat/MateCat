@@ -34,6 +34,8 @@ class DetectProprietaryXliff {
 		$tmp = self::isXliff( null, $fullPathToFile );
 		self::_checkIdiom( $tmp );
 		self::_checkSDL( $tmp );
+		self::_checkGlobalSight( $tmp );
+		self::_checkMateCATConverter( $tmp );
 		return self::$fileType;
 
 	}
@@ -115,12 +117,12 @@ class DetectProprietaryXliff {
         }
     }
 
-    protected static function _checkOkapi( $tmp ){
+    protected static function _checkMateCATConverter( $tmp ){
         if( isset($tmp[0]) ){
-            if( stripos( $tmp[0], 'xmlns:okp="okapi-framework' ) !== false ) {
-                self::$fileType[ 'proprietary' ]            = true;
-                self::$fileType[ 'proprietary_name' ]       = 'Okapi-Longhorn Download File';
-                self::$fileType[ 'proprietary_short_name' ] = 'okapi';
+            if( stripos( $tmp[0], 'tool-id="matecat-converter"' ) !== false ) {
+                self::$fileType[ 'proprietary' ]            = false;
+                self::$fileType[ 'proprietary_name' ]       = 'MateCAT Converter';
+                self::$fileType[ 'proprietary_short_name' ] = 'matecat_converter';
             }
         }
     }
@@ -135,7 +137,7 @@ class DetectProprietaryXliff {
 		self::_checkIdiom( $tmp );
         self::_checkSDL( $tmp );
         self::_checkGlobalSight( $tmp );
-        self::_checkOkapi( $tmp );
+        self::_checkMateCATConverter( $tmp );
 		return self::$fileType;
 
 	}
