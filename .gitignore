@@ -29,3 +29,9 @@ unitTest/xhGui/
 unitTest/coverage/*
 internal_scripts
 local_storage
+
+# composer files
+composer.phar
+vendor
+
+.env
