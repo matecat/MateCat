@@ -1,5 +1,7 @@
 <?php
 
+__halt_compiler();
+
 /**
  * User: Domenico Lupinetti ( Ostico )
  * Date: 25/07/13
@@ -43,4 +45,3 @@ class Framework_AllTests {
     }
 
 }
-

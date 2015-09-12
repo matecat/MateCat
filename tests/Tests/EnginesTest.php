@@ -1,10 +1,13 @@
 <?php
+
+__halt_compiler();
+
 /**
  * Created by JetBrains PhpStorm.
  * User: domenico
  * Date: 09/10/13
  * Time: 15.31
- * 
+ *
  */
 include_once("AbstractTest.php");
 include_once INIT::$MODEL_ROOT . '/queries.php';
@@ -260,4 +263,3 @@ class Tests_EnginesTest extends Tests_AbstractTest {
     }
 
 }
-

@@ -3,7 +3,7 @@
  * User: domenico
  * Date: 09/10/13
  * Time: 15.21
- * 
+ *
  */
 
 if( !class_exists('INIT', false ) ){
@@ -15,7 +15,7 @@ if( !class_exists('INIT', false ) ){
 
 }
 
-abstract class Tests_AbstractTest extends PHPUnit_Framework_TestCase {
+abstract class AbstractTest extends PHPUnit_Framework_TestCase {
 
     protected $thisTest;
 

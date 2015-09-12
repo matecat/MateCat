@@ -6,6 +6,9 @@
  * Time: 15.31
  *
  */
+
+__halt_compiler();
+
 include_once("AbstractTest.php");
 
 class Tests_MultiCurlHandlerTest extends Tests_AbstractTest {
@@ -116,4 +119,3 @@ class Tests_MultiCurlHandlerTest extends Tests_AbstractTest {
     }
 
 }
-

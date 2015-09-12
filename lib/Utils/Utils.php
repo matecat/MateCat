@@ -82,6 +82,9 @@ class Utils {
 	}
 
 	public static function sendErrMailReport( $htmlContent, $subject = null ){
+        if ( EnvWrap::isTest() ) {
+          return true ;
+        }
 
 		include_once @INIT::$UTILS_ROOT . '/phpmailer/class.phpmailer.php';
 		if( !class_exists( 'PHPMailer', false ) ){

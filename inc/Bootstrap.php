@@ -31,7 +31,10 @@ class Bootstrap {
         self::$CONFIG       = parse_ini_file( 'config.ini', true );
         self::$_ROOT        = realpath( dirname( __FILE__ ) . '/../' );
         $OAUTH_CONFIG       = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
-        register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
+
+        if (!getenv('phpunit')) {
+            register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
+        }
 
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];

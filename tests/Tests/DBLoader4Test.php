@@ -4,7 +4,7 @@
  * User: domenico
  * Date: 18/02/14
  * Time: 19.14
- * 
+ *
  */
 
 include_once("AbstractTest.php");
@@ -37,4 +37,4 @@ class Tests_DBLoader4Test {
         return self::$db;
     }
 
-} 
+}

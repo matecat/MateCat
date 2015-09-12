@@ -55,7 +55,10 @@ class NewController extends ajaxController {
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
                         'options' => array( 'default' => 1, 'min_range' => 0 )
                 ),
-                'private_tm_key' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'private_tm_key' => array(
+                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW,
+                    'options' => array( 'default' => 'new')
+                ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -65,6 +68,9 @@ class NewController extends ajaxController {
         }
         if ( !isset( $__postInput[ 'mt_engine' ] ) || is_null( $__postInput[ 'mt_engine' ] ) ) {
             $__postInput[ 'mt_engine' ] = 1;
+        }
+        if ( !isset( $__postInput[ 'private_tm_key' ] ) || is_null( $__postInput[ 'private_tm_key' ] ) ) {
+            $__postInput[ 'private_tm_key' ] = 'new';
         }
 
         foreach ( $__postInput as $key => $val ) {
