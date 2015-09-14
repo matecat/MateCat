@@ -5,6 +5,9 @@ class NewControllerTest extends IntegrationTest {
     function setup() {
         $this->path = '/api/new' ;
         $this->method = 'POST';
+
+        parent::setup();
+
     }
 
     function testValidatesTargetLanguage() {
@@ -65,6 +68,28 @@ class NewControllerTest extends IntegrationTest {
         $this->assertEquals( 'OK',      $response->status );
         $this->assertNotNull( $response->id_project );
         $this->assertNotNull( $response->project_pass );
+    }
 
+    function testIgnoresReferenceFiles() {
+        $this->params = array(
+            'project_name' => 'foo',
+            'target_lang' => 'it',
+            'source_lang' => 'en'
+        );
+
+        $this->files[] = test_file_path('zip-with-reference-files.zip');
+
+        $response =  json_decode( $this->makeRequest() );
+
+        $this->assertEquals( 'Success', $response->message);
+        $this->assertEquals( 'OK',      $response->status );
+        $this->assertNotNull( $response->id_project );
+        $this->assertNotNull( $response->project_pass );
+
+        $filesDao = new Files_FileDao( Database::obtain() );
+
+        $files = $filesDao->getByProjectId( $response->id_project );
+
+        $this->assertEquals( 1, count($files) ) ;
     }
 }

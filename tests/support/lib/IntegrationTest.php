@@ -56,4 +56,5 @@ abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
     $response = $this->makeRequest();
     $this->assertEquals( json_encode($expected), $response);
   }
+
 }

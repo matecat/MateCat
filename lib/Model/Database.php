@@ -77,6 +77,10 @@ class Database implements IDatabase {
             ));
     }
 
+    public function getConnection() {
+      $this->connect();
+      return $this->connection ;
+    }
 
     /**
      * @Override
