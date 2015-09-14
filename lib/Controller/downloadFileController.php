@@ -107,7 +107,7 @@ class downloadFileController extends downloadController {
         if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter') {
             $useLegacyConverters = false;
         } else {
-            // Use SDL Trados Studio in case of SDLXLIFF, Idiom and GlobalSight
+            // Use SDL Trados Studio in case of SDLXLIFF and GlobalSight
             $useLegacyConverters = true;
         }
 

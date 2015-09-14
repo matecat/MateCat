@@ -271,7 +271,7 @@ class ProjectManager {
 
             /*
                Conversion Enforce
-               Checking Extension is no more sufficient, we want check content if this is an idiom xlf file type, conversion are enforced
+               Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
             $isAFileToConvert = $this->isConversionToEnforce( $fileName );

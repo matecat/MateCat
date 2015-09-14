@@ -61,8 +61,7 @@ class ConversionHandler {
                     //conversion enforce
                     if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
 
-                        //ONLY IDIOM is forced to be converted
-                        //if file is not proprietary like idiom AND Enforce is disabled
+                        //if file is not proprietary AND Enforce is disabled
                         //we take it as is
                         if ( !$fileType[ 'proprietary' ] || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
                             $this->result[ 'code' ] = 1; // OK for client
