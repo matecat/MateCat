@@ -382,7 +382,7 @@ class NewController extends ajaxController {
                 $zipFiles = json_decode( $zipFiles, true );
 
 
-                $fileNames = array_column( $zipFiles, 'name' );
+                $fileNames = Utils::array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }
