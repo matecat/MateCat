@@ -91,5 +91,6 @@ class NewControllerTest extends IntegrationTest {
         $files = $filesDao->getByProjectId( $response->id_project );
 
         $this->assertEquals( 1, count($files) ) ;
+        $this->assertEquals( 'zip-with-reference-files.zip___SEP___amex-test.docx.xlf', $files[0]['filename'] );
     }
 }
