@@ -63,30 +63,6 @@
         };
     </script>
 
-
-
-<!-- Codice remarketing FB -->
-
-<script>(function() {
-  var _fbq = window._fbq || (window._fbq = []);
-  if (!_fbq.loaded) {
-    var fbds = document.createElement('script');
-    fbds.async = true;
-    fbds.src = '//connect.facebook.net/en_US/fbds.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(fbds, s);
-    _fbq.loaded = true;
-  }
-  _fbq.push(['addPixelId', '1445002372422861']);
-})();
-window._fbq = window._fbq || [];
-window._fbq.push(['track', 'PixelInitialized', {}]);
-</script>
-<noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?id=1445002372422861&amp;ev=PixelInitialized" /></noscript>
-
-
-
-
 </head>
 <body tal:condition="not:supportedBrowser">
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
@@ -980,8 +956,6 @@ Connect your TAUS DQF account to measure productivity.
        
     } );
 
-    
-
     $( "a.memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
         tab = $(this).attr('data-tab') || 'tm';
@@ -1000,10 +974,28 @@ Connect your TAUS DQF account to measure productivity.
 
     } );
 
-
 </script>
-<!-- Google Code per il tag di remarketing -->
 
+<!-- Codice remarketing FB -->
+<script>(function() {
+    var _fbq = window._fbq || (window._fbq = []);
+    if (!_fbq.loaded) {
+        var fbds = document.createElement('script');
+        fbds.async = true;
+        fbds.src = '//connect.facebook.net/en_US/fbds.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(fbds, s);
+        _fbq.loaded = true;
+    }
+    _fbq.push(['addPixelId', '1445002372422861']);
+})();
+window._fbq = window._fbq || [];
+window._fbq.push(['track', 'PixelInitialized', {}]);
+</script>
+<noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?id=1445002372422861&amp;ev=PixelInitialized" /></noscript>
+<!-- Codice remarketing FB -->
+
+<!-- Google Code per il tag di remarketing -->
 <script type="text/javascript">
     <!-- /* <![CDATA[*/ -->
     var google_conversion_id = 961218439;
@@ -1030,9 +1022,13 @@ Connect your TAUS DQF account to measure productivity.
     ga('send', 'pageview');
 
 </script>
+<!-- Google Code per il tag di remarketing -->
 
+<!-- Clickmeter code -->
 <img style='width:0;height:0;display:none;background:none;' src='https://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
+<!-- Clickmeter code -->
 
+<!-- Twitter code -->
 <script src="//platform.twitter.com/oct.js" type="text/javascript"></script>
 <script type="text/javascript">
     twttr.conversion.trackPid( 'l5dle' );
@@ -1041,8 +1037,9 @@ Connect your TAUS DQF account to measure productivity.
     <img height="1" width="1" style="display:none;" alt="" src="https://analytics.twitter.com/i/adsct?txn_id=l5dle&p_id=Twitter"/>
     <img height="1" width="1" style="display:none;" alt="" src="//t.co/i/adsct?txn_id=l5dle&p_id=Twitter"/>
 </noscript>
-<!-- code for facebook like -->
+<!-- Twitter code -->
 
+<!-- code for facebook like -->
 <div id="fb-root"></div>
 <script>
   window.fbAsyncInit = function() {
@@ -1061,6 +1058,7 @@ Connect your TAUS DQF account to measure productivity.
      fjs.parentNode.insertBefore(js, fjs);
    }(document, 'script', 'facebook-jssdk'));
 </script>
+<!-- code for facebook like -->
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
