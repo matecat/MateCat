@@ -74,6 +74,8 @@ abstract class downloadController extends controller {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
+            $fName = self::sanitizeFileExtension( $fName );
+
             $nFinfo = FilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
             if ( strlen( $_name ) < 3 ) {
@@ -88,7 +90,7 @@ abstract class downloadController extends controller {
 
             $content = $f->getContent();
             if( !empty( $content ) ){
-                $zip->addFromString($f->output_filename, $content);
+                $zip->addFromString( $fName, $content);
             }
         }
 

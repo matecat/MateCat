@@ -24,13 +24,13 @@ class setTranslationController extends ajaxController {
      * This constant represent the job progress percentage over
      * which the wordcount could be updated by a massive query.
      */
-    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
+//    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
 
     /**
      * The probability over which the wordcount massive query
      * will be triggered
      */
-    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
+//    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
 
     public function __construct() {
 
@@ -423,35 +423,37 @@ class setTranslationController extends ajaxController {
                 
                 //THIS IS THE WORST SOLUTION
                 
-                $updateJobCountersWithQuery = false;
-                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
-                $totalWords                 = array_sum( array(
-                        $this->jobData[ 'new_words' ],
-                        $this->jobData[ 'draft_words' ],
-                        $this->jobData[ 'translated_words' ],
-                        $this->jobData[ 'approved_words' ],
-                        $this->jobData[ 'rejected_words' ]
-                ) );
+//                $updateJobCountersWithQuery = false;
+//                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
+//                $totalWords                 = array_sum( array(
+//                        $this->jobData[ 'new_words' ],
+//                        $this->jobData[ 'draft_words' ],
+//                        $this->jobData[ 'translated_words' ],
+//                        $this->jobData[ 'approved_words' ],
+//                        $this->jobData[ 'rejected_words' ]
+//                ) );
+//
+//                // if job progress is above 90%, then toss a d100.
+//                // If the result is above 90, then manually update counters
+//                // with a query (super slow, but executed few times)
+//                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
+//                    $d100Result = rand( 1, 100 );
+//                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
+//                        $updateJobCountersWithQuery = true;
+//                    }
+//                }
+//
+//                if ( $updateJobCountersWithQuery ) {
+//                    $newTotals = $counter->updateDB_countAll( $newValues );
+//                } else {
+//                    $newTotals = $counter->updateDB( $newValues );
+//                }
 
-                // if job progress is above 90%, then toss a d100.
-                // If the result is above 90, then manually update counters
-                // with a query (super slow, but executed few times)
-                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
-                    $d100Result = rand( 1, 100 );
-                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
-                        $updateJobCountersWithQuery = true;
-                    }
-                }
-
-                if ( $updateJobCountersWithQuery ) {
-                    $newTotals = $counter->updateDB_countAll( $newValues );
-                } else {
-                    $newTotals = $counter->updateDB( $newValues );
-                }
+                $newTotals = $counter->updateDB( $newValues );
 
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
-//                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
 //                $x1 = explode( "\n" , var_export( $old_translation, true) );
 //                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
                 $db->rollback();

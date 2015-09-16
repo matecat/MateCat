@@ -44,19 +44,6 @@ class getSegmentsController extends ajaxController {
 
     }
 
-    private function stripTagsFromSource($text) {
-        $pattern_g_o = '|(<.*?>)|';
-        $pattern_g_c = '|(</.*?>)|';
-        $pattern_x = '|(<.*?/>)|';
-
-        $text = preg_replace($pattern_x, "", $text);
-
-        $text = preg_replace($pattern_g_o, "", $text);
-        $text = preg_replace($pattern_g_c, "", $text);
-        $text = str_replace("&nbsp;", " ", $text);
-        return $text;
-    }
-
     public function doAction() {
 
         //get Job Infos

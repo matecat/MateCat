@@ -778,12 +778,13 @@ $.extend(UI, {
 //            console.log('cliccato: ', e.target);
 //            console.log('a: ', !UI.currentSegment.is(e.target));
 //            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
-
+console.log('e.target: ', e.target);
             var container = $(UI.currentSegment);
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container
                 && !$(e.target).hasClass('translated') // has not clicked on a translated button
                 && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
+                && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
                 )
             {
 //                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
@@ -794,7 +795,11 @@ $.extend(UI, {
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-		}).on('click', '#quality-report', function(e){
+        }).on('click', 'section .sid, section .mbc-comment-link', function(e){
+            UI.closeSegment(UI.currentSegment, 1);
+        }).on('click', 'section .actions', function(e){
+            e.stopPropagation();
+        }).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
         }).on('keydown', function(e) {
@@ -948,12 +953,14 @@ $.extend(UI, {
             }
 
             if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
+
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
+
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
@@ -1582,7 +1589,7 @@ $.extend(UI, {
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
-					$('#' + $(this).attr('data-segmentid') + '-close').click();
+//					$('#' + $(this).attr('data-segmentid') + '-close').click();
                 }
 
 			}
@@ -2002,8 +2009,9 @@ $.extend(UI, {
 					segmentToOpen: UI.currentSegmentId
 				});
 			}
+            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
 
-		});
+        });
 		$("#exec-replaceall").click(function(e) {
 			e.preventDefault();
 			APP.confirm({

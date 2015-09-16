@@ -94,7 +94,7 @@ class Analysis_QueueHandler extends Stomp {
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
         $this->connect();
-//        $this->setReadTimeout( 0, 200000 );
+        $this->setReadTimeout( 5, 0 );
         $this->queueName = $queueName;
         return parent::subscribe( '/queue/' . $queueName );
 

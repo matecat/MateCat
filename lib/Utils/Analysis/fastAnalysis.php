@@ -136,7 +136,7 @@ do {
         _TimeStampMsg( "pid $pid: $num_segments segments" );
         _TimeStampMsg( "sending query to MyMemory analysis..." );
 
-        $ws->doLog = false; //tell to the engine to not log the output
+        $ws->doLog = true; //tell to the engine to not log the output
         $fastReport = $ws->fastAnalysis($segments);
 
         _TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
@@ -311,10 +311,11 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
                 unset( $fastReport[ $k ] );
             }
 
-            //anyway this key must be removed because he is no more needed and we want not to send it to the queue
-            unset( $fastReport[ $k ]['wc'] );
-
         }
+
+        //anyway this key must be removed because he is no more needed and we want not to send it to the queue
+        unset( $fastReport[ $k ]['wc'] );
+
     }
 
     unset( $data );

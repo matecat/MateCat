@@ -18,7 +18,7 @@ class changeJobsStatusController extends ajaxController {
         $filterArgs = array(
             'res'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'id'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+//            'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'new_status'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'status'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
@@ -55,11 +55,11 @@ class changeJobsStatusController extends ajaxController {
             $this->step = 100;
         };
 
-        if ( isset( $_POST[ 'project' ] ) ) {
-            $this->project_id = $__postInput[ 'project' ];
-        } else {
-            $this->project_id = false;
-        };
+//        if ( isset( $_POST[ 'project' ] ) ) {
+//            $this->project_id = $__postInput[ 'project' ];
+//        } else {
+//            $this->project_id = false;
+//        };
 
         if ( isset( $_POST[ 'password' ] ) ) {
             $this->job_password = $__postInput[ 'password' ];
@@ -131,7 +131,7 @@ class changeJobsStatusController extends ajaxController {
 
             $start = ( ( $this->page - 1 ) * $this->step ) + $this->step - 1;
 
-            $projects = ManageUtils::queryProjects( $start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
+            $projects = ManageUtils::queryProjects( $start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, null );
 
             $projnum = getProjectsNumber( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled );
 

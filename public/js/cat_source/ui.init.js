@@ -4,7 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.5.7";
+		this.version = "0.5.9";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -159,8 +159,8 @@ $.extend(UI, {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "alt+c",
-					"mac": "alt+meta+c",
+					"standard": "alt+f",
+					"mac": "alt+f",
 				}
 			},
 		};

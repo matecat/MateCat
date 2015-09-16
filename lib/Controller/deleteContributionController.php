@@ -76,7 +76,7 @@ class deleteContributionController extends ajaxController {
         $config[ 'translation' ]   = CatUtils::view2rawxliff( $this->target );
         $config[ 'source' ]        = $this->source_lang;
         $config[ 'target' ]        = $this->target_lang;
-        $config[ 'email' ]         = "demo@matecat.com";
+        $config[ 'email' ]         = INIT::$MYMEMORY_API_KEY;
         $config[ 'id_user' ]       = array();
 
         //get job's TM keys

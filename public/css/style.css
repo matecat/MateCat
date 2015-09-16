@@ -165,7 +165,11 @@ left: -5px;
 .warnings:empty{ display:none; }
 .mismatch .warnings{display:block}
 
-
+.warnings .tip
+{
+    display: block;
+    margin-left: 24px;
+}
 /*ul{margin:0;padding:0;list-style:none}
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}*/
 .breadcrumbs{color:#fff;padding:19px 0 4px 0px;}
@@ -3791,6 +3795,9 @@ body.cattool table.mgmt-mt tbody .enable-mt {
     display: none;
 }
 body.isAnonymous .add-mt-engine {
+    display: none;
+}
+body.cattool .nav-tabs li.mgmt-mt {
     display: none;
 }
 

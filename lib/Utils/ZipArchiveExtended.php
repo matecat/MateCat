@@ -122,6 +122,7 @@ class ZipArchiveExtended extends ZipArchive {
             $pathBySlash = array_values( explode( '/', $path ) );
 
             if( $pathBySlash[ 0 ] == '__MACOSX' ) continue;
+            if( end($pathBySlash) == '.DS_Store' ) continue;
 
             $pathBySlash = array_map( array( 'ZipArchiveExtended', 'treeKey' ), $pathBySlash );
 

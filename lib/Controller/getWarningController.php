@@ -112,21 +112,26 @@ class getWarningController extends ajaxController {
      */
     private function __globalWarningsCall() {
 
-        $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
+        $this->result[ 'token' ]   = $this->__postInput->token;
 
-        foreach ( $result as $position => &$item ) {
-
-            $item = $item[ 'id_segment' ];
-
+        try {
+            $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
+        } catch ( Exception $e ){
+            $this->result[ 'details' ]                = array();
+            $this->result[ 'translation_mismatches' ] = array( 'total' => 0, 'mine' => 0, 'list_in_my_job' => array() );
+            return;
         }
 
-        $this->result[ 'details' ] = array_values( $result );
-        $this->result[ 'token' ]   = $this->__postInput->token;
+        foreach ( $result as $position => &$item ) {
+            $item = $item[ 'id_segment' ];
+        }
+
 
 //        $msg = 'MateCat will be undergoing scheduled maintenance starting on Saturday, December 13 at 11:50 PM CEST. MateCat will be unavailable for approximately 4 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
 //        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-12-14 04:00:00"}]';
 
 
+        $this->result[ 'details' ] = array_values( $result );
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
 //        Log::doLog( $tMismatch );
