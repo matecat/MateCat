@@ -7,11 +7,11 @@ class EnvWrap {
     public static $TEST = 'test' ;
 
     public static function link( $source, $dest ) {
-        if ( ! self::isProduction()) {
-            return copy($source, $dest) ;
+        if ( self::isProduction()) {
+            return link($source, $dest) ;
         }
         else {
-            return link($source, $dest) ;
+            return copy($source, $dest) ;
         }
     }
 
