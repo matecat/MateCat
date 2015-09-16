@@ -1,6 +1,6 @@
 <?php
 
-class NewControllerTest extends IntegrationTest {
+class NewTest extends IntegrationTest {
 
     function setup() {
         $this->path = '/api/new' ;

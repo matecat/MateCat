@@ -33,3 +33,20 @@ function prepareTestSchema($testDatabase, $devDatabase) {
 function setEnvFile($env) {
   file_put_contents(PROJECT_ROOT . 'inc/.env', $env);
 }
+
+function integrationCreateTestProject(  ) {
+  $test = new CurlTest();
+
+  $test->path = '/api/new' ;
+  $test->method = 'POST';
+  $test->params = array(
+    'project_name' => 'foo',
+    'target_lang' => 'it',
+    'source_lang' => 'en'
+  );
+  $test->files[] = test_file_path('amex-test.docx.xlf');
+
+  $response =  json_decode( $test->run() );
+
+  return $response ;
+}

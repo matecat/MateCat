@@ -10,6 +10,7 @@
     >
     <php>
         <includePath>tests/support</includePath>
+        <includePath>tests/support/lib</includePath>
     </php>
     <testsuites>
         <testsuite name="cURL based tests">

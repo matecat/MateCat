@@ -24,6 +24,10 @@ register_shutdown_function(function() {
 
 Bootstrap::start();
 
+// delete all stored work files
+shell_exec("rm -rf " . INIT::$CACHE_REPOSITORY );
+shell_exec("rm -rf " . INIT::$FILES_REPOSITORY );
+
 Database::obtain (
     INIT::$DB_SERVER, INIT::$DB_USER,
     INIT::$DB_PASS, INIT::$DB_DATABASE
