@@ -141,6 +141,10 @@ abstract class Engines_AbstractEngine {
                             'message' => " {$curl_error[ 'error' ]}. Server Not Available (http status " . $curl_error[ 'http_code' ] .")"
                     )
             ); //return negative number
+            $responseRawValue = $mh->getSingleContent( $resourceHash ); // Although an error was returned some useful info might still be contained in the response body
+            if(!empty($responseRawValue)) {
+                $rawValue['result'] = $responseRawValue;
+            }
         } else {
             $rawValue = $mh->getSingleContent( $resourceHash );
         }
