@@ -59,76 +59,61 @@
             <div class="popup-box pricebox">
                 <div class="choose">
                     <div class="onyourown">
-                        <h2>Option #1 - Share the following link with your translator</h2>
+                        <h2>Share the following link with your translator</h2>
                         <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
                         <a  href='javascript:void(0)' onclick='trackClick( "translate" );' class="uploadbtn in-popup" target="_blank">Open</a>
                     </div>
                     <div class="outsourceto">
-                        <h2>Option #2 - Outsource to a translation company</h2>  <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show
-                        prices</a>
+                      
 
-                        <div class="revealprices">
-                            <div class="copytext">
-                                <img src="/public/img/logo_translated.png"/>
+                        
 
-                                <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">
+                            <div class="total">
+                                <div class="heading">
+                                    <h2>Outsource Project Management + Translation</h2>  
+                                    <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show prices</a>
+                                    <img src="/public/img/logo_translated.png"/>
+                                    <span>Guaranteed by</span>
+                                    <div class="trustbox" style="display:none;">
+                                        <strong>About</strong><br /> Translated, since 1999, provides professional translation services
+                                        with a team of more than 100,000 translators and is trusted by more than 40,000 customers.
+                                        <a href="http://www.translated.net/en/contact-us" target="_blank">http://www.translated.net/en/contact-us</a>
+                                        <div class="references">
+                                            <img src="/public/img/europe.jpg" style="width:65px;" />
+                                            <img src="/public/img/google.png" />
+                                            <img src="/public/img/benetton.jpg" />
+                                            <img src="/public/img/expedia.jpg" style="vertical-align:bottom;" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="offer">
+                                    <div class="translator_info">
+                                        <div class="translator_bio">
+                                            <p class="translator_name">Translator: <strong>ANNA</strong></p>
+                                            <p>Expert in <span class="tpricedesc">
+                                                Subject: ${subject | string:Information Technology}
+                                            </span>
+                                            </p>
+                                            <p>Year of experience: 16</p>
+                                            <a>more info</a>
+                                        </div>
+                                        <div class="translator_score">
+                                            <span class="score_number">95%</span>
+                                            <span class="score_legend">Success</span>
+                                        </div>
+
+                                        <div class="infobox" style="display:none;">
+                                            <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">
                                     T-Rank</a> to select our best translator in this field (<strong>${subject | string:IT}</strong>)
                                     and keep using the <strong>same translator</strong> for your next projects.
                                 </p>
-
-                                <p>
-                                    You can pay with a <strong>monthly invoice</strong> within 5 days of receipt by credit card, bank transfer or PayPal
-                                </p>
-
-                                <p class="trustbox">
-                                    <strong>About</strong><br /> Translated, since 1999, provides professional translation services
-                                    with a team of more than 100,000 translators and is trusted by more than 40,000 customers.
-                                <a href="http://www.translated.net/en/contact-us" target="_blank">http://www.translated.net/en/contact-us</a>
-                                </p>
-
-
-
-
-                                
-								<div class="references">
-									<img src="/public/img/europe.jpg" style="width:65px;" />
-									<img src="/public/img/google.png" />
-									<img src="/public/img/benetton.jpg" />
-									<img src="/public/img/expedia.jpg" style="vertical-align:bottom;" />
-								</div>
-                            </div>
-                            <div class="total">
-                                <div class="offer">
-                                    <div class="tprice">
-                                        <span class="tpricetitle">Professional Translation<br/>
-											<span class="tpricedesc" style="font-size:15px!important;">
-                                                Subject: ${subject | string:Information Technology}
-                                            </span>
-										</span>
-					                    <span class="euro">€</span>
-                                        <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
-										<span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>
-                                        
-                                    <select id="changecurrency">
-                                        <option value="EUR" data-symbol="€">Euro (EUR)</option>
-                                        <option value="USD" data-symbol="US$">US dollar (USD)</option>
-                                        <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
-                                        <option value="CAD" data-symbol="$">Canadian dollar (CAD)</option>
-                                        <option value="NZD" data-symbol="$">New Zealand dollar (NZD)</option>
-                                        <option value="GBP" data-symbol="£">Pound sterling (GBP)</option>
-                                        <option value="BRL" data-symbol="R$">Real (BRL)</option>
-                                        <option value="RUB" data-symbol="руб">Russian ruble (RUB)</option>
-                                        <option value="SEK" data-symbol="kr">Swedish krona (SEK)</option>
-                                        <option value="CHF" data-symbol="Fr.">Swiss franc (CHF)</option>
-                                        <option value="TRY" data-symbol="TL">Turkish lira (TL)</option>
-                                        <option value="KRW" data-symbol="￦">Won (KRW)</option>
-                                        <option value="JPY" data-symbol="￥">Yen (JPY)</option>
-                                        <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
-                                    </select>
+                                        </div>
                                     </div>
+                                    
                                     <div class="delivery">Delivery guaranteed by:
+                                        <br />
                                         <span class="time" data-timezone="" data-rawtime=""></span>
-                                        <span class="zone2">(UTC +1:00 ) Central European Time (Rome, Paris)
+                                        <span class="zone2">(UTC +1:00) Central European Time
                                             <!-- select id="changeTimezone" class="noselect" style="width:100%;">
                                                 <option value="-11">(UTC -11:00 ) Midway Islands, American Samoa</option>
                                                 <option value="-10">(UTC -10:00 ) Hawaii, Tahiti, Cook Islands</option>
@@ -162,24 +147,61 @@
                                                 <option value="13">(UTC +13:00 ) Samoa</option>
                                             </select -->
                                         </span>
+                                        <br />
+                                        <a class="needitfaster">Need it faster?</a>
                                       
                                     </div>
-                                    <div class="ilmiodiv"></div>
-                                    <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
-                                        <input type="hidden" name="url_ok" value=""/>
-                                        <input type="hidden" name="url_ko" value=""/>
-                                        <input type='hidden' name='data_key' value="" />
-                                        <input type="hidden" name="quoteData" value=""/>
-                                        <a href="#" class="continuebtn disabled">Order</a>
-                                    </form>
-                                    
-                                </div>
+                                    <div class="tprice">
+
+                                        <span class="euro">€</span>
+                                        <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
+                                        <br />
+                                        <span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>
+                                        
+                                    <select id="changecurrency">
+                                        <option value="EUR" data-symbol="€">Euro (EUR)</option>
+                                        <option value="USD" data-symbol="US$">US dollar (USD)</option>
+                                        <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
+                                        <option value="CAD" data-symbol="$">Canadian dollar (CAD)</option>
+                                        <option value="NZD" data-symbol="$">New Zealand dollar (NZD)</option>
+                                        <option value="GBP" data-symbol="£">Pound sterling (GBP)</option>
+                                        <option value="BRL" data-symbol="R$">Real (BRL)</option>
+                                        <option value="RUB" data-symbol="руб">Russian ruble (RUB)</option>
+                                        <option value="SEK" data-symbol="kr">Swedish krona (SEK)</option>
+                                        <option value="CHF" data-symbol="Fr.">Swiss franc (CHF)</option>
+                                        <option value="TRY" data-symbol="TL">Turkish lira (TL)</option>
+                                        <option value="KRW" data-symbol="￦">Won (KRW)</option>
+                                        <option value="JPY" data-symbol="￥">Yen (JPY)</option>
+                                        <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
+                                    </select>
+                                        <div class="ilmiodiv"></div>
+                                            <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
+                                                <input type="hidden" name="url_ok" value=""/>
+                                                <input type="hidden" name="url_ko" value=""/>
+                                                <input type='hidden' name='data_key' value="" />
+                                                <input type="hidden" name="quoteData" value=""/>
+                                                <a href="#" class="continuebtn disabled">Order</a>
+                                            </form>
+                                        
+                                        </div>
+                                    </div>
+                                    <div class="addrevision">
+                                         <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span>Increase the quality with the revision of another professional translator</span>
+                                    </div>
+                                   
                             </div>
                             <!-- end total-->
-                        </div>
+            
                         <!-- end reveal prices-->
                     </div>
                     <!--end outsourceto-->
+                     <div class="paymentinfo">
+                        <p><strong>Easy payments</strong>: pay a single monthly invoice within 30 days from delivery</p>
+                    </div>
+                    <div class="contact_box">
+                        <h3>Need a specific request?</h3>
+                        <p>Write to <a>info@matecat.com</a> or call +39 06 90 254 001</p><a class="standardbtn">Contact</a>
+                    </div>
                 </div>
             </div>
         </div>
