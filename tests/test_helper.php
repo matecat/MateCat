@@ -28,7 +28,14 @@ Bootstrap::start();
 shell_exec("rm -rf " . INIT::$CACHE_REPOSITORY );
 shell_exec("rm -rf " . INIT::$FILES_REPOSITORY );
 
-Database::obtain (
-    INIT::$DB_SERVER, INIT::$DB_USER,
-    INIT::$DB_PASS, INIT::$DB_DATABASE
-);
+function startConnection() {
+    $conn = Database::obtain (
+        INIT::$DB_SERVER, INIT::$DB_USER,
+        INIT::$DB_PASS, INIT::$DB_DATABASE
+    );
+    $conn->getConnection();
+}
+
+startConnection();
+
+require( 'queries.php' );

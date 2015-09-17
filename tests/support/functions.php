@@ -50,3 +50,26 @@ function integrationCreateTestProject(  ) {
 
   return $response ;
 }
+
+function integrationSetTranslation($options) {
+  $default = array(
+    // 'id_segment' => 205,
+    // 'id_job' => 12,
+    // 'password' => '8ec640b5c874',
+    // 'status' => 'draft',
+    'translation' => "simulated translation during tests",
+    'id_translator' => false,
+    'version' => time() ,
+    'propagate' => false,
+    'status' => 'draft'
+  );
+
+  $test = new CurlTest();
+  $test->params = array_merge( $default, $options);
+  $test->method = 'POST';
+  $test->path = '?action=setTranslation';
+  $response =  json_decode( $test->run() );
+
+  return $response ;
+
+}

@@ -380,21 +380,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        //Recount Job Totals
-        $old_wStruct = new WordCount_Struct();
-        $old_wStruct->setIdJob( $this->id_job );
-        $old_wStruct->setJobPassword( $this->password );
-        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
-        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
-        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
-        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
-        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
-
-        $old_wStruct->setIdSegment( $this->id_segment );
-
-        //redundant, this is made into WordCount_Counter::updateDB
-        $old_wStruct->setOldStatus( $old_translation[ 'status' ] );
-        $old_wStruct->setNewStatus( $this->status );
+        $old_wStruct = $this->recountJobTotals( $old_translation['status'] );
 
         //redundant because the update is made only where status = old status
         if ( $this->status != $old_translation[ 'status' ] ) {
@@ -420,42 +406,10 @@ class setTranslationController extends ajaxController {
             }
 
             try {
-                
-                //THIS IS THE WORST SOLUTION
-                
-//                $updateJobCountersWithQuery = false;
-//                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
-//                $totalWords                 = array_sum( array(
-//                        $this->jobData[ 'new_words' ],
-//                        $this->jobData[ 'draft_words' ],
-//                        $this->jobData[ 'translated_words' ],
-//                        $this->jobData[ 'approved_words' ],
-//                        $this->jobData[ 'rejected_words' ]
-//                ) );
-//
-//                // if job progress is above 90%, then toss a d100.
-//                // If the result is above 90, then manually update counters
-//                // with a query (super slow, but executed few times)
-//                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
-//                    $d100Result = rand( 1, 100 );
-//                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
-//                        $updateJobCountersWithQuery = true;
-//                    }
-//                }
-//
-//                if ( $updateJobCountersWithQuery ) {
-//                    $newTotals = $counter->updateDB_countAll( $newValues );
-//                } else {
-//                    $newTotals = $counter->updateDB( $newValues );
-//                }
-
                 $newTotals = $counter->updateDB( $newValues );
-
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
                 Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
-//                $x1 = explode( "\n" , var_export( $old_translation, true) );
-//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
                 $db->rollback();
 
                 return $e->getCode();
@@ -469,8 +423,9 @@ class setTranslationController extends ajaxController {
         $project   = getProject( $this->jobData[ 'id_project' ] );
         $project   = array_pop( $project );
 
-        $job_stats[ 'ANALYSIS_COMPLETE' ] = ( $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+        $job_stats[ 'ANALYSIS_COMPLETE' ] = (
+          $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+          $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
         $file_stats = array();
@@ -521,6 +476,25 @@ class setTranslationController extends ajaxController {
             Utils::sendErrMailReport( $msg );
         }
 
+    }
+
+    private function recountJobTotals( $old_status ) {
+        $old_wStruct = new WordCount_Struct();
+        $old_wStruct->setIdJob( $this->id_job );
+        $old_wStruct->setJobPassword( $this->password );
+        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
+        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
+        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
+        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
+        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
+
+        $old_wStruct->setIdSegment( $this->id_segment );
+
+        //redundant, this is made into WordCount_Counter::updateDB
+        $old_wStruct->setOldStatus( $old_status );
+        $old_wStruct->setNewStatus( $this->status );
+
+        return $old_wStruct ;
     }
 
 }

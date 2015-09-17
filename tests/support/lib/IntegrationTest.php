@@ -1,14 +1,15 @@
 <?php
 
 abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
-    public $path;
-    public $headers;
-    public $method;
-    public $params = array();
-    public $files = array();
+    protected $path;
+    protected $headers;
+    protected $method;
+    protected $params = array();
+    protected $files = array();
+
+    protected $conn ;
 
     function setup() {
-
     }
 
     function tearDown() {
