@@ -63,6 +63,8 @@ class CurlTest {
   }
 
   private function setHeaders($ch) {
-    curl_setopt( $ch, CURLOPT_HTTPHEADER, $this->headers );
+    if (! empty($this->headers) ) {
+      curl_setopt( $ch, CURLOPT_HTTPHEADER, $this->headers );
+    }
   }
 }
