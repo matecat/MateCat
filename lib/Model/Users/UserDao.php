@@ -9,8 +9,32 @@
 class Users_UserDao extends DataAccess_AbstractDao {
 
     const TABLE = "users";
-
     const STRUCT_TYPE = "Users_UserStruct";
+
+    public function createUser( $obj ){
+        $conn = $this->con->getConnection();
+
+        $obj->create_date = date('Y-m-d H:i:s');
+
+        $stmt = $conn->prepare("INSERT INTO users " .
+            " ( uid, email, salt, pass, create_date, first_name, last_name, api_key ) " .
+            " VALUES " .
+            " ( " .
+            " :uid, :email, :salt, :pass, :create_date, " .
+            " :first_name, :last_name, :api_key " .
+            " )"
+        ) ;
+        $stmt->execute( $obj->toArray() );
+
+        return $this->getByUid( $conn->lastInsertId() )[0];
+    }
+
+    public function getByUid( $id ) {
+        $conn = $this->con->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM users WHERE uid = ?");
+        $stmt->execute( array($id )) ;
+        return $stmt->fetchAll( PDO::FETCH_CLASS, 'Users_UserStruct');
+    }
 
     public function read( Users_UserStruct $obj ) {
         $obj = $this->sanitize( $obj );

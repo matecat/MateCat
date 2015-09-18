@@ -14,7 +14,7 @@ class ApiKeysTable extends AbstractMigration {
             ->addColumn('api_secret', 'string', array(
                 'limit' => '45', 'null' => false
             ))
-            ->addColumn('creation_date', 'datetime', array('null' => false))
+            ->addColumn('create_date', 'datetime', array('null' => false))
             ->addColumn('last_update', 'datetime', array('null' => false))
             ->addColumn('enabled', 'boolean', array(
                 'null' => false, 'default' => true
@@ -23,6 +23,8 @@ class ApiKeysTable extends AbstractMigration {
     }
 
     public function down() {
+
         $this->dropTable('api_keys');
+
     }
 }

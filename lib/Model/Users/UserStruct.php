@@ -13,6 +13,9 @@ class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements Dat
     public $create_date;
     public $first_name;
     public $last_name;
+    public $salt;
+    public $api_key;
+    public $pass;
 
     public static function getStruct() {
         return new Users_UserStruct();

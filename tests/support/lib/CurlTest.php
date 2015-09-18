@@ -46,7 +46,9 @@ class CurlTest {
       $this->url .= "?" . http_build_query( $this->params );
     }
 
-    Log::doLog( $this->url );
+
+    $this->setHeaders($ch) ;
+
     curl_setopt($ch, CURLOPT_URL, $this->url );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
@@ -58,5 +60,9 @@ class CurlTest {
     curl_close($ch);
     return $response;
 
+  }
+
+  private function setHeaders($ch) {
+    curl_setopt( $ch, CURLOPT_HTTPHEADER, $this->headers );
   }
 }

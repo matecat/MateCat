@@ -2,7 +2,7 @@
 
 abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
     protected $path;
-    protected $headers;
+    protected $headers = array();
     protected $method;
     protected $params = array();
     protected $files = array();
@@ -10,6 +10,7 @@ abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
     protected $conn ;
 
     function setup() {
+
     }
 
     function tearDown() {

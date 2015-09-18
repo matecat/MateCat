@@ -1,13 +1,11 @@
 <?php
 
 class NewTest extends IntegrationTest {
-
     function setup() {
         $this->path = '/api/new' ;
         $this->method = 'POST';
 
         parent::setup();
-
     }
 
     function testValidatesTargetLanguage() {
@@ -57,12 +55,16 @@ class NewTest extends IntegrationTest {
         $this->params = array(
             'project_name' => 'foo',
             'target_lang' => 'it',
-            'source_lang' => 'en'
+            'source_lang' => 'en',
+            'private_tm_key' => 'f05960431f879c750f48'
         );
 
-        $this->files[] = test_file_path('amex-test.docx.xlf');
+        // $this->files[] = test_file_path('amex-test.docx.xlf');
+        $this->files[] = test_file_path('Sonu_.docx.xliff');
 
         $response =  json_decode( $this->makeRequest() );
+
+        Log::doLog( $response );
 
         $this->assertEquals( 'Success', $response->message);
         $this->assertEquals( 'OK',      $response->status );
@@ -93,4 +95,5 @@ class NewTest extends IntegrationTest {
         $this->assertEquals( 1, count($files) ) ;
         $this->assertEquals( 'zip-with-reference-files.zip___SEP___amex-test.docx.xlf', $files[0]['filename'] );
     }
+
 }
