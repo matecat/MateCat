@@ -38,3 +38,5 @@ composer.phar
 vendor
 
 .env
+
+phinx.yml

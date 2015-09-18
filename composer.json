@@ -1,5 +1,8 @@
 {
     "require-dev": {
         "phpunit/phpunit": "^4.8"
+    },
+    "require": {
+        "robmorgan/phinx": "^0.4.6"
     }
 }
