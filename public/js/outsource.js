@@ -22,7 +22,7 @@ $.extend(UI, {
         });
 
         $( "input[name='revision']" ).click(function() {
-            $(".translate").trigger( "click" );
+            $(".translate").trigger( "click");
         });
 
         //Added .translate class in html button because of double call to
@@ -133,9 +133,9 @@ $.extend(UI, {
                         // setting information about translator
                         var subjectsString = "";
                         if( chunk.t_chosen_subject.length > 0 && chunk.t_other_subjects.length > 0 ) {
-                            subjectsString = "<b>" + chunk.t_chosen_subject + "</b>, " + chunk.t_other_subjects;
+                            subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>, " + chunk.t_other_subjects;
                         } else if( chunk.t_chosen_subject.length > 0 ) {
-                            subjectsString = "<b>" + chunk.t_chosen_subject + "</b>";
+                            subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>";
                         } else {
                             subjectsString = chunk.t_other_subjects;
                         }

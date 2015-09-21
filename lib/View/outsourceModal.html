@@ -46,7 +46,13 @@
 
     </script>
     <script type='text/javascript' id='cmconvscript' src='//www.clickmeter.com/js/conversionOnClick.js'></script>
-
+<script>
+$(document).ready(function() {
+    $('.show_translator').click(function() {
+        $('.translator_info_box').toggleClass('hide');
+    });
+});
+</script>
     <div class="modal outsource" data-type="view">
         <div class="popup-outer closeClickingOutside"></div>
         <div class="popup">
@@ -68,94 +74,109 @@
 
                         
 
-                            <div class="total">
+                            <div class="total_outsource">
                                 <div class="heading">
                                     <h2>Outsource Project Management + Translation</h2>  
                                     <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show prices</a>
-                                    <img src="/public/img/logo_translated.png"/>
-                                    <span>Guaranteed by</span>
-                                    <div class="trustbox" style="display:none;">
-                                        <strong>About</strong><br /> Translated, since 1999, provides professional translation services
-                                        with a team of more than 100,000 translators and is trusted by more than 40,000 customers.
-                                        <a href="http://www.translated.net/en/contact-us" target="_blank">http://www.translated.net/en/contact-us</a>
-                                        <div class="references">
-                                            <img src="/public/img/europe.jpg" style="width:65px;" />
-                                            <img src="/public/img/google.png" />
-                                            <img src="/public/img/benetton.jpg" />
-                                            <img src="/public/img/expedia.jpg" style="vertical-align:bottom;" />
-                                        </div>
-                                    </div>
+                                    
+                                   
                                 </div>
                                 <div class="offer">
-                                    <div class="translator_info">
-                                        <div class="translator_bio">
-                                            <p class="translator_name">Translator: <strong>ANNA</strong></p>
-                                            <p>Expert in: <span class="subjects">General</span></p>
-                                            <p>Year of experience: <span class="experience">16</span></p>
-                                            <a>more info</a>
+                                    <div class="guaranteed_by">
+                                        <strong>Guaranteed by</strong>
+                                        <img src="/public/img/logo_translated.png"/>
+                                        <a class="show_translator">How we guarantee quality</a>
+                                    </div>
+                                    <div class="translator_info_box hide">
+                                        <div class="trustbox">
+                                            <strong>About</strong><br /> Translated, since 1999, provides professional translation services
+                                            with a team of more than 100,000 translators and is trusted by more than 40,000 customers.
+                                            <a href="http://www.translated.net/en/contact-us" target="_blank">http://www.translated.net/en/contact-us</a>
+                                            <div class="references hide">
+                                                <img src="/public/img/europe.jpg" style="width:65px;" />
+                                                <img src="/public/img/google.png" />
+                                                <img src="/public/img/benetton.jpg" />
+                                                <img src="/public/img/expedia.jpg" style="vertical-align:bottom;" />
+                                            </div>
                                         </div>
-                                        <div class="translator_score">
-                                            <span class="score_number">95%</span>
-                                            <span class="score_legend">Success</span>
-                                        </div>
-
-                                        <div class="infobox" style="display:none;">
-                                            <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">
-                                    T-Rank</a> to select our best translator in this field (<strong>${subject | string:IT}</strong>)
-                                    and keep using the <strong>same translator</strong> for your next projects.
-                                </p>
+                                        <div class="translator_info">
+                                            <div class="translator_bio">
+                                                <span class="translator_name">Translator: <strong>ANNA</strong></span>
+                                                <p>Expert in: <span class="subjects">General</span></p>
+                                                <p>Year of experience: <span class="experience">16</span></p>
+                                                <p>Translated words in the last 12 months: <span class="translated_words">129,493</span></p>
+                                               
+                                            </div>
+                                            <div class="translator_score">     
+                                                    <div class="ribbonwrapper">
+                                                        <div id="imgback">
+                                                            <div id="rectangle">
+                                                                <span class="score_number"></span>
+                                                                 <span class="score_legend">Positive feedback</span>
+                                                            </div>
+                                                            <div id="left"></div>
+                                                            <div id="right"></div>
+                                                        </div>
+                                                        <div id="wedge"></div>
+                                                    </div>                                         
+                                            </div>
+                                            <div class="infobox" style="display:none;">
+                                                <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">
+                                                T-Rank</a> to select our best translator in this field (<strong>${subject | string:IT}</strong>)
+                                                and keep using the <strong>same translator</strong> for your next projects.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
+
                                     
-                                    <div class="delivery">Delivery guaranteed by:
-                                        <br />
-                                        <span class="time" data-timezone="" data-rawtime=""></span>
-                                        <span class="zone2">(UTC +1:00) Central European Time
-                                        <!-- select id="changeTimezone" class="noselect" style="width:100%;">
-                                            <option value="-11">(UTC -11:00 ) Midway Islands, American Samoa</option>
-                                            <option value="-10">(UTC -10:00 ) Hawaii, Tahiti, Cook Islands</option>
-                                            <option value="-9">(UTC -9:00 ) Alaska</option>
-                                            <option value="-8">(UTC -8:00 ) Pacific Standard Time (LA, Vancouver)</option>
-                                            <option value="-7">(UTC -7:00 ) Mountain Standard Time (Denver, SLC)</option>
-                                            <option value="-6">(UTC -6:00 ) Central Standard Time (Mexico, Chicago)</option>
-                                            <option value="-5">(UTC -5:00 ) Eastern Standard Time (NYC, Toronto)</option>
-                                            <option value="-4.5">(UTC -4:30 ) Venezuela (Caracas)</option>
-                                            <option value="-4">(UTC -4:00 ) Atlantic Standard Time (Santiago)</option>
-                                            <option value="-3">(UTC -3:00 ) Brasília, São Paulo, Buenos Aires</option>
-                                            <option value="-2">(UTC -2:00 ) South Sandwich Islands</option>
-                                            <option value="-1">(UTC -1:00 ) Azores, Cape Verde (Praia)</option>
-                                            <option value="0">(UTC) Western European Time (London, Lisbon)</option>
-                                            <option value="1">(UTC +1:00 ) Central European Time (Rome, Paris)</option>
-                                            <option value="2">(UTC +2:00 ) Eastern European Time, CAT </option>
-                                            <option value="3">(UTC +3:00 ) Arabia Standard Time (Baghdad, Riyadh)</option>
-                                            <option value="3.5">(UTC +3:30 ) Iran Standard Time (Tehran)</option>
-                                            <option value="4">(UTC +4:00 ) Moscow, St. Petersburg, Dubai</option>
-                                            <option value="4.5">(UTC +4:30 ) Afghanistan Time (Kabul)</option>
-                                            <option value="5">(UTC +5:00 ) Karachi, Tashkent, Maldive Islands</option>
-                                            <option value="5.5">(UTC +5:30 ) India Standard Time (Mumbai, Colombo)</option>
-                                            <option value="6">(UTC +6:00 ) Yekaterinburg, Almaty, Dhaka</option>
-                                            <option value="7">(UTC +7:00 ) Bangkok, Hanoi, Jakarta</option>
-                                            <option value="8">(UTC +8:00 ) Beijing, Perth, Singapore, Hong Kong</option>
-                                            <option value="9">(UTC +9:00 ) Tokyo, Seoul</option>
-                                            <option value="9.5">(UTC +9:30 ) ACST (Darwin, Adelaide)</option>
-                                            <option value="10">(UTC +10:00 ) AEST (Brisbane, Sydney), Yakutsk</option>
-                                            <option value="11">(UTC +11:00 ) Vladivostok, Nouméa, Solomon Islands</option>
-                                            <option value="12">(UTC +12:00 ) Auckland, Fiji, Marshall Islands</option>
-                                            <option value="13">(UTC +13:00 ) Samoa</option>
-                                        </select -->
-                                        </span>
-                                        <br />
-                                        <a class="needitfaster">Need it faster?</a>
-                                      
+                                    <div class="delivery">
+                                        <div class="delivery_label">Delivery by:</div>
+                                        <div class="delivery_details">
+                                            <span class="time" data-timezone="" data-rawtime=""></span>
+                                            <span class="zone2">
+                                            <select id="changeTimezone" class="hide" style="width:100%;">
+                                                <option value="-11">(UTC -11:00 ) Midway Islands, American Samoa</option>
+                                                <option value="-10">(UTC -10:00 ) Hawaii, Tahiti, Cook Islands</option>
+                                                <option value="-9">(UTC -9:00 ) Alaska</option>
+                                                <option value="-8">(UTC -8:00 ) Pacific Standard Time (LA, Vancouver)</option>
+                                                <option value="-7">(UTC -7:00 ) Mountain Standard Time (Denver, SLC)</option>
+                                                <option value="-6">(UTC -6:00 ) Central Standard Time (Mexico, Chicago)</option>
+                                                <option value="-5">(UTC -5:00 ) Eastern Standard Time (NYC, Toronto)</option>
+                                                <option value="-4.5">(UTC -4:30 ) Venezuela (Caracas)</option>
+                                                <option value="-4">(UTC -4:00 ) Atlantic Standard Time (Santiago)</option>
+                                                <option value="-3">(UTC -3:00 ) Brasília, São Paulo, Buenos Aires</option>
+                                                <option value="-2">(UTC -2:00 ) South Sandwich Islands</option>
+                                                <option value="-1">(UTC -1:00 ) Azores, Cape Verde (Praia)</option>
+                                                <option value="0">(UTC) Western European Time (London, Lisbon)</option>
+                                                <option value="1">(UTC +1:00 ) Central European Time (Rome, Paris)</option>
+                                                <option value="2">(UTC +2:00 ) Eastern European Time, CAT </option>
+                                                <option value="3">(UTC +3:00 ) Arabia Standard Time (Baghdad, Riyadh)</option>
+                                                <option value="3.5">(UTC +3:30 ) Iran Standard Time (Tehran)</option>
+                                                <option value="4">(UTC +4:00 ) Moscow, St. Petersburg, Dubai</option>
+                                                <option value="4.5">(UTC +4:30 ) Afghanistan Time (Kabul)</option>
+                                                <option value="5">(UTC +5:00 ) Karachi, Tashkent, Maldive Islands</option>
+                                                <option value="5.5">(UTC +5:30 ) India Standard Time (Mumbai, Colombo)</option>
+                                                <option value="6">(UTC +6:00 ) Yekaterinburg, Almaty, Dhaka</option>
+                                                <option value="7">(UTC +7:00 ) Bangkok, Hanoi, Jakarta</option>
+                                                <option value="8">(UTC +8:00 ) Beijing, Perth, Singapore, Hong Kong</option>
+                                                <option value="9">(UTC +9:00 ) Tokyo, Seoul</option>
+                                                <option value="9.5">(UTC +9:30 ) ACST (Darwin, Adelaide)</option>
+                                                <option value="10">(UTC +10:00 ) AEST (Brisbane, Sydney), Yakutsk</option>
+                                                <option value="11">(UTC +11:00 ) Vladivostok, Nouméa, Solomon Islands</option>
+                                                <option value="12">(UTC +12:00 ) Auckland, Fiji, Marshall Islands</option>
+                                                <option value="13">(UTC +13:00 ) Samoa</option>
+                                            </select>
+                                            </span>
+                                            <br />
+                                            <a class="needitfaster">Need it faster?</a>
+                                        </div>
                                     </div>
                                     <div class="tprice">
 
                                         <span class="euro">€</span>
                                         <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
-                                        <br />
-                                        <span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>
-                                        
-                                    <select id="changecurrency">
+                                        <select id="changecurrency">
                                         <option value="EUR" data-symbol="€">Euro (EUR)</option>
                                         <option value="USD" data-symbol="US$">US dollar (USD)</option>
                                         <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
@@ -170,8 +191,11 @@
                                         <option value="KRW" data-symbol="￦">Won (KRW)</option>
                                         <option value="JPY" data-symbol="￥">Yen (JPY)</option>
                                         <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
-                                    </select>
-                                        <div class="ilmiodiv"></div>
+                                        </select>
+                                        <br />
+                                        <span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>                                     
+                                        </div>
+                                        <div class="torder">
                                             <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
                                                 <input type="hidden" name="url_ok" value=""/>
                                                 <input type="hidden" name="url_ko" value=""/>
@@ -179,32 +203,31 @@
                                                 <input type="hidden" name="quoteData" value=""/>
                                                 <a href="#" class="continuebtn disabled">Order</a>
                                             </form>
-                                        
                                         </div>
                                     </div>
                                     <div class="addrevision">
-                                         <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span class="revision_delivery">Delivery: 19th September at 2:00 PM (UTC +1:00) </span><span class="revision_price_box">Total price including revision: <span class="revision_price">€9.36</span></span>
+                                         <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span class="revision_delivery">Delivery: 19th September at 2:00 PM (UTC +1:00) </span><span class="revision_price_box">+ <span class="revision_price">€9.36</span></span>
                                     </div>
                                    
                             </div>
                             <!-- end total-->
+                             <div class="paymentinfo">
+                                <p><strong>Easy payments</strong>: pay a single monthly invoice within 30 days from delivery</p>
+                            </div>
+                            <div class="contact_box">
+                                <h3>Need a specific request?</h3>
+                                <p>Contact us at <a>info@matecat.com</a> or call +39 06 90 254 001</p>
+                            </div>
             
                         <!-- end reveal prices-->
                     </div>
                     <!--end outsourceto-->
-                     <div class="paymentinfo">
-                        <p><strong>Easy payments</strong>: pay a single monthly invoice within 30 days from delivery</p>
-                    </div>
-                    <div class="contact_box">
-                        <h2>Need a specific request?</h2>
-                        <p>Contact us at <a>info@matecat.com</a> or call +39 06 90 254 001</p><a class="standardbtn">Contact</a>
-                    </div>
+                    
                 </div>
             </div>
         </div>
     </div>
 
 </div>
-
 </body>
 </html>
