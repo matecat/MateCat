@@ -71,6 +71,23 @@ class NewWithOwnershipTest extends IntegrationTest {
 
     }
 
+    function tests_missing_auth_sets_project_to_translated_user() {
+        $this->params = array(
+            'project_name' => 'foo',
+            'target_lang' => 'it',
+            'source_lang' => 'en',
+        );
+
+        $this->files[] = test_file_path('amex-test.docx.xlf');
+
+        $response = $this->getResponse() ;
+        $body     = json_decode( $response['body'] );
+
+        $project = Projects_ProjectDao::findById( $body->id_project );
+        $this->assertEquals( $project->id_customer, ProjectManager::TRANSLATED_USER );
+
+    }
+
 
 
 }

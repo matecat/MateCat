@@ -47,7 +47,7 @@ class ProjectManager {
                     array(
                             'id_project'           => null,
                             'create_date'          => date( "Y-m-d H:i:s" ),
-                            'id_customer'          => TRANSLATED_USER ,
+                            'id_customer'          => self::TRANSLATED_USER ,
                             'user_ip'              => null,
                             'project_name'         => null,
                             'result'               => null,
