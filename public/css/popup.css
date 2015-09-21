@@ -630,7 +630,6 @@ background: url(../img/card.png) no-repeat 330px 37px;
 background-size: 170px;
 }*/
 
-
 .paybox, .trustbox{
     font-size: 13px !important;
     margin-bottom: 0;
@@ -638,17 +637,21 @@ background-size: 170px;
 }
 
 .trustbox {
-    width: 43%;
+    width: 45%;
     float: left;
     margin: 2%;
     line-height: 25px;
-    padding: 2%;
+    padding: 1%;
     text-align: left;
     background-color: #F6F6F6;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
+.trustbox p {
+    font-size: 13px!important;
+    line-height: 21px;
+}
 
 table.chunks {
 overflow: hidden;
