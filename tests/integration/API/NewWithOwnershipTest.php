@@ -19,7 +19,7 @@ class NewWithOwnershipTest extends IntegrationTest {
         $this->assertNotNull( $user->uid ) ;
 
         $apiKey = Factory_ApiKey::create(array(
-            'uid' => $user->uid
+            'uid' => $user->uid,
         ));
 
         // run

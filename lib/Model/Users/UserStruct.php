@@ -24,4 +24,8 @@ class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements Dat
     public function fullName() {
         return $this->first_name . ' ' . $this->last_name ;
     }
+
+    public function getEmail() {
+        return $this->email ;
+    }
 }

@@ -2,6 +2,15 @@
 
 class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
+  static function findByKey($key) {
+    $conn = Database::obtain()->getConnection();
+    $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND api_key = ?");
+    $stmt->execute( array( $key ) ) ;
+
+    $stmt->setFetchMode(PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct');
+    return $stmt->fetch();
+  }
+
   public function create( $obj ) {
     $conn = $this->con->getConnection();
 

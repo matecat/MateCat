@@ -38,6 +38,8 @@ class ProjectManager {
 
     protected $langService;
 
+    const TRANSLATED_USER  = 'translated_user'  ;
+
     public function __construct( ArrayObject $projectStructure = null ) {
 
         if ( $projectStructure == null ) {
@@ -45,7 +47,7 @@ class ProjectManager {
                     array(
                             'id_project'           => null,
                             'create_date'          => date( "Y-m-d H:i:s" ),
-                            'id_customer'          => null,
+                            'id_customer'          => TRANSLATED_USER ,
                             'user_ip'              => null,
                             'project_name'         => null,
                             'result'               => null,
@@ -121,10 +123,8 @@ class ProjectManager {
         }
 
         // create project
-        $this->projectStructure[ 'ppassword' ]   = $this->_generatePassword();
-        $this->projectStructure[ 'user_ip' ]     = Utils::getRealIpAddr();
-        $this->projectStructure[ 'id_customer' ] = 'translated_user';
-
+        $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
+        $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
         $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
 
 

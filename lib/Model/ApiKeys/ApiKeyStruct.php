@@ -10,4 +10,14 @@ class ApiKeys_ApiKeyStruct extends DataAccess_AbstractDaoObjectStruct implements
     public $last_update  ;
     public $enabled  ;
 
+    public function validSecret( $secret ) {
+        return $this->api_secret == $secret ;
+    }
+
+    public function getUser() {
+        $dao = new Users_UserDao( Database::obtain() )  ;
+        $user =  $dao->getByUid( $this->uid ) ;
+        Log::doLog( $user ) ;
+        return $user ;
+    }
 }

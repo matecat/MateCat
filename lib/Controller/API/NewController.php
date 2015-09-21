@@ -33,16 +33,9 @@ class NewController extends ajaxController {
             'message' => 'Untraceable error (sorry, not mapped)'
     );
 
-    public function __construct() {
+    private $current_user ;
 
-        //limit execution time to 300 seconds
-        set_time_limit( 300 );
-
-        parent::__construct();
-
-        //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
-        header( "Connection: close" );
-
+    private function filterPostParams() {
         $filterArgs = array(
                 'project_name'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'source_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
@@ -80,6 +73,69 @@ class NewController extends ajaxController {
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
+        //
+        return $__postInput ;
+    }
+
+    private function validateEngines() {
+        if ( $this->tms_engine != 0 ) {
+            $test_valid_TMS = Engine::getInstance( $this->tms_engine );
+        }
+        if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
+            $test_valid_MT = Engine::getInstance( $this->mt_engine );
+        }
+    }
+
+    private function askNewMyMemoryKey() {
+        $APIKeySrv = new TMSService();
+
+        $newUser = $APIKeySrv->createMyMemoryKey();
+
+        $this->private_tm_user = $newUser->id;
+        $this->private_tm_pass = $newUser->pass;
+
+        $this->private_tm_key = array(
+            array(
+                'key'  => $newUser->key,
+                'name' => null,
+                'r'    => true,
+                'w'    => true
+            )
+        );
+    }
+
+    private function validateAuthHeader() {
+        if ($_SERVER['HTTP_AUTH_MATECAT_KEY'] == null) {
+            return true ;
+        }
+
+        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER['HTTP_AUTH_MATECAT_KEY'] );
+        if ( $key && $key->validSecret( $_SERVER['HTTP_AUTH_MATECAT_SECRET'] ) ) {
+            Log::doLog( $key ) ;
+
+            $this->current_user = $key->getUser();
+            return true ;
+        } else {
+            return false;
+        }
+    }
+
+    public function __construct() {
+        //limit execution time to 300 seconds
+        set_time_limit( 300 );
+
+        parent::__construct();
+
+        //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
+        header( "Connection: close" );
+
+        if ( ! $this->validateAuthHeader() ) {
+            header('HTTP/1.0 401 Unauthorized');
+            $this->api_output[ 'message' ] = 'Authentication failed';
+            return -1 ;
+        }
+
+        $__postInput = $this->filterPostParams();
 
         $this->project_name   = $__postInput[ 'project_name' ];
         $this->source_lang    = $__postInput[ 'source_lang' ];
@@ -88,13 +144,10 @@ class NewController extends ajaxController {
         $this->mt_engine      = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
         $this->private_tm_key = $__postInput[ 'private_tm_key' ];
 
+        // ------------------ INPUT VALIDATION ENDS HERE
+        //
         try {
-            if ( $this->tms_engine != 0 ) {
-                $test_valid_TMS = Engine::getInstance( $this->tms_engine );
-            }
-            if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-                $test_valid_MT = Engine::getInstance( $this->mt_engine );
-            }
+            $this->validateEngines();
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = $ex->getMessage();
             Log::doLog( $ex->getMessage() );
@@ -104,27 +157,9 @@ class NewController extends ajaxController {
 
         //from api a key is sent and the value is 'new'
         if ( $this->private_tm_key == 'new' ) {
-
             try {
-
-                $APIKeySrv = new TMSService();
-
-                $newUser = $APIKeySrv->createMyMemoryKey();
-
-                $this->private_tm_user = $newUser->id;
-                $this->private_tm_pass = $newUser->pass;
-
-                $this->private_tm_key = array(
-                        array(
-                                'key'  => $newUser->key,
-                                'name' => null,
-                                'r'    => true,
-                                'w'    => true
-                        )
-                );
-
+                $this->askNewMyMemoryKey();
             } catch ( Exception $e ) {
-
                 $this->api_output[ 'message' ] = 'Project Creation Failure';
                 $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
 
@@ -224,7 +259,6 @@ class NewController extends ajaxController {
 
         foreach ( $arFiles as $file_name ) {
             $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
-
 
             $conversionHandler = new ConversionHandler();
             $conversionHandler->setFileName( $file_name );
@@ -437,6 +471,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'tms_engine' ]           = $this->tms_engine;
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
+        $projectStructure[ 'id_customer' ]          = $this->current_user->getEmail() ;
 
         $projectManager = new ProjectManager( $projectStructure );
         $projectManager->createProject();
