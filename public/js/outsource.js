@@ -21,6 +21,10 @@ $.extend(UI, {
             $( ".revealprices" ).show();
         });
 
+        $( "input[name='revision']" ).click(function() {
+            $(".translate").trigger( "click" );
+        });
+
         //Added .translate class in html button because of double call to
         //API when displaying prices on showprices button ( class .in-popup was removed and .uploadbtn was too much widely used... )
 		$(".translate").click(function(e) {
@@ -45,6 +49,8 @@ $.extend(UI, {
 						action: 'outsourceTo',
 						pid: $('#pid').attr('data-pid'),
 						ppassword: $("#pid").attr("data-pwd"),
+                        addRevision: $("input[name='revision']").is(':checked'),
+                        fixedDelivery: '0',
 						jobs: [
 							{
 								jid: row.attr('data-jid'),
@@ -95,7 +101,7 @@ $.extend(UI, {
                         }
 
                         // update the timezone (both the displayed and the stored ones)
-                        changeTimezone( chunk.delivery_date, "0", timezoneToShow );
+                        changeTimezone( chunk.delivery_date, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow );
                         $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
                         /**
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
@@ -123,6 +129,29 @@ $.extend(UI, {
                         // update the currency (both the displayed and the stored ones)
                         changeCurrency( chunk.price, "EUR", currToShow );
                         $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
+
+                        // setting information about translator
+                        var subjectsString = "";
+                        if( chunk.t_chosen_subject.length > 0 && chunk.t_other_subjects.length > 0 ) {
+                            subjectsString = "<b>" + chunk.t_chosen_subject + "</b>, " + chunk.t_other_subjects;
+                        } else if( chunk.t_chosen_subject.length > 0 ) {
+                            subjectsString = "<b>" + chunk.t_chosen_subject + "</b>";
+                        } else {
+                            subjectsString = chunk.t_other_subjects;
+                        }
+
+                        $( ".translator_name > strong").text( chunk.t_name );
+                        $( ".experience").text( chunk.t_experience_years );
+                        $( ".score_number").text( chunk.t_vote + "%" );
+                        $( ".subjects").html( subjectsString );
+/*
+                        t_education: "International Management, Cardiff Metropolitan University"
+                        t_native_lang: "French"
+                         positive_feedbacks: "546"
+                         total_feedbacks: "0"
+                         t_words_specific: "54852"
+                        t_words_total: "215572"
+*/
                     }
 				});
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
@@ -237,20 +266,24 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
             var numWords = parseFloat( $(".title-words").text().replace( ",", "" ) );
             $( "#price_p_word").text( ( parseFloat( d.data ) / numWords ).toFixed( 3 ) );
 
-            document.cookie = "matecat_currency=" + currencyTo + "; path=/";
+            var expiration = new Date();
+            expiration.setYear( new Date().getFullYear() + 1);
+            document.cookie = "matecat_currency=" + currencyTo + "; expires=" + expiration.toUTCString() + "; path=/";
         }
     });
 }
 
 function changeTimezone( date, timezoneFrom, timezoneTo ){
-    var dd = new Date(date);
+    var dd = new Date( date );
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
     $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
 
     $( "span.time").attr("data-timezone", timezoneTo);
     $( "span.time").attr("data-rawtime", dd.toUTCString());
 
-    document.cookie = "matecat_timezone=" + timezoneTo + "; path=/";
+    var expiration = new Date();
+    expiration.setYear( new Date().getFullYear() + 1);
+    document.cookie = "matecat_timezone=" + timezoneTo + "; expires=" + expiration.toUTCString() + "; path=/";
 }
 
 function readCookie( cookieName ) {
