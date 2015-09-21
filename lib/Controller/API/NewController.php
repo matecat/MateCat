@@ -343,8 +343,8 @@ class NewController extends ajaxController {
 
                 $this->result = $conversionHandler->getResult();
 
-                if ( $this->result[ 'code' ] < 0 ) {
-                    $this->result;
+                if ( $this->result[ 'code' ] > 0 ) {
+                    $this->result = array();
                 }
 
             }
