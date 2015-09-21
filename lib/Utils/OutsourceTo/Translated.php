@@ -12,6 +12,10 @@
  *
  */
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
+
+    private $quoteType;
+    private $fixedDelivery;
+
     /**
      * Class constructor
      *
@@ -150,19 +154,21 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url = "https://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid .
+            $url = "http://www.translated.home/hts/matecat-endpoint.php?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid .
                     "&matecat_ppass=" . $this->ppassword .
                     "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
-                    "&subject=" . $subject;
+                    "&subject=" . $subject .
+                    "&jt=" . $this->quoteType .
+                    "&fd=" . $this->fixedDelivery;
 
-            if ( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ) ) {
+            if ( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) ) ) {
                 Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
-                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
+                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) );
             } else {
-                $cartElem               = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
+                $cartElem               = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) );
                 $cartElem[ "currency" ] = $this->currency;
                 $cartElem[ "timezone" ] = $this->timezone;
-                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
+                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) );
                 $cache_cart->addItem( $cartElem );
             }
         }
@@ -208,6 +214,17 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ][ 'target' ]; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $itemCart[ 'subject' ]       = $subject;
+            $itemCart[ 't_name' ]               = $result_quote[ 7 ];
+            $itemCart[ 't_native_lang' ]        = $result_quote[ 8 ];
+            $itemCart[ 't_words_total' ]        = $result_quote[ 9 ];
+            $itemCart[ 't_words_specific' ]     = $result_quote[ 10 ];
+            $itemCart[ 't_vote' ]               = $result_quote[ 11 ];
+            $itemCart[ 'positive_feedbacks' ]   = $result_quote[ 12 ];
+            $itemCart[ 'total_feedbacks' ]      = $result_quote[ 13 ];
+            $itemCart[ 't_experience_years' ]   = $result_quote[ 14 ];
+            $itemCart[ 't_education' ]          = $result_quote[ 15 ];
+            $itemCart[ 't_chosen_subject' ]     = $result_quote[ 16 ];
+            $itemCart[ 't_other_subjects' ]     = $result_quote[ 17 ];
 
             $cache_cart->addItem( $itemCart );
 
@@ -224,9 +241,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         //now get the right contents
         foreach ( $this->jobList as $job ) {
-            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
-            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ) );
-            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ) );
+            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) );
+            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) ) );
+            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->quoteType . "-" . strtotime( $this->fixedDelivery ) ) );
         }
 
         //check for failures.. destroy the cache
@@ -238,4 +255,40 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     }
 
-} 
+
+
+    /**********************************************************************************************/
+    /************** SOME MORE TRANSLATED-SPECIFIC FUNCTIONS FOR SETTING QUOTE PARAMETERS **********/
+    /**********************************************************************************************/
+
+    /**
+     * Set the type of quote to be performed
+     *
+     * @param string $quoteTye
+     *          must be a value in ['T', 'R'], where
+     *              T -> represents Translation
+     *              R -> represents Revision
+     *
+     * @return $this
+     */
+    public function setQuoteType( $quoteType ) {
+        $this->quoteType = $quoteType;
+
+        return $this;
+    }
+
+    /**
+     * Set the fixed (desidered) delivery date of the translation.
+     * This parameters will be set only when the customer uses "need it faster" feature
+     *
+     * @param string $fixedDeliveryDate
+     *
+     * @return $this
+     */
+    public function setFixedDelivery( $fixedDelivery ) {
+        $this->fixedDelivery = $fixedDelivery;
+
+        return $this;
+    }
+
+}

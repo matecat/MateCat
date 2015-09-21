@@ -33,6 +33,18 @@ class outsourceToController extends ajaxController {
     private $timezone;
 
     /**
+     * The type of quote the customer asked for
+     * @var bool
+     */
+    private $quoteType;
+
+    /**
+     * The delivery date the customer has chosen with 'need it faster' feature
+     * @var string (representing a date)
+     */
+    private $fixedDelivery;
+
+    /**
      * A list of job_id/job_password for quote request
      *
      * <pre>
@@ -64,6 +76,8 @@ class outsourceToController extends ajaxController {
                 'ppassword'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
                 'currency'        => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'timezone'        => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'addRevision'     => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'fixedDelivery'   => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'jobs'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY  | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
@@ -77,6 +91,8 @@ class outsourceToController extends ajaxController {
         $this->ppassword = $__postInput[ 'ppassword' ];
         $this->currency  = $__postInput[ 'currency' ];
         $this->timezone  = $__postInput[ 'timezone' ];
+        $this->quoteType = $__postInput[ 'addRevision' ] == "true" ? 'R' : 'T';
+        $this->fixedDelivery = $__postInput[ 'fixedDelivery' ];
         $this->jobList   = $__postInput[ 'jobs' ];
 
         if( empty( $this->pid ) ){
@@ -131,6 +147,8 @@ class outsourceToController extends ajaxController {
                     ->setCurrency( $this->currency )
                     ->setTimezone( $this->timezone )
                     ->setJobList( $this->jobList )
+                    ->setQuoteType( $this->quoteType )
+                    ->setFixedDelivery( $this->fixedDelivery )
                     ->performQuote();
 
         /*
