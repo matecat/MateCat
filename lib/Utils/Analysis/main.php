@@ -9,6 +9,7 @@ $db->debug=false;
 $db->connect();
 
 declare ( ticks = 10 );
+
 if (! function_exists ( 'pcntl_signal' )) {
     $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
     _TimeStampMsg( $msg );
@@ -22,8 +23,6 @@ if (! function_exists ( 'pcntl_signal' )) {
     _TimeStampMsg( $msg );
 
 }
-
-
 
 function _TimeStampMsg( $msg, $log = true ) {
     if( $log ) Log::doLog( $msg );
