@@ -42,6 +42,8 @@ class catController extends viewController {
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
+    private $job ;
+
     /**
      * @var string
      */
@@ -70,6 +72,7 @@ class catController extends viewController {
         $this->password   = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
+        $this->job        = Jobs_JobDao::getById( $this->jid );
 
         if ( isset( $_GET[ 'step' ] ) ) {
             $this->step = $_GET[ 'step' ];
@@ -469,6 +472,9 @@ class catController extends viewController {
 
         $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS ;
         $this->template->copySourceInterval = INIT::$COPY_SOURCE_INTERVAL;
+
+        $this->template->projectCompletionFeature =
+            $this->job->isFeatureEnabled( Features::PROJECT_COMPLETION );
 
         if ( $this->job_not_found || $this->job_cancelled ) {
             $this->template->pid                 = null;

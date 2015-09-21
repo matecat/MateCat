@@ -7,7 +7,8 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
        $conn = Database::obtain()->getConnection();
        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = ?");
        $stmt->execute( array( $id ) );
-       return $stmt->fetchAll( PDO::FETCH_CLASS, 'Projects_ProjectStruct')[0];
+       $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_ProjectStruct');
+       return $stmt->fetch();
     }
 
     public function getChunks( ) {
