@@ -129,12 +129,6 @@ class NewController extends ajaxController {
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
 
-        if ( ! $this->validateAuthHeader() ) {
-            header('HTTP/1.0 401 Unauthorized');
-            $this->api_output[ 'message' ] = 'Authentication failed';
-            return -1 ;
-        }
-
         $__postInput = $this->filterPostParams();
 
         $this->project_name   = $__postInput[ 'project_name' ];
@@ -202,6 +196,12 @@ class NewController extends ajaxController {
     }
 
     public function doAction() {
+
+        if ( ! $this->validateAuthHeader() ) {
+            header('HTTP/1.0 401 Unauthorized');
+            $this->api_output[ 'message' ] = 'Authentication failed';
+            return -1 ;
+        }
 
         $uploadFile = new Upload();
 

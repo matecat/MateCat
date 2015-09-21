@@ -9,15 +9,24 @@ class CurlTest {
 
   private $url ;
 
+  private $response_header ;
+  private $response_body ;
+  private $response_code ;
+
+  private $result ;
+
   function __construct( $options=array() ) {
     $this->path    = @$options['path'];
     $this->headers = @$options['headers'];
     $this->params  = @$options['params'];
     $this->files   = @$options['files'];
     $this->method  = @$options['method'];
+
   }
 
   function run() {
+    if ( $this->result !== null ) return $this->result ;
+
     $ch = curl_init();
 
     $this->url = "http://localhost$this->path";
@@ -46,20 +55,39 @@ class CurlTest {
       $this->url .= "?" . http_build_query( $this->params );
     }
 
-
     $this->setHeaders($ch) ;
 
     curl_setopt($ch, CURLOPT_URL, $this->url );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_VERBOSE, 0);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+
     $response = curl_exec($ch);
 
+    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+    $this->response_header = substr($response, 0, $header_size);
+    $this->response_body   = substr($response, $header_size);
+    $this->response_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
     if ($response === false) {
+      $this->result = false;
       echo 'Curl error: ' . curl_error($ch);
+    } else {
+      $this->result = true;
     }
 
     curl_close($ch);
-    return $response;
+    return $this->result ;
+  }
 
+  public function getResponse() {
+    if ( $this->run() ) {
+      return array(
+        'header' => $this->response_header,
+        'body' => $this->response_body,
+        'code' => $this->response_code
+      );
+    }
   }
 
   private function setHeaders($ch) {

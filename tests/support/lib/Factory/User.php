@@ -2,10 +2,13 @@
 
 class Factory_User extends Factory_Base {
 
-    static function create( $values ) {
+    public static $email_counter = 0 ;
+
+    static function create( $values=array() ) {
+        $email_counter = self::$email_counter += 1 ;
 
         $values = array_merge(array(
-            'email' => 'foo@example.org',
+            'email' => "test-email-{$email_counter}@example.org",
             'salt' => '1234abcd',
             'pass' => '1234abcd',
             'first_name' => 'John',
@@ -17,7 +20,6 @@ class Factory_User extends Factory_Base {
         $userStruct = new Users_UserStruct( $values );
 
         return $dao->createUser( $userStruct );
-
     }
 
 }

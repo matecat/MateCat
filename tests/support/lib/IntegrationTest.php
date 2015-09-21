@@ -17,6 +17,10 @@ abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
 
     }
 
+    function getResponse() {
+        return $this->makeRequest();
+    }
+
     function makeRequest() {
         $curlTest = new CurlTest( array(
             'path' => $this->path,
@@ -26,12 +30,17 @@ abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
             'files' => $this->files
         )  );
 
-        return $curlTest->run();
+        return $curlTest->getResponse();
     }
 
     function assertJSONResponse($expected) {
-        $response = $this->makeRequest();
-        $this->assertEquals( json_encode($expected), $response);
+        $response = $this->getResponse();
+
+        Log::doLog( $response );
+
+        if ( $this->makeRequest() ) {
+          $this->assertEquals( json_encode($expected), $response['body'] );
+        }
     }
 
 }
