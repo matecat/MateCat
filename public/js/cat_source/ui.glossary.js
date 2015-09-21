@@ -170,11 +170,14 @@ $.extend(UI, {
 			sourceString = $('.editor .source').html();
 
             $.each(UI.intervalsUnion, function(index) {
+                if(this === UI.lastIntervalUnionAnalysed) return;
+                UI.lastIntervalUnionAnalysed = this;
 				added = markLength * index;
 				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
 				$('.editor .source').html(sourceString);
 			});
+            UI.lastIntervalUnionAnalysed = null;
 
             $('.editor .source mark mark').each(function () {
                 $(this).replaceWith($(this).html());
