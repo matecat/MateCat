@@ -124,7 +124,7 @@ span.complete {
 				  background: #12b4df;}
 .continuebtn,  .continuebtn:hover {background:#7eaf3e;}
 
-.uploadbtn:active, .continuebtn:hover {-moz-box-shadow: inset 0 0 1px 1px #888;
+.uploadbtn:active, .continuebtn:active, .modal.outsource .standardbtn:active {-moz-box-shadow: inset 0 0 1px 1px #888;
 				   -webkit-box-shadow: inset 0 0 1px 1px #888;
 				   box-shadow: inset 0 0 1px 1px #888;}
 

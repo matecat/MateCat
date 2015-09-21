@@ -157,9 +157,10 @@ p.translator_name {
     background: #efefef;
 }
 
-.onyourown h2 {
+.onyourown h2,
+.contact_box h2 {
     border-bottom: 1px solid #ccc;
-    width: 96%;
+    width: 97%;
     padding: 1% 2%;
 }
 
@@ -328,18 +329,16 @@ clear:both;
 
 .contact_box p {
     float: left;
+    display: inline-block;
+    padding: 2%;
 }
 
 .contact_box .standardbtn {
-    margin-top:-20px!important;
+    margin: 10px 2%!important;
     width: 150px!important;
 }
 
-.contact_box {
-    border-top: 1px solid #ccc;
-    margin-top: 20px;
-    padding: 10px 20px;
-}
+
 
 .addrevision h4 {
     font-size: 20px;
@@ -374,7 +373,7 @@ text-align: center;}
 }
 
 
-.onyourown, .outsourceto {
+.onyourown, .outsourceto, .contact_box {
     border: 1px solid #ccc;
     border-radius: 3px;
     margin: 10px auto;
@@ -399,7 +398,8 @@ text-align: center;}
 }
 
 .translator_info a,
-.delivery a {
+.delivery a,
+.contact_box p a {
     color:#0d8fb2;
     text-decoration: underline;
 }
