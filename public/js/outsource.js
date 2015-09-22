@@ -150,7 +150,7 @@ $.extend(UI, {
                         $( ".translator_name > strong").text( chunk.t_name );
                         $( ".experience").text( chunk.t_experience_years );
                         $( ".subjects").html( subjectsString );
-                        $( ".translated_words").html( chunk.t_words_total );
+                        $( ".translated_words").html( chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
 
                         var voteToShow = ( showRevisionInfo ) ? chunk.r_vote : chunk.t_vote;
                         $(".score_number").text( parseInt( voteToShow ) + "%");
@@ -261,13 +261,13 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
         },
         success: function (d) {
             $( elementToUpdateSymbol ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
-            $( elementToUpdateValue ).text( parseFloat( d.data).toFixed( 2 ) );
+            $( elementToUpdateValue ).text( parseFloat( d.data).toFixed( 2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
             $( elementToUpdateValue ).attr( "data-rawprice", d.data );
             $( elementToUpdateValue ).attr( "data-currency", currencyTo );
 
             if( elementToUpdatePPW.length > 0 ) {
                 var numWords = parseFloat($(".title-words").text().replace(",", ""));
-                $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3));
+                $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
             }
 
             var expiration = new Date();
