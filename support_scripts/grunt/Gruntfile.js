@@ -37,6 +37,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
+                    basePath + 'cat_source/project_completion.*.js',
                     basePath + 'tm.js'
 				],
 				dest: buildPath + 'cat.js'
