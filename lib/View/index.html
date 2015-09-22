@@ -332,41 +332,6 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
-<!-- Actually unused -->
-<!--
-        <div id="alertConfirmTranslation" class="dialog" title="Attention">
-            <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
-            <form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
-        </div>
--->
-        <!--
-                        <div class="end-message-box">
-                        <div class="end-message-col1">
-                        <h3>Faxová úloha<span>*</span>!</h3>
-                       <img src="${basepath}public/img/end-message.jpg" /> 
-                       <p><span>*</span>Now you know how to say “<strong>Good Job</strong>” in Czech.</p>
-                       </div>
-                        <div class="end-message-col2">
-                <h4>It took you only <strong>30 minutes</strong> <br />
-                  to finish the translation!</h4>
-				
-                                                <form id="fileDownload" action="${basepath}" method="post">
-                                                        <input type="hidden" name="action" value="downloadFile" />
-                                                        <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                                                        <input type="hidden" name="id_file" value="" />
-                                                        <input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
-                                                        <input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                                                </form>
-						
-                               <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
-				
-				  
-                                <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
-                <span>that you are available for new work</span></a>
-                <input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
-                                </div>
-                                </div>
-        -->
         <script src="${basepath}public/js/lib/snapengage.js"></script>
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
