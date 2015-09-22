@@ -22,7 +22,7 @@ $.extend(UI, {
         });
 
         $( "input[name='revision']" ).click(function() {
-            $(".translate").trigger( "click");
+            $(".translate").trigger( "click" );
         });
 
         //Added .translate class in html button because of double call to
