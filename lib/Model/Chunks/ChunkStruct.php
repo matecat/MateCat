@@ -6,6 +6,8 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
     public $password;
     public $id_project ;
     public $create_date ;
+    public $job_first_segment;
+    public $job_last_segment ;
     public $last_opened_segment ;
     public $last_update ;
     public $source ;
@@ -20,6 +22,11 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
     public function getTranslations() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
         return $dao->getByJobId( $this->id );
+    }
+
+    public function findLatestTranslation() {
+        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+        return $dao->lastTranslationByChunk( $this );
     }
 
 }

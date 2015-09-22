@@ -24,7 +24,11 @@
                 server_load_time: '${load_time}',
                 tms_enabled: ${tms_enabled | string:true},
                 mt_enabled: ${mt_enabled | string:true},
-                job_id: '${jid}',
+                id_job: '${jid}',
+                get job_id() {
+                  console.log('job_id is deprecated, use id_job instead');
+                  return this.id_job ;
+                },
                 password: '${password}',
                 source_rfc: '${source_code}',
                 target_rfc: '${target_code}',

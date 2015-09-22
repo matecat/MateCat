@@ -56,7 +56,9 @@ class catController extends viewController {
         $this->start_time = microtime( 1 ) * 1000;
 
         parent::__construct( false );
+
         parent::makeTemplate( "index.html" );
+
 
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -135,7 +137,6 @@ class catController extends viewController {
 
         if ( $data[ 0 ][ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
             $this->job_archived = true;
-//			$this->setTemplateVars();
             //stop execution
             return;
         }
@@ -469,12 +470,11 @@ class catController extends viewController {
     }
 
     public function setTemplateVars() {
+        $this->decorator = new CatDecorator( $this, $this->template );
+        $this->decorator->decorate();
 
         $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS ;
         $this->template->copySourceInterval = INIT::$COPY_SOURCE_INTERVAL;
-
-        $this->template->projectCompletionFeature =
-            $this->job->isFeatureEnabled( Features::PROJECT_COMPLETION );
 
         if ( $this->job_not_found || $this->job_cancelled ) {
             $this->template->pid                 = null;
@@ -598,6 +598,14 @@ class catController extends viewController {
           $this->template->comments_enabled  = true ;
           $this->template->sse_base_url      = INIT::$SSE_BASE_URL ;
         }
+    }
+
+    public function getJobStats() {
+      return $this->job_stats ;
+    }
+
+    public function getJob() {
+      return $this->job ;
     }
 
 }

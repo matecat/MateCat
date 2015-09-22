@@ -18,4 +18,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
   public function isFeatureEnabled( $feature_code ) {
     return $this->getProject()->isFeatureEnabled( $feature_code ) ;
   }
+
+  public function isMarkedComplete() {
+    return Chunks_ChunkCompletionEventDao::isCompleted( $this ) ;
+  }
+
+  public function findLatestTranslation() {
+    $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+    return $dao->lastTranslationByChunk( $this );
+  }
+
 }

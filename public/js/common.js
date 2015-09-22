@@ -180,7 +180,8 @@ APP = {
 			setup.error = req.error;
 		if (typeof req.beforeSend === 'function')
 			setup.beforeSend = req.beforeSend;
-		$.ajax(setup);        
+
+		return $.ajax(setup);
 	}, 
     appendTime: function() {
         var t = new Date();
