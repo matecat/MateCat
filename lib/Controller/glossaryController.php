@@ -74,7 +74,7 @@ class glossaryController extends ajaxController {
             $config[ 'tnote' ]       = $this->comment;
             $config[ 'source' ]      = $this->job_info[ 'source' ];
             $config[ 'target' ]      = $this->job_info[ 'target' ];
-            $config[ 'email' ]       = "demo@matecat.com";
+            $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
             $config[ 'id_user' ]     = $this->job_info[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;

@@ -1025,7 +1025,7 @@ class ProjectManager {
                         FROM segments s
                         JOIN files_job fj on fj.id_file=s.id_file
                         JOIN jobs j ON j.id = fj.id_job
-                        LEFT  JOIN segment_translations st ON st.id_segment = s.id
+                        LEFT  JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
                         WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
                         AND j.id = %u
                         AND j.password = '%s'

@@ -174,7 +174,7 @@ class getContributionController extends ajaxController {
             $config[ 'segment' ]       = $this->text;
             $config[ 'source' ]        = $this->source;
             $config[ 'target' ]        = $this->target;
-            $config[ 'email' ]         = "demo@matecat.com";
+            $config[ 'email' ]         = INIT::$MYMEMORY_API_KEY;
             $config[ 'id_user' ]       = array();
             $config[ 'num_result' ]    = $this->num_results;
             $config[ 'isConcordance' ] = $this->concordance_search;
@@ -219,7 +219,7 @@ class getContributionController extends ajaxController {
             $config[ 'segment' ] = $this->text;
             $config[ 'source' ]  = $this->source;
             $config[ 'target' ]  = $this->target;
-            $config[ 'id_user' ] = "demo@matecat.com";
+            $config[ 'id_user' ] = INIT::$MYMEMORY_API_KEY;
             $config[ 'segid' ]   = $this->id_segment;
 
             $mt_result = $mt->get( $config );

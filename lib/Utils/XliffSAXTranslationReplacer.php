@@ -2,25 +2,25 @@
 
 class XliffSAXTranslationReplacer {
 
-    private $originalFP;
+    protected $originalFP;
 
-    private $inTU = false;//flag to check whether we are in a <trans-unit>
-    private $inTarget = false;//flag to check whether we are in a <target>, to ignore everything
-    private $isEmpty = false; //flag to check whether we are in an empty tag (<tag/>)
+    protected $inTU = false;//flag to check whether we are in a <trans-unit>
+    protected $inTarget = false;//flag to check whether we are in a <target>, to ignore everything
+    protected $isEmpty = false; //flag to check whether we are in an empty tag (<tag/>)
 
-    private $CDATABuffer = ""; //buffer for special tag
-    private $bufferIsActive = false; //buffer for special tag
+    protected $CDATABuffer = ""; //buffer for special tag
+    protected $bufferIsActive = false; //buffer for special tag
 
-    private $offset = 0;//offset for SAX pointer
-    private $outputFP;//output stream pointer
-    private $currentBuffer;//the current piece of text it's been parsed
-    private $len;//length of the currentBuffer
-    private $segments; //array of translations
-    private $currentId;//id of current <trans-unit>
+    protected $offset = 0;//offset for SAX pointer
+    protected $outputFP;//output stream pointer
+    protected $currentBuffer;//the current piece of text it's been parsed
+    protected $len;//length of the currentBuffer
+    protected $segments; //array of translations
+    protected $currentId;//id of current <trans-unit>
 
-    private $target_lang;
+    protected $target_lang;
 
-    private $sourceInTarget;
+    protected $sourceInTarget;
 
     public function __construct( $originalXliffFilename, $segments, $trg_lang = null, $outputFile = null ) {
 
@@ -139,7 +139,7 @@ class XliffSAXTranslationReplacer {
     /*
        callback for tag open event
      */
-    private function tagOpen( $parser, $name, $attr ) {
+    protected function tagOpen( $parser, $name, $attr ) {
 
         //check if we are entering into a <trans-unit>
         if ( 'trans-unit' == $name ) {
@@ -238,7 +238,7 @@ class XliffSAXTranslationReplacer {
     /*
        callback for tag close event
      */
-    private function tagClose( $parser, $name ) {
+    protected function tagClose( $parser, $name ) {
 
         $tag = '';
 
@@ -333,7 +333,7 @@ class XliffSAXTranslationReplacer {
     /*
        callback for CDATA event
      */
-    private function characterData( $parser, $data ) {
+    protected function characterData( $parser, $data ) {
         //don't write <target> data
         if ( !$this->inTarget && !$this->bufferIsActive ) {
 
@@ -349,7 +349,7 @@ class XliffSAXTranslationReplacer {
     /*
        postprocess escaped data and write to disk
      */
-    private function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
+    protected function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
         //postprocess string
         $data = preg_replace( "/#%(.*?)#%/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
@@ -366,7 +366,7 @@ class XliffSAXTranslationReplacer {
     /*
        prepare segment tagging for xliff insertion
      */
-    private function prepareSegment( $seg, $transunit_translation = "" ) {
+    protected function prepareSegment( $seg, $transunit_translation = "" ) {
         $end_tags = "";
 
 //        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );

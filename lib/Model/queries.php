@@ -723,7 +723,8 @@ function getTMForTMXExport( $jid, $jPassword ) {
     $sql = "
         SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
         IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
-            Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date
+            Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date,
+            st.status, suggestions_array
         FROM segment_translations st
         JOIN segments ON id = id_segment
         JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
@@ -731,7 +732,7 @@ function getTMForTMXExport( $jid, $jPassword ) {
             WHERE st.id_job = " . (int)$jid . "
             AND show_in_cattool = 1
             AND suggestion_source is not null
-            AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
+            -- AND (suggestion_source = 'TM' or suggestion_source not in ('MT','MT-') )
 ";
 
     try {
@@ -739,6 +740,37 @@ function getTMForTMXExport( $jid, $jPassword ) {
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
+    }
+
+    foreach( $results as $key => $value ){
+
+        //we already extracted a 100% match by definition
+        if( in_array( $value['status'], array(
+                    Constants_TranslationStatus::STATUS_TRANSLATED,
+                    Constants_TranslationStatus::STATUS_APPROVED
+                )
+            )
+        ) continue;
+
+        $suggestions_array = json_decode( $value['suggestions_array'] );
+        foreach( $suggestions_array as $_k => $_sugg ){
+
+            //we want the highest value of TM and we must exclude the MT
+            if( strpos( $_sugg->created_by, 'MT' ) !== false ) continue;
+
+            //override the content of the result with the fuzzy matches
+            $results[ $key ][ 'segment' ] = $_sugg->segment;
+            $results[ $key ][ 'translation' ] = $_sugg->translation;
+            $results[ $key ][ '_created_by' ] = 'MateCat_OmegaT_Export';
+
+            //stop, we found the first TM value in the list
+            break;
+
+        }
+
+        //if no TM found unset the result
+        if( !isset( $results[ $key ][ '_created_by' ] ) ) unset( $results[ $key ] );
+
     }
 
     return $results;
@@ -1517,13 +1549,10 @@ function getLastSegmentIDs( $id_job ) {
 
 function getEQWLastHour( $id_job, $estimation_seg_ids ) {
 
-    // Old raw-wordcount
-    /*
-       $query = "SELECT SUM(raw_word_count), MIN(translation_date), MAX(translation_date),
-       IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity,
-       ROUND(SUM(raw_word_count)/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour,
-       count(*) from segment_translations
-       INNER JOIN segments on id=segment_translations.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
+    /**
+     * If the translator translated the last ten segments in less than 1 hour
+     * In the cattool there will be the calculation of word per hour in the footer bar
+     *
      */
     $query = "
             SELECT SUM(IF(Ifnull(st.eq_word_count, 0) = 0, raw_word_count,

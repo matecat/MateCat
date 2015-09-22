@@ -20,10 +20,10 @@
     <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
     <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
 
-    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!"/>
     <meta name="viewport" content="width=device-width"/>
     <meta property="og:title" content="Translate a file with MateCat" />
-    <meta property="og:description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
     <!-- jQuery UI styles -->
@@ -63,30 +63,6 @@
         };
     </script>
 
-
-
-<!-- Codice remarketing FB -->
-
-<script>(function() {
-  var _fbq = window._fbq || (window._fbq = []);
-  if (!_fbq.loaded) {
-    var fbds = document.createElement('script');
-    fbds.async = true;
-    fbds.src = '//connect.facebook.net/en_US/fbds.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(fbds, s);
-    _fbq.loaded = true;
-  }
-  _fbq.push(['addPixelId', '1445002372422861']);
-})();
-window._fbq = window._fbq || [];
-window._fbq.push(['track', 'PixelInitialized', {}]);
-</script>
-<noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?id=1445002372422861&amp;ev=PixelInitialized" /></noscript>
-
-
-
-
 </head>
 <body tal:condition="not:supportedBrowser">
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
@@ -112,44 +88,14 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     </div>
     <div class="cl"></div>
 </header>
-<div class="hide learnmore">
-    <span class="open-more pull-right">✕</span>
 
-    <h1>Post-editing and outsourcing made easy</h1>
-
-    <div class="col-3">
-        <h2>State-of-the-art MT <br/>and public TMs</h2>
-
-        <p>Translation and post-editing <br/>in 80 languages with zero <br/>start-up time</p>
-        <img src="${basepath}public/img/box1.jpg"/>
-
-    </div>
-    <div class="col-3">
-        <h2>Outsource your extra projects <br/>in one click</h2>
-
-        <p>Take on any projects,<br/>even in languages<br/>that you do not cover yourself</p>
-        <img src="${basepath}public/img/box2.jpg"/>
-
-    </div>
-    <div class="col-3">
-        <h2><strong>It’s free</strong><br/>and always will be</h2>
-
-        <p>A free CAT tool for LSPs, <br/> professional translators <br/>and customers</p>
-        <img src="${basepath}public/img/box3.jpg"/>
-
-    </div>
-    <div class="bottom-lm">
-        <p><a href="https://www.matecat.com/benefits/" target="_blank">Learn more about MateCat</a></p>
-    </div>
-
-</div>
 
 <div class="wrapper-claim">
     <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
     <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-    <h2 class="payoff">MateCat gives you more matches than any other CAT tool. <span class="hide-payoff"><a class="open-more">Learn more</a>.</span></h2>
+    <h2 class="payoff">MateCat gives you more matches than any other CAT tool.</h2>
 </div>
 <div class="wrapper-upload">
 
@@ -455,7 +401,7 @@ Connect your TAUS DQF account to measure productivity.
                 <span>Cancel upload</span>
             </button>
 -->
-<p tal:condition="true:conversion_enabled" class="supported-files">This hosted version of MateCat supports
+<p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
     <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>
 
 <div class="uploadbtn-box">
@@ -906,15 +852,19 @@ Connect your TAUS DQF account to measure productivity.
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 <footer>
+
     <div class="wrapper">
 
-        <nav>
-
-            <ul>
+            <ul class="external-links">
                 <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
 
                 <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
                 <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
+            </ul>
+
+        <nav>
+
+            <ul>
 
                 <tal:block tal:condition="php: !empty(logged_user)">
                     <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
@@ -1006,8 +956,6 @@ Connect your TAUS DQF account to measure productivity.
        
     } );
 
-    
-
     $( "a.memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
         tab = $(this).attr('data-tab') || 'tm';
@@ -1026,10 +974,28 @@ Connect your TAUS DQF account to measure productivity.
 
     } );
 
-
 </script>
-<!-- Google Code per il tag di remarketing -->
 
+<!-- Codice remarketing FB -->
+<script>(function() {
+    var _fbq = window._fbq || (window._fbq = []);
+    if (!_fbq.loaded) {
+        var fbds = document.createElement('script');
+        fbds.async = true;
+        fbds.src = '//connect.facebook.net/en_US/fbds.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(fbds, s);
+        _fbq.loaded = true;
+    }
+    _fbq.push(['addPixelId', '1445002372422861']);
+})();
+window._fbq = window._fbq || [];
+window._fbq.push(['track', 'PixelInitialized', {}]);
+</script>
+<noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?id=1445002372422861&amp;ev=PixelInitialized" /></noscript>
+<!-- Codice remarketing FB -->
+
+<!-- Google Code per il tag di remarketing -->
 <script type="text/javascript">
     <!-- /* <![CDATA[*/ -->
     var google_conversion_id = 961218439;
@@ -1056,9 +1022,13 @@ Connect your TAUS DQF account to measure productivity.
     ga('send', 'pageview');
 
 </script>
+<!-- Google Code per il tag di remarketing -->
 
+<!-- Clickmeter code -->
 <img style='width:0;height:0;display:none;background:none;' src='https://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
+<!-- Clickmeter code -->
 
+<!-- Twitter code -->
 <script src="//platform.twitter.com/oct.js" type="text/javascript"></script>
 <script type="text/javascript">
     twttr.conversion.trackPid( 'l5dle' );
@@ -1067,6 +1037,28 @@ Connect your TAUS DQF account to measure productivity.
     <img height="1" width="1" style="display:none;" alt="" src="https://analytics.twitter.com/i/adsct?txn_id=l5dle&p_id=Twitter"/>
     <img height="1" width="1" style="display:none;" alt="" src="//t.co/i/adsct?txn_id=l5dle&p_id=Twitter"/>
 </noscript>
+<!-- Twitter code -->
+
+<!-- code for facebook like -->
+<div id="fb-root"></div>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '813588178762126',
+      xfbml      : true,
+      version    : 'v2.4'
+    });
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
+<!-- code for facebook like -->
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
