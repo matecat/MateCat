@@ -89,7 +89,7 @@ box-shadow: inset 0 0 1px 1px #888;
 .outsource.modal .popup
 {
 	width: 900px;
-	margin: -150px 0 0 -400px;
+	margin: -170px 0 0 -400px;
 }
 .outsource.modal .popup-box {
 text-align:left; padding:0 20px;
@@ -305,7 +305,6 @@ clear:both;
 .pricebox .outsourceto .heading {
     margin-top: 15px;
     text-align:left;
-    padding: 1% 0;
     margin: 0 auto 5px;
     overflow: hidden;
 }
@@ -316,6 +315,7 @@ clear:both;
     background-color: #fff;
     padding: 5px 0% 10px;
     text-align: left;
+    color: #666;
 }
 
 .pricebox .outsourceto .guaranteed_by img {
@@ -340,7 +340,6 @@ clear:both;
 }
 
 .revision_price_box {
-    float: right;
     width: 21%;
     font-size: 20px;
     text-align: center;
@@ -403,7 +402,7 @@ margin-top: 0!important;
     margin: 0 auto;
     overflow: hidden;
     background: #fff;
-    padding: 1% 2%;
+    padding: 2% 0 0;
 }
 
 .onyourown, .outsourceto {
@@ -533,7 +532,7 @@ margin-top: 0!important;
 }
 
 .translator_name {
-    border-bottom: 1px solid #E6E6E6;
+    border-bottom: 1px solid #ccc;
     font-size: inherit!important;
     display: inline-block;
     float: left;
@@ -571,9 +570,13 @@ margin-top: 0!important;
     height: 70px;
     padding: 10px;
     z-index: 100;
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(243,197,189,1)), color-stop(1%,rgba(232,108,87,1)), color-stop(20%,rgba(234,40,3,1)), color-stop(100%,rgba(199,34,0,1)));
-    background: -webkit-linear-gradient(top,#0D7E9A 0%,#09beec 20%,#329BB5 100%);
+    border-radius: 0px 0px 3px 3px;
+    background: #FFA500;
+    color: #FFFFFF;
+    border: 1px solid #C78100;
+    text-shadow: 1px 1px 2px #5B5B5B;
 }
+
 #wedge {
     width: 0;
     height: 0;
@@ -581,7 +584,7 @@ margin-top: 0!important;
     left: 0;
     position: absolute;
     -webkit-animation: img 0.5s ease-in-out;
-    border-bottom: 10px solid #004C5F;
+    border-bottom: 10px solid #845500;
     border-left: 10px solid transparent;
 }
 
@@ -594,7 +597,7 @@ margin-top: 0!important;
 }
 
 .revision_price_box {
-    float: right;
+    margin-left: 15%!important;
 }
 
 .addrevision {
@@ -657,9 +660,12 @@ select#changeTimezone,
 a.changecurrency {
     float: right;
 }
+
+
 select#changeTimezone,
 #changecurrency {
     width: 14%;
+        margin-right: 1%;
     border: 1px solid #ccc;
     height: 30px;
     font-size: 10px;
