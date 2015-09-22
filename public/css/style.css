@@ -3878,3 +3878,17 @@ body.cattool .nav-tabs li.mgmt-mt {
     border: 1px solid yellow;
     border-radius: 3px;
 }
+
+#export_edit_log_csv_link{
+	top: 30px;
+	position: relative;
+	font-style: italic;
+}
+
+.color_green{
+	color: #6AA84F;
+}
+
+.bg_orange{
+	background: #ee6633;
+}
