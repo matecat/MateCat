@@ -106,8 +106,8 @@ text-align:left; padding:0 20px;
     margin-bottom: 20px;
     font-size: 15px;
     color: #333;
-    width: 72%;
-    margin: 2%;
+    width: 76%;
+    margin: 1% 0%;
 }
 
 .outsource.modal p {
@@ -159,18 +159,16 @@ p.translator_name {
 	font-weight: bold;
     float: left;
 	margin: 0;
-    background: #efefef;
 }
 
 .onyourown h2,
 .contact_box h2 {
-    border-bottom: 1px solid #ccc;
-    width: 97%;
-    padding: 1% 2%;
+    width: 100%;
+    padding: 1% 0%;
 }
 
 .onyourown a.uploadbtn.in-popup {
-    margin: 2%!important;
+    margin: 1%!important;
     width: 150px;
 }
 
@@ -307,20 +305,17 @@ clear:both;
 .pricebox .outsourceto .heading {
     margin-top: 15px;
     text-align:left;
-    padding: 1% 2%;
-    margin: 0 auto;
+    padding: 1% 0;
+    margin: 0 auto 5px;
     overflow: hidden;
-        background: #efefef;
-    border-bottom: 1px solid #ccc;
 }
 
 
 
 .guaranteed_by {
     background-color: #fff;
-    padding: 5px 2%;
+    padding: 5px 0% 10px;
     text-align: left;
-    border-bottom: 1px solid #E1E1E1;
 }
 
 .pricebox .outsourceto .guaranteed_by img {
@@ -370,8 +365,9 @@ margin-top: 0!important;
 .outsourceto {
     float: left;
     width: 100%;
+    border-top: 1px solid #ccc;
     text-align: center;
-    margin-top: 30px!important;
+    padding-top: 15px!important;
 }
 
 .pricebox .tprice,
@@ -380,7 +376,7 @@ margin-top: 0!important;
 }
 
 .pricebox .tprice {
-    padding: 2% 2% 0;
+    padding: 3% 2% 1% 2%;
 }
 .pricebox .delivery {
     padding: 3% 2% 1% 2%;
@@ -391,7 +387,14 @@ margin-top: 0!important;
     margin: 0 auto;
     overflow: hidden;
     width: 100%;
-    background: #f7f8f9;
+}
+
+.border {
+    background: #fafafa;
+    border:1px solid #ccc;
+    border-radius: 4px;
+    margin: 0 auto;
+    overflow: hidden;
 }
 
 .contact_box {
@@ -399,11 +402,11 @@ margin-top: 0!important;
     margin: 10px;
     margin: 0 auto;
     overflow: hidden;
-    padding: 1% 2%;}
+    background: #fff;
+    padding: 1% 2%;
+}
 
 .onyourown, .outsourceto {
-    border: 1px solid #ccc;
-    border-radius: 3px;
     margin: 10px auto;
     overflow: hidden;
 }
@@ -413,17 +416,12 @@ margin-top: 0!important;
     margin-right: 10px;
 }
 
-.onyourown {
-     width: 100%;
-     margin-top:20px;
-}
 
 .pricebox .continuebtn {
     clear: both;
     float: left;
     width: 150px;
     margin: 10px 0!important;
-    background:#09beec;
 }
 
 .paymentinfo p {
@@ -476,11 +474,11 @@ margin-top: 0!important;
 }
 
 .pricebox .tprice {
-    width: 21%;
+    width: 22%;
 }
 
 .pricebox .torder {
-    width: 21%;
+    width: 20%;
     margin-top: 15px;
     padding: 1%;
 }
@@ -503,8 +501,10 @@ margin-top: 0!important;
 .references, 
 .paymentinfo {
     text-align: center;
-    margin: 5px 0;
+    padding: 5px 0;
     display: inline-block;
+    width: 100%;
+    background-color: #fff;
 }
 
 .references > img {
@@ -601,8 +601,6 @@ margin-top: 0!important;
     float: left;
     width: 96%;
     border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    background-color: #f7f8f9;
     text-align: left;
     padding: 1% 2%;
 }
@@ -635,6 +633,45 @@ background-size: 170px;
     margin-bottom: 0;
     margin-top: 0;
 }
+
+a.changeTimezoneTrigger {
+    float: right;
+    font-weight: normal;
+    margin-left: 10px;
+}
+
+a.changeTimezoneTrigger,
+a.changecurrency {
+    color: #666;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 0px 12px;
+    border-radius: 4px;
+}
+
+select#changeTimezone,
+#changecurrency,
+a.changecurrency {
+    float: right;
+}
+select#changeTimezone,
+#changecurrency {
+    width: 14%;
+    border: 1px solid #ccc;
+    height: 30px;
+    font-size: 10px;
+}
+
+select#changeTimezone {
+    display: block;
+    width: 11%;
+    margin-right: 10px;
+}
+
+.hide {display: none!important;}
 
 .trustbox {
     width: 45%;

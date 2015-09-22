@@ -280,7 +280,7 @@ function changeTimezone( date, timezoneFrom, timezoneTo ){
 
     $( "span.time").attr("data-timezone", timezoneTo);
     $( "span.time").attr("data-rawtime", dd.toUTCString());
-
+    $( ".changeTimezoneTrigger" ).text( "GMT" +$( "#changeTimezone" ).find( "option[value='" + timezoneTo + "']" ).attr("data-timezone" ) );
     var expiration = new Date();
     expiration.setYear( new Date().getFullYear() + 1);
     document.cookie = "matecat_timezone=" + timezoneTo + "; expires=" + expiration.toUTCString() + "; path=/";
