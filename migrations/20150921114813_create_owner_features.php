@@ -18,6 +18,8 @@ class CreateOwnerFeatures extends AbstractMigration
             ->addColumn('enabled', 'boolean', array(
                 'null' => false, 'default' => true
             ))
+
+            ->addIndex(array('uid', 'feature_code' ), array('unique' => true))
             ->save();
     }
 
