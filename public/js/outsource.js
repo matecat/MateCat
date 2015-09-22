@@ -49,7 +49,6 @@ $.extend(UI, {
 						action: 'outsourceTo',
 						pid: $('#pid').attr('data-pid'),
 						ppassword: $("#pid").attr("data-pwd"),
-                        addRevision: $("input[name='revision']").is(':checked'),
                         fixedDelivery: '0',
 						jobs: [
 							{
@@ -93,6 +92,8 @@ $.extend(UI, {
                             return false;
                         }
 
+                        var showRevisionInfo = $( "input[name='revision']" ).is( ":checked" );
+
                         // if the customer has a timezone in the cookie, then use it
                         // otherwise attemp to guess it from his browser infos
                         var timezoneToShow = readCookie( "matecat_timezone" );
@@ -101,7 +102,10 @@ $.extend(UI, {
                         }
 
                         // update the timezone (both the displayed and the stored ones)
-                        changeTimezone( chunk.delivery_date, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow );
+                        var deliveryToShow = ( showRevisionInfo ) ?  chunk.r_delivery : chunk.delivery;
+                        changeTimezone(deliveryToShow, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
+                        changeTimezone(chunk.r_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
+
                         $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
                         /**
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
@@ -127,31 +131,29 @@ $.extend(UI, {
                         }
 
                         // update the currency (both the displayed and the stored ones)
-                        changeCurrency( chunk.price, "EUR", currToShow );
+                        var priceToShow = ( showRevisionInfo ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
+                        changeCurrency( priceToShow, "EUR", currToShow, ".euro", ".displayprice", "#price_p_word");
+                        changeCurrency( chunk.r_price, "EUR", currToShow, ".revision_currency", ".revision_price", "" );
+
                         $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
 
                         // setting information about translator
                         var subjectsString = "";
-                        if( chunk.t_chosen_subject.length > 0 && chunk.t_other_subjects.length > 0 ) {
-                            subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>, " + chunk.t_other_subjects;
+                        if( chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0 ) {
+                            subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>, " + chunk.t_subjects;
                         } else if( chunk.t_chosen_subject.length > 0 ) {
                             subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>";
                         } else {
-                            subjectsString = chunk.t_other_subjects;
+                            subjectsString = chunk.t_subjects;
                         }
 
                         $( ".translator_name > strong").text( chunk.t_name );
                         $( ".experience").text( chunk.t_experience_years );
-                        $( ".score_number").text( chunk.t_vote + "%" );
                         $( ".subjects").html( subjectsString );
-/*
-                        t_education: "International Management, Cardiff Metropolitan University"
-                        t_native_lang: "French"
-                         positive_feedbacks: "546"
-                         total_feedbacks: "0"
-                         t_words_specific: "54852"
-                        t_words_total: "215572"
-*/
+                        $( ".translated_words").html( chunk.t_words_total );
+
+                        var voteToShow = ( showRevisionInfo ) ? chunk.r_vote : chunk.t_vote;
+                        $(".score_number").text( parseInt( voteToShow ) + "%");
                     }
 				});
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
@@ -205,17 +207,17 @@ $.extend(UI, {
 		});
 
         $( "#changecurrency" ).change( function(){
-            var amount      = $( ".displayprice").attr( "data-rawprice" );
             var currencyFrom = $( ".displayprice").attr( "data-currency" );
             var currencyTo  = $( "#changecurrency option:selected" ).val();
-            changeCurrency( amount, currencyFrom, currencyTo );
+            changeCurrency( $( ".displayprice").attr( "data-rawprice" ), currencyFrom, currencyTo, ".euro", ".displayprice", "#price_p_word" );
+            changeCurrency( $( ".revision_price").attr( "data-rawprice" ), currencyFrom, currencyTo, ".revision_currency", ".revision_price", "" );
         });
 
         $( "#changeTimezone" ).change( function(){
-            var date = $( "span.time").attr( "data-rawtime" );
             var timezoneFrom = $( "span.time").attr( "data-timezone" );
             var timezoneTo = $( "#changeTimezone option:selected" ).val();
-            changeTimezone( date, timezoneFrom, timezoneTo );
+            changeTimezone( $( "span.time").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.time" );
+            changeTimezone( $( "span.revision_delivery").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.revision_delivery" );
         });
 	},
 	getFarthestDate: function() {
@@ -249,7 +251,7 @@ $.extend(UI, {
 
 
 
-function changeCurrency( amount, currencyFrom, currencyTo ) {
+function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol, elementToUpdateValue, elementToUpdatePPW ) {
     APP.doRequest({
         data: {
             action: 'changeCurrency',
@@ -258,13 +260,15 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
             currencyTo: currencyTo
         },
         success: function (d) {
-            $( ".euro" ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
-            $( ".displayprice" ).text( parseFloat( d.data).toFixed( 2 ) );
-            $( ".displayprice" ).attr( "data-rawprice", d.data );
-            $( ".displayprice" ).attr( "data-currency", currencyTo );
+            $( elementToUpdateSymbol ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
+            $( elementToUpdateValue ).text( parseFloat( d.data).toFixed( 2 ) );
+            $( elementToUpdateValue ).attr( "data-rawprice", d.data );
+            $( elementToUpdateValue ).attr( "data-currency", currencyTo );
 
-            var numWords = parseFloat( $(".title-words").text().replace( ",", "" ) );
-            $( "#price_p_word").text( ( parseFloat( d.data ) / numWords ).toFixed( 3 ) );
+            if( elementToUpdatePPW.length > 0 ) {
+                var numWords = parseFloat($(".title-words").text().replace(",", ""));
+                $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3));
+            }
 
             var expiration = new Date();
             expiration.setYear( new Date().getFullYear() + 1);
@@ -273,13 +277,13 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
     });
 }
 
-function changeTimezone( date, timezoneFrom, timezoneTo ){
+function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
     var dd = new Date( date );
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
-    $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
+    $( elementToUpdate ).text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
 
-    $( "span.time").attr("data-timezone", timezoneTo);
-    $( "span.time").attr("data-rawtime", dd.toUTCString());
+    $( elementToUpdate ).attr("data-timezone", timezoneTo);
+    $( elementToUpdate ).attr("data-rawtime", dd.toUTCString());
 
     var expiration = new Date();
     expiration.setYear( new Date().getFullYear() + 1);
