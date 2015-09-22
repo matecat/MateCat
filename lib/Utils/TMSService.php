@@ -393,4 +393,44 @@ class TMSService {
 
     }
 
+    /**
+     * Export Job as Tmx File
+     *
+     * @param $jid
+     * @param $jPassword
+     * @param $sourceLang
+     * @param $targetLang
+     *
+     * @return SplTempFileObject $tmpFile
+     *
+     */
+    public function exportJobAsCSV( $jid, $jPassword, $sourceLang, $targetLang ) {
+
+        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 15MB */ );
+        $tmpFile->setCsvControl(';');
+
+        $csv_fields = array(
+                "Source: $sourceLang", "Target: $targetLang"
+        );
+
+        $tmpFile->fputcsv( $csv_fields );
+
+        $result = getTranslationsForTMXExport( $jid, $jPassword );
+
+        foreach ( $result as $k => $row ) {
+
+            $row_array = array(
+                    $row[ 'segment' ], $row[ 'translation' ]
+            );
+
+            $tmpFile->fputcsv( $row_array );
+
+        }
+
+        $tmpFile->rewind();
+
+        return $tmpFile;
+
+    }
+
 }
