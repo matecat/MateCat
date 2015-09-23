@@ -27,6 +27,9 @@ class ProjectManager {
     protected $uploadDir;
 
     protected $checkTMX;
+
+    protected $checkGlossary;
+
     /*
        flag used to indicate TMX check status: 
        0-not to check, or check passed
@@ -231,9 +234,17 @@ class ProjectManager {
         //sort files in order to process TMX first
         $sortedFiles = array();
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+
+            //check for glossary files and tmx and put them in front of the list
+            $infoFile = DetectProprietaryXliff::getInfo( $fileName );
+            if ( DetectProprietaryXliff::getMemoryFileType() ) {
+
                 //found TMX, enable language checking routines
-                $this->checkTMX = 1;
+                if( DetectProprietaryXliff::isTMXFile() ) $this->checkTMX = 1;
+
+                //not used at moment but needed if we want to do a poll for status
+                if( DetectProprietaryXliff::isGlossaryFile() ) $this->checkGlossary = 1;
+
                 array_unshift( $sortedFiles, $fileName );
             } else {
                 array_push( $sortedFiles, $fileName );
@@ -621,6 +632,28 @@ class ProjectManager {
 
                 try {
                     $this->tmxServiceWrapper->addTmxInMyMemory();
+                } catch ( Exception $e ) {
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
+                            "code" => $e->getCode(), "message" => $e->getMessage()
+                    );
+
+                    throw new Exception( $e );
+                }
+
+                //in any case, skip the rest of the loop, go to the next file
+                continue;
+
+            } elseif( 'g' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION )  ){
+
+                //{"responseStatus":"202","responseData":{"id":505406}}
+                //load it into MyMemory; we'll check later on how it went
+                $file            = new stdClass();
+                $file->file_path = "$this->uploadDir/$fileName";
+                $this->tmxServiceWrapper->setName( $fileName );
+                $this->tmxServiceWrapper->setFile( array( $file ) );
+
+                try {
+                    $this->tmxServiceWrapper->addGlossaryInMyMemory();
                 } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = array(
                             "code" => $e->getCode(), "message" => $e->getMessage()
