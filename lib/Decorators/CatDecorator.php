@@ -21,28 +21,12 @@ class CatDecorator {
 
   public function decorate() {
     $this->projectCompletionFeature();
-    $this->headerButtonLabel();
-  }
 
-  public function isDownloadable() {
-
+    // TODO: add future presentation logic here
   }
 
   private function projectCompletionFeature() {
     $this->template->projectCompletionFeature = $this->project_completion_feature_enabled ;
   }
 
-  private function headerButtonLabel() {
-    if ( $this->project_completion_feature_enabled ) {
-
-    }
-    else {
-
-    }
-
-  }
-
-  private function evalHeader() {
-
-  }
 }
