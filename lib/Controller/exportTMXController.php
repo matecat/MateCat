@@ -12,6 +12,7 @@ class exportTMXController extends downloadController {
     private $jobID;
     private $jobPass;
     private $tmx;
+    private $type;
     private $fileName;
 
     protected $errors;
@@ -20,6 +21,10 @@ class exportTMXController extends downloadController {
         $filterArgs = array(
                 'jid'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'jpass' => array(
+                        'filter'  => FILTER_SANITIZE_STRING,
+                        'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ),
+                'type'  => array(
                         'filter'  => FILTER_SANITIZE_STRING,
                         'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 )
@@ -31,6 +36,7 @@ class exportTMXController extends downloadController {
 
         $this->jobID   = $getInput[ 'jid' ];
         $this->jobPass = $getInput[ 'jpass' ];
+        $this->type    = $getInput[ 'type' ];
 
         if ( $this->jobID == null || empty( $this->jobID ) ) {
             $this->errors [ ] = array(
@@ -80,12 +86,22 @@ class exportTMXController extends downloadController {
 
         $tmsService = new TMSService();
 
-        /**
-         * @var $tmx SplTempFileObject
-         */
-        $this->tmx = $tmsService->exportJobAsTMX( $this->jobID, $this->jobPass, $source, $target );
-
-        $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".tmx";
+        switch( $this->type ){
+            case 'csv':
+                /**
+                 * @var $tmx SplTempFileObject
+                 */
+                $this->tmx = $tmsService->exportJobAsCSV( $this->jobID, $this->jobPass, $source, $target );
+                $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".csv";
+                break;
+            default:
+                /**
+                 * @var $tmx SplTempFileObject
+                 */
+                $this->tmx = $tmsService->exportJobAsTMX( $this->jobID, $this->jobPass, $source, $target );
+                $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".tmx";
+                break;
+        }
 
     }
 
