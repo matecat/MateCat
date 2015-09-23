@@ -477,7 +477,9 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extqxp"></span>
             {% mimeok=1} %}
 			
-		
+			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
 			
 			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extttx"></span>
@@ -626,8 +628,12 @@ Connect your TAUS DQF account to measure productivity.
 					
             <span class="extqxp"></span>
             {% mimeok=1} %}
-			
-		
+
+
+			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
+
 			
 			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extttx"></span>
