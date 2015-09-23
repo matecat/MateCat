@@ -16,8 +16,8 @@ class NewTest extends IntegrationTest {
             'message' => "Missing target language."
         );
 
-        $response = $this->makeRequest();
-        $this->assertJSONResponse( $expected, $response );
+        $response = $this->getResponse() ;
+        $this->assertJSONResponse( $expected, $response['body'] );
     }
 
     function testValidatesSourceLanguage() {
@@ -31,8 +31,8 @@ class NewTest extends IntegrationTest {
             'message' => "Missing source language."
         );
 
-        $response = $this->makeRequest();
-        $this->assertJSONResponse( $expected, $response );
+        $response = $this->getResponse() ;
+        $this->assertJSONResponse( $expected, $response['body'] );
     }
 
     function testValidatesMissingFiles() {
@@ -47,8 +47,8 @@ class NewTest extends IntegrationTest {
             'message' => "No files received."
         );
 
-        $response = $this->makeRequest();
-        $this->assertJSONResponse( $expected, $response );
+        $response = $this->getResponse() ;
+        $this->assertJSONResponse( $expected, $response['body'] );
     }
 
     function testSubmitsProject() {
@@ -62,7 +62,8 @@ class NewTest extends IntegrationTest {
         // $this->files[] = test_file_path('amex-test.docx.xlf');
         $this->files[] = test_file_path('amex-test.docx.xlf');
 
-        $response =  json_decode( $this->makeRequest() );
+        $response = $this->getResponse() ;
+        $response = json_decode( $response['body'] );
 
         Log::doLog( $response );
 
@@ -81,7 +82,8 @@ class NewTest extends IntegrationTest {
 
         $this->files[] = test_file_path('zip-with-reference-files.zip');
 
-        $response =  json_decode( $this->makeRequest() );
+        $response =  $this->makeRequest();
+        $response =  json_decode( $response['body'] );
 
         $this->assertEquals( 'Success', $response->message);
         $this->assertEquals( 'OK',      $response->status );

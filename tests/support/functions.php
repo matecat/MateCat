@@ -46,9 +46,9 @@ function integrationCreateTestProject(  ) {
   );
   $test->files[] = test_file_path('amex-test.docx.xlf');
 
-  $response =  json_decode( $test->run() );
+  $response = $test->getResponse();
 
-  return $response ;
+  return json_decode( $response['body'] ) ;
 }
 
 function integrationSetTranslation($options) {
@@ -68,8 +68,8 @@ function integrationSetTranslation($options) {
   $test->params = array_merge( $default, $options);
   $test->method = 'POST';
   $test->path = '?action=setTranslation';
-  $response =  json_decode( $test->run() );
+  $response =  $test->getResponse();
 
-  return $response ;
+  return json_decode( $response['body'] )  ;
 
 }

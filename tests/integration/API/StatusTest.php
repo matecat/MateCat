@@ -15,7 +15,7 @@ class StatusTest extends IntegrationTest {
             "message" => [-1,"No id project provided"]
         );
 
-        $response = $this->makeRequest();
+        $response = $this->makeRequest()['body'];
         $this->assertJSONResponse( $expected, $response );
     }
 
@@ -27,7 +27,8 @@ class StatusTest extends IntegrationTest {
             'project_pass' => $project->project_pass
         );
 
-        $response = json_decode ( $this->makeRequest() ) ;
+
+        $response = json_decode ( $this->makeRequest()['body'] ) ;
 
         $this->assertEquals( $response->status, 'ANALYZING' );
     }
@@ -67,7 +68,7 @@ class StatusTest extends IntegrationTest {
         }
 
         // iterate all segments and setTranslations
-        $response = json_decode ( $this->makeRequest() ) ;
+        $response = json_decode ( $this->makeRequest()['body'] ) ;
 
     }
 }
