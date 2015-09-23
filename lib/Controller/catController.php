@@ -74,7 +74,7 @@ class catController extends viewController {
         $this->password   = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
-        $this->job        = Jobs_JobDao::getById( $this->jid );
+        $this->job        = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
 
         if ( isset( $_GET[ 'step' ] ) ) {
             $this->step = $_GET[ 'step' ];

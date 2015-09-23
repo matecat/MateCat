@@ -16,12 +16,13 @@ class HeaderDecorator {
     public $mainButtonId ;
     public $mainButtonProgressLabel ;
 
-    const COMPLETED = 'Completed!';
-    const MARK_AS_COMPLETE = 'Mark as complete';
+    const COMPLETED = 'SENT';
+    const MARK_AS_COMPLETE = 'SEND';
     const DOWNLOAD_TRANSLATION = 'Download translation';
+
     const PREVIEW = 'Preview';
     const DOWNLOADING = 'Downloading...';
-    const SAVING = 'Saving...';
+    const SAVING = 'Sending...';
 
     public function __construct( $controller ) {
       $this->controller = $controller;
@@ -54,7 +55,6 @@ class HeaderDecorator {
         $this->mainButtonLabel        = self::MARK_AS_COMPLETE ;
         $this->mainButtonLabelReverse = self::COMPLETED ;
       }
-      $this->mainButtonProgressLabel = self::SAVING ;
     }
 
     private function evalForDefault() {
@@ -68,7 +68,6 @@ class HeaderDecorator {
         $this->mainButtonLabel        = self::PREVIEW ;
         $this->mainButtonLabelReverse = self::DOWNLOAD_TRANSLATION  ;
       }
-      $this->mainButtonProgressLabel = self::DOWNLOADING ;
     }
 
     // TODO the job itself should know about this

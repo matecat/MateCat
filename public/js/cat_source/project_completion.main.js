@@ -13,8 +13,8 @@ if ( ProjectCompletion.enabled() ) {
         console.log( 'mark as complete click');
 
         var data = {
-            action : 'Features_ProjectCompletion_SetChunkCompleted',
-            id_job : config.id_job,
+            action   : 'Features_ProjectCompletion_SetChunkCompleted',
+            id_job   : config.id_job,
             password : config.password
         }
 

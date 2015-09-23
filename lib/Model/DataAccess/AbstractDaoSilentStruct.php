@@ -17,6 +17,12 @@ class DataAccess_AbstractDaoSilentStruct extends stdClass {
         }
     }
 
+    public function __get( $name ) {
+        if (!property_exists( $this, $name )) {
+            throw new DomainException( 'Trying to get an undefined property ' . $name );
+        }
+    }
+
     public function __set( $name, $value ) {
         if ( !property_exists( $this, $name ) ) {
             // TODO: write to logs once we'll be able to have

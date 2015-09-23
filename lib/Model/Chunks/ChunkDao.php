@@ -5,8 +5,6 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     public static function getByIdAndPassword( $id, $password ) {
         $conn = Database::obtain()->getConnection();
 
-        Log::doLog( 'getByIdAndPassword', $id, $password );
-
         $stmt = $conn->prepare(
             "SELECT * FROM jobs WHERE id = :id_job "  .
             " AND password = :password "

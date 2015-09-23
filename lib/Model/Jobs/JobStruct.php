@@ -6,6 +6,10 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
   public $id_project ;
   public $create_date ;
   public $last_opened_segment ;
+
+  public $job_first_segment ;
+  public $job_last_segment ;
+
   public $last_update ;
   public $source ;
   public $target ;
@@ -19,13 +23,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     return $this->getProject()->isFeatureEnabled( $feature_code ) ;
   }
 
-  public function isMarkedComplete() {
-    return Chunks_ChunkCompletionEventDao::isCompleted( $this ) ;
-  }
-
   public function findLatestTranslation() {
     $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-    return $dao->lastTranslationByChunk( $this );
+    return $dao->lastTranslationByJobOrChunk( $this );
   }
 
 }

@@ -8,8 +8,6 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     private $chunk ;
 
     public function __construct() {
-      Log::doLog('Features_ProjectCompletion_JobCompletionController');
-
       $filterArgs = array(
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'    => array(
@@ -52,8 +50,9 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function getUid() {
+        $this->checkLogin();
         if ( $this->userIsLogged ) {
-            return $this->current_user->uid;
+            return $this->uid ;
         } else {
             return null;
         }

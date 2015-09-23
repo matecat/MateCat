@@ -30,7 +30,6 @@ class CatDecorator {
 
   private function projectCompletionFeature() {
     $this->template->projectCompletionFeature = $this->project_completion_feature_enabled ;
-    // $this->template->jobCompletionStatus = $this->job->isMarkedComplete();
   }
 
   private function headerButtonLabel() {

@@ -19,6 +19,10 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         return $dao->getByChunkId( $this->id, $this->password );
     }
 
+    public function isMarkedComplete() {
+        return Chunks_ChunkCompletionEventDao::isCompleted( $this ) ;
+    }
+
     public function getTranslations() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
         return $dao->getByJobId( $this->id );
@@ -26,7 +30,19 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
 
     public function findLatestTranslation() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-        return $dao->lastTranslationByChunk( $this );
+        return $dao->lastTranslationByJobOrChunk( $this );
+    }
+
+    public function getProject() {
+        return $this->getJob()->getProject();
+    }
+
+    public function isFeatureEnabled( $feature_code ) {
+        return $this->getJob()->isFeatureEnabled( $feature_code );
+    }
+
+    public function getJob() {
+        return new Jobs_JobStruct( $this->toArray() );
     }
 
 }
