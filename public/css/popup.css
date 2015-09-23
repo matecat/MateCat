@@ -979,13 +979,10 @@ box-shadow: -2px 5px 7px #7B7B7B;
 
 
 #forceDeliveryContainer #delivery_manual_error {
-    top: 362px;
-    left: 320px;
     opacity: 0.87;
-    display: block;
     color: red;
+    margin-left: 12px;
     text-align: right;
-    margin-right: 52px;
     font-size: 14px;
     margin-top: 10px;
     position: absolute;
@@ -995,8 +992,8 @@ box-shadow: -2px 5px 7px #7B7B7B;
 
 #forceDeliveryContainer #delivery_manual_error div {
     background: #B92227;
+    width: 225px;
     color: #fff;
-    width: 230px;
     text-align: left;
     font-size: 12px;
     border: 2px solid #ddd;

@@ -70,7 +70,7 @@ class outsourceToController extends ajaxController {
                 'ppassword'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
                 'currency'        => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'timezone'        => array( 'filter' => FILTER_SANITIZE_STRING ),
-                'fixedDelivery'   => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'fixedDelivery'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'jobs'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY  | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
@@ -101,6 +101,10 @@ class outsourceToController extends ajaxController {
 
         if ( empty( $this->timezone ) && $this->timezone !== "0" ) {
             $this->timezone = @$_COOKIE[ "matecat_timezone" ];
+        }
+
+        if ( $this->fixedDelivery > 0 ) {
+            $this->fixedDelivery = date( "Y-m-d H:i:s", $this->fixedDelivery / 1000 );
         }
         //        Log::doLog(  $this->jobList  );
         /**

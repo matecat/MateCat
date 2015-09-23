@@ -46,20 +46,6 @@
 
     </script>
     <script type='text/javascript' id='cmconvscript' src='//www.clickmeter.com/js/conversionOnClick.js'></script>
-<script>
-$(document).ready(function() {
-    $('.show_translator').click(function() {
-        $('.translator_info_box').toggleClass('hide');
-        $('#forceDeliveryContainer').addClass('hide');
-    });
-    $('.needitfaster').click(function() {
-        $('#forceDeliveryContainer').removeClass('hide');
-    });
-    $('.x-popup2, .forceDeliveryButtonOk').click(function() {
-        $('#forceDeliveryContainer').addClass('hide');
-    });
-});
-</script>
     <div class="modal outsource" data-type="view">
         <div class="popup-outer closeClickingOutside"></div>
         <div class="popup">
@@ -224,6 +210,7 @@ $(document).ready(function() {
             <a href="#" class="x-popup2"></a>
             
             <div class="delivery-manual">
+                <span id="forceDeliveryChosenDate" class="hide">0</span>
              
                 <div class="delivery-manual-date">
                     <div class="tabsContent">
@@ -280,8 +267,8 @@ $(document).ready(function() {
                     </select>               
 
                     <!--  design took fron validationEngine not the logic. Hardcoded -->
-                    <div id="delivery_manual_error" style="display: none;">                     
-                        <div>* La data e/o l'ora scelte sono già passate</div>
+                    <div id="delivery_manual_error" class="hide">
+                        <div>* Chosen delivery date is in the past</div>
                     </div>
                     
                     
@@ -308,16 +295,7 @@ $(document).ready(function() {
             
 
         </div>
-        
-        <div style="display: none;" id="fasterDeliveryContainer">
-            <h1>Non è la data che avevi scelto?</h1>
-            <p>
-                Consegniamo prima di quanto richiesto.<br/>
-                Questa data ci dà già tutto il tempo necessario per consegnarti un lavoro di qualità al prezzo minore.
-            </p>
-            <input type="button" value="Chiudi" />
-        </div>
-                        <!-- end date picker -->    
+                        <!-- end date picker -->
                     </div>
                     <!--end outsourceto-->
                     

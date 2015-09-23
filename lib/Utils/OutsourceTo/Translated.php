@@ -167,7 +167,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                     "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
                     "&subject=" . $subject .
                     "&jt=R" .
-                    "&fd=" . $this->fixedDelivery .
+                    "&fd=" . urlencode( $this->fixedDelivery ) .
                     "&of=json";
 
             if ( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) ) ) {

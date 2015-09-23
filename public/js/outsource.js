@@ -21,6 +21,11 @@ $.extend(UI, {
             $( ".revealprices" ).show();
         });
 
+        $('.show_translator').click(function() {
+            $('.translator_info_box').toggleClass('hide');
+            $('#forceDeliveryContainer').addClass('hide');
+        });
+
         $( "input[name='revision']" ).click(function() {
             $(".translate").trigger( "click" );
         });
@@ -42,14 +47,12 @@ $.extend(UI, {
 				row = $(this).parents('.tablestats');
 				$('.modal.outsource .outsourceto h2').addClass('loading');
 
-				var display_boxPrice = false;
-
 				APP.doRequest({
 					data: {
 						action: 'outsourceTo',
 						pid: $('#pid').attr('data-pid'),
 						ppassword: $("#pid").attr("data-pwd"),
-                        fixedDelivery: '0',
+                        fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
 						jobs: [
 							{
 								jid: row.attr('data-jid'),
@@ -270,9 +273,7 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
                 $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
             }
 
-            var expiration = new Date();
-            expiration.setYear( new Date().getFullYear() + 1);
-            document.cookie = "matecat_currency=" + currencyTo + "; expires=" + expiration.toUTCString() + "; path=/";
+            setCookie( "matecat_currency", currencyTo );
         }
     });
 }
@@ -285,9 +286,7 @@ function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
     $( elementToUpdate ).attr("data-timezone", timezoneTo);
     $( elementToUpdate ).attr("data-rawtime", dd.toUTCString());
 
-    var expiration = new Date();
-    expiration.setYear( new Date().getFullYear() + 1);
-    document.cookie = "matecat_timezone=" + timezoneTo + "; expires=" + expiration.toUTCString() + "; path=/";
+    setCookie( "matecat_timezone", timezoneTo );
 }
 
 function readCookie( cookieName ) {
@@ -302,6 +301,14 @@ function readCookie( cookieName ) {
     }
     return "";
 }
+
+
+function setCookie( cookieName, cookieValue ) {
+    var expiration = new Date();
+    expiration.setYear( new Date().getFullYear() + 1);
+    document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
+}
+
 
 function updateCartParameters() {
     var linkPieces = $( "a.uploadbtn.in-popup").attr( "href").split( "/" );

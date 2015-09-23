@@ -1,113 +1,47 @@
 $( document ).ready( function()
 {
-    window.onresize = function() {
-        refreshPositions();
-    }
-
-    $( ".link-needfaster" ).click( function()
-    {
+    $( ".needitfaster" ).click( function() {
         var hours = new Date().getHours() + 1;
-        if( hours % 2 == 0 ) {
-        	hours += 1;
-        }
+        hours += ( hours % 2 == 0 ) ? 1 : 0;
+        hours = ( hours > 21 || hours < 7 ) ? 7 : hours;
 
-        if( hours > 21 || hours < 7 ) {
-        	hours = 7;
-        }
-
+        $( "#changeTimezone").addClass( "hide" );
+        $('#forceDeliveryContainer').removeClass('hide');
         $( "#whenTime option[value='" + hours + "']" ).attr( "selected", "selected" );
-
-        var currTmz = $( "#sel_customerTimezone").val();
-        $( "#whenTimezone option[value='" + currTmz + "']" ).attr( "selected", "selected" );
-    	
-    	refreshPositions();
-        $( "#forceDeliveryContainer" ).fadeIn( "fast" );
-        $( "#DOMWindowOverlay" ).fadeIn( "fast" );
-        $( ".delivery-manual" ).trigger( "click" );
-
+        $( "#whenTimezone option[value='" + $( "#changeTimezone").val() + "']" ).attr( "selected", "selected" );
     });
 
-    $( "#fasterdelivery" ).click( function()
-    {
-    	refreshPositions();
-        $( "#fasterDeliveryContainer" ).fadeIn( "fast" );
-        $( "#DOMWindowOverlay" ).fadeIn( "fast" );
+
+    $('.x-popup2').click(function() {
+        $( "#forceDeliveryContainer" ).addClass( "hide" );
+        $( "#changeTimezone").removeClass( "hide" );
+        $( "#forceDeliveryChosenDate").text( 0 );
+        $(".translate").trigger( "click" );
     });
 
-    $( "#DOMWindowOverlay" ).click( function()
-    {
-        $( "#forceDeliveryContainer" ).fadeOut( "fast" );
-        $( "#fasterDeliveryContainer" ).fadeOut( "fast" );
-        $( this ).fadeOut( "fast" );
+
+    $( ".popup").on( "change", "#whenTime, #whenTimezone", function() {
+        if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
+            $( "#delivery_manual_error").removeClass( "hide" );
+        } else {
+            $( "#delivery_manual_error").addClass( "hide" );
+        }
     });
 
-    $( "#fasterDeliveryContainer input[type='button']" ).click( function()
-    {
-		$( "#DOMWindowOverlay" ).trigger("click");
-    });
 
-    $( ".delivery-auto" ).click( function()
-    {
-    	$( this ).addClass( "delivery-selected" );
-    	$( ".delivery-manual" ).removeClass( "delivery-selected" );
-    	$( "input[name='whenRadio'][value='auto']" ).attr("checked", "checked");
-    	$( "input[name='whenRadio'][value='manual']" ).removeAttr("checked");
-    	$( "#whenTime" ).attr( "disabled", "disabled" );
-    	$( "#whenTimezone" ).attr( "disabled", "disabled" );
-    	$( ".datepicker a" ).attr( "style", "color: #999 !important" );
-    	$( ".datepickerDisabled a" ).attr( "style", "color: #bbb !important" );
-    	$( "#delivery_manual_error" ).hide();
-    });
+    $( ".forceDeliveryButtonOk").click( function() {
+        var chosenDate = getChosenDeliveryDate();
 
-    $( ".delivery-manual" ).click( function()
-    {
-    	$( this ).addClass( "delivery-selected" );
-    	$( ".delivery-auto" ).removeClass( "delivery-selected" );
-    	$( "input[name='whenRadio'][value='manual']" ).attr("checked", "checked");
-    	$( "input[name='whenRadio'][value='auto']" ).removeAttr("checked");
-    	$( "#whenTime" ).removeAttr( "disabled" );
-    	$( "#whenTimezone" ).removeAttr( "disabled" );
-    	$( ".datepicker a" ).attr( "style", "color: #333 !important" );
-    	$( ".datepickerDisabled a" ).attr( "style", "color: #666 !important" );
-    	checkTime();
-    });
+        if( !checkChosenDeliveryDate( chosenDate ) ) {
+            $( "#delivery_manual_error").removeClass( "hide" );
+            return;
+        }
 
-    $( ".delivery-manual-time select" ).change( function()
-    {
-    	checkTime();
-    });
+        $('#forceDeliveryContainer').addClass('hide');
+        $( "#changeTimezone").removeClass( "hide" );
 
-	$( "input[name='forceDeliveryButtonCancel']").click( function()
-	{
-		$( "#DOMWindowOverlay" ).trigger("click");
-	});
-
-    $( "input[name='forceDeliveryButtonOk']").click( function()
-    {
-    	var manualDelivery = $( "input[name='whenRadio'][value='manual']" ).is(":checked");
-    	if( manualDelivery )
-    	{
-	    	var chosenDate = checkTime();
-	    	if( !chosenDate ) return;
-	    }
-
-	    showOfferLoader();
-	    $( "#DOMWindowOverlay" ).trigger("click");
-	        
-		var url = window.location.href.substring( 0, window.location.href.indexOf( "?" ) ) + "?";
-		if( url.slice( - 1 ) == "#" || url.slice( - 1 ) == "&" ) {
-			url = url.substring(0, url.length - 1 );
-		}
-
-	    url += $( "#add_serv_cert" ).is( ":checked" ) ? "c=1&" : "";
-	    url += $( "#add_serv_rev" ).is( ":checked" ) ? "r=1&" : "";
-	    url += manualDelivery ? "f=" + (Math.floor(chosenDate/1000) + 3600) : "";
-
-		if( manualDelivery ) {
-	    	updateCustomerTimezone( $( "#whenTimezone" ).val(), url );
-	    } else {
-	        window.location.href = url;
-	    }
+        $( "#forceDeliveryChosenDate").text( chosenDate );
+        $(".translate").trigger( "click" );
     });
 
     
@@ -159,36 +93,22 @@ $( document ).ready( function()
 
 
 
-function refreshPositions()
-{
-	$( "#forceDeliveryContainer" ).css( "left", ( window.innerWidth - 680 ) / 2 );
-	$( "#forceDeliveryContainer" ).css( "top", ( window.innerHeight - 510 ) / 2 );
-
-	$( "#fasterDeliveryContainer" ).css( "left", ( window.innerWidth - 470 ) / 2 );
-	$( "#fasterDeliveryContainer" ).css( "top", ( window.innerHeight - 180 ) / 2 );
-}
-
-
-function checkTime()
-{
-	var day 	 = $( "#date2" ).DatePickerGetDate().getDate();
+function getChosenDeliveryDate() {
+    var day 	 = $( "#date2" ).DatePickerGetDate().getDate();
     var month 	 = $( "#date2" ).DatePickerGetDate().getMonth();
     var year 	 = $( "#date2" ).DatePickerGetDate().getFullYear();
     var time 	 = $( "#whenTime" ).val();
-    var timezone = $( "#whenTimezone" ).val();
+    var timezone = $( "#changeTimezone" ).val();
 
+    return new Date ( year, month, day, time, 00 ).getTime() - ( parseInt( timezone ) * 3600000 );
+}
+
+
+function checkChosenDeliveryDate( chosenDate ) {
     var baseDate = new Date();
-    var now = baseDate.getTime() + ( baseDate.getTimezoneOffset() * 60000 )
+    var now = baseDate.getTime() + ( baseDate.getTimezoneOffset() * 60000 );
 
-    var chosenDate = new Date (year, month, day, time, 00).getTime() - (parseInt(timezone) * 3600000);
-
-	if ( now > chosenDate ) {
-		$( "#delivery_manual_error" ).show();
-		return false;
-	}
-
-	$( "#delivery_manual_error" ).hide();
-	return chosenDate;
+    return chosenDate > now;
 }
 
 
@@ -1154,7 +1074,12 @@ function checkTime()
         			$( ".delivery-manual" ).trigger( "click" );
           		}
 
-          		checkTime();
+                if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
+                    $( "#delivery_manual_error").removeClass( "hide" );
+                } else {
+                    $( "#delivery_manual_error").addClass( "hide" );
+                }
+
                 return false;
             },
             prepareDate = function(options) {
