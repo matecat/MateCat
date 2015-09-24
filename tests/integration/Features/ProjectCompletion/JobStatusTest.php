@@ -9,14 +9,23 @@ class Features_ProjectCompletion_JobStatusTest extends IntegrationTest {
         $this->params = array(
             'id_job' => 1
         );
+
+        $this->markTestIncomplete();
     }
 
     function testsJSONForUncompletedJob() {
+      $this->markTestIncomplete();
     }
 
     function testsJSONForCompletedJob() {
+      $this->markTestIncomplete();
     }
 
     function testsSubmitCompletedStatus() {
+      $this->markTestIncomplete();
+    }
+
+    function testSubmitOnNonTranslatedProject() {
+      $this->markTestIncomplete();
     }
 }
