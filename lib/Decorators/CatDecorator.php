@@ -15,18 +15,18 @@ class CatDecorator {
     $this->project_completion_feature_enabled =
       $this->job->isFeatureEnabled( Features::PROJECT_COMPLETION );
 
-    $this->template->header = new HeaderDecorator( $controller ) ;
-
   }
 
   public function decorate() {
-    $this->projectCompletionFeature();
+    $this->template->header = new HeaderDecorator( $this->controller ) ;
 
+    $this->projectCompletionFeature();
     // TODO: add future presentation logic here
   }
 
   private function projectCompletionFeature() {
     $this->template->projectCompletionFeature = $this->project_completion_feature_enabled ;
+
   }
 
 }

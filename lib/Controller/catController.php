@@ -469,8 +469,6 @@ class catController extends viewController {
     }
 
     public function setTemplateVars() {
-        $this->decorator = new CatDecorator( $this, $this->template );
-        $this->decorator->decorate();
 
         $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS ;
         $this->template->copySourceInterval = INIT::$COPY_SOURCE_INTERVAL;
@@ -597,6 +595,9 @@ class catController extends viewController {
           $this->template->comments_enabled  = true ;
           $this->template->sse_base_url      = INIT::$SSE_BASE_URL ;
         }
+
+        $this->decorator = new CatDecorator( $this, $this->template );
+        $this->decorator->decorate();
     }
 
     public function getJobStats() {
