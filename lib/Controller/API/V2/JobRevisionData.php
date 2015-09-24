@@ -8,7 +8,7 @@ class API_V2_JobRevisionData extends API_V2_ProtectedKleinController {
 
     protected function validateRequest() {
         // TODO: move this query somewhere else
-        $pdo = PDOConnection::connectINIT() ;
+        $pdo = PDOConnection::connectINIT() ; // TODO this is pre PDO in Database::obtain(), change it.
         $stmt = $pdo->connection->prepare(
             'SELECT id FROM jobs WHERE id = :id_job AND password = :password'
         );

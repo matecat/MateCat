@@ -105,12 +105,12 @@ class NewController extends ajaxController {
     }
 
     private function validateAuthHeader() {
-        if ($_SERVER['HTTP_AUTH_MATECAT_KEY'] == null) {
+        if ($_SERVER['HTTP_X_MATECAT_KEY'] == null) {
             return true ;
         }
 
-        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER['HTTP_AUTH_MATECAT_KEY'] );
-        if ( $key && $key->validSecret( $_SERVER['HTTP_AUTH_MATECAT_SECRET'] ) ) {
+        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER['HTTP_X_MATECAT_KEY'] );
+        if ( $key && $key->validSecret( $_SERVER['HTTP_X_MATECAT_SECRET'] ) ) {
             Log::doLog( $key ) ;
 
             $this->current_user = $key->getUser();

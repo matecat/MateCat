@@ -20,6 +20,9 @@ Log::$uniqID = uniqid() ;
 
 $klein = new \Klein\Klein();
 
+// This is unreleased APIs. I'm no longer fond of the [i:id_job] in the path,
+// so before releasing change it use a querystring.
+//
 $klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data', function() {
     $reflect  = new ReflectionClass('API_V2_JobRevisionData');
     $instance = $reflect->newInstanceArgs(func_get_args());
@@ -30,6 +33,12 @@ $klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data/segments', functio
     $reflect  = new ReflectionClass('API_V2_JobRevisionData');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('segments');
+});
+
+$klein->respond('GET', '/api/v2/project-completion-status', function() {
+    $reflect  = new ReflectionClass('API_V2_ProjectCompletionStatus');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('status');
 });
 
 $klein->dispatch();

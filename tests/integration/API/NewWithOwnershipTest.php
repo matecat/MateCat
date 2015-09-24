@@ -24,8 +24,8 @@ class NewWithOwnershipTest extends IntegrationTest {
         $this->prepareUserAndKey();
 
         $this->headers = array(
-            "AUTH_MATECAT_KEY: {$this->test_data->api_key->api_key}",
-            "AUTH_MATECAT_SECRET: {$this->test_data->api_key->api_secret}"
+            "X-MATECAT-KEY: {$this->test_data->api_key->api_key}",
+            "X-MATECAT-SECRET: {$this->test_data->api_key->api_secret}"
         );
 
         $this->params = array(
@@ -51,8 +51,8 @@ class NewWithOwnershipTest extends IntegrationTest {
         $this->prepareUserAndKey();
 
         $this->headers = array(
-            "AUTH_MATECAT_KEY: not-a-valid-key",
-            "AUTH_MATECAT_SECRET: {$this->test_data->api_key->api_secret}"
+            "X-MATECAT-KEY: not-a-valid-key",
+            "X-MATECAT-SECRET: {$this->test_data->api_key->api_secret}"
         );
 
         $this->params = array(
