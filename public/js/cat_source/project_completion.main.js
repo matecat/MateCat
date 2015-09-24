@@ -7,10 +7,28 @@ ProjectCompletion = {
 if ( ProjectCompletion.enabled() ) {
 (function($,config,ProjectCompletion,undefined) {
 
-    console.log('projectCompletionFeature enabled');
+    var lastStats = null;
+    var sendLabel = 'SEND';
+    var sentLabel = 'SENT' ;
+    var sendingLabel = 'SENDING';
 
-    $(document).on('click', '#markAsCompleteButton', function(el) {
-        console.log( 'mark as complete click');
+    var clickableStatusClass = 'translated';
+
+    var button ;
+
+    $(function() {
+        button = $('#markAsCompleteButton');
+    });
+
+    var disableButtonToSentState = function() {
+        button.removeClass("notMarkedComplete");
+        button.addClass('isMarkedComplete');
+        button.attr('disabled', 'disabled');
+        button.val( sentLabel );
+    }
+
+    var submitProjectCompletion = function() {
+        console.log( 'submitProjectCompletion');
 
         var data = {
             action   : 'Features_ProjectCompletion_SetChunkCompleted',
@@ -19,14 +37,14 @@ if ( ProjectCompletion.enabled() ) {
         }
 
         var success = function( resp ) {
-            console.log( 'response success', resp );
-            button.removeClass('notMarkedComplete')
-                .addClass('isMarkedComplete');
+            disableButtonToSentState();
         }
 
         var error = function( error ) {
             console.log(error);
         }
+
+        button.val( sendingLabel );
 
         var request = APP.doRequest( {
             data : data ,
@@ -35,22 +53,38 @@ if ( ProjectCompletion.enabled() ) {
         });
     }
 
-    var isCompletionClickable = function() {
-        return  (
-            button.hasClass('translated') &&
-            button.hasClass('notMarkedComplete')
-        );
+    var evalSendButtonStatus = function() {
+        // assume a translation was edited, button should be clickable again
+        button.removeClass('isMarkableAsComplete isMarkedComplete');
+        button.addClass('notMarkedComplete');
+
+        if ( isClickableStatus(  ) ) {
+            button.addClass('isMarkableAsComplete');
+            button.removeAttr('disabled');
+        } else {
+            button.attr('disabled', 'disabled');
+        }
+
+        button.val( sendLabel );
     }
 
-    $(document).on('click', '#markAsCompleteButton', function(el) {
-        if ( isCompletionClickable() ) {
+    var isClickableStatus = function() {
+        return translationStatus( lastStats ) == clickableStatusClass ;
+    }
+
+    $(document).on('click', '#markAsCompleteButton', function(ev) {
+        ev.preventDefault();
+
+        if ( button.hasClass('isMarkableAsComplete')) {
             submitProjectCompletion();
         }
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
-        console.log( 'setTranslation',  data.stats );
+        console.log('setTranslation:success');
+
         lastStats = data.stats ;
+        evalSendButtonStatus();
     });
 
 

@@ -56,20 +56,19 @@ class HeaderDecorator {
         $this->mainButtonLabel        = self::MARK_AS_COMPLETE ;
         $this->mainButtonLabelReverse = self::COMPLETED ;
         $this->mainButtonClass = 'notMarkedComplete' ;
+
         if ( $this->downloadStatus() == 'draft' ) {
           $this->mainButtonEnabled = false ;
         } else {
           $this->mainButtonEnabled = true ;
+          $this->mainButtonClass .= ' isMarkableAsComplete' ;
         }
-
-
       }
-
     }
 
     private function evalForDefault() {
       $this->mainButtonId = 'downloadProject';
-      $this->mainButtonClass = 'downloadtr-button' ;
+      $this->mainButtonClass = 'downloadtr-button ' . $this->downloadStatus() ;
 
       if ( $this->isDownloadable() ) {
         $this->mainButtonLabel        = self::DOWNLOAD_TRANSLATION ;
