@@ -110,8 +110,10 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
             //for the moment, this daemon is single-loop-execution
             self::$RUNNING = false;
 
-            sleep(self::$sleeptime );
-
+            if ( self::$RUNNING ) {
+                sleep( self::$sleeptime );
+            }
+            
         } while (self::$RUNNING);
     }
 

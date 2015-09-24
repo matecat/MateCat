@@ -183,7 +183,9 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon
             Log::doLog("sleeping for 1 month");
             echo "sleeping for 1 month\n";
 
-            sleep( self::$sleeptime );
+            if ( self::$RUNNING ) {
+                sleep( self::$sleeptime );
+            }
 
         } while ( self::$RUNNING );
     }

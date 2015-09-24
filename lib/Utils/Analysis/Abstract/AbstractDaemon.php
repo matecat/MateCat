@@ -1,5 +1,11 @@
 <?php
 
+if (PHP_SAPI != 'cli' || isset ( $_SERVER ['HTTP_HOST'] )) {
+    die ( "This script can be run only in CLI Mode.\n\n" );
+}
+
+declare(ticks=1);
+
 set_time_limit(0);
 
 /**
