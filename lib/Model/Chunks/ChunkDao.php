@@ -10,13 +10,20 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
             " AND password = :password "
         );
 
-        $stmt->execute( array(
+        $params = array(
             'id_job' => $id,
-            'password' => $password )
-        );
+            'password' => $password ) ;
+
+        $stmt->execute(  $params );
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
-        return $stmt->fetch();
+        $fetched = $stmt->fetch();
+
+        if ( $fetched == false ) {
+            throw new Exceptions_RecordNotFound();
+        } else {
+            return $fetched;
+        }
     }
 
     function getByProjectID( $id_project ) {

@@ -6,17 +6,17 @@ class CatDecorator {
   private $template ;
   private $job ;
   private $project_completion_feature_enabled ;
-  private $header ;
 
   public function  __construct( $controller, $template ) {
     $this->controller = $controller ;
     $this->template = $template ;
-    $this->job = $this->controller->getJob();  ;
+    $this->job = $this->controller->getJob() ;
 
     $this->project_completion_feature_enabled =
       $this->job->isFeatureEnabled( Features::PROJECT_COMPLETION );
 
     $this->template->header = new HeaderDecorator( $controller ) ;
+
   }
 
   public function decorate() {

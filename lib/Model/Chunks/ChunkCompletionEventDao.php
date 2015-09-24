@@ -38,7 +38,6 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         // if no date is returned then the chunk cannot be completed.
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
         $latestTranslation =  $dao->lastTranslationByJobOrChunk( $chunk );
-        Log::doLog('latestTranslation', $latestTranslation);
 
         if ( $latestTranslation === false ) return false;
 

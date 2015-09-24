@@ -11,6 +11,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
        return $stmt->fetch();
     }
 
+    public function isMarkedComplete() {
+
+    }
+
     public function getChunks( ) {
         // TODO
     }

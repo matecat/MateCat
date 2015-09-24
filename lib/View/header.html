@@ -28,8 +28,15 @@
                            <input type="hidden" name="password" tal:attributes="value password" />
                            <input type="hidden" name="download_type" value="all" />
 
-                           <input type="button" class="downloadtr-button ${header/downloadStatus}"
-                           id="${header/mainButtonId}" value="${header/mainButtonLabel}" />
+                           <!-- Input button duplicated to allow `disabled` attribute to me missing completely -->
+                           <input type="button" class="${header/mainButtonClass} ${header/downloadStatus}"
+                              id="${header/mainButtonId}" value="${header/mainButtonLabel}"
+                              tal:condition="not: header/mainButtonEnabled" disabled="disabled" />
+
+                          <input type="button" class="${header/mainButtonClass} ${header/downloadStatus}"
+                              id="${header/mainButtonId}" value="${header/mainButtonLabel}"
+                              tal:condition="header/mainButtonEnabled" />
+
                        </form>
                 </a>
                 <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;

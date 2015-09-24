@@ -59,7 +59,6 @@ class catController extends viewController {
 
         parent::makeTemplate( "index.html" );
 
-
         $filterArgs = array(
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(

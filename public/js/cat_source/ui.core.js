@@ -1953,25 +1953,25 @@ console.log('changeStatus');
 		}
 	},
 	setDownloadStatus: function(stats) {
-		var t = 'approved';
-        var app = parseFloat(stats.APPROVED);
-        var tra = parseFloat(stats.TRANSLATED);
-        var dra = parseFloat(stats.DRAFT);
-        var rej = parseFloat(stats.REJECTED);
-        if (tra)
-            t = 'translated';
-        if (dra)
-            t = 'draft';
-        if (rej)
-            t = 'draft';
-        if( !tra && !dra && !rej && !app ){
-            t = 'draft';
+        var t = translationStatus( stats );
+
+        $('.downloadtr-button')
+            .removeClass("draft translated approved")
+            .addClass(t);
+
+        var downloadable = (t == 'translated' || t == 'approved') ;
+
+        if ( downloadable ) {
+            var label = 'DOWNLOAD TRANSLATION';
+        } else {
+            var label = 'PREVIEW';
         }
-		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
-        var label = (t == 'translated' || t == 'approved') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
-        var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
+
+        $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
+
+        // var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
 		$('#downloadProject').attr('value', label);
-        $('#previewDropdown').attr('data-download', isDownload);
+        $('#previewDropdown').attr('data-download', downloadable);
 	},
 	setProgress: function(stats) {
 		var s = stats;
@@ -2625,7 +2625,7 @@ console.log('changeStatus');
 //            id_segment: sidToSend,
             id_segment: id_segment,
 //            id_segment: id_segment.split('-')[0],
-            id_job: config.job_id,
+            id_job: config.id_job,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
             status: status,
@@ -2640,8 +2640,6 @@ console.log('changeStatus');
         };
         if(isSplitted) {
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
-//            console.log('aaa: ' + id_segment);
-//            console.log('bbb: ' , segment);
             this.setStatus($('#segment-' + id_segment), 'translated');
         }
         if(!propagate) {
@@ -2657,26 +2655,15 @@ console.log('changeStatus');
 			context: [reqArguments, options],
 			error: function() {
                 UI.addToSetTranslationTail(this[1]);
-/*
-                UI.addToSetTranslationTail({
-                    id_segment: this[0][0],
-                    status: this[0][1],
-                    caller: this[0][2],
-                    callback: false,
-                    byStatus: false,
-                    propagate: false
-                });
-*/
-//                UI.addToSetTranslationTail(this[0][0], this[0][1], this[0][2]);
                 UI.changeStatusOffline(this[0][0]);
                 UI.failedConnection(this[0], 'setTranslation');
                 UI.decrementOfflineCacheRemaining();
             },
-			success: function(d) {
+			success: function( d ) {
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(d, this[1]);
-//				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
+                $(document).trigger('setTranslation:success', d);
 			}
 		});
 
@@ -3281,25 +3268,18 @@ console.log('changeStatus');
         callback = options.callback;
         byStatus = options.byStatus;
         propagate = options.propagate;
-
         segment = $('#segment-' + id_segment);
-//        console.log('setTranslation_success');
+
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
 		if (d.data == 'OK') {
-//            console.log('setTranslation_success - segment: ', segment);
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
-//console.log('byStatus: ', byStatus);
-            //if this was in pending state remove
             $( segment ).removeClass( 'setTranslationPending' );
 
-			//check status of global warnings
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
-        //    $(segment).removeClass('setTranslationPending');
-//console.log('AAAA: ', JSON.stringify(byStatus));
             if((!byStatus)&&(propagate)) {
                 this.beforePropagateTranslation(segment, status);
             }
@@ -3328,7 +3308,6 @@ console.log('changeStatus');
         });
     },
     resetRecoverUnsavedSegmentsTimer: function () {
-//        console.log('setTranslation_success');
         clearTimeout(this.recoverUnsavedSegmentsTimer);
         this.recoverUnsavedSegmentsTimer = setTimeout(function() {
             UI.recoverUnsavedSetTranslations();

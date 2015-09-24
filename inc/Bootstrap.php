@@ -20,7 +20,9 @@ class Bootstrap {
             $current_env = file_get_contents( __DIR__ . '/.env' );
         }
 
-        if ( $current_env == null ) {
+        $current_env = trim(preg_replace('/\s\s+/', ' ', $current_env));
+
+        if ( $current_env == null || $current_env == '' ) {
             throw new Exception ( __METHOD__ . " -> ENV is not set." );
         }
 
