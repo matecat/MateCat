@@ -12,20 +12,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     static function uncompletedChunksByProjectId( $id_project ) {
-        // for each project you can have several jobs, one per targert language
+        // for each project you can have several jobs, one per targert language.
         // for each job you can have one or more chunks.
-        // jobs are identified by id_job and target language
-        // chunks are identified by id_job and password.
-        //
-        // translations have a reference to job, not to the chunk.
-        // in order to associate the segment_translation to the chunk we need to
-        // refer to the start and stop segment stored on the chunk.
-        //
-        // I would be great if we could have a chunk identifier on the segment_translation
-        //
-        // // for each project you can have several jobs, one per targert language
-        // for each job you can have one or more chunks.
-        // jobs are identified by id_job and target language
+        // jobs are identified by id_job and target language.
         // chunks are identified by id_job and password.
         //
         // translations have a reference to job, not to the chunk.
