@@ -48,10 +48,12 @@ class CurlTest {
     } else if (! empty($this->files)) {
       // If files are present pass an array in order to have cURL
       // use a multipart form-data.
-      curl_setopt($ch, CURLOPT_POSTFIELDS, $this->params);
+      if ( $this->params ) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->params);
+      }
     }
 
-    if ($this->method == 'GET' ) {
+    if ($this->method == 'GET' and $this->params) {
       $this->url .= "?" . http_build_query( $this->params );
     }
 

@@ -36,8 +36,6 @@ abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
     function assertJSONResponse($expected) {
         $response = $this->getResponse();
 
-        Log::doLog( $response );
-
         if ( $this->makeRequest() ) {
           $this->assertEquals( json_encode($expected), $response['body'] );
         }

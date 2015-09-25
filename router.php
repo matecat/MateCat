@@ -35,7 +35,7 @@ $klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data/segments', functio
     $instance->respond('segments');
 });
 
-$klein->respond('GET', '/api/v2/project-completion-status', function() {
+$klein->respond('GET', '/api/v2/project-completion-status/[i:id_job]', function() {
     $reflect  = new ReflectionClass('API_V2_ProjectCompletionStatus');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('status');

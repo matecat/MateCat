@@ -68,7 +68,6 @@ class NewWithOwnershipTest extends IntegrationTest {
 
         $this->assertEquals( $response['code'], 401);
         $this->assertEquals( $body->message, 'Authentication failed' );
-
     }
 
     function tests_missing_auth_sets_project_to_translated_user() {

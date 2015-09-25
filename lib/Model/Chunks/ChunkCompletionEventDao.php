@@ -14,14 +14,15 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare("INSERT INTO chunk_completion_events " .
             " ( " .
-            " id_job, password, job_first_segment, job_last_segment, " .
+            " id_project, id_job, password, job_first_segment, job_last_segment, " .
             " source, create_date, remote_ip_address, uid " .
             " ) VALUES ( " .
-            " :id_job, :password, :job_first_segment, :job_last_segment, " .
+            " :id_project, :id_job, :password, :job_first_segment, :job_last_segment, " .
             " :source, :create_date, :remote_ip_address, :uid " .
             " ); ");
 
         $stmt->execute( array(
+            'id_project'        => $chunk->getProject()->id,
             'id_job'            => $chunk->id,
             'password'          => $chunk->password,
             'job_first_segment' => $chunk->job_first_segment,
@@ -33,7 +34,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         ));
     }
 
-    public static function isCompleted( $chunk ) {
+    public static function isChunkCompleted( Chunks_ChunkStruct $chunk ) {
         // find the latest translation date for this chunk
         // if no date is returned then the chunk cannot be completed.
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
@@ -60,6 +61,21 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
 
         $fetched = $stmt->fetch();
         return $fetched != false ;
+    }
+
+    public static function isProjectCompleted( Projects_ProjectStruct $proj ) {
+        $uncompletedChunksByProjectId = Projects_ProjectDao::uncompletedChunksByProjectId( $proj->id );
+        return $uncompletedChunksByProjectId == false;
+    }
+
+    public static function isCompleted( $obj ) {
+        if ( $obj instanceof Chunks_ChunkStruct ) {
+            return self::isChunkCompleted( $obj );
+        } elseif ($obj instanceof Projects_ProjectStruct) {
+            return self::isProjectCompleted( $obj ) ;
+        } else {
+            throw new Exception( "Not a supported type" );
+        }
     }
 
     protected function _buildResult( $array_result ) {

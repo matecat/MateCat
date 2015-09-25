@@ -11,19 +11,21 @@ class ProjectCompletionStatusTest extends IntegrationTest {
             'uid' => $this->test_data->user->uid,
         ));
 
-    }
-
-    private function submitProjectWithApiKeys() {
-        $headers = array(
+        $this->test_data->headers = array(
             "X-MATECAT-KEY: {$this->test_data->api_key->api_key}",
             "X-MATECAT-SECRET: {$this->test_data->api_key->api_secret}"
         );
-        $this->test_data->project = integrationCreateTestProject( $headers );
+
     }
 
-    function testsCallOnValidProject() {
-        $this->prepareUserAndApiKey();
+    private function submitProjectWithApiKeys() {
+        $this->test_data->project = integrationCreateTestProject(
+            array('headers' => $this->test_data->headers)
+        );
+    }
 
+    private function setValidProjectWithAllTranslatedSegments() {
+        $this->prepareUserAndApiKey();
         Factory_OwnerFeature::create( array(
             'uid' => $this->test_data->user->uid,
             'feature_code' => 'project_completion'
@@ -31,13 +33,64 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
         $this->submitProjectWithApiKeys();
 
-        $chunks = integrationSetSegmentsTranslated( $this->test_data->project->id_project );
-        foreach( $chunks as $chunk ) {
-            integrationSetChunkAsComplete( $chunk );
+        $this->test_data->chunks = integrationSetSegmentsTranslated(
+            $this->test_data->project->id_project
+        );
+    }
+
+    function testsCallOnValidProject() {
+        $this->setValidProjectWithAllTranslatedSegments();
+
+        foreach( $this->test_data->chunks as $chunk ) {
+            integrationSetChunkAsComplete( array(
+                'params' => array(
+                    'id_job' => $chunk->id,
+                    'password' => $chunk->password
+                )
+            ));
         }
 
-        // TODO check everything OK
-        //
-        $this->markTestIncomplete();
+        $test = new CurlTest();
+        $test->path = '/api/v2/project-completion-status/' .
+            $this->test_data->project->id_project  ;
+        $test->method = 'GET';
+        $test->headers = $this->test_data->headers ;
+
+        $response = $test->getResponse();
+        $expected = array(
+            'project_status' => 'completed',
+        );
+
+        $this->assertEquals( json_encode($expected), $response['body'] );
+
     }
+
+    function testReturnsNonCompletedProject() {
+        $this->setValidProjectWithAllTranslatedSegments();
+
+        // foreach( $this->test_data->chunks as $chunk ) {
+        //     integrationSetChunkAsComplete( array(
+        //         'params' => array(
+        //             'id_job' => $chunk->id,
+        //             'password' => $chunk->password
+        //         )
+        //     ));
+        // }
+
+        $test = new CurlTest();
+        $test->path = '/api/v2/project-completion-status/' .
+            $this->test_data->project->id_project  ;
+        $test->method = 'GET';
+        $test->headers = $this->test_data->headers ;
+
+        $response = $test->getResponse();
+        $expected = array(
+            'project_status' => 'completed',
+        );
+
+        $this->assertEquals( json_encode($expected), $response['body'] );
+
+    }
+
+
 }

@@ -34,14 +34,14 @@ function setEnvFile($env) {
   file_put_contents(PROJECT_ROOT . 'inc/.env', $env);
 }
 
-function integrationSetChunkAsComplete( $chunk_id ) {
+function integrationSetChunkAsComplete( $options ) {
     $test = new CurlTest();
 
     if ( key_exists( 'headers' , $options ) ) {
         $test->headers = $options['headers'];
     }
 
-    $test->path = '?action=Features_ProjectCompletion_JobStatusTest';
+    $test->path = '?action=Features_ProjectCompletion_SetChunkCompleted';
     $test->method = 'POST';
     $test->params = array(
         'id_job' => $options['params']['id_job'],
@@ -89,6 +89,8 @@ function integrationSetSegmentsTranslated( $project_id ) {
             ) ) ;
         }
     }
+
+    return $chunks ;
 
 }
 
