@@ -3,18 +3,23 @@
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
     backupGlobals="false"
     backupStaticAttributes="false"
-    bootstrap="tests/test_helper.php"
+    bootstrap="test/test_helper.php"
     colors="true"
     verbose="true"
     reportUselessTests="true"
     >
     <php>
-        <includePath>tests/support</includePath>
-        <includePath>tests/support/lib</includePath>
+        <includePath>test/support</includePath>
+        <includePath>test/support/lib</includePath>
     </php>
     <testsuites>
         <testsuite name="cURL based tests">
-            <directory>tests/integration</directory>
+            <directory>test/integration</directory>
         </testsuite>
+        <!--
+        <testsuite name="legacy tests">
+            <directory>test/unit</directory>
+        </testsuite>
+        -->
     </testsuites>
 </phpunit>

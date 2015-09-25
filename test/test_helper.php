@@ -3,7 +3,7 @@
 putenv('phpunit=1');
 
 define('PROJECT_ROOT', realpath( dirname(__FILE__)) . '/../' );
-define('TEST_DIR', PROJECT_ROOT . 'tests/');
+define('TEST_DIR', realpath( dirname(__FILE__)));
 
 set_include_path ( get_include_path() . PATH_SEPARATOR . TEST_DIR );
 
