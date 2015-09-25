@@ -6,6 +6,7 @@ class Chunks_ChunkCompletionEventStruct extends DataAccess_AbstractDaoSilentStru
   const SOURCE_USER = 'user';
 
   public $id ;
+  public $id_project ;
   public $id_job ;
   public $password ;
   public $uid ;

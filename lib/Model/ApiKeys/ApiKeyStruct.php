@@ -17,7 +17,6 @@ class ApiKeys_ApiKeyStruct extends DataAccess_AbstractDaoObjectStruct implements
     public function getUser() {
         $dao = new Users_UserDao( Database::obtain() )  ;
         $user =  $dao->getByUid( $this->uid ) ;
-        Log::doLog( $user ) ;
         return $user ;
     }
 }

@@ -22,7 +22,19 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     public function isFeatureEnabled( $feature_code ) {
-      Log::doLog( 'isFeatureEnabled', $feature_code);
       return $this->getOwnerFeature( $feature_code ) !== false ;
+    }
+
+    public function getJobs() {
+      return $this->getChunks();
+    }
+
+    public function getChunks() {
+      $dao = new Chunks_ChunkDao( Database::obtain() );
+      return $dao->getByProjectID( $this->id );
+    }
+
+    public function isMarkedComplete() {
+      return Chunks_ChunkCompletionEventDao::isProjectCompleted( $this );
     }
 }

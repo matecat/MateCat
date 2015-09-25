@@ -210,7 +210,9 @@ class setTranslationController extends ajaxController {
         $check = new QA( $segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
 
+
         if ( $check->thereAreWarnings() ) {
+
             $err_json    = $check->getWarningsJSON();
             $translation = $this->translation;
         } else {
@@ -355,6 +357,8 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
+
+
         $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];

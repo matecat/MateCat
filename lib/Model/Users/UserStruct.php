@@ -28,4 +28,5 @@ class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements Dat
     public function getEmail() {
         return $this->email ;
     }
+
 }

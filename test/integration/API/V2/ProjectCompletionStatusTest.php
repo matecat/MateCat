@@ -85,7 +85,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
         $response = $test->getResponse();
         $expected = array(
-            'project_status' => 'completed',
+            'project_status' => 'not completed',
         );
 
         $this->assertEquals( json_encode($expected), $response['body'] );

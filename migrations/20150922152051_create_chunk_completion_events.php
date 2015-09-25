@@ -7,8 +7,8 @@ class CreateChunkCompletionEvents extends AbstractMigration
     public function up() {
       $table = $this->table('chunk_completion_events');
       $table
-        ->addColumn('id_job', 'biginteger', array('null' => false))
         ->addColumn('id_project', 'biginteger', array('null' => false))
+        ->addColumn('id_job', 'biginteger', array('null' => false))
         ->addColumn('uid', 'biginteger', array('null' => true))
 
         ->addColumn('job_first_segment', 'biginteger',
