@@ -1,6 +1,6 @@
 <?php
 
-class OwnerFeatures_OwnerFeaturesStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class OwnerFeatures_OwnerFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
   public $id;
   public $uid ;

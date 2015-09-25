@@ -34,8 +34,31 @@ function setEnvFile($env) {
   file_put_contents(PROJECT_ROOT . 'inc/.env', $env);
 }
 
-function integrationCreateTestProject(  ) {
+function integrationSetChunkAsComplete( $chunk_id ) {
+    $test = new CurlTest();
+
+    if ( key_exists( 'headers' , $options ) ) {
+        $test->headers = $options['headers'];
+    }
+
+    $test->path = '?action=Features_ProjectCompletion_JobStatusTest';
+    $test->method = 'POST';
+    $test->params = array(
+        'id_job' => $options['params']['id_job'],
+        'password' => $options['params']['password']
+    );
+
+    $response = $test->getResponse();
+
+    return json_decode( $response['body'] )  ;
+}
+
+function integrationCreateTestProject( $options=array() ) {
   $test = new CurlTest();
+
+  if ( key_exists( 'headers' , $options ) ) {
+      $test->headers = $options['headers'];
+  }
 
   $test->path = '/api/new' ;
   $test->method = 'POST';
@@ -49,6 +72,24 @@ function integrationCreateTestProject(  ) {
   $response = $test->getResponse();
 
   return json_decode( $response['body'] ) ;
+}
+
+function integrationSetSegmentsTranslated( $project_id ) {
+    $chunksDao = new Chunks_ChunkDao( Database::obtain() ) ;
+    $chunks = $chunksDao->getByProjectID( $project_id );
+
+    foreach( $chunks as $chunk ) {
+        $segments = $chunk->getSegments();
+        foreach( $segments as $segment) {
+            integrationSetTranslation( array(
+                'id_segment' => $segment->id ,
+                'id_job' => $chunk->id,
+                'password' => $chunk->password,
+                'status' => 'translated'
+            ) ) ;
+        }
+    }
+
 }
 
 function integrationSetTranslation($options) {

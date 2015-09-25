@@ -25,8 +25,6 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
     $values = array_diff_key( $obj->toArray(), array('id' => null) );
 
-    Log::doLog( $values );
-
     $stmt->execute( $values );
     return $this->getById( $conn->lastInsertId() )[0];
   }
