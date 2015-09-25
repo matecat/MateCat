@@ -219,27 +219,33 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'subject' ]              = $subject;
             $itemCart[ 'currency' ]             = $this->currency;
             $itemCart[ 'timezone' ]             = $this->timezone;
-            $itemCart[ 'price' ]                = $result_quote[ 'translation' ][ 'price' ];
-            $itemCart[ 'delivery' ]             = $result_quote[ 'translation' ][ 'delivery' ];
-            $itemCart[ 'r_price' ]              = $result_quote[ 'revision' ][ 'price' ];
-            $itemCart[ 'r_delivery' ]           = $result_quote[ 'revision' ][ 'delivery' ];
-            $itemCart[ 'quote_pid' ]            = $result_quote[ 'pid' ];
-            $itemCart[ 'show_info' ]            = $result_quote[ 'showquote' ];
-            $itemCart[ 'show_translator_data' ] = $result_quote[ 'show_translator_data' ];
-
-            if( $itemCart[ 'show_translator_data' ] == 1 ) {
-                $itemCart[ 't_name' ]               = $result_quote[ 'translation' ][ 'translator_name' ];
-                $itemCart[ 't_native_lang' ]        = $result_quote[ 'translation' ][ 'translator_native_lang' ];
-                $itemCart[ 't_words_specific' ]     = $result_quote[ 'translation' ][ 'translator_words_specific' ];
-                $itemCart[ 't_words_total' ]        = $result_quote[ 'translation' ][ 'translator_words_total' ];
-                $itemCart[ 't_vote' ]               = $result_quote[ 'translation' ][ 'translator_vote' ];
-                $itemCart[ 't_positive_feedbacks' ] = $result_quote[ 'translation' ][ 'translator_positive_feedbacks' ];
-                $itemCart[ 't_total_feedbacks' ]    = $result_quote[ 'translation' ][ 'translator_total_feedbacks' ];
-                $itemCart[ 't_experience_years' ]   = $result_quote[ 'translation' ][ 'translator_experience_years' ];
-                $itemCart[ 't_education' ]          = $result_quote[ 'translation' ][ 'translator_education' ];
-                $itemCart[ 't_chosen_subject' ]     = $result_quote[ 'translation' ][ 'chosen_subject' ];
-                $itemCart[ 't_subjects' ]           = $result_quote[ 'translation' ][ 'translator_subjects' ];
-                $itemCart[ 'r_vote' ]               = $result_quote[ 'revision' ][ 'revisor_vote' ];
+            $itemCart[ 'quote_result' ]         = $result_quote[ 'code' ];
+            $itemCart[ 'quote_available' ]      = $result_quote[ 'quote_available' ];
+            if( $itemCart[ 'quote_result' ] == 1 && $itemCart[ 'quote_available' ] == 1 ) {
+                $itemCart['price'] = $result_quote['translation']['price'];
+                $itemCart['delivery'] = $result_quote['translation']['delivery'];
+                $itemCart['r_price'] = $result_quote['revision']['price'];
+                $itemCart['r_delivery'] = $result_quote['revision']['delivery'];
+                $itemCart['quote_pid'] = $result_quote['pid'];
+                $itemCart['show_info'] = $result_quote['showquote'];
+                $itemCart['show_translator_data'] = $result_quote['show_translator_data'];
+                if ($itemCart['show_translator_data'] == 1) {
+                    $itemCart['t_name'] = $result_quote['translation']['translator_name'];
+                    $itemCart['t_native_lang'] = $result_quote['translation']['translator_native_lang'];
+                    $itemCart['t_words_specific'] = $result_quote['translation']['translator_words_specific'];
+                    $itemCart['t_words_total'] = $result_quote['translation']['translator_words_total'];
+                    $itemCart['t_vote'] = $result_quote['translation']['translator_vote'];
+                    $itemCart['t_positive_feedbacks'] = $result_quote['translation']['translator_positive_feedbacks'];
+                    $itemCart['t_total_feedbacks'] = $result_quote['translation']['translator_total_feedbacks'];
+                    $itemCart['t_experience_years'] = $result_quote['translation']['translator_experience_years'];
+                    $itemCart['t_education'] = $result_quote['translation']['translator_education'];
+                    $itemCart['t_chosen_subject'] = $result_quote['translation']['chosen_subject'];
+                    $itemCart['t_subjects'] = $result_quote['translation']['translator_subjects'];
+                    $itemCart['show_revisor_data'] = $result_quote['show_revisor_data'];
+                    if( $itemCart['show_revisor_data'] == 1 ) {
+                        $itemCart['r_vote'] = $result_quote['revision']['revisor_vote'];
+                    }
+                }
             }
 
             $cache_cart->addItem( $itemCart );
@@ -247,7 +253,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             Log::doLog( $itemCart );
 
             //Oops we got an error
-            if ( $result_quote[ 'code' ] != 1 ) {
+            if ( $itemCart[ 'quote_result' ] != 1 ) {
                 $failures[ $jpid ] = $jpid;
             }
 

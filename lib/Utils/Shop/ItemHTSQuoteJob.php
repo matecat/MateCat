@@ -33,6 +33,8 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'subject'             => 'general',
             'currency'            => 'EUR',
             'timezone'            => '0',
+            'quote_result'        => null,
+            'quote_available'     => null,
             'price'               => 0,
             'delivery'            => null,
             'r_price'             => 0,
@@ -52,6 +54,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             't_education'         => null,
             't_chosen_subject'    => null,
             't_subjects'          => null,
+            'show_revisor_data'   => null,
             'r_vote'              => null,
     );
 

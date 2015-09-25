@@ -46,6 +46,7 @@ $.extend(UI, {
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
 				row = $(this).parents('.tablestats');
 				$('.modal.outsource .outsourceto h2').addClass('loading');
+                $('body').addClass('showingOutsourceTo');
 
 				APP.doRequest({
 					data: {
@@ -82,20 +83,22 @@ $.extend(UI, {
                         UI.url_ko = d.return_url.url_ko;
                         UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd');
 
-                        if( chunk.price == 0 && chunk.words == '' ){
-                            console.log('Oops we got an error...');
-                            $('.tpricetitle' ).text('' ).css({'border-bottom':'none'});
-                            $('.outsource.modal .total span.euro' ).text( '' );
-                            $('.outsource.modal .total span.displayprice' ).text( '' );
-                            $('.outsource.modal .delivery span.zone2').text( '' );
-                            $('.outsource.modal .delivery').text( 'Ops we got an error, try again.' );
-                            $('.modal.outsource .outsourceto h2').removeClass('loading');
-                            $('.outsource.modal').show();
-                            $(".showprices" ).show();
+                        $( ".outsourceto").attr( "class", "outsourceto" );
+                        $('.outsource.modal .continuebtn').removeClass('disabled');
+                        $('.modal.outsource .outsourceto h2').removeClass('loading');
+
+
+                        if( chunk.quote_result != 1 ){
+                            $( ".outsourceto").addClass( "quoteError" );
                             return false;
                         }
 
-                        var showRevisionInfo = $( "input[name='revision']" ).is( ":checked" );
+                        if( chunk.quote_available != 1 ) {
+                            $(".outsourceto").addClass("quoteNotAvailable");
+                            return false;
+                        }
+
+                        var isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
 
                         // if the customer has a timezone in the cookie, then use it
                         // otherwise attemp to guess it from his browser infos
@@ -105,7 +108,7 @@ $.extend(UI, {
                         }
 
                         // update the timezone (both the displayed and the stored ones)
-                        var deliveryToShow = ( showRevisionInfo ) ?  chunk.r_delivery : chunk.delivery;
+                        var deliveryToShow = ( isRevisionChecked ) ?  chunk.r_delivery : chunk.delivery;
                         changeTimezone(deliveryToShow, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
                         changeTimezone(chunk.r_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
 
@@ -115,9 +118,6 @@ $.extend(UI, {
                          *
                          */
 
-						$('.outsource.modal .continuebtn').removeClass('disabled');
-//						console.log( chunk );
-						$('.modal.outsource .outsourceto h2').removeClass('loading');
 
 						//this tell to the ui if price box sould be displayed immediately
 						if( chunk.show_info == '1' ){
@@ -134,31 +134,42 @@ $.extend(UI, {
                         }
 
                         // update the currency (both the displayed and the stored ones)
-                        var priceToShow = ( showRevisionInfo ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
-                        changeCurrency( priceToShow, "EUR", currToShow, ".euro", ".displayprice", "#price_p_word");
+                        var priceToShow = ( isRevisionChecked ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
+                        changeCurrency( priceToShow, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
                         changeCurrency( chunk.r_price, "EUR", currToShow, ".revision_currency", ".revision_price", "" );
 
                         $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
 
                         // setting information about translator
+                        if( chunk.show_translator_data != 1 ) {
+                            $(".outsourceto").addClass("translatorNotAvailable");
+                            return false;
+                        }
+
                         var subjectsString = "";
-                        if( chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0 ) {
+                        if (chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0) {
                             subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>, " + chunk.t_subjects;
-                        } else if( chunk.t_chosen_subject.length > 0 ) {
+                        } else if (chunk.t_chosen_subject.length > 0) {
                             subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>";
                         } else {
                             subjectsString = chunk.t_subjects;
                         }
 
-                        $( ".translator_name > strong").text( chunk.t_name );
-                        $( ".experience").text( chunk.t_experience_years );
-                        $( ".subjects").html( subjectsString );
-                        $( ".translated_words").html( chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
+                        $(".translator_name > strong").text(chunk.t_name);
+                        $(".experience").text(chunk.t_experience_years);
+                        $(".subjects").html(subjectsString);
+                        $(".translated_words").html(chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
 
-                        var voteToShow = ( showRevisionInfo ) ? chunk.r_vote : chunk.t_vote;
-                        $(".score_number").text( parseInt( voteToShow ) + "%");
+                        var voteToShow = ( isRevisionChecked ) ? chunk.r_vote : chunk.t_vote;
+
+                        if( chunk.show_revisor_data != 1 ) {
+                            $(".outsourceto").addClass("revisorNotAvailable");
+                            voteToShow = chunk.t_vote;
+                        }
+
+                        $(".score_number").text(parseInt(voteToShow) + "%");
                     }
-				});
+                });
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
 				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
 
@@ -212,7 +223,7 @@ $.extend(UI, {
         $( "#changecurrency" ).change( function(){
             var currencyFrom = $( ".displayprice").attr( "data-currency" );
             var currencyTo  = $( "#changecurrency option:selected" ).val();
-            changeCurrency( $( ".displayprice").attr( "data-rawprice" ), currencyFrom, currencyTo, ".euro", ".displayprice", "#price_p_word" );
+            changeCurrency( $( ".displayprice").attr( "data-rawprice" ), currencyFrom, currencyTo, ".euro", ".displayprice", ".price_p_word" );
             changeCurrency( $( ".revision_price").attr( "data-rawprice" ), currencyFrom, currencyTo, ".revision_currency", ".revision_price", "" );
         });
 
@@ -278,6 +289,7 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
     });
 }
 
+
 function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
     var dd = new Date( date );
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
@@ -288,6 +300,7 @@ function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
 
     setCookie( "matecat_timezone", timezoneTo );
 }
+
 
 function readCookie( cookieName ) {
     cookieName += "=";

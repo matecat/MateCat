@@ -13,35 +13,22 @@ $( document ).ready( function()
 
 
     $('.x-popup2').click(function() {
-        $( "#forceDeliveryContainer" ).addClass( "hide" );
-        $( "#changeTimezone").removeClass( "hide" );
-        $( "#forceDeliveryChosenDate").text( 0 );
-        $(".translate").trigger( "click" );
+        prepareAndSubmitQuote( 0, true );
     });
 
 
     $( ".popup").on( "change", "#whenTime, #whenTimezone", function() {
-        if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
-            $( "#delivery_manual_error").removeClass( "hide" );
-        } else {
-            $( "#delivery_manual_error").addClass( "hide" );
-        }
+        prepareAndSubmitQuote( getChosenDeliveryDate(), false );
+    });
+
+
+    $( ".popup").on( "click", ".datepickerDays a, .datepickerDays span", function() {
+        prepareAndSubmitQuote( getChosenDeliveryDate(), false );
     });
 
 
     $( ".forceDeliveryButtonOk").click( function() {
-        var chosenDate = getChosenDeliveryDate();
-
-        if( !checkChosenDeliveryDate( chosenDate ) ) {
-            $( "#delivery_manual_error").removeClass( "hide" );
-            return;
-        }
-
-        $('#forceDeliveryContainer').addClass('hide');
-        $( "#changeTimezone").removeClass( "hide" );
-
-        $( "#forceDeliveryChosenDate").text( chosenDate );
-        $(".translate").trigger( "click" );
+        prepareAndSubmitQuote( getChosenDeliveryDate(), true );
     });
 
     
@@ -98,17 +85,37 @@ function getChosenDeliveryDate() {
     var month 	 = $( "#date2" ).DatePickerGetDate().getMonth();
     var year 	 = $( "#date2" ).DatePickerGetDate().getFullYear();
     var time 	 = $( "#whenTime" ).val();
-    var timezone = $( "#changeTimezone" ).val();
+    var timezone = $( "#whenTimezone" ).val();
 
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseInt( timezone ) * 3600000 );
+    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
 
 function checkChosenDeliveryDate( chosenDate ) {
     var baseDate = new Date();
-    var now = baseDate.getTime() + ( baseDate.getTimezoneOffset() * 60000 );
+    var now = baseDate.getTime()/* + ( baseDate.getTimezoneOffset() * 60000 )*/;
 
     return chosenDate > now;
+}
+
+
+function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
+    if( chosenDate != 0 && !checkChosenDeliveryDate( chosenDate ) ) {
+        $( "#delivery_manual_error").removeClass( "hide" );
+        return;
+    }
+
+    setCookie( "matecat_timezone", $( "#whenTimezone").val() );
+
+    $( "#delivery_manual_error").addClass( "hide" );
+    $( "#forceDeliveryChosenDate").text( chosenDate );
+
+    if( hideNeedItFaster ) {
+        $('#forceDeliveryContainer').addClass('hide');
+        $( "#changeTimezone").removeClass( "hide" );
+    }
+
+    $(".translate").trigger( "click" );
 }
 
 
@@ -945,6 +952,7 @@ function checkChosenDeliveryDate( chosenDate ) {
                 });
             },
             click = function(ev) {
+                var clickedOnAcceptableDay = false;
                 if ($(ev.target).is('span')) {
                     ev.target = ev.target.parentNode;
                 }
@@ -1026,6 +1034,11 @@ function checkChosenDeliveryDate( chosenDate ) {
                                     tmp.addMonths(val > 15 ? -1 : 1);
                                 }
                                 tmp.setDate(val);
+
+                                if( !( parentEl.hasClass('datepickerSaturday') || parentEl.hasClass('datepickerSunday') ) ) {
+                                    clickedOnAcceptableDay = true;
+                                }
+
                                 switch (options.mode) {
                                     case 'multiple':
                                         val = (tmp.setHours(0, 0, 0, 0)).valueOf();
@@ -1070,14 +1083,13 @@ function checkChosenDeliveryDate( chosenDate ) {
                     }
                 }
 
-                if( !$( "input[name='whenRadio'][value='manual']" ).is(":checked") ) {
-        			$( ".delivery-manual" ).trigger( "click" );
-          		}
-
                 if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
                     $( "#delivery_manual_error").removeClass( "hide" );
                 } else {
                     $( "#delivery_manual_error").addClass( "hide" );
+                    if( clickedOnAcceptableDay ) {
+                        prepareAndSubmitQuote(getChosenDeliveryDate(), false);
+                    }
                 }
 
                 return false;
