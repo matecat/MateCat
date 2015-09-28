@@ -303,7 +303,7 @@ $( function () {
         console.log( data.files[0].type );
         console.log( data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1] );
         var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
-        if ( extension == 'tmx' && config.conversionEnabled ) {
+        if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
             var tmDisabled = (typeof $( '#disable_tms_engine' ).attr( "checked" ) == 'undefined') ? false : true;
             if ( tmDisabled ) {
                 APP.alert( {

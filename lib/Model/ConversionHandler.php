@@ -54,7 +54,7 @@ class ConversionHandler {
 
             $fileType = DetectProprietaryXliff::getInfo( $file_path );
 
-            if ( DetectProprietaryXliff::isXliffExtension() ) {
+            if ( DetectProprietaryXliff::isXliffExtension() || DetectProprietaryXliff::getMemoryFileType() ) {
 
                 if ( INIT::$CONVERSION_ENABLED ) {
 
@@ -63,7 +63,7 @@ class ConversionHandler {
 
                         //if file is not proprietary AND Enforce is disabled
                         //we take it as is
-                        if ( !$fileType[ 'proprietary' ] || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
+                        if ( !$fileType[ 'proprietary' ] || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ] = 1; // OK for client
 
                             //This file has to be linked to cache!
@@ -78,7 +78,7 @@ class ConversionHandler {
                         // can handle them
                         if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter'
                                 || $fileType[ 'proprietary_short_name' ] == 'trados'
-                                || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
+                                || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ]     = 1; // OK for client
                             $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
 

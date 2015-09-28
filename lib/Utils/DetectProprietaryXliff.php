@@ -124,6 +124,42 @@ class DetectProprietaryXliff {
 
 	}
 
+	public static function getMemoryFileType( $pathInfo = array() ){
+
+		if( empty( $pathInfo ) ){
+			if ( empty( self::$fileType['info'] ) ) return false;
+		} else {
+			self::$fileType['info'] = $pathInfo;
+		}
+
+		switch( strtolower( self::$fileType['info']['extension'] ) ){
+			case 'tmx':
+				return 'tmx';
+				break;
+			case 'g':
+				return 'glossary';
+				break;
+			default:
+				return false;
+				break;
+		}
+
+	}
+
+	public static function isTMXFile( $pathInfo = array() ){
+
+		if( self::getMemoryFileType( $pathInfo ) == 'tmx' ) return true;
+		return false;
+
+	}
+
+	public static function isGlossaryFile( $pathInfo = array() ){
+
+		if( self::getMemoryFileType( $pathInfo ) == 'g' ) return true;
+		return false;
+
+	}
+
 	public static function isXliffExtension( $pathInfo = array() ){
 
         if( empty( $pathInfo ) ){
