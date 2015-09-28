@@ -69,7 +69,8 @@ module.exports = function(grunt) {
 				src: [
 					basePath + '../css/common.css',
 					basePath + '../css/style.css',
-					basePath + '../css/mbc-style.css'
+                    basePath + '../css/mbc-style.css',
+                    basePath + '../css/project-completion-feature.css'
 				],
 				dest: basePath + '../css/app.css'
 			}
@@ -80,7 +81,9 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
                 ].concat( cssFiles ) ,
+
                 tasks: ['development'],
+
                 options: {
                     interrupt: true,
                     livereload : true

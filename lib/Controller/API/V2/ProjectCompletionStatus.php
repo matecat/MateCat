@@ -55,8 +55,7 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
                         'password' => $job->password,
                         'download_url' => 'http://' . $_SERVER['HTTP_HOST'] . "/?action=downloadFile" .
                             "&id_job=" .  $job->id .
-                            "&password=" . $job->password  .
-                            "&filename=foobar.txt"
+                            "&password=" . $job->password
 
                     );
                 }

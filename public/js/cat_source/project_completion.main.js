@@ -21,6 +21,7 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     var disableButtonToSentState = function() {
+        button.removeClass("isMarkableAsComplete");
         button.removeClass("notMarkedComplete");
         button.addClass('isMarkedComplete');
         button.attr('disabled', 'disabled');
