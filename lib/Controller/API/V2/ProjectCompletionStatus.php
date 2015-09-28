@@ -9,8 +9,12 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
     }
 
     protected function validateRequest() {
-        $this->validator = new API_V2_ProjectValidator( $this->api_record, $this->request->id_project );
-        $this->feature = 'project_completion';
+        $this->validator = new API_V2_ProjectValidator(
+            $this->api_record,
+            $this->request->id_project
+        );
+        $this->validator->setFeature( 'project_completion' );
+
         if (! ($this->validator->validate() )) {
             $this->response->code(404);
             $this->response->json( array('error' => 'This project does not exist') );

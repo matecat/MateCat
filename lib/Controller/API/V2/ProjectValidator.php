@@ -5,12 +5,14 @@ class API_V2_ProjectValidator {
   private $api_record ;
   private $id_project ;
   private $project ;
-
-  public $feature ;
-
+  private $feature ;
 
   public function getProject() {
     return $this->project;
+  }
+
+  public function setFeature( $feature ) {
+    $this->feature = $feature ;
   }
 
   public function __construct( $api_record, $id_project ) {
@@ -34,7 +36,7 @@ class API_V2_ProjectValidator {
 
   private function validateFeatureEnabled() {
     return $this->feature == null ||
-      $this->project->getOwnerFeature( $this->feature ) ;
+      $this->project->getOwnerFeature( $this->feature )  ;
   }
 
   private function inProjectScope() {
