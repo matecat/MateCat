@@ -109,8 +109,8 @@ box-shadow: inset 0 0 1px 1px #888;
     margin-bottom: 20px;
     font-size: 15px;
     color: #333;
-    width: 76%;
-    margin: 1% 0%;
+    width: 71%;
+    margin: 2%;
 }
 
 .outsource.modal p {
@@ -162,6 +162,7 @@ p.translator_name {
 	font-weight: bold;
     float: left;
 	margin: 0;
+    background: #efefef;
 }
 
 .onyourown h2,
@@ -171,7 +172,7 @@ p.translator_name {
 }
 
 .onyourown a.uploadbtn.in-popup {
-    margin: 1%!important;
+    margin: 2%!important;
     width: 150px;
 }
 
@@ -200,7 +201,14 @@ margin: -10px 0 5px 40% !important;
 .revealprices img {width:140px;}
 
 
+body.showingOutsourceTo {
+    overflow: hidden;
+}
 
+
+body.showingOutsourceTo .SnapABug_Button {
+        z-index: 10000000000;
+}
 
 /* #changeTimezone, #changecurrency {
 width: auto;
@@ -308,18 +316,29 @@ clear:both;
 .pricebox .outsourceto .heading {
     margin-top: 15px;
     text-align:left;
-    margin: 0 auto 5px;
+    padding: 1% 2%;
+    margin: 0 auto;
     overflow: hidden;
+        background: #efefef;
+    border-bottom: 1px solid #ccc;
 }
 
 
 
 .guaranteed_by {
     background-color: #fff;
-    padding: 5px 0% 10px;
+    padding: 5px 2%;
     text-align: left;
-    color: #666;
+    border-bottom: 1px solid #E1E1E1;
 }
+
+.pricebox .outsourceto .guaranteed_by img {
+    width: 115px;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+
+
 
 .pricebox .outsourceto .guaranteed_by img {
     width: 115px;
@@ -369,7 +388,6 @@ margin-top: 0!important;
     width: 100%;
     border-top: 1px solid #ccc;
     text-align: center;
-    padding-top: 15px!important;
 }
 
 .pricebox .tprice,
@@ -399,18 +417,27 @@ margin-top: 0!important;
     overflow: hidden;
 }
 
+
+
 .contact_box {
     border-top: 1px dashed #ccc;
     margin: 10px;
     margin: 0 auto;
     overflow: hidden;
-    background: #fff;
-    padding: 2% 0 0;
-}
+    padding: 1% 2%;}
 
 .onyourown, .outsourceto {
-    margin: 10px auto;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+       margin: 20px auto 0 auto;
     overflow: hidden;
+}
+
+.onyourown h2,
+.contact_box h2 {
+    border-bottom: 1px solid #ccc;
+    width: 97%;
+    padding: 1% 2%;
 }
 
 .contact_box h3 {
