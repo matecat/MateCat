@@ -620,10 +620,7 @@ $.extend(UI, {
 		});
 
         $('#outer').click(function(e) {
-//            console.log('cliccato: ', e.target);
-//            console.log('a: ', !UI.currentSegment.is(e.target));
-//            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
-console.log('e.target: ', e.target);
+            console.log('e.target: ', e.target);
             var container = $(UI.currentSegment);
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container
@@ -632,7 +629,6 @@ console.log('e.target: ', e.target);
                 && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
                 )
             {
-//                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
                 UI.closeSegment(UI.currentSegment, 1);
             }
 
@@ -654,26 +650,14 @@ console.log('e.target: ', e.target);
             };
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
-            $('#downloadProject').click();
+            runDownload();
+
         }).on('click', '#previewDropdown .previewLink a', function(e) {
             e.preventDefault();
             $('.downloadtr-button.draft').click();
         }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
-            if( $('#downloadProject').hasClass('disabled') ) return false;
-            //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-            if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
-                APP.confirm({
-                    name: 'confirmDownload',
-                    cancelTxt: 'Fix errors',
-                    onCancel: 'goToFirstError',
-                    callback: 'continueDownload',
-                    okTxt: 'Continue',
-                    msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
-                });
-            } else {
-                UI.continueDownload();
-            }
+            runDownload();
 		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();

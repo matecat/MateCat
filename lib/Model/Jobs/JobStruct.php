@@ -5,15 +5,17 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
   public $password;
   public $id_project ;
   public $create_date ;
-  public $last_opened_segment ;
 
   public $job_first_segment ;
   public $job_last_segment ;
 
-  public $last_update ;
   public $source ;
   public $target ;
   public $tm_keys ;
+
+  public function getFile() {
+    return Files_FileDao::getByJobId( $this->id );
+  }
 
   public function getProject() {
     return Projects_ProjectDao::findById( $this->id_project );

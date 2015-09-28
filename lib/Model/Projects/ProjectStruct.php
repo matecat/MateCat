@@ -26,7 +26,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     public function getJobs() {
-      return $this->getChunks();
+      return Jobs_JobDao::getByProjectId( $this->id );
     }
 
     public function getChunks() {

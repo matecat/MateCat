@@ -461,6 +461,24 @@ function selectText(element) {
 	}
 }
 
+function runDownload() {
+    if( $('#downloadProject').hasClass('disabled') ) return false;
+
+    //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+    if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
+        APP.confirm({
+            name: 'confirmDownload',
+            cancelTxt: 'Fix errors',
+            onCancel: 'goToFirstError',
+            callback: 'continueDownload',
+            okTxt: 'Continue',
+            msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
+        });
+    } else {
+        UI.continueDownload();
+    }
+}
+
 function translationStatus(stats) {
     var t = 'approved';
     var app = parseFloat(stats.APPROVED);
