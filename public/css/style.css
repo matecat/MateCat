@@ -1598,7 +1598,7 @@ body.review .loader
 
 .source-title{margin:3px 0 0 20px !important;}
 .target-title{float:right; margin:3px 30px 0 0}
-.header{height: 20px; width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
+.header{height: 20px; width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom: 0px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
 
 
 .header .repetition
@@ -1767,7 +1767,7 @@ z-index: 10000;
 	width: 100%;
 	height:96%;
 	line-height:30px;
-	min-height: 70px;
+	min-height: 30px;
 	resize: none;
 	overflow:hidden;
 	margin:2px 0 0px -11px;
@@ -1989,8 +1989,8 @@ textarea, input, .editarea, .search-editarea, select  {
 	float:left;
     width: 99%;
 	height:100%;
-	padding-bottom:8px;
-	padding-top:15px;
+	padding-bottom: 0px;
+	padding-top: 5px;
 
 }
 .editor .wrap{/*padding-bottom:25px; */height:87% !important;}
@@ -3377,7 +3377,12 @@ color: #444!important;
 }
 
 section .toolbar {
-margin-left: -10px;
+    display: none;
+    margin-left: -10px;
+}
+
+section.editor .toolbar {
+    display: block;
 }
 
 .tagModeToggle span {
