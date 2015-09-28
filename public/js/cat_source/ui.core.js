@@ -499,20 +499,22 @@ console.log('changeStatus');
 
 
 		UI.footerHTML =	'<ul class="submenu">' +
-					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
+                    '	<li class="footerSwitcher">' +
+                    '	</li>' +
+                    '	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
+					'	<li class="tab-switcher tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
 					'		<a tabindex="-1" href="#">Concordance</a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
+					'	<li class="tab-switcher tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
+					'	<li class="tab-switcher tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
 					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'</ul>' +
-					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
+					'<div class="tab sub-editor matches open" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
 					'</div>' +
 					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
@@ -3465,6 +3467,25 @@ console.log('changeStatus');
         });
 
     },
+    switchFooter: function() {
+        console.log('switchFooter');
+        this.body.toggleClass('hideMatches');
+        $.cookie('hideMatches-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+    },
+    setHideMatches: function () {
+        console.log('setHideMatches');
+        if(typeof $.cookie('hideMatches-' + config.job_id) != 'undefined') {
+            if($.cookie('hideMatches-' + config.job_id) == 'true') {
+                UI.body.addClass('hideMatches')
+            } else {
+                UI.body.removeClass('hideMatches')
+            }
+        } else {
+            $.cookie('hideMatches-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+        }
+
+    },
+
 
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');

@@ -43,6 +43,7 @@ $.extend(UI, {
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
         this.fixHeaderHeightChange();
+        this.setHideMatches();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();

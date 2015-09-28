@@ -409,7 +409,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 .sid .txt {
     padding: 10px 0;
     background:#fff;
-    margin:20px 8px 0 8px;
+    margin:12px 8px 0 8px;
 }
 
 
@@ -605,7 +605,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 
-.buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin:20px 0 0 0;position:absolute;right:0;}
+.buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin: 10px 0 0 0;position:absolute;right:0;}
 .buttons li{float:left;text-align:center;margin:0px 0 20px 0px;height:35px;width:auto !important;padding:0 !Important}
 .buttons p {margin:2px 0 0 5px;font-size:11px;font-weight:normal;color:#666;display:none;text-align:center;}
 
@@ -1089,6 +1089,7 @@ section.loaded .submenu {display: block; }
     background: #efefef url(../img/point.gif) 0 0 repeat-x;
     z-index: 9999999999999;
 }
+
 .tab-switcher-al
 {
 	display: none;
@@ -1139,14 +1140,23 @@ body.noGlossary .tab-switcher-gl
 	float: left;
 	width: 100%;
     background: #fff !important;
-}   
+}
+.sub-editor.open
+{
+    display: block;
+}
+/*
 .sub-editor.matches
 {
 	display: block;
 }
+*/
+body.hideMatches .sub-editor {
+    display: none !important;
+}
 .sub-editor.matches .overflow
 {
-    min-height: 30px;;
+    min-height: 27px;
 }
 .addtmx-tr .open-popup-addtm-tr {
 height: 17px;
@@ -1716,7 +1726,11 @@ z-index: 10000;
   height: 100%;
 }
 
-.source{line-height:30px;padding-top:9px !important;}
+.source
+{
+    line-height: 27px;
+    padding-top: 9px !important;
+}
 .editor .source
 {
     padding-top: 4px !important;
@@ -1745,7 +1759,9 @@ z-index: 10000;
     word-wrap: break-word;
     word-break: normal;
 }
-
+.text .source.item {
+    padding-bottom: 10px;
+}
 
 
 /*
@@ -1766,8 +1782,8 @@ z-index: 10000;
 	/*float:right;*/
 	width: 100%;
 	height:96%;
-	line-height:30px;
-	min-height: 30px;
+	line-height: 27px;
+	min-height: 27px;
 	resize: none;
 	overflow:hidden;
 	margin:2px 0 0px -11px;
@@ -3140,7 +3156,7 @@ float: left;
 	display: block;
 	visibility: hidden;
 	margin-top: -6px;
-	padding-top:10px;
+	padding-top: 4px;
 }
 .editToolbar.visible
 {
@@ -3755,7 +3771,7 @@ color:red !important;
 
 .track-changes p {
   width: 100%;
-  line-height: 30px;
+  line-height: 27px;
   margin: 36px auto 17px auto;
   min-height: 70px;
   text-align: left;
@@ -3821,7 +3837,7 @@ body.cattool .nav-tabs li.mgmt-mt {
   outline:0;
   text-align: left;
   border-radius: 2px;
-  line-height: 30px;
+  line-height: 27px;
   font-size: 18px;
   color: #000;
   border: 1px solid #727272;
@@ -3883,3 +3899,20 @@ body.cattool .nav-tabs li.mgmt-mt {
     border: 1px solid yellow;
     border-radius: 3px;
 }
+.submenu li.footerSwitcher {
+    float: left;
+    width: 20px !important;
+    height: 27px;
+    border-right: 1px solid #000;
+    background: #fff url(../img/arrow-notification.png) 5px 9px no-repeat !important;
+    background-size: 10px !important;
+    cursor: pointer;
+}
+body.hideMatches .submenu li.footerSwitcher {
+    background-image: url(../img/arrow-stats.png) !important;
+}
+
+body.hideMatches .submenu {
+    margin-bottom: 8px;
+}
+
