@@ -98,24 +98,37 @@ class editlogController extends viewController {
         $this->template->pname       = $this->data[ 0 ][ 'pname' ];
         $this->template->source_code = $this->data[ 0 ][ 'source_lang' ];
         $this->template->target_code = $this->data[ 0 ][ 'target_lang' ];
-        $this->template->overall_tte = round(
-                                          $this->languageStatsData->total_time_to_edit / (1000 * $this->languageStatsData->total_wordcount ),
-                                          2
-                                       );
 
-        $this->template->overall_pee = round(
-                                        $this->languageStatsData->total_postediting_effort / ( $this->languageStatsData->job_count ),
-                                        2
-                                       );
+        /*
+         * Evaluate TTE and set it in the template
+         * NOTICE:  TTE is assigned to a variable because it's needed in future evaluations.
+         *          Otherwise it wouldn't be accessible
+         */
+        $__overallTTE = round(
+            $this->languageStatsData->total_time_to_edit / (1000 * $this->languageStatsData->total_wordcount ),
+            2
+        );
+        $this->template->overall_tte = $__overallTTE;
+
+        /*
+        * Evaluate PEE and set it in the template
+        * NOTICE:  PEE is assigned to a variable because it's needed in future evaluations.
+        *          Otherwise it wouldn't be accessible
+        */
+        $__overallPEE = round(
+            $this->languageStatsData->total_postediting_effort / ( $this->languageStatsData->job_count ),
+            2
+        );
+        $this->template->overall_pee = $__overallPEE;
 
         $this->template->pee_slow  = false;
         $this->template->tte_fast  = false;
 
-        if($this->stats['total-valid-tte'] < $this->template->overall_tte ) {
+        if($this->stats['total-tte-seconds'] < $__overallTTE ) {
             $this->template->tte_fast = true;
         }
 
-        if($this->stats['avg-pee'] + self::PEE_THRESHOLD < $this->template->overall_pee){
+        if($this->stats['avg-pee'] + self::PEE_THRESHOLD < $__overallPEE ){
             $this->template->pee_slow  = true;
         }
 
@@ -133,6 +146,8 @@ class editlogController extends viewController {
 
         $this->template->jobOwnerIsMe        = ( $this->logged_user[ 'email' ] == $this->jobData['owner'] );
     }
+
+
 }
 
 
