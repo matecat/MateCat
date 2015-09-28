@@ -6,7 +6,8 @@ module.exports = function(grunt) {
     var cssFiles = [
         basePath + '../css/common.css',
         basePath + '../css/style.css',
-        basePath + '../css/mbc-style.css'
+        basePath + '../css/mbc-style.css',
+        basePath + '../css/project-completion-feature.css'
     ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );

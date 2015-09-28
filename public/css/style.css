@@ -649,7 +649,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
 
-.approved, .isMarkedComplete
+.approved
     {
     background:#7cc576;
     color:#fff !important;

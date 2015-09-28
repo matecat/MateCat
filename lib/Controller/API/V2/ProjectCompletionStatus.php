@@ -9,7 +9,7 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
     }
 
     protected function validateRequest() {
-        $project_id = $this->request->id_job;
+        $project_id = $this->request->id_project;
         // check project has the correct id_customer
         $this->project = Projects_ProjectDao::findById( $project_id );
         if ( !$this->validateProjectAccess() ) {
@@ -39,18 +39,34 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
 
     public function status() {
         // TODO: move this in to a json presenter class
+        $uncompleted = Projects_ProjectDao::uncompletedChunksByProjectId(
+            $this->project->id
+        );
+
+        $response = array();
+
         try {
-            if ( $this->project->isMarkedComplete() ) {
-                $completed = 'completed';
+            if ( count($uncompleted) > 0 ) {
+                $response['completed'] = false;
+                $response['chunks'] = array();
+
+                foreach($uncompleted as $chunk) {
+                    $response['chunks'][] = array(
+                        'id' => $chunk->id,
+                        'password' => $chunk->password
+                    );
+                }
+
             } else  {
-                $completed = 'not completed';
+                $response['completed'] = true;
             }
+
         } catch ( Exception $e ){
             Log::doLog( $e->getMessage() ) ;
         }
 
         $this->response->json( array(
-            'project_status' => $completed
+            'project_status' => $response
         ) ) ;
     }
 }
