@@ -422,7 +422,6 @@ class setTranslationController extends ajaxController {
             try {
                 
                 //THIS IS THE WORST SOLUTION
-                
 //                $updateJobCountersWithQuery = false;
 //                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
 //                $totalWords                 = array_sum( array(
@@ -463,6 +462,20 @@ class setTranslationController extends ajaxController {
 
         } else {
             $newTotals = $old_wStruct;
+        }
+
+        //update total time to edit
+        try{
+            updateTotalTimeToEdit($this->id_job, $this->password, $this->time_to_edit);
+        }
+        catch ( Exception $e ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+            Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+//                $x1 = explode( "\n" , var_export( $old_translation, true) );
+//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
+            $db->rollback();
+
+            return $e->getCode();
         }
 
         $job_stats = CatUtils::getFastStatsForJob( $newTotals );
