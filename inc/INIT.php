@@ -84,7 +84,7 @@ class INIT {
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
-    public static $MAX_UPLOAD_TMX_FILE_SIZE = 104857600;    // 100 * 1024 * 1024; // bytes
+    public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
