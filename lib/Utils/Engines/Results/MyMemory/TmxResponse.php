@@ -16,6 +16,7 @@ class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractRespo
 
         $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
         $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
+        $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';
 
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
 
