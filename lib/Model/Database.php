@@ -90,6 +90,11 @@ class Database implements IDatabase {
         $this->connection = null;
     }
 
+    public function reconnect() {
+      $this->close();
+      $this->getConnection();
+    }
+
 
     /**
      * @Override

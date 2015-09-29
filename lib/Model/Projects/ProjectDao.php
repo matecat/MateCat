@@ -42,13 +42,14 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
             "( $query_most_recent_completion_events_for_chunk ) ch ON " .
             " st.id_segment BETWEEN ch.job_first_segment AND ch.job_last_segment " .
             " AND st.id_job = ch.id_job AND ch.id_project = :id_project " .
-            " AND ch.create_date <= st.translation_date" ;
+            " AND ch.create_date < st.translation_date" ;
 
         // This query should return no records, meaning all jobs have at least one
         // submitted chunk completion event.
         $query_to_return_unsubmitted_chunks = "SELECT jobs.id as id_job, jobs.password " .
             " FROM jobs LEFT JOIN chunk_completion_events ch ON " .
-            " jobs.id = ch.id_job AND jobs.password AND " .
+            " jobs.id = ch.id_job AND " .
+            " jobs.password = ch.password AND " .
             " jobs.job_first_segment = ch.job_first_segment AND " .
             " jobs.job_last_segment = ch.job_last_segment AND " .
             " jobs.id_project = ch.id_project " .
@@ -63,9 +64,12 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
             " ON jobs.id = filtered.id_job AND jobs.password = filtered.password " ;
 
         $conn = Database::obtain()->getConnection();
+        Log::doLog( $query_to_return_chunks );
         $stmt = $conn->prepare( $query_to_return_chunks ) ;
         $stmt->execute( array('id_project' => $id_project ) );
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
+
+
         return $stmt->fetchAll();
     }
 

@@ -40,8 +40,10 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
     function testsCallOnValidProject() {
         $this->setValidProjectWithAllTranslatedSegments();
+        $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
 
-        sleep(1); // avoid race conditions with database datetimes comparison
+        var_dump(Projects_ProjectDao::uncompletedChunksByProjectId( $project->id ));
+
         foreach( $this->test_data->chunks as $chunk ) {
             integrationSetChunkAsComplete( array(
                 'params' => array(
