@@ -51,7 +51,7 @@
         <div class="popup">
             <a href="#" class="x-popup"></a>
 
-		<h1><span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h1>
+		<h1>Choose how to translate: <span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h1>
 
         <!--    <h1>Choose the best way to translate</h1> -->
 
@@ -65,8 +65,10 @@
                     <div class="outsourceto">
                             <div class="total_outsource">
                                 <div class="heading">
-                                    <h2>Outsource Project Management + Translation</h2>  
+                                    <h2>Outsource Project Management + Translation<span class="revision_heading hide"> + Revision</span></h2>
+                        
                                     <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show prices</a> 
+
                                              
                                              <select id="changecurrency">
                                         <option value="EUR" data-symbol="€">Euro (EUR)</option>
@@ -88,7 +90,7 @@
                                     
                                              
                                             <select id="changeTimezone">
-                                                <option value="-11" data-timezone="-11">(GMT -11:00 ) Midway Islands, American Samoa</option>
+                                                <option value="-11" data-timezone="GMT -11">(GMT -11:00 ) Midway Islands, American Samoa</option>
                                                 <option value="-10" data-timezone="-10">(GMT -10:00 ) Hawaii, Tahiti, Cook Islands</option>
                                                 <option value="-9" data-timezone="-9">(GMT -9:00 ) Alaska</option>
                                                 <option value="-8" data-timezone="-8">(GMT -8:00 ) Pacific Standard Time (LA, Vancouver)</option>
@@ -122,21 +124,27 @@
                                 </div>
                                 <div class="offer">
                                     <div class="guaranteed_by">
-                                        Guaranteed by
-                                        <img src="/public/img/logo_translated.png"/>
-                                        <a class="show_translator">How we guarantee quality</a>
-                                    </div>
+                                        <div class="trust_text">
+                                        <strong>Guaranteed by</strong>
+                                        <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
+                                               
+                                            <p>Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)
+                                                            and keep using the same translator for your next projects. <a class="show_translator">Read more.</a></p>
+                                           
                                    
-                                            <div class="translator_info_box hide">
-                                                <div class="trustbox">
-                                                        <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">
-                                                        T-Rank</a> to select our best translator in this field (<strong>${subject | string:IT}</strong>)
-                                                        and keep using the <strong>same translator</strong> for your next projects.
-                                                        <p>We have more than 15 years' experience as a language services provider.
-                                                        We offer two key guarantees on quality and delivery, <a href="http://www.translated.net/en/T-Rank" target="_blank">read more</a>.</p>
-                                                        </p>
+                                            <p class="trustbox hide">
+                                                        
+                                                        We have more than 15 years' experience as a language services provider.
+                                                        <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">We offer two key guarantees on quality and delivery</a>.
+                                                        <br />
+                                                        <a class="hide_translator hide">Close.</a>
                                                    
-                                                </div>
+                                                </p>
+                                             
+                                            </div>
+                                             
+                                            <div class="translator_info_box hide">
+                                                
                                                 <div class="translator_info">
                                                     <div class="translator_bio">
                                                         <span class="translator_name">Translator: <strong></strong></span>
@@ -161,7 +169,7 @@
                                                 </div>
                                             </div>
 
-                                   
+                                        </div>
                                         <div class="delivery">
                                             <div class="delivery_label">Delivery by:</div>
                                             <div class="delivery_details">
@@ -170,15 +178,12 @@
                                                 <br />
                                                 <a class="needitfaster">Need it faster?</a>
                                             </div>
-                                        </div>
+                                        </div>                                      
                                         <div class="tprice">
-
-                                            <span class="euro">€</span>
+                                            <span class="euro"></span>
                                             <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
                                             <br />
-                                            <span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a class="price_p_word">0.10</a> / word</span>
-                                            </div>
-                                            <div class="torder">
+                                            <span class="displaypriceperword">about <span class="euro currency_per_word"></span> <a class="price_p_word"></a> / word</span>
                                                 <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
                                                     <input type="hidden" name="url_ok" value=""/>
                                                     <input type="hidden" name="url_ko" value=""/>
@@ -189,7 +194,7 @@
                                             </div>
                                        
                                         <div class="addrevision">
-                                             <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span class="revision_delivery">Delivery: 19th September at 2:00 PM (GMT +1:00) </span><span class="revision_price_box">+ <span class="revision_currency">€</span><span class="revision_price">9.36</span></span>
+                                             <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span class="revision_delivery"></span><span class="revision_price_box">+ <span class="revision_currency"></span><span class="revision_price"></span></span>
                                         </div>
                                     </div>
                                    
@@ -233,7 +238,7 @@
                         <option value="21">21 (evening)</option>
                     </select>
                     
-                    <br /><br /><br />
+                    <br /><br />
                     
                     <h3>Confirm your timezone</h3>
                     <select id="whenTimezone" name="whenTimezone">
@@ -274,25 +279,15 @@
                         <div>* Chosen delivery date is in the past</div>
                     </div>
                     
-                    
+                    <input type="hidden" id="datePickerSelectedDate" value=""  />
+                        <input type="hidden" id="datePickerSelectedDatePrint" value="" />
+                        <input name="forceDeliveryButtonOk" type="button" value="Continue" class="uploadbtn in-popup forceDeliveryButtonOk" />
                     
                         
                 </div>
-                <div class="deliverybuttons">
-                <div class="tprice">
-                <h3 class="updatedprice">Updated price</h3>
-                 <span class="euro">€</span>
-                                            <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
-                                            <br />
-                                            <span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a class="price_p_word">0.10</a> / word</span>
-                                            </div>                 
-                       
-
-                </div>
+              
                 
-                 <input type="hidden" id="datePickerSelectedDate" value=""  />
-                        <input type="hidden" id="datePickerSelectedDatePrint" value="" />
-                        <input name="forceDeliveryButtonOk" type="button" value="Continue" class="uploadbtn in-popup forceDeliveryButtonOk" />
+                 
             </div>
             
             

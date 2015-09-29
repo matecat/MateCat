@@ -22,12 +22,39 @@ $.extend(UI, {
         });
 
         $('.show_translator').click(function() {
+            $(this).toggleClass('hide');
+            $('.guaranteed_by').toggleClass('expanded');
+            $('.delivery,.tprice').toggleClass('compress');
+            $('.trustbox').toggleClass('hide');
             $('.translator_info_box').toggleClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
+            $('.hide_translator').toggleClass('hide');
+        });
+        $('.hide_translator').click(function() {
+            $(this).toggleClass('hide');
+            $('.guaranteed_by').toggleClass('expanded');
+            $('.delivery,.tprice').toggleClass('compress');
+            $('.trustbox').toggleClass('hide');
+            $('.translator_info_box').toggleClass('hide');
+            $('#forceDeliveryContainer').addClass('hide');
+            $('.show_translator').toggleClass('hide');
         });
 
+        $('#changeTimezone').on('change', function(e){ 
+            var datatimezone = $(this).find("option:selected").attr("data-timezone");
+            console.log(datatimezone);
+            $(this).find("option:selected").text('GMT ' + datatimezone);           
+            e.preventDefault();
+        }); 
+     
         $( "input[name='revision']" ).click(function() {
             $(".translate").trigger( "click" );
+            $('.delivery span,.tprice .euro, .tprice .displayprice').toggleClass('blink');
+        });
+
+        $('.addrevision input').change(function () {
+            $(this).parent().toggleClass('noopacity');
+            $('.revision_delivery, .revision_price, .revision_price_box, .revision_heading').toggleClass('hide');
         });
 
         //Added .translate class in html button because of double call to
