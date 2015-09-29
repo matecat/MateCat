@@ -807,7 +807,7 @@ box-shadow: 0 1px 2px #ccc;
     display: none;
     position: absolute;
     float: left;
-    margin-left: 47.4%;
+    margin-left: 47%;
     margin-top: 5px;
     background: url(../img/outercopy.png) center 1px no-repeat;
     width: 50px !important;
@@ -1608,7 +1608,20 @@ body.review .loader
 
 .source-title{margin:3px 0 0 20px !important;}
 .target-title{float:right; margin:3px 30px 0 0}
-.header{height: 20px; width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom: 0px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
+.header
+{
+    height: 5px;
+    width:100%;
+    color:#a7a9ac;
+    font-size:12px;
+    float:left;
+    text-align:left;
+    background:#efefef;
+    border-bottom:1px solid #ccc;
+    margin-bottom: 0px;
+    -webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;
+    box-shadow: inset 0 1px 1px 1px #f4f7f9;
+}
 
 
 .header .repetition
@@ -1661,7 +1674,7 @@ body.review .loader
     height:20px;
     text-align:center;
     width:25px;
-    top:-9px;
+    top: -10px;
     position:absolute;
     left:46.8%;
     color:#fff;
@@ -1670,6 +1683,9 @@ body.review .loader
     font-weight:bold;
     cursor:default;
     padding:0 10px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    z-index: 999;
 }
 /*
 .editor .percentuage{display:block !important;}
@@ -2196,7 +2212,19 @@ body.archived section .status-container a.status:hover
     cursor: default !important;
 }
 
-.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:15px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
+.editor .status
+{
+    width: 8px;
+    display: block;
+    position: absolute;
+    right: 0;
+    height: 97%;
+    padding-bottom: 15px;
+    background: #f5f5f5;
+    top: 3%;
+    margin: -6px 0 0 0 !important;
+    border-bottom: 0;
+}
 
 
 
@@ -3913,6 +3941,6 @@ body.hideMatches .submenu li.footerSwitcher {
 }
 
 body.hideMatches .submenu {
-    margin-bottom: 8px;
+    margin-bottom: 5px;
 }
 
