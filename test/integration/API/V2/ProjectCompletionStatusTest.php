@@ -41,6 +41,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
     function testsCallOnValidProject() {
         $this->setValidProjectWithAllTranslatedSegments();
 
+        sleep(1); // avoid race conditions with database datetimes comparison
         foreach( $this->test_data->chunks as $chunk ) {
             integrationSetChunkAsComplete( array(
                 'params' => array(
@@ -50,16 +51,31 @@ class ProjectCompletionStatusTest extends IntegrationTest {
             ));
         }
 
+        $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
+        $expected_jobs = array();
+
+        foreach ($project->getJobs()  as $job) {
+            $expected_jobs[] = array(
+                'id' => $job->id,
+                'password' => $job->password ,
+                'download_url' => "http://localhost/?action=downloadFile&id_job=$job->id&password=$job->password"
+            );
+        }
+
+        $expected = array(
+            'project_status' => array(
+                'id' => $this->test_data->project->id_project,
+                'jobs' => $expected_jobs,
+                'completed' => true,
+            )
+        );
+
         $test = new CurlTest();
         $test->path = '/api/v2/project-completion-status/' .
             $this->test_data->project->id_project  ;
         $test->method = 'GET';
         $test->headers = $this->test_data->headers ;
-
         $response = $test->getResponse();
-        $expected = array(
-            'project_status' => array('completed' => true)
-        );
 
         $this->assertEquals( json_encode($expected), $response['body'] );
 
@@ -101,6 +117,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $first_chunk = $chunks[0];
         $second_chunk = $chunks[1];
 
+        sleep(1); // avoid race conditions with database datetimes comparison
         integrationSetChunkAsComplete( array(
             'params' => array(
                 'id_job' => $first_chunk->id,
@@ -108,6 +125,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
             )
         ));
 
+        sleep(0.5);
         $test = new CurlTest();
         $test->path = '/api/v2/project-completion-status/' .
             $this->test_data->project->id_project  ;
@@ -117,6 +135,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $response = $test->getResponse();
         $expected = array(
             'project_status' => array(
+                'id' => $this->test_data->project->id_project,
                 'completed' => false,
                 'chunks' => array(
                     array(

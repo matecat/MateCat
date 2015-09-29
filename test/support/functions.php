@@ -113,6 +113,10 @@ function integrationSetTranslation($options) {
   $test->path = '?action=setTranslation';
   $response =  $test->getResponse();
 
+  if ( !in_array( (int) $response['code'], array(200, 201) )) {
+      throw new Exception( "invalid response code " . $response['code'] );
+  }
+
   return json_decode( $response['body'] )  ;
 
 }
