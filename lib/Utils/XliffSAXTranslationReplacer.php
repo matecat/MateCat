@@ -79,7 +79,7 @@ class XliffSAXTranslationReplacer {
                preprocess file
              */
             // obfuscate entities because sax automatically does html_entity_decode
-            $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+             $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
 
             $lastByte = $temporary_check_buffer[ strlen( $temporary_check_buffer ) - 1 ];
 
