@@ -516,7 +516,7 @@ section:hover .mbc-comment-link {
 .mbc-comment-link .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  margin:20px auto 0;
+  margin: 6px auto 0;
   padding: 10px 0;
   position: relative;
   width: 80px;
