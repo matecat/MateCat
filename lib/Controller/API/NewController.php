@@ -493,7 +493,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ]      = 'Success';
             $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
             $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
-            $this->api_output[ 'analyze_path' ] = "/analyze/" .
+            $this->api_output[ 'analyze_path' ] = INIT::$HTTPHOST . "/analyze/" .
                 $projectStructure[ 'project_name' ] . "/" .
                 $projectStructure[ 'result' ][ 'id_project' ] . "-" .
                 $projectStructure[ 'result' ][ 'ppassword' ];

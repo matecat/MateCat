@@ -42,7 +42,7 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
                     $response['jobs'][] = array(
                         'id' => $job->id,
                         'password' => $job->password,
-                        'download_url' => 'http://' . $_SERVER['HTTP_HOST'] . "/?action=downloadFile" .
+                        'download_url' => INIT::$HTTPHOST . "/?action=downloadFile" .
                             "&id_job=" .  $job->id .
                             "&password=" . $job->password
 
