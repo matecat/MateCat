@@ -3586,8 +3586,9 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 
 
 .outersource .copy {
-background: url(../img/outercopy@2x.png) center 1px no-repeat;
-background-size: 12px 11px;
+    top: 7px;
+    background: url(../img/outercopy@2x.png) center 1px no-repeat;
+    background-size: 12px 11px;
 }
 
 .outersource .copy:hover {
