@@ -89,7 +89,7 @@ class NewTest extends IntegrationTest {
         $this->assertEquals( 'OK',      $response->status );
         $this->assertNotNull( $response->id_project );
         $this->assertNotNull( $response->project_pass );
-        $this->assertNotNull( $response->analyze_path );
+        $this->assertNotNull( $response->analyze_url );
 
         $filesDao = new Files_FileDao( Database::obtain() );
 
