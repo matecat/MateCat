@@ -54,7 +54,7 @@ class ConversionHandler {
 
             $fileType = DetectProprietaryXliff::getInfo( $file_path );
 
-            if ( DetectProprietaryXliff::isXliffExtension() ) {
+            if ( DetectProprietaryXliff::isXliffExtension() || DetectProprietaryXliff::getMemoryFileType() ) {
 
                 if ( INIT::$CONVERSION_ENABLED ) {
 
@@ -64,7 +64,7 @@ class ConversionHandler {
                         //ONLY IDIOM is forced to be converted
                         //if file is not proprietary like idiom AND Enforce is disabled
                         //we take it as is
-                        if ( !$fileType[ 'proprietary' ] || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
+                        if ( !$fileType[ 'proprietary' ] || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ] = 1; // OK for client
 
                             //This file has to be linked to cache!
@@ -75,7 +75,7 @@ class ConversionHandler {
 
                         //if conversion enforce is active
                         //we force all xliff files but not files produced by SDL Studio because we can handle them
-                        if ( $fileType[ 'proprietary_short_name' ] == 'trados' || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
+                        if ( $fileType[ 'proprietary_short_name' ] == 'trados' || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ]     = 1; // OK for client
                             $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
 
