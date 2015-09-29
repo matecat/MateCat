@@ -42,7 +42,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
             "( $query_most_recent_completion_events_for_chunk ) ch ON " .
             " st.id_segment BETWEEN ch.job_first_segment AND ch.job_last_segment " .
             " AND st.id_job = ch.id_job AND ch.id_project = :id_project " .
-            " AND ch.create_date < st.translation_date" ;
+            " AND ch.create_date <= st.translation_date" ;
 
         // This query should return no records, meaning all jobs have at least one
         // submitted chunk completion event.
