@@ -35,17 +35,6 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
 
         try {
             if ( $is_completed ) {
-                $response['completed'] = false;
-                $response['chunks'] = array();
-
-                foreach($uncompleted as $chunk) {
-                    $response['chunks'][] = array(
-                        'id' => $chunk->id,
-                        'password' => $chunk->password
-                    );
-                }
-
-            } else  {
                 $jobs = $this->validator->getProject()->getJobs();
                 $response['jobs'] = array();
 
@@ -59,16 +48,27 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
 
                     );
                 }
-
                 $response['completed'] = true;
+            } else  {
+                $response['completed'] = false;
+                $response['chunks'] = array();
+
+                foreach($uncompleted as $chunk) {
+                    $response['chunks'][] = array(
+                        'id' => $chunk->id,
+                        'password' => $chunk->password
+                    );
+                }
             }
+
+            $this->response->json( array(
+                'project_status' => $response
+            ) ) ;
 
         } catch ( Exception $e ){
             Log::doLog( $e->getMessage() ) ;
+            // TODO handle 500 response code here
         }
 
-        $this->response->json( array(
-            'project_status' => $response
-        ) ) ;
     }
 }
