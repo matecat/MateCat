@@ -37,5 +37,3 @@ function startConnection() {
 }
 
 startConnection();
-
-require( 'queries.php' );

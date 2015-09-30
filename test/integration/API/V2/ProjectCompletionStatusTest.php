@@ -1,8 +1,11 @@
 <?php
 class ProjectCompletionStatusTest extends IntegrationTest {
 
+    private $test_data ;
+
     function setup() {
         $this->test_data = new StdClass();
+        parent::setup();
     }
 
     private function prepareUserAndApiKey() {
@@ -41,8 +44,6 @@ class ProjectCompletionStatusTest extends IntegrationTest {
     function testsCallOnValidProject() {
         $this->setValidProjectWithAllTranslatedSegments();
         $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
-
-        var_dump(Projects_ProjectDao::uncompletedChunksByProjectId( $project->id ));
 
         foreach( $this->test_data->chunks as $chunk ) {
             integrationSetChunkAsComplete( array(
@@ -119,7 +120,6 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $first_chunk = $chunks[0];
         $second_chunk = $chunks[1];
 
-        sleep(1); // avoid race conditions with database datetimes comparison
         integrationSetChunkAsComplete( array(
             'params' => array(
                 'id_job' => $first_chunk->id,
@@ -127,7 +127,6 @@ class ProjectCompletionStatusTest extends IntegrationTest {
             )
         ));
 
-        sleep(0.5);
         $test = new CurlTest();
         $test->path = '/api/v2/project-completion-status/' .
             $this->test_data->project->id_project  ;

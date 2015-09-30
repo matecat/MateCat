@@ -1,6 +1,8 @@
 <?php
 
-abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
+require 'lib/AbstractTest.php';
+
+abstract class IntegrationTest extends AbstractTest {
     protected $path;
     protected $headers = array();
     protected $method;
@@ -9,15 +11,8 @@ abstract class IntegrationTest extends PHPUnit_Framework_TestCase {
 
     protected $conn ;
 
-    function setup() {
-
-    }
-
-    function tearDown() {
-
-    }
-
     function getResponse() {
+        // This is deprecated , use curlTest instance in your tests instead
         return $this->makeRequest();
     }
 

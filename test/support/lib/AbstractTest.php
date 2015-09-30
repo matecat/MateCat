@@ -21,7 +21,7 @@ abstract class AbstractTest extends PHPUnit_Framework_TestCase {
     public function tearDown() {
         parent::tearDown();
         $resultTime = microtime(true) - $this->thisTest;
-        echo " " . str_pad( $this->getName(false) , 35, " ", STR_PAD_RIGHT ). " - Did in " . $resultTime . " seconds.\n";
+        echo " " . str_pad( get_class($this) . " " . $this->getName(false) , 35, " ", STR_PAD_RIGHT ). " - Did in " . $resultTime . " seconds.\n";
     }
 
 }
