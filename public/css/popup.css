@@ -1037,6 +1037,10 @@ box-shadow: -2px 5px 7px #7B7B7B;
     color: #999;
 }
 
+#forceDeliveryContainer tbody:nth-child(3) tr td:not(.empty) {
+    border-top:0!important;
+}
+
 #forceDeliveryContainer .delivery-auto h2 {
     font-size: 24px;
     margin: 0 0 10px 0;
@@ -1101,9 +1105,9 @@ box-shadow: -2px 5px 7px #7B7B7B;
 #forceDeliveryContainer .delivery-manual-time h3 {
     text-align: left;
     margin-left: 20px;
-    font-size: 19px;
+    font-size: 17px;
     font-weight: normal;
-    margin: 0px 0 10px 12px;
+    margin: 0px 0 6px 12px;
     line-height: 100%;
 }
 
@@ -1119,21 +1123,17 @@ box-shadow: -2px 5px 7px #7B7B7B;
     margin-left: 12px;
     text-align: right;
     font-size: 14px;
-    margin-top: 10px;
+    margin-top: 5px;
     position: absolute;
     padding-bottom: 13px;
     z-index: 100000;
 }
 
 #forceDeliveryContainer #delivery_manual_error div {
-    background: #B92227;
     width: 225px;
-    color: #fff;
     text-align: left;
-    font-size: 12px;
-    border: 2px solid #ddd;
-    box-shadow: 0px 0px 6px #000;
-    padding: 4px 10px 4px 10px;
+    font-size: 13px;
+    font-weight: bold;
     border-radius: 6px;
 }
 
@@ -1150,7 +1150,7 @@ box-shadow: -2px 5px 7px #7B7B7B;
 #forceDeliveryContainer input[type="button"] {
     width: 160px !important;
     float: none;
-    margin-top: 20px!important;    
+    margin-top: 25px!important;    
     margin-left: 55px!important;
 }
 
@@ -1193,9 +1193,24 @@ div#forceDeliveryContainer .x-popup2 {
     display: none;
 }
 
+#forceDeliveryContainer td.datepickerSpecial a {
+    border: 2px solid;
+    background-color: red!important;
+}
+
+#forceDeliveryContainer .datepickerDoW th {
+    padding: 5px 0;
+}
+
+#forceDeliveryContainer .datepickerDoW th:first-child,
+#forceDeliveryContainer th.datepickerWeek {
+    display: none;
+}
+
 #forceDeliveryContainer .datepickerNotInMonth {
     visibility: hidden;
 }
+
 
 #forceDeliveryContainer .datepicker table {
     background-color: transparent;
@@ -1206,7 +1221,7 @@ div#forceDeliveryContainer .x-popup2 {
 }
 
 #forceDeliveryContainer .datepicker table tr td a {
-    background-color: #CEDBE4;
+    background-color: #E1E1E1;
     text-decoration: none;
 }
 
