@@ -60,7 +60,7 @@ class NewTest extends IntegrationTest {
         );
 
         // $this->files[] = test_file_path('amex-test.docx.xlf');
-        $this->files[] = test_file_path('amex-test.docx.xlf');
+        $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
 
         $response = $this->getResponse() ;
         $response = json_decode( $response['body'] );

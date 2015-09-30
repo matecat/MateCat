@@ -34,7 +34,7 @@ class NewWithOwnershipTest extends IntegrationTest {
             'source_lang' => 'en',
         );
 
-        $this->files[] = test_file_path('amex-test.docx.xlf');
+        $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
 
         $response = $this->getResponse() ;
         $body =  json_decode( $response['body'] );
@@ -61,7 +61,7 @@ class NewWithOwnershipTest extends IntegrationTest {
             'source_lang' => 'en',
         );
 
-        $this->files[] = test_file_path('amex-test.docx.xlf');
+        $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
 
         $response = $this->getResponse() ;
         $body     = json_decode( $response['body'] );
@@ -77,7 +77,7 @@ class NewWithOwnershipTest extends IntegrationTest {
             'source_lang' => 'en',
         );
 
-        $this->files[] = test_file_path('amex-test.docx.xlf');
+        $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
 
         $response = $this->getResponse() ;
         $body     = json_decode( $response['body'] );

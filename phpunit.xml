@@ -16,10 +16,8 @@
         <testsuite name="cURL based tests">
             <directory>test/integration</directory>
         </testsuite>
-        <!--
-        <testsuite name="legacy tests">
+        <testsuite name="Unit tests">
             <directory>test/unit</directory>
         </testsuite>
-        -->
     </testsuites>
 </phpunit>
