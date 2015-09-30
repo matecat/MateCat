@@ -801,7 +801,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         $( rowClone ).find( '.name' ).first()
                                 .data( "zipfile", zipFile )
                                 .attr( "data-zipfile", zipFile )
-                                .html( "<span class=\"zip_internal_file\">" + file['name'] + "</span>" );
+                                .html( "<span class=\"zip_internal_file\">" + file['name'].replace(/&/g,"&amp;") + "</span>" );
 
                         $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize( file['size'] ) );
 

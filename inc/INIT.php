@@ -302,7 +302,7 @@ class INIT {
      * The maximum filename length accepted.
      * Usually OSes accept names of 255 characters at most.
      * During the execution a hash string can be prepended to the filename.
-     * So we reserve 35 chars for internal purposes.
+     * So we reserve 45 chars for internal purposes.
      */
     public static $MAX_FILENAME_LENGTH = 210;
 
