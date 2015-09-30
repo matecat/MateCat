@@ -40,21 +40,9 @@ $.extend(UI, {
             $('.show_translator').toggleClass('hide');
         });
 
-        $('#changeTimezone').on('change', function(e){ 
-            var datatimezone = $(this).find("option:selected").attr("data-timezone");
-            console.log(datatimezone);
-            $(this).find("option:selected").text('GMT ' + datatimezone);           
-            e.preventDefault();
-        }); 
-     
         $( "input[name='revision']" ).click(function() {
-            $(".translate").trigger( "click" );
-            $('.delivery span,.tprice .euro, .tprice .displayprice').toggleClass('blink');
-        });
-
-        $('.addrevision input').change(function () {
             $(this).parent().toggleClass('noopacity');
-            $('.revision_delivery, .revision_price, .revision_price_box, .revision_heading').toggleClass('hide');
+            $(".translate").trigger( "click" );
         });
 
         //Added .translate class in html button because of double call to
@@ -138,6 +126,7 @@ $.extend(UI, {
                         var deliveryToShow = ( isRevisionChecked ) ?  chunk.r_delivery : chunk.delivery;
                         changeTimezone(deliveryToShow, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
                         changeTimezone(chunk.r_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
+                        updateTimezonesDescriptions( timezoneToShow );
 
                         $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
                         /**
@@ -259,6 +248,7 @@ $.extend(UI, {
             var timezoneTo = $( "#changeTimezone option:selected" ).val();
             changeTimezone( $( "span.time").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.time" );
             changeTimezone( $( "span.revision_delivery").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.revision_delivery" );
+            updateTimezonesDescriptions( timezoneTo );
         });
 	},
 	getFarthestDate: function() {
@@ -293,6 +283,7 @@ $.extend(UI, {
 
 
 function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol, elementToUpdateValue, elementToUpdatePPW ) {
+    $('.delivery span, .tprice .euro, .tprice .displayprice, .tprice .price_p_word, .revision_price_box span').removeClass('blink');
     APP.doRequest({
         data: {
             action: 'changeCurrency',
@@ -301,10 +292,13 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
             currencyTo: currencyTo
         },
         success: function (d) {
-            $( elementToUpdateSymbol ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
-            $( elementToUpdateValue ).text( parseFloat( d.data).toFixed( 2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
+            $('.delivery span, .tprice .euro, .tprice .displayprice, .tprice .price_p_word, .revision_price_box span').addClass('blink');
             $( elementToUpdateValue ).attr( "data-rawprice", d.data );
             $( elementToUpdateValue ).attr( "data-currency", currencyTo );
+            $( elementToUpdateSymbol ).attr( "data-currency", currencyTo );
+
+            $( elementToUpdateSymbol ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
+            $( elementToUpdateValue ).text( parseFloat( d.data).toFixed( 2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
 
             if( elementToUpdatePPW.length > 0 ) {
                 var numWords = parseFloat($(".title-words").text().replace(",", ""));
@@ -320,12 +314,21 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
 function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
     var dd = new Date( date );
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
-    $( elementToUpdate ).text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
+    $( elementToUpdate ).text( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
 
     $( elementToUpdate ).attr("data-timezone", timezoneTo);
     $( elementToUpdate ).attr("data-rawtime", dd.toUTCString());
 
     setCookie( "matecat_timezone", timezoneTo );
+}
+
+function updateTimezonesDescriptions( selectedTimezone ) {
+    $( "#changeTimezone" ).find( "option").each( function() {
+        $( this ).text( $( this ).attr( "data-description-long" ) );
+    });
+
+    var selectedElement = $( "#changeTimezone" ).find( "option[value='" + selectedTimezone + "']");
+    selectedElement.text( selectedElement.attr( "data-description-short" ) );
 }
 
 
