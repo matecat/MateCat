@@ -172,6 +172,8 @@ class UploadHandler {
     }
 
     protected function validate( $uploaded_file, $file, $error, $index ) {
+        //TODO: these errors are shown in the UI but are not user friendly.
+
         if ( $error ) {
             $file->error = $error;
 
@@ -182,6 +184,11 @@ class UploadHandler {
 
             return false;
         }
+        else if(mb_strlen($file->name) > INIT::$MAX_FILENAME_LENGTH){
+            $file->error = "filenameTooLong";
+            return false;
+        }
+
         if ( !preg_match( $this->options[ 'accept_file_types' ], $file->name ) ) {
             $file->error = 'acceptFileTypes';
 
