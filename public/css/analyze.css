@@ -336,7 +336,7 @@ table tr.totaltable td.total
 
 
 tbody:nth-child(3) tr td:not(.empty) {
-  border-top: 1px solid #ccc !important;
+  border-top: 1px solid #ccc;
 }
 
 .empty{border:0 !Important;background:#F0F0F0 !important;width: 120px;

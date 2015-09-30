@@ -110,7 +110,7 @@ box-shadow: inset 0 0 1px 1px #888;
     margin-bottom: 20px;
     font-size: 15px;
     color: #333;
-    width: 71%;
+    width: 70%;
     margin: 2%;
 }
 
@@ -170,14 +170,34 @@ p.translator_name {
 
 .onyourown a.uploadbtn.in-popup {
     margin: 2%!important;
-    width: 150px;
+    width: 160px;
 }
 
-.outsource.modal h2.loading {
-	background: url(../img/loader.gif) right 6px no-repeat;
+.outsource.modal.loading .delivery
+{
+	background: url(../img/loader.gif) #f6f6f6 center center no-repeat;
 	background-size: 20px;
-	padding-right: 40px;
 }
+
+.outsource.modal.loading .tprice
+{
+    background: url(../img/loader.gif) #f6f6f6 center 30px no-repeat;
+    background-size: 20px;
+    padding-top: 44px;
+}
+
+.outsource.modal.loading .tprice.compress {
+    padding: 134px 1% 10px 1%;
+}
+
+
+.outsource.modal.loading .delivery_details, 
+.outsource.modal.loading .displayprice,
+.outsource.modal.loading .euro,
+.outsource.modal.loading .displaypriceperword {
+display: none;
+}
+
 .outs h2 {
     background-size: 180px;
     height: 41px;
@@ -362,7 +382,7 @@ clear:both;
 
 .contact_box .standardbtn {
     margin: 10px 2%!important;
-    width: 150px!important;
+    width: 160px!important;
 }
 
 .revision_price_box {
@@ -407,13 +427,16 @@ margin-top: 0!important;
 }
 
 .pricebox .tprice {
-    padding: 2% 2% 1% 2%;
+    padding: 2% 1% 1%;
 }
 
 .pricebox .delivery {
     padding: 2.5% 2% 2.4% 2%;
 }
 
+.delivery.compress {
+    padding: 0;
+}
 
 
 .offer {
@@ -477,9 +500,10 @@ margin-top: 0!important;
 
 .pricebox .continuebtn {
     clear: both;
-    float: left;
+    float: none;
     width: 150px;
-    margin: 10px 0 0px 10px!important;
+    margin: 10px auto 0 auto!important;
+    overflow: hidden;
 }
 
 .paymentinfo p {
@@ -512,49 +536,49 @@ a.hide_translator {
 }
 
 .blink {
+   
  -webkit-animation-name: blinker;
-    -webkit-animation-duration: 1s;
+    -webkit-animation-duration: 0.4s;
     -webkit-animation-timing-function: linear;
 
     
     -moz-animation-name: blinker;
-    -moz-animation-duration: 1s;
+    -moz-animation-duration: 0.4;
     -moz-animation-timing-function: linear;
 
     
     animation-name: blinker;
-    animation-duration: 1s;
+    animation-duration: 0.4;
     animation-timing-function: linear;
 }
 
+
+
 @-moz-keyframes blinker {  
-    0% { opacity: 1.0; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1.0; }
+    0% {  background: transparent; }
+    50% {  background: rgb(255, 255, 153);}
+    100% {  background: transparent; }
 }
 
 @-webkit-keyframes blinker {  
-    0% { opacity: 1.0; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1.0; }
+    0% {  background: transparent; }
+    50% {  background: rgb(255, 255, 153);}
+    100% {  background: transparent; }
 }
 
 @keyframes blinker {  
-    0% { opacity: 1.0; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1.0; }
+    0% {  background: transparent; }
+    50% {  background: rgb(255, 255, 153);}
+    100% {  background: transparent; }
 }
 
 .translator_info_box {
-    width: 43%;
-    padding: 0% 2% 0% 2%;
+    width: 44%;
+    padding: 0% 0% 0% 3%;
     float: left;
     margin-top: 0%;
-    border-radius: 4px;
-    border: 1px solid #ECECEC;
-    margin-left: 4%;
-    background-color: #FFFFFF;
-    box-shadow: -1px 2px 2px #DBDBDB;
+    border-left: 1px solid #ECECEC;
+    margin-left: 3%;
 }
 
 .pricebox .translator_info,
@@ -578,8 +602,10 @@ a.hide_translator {
 }
 
 
+
+
 .pricebox .tprice {
-       width: calc(22% - 1px);
+       width: calc(24% - 1px);
         background: #f8f8f8;
 }
 
@@ -592,6 +618,7 @@ a.hide_translator {
 .pricebox .delivery {
     width: 34%;
     background: #f8f8f8;
+    min-height: 93px;
 }
 
 .guaranteed_by.expanded {
@@ -602,7 +629,14 @@ a.hide_translator {
 }
 
 .pricebox .delivery.compress {
-       width: calc(22% - 1px);
+    width: 94%;
+    line-height: 24px;
+    background: transparent;
+    border-top: 1px solid #ccc;
+    margin: 6px;
+    padding: 8px 0px;
+    min-height: 10px;
+    line-height: 22px;
 }
 
 .delivery.compress .delivery_label {
@@ -631,19 +665,18 @@ a.hide_translator {
     opacity: 1!important;
 }
 
+.noopacity .revision_delivery, .noopacity .revision_price_box {
+    opacity: 0;
+}
+
 .delivery.compress span {
     font-size: 17px;
 }
 
 .tprice.compress {
     border-left:none;
-       width: calc(22% - 1px);
 }
 
-.pricebox .tprice.compress, 
-.pricebox .delivery.compress {
-    padding: 1% 2% 1% 2%!important;
-}
 
 .pricebox .tprice .tpricetitle {
     border-bottom: 1px solid #ccc;
@@ -715,17 +748,17 @@ a.hide_translator {
 
 span.label_info {
     float: left;
-    width: 60%;
+    width: 76%;
     font-weight: bold;
     /* color: #7A7A7A; */
 }
 
 span.subjects {
-    width: 68%!important;
+    width: 74%!important;
 }
 span.subjects, span.experience, span.translated_words {
     float: right;
-    width: 40%;
+    width: 24%;
     text-align: right;
 }
 
@@ -733,24 +766,23 @@ span.subjects, span.experience, span.translated_words {
 
 .ribbonwrapper {
     position: absolute;
-    top: -10px;
-    right: 14px;
+    top: -9px;
+    right: 0;
 }
 
 .translator_bio > p:nth-child(2) > span.label_info {
-    width: 30%;
+    width: 24%;
 }
 
 #imgback {
-    width: 50px;
-    float: left;
+    width: 110px;
+    float: right;
     margin-left: 10px;
     margin-top: 1px;
     -webkit-animation: img 0.5s ease-in-out;
 }
 
 #rectangle {
-    width: 111%;
     height: 38px;
     padding: 10px;
     z-index: 100;
@@ -862,11 +894,19 @@ select#changeTimezone {
     margin-right: 10px;
 }
 
-.hide {display: none!important;}
+.hide {display: none;}
 
 
-.tprice [data-currency="RUB"] {
-    font-size:10px!important;
+.revision_currency {
+    margin-right: 5px!important;
+}
+
+.tprice [data-currency="RUB"],
+.tprice [data-currency="BRL"],
+.tprice [data-currency="JPY"],
+.tprice [data-currency="KRW"]
+ {
+    font-size:28px!important;
 }
 
 table.chunks {
@@ -999,7 +1039,7 @@ box-shadow: -2px 5px 7px #7B7B7B;
 
 #forceDeliveryContainer {
     height: 185px;
-    width: 563px;
+    width: 520px;
     background: #FFFFFF;
     border: 5px solid #F4F4F4;
     border-radius: 4px;
@@ -1007,8 +1047,8 @@ box-shadow: -2px 5px 7px #7B7B7B;
     z-index: 10001;
     color: #fff;
     padding: 20px;
-    top: 403px;
-    left: 368px;
+    top: 400px;
+    left: 400px;
     zoom: 0.9;
     text-align: left;
     -moz-box-shadow: 0 0px 11px #888;
@@ -1082,7 +1122,7 @@ box-shadow: -2px 5px 7px #7B7B7B;
 
 #forceDeliveryContainer .delivery-manual-date {
     float: left;
-    width: 276px;
+    width: 240px;
     height: 200px;
 }
 
@@ -1097,7 +1137,7 @@ box-shadow: -2px 5px 7px #7B7B7B;
 
 #forceDeliveryContainer .delivery-manual-time {
     float: left;
-    width: 276px;
+    width: 255px;
     height: 200px;
     margin: 0px 10px 0px 0;
 }
@@ -1194,8 +1234,9 @@ div#forceDeliveryContainer .x-popup2 {
 }
 
 #forceDeliveryContainer td.datepickerSpecial a {
-    border: 2px solid;
-    background-color: red!important;
+    border: 1px solid;
+    color: #09beec;
+    background-color: #F3F3F3!important;
 }
 
 #forceDeliveryContainer .datepickerDoW th {
@@ -1218,6 +1259,7 @@ div#forceDeliveryContainer .x-popup2 {
     font-size: 16px;
     text-align: right;
     font-weight: normal !important;
+        border-collapse: collapse;
 }
 
 #forceDeliveryContainer .datepicker table tr td a {
@@ -1251,19 +1293,18 @@ div#forceDeliveryContainer .x-popup2 {
 
 #forceDeliveryContainer .datepicker a {
   text-decoration: none;
-  padding: 2px 2px 4px 2px;
+  padding: 4px;
   outline: none;
   display: block;
   color: #333;
 }
 
 #forceDeliveryContainer .datepickerDays a {
-  width: 20px;
   line-height: 20px;
   height: 16px;
   margin: 1px;
-  background: #CEDBE4;
-  padding-right: 2px;
+  background: #D6E7F4;
+  padding: 4px;
 }
 
 
@@ -1283,8 +1324,13 @@ div#forceDeliveryContainer .x-popup2 {
     text-align: center;
 }
 
+#forceDeliveryContainer .datepicker table td.datepickerDisabled a {
+    opacity: 0.5;
+}
+
 #forceDeliveryContainer .datepickerSelected a {
-    background-color: white !important;
+    background-color: #7eaf3e !important;
+    color:#fff;
 }
 
 .forceNotAvailable {

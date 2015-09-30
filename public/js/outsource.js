@@ -25,6 +25,7 @@ $.extend(UI, {
             $(this).toggleClass('hide');
             $('.guaranteed_by').toggleClass('expanded');
             $('.delivery,.tprice').toggleClass('compress');
+            $('.delivery').appendTo(".displaypriceperword ");
             $('.trustbox').toggleClass('hide');
             $('.translator_info_box').toggleClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
@@ -33,6 +34,7 @@ $.extend(UI, {
         $('.hide_translator').click(function() {
             $(this).toggleClass('hide');
             $('.guaranteed_by').toggleClass('expanded');
+            $('.delivery').appendTo(".delivery_container");
             $('.delivery,.tprice').toggleClass('compress');
             $('.trustbox').toggleClass('hide');
             $('.translator_info_box').toggleClass('hide');
@@ -43,6 +45,7 @@ $.extend(UI, {
         $( "input[name='revision']" ).click(function() {
             $(this).parent().toggleClass('noopacity');
             $(".translate").trigger( "click" );
+            $('.revision_heading').toggleClass('hide');
         });
 
         //Added .translate class in html button because of double call to
@@ -60,7 +63,8 @@ $.extend(UI, {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
 				row = $(this).parents('.tablestats');
-				$('.modal.outsource .outsourceto h2').addClass('loading');
+				$('.modal.outsource').addClass('loading');
+                $('.outsource.modal .continuebtn').addClass('loading');
                 $('body').addClass('showingOutsourceTo');
 
 				APP.doRequest({
@@ -100,7 +104,7 @@ $.extend(UI, {
 
                         $( ".outsourceto").attr( "class", "outsourceto" );
                         $('.outsource.modal .continuebtn').removeClass('disabled');
-                        $('.modal.outsource .outsourceto h2').removeClass('loading');
+                        $('.modal.outsource').removeClass('loading');
 
 
                         if( chunk.quote_result != 1 ){
@@ -283,7 +287,7 @@ $.extend(UI, {
 
 
 function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol, elementToUpdateValue, elementToUpdatePPW ) {
-    $('.delivery span, .tprice .euro, .tprice .displayprice, .tprice .price_p_word, .revision_price_box span').removeClass('blink');
+    $('.tprice').removeClass('blink');
     APP.doRequest({
         data: {
             action: 'changeCurrency',
@@ -292,7 +296,7 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
             currencyTo: currencyTo
         },
         success: function (d) {
-            $('.delivery span, .tprice .euro, .tprice .displayprice, .tprice .price_p_word, .revision_price_box span').addClass('blink');
+            $('.tprice').addClass('blink');
             $( elementToUpdateValue ).attr( "data-rawprice", d.data );
             $( elementToUpdateValue ).attr( "data-currency", currencyTo );
             $( elementToUpdateSymbol ).attr( "data-currency", currencyTo );
