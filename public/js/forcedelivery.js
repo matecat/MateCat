@@ -28,7 +28,8 @@ $( document ).ready( function()
 
 
     $( ".forceDeliveryButtonOk").click( function() {
-        prepareAndSubmitQuote( getChosenDeliveryDate(), true );
+        $('#forceDeliveryContainer').addClass('hide');
+        $( "#changeTimezone").removeClass( "hide" );
     });
 
     
@@ -93,7 +94,7 @@ function getChosenDeliveryDate() {
 
 function checkChosenDeliveryDate( chosenDate ) {
     var baseDate = new Date();
-    var now = baseDate.getTime()/* + ( baseDate.getTimezoneOffset() * 60000 )*/;
+    var now = baseDate.getTime();
 
     return chosenDate > now;
 }

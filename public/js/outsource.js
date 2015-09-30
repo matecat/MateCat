@@ -64,7 +64,7 @@ $.extend(UI, {
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
 				row = $(this).parents('.tablestats');
 				$('.modal.outsource').addClass('loading');
-                $('.outsource.modal .continuebtn').addClass('loading');
+                $('.outsource.modal .continuebtn').addClass('loading disabled');
                 $('body').addClass('showingOutsourceTo');
 
 				APP.doRequest({
@@ -103,9 +103,6 @@ $.extend(UI, {
                         UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd');
 
                         $( ".outsourceto").attr( "class", "outsourceto" );
-                        $('.outsource.modal .continuebtn').removeClass('disabled');
-                        $('.modal.outsource').removeClass('loading');
-
 
                         if( chunk.quote_result != 1 ){
                             $( ".outsourceto").addClass( "quoteError" );
@@ -308,6 +305,9 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
                 var numWords = parseFloat($(".title-words").text().replace(",", ""));
                 $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
             }
+
+            $('.outsource.modal .continuebtn').removeClass('disabled');
+            $('.modal.outsource').removeClass('loading');
 
             setCookie( "matecat_currency", currencyTo );
         }
