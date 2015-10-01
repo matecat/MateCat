@@ -44,45 +44,15 @@ class editlogController extends viewController {
 
         $this->generateAuthURL();
 
-        //pay a little query to avoid to fetch 5000 rows
-        $this->jobData = $jobData = getJobData( $this->jid, $this->password );
+        $model = new EditLog_EditLogModel();
+        $model -> setJid($this->jid);
+        $model -> setPassword( $this->password );
 
-        $wStruct = new WordCount_Struct();
-        $wStruct->setIdJob( $this->jid );
-        $wStruct->setJobPassword( $this->password );
-        $wStruct->setNewWords( $jobData[ 'new_words' ] );
-        $wStruct->setDraftWords( $jobData[ 'draft_words' ] );
-        $wStruct->setTranslatedWords( $jobData[ 'translated_words' ] );
-        $wStruct->setApprovedWords( $jobData[ 'approved_words' ] );
-        $wStruct->setRejectedWords( $jobData[ 'rejected_words' ] );
+        $model -> controllerDoAction();
 
-        if ( $jobData[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $jobData[ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
-            //this job has been archived
-            $this->job_archived    = true;
-            $this->job_owner_email = $jobData[ 'job_owner' ];
-        }
-
-        $tmp = CatUtils::getEditingLogData( $this->jid, $this->password );
-
-        $this->data  = $tmp[ 0 ];
-        $this->stats = $tmp[ 1 ];
-
-        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
-
-        $proj                 = getProject( $jobData[ 'id_project' ] );
-        $this->project_status = $proj[ 0 ];
-
-        $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
-        $maxDate        = $__langStatsDao->getLastDate();
-
-        $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
-        $languageSearchObj->date   = $maxDate;
-        $languageSearchObj->source = $this->data[ 0 ][ 'source_lang' ];
-        $languageSearchObj->target = $this->data[ 0 ][ 'target_lang' ];
-
-        $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-        $this->languageStatsData = $this->languageStatsData[0];
-
+        $this->job_stats = $model->getJobStats();
+        $this->stats = $model->getStats();
+        $this->data = $model->getData();
 
     }
 
@@ -146,7 +116,6 @@ class editlogController extends viewController {
 
         $this->template->jobOwnerIsMe        = ( $this->logged_user[ 'email' ] == $this->jobData['owner'] );
     }
-
 
 }
 
