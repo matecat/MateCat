@@ -398,7 +398,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	display: block;
 	font-size: 12px;
 	z-index: 999;
-	color: #999;
+	color: #aaa;
 	text-decoration: none;
 	cursor: default;
 	height: inherit;
@@ -1610,7 +1610,7 @@ body.review .loader
 .target-title{float:right; margin:3px 30px 0 0}
 .header
 {
-    height: 5px;
+    height: 20px;
     width:100%;
     color:#a7a9ac;
     font-size:12px;
@@ -1674,7 +1674,7 @@ body.review .loader
     height:20px;
     text-align:center;
     width:25px;
-    top: -10px;
+    top: -9px;
     position:absolute;
     left:46.8%;
     color:#fff;
@@ -1683,8 +1683,6 @@ body.review .loader
     font-weight:bold;
     cursor:default;
     padding:0 10px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
     z-index: 999;
 }
 /*
@@ -1799,7 +1797,7 @@ z-index: 10000;
 	width: 100%;
 	height:96%;
 	line-height: 27px;
-	min-height: 27px;
+	min-height: 54px;
 	resize: none;
 	overflow:hidden;
 	margin:2px 0 0px -11px;
