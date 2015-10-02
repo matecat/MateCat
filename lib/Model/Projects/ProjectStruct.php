@@ -15,18 +15,23 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $for_debug ;
     public $pretranslate_100 ;
 
+    protected $cached_results = array();
+    // protected static $cachables = array('getJobs') ;
+
     public function getOwnerFeature( $feature_code ) {
       return OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
         $feature_code, $this->id_customer
       );
     }
 
-    public function isFeatureEnabled( $feature_code ) {
-      return $this->getOwnerFeature( $feature_code ) !== false ;
+    public function getJobs() {
+      return $this->cachable(__function__, func_get_args(), function() {
+        return Jobs_JobDao::getByProjectId( $this->id, func_get_args() );
+      });
     }
 
-    public function getJobs() {
-      return Jobs_JobDao::getByProjectId( $this->id );
+    public function isFeatureEnabled( $feature_code ) {
+      return $this->getOwnerFeature( $feature_code ) !== false ;
     }
 
     public function getChunks() {

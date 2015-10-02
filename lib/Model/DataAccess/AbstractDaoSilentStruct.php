@@ -17,6 +17,22 @@ class DataAccess_AbstractDaoSilentStruct extends stdClass {
         }
     }
 
+    /**
+     * @return $this
+     */
+    public function clear() {
+        $this->cached_results = array();
+        return $this;
+    }
+
+    protected function cachable($method_name, $params, $function) {
+      if ( !key_exists($method_name,  $this->cached_results) ) {
+        $this->cached_results[$method_name] =
+          call_user_func($function, $params);
+      }
+      return $this->cached_results[$method_name];
+    }
+
     public function __get( $name ) {
         if (!property_exists( $this, $name )) {
             throw new DomainException( 'Trying to get an undefined property ' . $name );
