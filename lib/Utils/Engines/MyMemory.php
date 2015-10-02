@@ -255,11 +255,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         try {
 
             $origFile = new SplFileObject( $file, 'r+' );
-            $origFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY );
+            $origFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
             $tmpFileName = tempnam( "/tmp", 'GLOS' );
             $newFile = new SplFileObject( $tmpFileName, 'r+' );
-            $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY );
+            $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
             foreach ( $origFile as $line_num => $line ) {
 
