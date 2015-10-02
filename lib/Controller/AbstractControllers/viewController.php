@@ -38,9 +38,9 @@ abstract class viewController extends controller {
     protected $authURL;
 
     /**
-     * Flag to get info about user authentication
+     * The logged user's object
      *
-     * @var bool
+     * @var Users_UserStruct
      */
     protected $logged_user = false;
 
@@ -359,4 +359,17 @@ abstract class viewController extends controller {
         return $is_revision_url;
     }
 
+    /**
+     * @return Users_UserStruct
+     */
+    public function getLoggedUser(){
+        return $this->logged_user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthUrl(){
+        return $this->authURL;
+    }
 }

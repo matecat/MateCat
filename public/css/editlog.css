@@ -1,0 +1,35 @@
+#current_page{
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#pagination{
+    width: 300px;
+}
+
+#pagination_box nav li{
+    border: 0;
+}
+
+#pagination_box nav li a {
+    text-decoration: none;
+}
+
+#sort_box{
+    padding:20px 10px 30px 10px;
+}
+
+#sort_box label{
+    padding-right: 20px;
+    font-size: 18px;
+}
+
+.translate-box select, .mgmt-table-mt select {
+    width: 257px;
+    height: 37px;
+    padding: 5px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    margin: 0 0 5px 0;
+}
+
