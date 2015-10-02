@@ -326,8 +326,8 @@ class analyzeController extends viewController {
         $this->template->project_status             = $this->project_status;
         $this->template->num_segments               = $this->num_segments;
         $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
-        $this->template->logged_user                = $this->logged_user['short'];
-        $this->template->extended_user              = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
+        $this->template->logged_user                = $this->logged_user->shortName();
+        $this->template->extended_user              = trim( $this->logged_user->fullName() );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
         $this->template->outsource_service_login    = $this->_outsource_login_API;

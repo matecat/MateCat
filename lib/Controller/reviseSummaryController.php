@@ -107,8 +107,8 @@ class reviseSummaryController extends viewController {
 
 
         $this->template->build_number  = INIT::$BUILD_NUMBER;
-        $this->template->extended_user = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
-        $this->template->logged_user   = $this->logged_user[ 'short' ];
+        $this->template->extended_user = trim( $this->logged_user->fullName() );
+        $this->template->logged_user   = $this->logged_user->shortName();
         $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->authURL       = $this->authURL;
 

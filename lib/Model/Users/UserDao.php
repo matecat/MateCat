@@ -12,6 +12,12 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "Users_UserStruct";
 
+    /**
+     * @param Users_UserStruct $obj
+     *
+     * @return Users_UserStruct|Users_UserStruct[]
+     * @throws Exception
+     */
     public function read( Users_UserStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
