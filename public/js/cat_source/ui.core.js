@@ -497,7 +497,6 @@ console.log('changeStatus');
             return false;
         }
 
-
 		UI.footerHTML =	'<ul class="submenu">' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
@@ -510,6 +509,9 @@ console.log('changeStatus');
 					'	</li>' +
 					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
 					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
+					'	</li>' +
+                    '	<li class="tab-switcher-notes" id="segment-' + this.currentSegmentId + '-notes">' +
+					'		<a tabindex="-1" href="#">Messages<span class="number"></span></a>' +
 					'	</li>' +
 					'</ul>' +
 					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +

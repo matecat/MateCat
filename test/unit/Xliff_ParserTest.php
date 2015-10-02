@@ -30,10 +30,10 @@ class Xliff_ParserTest extends AbstractTest {
         $xliff     = $xliff_obj->Xliff2Array( $content );
 
         $this->assertEquals( 'This is a comment',
-            $xliff['files'][1]['trans-units'][4]['notes'][0]['raw_content']);
+            $xliff['files'][1]['trans-units'][4]['notes'][0]['raw-content']);
         
         $this->assertEquals( 'This is another comment',
-            $xliff['files'][1]['trans-units'][6]['notes'][0]['raw_content']);
+            $xliff['files'][1]['trans-units'][6]['notes'][0]['raw-content']);
     }
 
 }

@@ -30,4 +30,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     return $dao->lastTranslationByJobOrChunk( $this );
   }
 
+  public function getChunks() {
+    $dao = new Chunks_ChunkDao( Database::obtain() );
+    return $dao->getByProjectId( $this->id_project );
+  }
+
 }

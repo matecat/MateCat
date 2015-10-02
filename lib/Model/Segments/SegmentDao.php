@@ -2,7 +2,7 @@
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
 
-    function getByChunkId( $id_job, $password) {
+    function getByChunkId($id_job, $password) {
         $conn = $this->con->getConnection();
 
         $query = " SELECT segments.* FROM segments " .
@@ -19,7 +19,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             'password' => $password
         ) );
 
-        return $stmt->fetchAll( PDO::FETCH_CLASS, 'Segments_SegmentStruct' ) ;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Segments_SegmentStruct');
+        return $stmt->fetchAll( ) ;
     }
 
     protected function _buildResult($array_result) {

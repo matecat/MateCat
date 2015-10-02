@@ -72,6 +72,7 @@ class ProjectManager {
                             'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
                             'segments'             => array(), //array of files_id => segmentsArray()
                             'translations'         => array(),
+                            'notes'                => array(),
                             //one translation for every file because translations are files related
                             'query_translations'   => array(),
                             'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
@@ -122,7 +123,7 @@ class ProjectManager {
             return false;
         }
 
-        // create project
+        // create project?
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
         $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
@@ -846,8 +847,8 @@ class ProjectManager {
             //get payable rates
             $projectStructure[ 'payable_rates' ] = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
 
-            $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment
-				FROM segments WHERE id_file IN ( %s )";
+            $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment " .
+				        " FROM segments WHERE id_file IN ( %s )";
 
             $string_file_list    = implode( ",", $projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $last_segments_query = sprintf( $query_min_max, $string_file_list );
@@ -913,12 +914,28 @@ class ProjectManager {
                     Utils::sendErrMailReport( $msg );
                 }
 
+                if (! empty($this->projectStructure['notes'])) {
+                    $this->insertSegmentNotesForFile( );
+                }
+
                 insertFilesJob( $jid, $fid );
 
             }
 
         }
 
+    }
+
+    private function insertSegmentNotesForFile( $fid ) {
+        foreach( $this->projectStructure['notes'] as $k => $v) {
+            $id_segment = $v['id_segment'] ;
+            foreach( $v['entries'] as $kk => $note) {
+                Segments_SegmentNoteDao::insertRecord( array(
+                    'id_segment' => $id_segment,
+                    'note' => $note
+                ));
+            }
+        }
     }
 
     /**
@@ -1344,6 +1361,7 @@ class ProjectManager {
         $xliff_obj = new Xliff_Parser();
         $xliff     = $xliff_obj->Xliff2Array( $xliff_file_content );
 
+
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
             Log::doLog( "Xliff Import: Error parsing. " . join( "\n", $xliff[ 'parser-errors' ] ) );
@@ -1495,6 +1513,8 @@ class ProjectManager {
                                 }
 
                             }
+                            $this->addNotesToProjectStructure( $xliff_trans_unit );
+
                         }
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
@@ -1548,7 +1568,6 @@ class ProjectManager {
 
         Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 
-
         foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
 
             try {
@@ -1562,10 +1581,14 @@ class ProjectManager {
 
         }
 
-        //Log::doLog( $this->projectStructure );
-
-        if ( !empty( $this->projectStructure[ 'translations' ] ) ) {
-
+        // Here we make a query for the last inserted segments. This is the point where we
+        // can read the id of the segments table to reference it in other inserts in other tables.
+        //
+        if ( !(
+            empty( $this->projectStructure[ 'notes' ] ) &&
+            empty( $this->projectStructure[ 'translations' ] )
+            )
+        ) {
             //natural order id ASC the same as the translations was inserted in the ArrayObject
             $last_segments_query = "SELECT id, internal_id, segment_hash, xliff_mrk_id from segments WHERE id_file = %u";
             $last_segments_query = sprintf( $last_segments_query, $fid );
@@ -1576,6 +1599,11 @@ class ProjectManager {
             $_last_segments = $this->dbHandler->fetch_array( $last_segments_query );
             foreach ( $_last_segments as $k => $row ) {
 
+                // The following call is to save `id_segment` for notes,
+                // to be used later to insert the record in notes table.
+                $this->setSegmentIdForNotes( $row );
+
+                // The following block of code is for translations
                 if ( $this->projectStructure[ 'translations' ]->offsetExists( "" . $row[ 'internal_id' ] ) ) {
 
                     if( !array_key_exists( "" . $row[ 'internal_id' ], $array_internal_segmentation_counter ) ){
@@ -1606,9 +1634,6 @@ class ProjectManager {
                     //set this var only for easy reading
                     $short_var_counter = $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ];
 
-//                    Log::doLog( $row[ 'internal_id' ] );
-//                    Log::doLog( $short_var_counter );
-
                     if( !$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetExists( $short_var_counter ) ){
                         continue;
                     }
@@ -1618,13 +1643,22 @@ class ProjectManager {
                     //WARNING offset 2 are the target translations
                     $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
 
-//                    Log::doLog(  $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ] );
-
                 }
 
             }
 
         }
+    }
+
+    private function setSegmentIdForNotes( $row ) {
+        $internal_id = "" . $row['internal_id'] ;
+
+        if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
+            $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet('id_segment', $row['id']);
+        }
+
+        Log::doLog( "@@@", var_export( $this->projectStructure['notes'][$internal_id], true));
+
     }
 
     protected function _insertPreTranslations( $jid ) {
@@ -1634,8 +1668,6 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
 
             if ( empty( $struct ) ) {
-                //this should not be
-                //Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
                 continue;
             }
 
@@ -1660,7 +1692,7 @@ class ProjectManager {
 
             Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
 
-//            Log::doLog( print_r( $this->projectStructure['translations'],true ) );
+            // Log::doLog( print_r( $this->projectStructure['translations'],true ) );
 
             foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
 
@@ -1867,6 +1899,39 @@ class ProjectManager {
 
     private function sortByStrLenAsc( $a, $b ) {
         return strlen( $a ) >= strlen( $b );
+    }
+
+    private function addNotesToProjectStructure( $trans_unit ) {
+        /**
+         * notes structure is the following:
+         *
+         *  ... ['notes'][ $internal_id ] = array(
+         *      'entries' => array( // one item per comment in the trans unit ),
+         *      'id_segment' => (int) to be populated later for the database insert
+         */
+
+        $id = self::sanitizedUnitId( $trans_unit );
+        if ( isset( $trans_unit[ 'notes' ] ) ) {
+            foreach( $trans_unit['notes'] as $note ) {
+                $this->initArrayObject( 'notes', $id );
+
+                if ( ! $this->projectStructure['notes'][$id]->offsetExists('entries') ) {
+                    $this->projectStructure['notes'][$id]->offsetSet( 'entries',  new ArrayObject());
+                    $this->projectStructure['notes'][$id]->offsetSet( 'id_segment', null);
+                }
+                $this->projectStructure[ 'notes' ][ $id ]['entries']->append( $note['raw-content'] )  ;
+            }
+        }
+    }
+
+    private function initArrayObject($key, $id) {
+        if ( !$this->projectStructure[ $key ]->offsetExists( $id ) ) {
+            $this->projectStructure[ $key ]->offsetSet( $id, new ArrayObject( ) );
+        }
+    }
+
+    private static function sanitizedUnitId( $unit ) {
+        return "" . $unit[ 'attr' ][ 'id' ] ;
     }
 
     private function isConversionToEnforce( $fileName ) {

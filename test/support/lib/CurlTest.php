@@ -73,7 +73,7 @@ class CurlTest {
 
     if ($response === false) {
       $this->result = false;
-      echo 'Curl error: ' . curl_error($ch);
+      echo 'PATH ' . $this->path . ' - Curl error: ' . curl_error($ch);
     } else {
       $this->result = true;
     }

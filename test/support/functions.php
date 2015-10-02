@@ -71,7 +71,12 @@ function integrationCreateTestProject( $options=array() ) {
     'target_lang' => 'it',
     'source_lang' => 'en'
   );
-  $test->files[] = test_file_path('xliff/amex-test.docx.xlf');
+
+  if ( key_exists('files', $options) ) {
+      $test->files = $options['files'];
+  } else {
+      $test->files[] = test_file_path('amex-test.docx.xlf');
+  }
 
   $response = $test->getResponse();
 

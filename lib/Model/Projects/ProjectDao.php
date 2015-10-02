@@ -3,6 +3,10 @@
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
+    /**
+     * @param $id
+     * @return Projects_ProjectStruct
+     */
     static function findById( $id ) {
        $conn = Database::obtain()->getConnection();
        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = ?");
@@ -68,7 +72,6 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $query_to_return_chunks ) ;
         $stmt->execute( array('id_project' => $id_project ) );
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
-
 
         return $stmt->fetchAll();
     }
