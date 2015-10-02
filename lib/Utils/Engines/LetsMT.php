@@ -149,7 +149,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             $parsed = json_decode( $rawValue['result'], true );
             if (!empty($parsed['ErrorMessage'])) {
                 $mt_code = intval($parsed['ErrorCode']);
-                $code = $mt_code == 21 ? '-1002' : '-1001'; // if engine is waking up render message as a warning (code -1002) else as error (code -1001).
+                $code = $mt_code == 21 ? '-2002' : '-2001'; // if engine is waking up render message as a warning (code -2002) else as error (code -2001).
                 $message = sprintf("(%s) %s", $parsed['ErrorCode'], $parsed['ErrorMessage']);
                 $decoded = array(
                     'error' => array(
