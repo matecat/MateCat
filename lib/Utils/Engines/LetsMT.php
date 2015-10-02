@@ -162,7 +162,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             else{
                 $decoded = array( 'error' => $rawValue['error']);
                 if (strpos($decoded['error'], 'Server Not Available (http status 401)') !== false) {
--                   $decoded['error']['message'] = 'Invalid Client ID.';
+                   $decoded['error']['message'] = 'Invalid Client ID.';
                 }
             }
         }
