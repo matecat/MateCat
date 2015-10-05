@@ -37,7 +37,8 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
      */
     public $others = array(
             'system_list_relative_url' => 'GetSystemList',
-            'term_list_relative_url' => 'GetSystemTermCorpora'
+            'term_list_relative_url' => 'GetSystemTermCorpora',
+            'app_id' => 'matecat'
     );
 
     /**
