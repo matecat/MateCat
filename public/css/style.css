@@ -3928,15 +3928,20 @@ body.cattool .nav-tabs li.mgmt-mt {
 }
 .submenu li.footerSwitcher {
     float: left;
-    width: 20px !important;
+    width: 23px !important;
     height: 27px;
     border-right: 1px solid #000;
-    background: #fff url(../img/arrow-notification.png) 5px 9px no-repeat !important;
-    background-size: 10px !important;
+    background: #fff url(../img/matches-up.png) 5px 9px no-repeat !important;
+/*    background-size: 10px !important; */
     cursor: pointer;
 }
 body.hideMatches .submenu li.footerSwitcher {
-    background-image: url(../img/arrow-stats.png) !important;
+    -moz-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+    filter: FlipV;
+    -ms-filter: "FlipV";
 }
 
 body.hideMatches .submenu {
