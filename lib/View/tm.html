@@ -614,6 +614,8 @@
                 var targetSelect = $('#target_lang_field select');
                 var systemSelect = $('#system_field select');
                 var systemOptions = $('#system_field select option');
+                var sourceLangIdInput = $('#source-lang-id');
+                var targetLangIdInput = $('#target-lang-id');
                 var showOnlyRunningCheckbox = $('#filter_running_field input');
                 var showOnlyRunning = showOnlyRunningCheckbox.prop('checked');
                 var runningStatuses = { running: true, standby: true };
@@ -692,12 +694,21 @@
                     
                     targetSelect.val(targetSelect.find("option:first").val()).change();
                 }
+
+                var setLanguageCodes = function () {
+                    var systemSourceCode = $("option:selected", this).data('source-language-code');
+                    var systemTargetCode = $("option:selected", this).data('target-language-code');
+
+                    sourceLangIdInput.val(systemSourceCode);
+                    targetLangIdInput.val(systemTargetCode);
+                }
                 
                 // this method can get called multiple times. remove previously added event handlers
                 sourceSelect.off('change');
                 targetSelect.off('change');
                 sourceSelect.change(fillTargetLanguages);
                 targetSelect.change(filterSystems);
+                systemSelect.change(setLanguageCodes);
                 sourceSelect.val(sourceSelect.find("option:first").val()).change();
             }
 
@@ -788,6 +799,12 @@
             <div id="minimum_qe_field" class="provider-field pull-right disabled">
                 <label class="lighttext">Don't show translation if its QE score is below</label>
                 <input type="number" step="0.01" min="0" max="1" value="0" data-field-name="minimum_qe" disabled="true"/>
+            </div>
+            <div class="provider-field hide">
+                <input id="source-lang-id" data-field-name="source_lang" />
+            </div>
+            <div class="provider-field hide">
+                <input id="target-lang-id" data-field-name="target_lang" />
             </div>
             <div class="clear"></div>
         </div>
