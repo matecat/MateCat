@@ -156,7 +156,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
         $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
-                $parameters['appID'] = ""; // not used for now
+                $parameters['appID'] = $this->app_id;
                 $parameters['systemID'] = $this->system_id;
                 $parameters['clientID'] = $this->client_id;
                 $qeParam = $this->use_qe ? ",qe" : "";
@@ -177,7 +177,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
        $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
-                $parameters['appID'] = ""; // not used for now
+                $parameters['appID'] = $this->app_id;
                 $parameters['systemID'] = $this->system_id;
                 $parameters['clientID'] = $this->client_id;
                 $parameters['options'] = "termCorpusId=" . $this->terms_id;
@@ -207,7 +207,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     public function getSystemList($_config) {
 
         $parameters = array();
-                $parameters['appID'] = ""; // not used for now
+                $parameters['appID'] = $this->app_id;
                 $parameters['clientID'] = $this->client_id;
 
 	$this->call( 'system_list_relative_url', $parameters );
@@ -224,7 +224,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     public function getTermList() {
 
         $parameters = array();
-                $parameters['appID'] = ""; // not used for now
+                $parameters['appID'] = $this->app_id;
                 $parameters['clientID'] = $this->client_id;
                 $parameters['systemID'] = $this->system_id;
 
