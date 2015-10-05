@@ -49,12 +49,20 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             if(!empty($parsed['translation'])){
                 // this is a response from a translate request
                 
+                if ($this->use_qe && floatval($parsed['qualityEstimate']) < $this->minimum_qe){
+                    $mt_result = array(
+                                    'error' => array(
+                                                'code' => -3001,
+                                                'message' => 'Translation QE score below treshold'
+                                    )
+                    );
+                    return $mt_result;
+                }
+
                 $decoded = array(
                             'data' => array(
                                     "translations" => array(
-                                            array( 'translatedText' =>
-                                                $this->use_qe && floatval($parsed['qualityEstimate']) < $this->minimum_qe ?
-                                                    "" : $this->_resetSpecialStrings($parsed['translation']))
+                                            array( 'translatedText' => $this->_resetSpecialStrings($parsed['translation']))
                                     )
                             )
                     );
