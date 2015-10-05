@@ -350,20 +350,21 @@ class Xliff_Parser {
 			}
 		}
 
-
 		return $content;
 	}
 
     private static function evalNotes(&$xliff, $i, $j, $trans_unit) {
-      $temp = null;
-      preg_match('|<note>(.+)</note>|si', $trans_unit, $temp);
-
-      if (isset($temp[1])) {
-        $temp[1] = self::fix_non_well_formed_xml($temp[1]);
-
-        $note = array('raw-content' => $temp[1] );
-        $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
-      }
+        $temp = null;
+        preg_match_all('|<note>(.+?)</note>|si', $trans_unit, $temp);
+        $matches = array_values( $temp[1] );
+        if ( count($matches) > 0 ) {
+            foreach($matches as $match) {
+                $note = array(
+                    'raw-content' => self::fix_non_well_formed_xml($match)
+                );
+                $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
+            }
+        }
     }
 
 }

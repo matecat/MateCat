@@ -926,7 +926,7 @@ class ProjectManager {
 
     }
 
-    private function insertSegmentNotesForFile( $fid ) {
+    private function insertSegmentNotesForFile( ) {
         foreach( $this->projectStructure['notes'] as $k => $v) {
             $id_segment = $v['id_segment'] ;
             foreach( $v['entries'] as $kk => $note) {

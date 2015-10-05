@@ -7,6 +7,7 @@
                 <source xml:lang="en-US">An English string</source>
                 <target xml:lang="pt-BR">This is Brazilian text 1</target>
                 <note>This is a comment</note>
+                <note>This is another comment for the same segment</note>
             </trans-unit>
             <trans-unit cat1="Antiques" cat2="Antiquities" id="a2">
                 <source xml:lang="en-US">This unit has a comment too</source>
