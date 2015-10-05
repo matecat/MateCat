@@ -296,7 +296,9 @@ console.log('changeStatus');
 		}
 	},
 */
-	closeSegment: function(segment, byButton, operation) { console.log('CLOSE SEGMENT');
+    closeSegment: function(segment, byButton, operation) {
+        console.log('CLOSE SEGMENT');
+
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
@@ -483,55 +485,60 @@ console.log('changeStatus');
         buttonsOb.before('<p class="warnings"></p>');
         UI.segmentButtons = null;
 	},
+
 	createFooter: function(segment, emptyContributions) {
+        var sid = UI.getSegmentId( segment );
+
 		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
-		if ($('.matches .overflow', segment).text() !== '') {
-			if(!emptyContributions) {
+
+		if ( $('.matches .overflow', segment).text() !== '' ) {
+			if (!emptyContributions) {
 				$('.matches .overflow', segment).empty();
 				return false;
 			}
 		}
-		if ($('.footer', segment).text() !== '') {
+
+		if ( $('.footer', segment).text() !== '' ) {
             return false;
         }
 
 		UI.footerHTML =	'<ul class="submenu">' +
-					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
+					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + sid + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
+					'	<li class="tab-switcher-cc" id="segment-' + sid + '-cc">' +
 					'		<a tabindex="-1" href="#">Concordance</a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
+					'	<li class="tab-switcher-gl" id="segment-' + sid + '-gl">' +
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
+					'	<li class="tab-switcher-al" id="segment-' + sid + '-al">' +
 					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
                     '	</li>' ;
 
                     if ( SegmentNotes.enabled() ) {
-                        UI.footerHTML = UI.footerHTML + SegmentNotes.tabHTML( this.currentSegmentId ) ;
+                        UI.footerHTML = UI.footerHTML + SegmentNotes.tabHTML( sid ) ;
                     }
 
                     UI.footerHTML = UI.footerHTML + '</ul>'  ;
 
                     UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
+					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + sid + '-matches">' +
 					'	<div class="overflow"></div>' +
                     '</div>' ;
 
                     if ( SegmentNotes.enabled() ) {
-                        UI.footerHTML = UI.footerHTML + SegmentNotes.panelHTML( this.currentSegmentId ) ;
+                        UI.footerHTML = UI.footerHTML + SegmentNotes.panelHTML( sid ) ;
                     }
 
                     UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+					'<div class="tab sub-editor concordances" id="segment-' + sid + '-concordances">' +
 					'	<div class="overflow">' +
 						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
 					'		<div class="results"></div>' +
 					'	</div>' +
 					'</div>' +
-					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
+					'<div class="tab sub-editor glossary" id="segment-' + sid + '-glossary">' +
 					'	<div class="overflow">' +
 
 					((config.tms_enabled)?
@@ -549,18 +556,25 @@ console.log('changeStatus');
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
 					'</div>';
-        UI.currentSegment.trigger('footerCreation');
-        $('.footer', segment).html(UI.footerHTML);
-        alternativesTabHtml =   '<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
-                               '	<div class="overflow"></div>' +
-                               '</div>';
-        $('.footer .tab.glossary').after(alternativesTabHtml);
 
-        UI.currentSegment.trigger('afterFooterCreation', UI.currentSegment);
+        UI.currentSegment.trigger('footerCreation');
+
+        $('.footer', segment).html(UI.footerHTML);
+
+        alternativesTabHtml =  '' +
+            '<div class="tab sub-editor alternatives" id="segment-' + sid + '-alternatives">' +
+            '	<div class="overflow"></div>' +
+            '</div>';
+
+        $('.footer .tab.glossary').after( alternativesTabHtml );
+
+        UI.currentSegment.trigger('afterFooterCreation', segment);
         UI.footerHTML = null;
-		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-            var d = JSON.parse(UI.getFromStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
-			UI.processContributions(d, segment);
+
+        // FIXME: arcane. Whatever it does, it should go in the contribution module.
+		if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
+            var d = JSON.parse( UI.getFromStorage('contribution-' + config.job_id + '-' + sid ) );
+			UI.processContributions( d, segment );
 		}
 	},
 
@@ -1245,7 +1259,7 @@ console.log('changeStatus');
 		var isEqual = (s1 == s2);
 
 		getNormally = isNotSimilar || isEqual;
-//		console.log('getNormally: ', getNormally);
+
 		this.activateSegment(getNormally);
         segment.trigger('open');
         $('section').first().nextAll('.undoCursorPlaceholder').remove();
@@ -1257,7 +1271,7 @@ console.log('changeStatus');
 		this.setCurrentSegment();
 
 		if (!this.readonly) {
- //           console.log('getNormally: ', getNormally);
+
 			if(getNormally) {
 				this.getContribution(segment, 0);
 			} else {
@@ -1271,8 +1285,6 @@ console.log('changeStatus');
 			}
 		}
 
-
-//		if(!isNotSimilar) $('.editor .alternatives .overflow').hide();
 		this.currentSegment.addClass('opened');
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
@@ -1323,7 +1335,7 @@ console.log('changeStatus');
 		if (!this.readonly) {
 			this.getContribution(segment, 1);
 			this.getContribution(segment, 2);
-//			if(this.nextSegmentId != this.nextUntranslatedSegmentId) this.getContribution(segment, 2);
+
 			if(!this.noGlossary) this.getGlossary(segment, true, 1);
 			if(!this.noGlossary) this.getGlossary(segment, true, 2);
 		}
@@ -1512,34 +1524,22 @@ console.log('changeStatus');
 		}
 	},
     getSegmentMarkup: function (segment, t, readonly, autoPropagated, autoPropagable, escapedSegment, splitAr, splitGroup, originalId) {
-//        console.log(splitGroup[0] + ' - ' + (splitGroup[splitGroup.length - 1]) );
-//        console.log('VEDIAMO: ', segment);
-//        console.log('"'+segment.sid+'" - "'+splitGroup[0]);
-        // TEMP
-//        segment.version = '12345678';
-        // END TEMP
         splitGroup = segment.split_group || splitGroup || '';
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
         newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-propagable="' + autoPropagable + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
-//            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div></div>' +
             '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#" title="Click to split segment"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
             ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
             ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
             '	<div class="body">' +
             '		<div class="header toggle" id="segment-' + segment.sid + '-header">' +
-//						'			<h2 title="" class="percentuage"><span></span></h2>' +
-//						'			<a href="#" id="segment-' + segment.sid + '-close" class="close" title="Close this segment"></a>' +
-//						'			<a href="#" id="segment-' + segment.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
             '		</div>' +
             '		<div class="text">' +
             '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
             '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
-//            '               <div class="actions"><a class="split" href="#"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div>' +
             '				<div class="copy" title="Copy source to target">' +
             '                   <a href="#"></a>' +
             '                   <p>ALT+CTRL+I</p>' +
-//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
             '				</div>' +
             '				<div class="target item" id="segment-' + segment.sid + '-target">' +
             '					<span class="hide toggle"> ' +
@@ -1547,7 +1547,6 @@ console.log('changeStatus');
             '					</span>' +
             '					<div class="textarea-container">' +
             '						<span class="loader"></span>' +
-//                        tagModes +
             '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + segment.sid + '-editarea" data-sid="' + segment.sid + '">' + ((!segment.translation) ? '' : UI.decodePlaceholdersToText(segment.translation, true, segment.sid, 'translation')) + '</div>' +
             '                       <div class="toolbar">' +
             ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
@@ -1796,14 +1795,18 @@ console.log('changeStatus');
 		});
 	},
 	setCurrentSegment_success: function(id_segment, d) {
-		if (d.errors.length)
+		if (d.errors.length) {
 			this.processErrors(d.errors, 'setCurrentSegment');
+        }
+
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
-//		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
-        if(config.alternativesEnabled) this.getTranslationMismatches(id_segment);
-//		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
+
+        if (config.alternativesEnabled) {
+            this.getTranslationMismatches(id_segment);
+        }
+
         $('html').trigger('setCurrentSegment_success', d);
     },
     getTranslationMismatches: function (id_segment) {
@@ -2783,65 +2786,6 @@ console.log('changeStatus');
 			}
 		});
 	},
-/*
-    checkTMgrants: function(panel) {console.log('checkTMgrants');
-        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
-        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
-        if(!r && !w) {
-            console.log('panel: ', panel);
-            $(panel).find('.error-message').text('Either "Show matches from TM" or "Add translations to TM" must be checked').show();
-            return false;
-        } else {
-            return true;
-        }
-    },
-*/
-/*
-    checkTMKey: function(key, operation) {console.log('checkTMKey');
-        console.log('operation: ', operation);
-
-        if( operation == 'key' ){
-            console.log('adding a key');
-            UI.execAddTMKey();
-        } else {
-
-            APP.doRequest({
-                data: {
-                    action: 'ajaxUtils',
-                    exec: 'checkTMKey',
-                    tm_key: key
-                },
-                context: operation,
-                error: function() {
-                    console.log('checkTMKey error!!');
-                },
-                success: function(d) {
-                    console.log('checkTMKey success!!');
-                    console.log('d: ', d);
-                    console.log('d.success: ', d.success);
-                    if(d.success == true) {
-                        console.log('key is good');
-                        console.log('adding a tm');
-                        UI.execAddTM();
-                        return true;
-                    } else {
-                        console.log('key is bad');
-                        if(this == 'key') {
-                            console.log('error adding a key');
-                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
-                        } else {
-                            console.log('error adding a tm');
-                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
-                        }
-                        return false;
-                    }
-                }
-            });
-
-        }
-
-    },
-*/
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
@@ -2852,31 +2796,6 @@ console.log('changeStatus');
         } else {
             $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
         }
- /*
-        if(button.attr('id') == 'addtm-add') {
-            if(
-                ($('#addtm-tr-key').val() != '')&&
-                ($('.addtm-tr input:file').val() != '')&&
-                UI.checkTMgrants($('.addtm-tr'))
-            ) {
-                $('#addtm-add').removeAttr('disabled').removeClass('disabled');
-            } else {
-                $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
-            }
-        } else {
-            console.log('1: ', $('#addtm-tr-key-key').val());
-            console.log('2: ', UI.checkTMgrants($('.addtm-tr-key')));
-            console.log('3: ', button);
-            if(
-                ($('#addtm-tr-key-key').val() != '')&&
-                    UI.checkTMgrants($('.addtm-tr-key'))
-                ) {
-                $(button).removeAttr('disabled').removeClass('disabled');
-            } else {
-                $(button).attr('disabled', 'disabled').addClass('disabled');
-            }
-        }
-*/
     },
     checkManageTMEnable: function() {
         console.log($('#addtm-tr-key').val().length);
@@ -2888,65 +2807,6 @@ console.log('changeStatus');
             $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
         }
     },
-/*
-    execAddTM: function() {
-        fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
-    },
-*/
-/*
-    execAddTMKey: function() {
-        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
-        var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
-        var TMKey = $('#addtm-tr-key').val();
-
-        APP.doRequest({
-            data: {
-                action: 'addTM',
-                exec: 'addTM',
-                job_id: config.job_id,
-                job_pass: config.password,
-                tm_key: TMKey,
-                r: r,
-                w: w
-            },
-            context: TMKey,
-            error: function() {
-                console.log('addTM error!!');
-            },
-            success: function(d) {
-                console.log('addTM success!!');
-                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
-                $('.popup-addtm-tr .x-popup').click();
-                UI.showMessage({
-                    msg: txt
-                });
-                UI.clearAddTMpopup();
-            }
-        });
-    },
-*/
-/*
-    pollForUploadCallback: function(TMKey, TMName) {
-        console.log('aaa: ', $('#uploadCallback').text());
-        if($('#uploadCallback').text() != '') {
-            msg = $.parseJSON($('#uploadCallback pre').text());
-            console.log('msg: ', msg);
-            if(msg.success == true) {
-                UI.pollForUploadProgress(TMKey, TMName);
-            } else {
-                UI.showMessage({
-                    msg: 'Error: ' + msg.errors[0].message
-                });
-            }
-        } else {
-            setTimeout(function() {
-                UI.pollForUploadCallback(TMKey, TMName);
-            }, 1000);
-        }
-
-    },
-*/
-
 
     clearAddTMpopup: function() {
         $('#addtm-tr-key').val('');
@@ -3007,36 +2867,21 @@ console.log('changeStatus');
             "data": data,
             "stack": stackTrace()
         };
-//        console.log('prova: ', prova);
-//        console.log('logValue: ', JSON.stringify(logValue));
         UI.addInStorage('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue), 'log');
-//        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
-
-/*
-        console.log('dopo errore');
-        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
-        console.log(coso);
-        console.log($.parseJSON(JSON.stringify(data)));
-*/
-//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
-
     },
+
     extractLogs: function() {
         if(this.isPrivateSafari) return;
         var pendingLogs = [];
         inp = 'log';
         $.each(localStorage, function(k,v) {
             if(k.substring(0, inp.length) === inp) {
-//                console.log('v: ', v);
-//                console.log('$.parseJSON(v): ', $.parseJSON(v));
                 pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
             }
         });
         logs = JSON.stringify(pendingLogs);
         this.clearStorage('log');
 
-//        console.log('pendingLogs: ', pendingLogs);
-//        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
         return logs;
     },
 
@@ -3072,55 +2917,7 @@ console.log('changeStatus');
         $(area).find('span.space-marker').replaceWith(' ');
         $(area).find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
 
-//        Now commented, but valid for future purposes when the user will choose what type of carriage return
-//        $('br', area).each(function() {
-//
-//            try{
-//                var br = this;
-//                //split ensure array with at least 1 item or throws exception
-//                var classes = $(br).attr('class').split(' ');
-//                $(classes).each( function( index, value ){
-//                    switch( value ){
-//                        case config.lfPlaceholderClass:
-//                            $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
-//                            break;
-//                        case config.crPlaceholderClass:
-//                            $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
-//                            break;
-//                        case config.crlfPlaceholderClass:
-//                            $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
-//                            break;
-//                    }
-//                });
-//            } catch ( e ){
-//                console.log( "Exception on placeholder replacement.\nAdded a default placeholder " + e.message );
-//                //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
-//                //so
-//                $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
-//            }
-//
-//        });
-//		return area.text();
-
-
-/*      //trim last br if it is present and if after that element there's nothing
-        //check if a node with placeholdr class exists and take the last one
-        var lastPlacehold = $( 'span.placeholder:last', area ).get(0);
-        if( typeof lastPlacehold != 'undefined' ){
-            //if there are NOT something after
-            if( lastPlacehold.nextSibling == null ) {
-                $( 'span.placeholder:last', area ).remove();
-            }
-        }
-*/
-        //same as preeceding commented but with regular expression, better because remove ALL trailing BR not only one
-        /* trim all last br if it is present and if after that element there's nothing */
-//        console.log( $( area ).text() );
-//        console.log( $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" ) );
         return $(area).text();
-
-//        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
-
 
     },
 
@@ -3136,7 +2933,6 @@ console.log('changeStatus');
         if(UI.markSpacesEnabled) {
             if(jumpSpacesEncode) {
                 _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
-//			_str = this.encodeSpacesAsPlaceholders(_str);
             }
         }
 
@@ -3622,12 +3418,6 @@ console.log('changeStatus');
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-/*
-        console.log('rangySelectionBoundary: ', $('.rangySelectionBoundary'));
-        console.log('rangySelectionBoundary.next(): ', $('.rangySelectionBoundary').next());
-        console.log('rangySelectionBoundary.next() non è una section: ', !$('.rangySelectionBoundary').next().is('.section'));
-        if(!$('.rangySelectionBoundary').next().is('.section')) $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-*/
         $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));

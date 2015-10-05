@@ -3,9 +3,6 @@ if ( SegmentNotes.enabled() )
 
     var tpls = {
         notesPanel : '' +
-            '<div class="notes-panel">Foo bar</div>',
-
-        panel : '' +
             '<div class="tab sub-editor segment-notes" id="" >' +
             '	<div class="overflow">' +
             '       <div class="segment-notes-container">  ' +
