@@ -66,12 +66,16 @@ if ( SegmentNotes.enabled() )
         return output;
     }
 
-    var activateTab = function() {
-        if ( $('.tab-switcher-notes:visible').length == 0 ) {
-            console.log('@@ !! no tab visible');
-            return ;
-        }
+    var waitForTabAndActivate = function() {
+        var interval = setInterval(function() {
+            if ( $('.tab-switcher-notes:visible').length > 0 ) {
+                clearInterval( interval );
+                activateTab();
+            }
+        });
+    }
 
+    var activateTab = function() {
         $('.editor .submenu .active').removeClass('active');
         $('.tab-switcher-notes').addClass('active');
 
@@ -84,7 +88,7 @@ if ( SegmentNotes.enabled() )
 
         if ( segment.isFooterCreated() ) {
             console.log('@@ segmentOpened, clicking');
-            activateTab();
+            waitForTabAndActivate();
         }
 
     });
@@ -97,7 +101,7 @@ if ( SegmentNotes.enabled() )
         // completed while we were on the active segment.
         if ( segment === UI.currentSegment[0] ) {
             console.log('@@ afterFooterCreation, clicking');
-            activateTab();
+            waitForTabAndActivate();
         }
     });
 

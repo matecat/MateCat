@@ -566,6 +566,7 @@ console.log('changeStatus');
             '	<div class="overflow"></div>' +
             '</div>';
 
+        // FIXME: this is global search for element
         $('.footer .tab.glossary').after( alternativesTabHtml );
 
         UI.currentSegment.trigger('afterFooterCreation', segment);
@@ -1308,19 +1309,6 @@ console.log('changeStatus');
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
 			if (lastOpened != 'segment-' + this.currentSegmentId)
 				this.closeSegment(this.lastOpenedSegment, 0, operation);
-            if(this.lastOpenedSegment) {
- //               this.lastOpenedSegment.find('.editarea').html('ss');
- /*
-                setTimeout(function() {
-                    UI.lastOpenedSegment.attr('data-hash', UI.lastOpenedSegment.attr('data-hash'));
-                }, 1000);
-                this.lastOpenedSegment.attr('data-hash', this.lastOpenedSegment.attr('data-hash'));
-                */
-            }
-
-                //console.log("this.lastOpenedSegment: ", this.lastOpenedSegment.attr('data-hash'));
-//            console.log("this.lastOpenedSegment.attr('data-tagmode): ", this.lastOpenedSegment.attr('data-tagmode'));
-//                this.lastOpenedSegment.attr('data-autopropagated', this.lastOpenedSegment.attr('data-autopropagated'));
 		}
 		this.opening = false;
 		this.body.addClass('editing');
