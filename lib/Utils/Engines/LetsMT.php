@@ -17,7 +17,9 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
     protected $_config = array(
             'segment'     => null,
-            'translation' => null
+            'translation' => null,
+            'source'      => null,
+            'target'      => null
     );
 
     public function __construct($engineRecord) {
@@ -161,6 +163,14 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+
+        // if any of the engine languages is not set, continue, else check if engine and document languages match
+        if($this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
+                ($this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ])) {
+            return array('error' => array( 'code' => -3002, 'message' => 'Engine and document languages do not match'));
+        }
 
         $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
@@ -181,6 +191,16 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         //if engine does not implement SET method, exit
         if ( null == $this->contribute_relative_url ) {
             return true;
+        }
+
+
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+
+        // if any of the engine languages is not set, continue, else check if engine and document languages match
+        if($this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
+                ($this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ])) {
+            return array('error' => array( 'code' => -3002, 'message' => 'Engine and document languages do not match'));
         }
 
        $parameters = array();
