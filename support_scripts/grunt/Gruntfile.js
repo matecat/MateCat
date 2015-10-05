@@ -7,6 +7,7 @@ module.exports = function(grunt) {
         basePath + '../css/common.css',
         basePath + '../css/style.css',
         basePath + '../css/mbc-style.css',
+        basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css'
     ]
 
@@ -39,8 +40,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
-                    basePath + 'cat_source/segment_notes.main.js',
-                    basePath + 'cat_source/segment_notes.templates.js',
+                    basePath + 'cat_source/segment_notes.*.js',
                     basePath + 'tm.js'
 				],
 				dest: buildPath + 'cat.js'

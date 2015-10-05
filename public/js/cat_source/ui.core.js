@@ -484,8 +484,6 @@ console.log('changeStatus');
         UI.segmentButtons = null;
 	},
 	createFooter: function(segment, emptyContributions) {
-//		isNotSimilar = emptyContributions;
-//		console.log('emptyContributions: ', emptyContributions);
 		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
 		if ($('.matches .overflow', segment).text() !== '') {
 			if(!emptyContributions) {
@@ -509,14 +507,24 @@ console.log('changeStatus');
 					'	</li>' +
 					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
 					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
-					'	</li>' +
-                    '	<li class="tab-switcher-notes" id="segment-' + this.currentSegmentId + '-notes">' +
-					'		<a tabindex="-1" href="#">Messages<span class="number"></span></a>' +
-					'	</li>' +
-					'</ul>' +
+                    '	</li>' ;
+
+                    if ( SegmentNotes.enabled() ) {
+                        UI.footerHTML = UI.footerHTML + SegmentNotes.tabHTML( this.currentSegmentId ) ;
+                    }
+
+                    UI.footerHTML = UI.footerHTML + '</ul>'  ;
+
+                    UI.footerHTML = UI.footerHTML +
 					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
-					'</div>' +
+                    '</div>' ;
+
+                    if ( SegmentNotes.enabled() ) {
+                        UI.footerHTML = UI.footerHTML + SegmentNotes.panelHTML( this.currentSegmentId ) ;
+                    }
+
+                    UI.footerHTML = UI.footerHTML +
 					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
 					'	<div class="overflow">' +
 						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
@@ -547,21 +555,15 @@ console.log('changeStatus');
                                '	<div class="overflow"></div>' +
                                '</div>';
         $('.footer .tab.glossary').after(alternativesTabHtml);
-//        console.log('footer html: ', $('.footer', segment).html());
-        UI.currentSegment.trigger('afterFooterCreation');
+
+        UI.currentSegment.trigger('afterFooterCreation', UI.currentSegment);
         UI.footerHTML = null;
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-//			if(isNotSimilar) return false;
             var d = JSON.parse(UI.getFromStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
-//            var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment)));
-//			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
-
-//			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
-//			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
-
 	},
+
     createHeader: function(forceCreation) {
 
         forceCreation = forceCreation || false;
@@ -848,12 +850,16 @@ console.log('changeStatus');
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
 			});
+
+            SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
+
 			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event
 			if ((where == 'before') && (numsegToAdd)) {
 				this.scrollSegment($('#segment-' + this.segMoving));
 			}
+
 			if (this.body.hasClass('searchActive')) {
 				segLimit = (where == 'before') ? firstSeg : lastSeg;
 				this.markSearchResults({
@@ -865,8 +871,7 @@ console.log('changeStatus');
 			}
 
 		}
-//		if (where == 'after') {
-//		}
+
 		if (d.data.files.length === 0) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
@@ -970,12 +975,16 @@ console.log('changeStatus');
         if (d.errors.length)
 			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
+
+        SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
+
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
 		});
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
+
 
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
@@ -1441,9 +1450,9 @@ console.log('changeStatus');
 
         $.each(files, function(k) {
 			var newFile = '';
-//            var fid = fs['ID_FILE'];
 			var fid = k;
 			var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
+            var filenametoshow ;
 
 			if (articleToAdd) {
 				filenametoshow = truncate_filename(this.filename, 40);
