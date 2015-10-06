@@ -3469,6 +3469,7 @@ console.log('changeStatus');
     },
     switchFooter: function() {
         console.log('switchFooter');
+        this.currentSegment.find('.footer').removeClass('showMatches');
         this.body.toggleClass('hideMatches');
         $.cookie('hideMatches-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
     },

@@ -1665,9 +1665,14 @@ console.log('e.target: ', e.target);
 			UI.copySource();
 		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
 			return false;
-        }).on('click', 'section .footer .tab-switcher', function() {
-            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
-		}).on('click', '.tab-switcher-tm', function(e) {
+        }).on('click', 'section .footer .tab-switcher', function(e) {
+            e.preventDefault();
+            UI.currentSegment.trigger('showMatchesLocal');
+//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
+        }).on('showMatchesLocal', '.editor', function(e) {
+            UI.currentSegment.find('.footer').addClass('showMatches');
+//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
+        }).on('click', '.tab-switcher-tm', function(e) {
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');
 			$(this).addClass('active');

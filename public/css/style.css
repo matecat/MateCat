@@ -1154,6 +1154,9 @@ body.noGlossary .tab-switcher-gl
 body.hideMatches .sub-editor {
     display: none !important;
 }
+body .footer.showMatches .sub-editor.open {
+    display: block !important;
+}
 .sub-editor.matches .overflow
 {
     min-height: 27px;
