@@ -22,24 +22,24 @@ $.extend(UI, {
         });
 
         $('.show_translator').click(function() {
-            $(this).toggleClass('hide');
-            $('.guaranteed_by').toggleClass('expanded');
-            $('.delivery,.tprice,.pricebox').toggleClass('compress');
+            $(this).addClass('hide');
+            $('.guaranteed_by').addClass('expanded');
+            $('.delivery,.tprice,.pricebox').addClass('compress');
             $('.delivery').appendTo(".displaypriceperword ");
-            $('.trustbox2').toggleClass('hide');
-            $('.translator_info_box').toggleClass('hide');
+            $('.trustbox2').removeClass('hide');
+            $('.translator_info_box').removeClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
-            $('.hide_translator').toggleClass('hide');
+            $('.hide_translator').removeClass('hide');
         });
         $('.hide_translator').click(function() {
-            $(this).toggleClass('hide');
-            $('.guaranteed_by').toggleClass('expanded');
+            $(this).addClass('hide');
+            $('.guaranteed_by').removeClass('expanded');
             $('.delivery').appendTo(".delivery_container");
-            $('.delivery,.tprice,.pricebox').toggleClass('compress');
-            $('.trustbox2').toggleClass('hide');
-            $('.translator_info_box').toggleClass('hide');
+            $('.delivery,.tprice,.pricebox').removeClass('compress');
+            $('.trustbox2').addClass('hide');
+            $('.translator_info_box').addClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
-            $('.show_translator').toggleClass('hide');
+            $('.show_translator').removeClass('hide');
         });
 
         $( "input[name='revision']" ).click(function() {
@@ -60,6 +60,7 @@ $.extend(UI, {
 			$( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
 			$( ".title-words" ).text( words );
 
+
 			if(config.enable_outsource) {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
@@ -67,7 +68,8 @@ $.extend(UI, {
 				$('.modal.outsource').addClass('loading');
                 $('.outsource.modal .continuebtn').addClass('loading disabled');
                 $('body').addClass('showingOutsourceTo');
-                resetOutsourcePopup( false );
+//                resetOutsourcePopup( false );
+
 
 				APP.doRequest({
 					data: {
@@ -105,12 +107,17 @@ $.extend(UI, {
                         UI.url_ko = d.return_url.url_ko;
                         UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
 
+
+                        $( ".outsourceto").attr( "class", "outsourceto" );
+                        console.log('richiedo preventivo');
+
+
                         if( chunk.quote_result != 1 ){
                             $(".outsourceto").addClass( "quoteError" );
-                            $('.outsource #changeTimezone, .modal.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').toggleClass("hide");
-                            $('.ErrorMsgQuoteError').toggleClass('hide');
+                            $('.outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
+                            $('.ErrorMsgQuoteError').removeClass('hide');
                             $('#forceDeliveryContainer').css('top','365px');
-                            $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').hide();
+                            $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
                             $('.needitfaster').html('Change delivery date');
                             $('.outsource.modal .continuebtn').addClass('disabled');
                             return false;
@@ -118,10 +125,11 @@ $.extend(UI, {
                         
                         if( chunk.quote_available != 1 ) {
                             $(".outsourceto").addClass("quoteNotAvailable");
-                            $('.ErrorMsgquoteNotAvailable').toggleClass('hide');
-                            $('#forceDeliveryContainer').css('top','365px');
-                            $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').hide();
+                            $('.ErrorMsgquoteNotAvailable').removeClass('hide');
+                            $('#forceDeliveryContainer').css('top','465px');
+                            $('.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
                             $('.needitfaster').html('Change delivery date');
+                            $('#forceDeliveryContainer #delivery_not_available').removeClass('hide');
                             $('.outsource.modal .continuebtn').addClass('disabled');
                             return false;
                         }
@@ -145,8 +153,13 @@ $.extend(UI, {
 
                         if( new Date( deliveryToShow ).getTime() < $( "#forceDeliveryChosenDate" ).text() ) {
                             $( ".delivery_container > .delivery").addClass( "faster" );
+                            $('#delivery_before_time').removeClass('hide');
+                            $('.modal.outsource .tooltip').removeClass('hide');
+
                         } else {
                             $( ".delivery_container > .delivery").removeClass( "faster" );
+                            $('#delivery_before_time').addClass('hide');
+                            $('.modal.outsource .tooltip').addClass('hide');
                         }
 
                         /**
@@ -180,13 +193,11 @@ $.extend(UI, {
                         if( chunk.show_translator_data != 1 ) {
                             $('.outsourceto').addClass("translatorNotAvailable");
                             $('.outsource.modal .minus,').hide();
-                            $('.translator_bio,.outsource.modal .more,.trustbox2,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').toggleClass('hide');
+                            $('.trustbox2').removeClass('hide');
+                            $('.translator_bio,.outsource.modal .more,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').addClass('hide');
                         return false;
                         }
 
-                        // delivery before time 
-
-                        // $('#delivery_before_time').toggleClass('hide');
 
                         var subjectsString = "";
                         if (chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0) {
@@ -210,8 +221,10 @@ $.extend(UI, {
                         }
 
                         $(".score_number").text(parseInt(voteToShow) + "%");
+
                     }
                 });
+                         console.log('richiedo preventivo fine');
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
 				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
 
@@ -413,4 +426,15 @@ function updateCartParameters() {
 
 function resetOutsourcePopup( resetHard ) {
     $( ".outsourceto").attr( "class", "outsourceto" );
+    $( ".show_translator.more").attr( "class", "" ).addClass("show_translator more");
+    $( ".hide_translator.more").attr( "class", "" ).addClass("hide_translator more hide");
+    $('#forceDeliveryContainer').addClass("hide");
+    $('.trustbox2').attr( "class", "trustbox2" ).addClass("hide");
+    $('.trustbox1').attr( "class", "trustbox1" );
+    $('.translator_info_box').attr( "class", "translator_info_box" ).addClass("hide");
+    $('.translator_bio').attr( "class", "translator_bio" );
+    $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
+    $('.tprice.compress').attr( "class", "tprice" );
+    $('.popup-box.pricebox.compress').attr( "class", "" ).addClass("popup-box pricebox");
+    $('.delivery').appendTo(".delivery_container").attr("class","delivery");
 }
