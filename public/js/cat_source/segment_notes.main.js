@@ -54,8 +54,6 @@ if ( SegmentNotes.enabled() )
     }
 
     var panelHTML = function( sid ) {
-        console.debug('@@ panelHTML called with sid',  sid);
-
         var segment = UI.Segment.find( sid );
         var notes = segmentNotes[ segment.absoluteId ] ;
         var output = '' ;
@@ -79,15 +77,12 @@ if ( SegmentNotes.enabled() )
     }
 
     $(window).on('segmentOpened', function(e) {
-        console.debug('segmentOpened', e.segment ) ;
         if ( tabVisible( e.segment ) ) {
-            console.debug('@@ segmentOpened activating');
             activateTab();
         }
     });
 
     $(document).on('createFooter:skipped', function(e, segment) {
-        console.debug(' createFooter:skipped');
     });
 
     $(document).on('createFooter:skipped:cached', function(e, segment) {
@@ -100,20 +95,16 @@ if ( SegmentNotes.enabled() )
         var segment = new UI.Segment( e.segment );
 
         if ( tabVisible( segment ) && segment.isFooterCreated() ) {
-            console.debug('@@ segmentOpened, clicking');
             activateTab();
         }
 
     });
 
     $(window).on('getContribution:complete', function(e, segment) {
-        console.debug('@@ getContribution:complete', $(segment).attr('id') );
-
         // IF this event triggers for the current segment it
         // means that the footer was not cached and the loading
         // completed while we were on the active segment.
         if ( tabVisible( segment ) ) {
-            console.debug('@@ getContribution, clicking');
             activateTab();
         }
     });
