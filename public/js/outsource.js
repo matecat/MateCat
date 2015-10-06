@@ -68,7 +68,8 @@ $.extend(UI, {
 				$('.modal.outsource').addClass('loading');
                 $('.outsource.modal .continuebtn').addClass('loading disabled');
                 $('body').addClass('showingOutsourceTo');
-                resetOutsourcePopup( false );
+//                resetOutsourcePopup( false );
+
 
 				APP.doRequest({
 					data: {
@@ -113,7 +114,7 @@ $.extend(UI, {
 
                         if( chunk.quote_result != 1 ){
                             $(".outsourceto").addClass( "quoteError" );
-                            $('.outsource #changeTimezone, .modal.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
+                            $('.outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
                             $('.ErrorMsgQuoteError').removeClass('hide');
                             $('#forceDeliveryContainer').css('top','365px');
                             $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
@@ -125,9 +126,10 @@ $.extend(UI, {
                         if( chunk.quote_available != 1 ) {
                             $(".outsourceto").addClass("quoteNotAvailable");
                             $('.ErrorMsgquoteNotAvailable').removeClass('hide');
-                            $('#forceDeliveryContainer').css('top','365px');
+                            $('#forceDeliveryContainer').css('top','465px');
                             $('.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
                             $('.needitfaster').html('Change delivery date');
+                            $('#forceDeliveryContainer #delivery_not_available').removeClass('hide');
                             $('.outsource.modal .continuebtn').addClass('disabled');
                             return false;
                         }
@@ -419,4 +421,15 @@ function updateCartParameters() {
 
 function resetOutsourcePopup( resetHard ) {
     $( ".outsourceto").attr( "class", "outsourceto" );
+    $( ".show_translator.more").attr( "class", "" ).addClass("show_translator more");
+    $( ".hide_translator.more").attr( "class", "" ).addClass("hide_translator more hide");
+    $('#forceDeliveryContainer').addClass("hide");
+    $('.trustbox2').attr( "class", "trustbox2" ).addClass("hide");
+    $('.trustbox1').attr( "class", "trustbox1" );
+    $('.translator_info_box').attr( "class", "translator_info_box" ).addClass("hide");
+    $('.translator_bio').attr( "class", "translator_bio" );
+    $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
+    $('.tprice.compress').attr( "class", "tprice" );
+    $('.popup-box.pricebox.compress').attr( "class", "" ).addClass("popup-box pricebox");
+    $('.delivery').appendTo(".delivery_container").attr("class","delivery");
 }

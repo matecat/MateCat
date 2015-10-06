@@ -143,11 +143,10 @@ p.translator_name {
 }
 
 .outsource.modal h2 {
-	font-size: 23px;
-	font-weight: bold;
-    float: left;
-	margin: 0;
-    background: #efefef;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 0;
+    margin: 15px 0;
 }
 
 .onyourown h2,
@@ -331,13 +330,13 @@ clear:both;
 
 /* versione 3: box */
 .revealprices {display:none;}
-.pricebox .outsourceto .heading {
+.pricebox .heading {
     margin-top: 15px;
     text-align:left;
-    padding: 1% 2%;
+    padding: 7px 2%;
     margin: 0 auto;
     overflow: hidden;
-        background: #efefef;
+    background: #efefef;
     border-bottom: 1px solid #ccc;
 }
 
@@ -379,6 +378,10 @@ clear:both;
 .modal.outsource .standardbtn {
     background:#f4f4f4!important;
     color:#333;
+}
+
+.modal.outsource a:hover {
+    text-decoration: none!important;
 }
 
 .contact_box p {
@@ -492,7 +495,7 @@ margin-top: 0!important;
 
 .contact_box {
     border-top: 1px dashed #ccc;
-    margin: 20px auto 0;
+    margin: 15px auto 0;
     overflow: hidden;
     padding: 1% 2%;
 
@@ -501,8 +504,12 @@ margin-top: 0!important;
 .onyourown, .outsourceto {
     border: 1px solid #ccc;
     border-radius: 3px;
-       margin: 20px auto 0 auto;
+       margin: 0 auto;
     overflow: hidden;
+}
+
+.outsource .heading h3 {
+    float: left;
 }
 
 .onyourown h2,
@@ -532,17 +539,24 @@ margin-top: 0!important;
 
 .translator_info a,
 .delivery a,
-.guaranteed_by a,
-.contact_box p a,
-.guaranteed_by a.more {
+.contact_box p a {
     color:#0d8fb2;
     text-decoration: underline;
     cursor: pointer;
 }
 
 .guaranteed_by a.more {
+    color: #333!important;
     text-decoration: none;
+    cursor: pointer;
+    font-weight: normal!important;
 }
+
+.guaranteed_by a.more span {
+    font-weight: normal!important;
+    text-decoration: underline!important;
+}
+
 
 .pricebox.compress #forceDeliveryContainer{
     top: 500px!important;
@@ -850,7 +864,7 @@ span.subjects, span.experience, span.translated_words, span.score_number {
     width: 98%;
     border-top: 1px solid #ccc;
     text-align: left;
-    padding: 1% 0% 1% 2%;
+    padding: 5px 0% 5px 2%;
     background:#fff;
 }
 
@@ -1116,7 +1130,7 @@ a.tooltip.gray span:after {
     z-index: 10001;
     color: #fff;
     padding: 20px;
-    top: 405px;
+    top: 440px;
     left: 435px;
     zoom: 0.9;
     text-align: left;
@@ -1227,6 +1241,7 @@ a.tooltip.gray span:after {
 
 
 #forceDeliveryContainer #delivery_manual_error,
+#forceDeliveryContainer #delivery_not_available,
 #forceDeliveryContainer #delivery_before_time {
     opacity: 0.87;
     color: red;
@@ -1240,6 +1255,7 @@ a.tooltip.gray span:after {
 }
 
 #forceDeliveryContainer #delivery_manual_error div,
+#forceDeliveryContainer #delivery_not_available div
 #forceDeliveryContainer #delivery_before_time div {
     width: 225px;
     text-align: left;

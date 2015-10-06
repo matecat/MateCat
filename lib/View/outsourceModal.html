@@ -51,21 +51,24 @@
         <div class="popup">
             <a href="#" class="x-popup"></a>
 
-        <h1>Choose how to translate: <span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h1>
+       <h1>Translate</h1>
 
         <!--    <h1>Choose the best way to translate</h1> -->
 
             <div class="popup-box pricebox">
+             <h2>Choose how to translate: <span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h2>
                 <div class="choose">
                     <div class="onyourown">
-                        <h2>Share the following link with your translator</h2>
+                        <div class="heading">
+                            <h3>Share the following link with your translator</h3>
+                        </div>
                         <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
                         <a  href='javascript:void(0)' onclick='trackClick( "translate" );' class="uploadbtn in-popup" target="_blank">Open</a>
                     </div>
                     <div class="outsourceto">
                             <div class="total_outsource">
                                 <div class="heading">
-                                    <h2>Outsource Project Management + Translation<span class="revision_heading hide"> + Revision</span></h2>
+                                    <h3>Outsource Project Management + Translation<span class="revision_heading hide"> + Revision</span></h3>
                         
                                     <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show prices</a> 
 
@@ -127,14 +130,14 @@
                                             <strong>Guaranteed by</strong>
                                             <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
                                             <p class="trustbox1">Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)
-                                                                and keep using the same translator for your next projects. <br /><a class="show_translator more">Read more</a></p>
+                                                                and keep using the same translator for your next projects. <br /><a class="show_translator more"><span>Read more</span></a></p>
                                                
                                        
                                             <p class="trustbox2 hide">
                                             We have more than 15 years' experience as a language services provider.
                                             <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">We offer two key guarantees on quality and delivery</a>.
                                             <br />
-                                            <a class="hide_translator more minus hide">Close</a>
+                                            <a class="hide_translator more minus hide"><span>Close</span></a>
                                             </p>                                         
                                         </div>
                                         <div class="translator_info_box hide">
@@ -279,6 +282,9 @@
                     </div>
                     <div id="delivery_before_time" class="hide">
                         <div>We will deliver before the selected date</div>
+                    </div>
+                    <div id="delivery_not_available" class="hide">
+                        <div>Deadline too close, pick another one.</div>
                     </div>
                     
                     <input type="hidden" id="datePickerSelectedDate" value=""  />
