@@ -120,7 +120,8 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
         $( "#changeTimezone").removeClass( "hide" );
     }
 
-    $(".translate").trigger( "click" );
+    var fullTranslateUrl = $(".onyourown a.uploadbtn").attr("href");
+    $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
 }
 
 
