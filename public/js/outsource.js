@@ -44,7 +44,8 @@ $.extend(UI, {
 
         $( "input[name='revision']" ).click(function() {
             $(this).parent().toggleClass('noopacity');
-            $(".translate").trigger( "click" );
+            var fullTranslateUrl = $(".onyourown a.uploadbtn").attr("href");
+            $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
             $('.revision_heading').toggleClass('hide');
         });
 
@@ -66,6 +67,7 @@ $.extend(UI, {
 				$('.modal.outsource').addClass('loading');
                 $('.outsource.modal .continuebtn').addClass('loading disabled');
                 $('body').addClass('showingOutsourceTo');
+                resetOutsourcePopup( false );
 
 				APP.doRequest({
 					data: {
@@ -102,8 +104,6 @@ $.extend(UI, {
                         UI.url_ok = d.return_url.url_ok;
                         UI.url_ko = d.return_url.url_ko;
                         UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
-
-                        $( ".outsourceto").attr( "class", "outsourceto" );
 
                         if( chunk.quote_result != 1 ){
                             $(".outsourceto").addClass( "quoteError" );
@@ -260,6 +260,7 @@ $.extend(UI, {
 			$('.modal.outsource .displayprice').empty();
 			$('.modal.outsource .delivery .time').empty();
 			$('.modal.outsource .revealprices, .modal.outsource .showprices').hide();
+            resetOutsourcePopup( true );
 		});
 
         $( "#changecurrency" ).change( function(){
@@ -341,7 +342,7 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
 
 
 function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
-    var dd = new Date( date );
+    var dd = new Date( date.replace(/-/g, "/") );
     dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
     $( elementToUpdate ).text( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
 
@@ -403,4 +404,8 @@ function updateCartParameters() {
         success: function () {}
     });
 
+}
+
+function resetOutsourcePopup( resetHard ) {
+    $( ".outsourceto").attr( "class", "outsourceto" );
 }
