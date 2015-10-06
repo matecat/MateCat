@@ -1165,7 +1165,7 @@ margin-left: 10px;
 	    cursor: pointer;
     }
 
-    .popup .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup, .x-popup2
+    .popup .x-popup, .mgmt-panel .x-popup, .slide-panel .x-popup
     {
 	    color:#fff;
         text-decoration: none;
@@ -1178,7 +1178,7 @@ margin-left: 10px;
 	    background-size: 22px;
     }
 
-    .popup .x-popup:hover, .slide-panel .x-popup:hover, #forceDeliveryContainer .x-popup2:hover {
+    .popup .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
         color:red;
     }
 	
