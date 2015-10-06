@@ -196,7 +196,8 @@ p.translator_name {
 .outsource.modal.loading .addrevision .revision_delivery,
 .outsource.modal.loading .addrevision .revision_price_box,
 .outsource.modal.loading .translator_info,
-.outsource.modal.loading .displaypriceperword {
+.outsource.modal.loading .displaypriceperword,
+.outsource.modal.loading .more {
     display: none;
 }
 
@@ -1075,6 +1076,14 @@ box-shadow: -2px 5px 7px #7B7B7B;
     /* background-color: #f8f8f8; */
 }
 
+.compress .tooltip.gray span {
+    left: -197px;
+}
+
+.compress .tooltip span:before, .compress .tooltip span:after {
+    left: 87%;
+}
+
 .tooltip:hover span {
     opacity: 1;
     top: -150px;
@@ -1088,6 +1097,7 @@ a.tooltip.gray {
 
 a.tooltip.gray span {
     background: #EEE;
+    font-size: 15px;
 }
 
 a.tooltip.gray span:after {
@@ -1503,6 +1513,7 @@ a.tooltip.gray span:after {
     min-height: 109px;
 }
 
-.quoteNotAvailable .pricebox .delivery {
+.quoteError .delivery
+ {
     padding: 0.5% 2% 4% 2%;
 }
