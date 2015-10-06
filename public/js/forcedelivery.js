@@ -11,11 +11,13 @@ $( document ).ready( function()
         $( "#whenTimezone option[value='" + $( "#changeTimezone").val() + "']" ).attr( "selected", "selected" );
     });
 
-
-    $('.x-popup2').click(function() {
-        prepareAndSubmitQuote( 0, true );
+    $('.modal.outsource .x-popup2').click(function () {
+        $('#forceDeliveryContainer').addClass('hide');
     });
 
+    $('.modal.outsource .btn-cancel').click(function() {
+        prepareAndSubmitQuote( 0, true );
+    });
 
     $( ".popup").on( "change", "#whenTime, #whenTimezone", function() {
         prepareAndSubmitQuote( getChosenDeliveryDate(), false );
@@ -103,12 +105,14 @@ function checkChosenDeliveryDate( chosenDate ) {
 function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
     if( chosenDate != 0 && !checkChosenDeliveryDate( chosenDate ) ) {
         $( "#delivery_manual_error").removeClass( "hide" );
+        $('.forceDeliveryButtonOk').addClass('disabled')
         return;
     }
 
     setCookie( "matecat_timezone", $( "#whenTimezone").val() );
 
     $( "#delivery_manual_error").addClass( "hide" );
+    $('.forceDeliveryButtonOk').removeClass('disabled')
     $( "#forceDeliveryChosenDate").text( chosenDate );
 
     if( hideNeedItFaster ) {

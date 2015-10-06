@@ -51,7 +51,7 @@
         <div class="popup">
             <a href="#" class="x-popup"></a>
 
-		<h1>Choose how to translate: <span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h1>
+        <h1>Choose how to translate: <span class="title-source">English</span> &gt; <span class="title-target">Italian</span>, <span class="title-words">1000</span> words</h1>
 
         <!--    <h1>Choose the best way to translate</h1> -->
 
@@ -124,60 +124,56 @@
                                 <div class="offer">
                                     <div class="guaranteed_by">
                                         <div class="trust_text">
-                                        <strong>Guaranteed by</strong>
-                                        <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
+                                            <strong>Guaranteed by</strong>
+                                            <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
+                                            <p class="trustbox1">Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)
+                                                                and keep using the same translator for your next projects. <br /><a class="show_translator more">Read more</a></p>
                                                
-                                            <p>Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)
-                                                            and keep using the same translator for your next projects. <a class="show_translator">Read more.</a></p>
-                                           
-                                   
-                                            <p class="trustbox hide">
-                                                        
-                                                        We have more than 15 years' experience as a language services provider.
-                                                        <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">We offer two key guarantees on quality and delivery</a>.
-                                                        <br />
-                                                        <a class="hide_translator hide">Close.</a>
-                                                   
-                                                </p>
-                                             
-                                            </div>
-                                             
-                                            <div class="translator_info_box hide">
-                                                
-                                                <div class="translator_info">
+                                       
+                                            <p class="trustbox2 hide">
+                                            We have more than 15 years' experience as a language services provider.
+                                            <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">We offer two key guarantees on quality and delivery</a>.
+                                            <br />
+                                            <a class="hide_translator more minus hide">Close</a>
+                                            </p>                                         
+                                        </div>
+                                        <div class="translator_info_box hide">
+                                            <div class="translator_info">
                                                     <div class="translator_bio">
                                                         <span class="translator_name">Translator: <strong></strong></span>
+                                                        <p><span class="label_info">Positive feedback:</span><span class="score_number"></span></p>
                                                         <p><span class="label_info">Expert in:</span>
                                                         <span class="subjects"></span>
                                                         </p>
                                                         <p><span class="label_info">Years of experience:</span> <span class="experience"></span></p>
-                                                        <p><span class="label_info">Words translated last 12 months:</span><span class="translated_words"></span></p>
-                                                       
+                                                        <p><span class="label_info">Words translated last 12 months:</span><span class="translated_words"></span></p> 
                                                     </div>
-                                                    <div class="translator_score">     
-                                                            <div class="ribbonwrapper">
-                                                                <div id="imgback">
-                                                                    <div id="rectangle">
-                                                                        <span class="score_number"></span>
-                                                                         <span class="score_legend">Positive feedback</span>
-                                                                    </div>
-                                                                    <div id="left"></div>
-                                                                    <div id="right"></div>
-                                                                </div>
-                                                            </div>                                         
-                                                    </div>
+                                                   
+                                                   
                                                 </div>
                                             </div>
-
                                         </div>
                                         <div class="delivery_container">
                                             <div class="delivery">
                                                 <div class="delivery_label">Delivery by:</div>
                                                 <div class="delivery_details">
-                                                    <span class="time" data-timezone="" data-rawtime=""></span>
-                                                    <span class="zone2"></span>
-                                                    <br />
-                                                    <a class="needitfaster">Need it faster?</a>
+                                                        <div class="ErrorMsg ErrorMsgQuoteError hide">
+                                                            <h3>Ooops! <br />Something went wrong!</h3>
+                                                            <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
+                                                        </div>  
+                                                        <div class="ErrorMsgquoteNotAvailable hide">
+                                                            <h3>Not available. </h3>
+                                                            <p>Unfortunately the solution chosen is not available. 
+                                                            Try again with another delivery date.</p>
+                                                        </div>
+                                                        <span class="time" data-timezone="" data-rawtime=""></span>
+                                                        <a class="tooltip gray hide">i
+                                                            <span><strong>We will deliver before the selected date.</strong><br />
+                                                            This date already provides us with all the time we need to deliver quality work at the lowest price
+                                                            </span>
+                                                        </a>
+                                                        <span class="zone2"></span>
+                                                        <a class="needitfaster">Need it faster?</a>
                                                 </div>
                                             </div>    
                                         </div>                                  
@@ -193,8 +189,8 @@
                                                     <input type="hidden" name="quoteData" value=""/>
                                                     <a href="#" class="continuebtn disabled">Order</a>
                                                 </form>
-                                            </div>
-                                       
+                                        </div>
+                                                                       
                                         <div class="addrevision">
                                              <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span class="revision_delivery"></span><span class="revision_price_box">+ <span class="revision_currency"></span><span class="revision_price"></span></span>
                                         </div>
@@ -217,8 +213,7 @@
                         <!-- end reveal prices-->
                         <!-- begin date picker -->
                             <div id="forceDeliveryContainer" class="hide">
-            <a href="#" class="x-popup2"></a>
-            
+                            <a href="#" class="x-popup2"></a>
             <div class="delivery-manual">
                 <span id="forceDeliveryChosenDate" class="hide">0</span>
              
@@ -230,14 +225,14 @@
                 <div class="delivery-manual-time">
                     <h3>Choose a time</h3>
                     <select name="whenTime"  id="whenTime">
-                        <option value="07">7 (morning)</option>
-                        <option value="09">9 (morning)</option>
-                        <option value="11">11 (morning)</option>
-                        <option value="13">13 (evening)</option>
-                        <option value="15">15 (evening)</option>
-                        <option value="17">17 (evening)</option>
-                        <option value="19">19 (evening)</option>
-                        <option value="21">21 (evening)</option>
+                        <option value="07">7 (AM)</option>
+                        <option value="09">9 (AM)</option>
+                        <option value="11">11 (AM)</option>
+                        <option value="13">13 (PM)</option>
+                        <option value="15">15 (PM)</option>
+                        <option value="17">17 (PM)</option>
+                        <option value="19">19 (PM)</option>
+                        <option value="21">21 (PM)</option>
                     </select>
                     
                     <br /><br />
@@ -280,11 +275,14 @@
                     <div id="delivery_manual_error" class="hide">
                         <div>* Chosen delivery date is in the past</div>
                     </div>
+                    <div id="delivery_before_time" class="hide">
+                        <div>We will deliver before the selected date</div>
+                    </div>
                     
                     <input type="hidden" id="datePickerSelectedDate" value=""  />
                         <input type="hidden" id="datePickerSelectedDatePrint" value="" />
                         <input name="forceDeliveryButtonOk" type="button" value="Continue" class="uploadbtn in-popup forceDeliveryButtonOk" />
-                    
+                    <a href="#" class="btn-cancel in-popup">Clear</a>
                         
                 </div>
               

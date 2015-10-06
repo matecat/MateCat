@@ -24,9 +24,9 @@ $.extend(UI, {
         $('.show_translator').click(function() {
             $(this).toggleClass('hide');
             $('.guaranteed_by').toggleClass('expanded');
-            $('.delivery,.tprice').toggleClass('compress');
+            $('.delivery,.tprice,.pricebox').toggleClass('compress');
             $('.delivery').appendTo(".displaypriceperword ");
-            $('.trustbox').toggleClass('hide');
+            $('.trustbox2').toggleClass('hide');
             $('.translator_info_box').toggleClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
             $('.hide_translator').toggleClass('hide');
@@ -35,8 +35,8 @@ $.extend(UI, {
             $(this).toggleClass('hide');
             $('.guaranteed_by').toggleClass('expanded');
             $('.delivery').appendTo(".delivery_container");
-            $('.delivery,.tprice').toggleClass('compress');
-            $('.trustbox').toggleClass('hide');
+            $('.delivery,.tprice,.pricebox').toggleClass('compress');
+            $('.trustbox2').toggleClass('hide');
             $('.translator_info_box').toggleClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
             $('.show_translator').toggleClass('hide');
@@ -105,12 +105,23 @@ $.extend(UI, {
                         $( ".outsourceto").attr( "class", "outsourceto" );
 
                         if( chunk.quote_result != 1 ){
-                            $( ".outsourceto").addClass( "quoteError" );
+                            $(".outsourceto").addClass( "quoteError" );
+                            $('.outsource #changeTimezone, .modal.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').toggleClass("hide");
+                            $('.ErrorMsgQuoteError').toggleClass('hide');
+                            $('#forceDeliveryContainer').css('top','365px');
+                            $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').hide();
+                            $('.needitfaster').html('Change delivery date');
+                            $('.outsource.modal .continuebtn').addClass('disabled');
                             return false;
                         }
-
+                        
                         if( chunk.quote_available != 1 ) {
                             $(".outsourceto").addClass("quoteNotAvailable");
+                            $('.ErrorMsgquoteNotAvailable').toggleClass('hide');
+                            $('#forceDeliveryContainer').css('top','365px');
+                            $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').hide();
+                            $('.needitfaster').html('Change delivery date');
+                            $('.outsource.modal .continuebtn').addClass('disabled');
                             return false;
                         }
 
@@ -159,9 +170,15 @@ $.extend(UI, {
 
                         // setting information about translator
                         if( chunk.show_translator_data != 1 ) {
-                            $(".outsourceto").addClass("translatorNotAvailable");
-                            return false;
+                            $('.outsourceto').addClass("translatorNotAvailable");
+                            $('.outsource.modal .minus,').hide();
+                            $('.translator_bio,.outsource.modal .more,.trustbox2,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').toggleClass('hide');
+                        return false;
                         }
+
+                        // delivery before time 
+
+                        // $('#delivery_before_time').toggleClass('hide');
 
                         var subjectsString = "";
                         if (chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0) {

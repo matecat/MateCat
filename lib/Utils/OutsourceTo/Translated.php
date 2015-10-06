@@ -153,7 +153,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url =  "http://www.translated.home/hts/matecat-endpoint.php?" .
+            $url =  "http://www.translated.net/hts/matecat-endpoint.php?" .
                     "f=quote&" .
                     "cid=htsdemo&" .
                     "p=htsdemo5&" .
