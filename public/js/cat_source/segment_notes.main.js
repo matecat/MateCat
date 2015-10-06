@@ -36,8 +36,9 @@ if ( SegmentNotes.enabled() )
         var panel = $('<div class="tab sub-editor segment-notes" id="" >' +
             '	<div class="overflow">' +
             '       <div class="segment-notes-container">  ' +
-            '       	<div class="segment-notes-panel-header">Notes</div>' +
-            '           <div class="segment-notes-panel-body"><ul></ul></div> ' +
+            '           <div class="segment-notes-panel-body">' +
+            '             <ul class="graysmall"></ul> ' +
+            '           </div>' +
             '       </div> ' +
             '	</div>' +
             '</div>') ;
@@ -46,7 +47,12 @@ if ( SegmentNotes.enabled() )
 
         var root  = $(panel);
         $.each(notes, function() {
-            var li = $('<li/>').text( this.note );
+            var li = $('<li/>');
+            var label = $('<span class="note-label">Note: </span>');
+            var text = $('<span />').text( this.note );
+
+            li .append( label ) .append( text ) ;
+
             root.find('ul').append( li );
         });
 

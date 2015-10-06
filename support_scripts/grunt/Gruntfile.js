@@ -72,6 +72,7 @@ module.exports = function(grunt) {
 					basePath + '../css/common.css',
 					basePath + '../css/style.css',
                     basePath + '../css/mbc-style.css',
+                    basePath + '../css/segment-notes.css',
                     basePath + '../css/project-completion-feature.css'
 				],
 				dest: basePath + '../css/app.css'
