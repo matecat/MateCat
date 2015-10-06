@@ -54,7 +54,7 @@ if ( SegmentNotes.enabled() )
     }
 
     var panelHTML = function( sid ) {
-        console.log('@@ panelHTML called with sid',  sid);
+        console.debug('@@ panelHTML called with sid',  sid);
 
         var segment = UI.Segment.find( sid );
         var notes = segmentNotes[ segment.absoluteId ] ;
@@ -66,13 +66,8 @@ if ( SegmentNotes.enabled() )
         return output;
     }
 
-    var waitForTabAndActivate = function() {
-        var interval = setInterval(function() {
-            if ( $('.tab-switcher-notes:visible').length > 0 ) {
-                clearInterval( interval );
-                activateTab();
-            }
-        });
+    var tabVisible = function( segment ) {
+        return $('.tab-switcher-notes:visible', segment).length > 0;
     }
 
     var activateTab = function() {
@@ -84,24 +79,42 @@ if ( SegmentNotes.enabled() )
     }
 
     $(window).on('segmentOpened', function(e) {
+        console.debug('segmentOpened', e.segment ) ;
+        if ( tabVisible( e.segment ) ) {
+            console.debug('@@ segmentOpened activating');
+            activateTab();
+        }
+    });
+
+    $(document).on('createFooter:skipped', function(e, segment) {
+        console.debug(' createFooter:skipped');
+    });
+
+    $(document).on('createFooter:skipped:cached', function(e, segment) {
+        if ( tabVisible( segment ) ) {
+            activateTab();
+        }
+    });
+
+    $(window).on('segmentOpened', function(e) {
         var segment = new UI.Segment( e.segment );
 
-        if ( segment.isFooterCreated() ) {
-            console.log('@@ segmentOpened, clicking');
-            waitForTabAndActivate();
+        if ( tabVisible( segment ) && segment.isFooterCreated() ) {
+            console.debug('@@ segmentOpened, clicking');
+            activateTab();
         }
 
     });
 
-    $(window).on('afterFooterCreation', function(e, segment) {
-        console.log('@@', segment, UI.currentSegment, segment === UI.currentSegment[0] );
+    $(window).on('getContribution:complete', function(e, segment) {
+        console.debug('@@ getContribution:complete', $(segment).attr('id') );
 
         // IF this event triggers for the current segment it
         // means that the footer was not cached and the loading
         // completed while we were on the active segment.
-        if ( segment === UI.currentSegment[0] ) {
-            console.log('@@ afterFooterCreation, clicking');
-            waitForTabAndActivate();
+        if ( tabVisible( segment ) ) {
+            console.debug('@@ getContribution, clicking');
+            activateTab();
         }
     });
 

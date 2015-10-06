@@ -494,11 +494,13 @@ console.log('changeStatus');
 		if ( $('.matches .overflow', segment).text() !== '' ) {
 			if (!emptyContributions) {
 				$('.matches .overflow', segment).empty();
+                $(document).trigger('createFooter:skipped', segment);
 				return false;
 			}
 		}
 
 		if ( $('.footer', segment).text() !== '' ) {
+            $(document).trigger('createFooter:skipped:cached', segment);
             return false;
         }
 
@@ -559,7 +561,7 @@ console.log('changeStatus');
 
         UI.currentSegment.trigger('footerCreation');
 
-        $('.footer', segment).html(UI.footerHTML);
+        $('.footer', segment).html( UI.footerHTML );
 
         alternativesTabHtml =  '' +
             '<div class="tab sub-editor alternatives" id="segment-' + sid + '-alternatives">' +
@@ -570,6 +572,7 @@ console.log('changeStatus');
         $('.footer .tab.glossary').after( alternativesTabHtml );
 
         UI.currentSegment.trigger('afterFooterCreation', segment);
+
         UI.footerHTML = null;
 
         // FIXME: arcane. Whatever it does, it should go in the contribution module.
