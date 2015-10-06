@@ -159,8 +159,8 @@ $.extend(UI, {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "alt+c",
-					"mac": "alt+meta+c",
+					"standard": "alt+f",
+					"mac": "alt+f",
 				}
 			},
 		};

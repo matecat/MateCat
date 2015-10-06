@@ -3797,6 +3797,9 @@ body.cattool table.mgmt-mt tbody .enable-mt {
 body.isAnonymous .add-mt-engine {
     display: none;
 }
+body.cattool .nav-tabs li.mgmt-mt {
+    display: none;
+}
 
 .splitArea {
   width: 45.5%;

@@ -214,7 +214,7 @@ do {
     $_config[ 'segment' ] = $text;
     $_config[ 'source' ]  = $source;
     $_config[ 'target' ]  = $target;
-    $_config[ 'email' ]   = "tmanalysis@matecat.com";
+    $_config[ 'email' ]   = INIT::$MYMEMORY_TM_API_KEY;
 
     $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $objQueue[ 'tm_keys' ], 'r', 'tm' );
     if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
