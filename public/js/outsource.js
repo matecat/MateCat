@@ -73,6 +73,7 @@ $.extend(UI, {
 						pid: $('#pid').attr('data-pid'),
 						ppassword: $("#pid").attr("data-pwd"),
                         fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
+                        typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
 						jobs: [
 							{
 								jid: row.attr('data-jid'),
@@ -100,7 +101,7 @@ $.extend(UI, {
 
                         UI.url_ok = d.return_url.url_ok;
                         UI.url_ko = d.return_url.url_ko;
-                        UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd');
+                        UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
 
                         $( ".outsourceto").attr( "class", "outsourceto" );
 
@@ -130,6 +131,13 @@ $.extend(UI, {
                         updateTimezonesDescriptions( timezoneToShow );
 
                         $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
+
+                        if( new Date( deliveryToShow ).getTime() < $( "#forceDeliveryChosenDate" ).text() ) {
+                            $( ".delivery_container > .delivery").addClass( "faster" );
+                        } else {
+                            $( ".delivery_container > .delivery").removeClass( "faster" );
+                        }
+
                         /**
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
                          *
@@ -366,6 +374,8 @@ function updateCartParameters() {
             action: 'outsourceTo',
             pid: $('#pid').attr('data-pid'),
             ppassword: $("#pid").attr("data-pwd"),
+            fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
+            typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
             jobs: [
                 {
                     jid: jobData[0],

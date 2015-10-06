@@ -14,6 +14,7 @@
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     private $fixedDelivery;
+    private $typeOfService;
 
     /**
      * Class constructor
@@ -153,7 +154,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url =  "http://www.translated.home/hts/matecat-endpoint.php?" .
+            $fixedDeliveryDateForQuote = ( $this->fixedDelivery > 0 ) ? date( "Y-m-d H:i:s", $this->fixedDelivery / 1000 ) : "0";
+
+            $url =  "https://www.translated.net/hts/matecat-endpoint.php?" .
                     "f=quote&" .
                     "cid=htsdemo&" .
                     "p=htsdemo5&" .
@@ -167,17 +170,18 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                     "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
                     "&subject=" . $subject .
                     "&jt=R" .
-                    "&fd=" . urlencode( $this->fixedDelivery ) .
+                    "&fd=" . urlencode( $fixedDeliveryDateForQuote ) .
                     "&of=json";
 
-            if ( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) ) ) {
+            if ( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery ) ) {
                 Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
-                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) );
+                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
             } else {
-                $cartElem               = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) );
+                $cartElem               = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
                 $cartElem[ "currency" ] = $this->currency;
                 $cartElem[ "timezone" ] = $this->timezone;
-                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) );
+                $cartElem[ "typeOfService" ] = $this->typeOfService;
+                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
                 $cache_cart->addItem( $cartElem );
             }
         }
@@ -213,14 +217,15 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'id' ]                   = $jpid;
             $itemCart[ 'project_name' ]         = $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
             $itemCart[ 'name' ]                 = "MATECAT_$jpid";
-            $itemCart[ 'source' ]               = $_jobLangs[$jpid]['source']; //get the right language
-            $itemCart[ 'target' ]               = $_jobLangs[$jpid]['target']; //get the right language
+            $itemCart[ 'source' ]               = $source; //get the right language
+            $itemCart[ 'target' ]               = $target; //get the right language
             $itemCart[ 'words' ]                = $job_payableWords;
             $itemCart[ 'subject' ]              = $subject;
             $itemCart[ 'currency' ]             = $this->currency;
             $itemCart[ 'timezone' ]             = $this->timezone;
             $itemCart[ 'quote_result' ]         = $result_quote[ 'code' ];
             $itemCart[ 'quote_available' ]      = $result_quote[ 'quote_available' ];
+            $itemCart[ 'typeOfService' ]        = $this->typeOfService;
             if( $itemCart[ 'quote_result' ] == 1 && $itemCart[ 'quote_available' ] == 1 ) {
                 $itemCart['price'] = $result_quote['translation']['price'];
                 $itemCart['delivery'] = $result_quote['translation']['delivery'];
@@ -263,9 +268,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         //now get the right contents
         foreach ( $this->jobList as $job ) {
-            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) );
-            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) ) );
-            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . strtotime( $this->fixedDelivery ) ) );
+            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
+            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery ) );
+            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery ) );
         }
 
         //check for failures.. destroy the cache
@@ -287,7 +292,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * Set the fixed (desidered) delivery date of the translation.
      * This parameters will be set only when the customer uses "need it faster" feature
      *
-     * @param string $fixedDeliveryDate
+     * @param string $fixedDelivery
      *
      * @return $this
      */
@@ -297,4 +302,18 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         return $this;
     }
 
+
+    /**
+     * Set the chosen type of service.
+     * This parameters, for the moment can be only: "premium" or "professional"
+     *
+     * @param string $typeOfService
+     *
+     * @return $this
+     */
+    public function setTypeOfService( $typeOfService ) {
+        $this->typeOfService = $typeOfService;
+
+        return $this;
+    }
 }

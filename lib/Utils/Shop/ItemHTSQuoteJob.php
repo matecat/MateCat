@@ -35,6 +35,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'timezone'            => '0',
             'quote_result'        => null,
             'quote_available'     => null,
+            'typeOfService'       => "",
             'price'               => 0,
             'delivery'            => null,
             'r_price'             => 0,
