@@ -251,6 +251,11 @@ APP = {
                 filled_tpl.html( options['txt'] );
             }
 
+            if ( typeof options['context'] != 'undefined' ) {
+                filled_tpl.data( 'context', options['context'] )
+                        .attr( 'data-context', options['context'] );
+            }
+
             return filled_tpl;
         };
 
@@ -369,6 +374,7 @@ APP = {
                     case 'alert' :
                         filled_tpl.find( '.popup' )
                                 .append( renderOkButton( {
+                                            'context' : options['context'],
                                             'callback': options['onConfirm'],
                                             'txt': options['okTxt']
                                         }
@@ -381,10 +387,12 @@ APP = {
                                 .addClass('confirm_checkbox')
                                 .addClass('popup-confirm')
                                 .append( renderCancelButton( {
+                                    'context' : options['context'],
                                     'callback': options['onCancel'],
                                     'txt': options['cancelTxt']
                                 } )
                                 ).append( renderOkButton( {
+                                    'context' : options['context'],
                                     'callback': options['onConfirm'],
                                     'txt': options['okTxt']
                                 })
