@@ -61,8 +61,7 @@ class ConversionHandler {
                     //conversion enforce
                     if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
 
-                        //ONLY IDIOM is forced to be converted
-                        //if file is not proprietary like idiom AND Enforce is disabled
+                        //if file is not proprietary AND Enforce is disabled
                         //we take it as is
                         if ( !$fileType[ 'proprietary' ] || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ] = 1; // OK for client
@@ -73,9 +72,13 @@ class ConversionHandler {
 
                     } else {
 
-                        //if conversion enforce is active
-                        //we force all xliff files but not files produced by SDL Studio because we can handle them
-                        if ( $fileType[ 'proprietary_short_name' ] == 'trados' || DetectProprietaryXliff::getMemoryFileType() ) {
+                        // if conversion enforce is active
+                        // we force all xliff files but not files produced by
+                        // SDL Studio or by the MateCAT converters, because we
+                        // can handle them
+                        if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter'
+                                || $fileType[ 'proprietary_short_name' ] == 'trados'
+                                || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ]     = 1; // OK for client
                             $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
 
@@ -139,7 +142,14 @@ class ConversionHandler {
         if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
-            $converter = new FileFormatConverter( $this->segmentation_rule );
+            // By default, use always the new converters...
+            $useLegacyConverters = false;
+            if ($this->segmentation_rule !== null) {
+                // ...but new converters don't support custom segmentation rules.
+                // if $this->segmentation_rule is set use the old ones.
+                $useLegacyConverters = true;
+            }
+            $converter = new FileFormatConverter($useLegacyConverters);
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );

@@ -57,6 +57,11 @@ SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.com'
 SMTP_HOSTNAME = 'localhost'
 
+; Converter Server Configuration
+CONVERTER_SERVER_ADDRESS = 'localhost'
+CONVERTER_SERVER_PORT = '8082';
+
+
 ;----------------------------------------
 [production]
 DB_SERVER = "localhost"
@@ -76,5 +81,9 @@ SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.com'
 SMTP_HOSTNAME = 'localhost'
+
+; Converter Server Configuration
+CONVERTER_SERVER_ADDRESS = 'localhost'
+CONVERTER_SERVER_PORT = '8082';
 
 ;----------------------------------------

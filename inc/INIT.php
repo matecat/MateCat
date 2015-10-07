@@ -63,16 +63,8 @@ class INIT {
     public static $REFERENCE_REPOSITORY;
     public static $DQF_ENABLED = false;
 
-
-    public static $LONGHORN_SERVER = false;
-    public static $LONGHORN_OFFICE_SERVER_URL;
-    public static $LONGHORN_OFFICE_SERVER_PORT;
-    public static $LONGHORN_ANT_PATH;
-
-    public static $LONGHORN_PIPELINE_PATH;
-    public static $LONGHORN_SEGMENTATION_PATH;
-    public static $LONGHORN_CONFIGURATION_PATH;
-
+    public static $CONVERTER_SERVER_ADDRESS;
+    public static $CONVERTER_SERVER_PORT;
 
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
@@ -84,7 +76,7 @@ class INIT {
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
-    public static $MAX_UPLOAD_TMX_FILE_SIZE = 104857600;    // 100 * 1024 * 1024; // bytes
+    public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
@@ -203,18 +195,6 @@ class INIT {
 
     }
 
-    public static $LONGHORN_CONVERTIBLE_EXTENSIONS = array(
-            "doc"  => "docx",
-            "dot"  => "docx",
-            "xls"  => "xlsx",
-            "xlt"  => "xlsx",
-            "xlsb" => "xlsx",
-            "xlw"  => "xlsx",
-            "ppt"  => "pptx",
-            "pot"  => "pptx",
-            "pps"  => "pptx"
-    );
-
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
     public static $SUPPORTED_FILE_TYPES = array(
@@ -222,73 +202,81 @@ class INIT {
                     'doc'  => array( '', '', 'extdoc' ),
                     'dot'  => array( '', '', 'extdoc' ),
                     'docx' => array( '', '', 'extdoc' ),
-                    'dotx' => array( '', '', 'extdoc' ),
                     'docm' => array( '', '', 'extdoc' ),
+                    'dotx' => array( '', '', 'extdoc' ),
                     'dotm' => array( '', '', 'extdoc' ),
                     'rtf'  => array( '', '', 'extdoc' ),
                     'odt'  => array( '', '', 'extdoc' ),
-                    'sxw'  => array( '', '', 'extdoc' ),
-                    'txt'  => array( '', '', 'exttxt' ),
+                    'ott'  => array( '', '', 'extdoc' ),
                     'pdf'  => array( '', '', 'extpdf' ),
+                    'txt'  => array( '', '', 'exttxt' ),
                     'xls'  => array( '', '', 'extxls' ),
                     'xlt'  => array( '', '', 'extxls' ),
-                    'xlsm' => array( '', '', 'extxls' ),
                     'xlsx' => array( '', '', 'extxls' ),
+                    'xlsm' => array( '', '', 'extxls' ),
                     'xltx' => array( '', '', 'extxls' ),
+                    'xltm' => array( '', '', 'extxls' ),
                     'ods'  => array( '', '', 'extxls' ),
-                    'sxc'  => array( '', '', 'extxls' ),
+                    'ots'  => array( '', '', 'extxls' ),
                     'csv'  => array( '', '', 'extxls' ),
-                    'pot'  => array( '', '', 'extppt' ),
-                    'pps'  => array( '', '', 'extppt' ),
+                    'tsv'  => array( '', '', 'extxls' ),
                     'ppt'  => array( '', '', 'extppt' ),
-                    'potm' => array( '', '', 'extppt' ),
-                    'potx' => array( '', '', 'extppt' ),
-                    'ppsm' => array( '', '', 'extppt' ),
-                    'ppsx' => array( '', '', 'extppt' ),
-                    'pptm' => array( '', '', 'extppt' ),
+                    'pps'  => array( '', '', 'extppt' ),
+                    'pot'  => array( '', '', 'extppt' ),
                     'pptx' => array( '', '', 'extppt' ),
+                    'pptm' => array( '', '', 'extppt' ),
+                    'ppsx' => array( '', '', 'extppt' ),
+                    'ppsm' => array( '', '', 'extppt' ),
+                    'potx' => array( '', '', 'extppt' ),
+                    'potm' => array( '', '', 'extppt' ),
                     'odp'  => array( '', '', 'extppt' ),
-                    'sxi'  => array( '', '', 'extppt' ),
+                    'otp'  => array( '', '', 'extppt' ),
                     'xml'  => array( '', '', 'extxml' ),
                     'zip'  => array( '', '', 'extzip' ),
-                //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
                     'htm'   => array( '', '', 'exthtm' ),
                     'html'  => array( '', '', 'exthtm' ),
                     'xhtml' => array( '', '', 'exthtm' ),
-                    'xml'   => array( '', '', 'extxml' )
+                    'xml'   => array( '', '', 'extxml' ),
+                    'dtd'   => array( '', '', 'extxml' ),
+                    'php'   => array( '', '', 'NO-ICON' ),
+                    'json'  => array( '', '', 'NO-ICON'),
+                    'yaml'   => array( '', '', 'NO-ICON' )
+            ),
+            'Scanned Files'                 => array(
+                    'pdf'   => array( '', '', 'extpdf' ),
+                    'bmp'   => array( '', '', 'NO-ICON' ),
+                    'png'   => array( '', '', 'NO-ICON' ),
+                    'gif'   => array( '', '', 'NO-ICON' ),
+                    'jpeg'   => array( '', '', 'NO-ICON' ),
+                    'tiff'  => array( '', '', 'NO-ICON' )
             ),
             "Interchange Formats" => array(
                     'xliff'    => array( 'default', '', 'extxif' ),
                     'sdlxliff' => array( 'default', '', 'extxif' ),
                     'tmx'      => array( '', '', 'exttmx' ),
                     'ttx'      => array( '', '', 'extttx' ),
-                    'itd'      => array( '', '', 'extitd' ),
-                    'xlf'      => array( 'default', '', 'extxlf' )
+                    'xlf'      => array( 'default', '', 'extxlf' ),
             ),
             "Desktop Publishing"  => array(
-                //                'fm' => array('', "Try converting to MIF"),
                     'mif'  => array( '', '', 'extmif' ),
-                    'inx'  => array( '', '', 'extidd' ),
                     'idml' => array( '', '', 'extidd' ),
-                    'icml' => array( '', '', 'extidd' ),
-                //                'indd' => array('', "Try converting to INX"),
-                    'xtg'  => array( '', '', 'extqxp' ),
-                    'tag'  => array( '', '', 'exttag' ),
+                    'icml' => array( '', '', 'NO-ICON' ),
                     'xml'  => array( '', '', 'extxml' ),
                     'dita' => array( '', '', 'extdit' )
             ),
             "Localization"        => array(
                     'properties'  => array( '', '', 'extpro' ),
-                    'rc'          => array( '', '', 'extrcc' ),
                     'resx'        => array( '', '', 'extres' ),
                     'xml'         => array( '', '', 'extxml' ),
+                    'txml'        => array( '', '', 'extxml' ),
                     'dita'        => array( '', '', 'extdit' ),
-                    'sgm'         => array( '', '', 'extsgm' ),
-                    'sgml'        => array( '', '', 'extsgm' ),
                     'Android xml' => array( '', '', 'extxml' ),
                     'strings'     => array( '', '', 'extstr' ),
+                    'srt'         => array( '', '', 'NO-ICON' ),
+                    'wix'         => array( '', '', 'NO-ICON' ),
+                    'po'          => array( '', '', 'NO-ICON'  ),
                     'g'           => array( '', '', 'exttxt' )
             )
     );
@@ -297,6 +285,14 @@ class INIT {
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
     );
+
+    /*
+     * The maximum filename length accepted.
+     * Usually OSes accept names of 255 characters at most.
+     * During the execution a hash string can be prepended to the filename.
+     * So we reserve 45 chars for internal purposes.
+     */
+    public static $MAX_FILENAME_LENGTH = 210;
 
     /**
      * Initialize the Class Instance

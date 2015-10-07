@@ -58,7 +58,7 @@ class XliffSAXTranslationReplacer {
     public function replaceTranslation() {
 
         //write xml header
-        fwrite( $this->outputFP, '<?xml version="1.0" encoding="utf-8"?>' );
+        fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );
 
         //create parser
         $xml_parser = xml_parser_create( 'UTF-8' );
@@ -79,7 +79,7 @@ class XliffSAXTranslationReplacer {
                preprocess file
              */
             // obfuscate entities because sax automatically does html_entity_decode
-            $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+             $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
 
             $lastByte = $temporary_check_buffer[ strlen( $temporary_check_buffer ) - 1 ];
 
@@ -264,7 +264,15 @@ class XliffSAXTranslationReplacer {
 
                     //init translation
                     $translation = '';
-                    foreach ( $id_list as $id ) {
+                    $lastMrkId = -1;
+
+                    foreach ( $id_list as $pos => $id ) {
+                        empty( $this->segments[ $id ][ "mrk_id" ] ) && ( $this->segments[ $id ][ "mrk_id" ] = 0 );
+
+                        if( $this->segments[ $id ][ "mrk_id" ] <= $lastMrkId ) {
+                            break;
+                        }
+
                         $seg = $this->segments[ $id ];
 
                         //delete translations so the prepareSegment
@@ -274,10 +282,12 @@ class XliffSAXTranslationReplacer {
                         }
 
                         $translation = $this->prepareSegment( $seg, $translation );
+                        unset(  $this->segments[ 'matecat|' . $this->currentId ][ $pos ] );
+                        $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
                     }
 
                     //append translation
-                    $tag = "<target>$translation</target>";
+                    $tag = "<target xml:lang=\"" . strtolower( $this->target_lang ) . "\">$translation</target>";
                 }
 
                 //signal we are leaving a target
@@ -381,8 +391,8 @@ class XliffSAXTranslationReplacer {
 
         }
 
-        if (!empty($seg['mrk_id'])) {
-            $translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
+        if ( !empty($seg['mrk_id']) || $seg['mrk_id'] == 0 ) {
+            $translation = "<mrk mid=\"" . $seg['mrk_id'] . "\" mtype=\"seg\">" . $seg['mrk_prev_tags'] . $translation . $seg['mrk_succ_tags'] . "</mrk>";
         }
 
         $transunit_translation .= $seg[ 'prev_tags' ] . $translation . $end_tags . $seg[ 'succ_tags' ];

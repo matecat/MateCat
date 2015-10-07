@@ -235,6 +235,14 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
             $( ".displayprice" ).attr( "data-currency", currencyTo );
 
             var numWords = parseFloat( $(".title-words").text().replace( ",", "" ) );
+
+            /**
+             * This is a patch to avoid "Infinity/word €" price
+             */
+            if(numWords == 0){
+                numWords = 1;
+            }
+
             $( "#price_p_word").text( ( parseFloat( d.data ) / numWords ).toFixed( 3 ) );
 
             document.cookie = "matecat_currency=" + currencyTo + "; path=/";

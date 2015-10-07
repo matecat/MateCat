@@ -52,7 +52,7 @@ class Xliff_Parser {
 		}
 
 		// Checking Requirements (By specs, I know that xliff version is in the first 1KB)
-		preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\']|si', substr($file_content, 0, 1000), $tmp);
+		preg_match('|<xliff.*?\sversion\s?=\s?["\'](.*?)["\']|si', substr($file_content, 0, 1000), $tmp);
 		if (!isset($tmp[1])) {
 			$xliff['parser-errors'][] = "Cannot import. This does not seems a valid XLIFF, we support version 1.0, 1.1, 1.2.";
 			return $xliff;
