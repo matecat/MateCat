@@ -114,6 +114,7 @@ $.extend(UI, {
 
                         if( chunk.quote_result != 1 ){
                             $(".outsourceto").addClass( "quoteError" );
+                            $('.modal.outsource').removeClass('loading');
                             $('.outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
                             $('.ErrorMsgQuoteError').removeClass('hide');
                             $('#forceDeliveryContainer').css('top','465px');
