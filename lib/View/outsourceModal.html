@@ -160,15 +160,13 @@
                                             <div class="delivery">
                                                 <div class="delivery_label">Delivery by:</div>
                                                 <div class="delivery_details">
-                                                        <div class="ErrorMsgquoteNotAvailable hide">
+                                                        <div class="ErrorMsgquoteNotAvailable ErrorMsg hide">
                                                             <h3>Not available. </h3>
                                                             <p>Unfortunately the solution chosen is not available. 
                                                             Try again with another delivery date.</p>
                                                         </div>
                                                         <div class="ErrorMsg ErrorMsgQuoteError hide">
                                                             <h3>Ooops! <br />Cannot generate quote!</h3>
-                                                            <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
-                                                        
                                                         </div>  
                                                         
                                                         <span class="time" data-timezone="" data-rawtime=""></span>
@@ -183,9 +181,13 @@
                                             </div>    
                                         </div>                                  
                                         <div class="tprice">
+                                            <div class="ErrorMsg ErrorMsgQuoteError hide">
+                                                <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
+                                            </div>
                                             <span class="euro"></span>
                                             <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
                                             <br />
+
                                             <span class="displaypriceperword">about <span class="euro currency_per_word"></span> <a class="price_p_word"></a> / word</span>
                                                 <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
                                                     <input type="hidden" name="url_ok" value=""/>
@@ -230,14 +232,14 @@
                 <div class="delivery-manual-time">
                     <h3>Choose a time</h3>
                     <select name="whenTime"  id="whenTime">
-                        <option value="07">7 (AM)</option>
-                        <option value="09">9 (AM)</option>
-                        <option value="11">11 (AM)</option>
-                        <option value="13">13 (PM)</option>
-                        <option value="15">15 (PM)</option>
-                        <option value="17">17 (PM)</option>
-                        <option value="19">19 (PM)</option>
-                        <option value="21">21 (PM)</option>
+                        <option value="07">7:00 AM</option>
+                        <option value="09">9:00 AM</option>
+                        <option value="11">11:00 AM</option>
+                        <option value="13">1:00 PM</option>
+                        <option value="15">3:00 PM</option>
+                        <option value="17">5:00 PM</option>
+                        <option value="19">7:00 PM</option>
+                        <option value="21">9:00 PM</option>
                     </select>
                     
                     <br /><br />

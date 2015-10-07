@@ -170,7 +170,7 @@ p.translator_name {
 {
     background: url(../img/loader.gif) #f6f6f6 center 30px no-repeat;
     background-size: 20px;
-    padding-top: 45px;
+    padding-top: 47px;
 }
 
 .outsource.modal.loading .translator_info_box
@@ -182,11 +182,11 @@ p.translator_name {
 }
 
 .outsource.modal.loading .tprice.compress {
-    padding: 131px 1% 9px 1%;
+    padding: 133px 1% 6px 1%;
 }
 
 .pricebox .tprice.compress {
-    padding: 2% 1% 1% 1%;
+    padding: 20px 1% 5px 1%;
 }
 
 .outsource.modal.loading .delivery_details, 
@@ -197,6 +197,14 @@ p.translator_name {
 .outsource.modal.loading .translator_info,
 .outsource.modal.loading .displaypriceperword,
 .outsource.modal.loading .more {
+    display: none;
+}
+
+.outsource.modal.loading .outsourceto:not(.translatorNotAvailable) .trustbox1 {
+    margin-bottom:22px!important;
+}
+
+.outsource.modal.loading .outsourceto.translatorNotAvailable .trustbox1 {
     display: none;
 }
 
@@ -450,7 +458,7 @@ margin-top: 0!important;
 }
 
 .pricebox .tprice {
-    padding: 2% 1% 1.5% 1%;
+    padding: 20px 1% 12px 1%;
 }
 
 .pricebox .delivery {
@@ -1153,6 +1161,10 @@ a.tooltip.gray span:after {
     line-height: 1;
 }
 
+#SnapABug_WP {
+    z-index: 100000000000000000000000000000000!important;
+}
+
 #forceDeliveryContainer .delivery-auto {
     width: 635px;
     height: auto;
@@ -1251,6 +1263,7 @@ a.tooltip.gray span:after {
     color: red;
     margin-left: 12px;
     text-align: right;
+    font-weight: bold;
     font-size: 14px;
     margin-top: 5px;
     position: absolute;
@@ -1504,8 +1517,16 @@ a.tooltip.gray span:after {
     height: 60px;
     padding: 2% 4%;
     text-align: left;
+        font-weight: normal;
 }
 
+.tprice .ErrorMsgQuoteError,  .tprice .ErrorMsg a {
+    color: #333!important;
+}
+
+.delivery .ErrorMsg.ErrorMsgQuoteError {
+    margin-top: 16px;
+}
 
 .ErrorMsg, .ErrorMsg h3, .ErrorMsg a {
     color: red!important;
