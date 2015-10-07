@@ -4,6 +4,7 @@ class Segments_SegmentNoteStruct extends DataAccess_AbstractDaoSilentStruct impl
 
     public $id ;
     public $id_segment ; 
-    public $note; 
+    public $internal_id ;
+    public $note ;
 
 }

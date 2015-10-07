@@ -917,17 +917,13 @@ class ProjectManager {
                 if (! empty($this->projectStructure['notes'])) {
                     $this->insertSegmentNotesForFile( );
                 }
-
                 insertFilesJob( $jid, $fid );
-
             }
-
         }
-
     }
 
     private function insertSegmentNotesForFile( ) {
-        foreach( $this->projectStructure['notes'] as $k => $v) {
+        foreach( $this->projectStructure['notes'] as $internal_id => $v) {
             $entries = $v['entries'];
             $segments = $v['segment_ids'] ;
 
@@ -935,6 +931,7 @@ class ProjectManager {
             foreach( $segments as $segment ) {
                 foreach( $entries as $note ) {
                     Segments_SegmentNoteDao::insertRecord( array(
+                        'internal_id' => $internal_id,
                         'id_segment' => $segment,
                         'note' => $note
                     ));
@@ -1926,17 +1923,17 @@ class ProjectManager {
          *      'id_segment' => (int) to be populated later for the database insert
          */
 
-        $id = self::sanitizedUnitId( $trans_unit );
+        $internal_id = self::sanitizedUnitId( $trans_unit );
         if ( isset( $trans_unit[ 'notes' ] ) ) {
             foreach( $trans_unit['notes'] as $note ) {
-                $this->initArrayObject( 'notes', $id );
+                $this->initArrayObject( 'notes', $internal_id );
 
-                if ( ! $this->projectStructure['notes'][$id]->offsetExists('entries') ) {
-                    $this->projectStructure['notes'][$id]->offsetSet( 'entries',  new ArrayObject());
-                    $this->projectStructure['notes'][$id]->offsetSet( 'segment_ids', array() );
+                if ( ! $this->projectStructure['notes'][$internal_id]->offsetExists('entries') ) {
+                    $this->projectStructure['notes'][$internal_id]->offsetSet( 'entries',  new ArrayObject());
+                    $this->projectStructure['notes'][$internal_id]->offsetSet( 'segment_ids', array() );
                 }
 
-                $this->projectStructure[ 'notes' ][ $id ]['entries']->append( $note['raw-content'] )  ;
+                $this->projectStructure[ 'notes' ][ $internal_id ]['entries']->append( $note['raw-content'] )  ;
             }
         }
     }

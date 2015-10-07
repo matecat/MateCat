@@ -16,8 +16,12 @@ class Segments_SegmentStruct extends DataAccess_AbstractDaoSilentStruct implemen
   public $raw_word_count;
   public $show_in_cattool ;
 
+  protected $cached_results = array();
+
   public function getNotes() {
-    return Segments_SegmentNoteDao::getBySegmentId( $this->id ); 
+    return $this->cachable(__function__, func_get_args(), function() {
+      return Segments_SegmentNoteDao::getBySegmentId( $this->id );
+    });
   }
 
 }

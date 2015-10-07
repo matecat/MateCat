@@ -78,16 +78,29 @@ class Features_SegmentNotesCreationTest extends AbstractTest
         $project = Projects_ProjectDao::findById($body->id_project);
 
         $jobs = $project->getJobs();
+
+        // expect one job is created
         $this->assertEquals(1, count($project->getJobs()));
 
         $segments = $project->getJobs()[0]->getChunks()[0]->getSegments();
+
+        // expect one segment per mrk
         $this->assertEquals( 2, count($segments));
 
+        // expect the correct notes count
         $this->assertEquals( 1, count( $segments[0]->getNotes() ) );
+        $this->assertEquals( 1, count( $segments[1]->getNotes() ) );
 
-        $this->assertEquals('Test note',
-            $segments[1]->getNotes()[0]->note
+        // expect the same note text
+        $this->assertEquals('Test note', $segments[0]->getNotes()[0]->note);
+        $this->assertEquals('Test note', $segments[1]->getNotes()[0]->note);
+
+        // expect the internal_id is saved appropriately
+        $this->assertEquals(
+            $segments[0]->getNotes()[0]->internal_id,
+            $segments[1]->getNotes()[0]->internal_id
         );
+
     }
 
 }
