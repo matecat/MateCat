@@ -62,8 +62,32 @@ class Features_SegmentNotesCreationTest extends AbstractTest
 
             $segments[0]->getNotes()[0]->note
         );
+    }
 
+    function testNoteIsAssignedToAllMrkInTransUnit() {
+        $options = array('files' => array(
+            test_file_path('xliff/sdlxliff-with-mrk-and-note.xlf.sdlxliff')
+        ));
 
+        $body = integrationCreateTestProject($options);
+
+        $this->assertNotNull($body->id_project);
+        $this->assertNotNull($body->project_pass);
+
+        // ensure one job is created
+        $project = Projects_ProjectDao::findById($body->id_project);
+
+        $jobs = $project->getJobs();
+        $this->assertEquals(1, count($project->getJobs()));
+
+        $segments = $project->getJobs()[0]->getChunks()[0]->getSegments();
+        $this->assertEquals( 2, count($segments));
+
+        $this->assertEquals( 1, count( $segments[0]->getNotes() ) );
+
+        $this->assertEquals('Test note',
+            $segments[1]->getNotes()[0]->note
+        );
     }
 
 }

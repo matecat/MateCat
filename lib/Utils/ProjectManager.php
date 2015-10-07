@@ -928,12 +928,17 @@ class ProjectManager {
 
     private function insertSegmentNotesForFile( ) {
         foreach( $this->projectStructure['notes'] as $k => $v) {
-            $id_segment = $v['id_segment'] ;
-            foreach( $v['entries'] as $kk => $note) {
-                Segments_SegmentNoteDao::insertRecord( array(
-                    'id_segment' => $id_segment,
-                    'note' => $note
-                ));
+            $entries = $v['entries'];
+            $segments = $v['segment_ids'] ;
+
+            // TODO: refactor using bulk insert
+            foreach( $segments as $segment ) {
+                foreach( $entries as $note ) {
+                    Segments_SegmentNoteDao::insertRecord( array(
+                        'id_segment' => $segment,
+                        'note' => $note
+                    ));
+                }
             }
         }
     }
@@ -1399,7 +1404,6 @@ class ProjectManager {
 
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
-
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
                             //rest flag because if the first mrk of the seg-source is not translatable the rest of
@@ -1451,15 +1455,13 @@ class ProjectManager {
 
                                     }
 
-                                    $this->addNotesToProjectStructure( $xliff_trans_unit );
-
                                 }
 
                             }
 
                             //Log::doLog( $xliff_trans_unit ); die();
 
-//                            $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
+                            // $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
 
                             $mid               = $this->dbHandler->escape( $seg_source[ 'mid' ] );
                             $ext_tags          = $this->dbHandler->escape( $seg_source[ 'ext-prec-tags' ] );
@@ -1479,7 +1481,9 @@ class ProjectManager {
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( "('$trans_unit_id',$fid,$file_reference,'$source','$source_hash',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
 
-                        }
+                        } // end foreach seg-source
+
+                        $this->addNotesToProjectStructure( $xliff_trans_unit);
 
                     } else {
 
@@ -1515,9 +1519,10 @@ class ProjectManager {
                                 }
 
                             }
-                            $this->addNotesToProjectStructure( $xliff_trans_unit );
 
                         }
+
+                        $this->addNotesToProjectStructure( $xliff_trans_unit );
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
 
@@ -1652,15 +1657,24 @@ class ProjectManager {
         }
     }
 
+    /**
+     * setSegmentIdForNotes
+     *
+     * Adds notes to segment, taking into account that a same note may be assigned to
+     * more than one MateCat segment, to the <mrk> tags.
+     *
+     * Example:
+     * ['notes'][ $internal_id] => array( 'xxx' );
+     * ['notes'][ $internal_id] => array( 'xxx', 'yyy' ); // in case of mrk tags
+     *
+     */
+
     private function setSegmentIdForNotes( $row ) {
         $internal_id = "" . $row['internal_id'] ;
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
-            $this->projectStructure[ 'notes' ][ $internal_id ]->offsetSet('id_segment', $row['id']);
+            array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row['id']);
         }
-
-        Log::doLog( "@@@", var_export( $this->projectStructure['notes'][$internal_id], true));
-
     }
 
     protected function _insertPreTranslations( $jid ) {
@@ -1919,8 +1933,9 @@ class ProjectManager {
 
                 if ( ! $this->projectStructure['notes'][$id]->offsetExists('entries') ) {
                     $this->projectStructure['notes'][$id]->offsetSet( 'entries',  new ArrayObject());
-                    $this->projectStructure['notes'][$id]->offsetSet( 'id_segment', null);
+                    $this->projectStructure['notes'][$id]->offsetSet( 'segment_ids', array() );
                 }
+
                 $this->projectStructure[ 'notes' ][ $id ]['entries']->append( $note['raw-content'] )  ;
             }
         }
