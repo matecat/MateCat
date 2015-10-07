@@ -36,4 +36,26 @@ class Xliff_ParserTest extends AbstractTest {
             $xliff['files'][1]['trans-units'][6]['notes'][0]['raw-content']);
     }
 
+    function testConvertedFile() {
+        $file = test_file_path('xliff/file-with-notes-converted.xliff');
+        $content = file_get_contents( $file );
+
+        $xliff_obj = new Xliff_Parser();
+        $xliff     = $xliff_obj->Xliff2Array( $content );
+
+        $this->assertEquals(
+            "This is a comment\n" .
+            "---\n" .
+            "This is a comment number two\n" .
+            "---\n" .
+            "This is a comment number three",
+
+            $xliff['files'][3]['trans-units'][1]['notes'][0]['raw-content']
+        );
+
+        $this->assertEquals( 'This is another comment',
+            $xliff['files'][3]['trans-units'][3]['notes'][0]['raw-content']);
+
+    }
+
 }

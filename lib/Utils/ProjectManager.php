@@ -1451,6 +1451,8 @@ class ProjectManager {
 
                                     }
 
+                                    $this->addNotesToProjectStructure( $xliff_trans_unit );
+
                                 }
 
                             }
