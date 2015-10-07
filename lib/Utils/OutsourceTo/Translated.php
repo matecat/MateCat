@@ -133,6 +133,12 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             //trim decimals to int
             $job_payableWords = (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ];
 
+            /**
+             * This is a patch: translated does not give a response for quotes with 0 words.
+             */
+            if($job_payableWords == 0){
+                $job_payableWords = 1;
+            }
             /*
              * //languages are in the form:
              *

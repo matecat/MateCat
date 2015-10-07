@@ -84,7 +84,7 @@ class INIT {
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
-    public static $MAX_UPLOAD_TMX_FILE_SIZE = 104857600;    // 100 * 1024 * 1024; // bytes
+    public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
@@ -135,6 +135,18 @@ class INIT {
      * The MateCat Version
      */
     public static $BUILD_NUMBER;
+
+    /**
+     * MyMemory Developer Email Key for the cattool
+     * @var string
+     */
+    public static $MYMEMORY_API_KEY = 'demo@matecat.com' ;
+
+    /**
+     * MyMemory Developer Email Key for the analysis
+     * @var string
+     */
+    public static $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com' ;
 
 
     public static $ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
@@ -276,7 +288,8 @@ class INIT {
                     'sgm'         => array( '', '', 'extsgm' ),
                     'sgml'        => array( '', '', 'extsgm' ),
                     'Android xml' => array( '', '', 'extxml' ),
-                    'strings'     => array( '', '', 'extstr' )
+                    'strings'     => array( '', '', 'extstr' ),
+                    'g'           => array( '', '', 'exttxt' )
             )
     );
 
@@ -284,6 +297,14 @@ class INIT {
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
     );
+
+    /*
+     * The maximum filename length accepted.
+     * Usually OSes accept names of 255 characters at most.
+     * During the execution a hash string can be prepended to the filename.
+     * So we reserve 45 chars for internal purposes.
+     */
+    public static $MAX_FILENAME_LENGTH = 210;
 
     /**
      * Initialize the Class Instance

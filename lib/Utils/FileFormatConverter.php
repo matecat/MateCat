@@ -64,7 +64,7 @@ class FileFormatConverter {
         ), ArrayObject::ARRAY_AS_PROPS );
 
         $db         = Database::obtain();
-        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0" );
+        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0 AND conversion_api_version != 'open 1.0' " );
 
         foreach ( $converters as $converter_storage ) {
             self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];

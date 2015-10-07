@@ -156,7 +156,8 @@ $.extend(UI, {
 //		console.log(!localStorage.getItem('4679214'));
 //		console.log(localStorage.getItem('4679215'));
 		this.processContributions(d, segment);
-	},
+        this.currentSegmentQA();
+    },
 	processContributions: function(d, segment) {
         if(!d) return true;
 		this.renderContributions(d, segment);

@@ -61,6 +61,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             case 'api_key_create_user_url':
                 $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded );
                 break;
+            case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
                 $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded );
@@ -237,6 +238,76 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
+    /**
+     * Post a file to myMemory
+     *
+     * Remove the first line from csv ( source and target )
+     * and rewrite the csv because MyMemory doesn't want the header line
+     *
+     * @param            $file
+     * @param            $key
+     * @param bool|false $name
+     *
+     * @return Engines_Results_MyMemory_TmxResponse
+     */
+    public function glossaryImport( $file, $key, $name = false ) {
+
+        try {
+
+            $origFile = new SplFileObject( $file, 'r+' );
+            $origFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
+
+            $tmpFileName = tempnam( "/tmp", 'GLOS' );
+            $newFile = new SplFileObject( $tmpFileName, 'r+' );
+            $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
+
+            foreach ( $origFile as $line_num => $line ) {
+
+                if( count( $line ) < 2 ){
+                    throw new RuntimeException( "No valid glossary file provided. Field separator could be not valid." );
+                }
+
+                if ( $line_num == 0 ){
+                    list( $source_lang, $target_lang, ) = $line;
+                    if ( empty( $source_lang ) || empty( $target_lang ) ){
+                        throw new RuntimeException( "No language definition found in glossary file." );
+                    }
+                    continue;
+                }
+
+                //copy stream to stream
+                $newFile->fputcsv( $line );
+
+            }
+            $newFile->fflush();
+
+            $origFile = null; //close the file handle
+            $newFile = null; //close the file handle
+            copy( $tmpFileName, $file );
+            unlink( $tmpFileName );
+
+        } catch( RuntimeException $e ){
+            $this->result = new Engines_Results_MyMemory_TmxResponse( array(
+                    "responseStatus"  => 406,
+                    "responseData"    => null,
+                    "responseDetails" => $e->getMessage()
+            ) );
+            return $this->result;
+        }
+
+        $postFields = array(
+                'glossary'    => "@" . realpath( $file ),
+                'source_lang' => $source_lang,
+                'target_lang' => $target_lang,
+                'name'        => $name,
+        );
+
+        $postFields[ 'key' ] = trim( $key );
+
+        $this->call( "glossary_import_relative_url", $postFields, true );
+
+        return $this->result;
+    }
 
     public function import( $file, $key, $name = false ) {
 

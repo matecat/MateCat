@@ -342,6 +342,11 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
 
             if( elementToUpdatePPW.length > 0 ) {
                 var numWords = parseFloat($(".title-words").text().replace(",", ""));
+
+                if(numWords == 0){
+                    numWords = 1;
+                }
+
                 $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
             }
 
