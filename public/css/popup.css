@@ -156,7 +156,7 @@ p.translator_name {
 }
 
 .onyourown a.uploadbtn.in-popup {
-    margin: 2%!important;
+    margin: 2% 2.5% 2% 2%!important;
     width: 160px;
 }
 
@@ -506,8 +506,7 @@ margin-top: 0!important;
     border-top: 1px dashed #ccc;
     margin: 15px auto 0;
     overflow: hidden;
-    padding: 1% 2%;
-
+    padding: 1% 2% 0;
 }
 
 .onyourown, .outsourceto {
@@ -539,7 +538,7 @@ margin-top: 0!important;
 .pricebox .continuebtn {
     clear: both;
     float: none;
-    width: 150px;
+    width: 160px;
     margin: 10px auto 0 auto!important;
     overflow: hidden;
 }
@@ -570,7 +569,7 @@ margin-top: 0!important;
 
 
 .pricebox.compress #forceDeliveryContainer{
-    top: 500px!important;
+    top: 500px;
 }
 
 .guaranteed_by a {
@@ -1044,9 +1043,33 @@ display: block;
 cursor: pointer;
 }
 
+@media screen and (min-height: 715px) {
+    .contact_box {
+        margin-bottom:10px;
+    }
+}
 
 
+@media screen and (max-height: 715px) and (min-height: 600px) {
+ .outsource.modal .popup {
+    top: 25%;
+ }
+ .outsource.modal .popup-box {
+    overflow-y: visible;
+    max-height: 590px;
+}
+}
 
+@media screen and (max-height: 650px) and (min-height: 600px) {
+.outsource.modal .popup-box {
+    overflow-y: visible;
+    max-height: 540px;
+}
+
+ .outsource.modal .popup {
+    top: 27%;
+ }
+}
 
 
 @media screen and (max-height: 600px) {
@@ -1057,7 +1080,7 @@ margin: 0 0 0 -400px;
 }
 
 #forceDeliveryContainer {
-    top: 360px;
+    top: 425px!important;
 }
 
 .guaranteed_by.expanded {
@@ -1068,7 +1091,7 @@ margin: 0 0 0 -400px;
 }
 .outsource.modal .popup-box {
     overflow-y: visible;
-    max-height: 500px;
+    max-height: 560px;
 }
 
 .outsource.modal .popup p {
@@ -1141,7 +1164,7 @@ a.tooltip.gray span:after {
     z-index: 10001;
     color: #fff;
     padding: 20px;
-    top: 428px;
+    top: 424px;
     left: 435px;
     zoom: 0.9;
     z-index: 99999999999999999999;    
@@ -1460,6 +1483,13 @@ a.tooltip.gray span:after {
 }
 
 
+td.datepickerSaturday:not(.datepickerDisabled) a, 
+td.datepickerSunday:not(.datepickerDisabled) a {
+       cursor: not-allowed!important;
+    background-color: #E7E7E7!important;
+    color: #C2C2C2!important;
+}
+
 
 
 #fasterDeliveryContainer {
@@ -1530,6 +1560,7 @@ a.tooltip.gray span:after {
 
 .ErrorMsg, .ErrorMsg h3, .ErrorMsg a {
     color: red!important;
+    font-weight: normal;
 }
 
 .quoteError {
@@ -1558,3 +1589,5 @@ a.tooltip.gray span:after {
  {
     padding: 0.5% 2% 4% 2%;
 }
+
+

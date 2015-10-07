@@ -105,6 +105,7 @@ function checkChosenDeliveryDate( chosenDate ) {
 function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
     if( chosenDate != 0 && !checkChosenDeliveryDate( chosenDate ) ) {
         $( "#delivery_manual_error").removeClass( "hide" );
+        $('#delivery_before_time,#delivery_not_available').addClass('hide');
         $('.forceDeliveryButtonOk').addClass('disabled')
         return;
     }
@@ -1091,6 +1092,8 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
 
                 if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
                     $( "#delivery_manual_error").removeClass( "hide" );
+                    $('.delivery_before_time,.delivery_not_available,.modal.outsource .tooltip').addClass('hide');
+
                 } else {
                     $( "#delivery_manual_error").addClass( "hide" );
                     if( clickedOnAcceptableDay ) {
