@@ -185,6 +185,9 @@ class engineController extends ajaxController {
                                                                                                     // for the user to choose from. the check happens later on
                 $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
                 $newEngine->extra_parameters[ 'use_qe' ]        = $this->engineData[ 'use_qe' ];
+                $newEngine->extra_parameters[ 'source_lang' ]   = $this->engineData[ 'source_lang' ];
+                $newEngine->extra_parameters[ 'target_lang' ]   = $this->engineData[ 'target_lang' ];
+
                 if ($newEngine->extra_parameters[ 'use_qe' ]) {
                     $minQEString = $this->engineData[ 'minimum_qe' ];
                     if (!is_numeric($minQEString)) {
