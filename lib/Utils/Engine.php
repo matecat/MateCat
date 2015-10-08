@@ -40,5 +40,10 @@ class Engine {
         return new $className( $engineRecord );
 
     }
+    
+    public static function createTempInstance( $engineRecord ) {
+        $className = 'Engines_' . $engineRecord->class_load;
+        return new $className( $engineRecord );
+    }
 
 }

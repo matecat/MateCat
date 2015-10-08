@@ -20,7 +20,7 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "https://mtdevlogic.tilde.lv/ws/service.svc/json"; // TODO change to the production version
+    public $base_url = "https://www.letsmt.eu/ws/service.svc/json";
     
     /**
      * @var string
@@ -32,6 +32,13 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
      */
     public $contribute_relative_url = "UpdateTranslation";
 
+    /**
+     * @var array
+     */
+    public $others = array(
+            'system_list_relative_url' => 'GetSystemList',
+            'term_list_relative_url' => 'GetSystemTermCorpora'
+    );
 
     /**
      * @var string
@@ -45,7 +52,9 @@ class EnginesModel_LetsMTStruct extends EnginesModel_EngineStruct {
     public $extra_parameters = array(
             'client_id'     => "",
             'system_id'     => "",
-            'terms_id'      => ""
+            'terms_id'      => "",
+            'use_qe'        => false,
+            'minimum_qe'    => 0
     );
 
     /**

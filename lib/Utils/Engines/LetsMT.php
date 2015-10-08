@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author Rihards Krislauks rihards.krislauks@tilde.lv
+ * @author Rihards Krislauks rihards.krislauks@tilde.lv / rihards.krislauks@gmail.com
  */
 
 /**
@@ -17,9 +17,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
     protected $_config = array(
             'segment'     => null,
-            'translation' => null,
-            'source'      => null,
-            'target'      => null,
+            'translation' => null
     );
 
     public function __construct($engineRecord) {
@@ -48,56 +46,142 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
         if( is_string( $rawValue ) ) {
             $parsed = json_decode( $rawValue, true );
-            $decoded = array(
-                        'data' => array(
-                                "translations" => array(
-                                        array( 'translatedText' => $this->_resetSpecialStrings( $parsed['translation'] ) )
-                                )
-                        )
+            if(!empty($parsed['translation'])){
+                // this is a response from a translate request
+                
+                $decoded = array(
+                            'data' => array(
+                                    "translations" => array(
+                                            array( 'translatedText' =>
+                                                $this->use_qe && floatval($parsed['qualityEstimate']) < $this->minimum_qe ?
+                                                    "" : $this->_resetSpecialStrings($parsed['translation']))
+                                    )
+                            )
+                    );
+                
+                $mt_result = new Engines_Results_MT( $decoded );
+
+                if ( $mt_result->error->code < 0 ) {
+                    $mt_result = $mt_result->get_as_array();
+                    $mt_result['error'] = (array)$mt_result['error'];
+                    return $mt_result;
+                }
+
+                $mt_match_res = new Engines_Results_MyMemory_Matches(
+                        $this->_resetSpecialStrings( $all_args[ 1 ][ 'text' ] ),
+                        $mt_result->translatedText,
+                        100 - $this->getPenalty() . "%",
+                        "MT-" . $this->getName(),
+                        date( "Y-m-d" )
                 );
+
+                $mt_res                          = $mt_match_res->get_as_array();
+                $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
+
+                return $mt_res;
+            } elseif (!empty($parsed['System'])){
+                // this is a response from a getSystemList request
+                
+                $decoded = array();
+                foreach($parsed['System'] as $systemData){
+                    $statusName = "";
+                    $status = "";
+                    foreach ($systemData['Metadata'] as $value){
+                        if ($value['Key'] === 'status'){
+                            $status = $value['Value'];
+                            switch ($status)
+                            {
+                                case "running":
+                                    $statusName = "Running";
+                                    break;
+                                case "queuingtransl":
+                                    $statusName = "Queuing";
+                                    break;
+                                case "notstarted":
+                                    $statusName = "Not Started";
+                                    break;
+                                case "nottrained":
+                                    $statusName = "Not Trained";
+                                    break;
+                                case "error":
+                                    $statusName = "Not Trained";
+                                    break;
+                                case "training":
+                                    $statusName = "Training";
+                                    break;
+                                case "standby":
+                                    $statusName = "Standby";
+                                    break;
+                                default:
+                                    $statusName = $value['Value'];
+                                    break;
+                            }
+                            break;
+                        }
+                    }
+                    $systemName = sprintf('%s (%s)',
+                                            $systemData['Title']['Text'],
+                                            $statusName);
+                    $systemMetadata = array('source-language-code' => $systemData['SourceLanguage']['Code'],
+                                            'target-language-code' => $systemData['TargetLanguage']['Code'],
+                                            'source-language-name' => $systemData['SourceLanguage']['Name']['Text'],
+                                            'target-language-name' => $systemData['TargetLanguage']['Name']['Text'],
+                                            'status'               => $status
+                        );
+                    $decoded[$systemData['ID']] = array('name'     => $systemName,
+                                                        'metadata' => $systemMetadata
+                        );
+                }
+                asort($decoded);
+                
+                return $decoded;
+            } elseif (!empty($parsed[0]) && !empty($parsed[0]['CorpusId'])){
+                // this is a response from getSystemTermCorpora request
+                
+                $decoded = array();
+                foreach($parsed as $termData){
+                    if ($termData['Status'] == 'Ready') {
+                        $decoded[$termData['CorpusId']] = $termData['Title'];
+                    }
+                }
+            }
         } else {
-            $decoded = array(
-                    'error' => array( "message" => $error['h1'] . ": " . $error['p'][2], 'code' => -1 ) // TODO taken from MicrosoftHub. check if works
+            $parsed = json_decode( $rawValue['result'], true );
+            if (!empty($parsed['ErrorMessage'])) {
+                $mt_code = intval($parsed['ErrorCode']);
+                $code = $mt_code == 21 ? '-1002' : '-1001'; // if engine is waking up render message as a warning (code -1002) else as error (code -1001).
+                $message = sprintf("(%s) %s", $parsed['ErrorCode'], $parsed['ErrorMessage']);
+                $decoded = array(
+                    'error' => array(
+                            'code' => $code,
+                            'message' => $message,
+                            'created_by' => "MT-" . $this->getName()
+                    )
                 );
+            }
+            else{
+                $decoded = array( 'error' => $rawValue['error']);
+                if (strpos($decoded['error'], 'Server Not Available (http status 401)') !== false) {
+-                   $decoded['error']['message'] = 'Invalid Client ID.';
+                }
+            }
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result = $mt_result->get_as_array();
-            $mt_result['error'] = (array)$mt_result['error'];
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $this->_resetSpecialStrings( $all_args[ 1 ][ 'text' ] ),
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
-
-        $mt_res                          = $mt_match_res->get_as_array();
-        $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
-
-        return $mt_res;
+        return $decoded;
 
     }
 
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
                 $parameters['appID'] = ""; // not used for now
                 $parameters['systemID'] = $this->system_id;
                 $parameters['clientID'] = $this->client_id;
-                $parameters['options'] = "termCorpusId=" . $this->terms_id;
-		//$parameters['source'] = $_config[ 'source' ];
-		//$parameters['target'] = $_config[ 'target' ];
+                $qeParam = $this->use_qe ? ",qe" : "";
+                $parameters['options'] = "termCorpusId=" . $this->terms_id . $qeParam;
 
 	$this->call( "translate_relative_url", $parameters );
 
@@ -112,9 +196,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             return true;
         }
 
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-
        $parameters = array();
 		$parameters['text'] = $_config[ 'segment' ];
                 $parameters['appID'] = ""; // not used for now
@@ -122,8 +203,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $parameters['clientID'] = $this->client_id;
                 $parameters['options'] = "termCorpusId=" . $this->terms_id;
                 $parameters[ 'translation' ] = $_config[ 'translation' ];
-                //$parameters[ 'source' ]      = $_config[ 'source' ];
-                //$parameters[ 'target' ]      = $_config[ 'target' ];
 
         $this->call( "contribute_relative_url", $parameters );
 
@@ -145,6 +224,49 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             return true;
         }
     }
+    
+    public function getSystemList($_config) {
 
+        $parameters = array();
+                $parameters['appID'] = ""; // not used for now
+                $parameters['clientID'] = $this->client_id;
 
+	$this->call( 'system_list_relative_url', $parameters );
+        
+        if (isset($this->result['error']['code'])) {
+            return $this->result;
+        }
+        $systemList = $this->result;
+        
+        return $systemList;
+        
+    }
+    
+    public function getTermList() {
+
+        $parameters = array();
+                $parameters['appID'] = ""; // not used for now
+                $parameters['clientID'] = $this->client_id;
+                $parameters['systemID'] = $this->system_id;
+
+	$this->call( 'term_list_relative_url', $parameters );
+
+        $termList = $this->result;
+        if ( isset( $termList['error']['code'] ) ) {
+            return array('error' => $termList['error']);
+        }
+        
+        return array('terms' => $termList);
+    }
+
+    public function wakeUp(){
+        $_config = $this->getConfigStruct();
+        $_config['segment'] = 'wakeup';
+
+        $this->_setAdditionalCurlParams( array(
+                       CURLOPT_TIMEOUT        => 1
+               ));
+
+        $this->get($_config);
+    }
 }
