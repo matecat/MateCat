@@ -240,17 +240,17 @@ class INIT {
                     'xhtml' => array( '', '', 'exthtm' ),
                     'xml'   => array( '', '', 'extxml' ),
                     'dtd'   => array( '', '', 'extxml' ),
-                    'php'   => array( '', '', 'NO-ICON' ),
-                    'json'  => array( '', '', 'NO-ICON'),
-                    'yaml'   => array( '', '', 'NO-ICON' )
+                    'php'   => array( '', '', 'extxml' ),
+                    'json'  => array( '', '', 'extxml'),
+                    'yaml'   => array( '', '', 'extxml' )
             ),
             'Scanned Files'                 => array(
                     'pdf'   => array( '', '', 'extpdf' ),
-                    'bmp'   => array( '', '', 'NO-ICON' ),
-                    'png'   => array( '', '', 'NO-ICON' ),
-                    'gif'   => array( '', '', 'NO-ICON' ),
-                    'jpeg'   => array( '', '', 'NO-ICON' ),
-                    'tiff'  => array( '', '', 'NO-ICON' )
+                    'bmp'   => array( '', '', 'extimg' ),
+                    'png'   => array( '', '', 'extimg' ),
+                    'gif'   => array( '', '', 'extimg' ),
+                    'jpeg'   => array( '', '', 'extimg' ),
+                    'tiff'  => array( '', '', 'extimg' )
             ),
             "Interchange Formats" => array(
                     'xliff'    => array( 'default', '', 'extxif' ),
@@ -262,7 +262,7 @@ class INIT {
             "Desktop Publishing"  => array(
                     'mif'  => array( '', '', 'extmif' ),
                     'idml' => array( '', '', 'extidd' ),
-                    'icml' => array( '', '', 'NO-ICON' ),
+                    'icml' => array( '', '', 'exticml' ),
                     'xml'  => array( '', '', 'extxml' ),
                     'dita' => array( '', '', 'extdit' )
             ),
@@ -274,10 +274,10 @@ class INIT {
                     'dita'        => array( '', '', 'extdit' ),
                     'Android xml' => array( '', '', 'extxml' ),
                     'strings'     => array( '', '', 'extstr' ),
-                    'srt'         => array( '', '', 'NO-ICON' ),
-                    'wix'         => array( '', '', 'NO-ICON' ),
-                    'po'          => array( '', '', 'NO-ICON'  ),
-                    'g'           => array( '', '', 'exttxt' )
+                    'srt'         => array( '', '', 'extsrt' ),
+                    'wix'         => array( '', '', 'extwix' ),
+                    'po'          => array( '', '', 'extpo'  ),
+                    'g'           => array( '', '', 'extg' )
             )
     );
 
