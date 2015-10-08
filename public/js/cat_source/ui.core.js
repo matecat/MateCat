@@ -516,6 +516,7 @@ console.log('changeStatus');
 					'</ul>' +
 					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
+                                        '       <div class="engine-errors"></div>' +
 					'</div>' +
 					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
 					'	<div class="overflow">' +
