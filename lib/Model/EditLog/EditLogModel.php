@@ -8,22 +8,26 @@
  */
 class EditLog_EditLogModel {
     //number of percentage point under which the post editing effor evaluation is still accepted;
-    const PEE_THRESHOLD         = 1;
+    const PEE_THRESHOLD = 1;
     const MAX_SEGMENTS_PER_PAGE = 50;
+    const CACHETIME = 108000;
 
     private static $segments_per_page = 10;
-    private static $pageNumber        = 1;
+    private static $start_id = -1;
+    private static $sort_by = "sid";
 
-    private $jid            = "";
-    private $password       = "";
+
+    private $jid = "";
+    private $password = "";
     private $project_status = "";
-    private $job_archived   = false;
+    private $job_archived = false;
 
     private $job_owner_email;
     private $jobData;
     private $job_stats;
     private $stats;
     private $data;
+    private $pagination;
     private $languageStatsData;
     private $db;
 
@@ -35,32 +39,35 @@ class EditLog_EditLogModel {
 
     public function controllerDoAction() {
         //pay a little query to avoid to fetch 5000 rows
-        $this->jobData = $jobData = getJobData( $this->jid, $this->password );
+        $this->jobData   = getJobData( $this->jid, $this->password );
+        $this->job_stats = $this->getFastStatsForJob();
 
-        $wStruct = new WordCount_Struct();
-        $wStruct->setIdJob( $this->jid );
-        $wStruct->setJobPassword( $this->password );
-        $wStruct->setNewWords( $jobData[ 'new_words' ] );
-        $wStruct->setDraftWords( $jobData[ 'draft_words' ] );
-        $wStruct->setTranslatedWords( $jobData[ 'translated_words' ] );
-        $wStruct->setApprovedWords( $jobData[ 'approved_words' ] );
-        $wStruct->setRejectedWords( $jobData[ 'rejected_words' ] );
-
-        if ( $jobData[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $jobData[ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $this->jobData[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $this->jobData == Constants_JobStatus::STATUS_CANCELLED ) {
             //this job has been archived
             $this->job_archived    = true;
-            $this->job_owner_email = $jobData[ 'job_owner' ];
+            $this->job_owner_email = $this->jobData[ 'job_owner' ];
+        }
+
+        if ( self::$start_id == -1 ) {
+            self::$start_id = $this->jobData[ 'job_first_segment' ];
         }
 
         //TODO: portare dentro il codice
-        $tmp = CatUtils::getEditingLogData( $this->jid, $this->password );
+        $tmp = $this->getEditLogData();
 
-        $this->data  = $tmp[ 0 ];
+        $this->data       = $tmp[ 0 ];
+        $this->pagination = $tmp[ 2 ];
+
+        foreach ( $this->data as $i => $dataRow ) {
+            /**
+             * @var $dataRow EditLog_EditLogSegmentClientStruct
+             */
+            $this->data[ $i ] = $dataRow->toArray();
+        }
+
         $this->stats = $tmp[ 1 ];
 
-        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
-
-        $proj                 = getProject( $jobData[ 'id_project' ] );
+        $proj                 = getProject( $this->jobData[ 'id_project' ] );
         $this->project_status = $proj[ 0 ];
 
         $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
@@ -68,8 +75,8 @@ class EditLog_EditLogModel {
 
         $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
         $languageSearchObj->date   = $maxDate;
-        $languageSearchObj->source = $this->data[ 0 ][ 'source_lang' ];
-        $languageSearchObj->target = $this->data[ 0 ][ 'target_lang' ];
+        $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
+        $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
 
         $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
         $this->languageStatsData = $this->languageStatsData[ 0 ];
@@ -88,6 +95,319 @@ class EditLog_EditLogModel {
         //do sorting
 
         //return output
+    }
+
+    /**
+     * @return array
+     */
+    private function getFastStatsForJob() {
+        $wStruct = new WordCount_Struct();
+        $wStruct->setIdJob( $this->jid );
+        $wStruct->setJobPassword( $this->password );
+        $wStruct->setNewWords( $this->jobData[ 'new_words' ] );
+        $wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
+        $wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
+        $wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
+        $wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
+
+        return CatUtils::getFastStatsForJob( $wStruct );
+    }
+
+    private function getEditLogData( $use_ter_diff = false ) {
+        $editLogDao = new EditLog_EditLogDao( Database::obtain() );
+        $data       = $editLogDao->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
+
+        $__pagination_prev = PHP_INT_MAX;
+        $__pagination_next = -2147483648;     //PHP_INT_MIN
+
+        $slow_cut = 30;
+        $fast_cut = 0.25;
+
+        $stat_too_slow = array();
+        $stat_too_fast = array();
+
+        if ( !$data ) {
+            return false;
+        }
+
+        $stats[ 'total-word-count' ] = 0;
+        $stat_mt                     = array();
+        $stat_valid_rwc              = array();
+        $stat_rwc                    = array();
+        $stat_valid_tte              = array();
+        $stat_pee                    = array();
+        $stat_ter                    = array();
+
+        $output_data = array();
+        foreach ( $data as $seg ) {
+
+            //if the segment is before the current one
+            if ( $seg->id < self::$start_id ) {
+                if ( $seg->id <= $__pagination_prev ) {
+                    $__pagination_prev = $seg->id;
+                }
+                continue;
+            }
+
+            if ( $seg->id > $__pagination_next ) {
+                $__pagination_next = $seg->id;
+            }
+
+            $displaySeg = new EditLog_EditLogSegmentClientStruct(
+                    $seg->toArray()
+            );
+
+            $displaySeg->suggestion_match .= "%";
+            $displaySeg->job_id               = $this->jid;
+            $tte                              = CatUtils::parse_time_to_edit( $seg->time_to_edit );
+            $displaySeg->display_time_to_edit = "$tte[1]m:$tte[2]s";
+
+            $stat_rwc[] = $seg->raw_word_count;
+
+            // by definition we cannot have a 0 word sentence. It is probably a - or a tag, so we want to consider at least a word.
+            if ( $seg->raw_word_count < 1 ) {
+                $displaySeg->raw_word_count = 1;
+            }
+
+            //todo: remove this
+            $displaySeg->secs_per_word = $seg->getSecsPerWord();
+
+            if ( ( $displaySeg->secs_per_word < $slow_cut ) AND ( $displaySeg->secs_per_word > $fast_cut ) ) {
+                $displaySeg->stats_valid       = 'Yes';
+                $displaySeg->stats_valid_color = '';
+                $displaySeg->stats_valid_style = '';
+
+                $stat_valid_rwc[] = $seg->raw_word_count;
+                $stat_valid_tte[] = $displaySeg->display_time_to_edit;
+                $stat_spw[]       = $displaySeg->secs_per_word;
+            } else {
+                $displaySeg->stats_valid       = 'No';
+                $displaySeg->stats_valid_color = '#ee6633';
+                $displaySeg->stats_valid_style = 'border:2px solid #EE6633';
+            }
+
+
+            // Stats
+            if ( $displaySeg >= $slow_cut ) {
+                $stat_too_slow[] = $seg->raw_word_count;
+            }
+            if ( $displaySeg <= $fast_cut ) {
+                $stat_too_fast[] = $seg->raw_word_count;
+            }
+
+
+            $displaySeg->pe_effort_perc = $displaySeg->getPeePerc();
+
+
+            if ( $displaySeg->pe_effort_perc < 0 ) {
+                $displaySeg->pe_effort_perc = 0;
+            }
+            if ( $displaySeg->pe_effort_perc > 100 ) {
+                $displaySeg->pe_effort_perc = 100;
+            }
+
+            $stat_pee[] = $displaySeg->pe_effort_perc * $seg->raw_word_count;
+
+            $displaySeg->pe_effort_perc .= "%";
+
+            $lh   = Langs_Languages::getInstance();
+            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg->job_target ) );
+
+            $sug_for_diff = CatUtils::placehold_xliff_tags( $seg->suggestion );
+            $tra_for_diff = CatUtils::placehold_xliff_tags( $seg->translation );
+
+//            possible patch
+//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
+//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
+
+            //with this patch we have warnings when accessing indexes
+            if ( $use_ter_diff ) {
+                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            } else {
+                $ter = array();
+            }
+
+            $displaySeg->ter = @$ter[ 1 ] * 100;
+            $stat_ter[]      = $displaySeg->ter * $seg->raw_word_count;
+            $displaySeg->ter = round( @$ter[ 1 ] * 100 ) . "%";
+            $diff_ter        = @$ter[ 0 ];
+
+            if ( $seg->suggestion <> $seg->translation ) {
+
+                //force use of third party ter diff
+                if ( $use_ter_diff ) {
+                    $displaySeg->diff = $diff_ter;
+                } else {
+                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
+                    // we will use diff_PE until ter_diff will not work properly
+                    $displaySeg->diff = $diff_PE;
+                }
+
+                //$seg[ 'diff_ter' ] = $diff_ter;
+
+            } else {
+                $displaySeg->diff = '';
+                //$seg[ 'diff_ter' ] = '';
+            }
+
+            $displaySeg->diff = CatUtils::restore_xliff_tags_for_view( $displaySeg->diff );
+            //$seg['diff_ter'] = self::restore_xliff_tags_for_view($seg['diff_ter']);
+
+            // BUG: While suggestions source is not correctly set
+            if ( ( $displaySeg->suggestion_match == "85%" ) OR ( $displaySeg->suggestion_match == "86%" ) ) {
+                $displaySeg->suggestion_source = 'Machine Translation';
+                $stat_mt[]                     = $seg->raw_word_count;
+            } else {
+                $displaySeg->suggestion_source = 'Translation Memory';
+            }
+
+            $displaySeg->suggestion_view = trim( CatUtils::rawxliff2view( $seg->suggestion ) );
+            $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );
+            $displaySeg->translation     = trim( CatUtils::rawxliff2view( $seg->translation ) );
+
+            $array_patterns = array(
+                    rtrim( CatUtils::lfPlaceholderRegex, 'g' ),
+                    rtrim( CatUtils::crPlaceholderRegex, 'g' ),
+                    rtrim( CatUtils::crlfPlaceholderRegex, 'g' ),
+                    rtrim( CatUtils::tabPlaceholderRegex, 'g' ),
+                    rtrim( CatUtils::nbspPlaceholderRegex, 'g' ),
+            );
+
+
+            $array_replacements_csv      = array(
+                    '\n',
+                    '\r',
+                    '\r\n',
+                    '\t',
+                    Utils::unicode2chr( 0Xa0 ),
+            );
+            $displaySeg->source_csv      = preg_replace( $array_patterns, $array_replacements_csv, $seg->source );
+            $displaySeg->translation_csv = preg_replace( $array_patterns, $array_replacements_csv, $seg->translation );
+            $displaySeg->sug_csv         = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->suggestion_view );
+            $displaySeg->diff_csv        = preg_replace( $array_patterns, $array_replacements_csv, $displaySeg->diff );
+
+
+            $array_replacements          = array(
+                    '<span class="_0A"></span><br />',
+                    '<span class="_0D"></span><br />',
+                    '<span class="_0D0A"></span><br />',
+                    '<span class="_tab">&#9;</span>',
+                    '<span class="_nbsp">&nbsp;</span>',
+            );
+            $displaySeg->source          = preg_replace( $array_patterns, $array_replacements, $seg->source );
+            $displaySeg->translation     = preg_replace( $array_patterns, $array_replacements, $seg->translation );
+            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $displaySeg->sug_view );
+            $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
+
+            if ( $seg->mt_qe == 0 ) {
+                $displaySeg->mt_qe = 'N/A';
+            }
+
+            $output_data[] = $displaySeg;
+        }
+
+        $pagination = $this->evaluatePagination( $__pagination_prev, $__pagination_next + 1 );
+
+        $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
+        $stats[ 'valid-word-count' ]  = array_sum( $stat_valid_rwc );
+
+        if ( $stats[ 'edited-word-count' ] > 0 ) {
+            $stats[ 'too-slow-words' ] = round( array_sum( $stat_too_slow ) / $stats[ 'edited-word-count' ], 2 ) * 100;
+            $stats[ 'too-fast-words' ] = round( array_sum( $stat_too_fast ) / $stats[ 'edited-word-count' ], 2 ) * 100;
+            $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
+            $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
+        }
+//        echo array_sum($stat_ter);
+//        echo "@@@";
+//        echo array_sum($stat_rwc);
+//        exit;
+
+        $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
+        $stats[ 'tm-words' ]        = 100 - $stats[ 'mt-words' ];
+        $stats[ 'total-valid-tte' ] = round( array_sum( $stat_valid_tte ) / 1000 );
+
+        // Non weighted...
+        // $stats['avg-secs-per-word'] = round(array_sum($stat_spw)/count($stat_spw),1);
+        // Weighted
+        $stats[ 'avg-secs-per-word' ] = round( $stats[ 'total-valid-tte' ] / $stats[ 'valid-word-count' ], 1 );
+        $stats[ 'est-words-per-day' ] = number_format( round( 3600 * 8 / $stats[ 'avg-secs-per-word' ] ), 0, '.', ',' );
+
+        // Last minute formatting (after calculations)
+        $temp                       = CatUtils::parse_time_to_edit( round( array_sum( $stat_valid_tte ) ) );
+        $stats[ 'total-valid-tte' ] = "$temp[0]h:$temp[1]m:$temp[2]s";
+
+        $stats[ 'total-tte-seconds' ] = $temp[ 0 ] * 3600 + $temp[ 1 ] * 60 + $temp[ 2 ];
+
+        return array( $output_data, $stats, $pagination );
+
+    }
+
+    private function evaluatePagination( $prev_id, $next_id ) {
+        $editLogDao = new EditLog_EditLogDao( Database::obtain() );
+        $editLogDao->setCacheTTL( self::CACHETIME );
+        $pagination = array(
+                'first'        => PHP_INT_MAX,
+                'prev'         => $prev_id,
+                'current'      => self::$start_id,
+                'next'         => $next_id,
+                'last'         => -2147483648,  //PHP_INT_MIN
+                'page_index'   => null,
+                'current_page' => 1,
+                'last_page'    => -1
+        );
+
+        $pagination[ 'last' ]  = $editLogDao->getLastPage_firstID( $this->getJid(), $this->getPassword() );
+        $pagination[ 'first' ] = $editLogDao->getFirstPage_firstID( $this->getJid(), $this->getPassword() );
+
+        $pagination[ 'page_index' ] = $editLogDao->getPagination( $this->getJid(), $this->getPassword() );
+
+        $pagination[ 'current_page' ] = self::evaluateCurrentPage( $pagination[ 'page_index' ], self::$start_id );
+        $pagination[ 'last_page' ]    = count( $pagination[ 'page_index' ] );
+
+        //fix next page id if necessary
+        if ( $pagination[ 'next' ] > $pagination[ 'last' ] ) {
+            $pagination[ 'next' ] = $pagination[ 'last' ];
+        }
+
+        if ( $pagination[ 'prev' ] < $pagination[ 'first' ] ) {
+            $pagination[ 'prev' ] = $pagination[ 'first' ];
+        } else if ( $pagination[ 'prev' ] == PHP_INT_MAX ) {
+            $pagination[ 'prev' ] = $pagination[ 'first' ];
+        }
+
+        if ( $pagination[ 'prev' ] == $pagination[ 'first' ] ) {
+            unset( $pagination[ 'first' ] );
+        }
+
+        if ( $pagination[ 'next' ] == $pagination[ 'last' ] ) {
+            unset( $pagination[ 'last' ] );
+        }
+
+        //this happens because the first time that the page is loaded
+        //the start segment could not be visible ( show_in_cattool = 0 )
+        if ( $pagination[ 'current' ] < $pagination[ 'prev' ] ) {
+            $pagination[ 'current' ] = $pagination[ 'prev' ];
+        }
+
+        if ( $pagination[ 'next' ] == $pagination[ 'current' ] ) {
+            unset( $pagination[ 'next' ] );
+        }
+
+        if ( $pagination[ 'prev' ] == $pagination[ 'current' ] ) {
+            unset( $pagination[ 'prev' ] );
+        }
+
+
+        return $pagination;
+    }
+
+    private static function evaluateCurrentPage( Array $index, $startIndex ) {
+        $i = 0;
+        while ( $i < count( $index ) && $startIndex > $index[ $i ][ 'start_segment' ] ) {
+            $i++;
+        }
+
+        return $index[ $i ][ 'page' ];
     }
 
     /**
@@ -133,10 +453,17 @@ class EditLog_EditLogModel {
     }
 
     /**
-     * @param int $pageNumber
+     * @param int $start_id
      */
-    public static function setPageNumber( $pageNumber ) {
-        self::$pageNumber = $pageNumber;
+    public static function setStartId( $start_id ) {
+        self::$start_id = $start_id;
+    }
+
+    /**
+     * @param string $sort_by
+     */
+    public static function setSortBy( $sort_by ) {
+        self::$sort_by = $sort_by;
     }
 
     /**
@@ -208,4 +535,12 @@ class EditLog_EditLogModel {
     public function getLanguageStatsData() {
         return $this->languageStatsData;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPagination() {
+        return $this->pagination;
+    }
+
 }

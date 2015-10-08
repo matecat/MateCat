@@ -24,7 +24,11 @@ class EditLogDecorator {
         $this->template->job_archived = ( $model->isJobArchived() ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->owner_email  = $model->getJobOwnerEmail();
 
+        /**
+         * @var $data EditLog_EditLogSegmentClientStruct[]
+         */
         $data           = $model->getData();
+        $pagination     = $model->getPagination();
         $stats          = $model->getStats();
         $job_stats      = $model->getJobStats();
         $project_status = $model->getProjectStatus();
@@ -34,9 +38,10 @@ class EditLogDecorator {
         $this->template->password    = $model->getPassword();
         $this->template->data        = $data;
         $this->template->stats       = $stats;
+        $this->template->pagination  = $pagination;
         $this->template->pname       = $data[ 0 ][ 'pname' ];
-        $this->template->source_code = $data[ 0 ][ 'source_lang' ];
-        $this->template->target_code = $data[ 0 ][ 'target_lang' ];
+        $this->template->source_code = $data[ 0 ][ 'job_source' ];
+        $this->template->target_code = $data[ 0 ][ 'job_target' ];
 
         $this->template->overall_tte = $model->evaluateOverallTTE();
         $this->template->overall_pee = $model->evaluateOverallPEE();

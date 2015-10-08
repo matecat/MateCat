@@ -3,8 +3,18 @@
     font-size: 1.1em;
 }
 
-#pagination{
-    width: 300px;
+#pagination_box{
+    position: absolute;
+    left: 50%;
+    width: 30%;
+    margin-left: -150px;
+}
+
+#pagination_box nav {
+    float: none;
+    /* hack to center this nav */
+    width: 100%;
+    margin: 0 auto;
 }
 
 #pagination_box nav li{
