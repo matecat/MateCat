@@ -110,6 +110,7 @@ UI = {
 			$('.popup-split .x-popup').click();
 		}).on('click', '.modal .x-popup', function(e) {
 			e.preventDefault();
+            $( "body").removeClass( "showingOutsourceTo" );
 			APP.closePopup();
 		}).on('click', '.popup-split .x-popup', function(e) {
 			UI.resetSplitPopup();

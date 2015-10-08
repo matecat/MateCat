@@ -1178,7 +1178,7 @@ margin-left: 10px;
 	    background-size: 22px;
     }
 
-    .popup .x-popup:hover, .slide-panel .x-popup:hover {
+    .popup .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
         color:red;
     }
 	
@@ -2847,6 +2847,7 @@ color: #000;
 .sorting:after,
 .splitbtn:before,
 .x-popup:before,
+.x-popup2:before,
 .popup .x-popup:before, 
 .mgmt-panel .x-popup:before, 
 .popup-tm .x-popup:before,
@@ -3200,7 +3201,8 @@ float: right;
 
 }
 
-.x-popup:before {
+.x-popup:before,
+.x-popup2:before {
     content: "\f057";
 }
 
