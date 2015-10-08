@@ -239,6 +239,7 @@
                                                 <option value="iptranslator" >IPTranslator from Iconic</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
+                                                <option value="letsmt" >Tilde MT</option>
                                         </select>
                                       <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
                                           <span class="text">Cancel</span>
@@ -472,6 +473,36 @@
         <a href="mailto:support@matecat.com" class="continuebtn btn-ok">Contact MateCat</a>
     </template>
     <!-- fine blocco moses -->
+    <!-- sakam letsmt bloku -->
+    <template id="mt-provider-letsmt-fields">
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>Client ID<sup>*</sup></label>
+                <input class="required" data-field-name="client_id" placeholder="here" />
+            </div>
+            <div class="provider-field">
+                <label>System ID<sup>*</sup></label>
+                <input class="required" data-field-name="system_id" placeholder="here" />
+            </div>
+            <div class="provider-field">
+                <label>Terms ID</label>
+                <input data-field-name="terms_id" placeholder="here" />
+            </div>
+        </div>
+    </template>
+
+    <template id="mt-provider-letsmt-msg">
+        <p><strong>Tilde</strong> specializes in developing custom MT systems for complex languages like the Nordic, Baltic, Russian, and Central and Eastern European languages.</p>
+        <p>In order to boost translation quality and accuracy, our MT systems can fully integrate your domain-specific terminology in the right inflectional forms.</p>
+        <p>Contact Tilde MT to get a custom MT system for your language pair and domain.</p>
+        <a href="https://www.letsmt.eu" target="_blank" class="continuebtn btn-ok">Tilde MT</a>
+    </template>
+    <!-- beidzam letsmt bloku -->
 
 
 </div>
