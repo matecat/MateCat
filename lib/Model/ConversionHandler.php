@@ -149,6 +149,12 @@ class ConversionHandler {
                 // if $this->segmentation_rule is set use the old ones.
                 $useLegacyConverters = true;
             }
+
+            //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+            if( getenv( 'LEGACY_CONVERSION' ) !== false ){
+                $useLegacyConverters = true;
+            }
+
             $converter = new FileFormatConverter($useLegacyConverters);
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
