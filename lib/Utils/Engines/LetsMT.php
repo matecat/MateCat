@@ -7,12 +7,11 @@
 /**
  * Class Engines_LetsMT
  * @property string oauth_url
- * @property int token_endlife
+ * @property int    token_endlife
  * @property string token
- * @property string   client_id
- * @property string   client_secret
+ * @property string client_id
+ * @property string client_secret
  */
-
 class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected $_config = array(
@@ -22,8 +21,8 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             'target'      => null
     );
 
-    public function __construct($engineRecord) {
-        parent::__construct($engineRecord);
+    public function __construct( $engineRecord ) {
+        parent::__construct( $engineRecord );
         if ( $this->engineRecord->type != "MT" ) {
             throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
         }
@@ -32,8 +31,9 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     protected function _fixLangCode( $lang ) {
 
         $lang = strtolower( trim( $lang ) );
-        $l = explode( "-", $lang );
-        return $l[0];
+        $l    = explode( "-", $lang );
+
+        return $l[ 0 ];
 
     }
 
@@ -42,38 +42,40 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
      *
      * @return array
      */
-    protected function _decode( $rawValue ){
+    protected function _decode( $rawValue ) {
 
-        $all_args =  func_get_args();
+        $all_args = func_get_args();
 
-        if( is_string( $rawValue ) ) {
+        if ( is_string( $rawValue ) ) {
             $parsed = json_decode( $rawValue, true );
-            if(!empty($parsed['translation'])){
+            if ( !empty( $parsed[ 'translation' ] ) ) {
                 // this is a response from a translate request
-                
-                if ($this->use_qe && floatval($parsed['qualityEstimate']) < $this->minimum_qe){
+
+                if ( $this->use_qe && floatval( $parsed[ 'qualityEstimate' ] ) < $this->minimum_qe ) {
                     $mt_result = array(
-                                    'error' => array(
-                                                'code' => -3001,
-                                                'message' => 'Translation QE score below treshold'
-                                    )
+                            'error' => array(
+                                    'code'    => -3001,
+                                    'message' => 'Translation QE score below treshold'
+                            )
                     );
+
                     return $mt_result;
                 }
 
                 $decoded = array(
-                            'data' => array(
-                                    "translations" => array(
-                                            array( 'translatedText' => $this->_resetSpecialStrings($parsed['translation']))
-                                    )
-                            )
-                    );
-                
+                        'data' => array(
+                                "translations" => array(
+                                        array( 'translatedText' => $this->_resetSpecialStrings( $parsed[ 'translation' ] ) )
+                                )
+                        )
+                );
+
                 $mt_result = new Engines_Results_MT( $decoded );
 
                 if ( $mt_result->error->code < 0 ) {
-                    $mt_result = $mt_result->get_as_array();
-                    $mt_result['error'] = (array)$mt_result['error'];
+                    $mt_result            = $mt_result->get_as_array();
+                    $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
+
                     return $mt_result;
                 }
 
@@ -89,18 +91,18 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 $mt_res[ 'sentence_confidence' ] = $mt_result->sentence_confidence; //can be null
 
                 return $mt_res;
-            } elseif (!empty($parsed['System'])){
+            }
+            elseif ( !empty( $parsed[ 'System' ] ) ) {
                 // this is a response from a getSystemList request
-                
+
                 $decoded = array();
-                foreach($parsed['System'] as $systemData){
+                foreach ( $parsed[ 'System' ] as $systemData ) {
                     $statusName = "";
-                    $status = "";
-                    foreach ($systemData['Metadata'] as $value){
-                        if ($value['Key'] === 'status'){
-                            $status = $value['Value'];
-                            switch ($status)
-                            {
+                    $status     = "";
+                    foreach ( $systemData[ 'Metadata' ] as $value ) {
+                        if ( $value[ 'Key' ] === 'status' ) {
+                            $status = $value[ 'Value' ];
+                            switch ( $status ) {
                                 case "running":
                                     $statusName = "Running";
                                     break;
@@ -123,63 +125,79 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                                     $statusName = "Standby";
                                     break;
                                 default:
-                                    $statusName = $value['Value'];
+                                    $statusName = $value[ 'Value' ];
                                     break;
                             }
                             break;
                         }
                     }
-                    $systemName = sprintf('%s (%s)',
-                                            $systemData['Title']['Text'],
-                                            $statusName);
-                    $systemMetadata = array('source-language-code' => $systemData['SourceLanguage']['Code'],
-                                            'target-language-code' => $systemData['TargetLanguage']['Code'],
-                                            'source-language-name' => $systemData['SourceLanguage']['Name']['Text'],
-                                            'target-language-name' => $systemData['TargetLanguage']['Name']['Text'],
-                                            'status'               => $status
-                        );
-                    $decoded[$systemData['ID']] = array('name'     => $systemName,
-                                                        'metadata' => $systemMetadata
-                        );
+                    $systemName                     = sprintf( '%s (%s)',
+                            $systemData[ 'Title' ][ 'Text' ],
+                            $statusName );
+                    $systemMetadata                 = array(
+                            'source-language-code' => $systemData[ 'SourceLanguage' ][ 'Code' ],
+                            'target-language-code' => $systemData[ 'TargetLanguage' ][ 'Code' ],
+                            'source-language-name' => $systemData[ 'SourceLanguage' ][ 'Name' ][ 'Text' ],
+                            'target-language-name' => $systemData[ 'TargetLanguage' ][ 'Name' ][ 'Text' ],
+                            'status'               => $status
+                    );
+                    $decoded[ $systemData[ 'ID' ] ] = array(
+                            'name'     => $systemName,
+                            'metadata' => $systemMetadata
+                    );
                 }
-                asort($decoded);
-                
+                asort( $decoded );
+
                 return $decoded;
-            } elseif (!empty($parsed[0]) && !empty($parsed[0]['CorpusId'])){
+            }
+            elseif ( !empty( $parsed[ 0 ] ) && !empty( $parsed[ 0 ][ 'CorpusId' ] ) ) {
                 // this is a response from getSystemTermCorpora request
-                
+
                 $decoded = array();
-                foreach($parsed as $termData){
-                    if ($termData['Status'] == 'Ready') {
-                        $decoded[$termData['CorpusId']] = $termData['Title'];
+                foreach ( $parsed as $termData ) {
+                    if ( $termData[ 'Status' ] == 'Ready' ) {
+                        $decoded[ $termData[ 'CorpusId' ] ] = $termData[ 'Title' ];
                     }
                 }
             }
-        } else {
+        }
+        else {
+
             // get the response body for the error message
-            $parsed = array();
-            if (!empty($rawValue['error'])){
-                $parsed = json_decode( $rawValue['error']['response'], true );
-            }
-            if (!empty($parsed['ErrorMessage'])) {
-                $mt_code = intval($parsed['ErrorCode']);
-                $code = $mt_code == 21 ? '-2002' : '-2001'; // if engine is waking up render message as a warning (code -2002) else as error (code -2001).
-                $message = sprintf("(%s) %s", $parsed['ErrorCode'], $parsed['ErrorMessage']);
+            $parsed = json_decode( $rawValue[ 'error' ][ 'response' ], true );
+
+            if ( !empty( $parsed[ 'ErrorMessage' ] ) ) {
+                $mt_code = intval( $parsed[ 'ErrorCode' ] );
+                $code    = $mt_code == 21 ? '-2002' : '-2001'; // if engine is waking up render message as a warning (code -2002) else as error (code -2001).
+                $message = sprintf( "(%s) %s", $parsed[ 'ErrorCode' ], $parsed[ 'ErrorMessage' ] );
                 $decoded = array(
-                    'error' => array(
-                            'code' => $code,
-                            'message' => $message,
-                            'created_by' => "MT-" . $this->getName()
-                    )
+                        'error' => array(
+                                'code'       => $code,
+                                'message'    => $message,
+                                'created_by' => "MT-" . $this->getName()
+                        )
                 );
-            }
-            // no response body for the error message
-            else{
-                $decoded = array( 'error' => $rawValue['error']);
-                if (strpos($decoded['error'], 'Server Not Available (http status 401)') !== false) {
-                   $decoded['error']['message'] = 'Invalid Client ID.';
+            } // no response body for the error message
+            elseif( is_array( $rawValue['error'] ) ){
+
+                //Curl Error also ( Timeout/DNS/Socket )
+                $decoded = new Engines_Results_MT( $rawValue );
+                if ( $decoded->error->code < 0 ) {
+                    $decoded            = $decoded->get_as_array();
+                    $decoded[ 'error' ] = (array)$decoded[ 'error' ];
                 }
+
             }
+            else {
+
+                $decoded = array( 'error' => $rawValue[ 'error' ] );
+                if ( strpos( $decoded[ 'error' ], 'Server Not Available (http status 401)' ) !== false ) {
+                    $decoded[ 'error' ][ 'message' ] = 'Invalid Client ID.';
+
+                }
+
+            }
+
         }
 
         return $decoded;
@@ -189,24 +207,29 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
     public function get( $_config ) {
 
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         // if any of the engine languages is not set, continue, else check if engine and document languages match
-        if($this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
-                ($this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ])) {
-            return array('error' => array( 'code' => -3002, 'message' => 'Engine and document languages do not match'));
+        if ( $this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
+                ( $this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ] )
+        ) {
+            return array(
+                    'error' => array(
+                            'code' => -3002, 'message' => 'Engine and document languages do not match'
+                    )
+            );
         }
 
-        $parameters = array();
-		$parameters['text'] = $_config[ 'segment' ];
-                $parameters['appID'] = $this->app_id;
-                $parameters['systemID'] = $this->system_id;
-                $parameters['clientID'] = $this->client_id;
-                $qeParam = $this->use_qe ? ",qe" : "";
-                $parameters['options'] = "termCorpusId=" . $this->terms_id . $qeParam;
+        $parameters               = array();
+        $parameters[ 'text' ]     = $_config[ 'segment' ];
+        $parameters[ 'appID' ]    = $this->app_id;
+        $parameters[ 'systemID' ] = $this->system_id;
+        $parameters[ 'clientID' ] = $this->client_id;
+        $qeParam                  = $this->use_qe ? ",qe" : "";
+        $parameters[ 'options' ]  = "termCorpusId=" . $this->terms_id . $qeParam;
 
-	$this->call( "translate_relative_url", $parameters );
+        $this->call( "translate_relative_url", $parameters );
 
         return $this->result;
 
@@ -224,18 +247,23 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         // if any of the engine languages is not set, continue, else check if engine and document languages match
-        if($this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
-                ($this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ])) {
-            return array('error' => array( 'code' => -3002, 'message' => 'Engine and document languages do not match'));
+        if ( $this->source_lang && $_config[ 'source' ] && $this->target_lang && $_config[ 'target' ] &&
+                ( $this->source_lang !== $_config[ 'source' ] || $this->target_lang !== $_config[ 'target' ] )
+        ) {
+            return array(
+                    'error' => array(
+                            'code' => -3002, 'message' => 'Engine and document languages do not match'
+                    )
+            );
         }
 
-       $parameters = array();
-		$parameters['text'] = $_config[ 'segment' ];
-                $parameters['appID'] = $this->app_id;
-                $parameters['systemID'] = $this->system_id;
-                $parameters['clientID'] = $this->client_id;
-                $parameters['options'] = "termCorpusId=" . $this->terms_id;
-                $parameters[ 'translation' ] = $_config[ 'translation' ];
+        $parameters                  = array();
+        $parameters[ 'text' ]        = $_config[ 'segment' ];
+        $parameters[ 'appID' ]       = $this->app_id;
+        $parameters[ 'systemID' ]    = $this->system_id;
+        $parameters[ 'clientID' ]    = $this->client_id;
+        $parameters[ 'options' ]     = "termCorpusId=" . $this->terms_id;
+        $parameters[ 'translation' ] = $_config[ 'translation' ];
 
         $this->call( "contribute_relative_url", $parameters );
 
@@ -257,49 +285,49 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
             return true;
         }
     }
-    
-    public function getSystemList($_config) {
 
-        $parameters = array();
-                $parameters['appID'] = $this->app_id;
-                $parameters['clientID'] = $this->client_id;
+    public function getSystemList( $_config ) {
 
-	$this->call( 'system_list_relative_url', $parameters );
-        
-        if (isset($this->result['error']['code'])) {
+        $parameters               = array();
+        $parameters[ 'appID' ]    = $this->app_id;
+        $parameters[ 'clientID' ] = $this->client_id;
+
+        $this->call( 'system_list_relative_url', $parameters );
+
+        if ( isset( $this->result[ 'error' ][ 'code' ] ) ) {
             return $this->result;
         }
         $systemList = $this->result;
-        
+
         return $systemList;
-        
+
     }
-    
+
     public function getTermList() {
 
-        $parameters = array();
-                $parameters['appID'] = $this->app_id;
-                $parameters['clientID'] = $this->client_id;
-                $parameters['systemID'] = $this->system_id;
+        $parameters               = array();
+        $parameters[ 'appID' ]    = $this->app_id;
+        $parameters[ 'clientID' ] = $this->client_id;
+        $parameters[ 'systemID' ] = $this->system_id;
 
-	$this->call( 'term_list_relative_url', $parameters );
+        $this->call( 'term_list_relative_url', $parameters );
 
         $termList = $this->result;
-        if ( isset( $termList['error']['code'] ) ) {
-            return array('error' => $termList['error']);
+        if ( isset( $termList[ 'error' ][ 'code' ] ) ) {
+            return array( 'error' => $termList[ 'error' ] );
         }
-        
-        return array('terms' => $termList);
+
+        return array( 'terms' => $termList );
     }
 
-    public function wakeUp(){
-        $_config = $this->getConfigStruct();
-        $_config['segment'] = 'wakeup';
+    public function wakeUp() {
+        $_config              = $this->getConfigStruct();
+        $_config[ 'segment' ] = 'wakeup';
 
         $this->_setAdditionalCurlParams( array(
-                       CURLOPT_TIMEOUT        => 1
-               ));
+                CURLOPT_TIMEOUT => 1
+        ) );
 
-        $this->get($_config);
+        $this->get( $_config );
     }
 }

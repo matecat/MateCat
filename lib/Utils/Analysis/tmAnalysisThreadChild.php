@@ -94,29 +94,29 @@ function myProcessExists( $pid ) {
 $i = 1;
 do {
 
-//    try {
-//
-//        // PROCESS CONTROL FUNCTIONS
-//        if ( !myProcessExists( $my_pid ) ) {
-//            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
-//            cleanShutDown();
-//        }
-//
-//        // control if parent is still running
-//        if ( !isParentRunning( $parent_pid ) ) {
-//            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
-//            cleanShutDown();
-//        }
-//        // PROCESS CONTROL FUNCTIONS
-//
-//    } catch( Exception $e ){
-//        $secs = 3;
-//        _TimeStampMsg( "--- (child $my_pid) : Failed to read from Redis. Doing nothing, wait $secs seconds and re-try in next cycle." );
-//        _TimeStampMsg( $e->getMessage() );
-//        sleep($secs);
-//        continue;
-//
-//    }
+    try {
+
+        // PROCESS CONTROL FUNCTIONS
+        if ( !myProcessExists( $my_pid ) ) {
+            _TimeStampMsg( "(child $my_pid) :  EXITING! my pid does not exists anymore, my parent told me to die." );
+            cleanShutDown();
+        }
+
+        // control if parent is still running
+        if ( !isParentRunning( $parent_pid ) ) {
+            _TimeStampMsg( "--- (child $my_pid) : EXITING : my parent seems to be died." );
+            cleanShutDown();
+        }
+        // PROCESS CONTROL FUNCTIONS
+
+    } catch( Exception $e ){
+        $secs = 3;
+        _TimeStampMsg( "--- (child $my_pid) : Failed to read from Redis. Doing nothing, wait $secs seconds and re-try in next cycle." );
+        _TimeStampMsg( $e->getMessage() );
+        sleep($secs);
+        continue;
+
+    }
 
 //    _TimeStampMsg( $my_pid . ": i'm alive!" );
 
