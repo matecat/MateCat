@@ -313,15 +313,15 @@ $.extend(UI, {
                 var messageClass = "";
                 var imgClass = "";
                 var  messageTypeText = '';
-                if(this.code == '-1001') {
-                    console.log('ERROR -1001');
+                if(this.code == '-2001') {
+                    console.log('ERROR -2001');
                     percentClass = "per-red";
                     messageClass = 'error';
                     imgClass = 'error-img';
                     messageTypeText = 'Error: ';
                 }
-                else if (this.code == '-1002') {
-                    console.log('WARNING -1002');
+                else if (this.code == '-2002') {
+                    console.log('WARNING -2002');
                     percentClass = "per-orange";
                     messageClass = 'warning';
                     imgClass = 'warning-img';

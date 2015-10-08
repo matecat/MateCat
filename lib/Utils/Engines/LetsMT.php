@@ -146,10 +146,14 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 }
             }
         } else {
-            $parsed = json_decode( $rawValue['result'], true );
+            // get the response body for the error message
+            $parsed = array();
+            if (!empty($rawValue['error'])){
+                $parsed = json_decode( $rawValue['error']['response'], true );
+            }
             if (!empty($parsed['ErrorMessage'])) {
                 $mt_code = intval($parsed['ErrorCode']);
-                $code = $mt_code == 21 ? '-1002' : '-1001'; // if engine is waking up render message as a warning (code -1002) else as error (code -1001).
+                $code = $mt_code == 21 ? '-2002' : '-2001'; // if engine is waking up render message as a warning (code -2002) else as error (code -2001).
                 $message = sprintf("(%s) %s", $parsed['ErrorCode'], $parsed['ErrorMessage']);
                 $decoded = array(
                     'error' => array(
@@ -159,10 +163,11 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                     )
                 );
             }
+            // no response body for the error message
             else{
                 $decoded = array( 'error' => $rawValue['error']);
                 if (strpos($decoded['error'], 'Server Not Available (http status 401)') !== false) {
--                   $decoded['error']['message'] = 'Invalid Client ID.';
+                   $decoded['error']['message'] = 'Invalid Client ID.';
                 }
             }
         }
