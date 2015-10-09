@@ -74,6 +74,11 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
     public $diff_csv;
 
     /**
+     * @var int
+     */
+    public $num_translation_mismatch;
+
+    /**
      * @return float|string
      */
     public function getPeePerc() {
@@ -82,5 +87,20 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
         }
 
         return $this->pe_effort_perc;
+    }
+
+    public function evaluateWarningString() {
+        $this->getWarning();
+
+        $num_translation_mismatches = $this->num_translation_mismatch;
+
+        if ( !empty( $num_translation_mismatches ) ) {
+            $this->warnings[] = sprintf(
+                    "Translation Mismatch ( %d )",
+                    $num_translation_mismatches
+            );
+        }
+
+        $this->warnings = implode( ", ", $this->warnings );
     }
 }

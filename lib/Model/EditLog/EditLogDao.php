@@ -34,8 +34,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $queryCenter = "
-                    SELECT segments.id AS __sid
+        $querySegments = "SELECT segments.id AS __sid
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
@@ -74,7 +73,8 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             j.source AS job_source,
             j.target AS job_target,
             s.raw_word_count,
-            p.name as proj_name
+            p.name as proj_name,
+            st.segment_hash
                 FROM
                 jobs j
                 INNER JOIN segment_translations st ON j.id=st.id_job
@@ -91,8 +91,8 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                 ORDER BY time_to_edit DESC";
 
-        $queryCenter = sprintf(
-                $queryCenter,
+        $querySegments = sprintf(
+                $querySegments,
                 $job_id,
                 $password,
                 $ref_segment,
@@ -106,13 +106,44 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $result = $this->_fetch_array(
                 sprintf(
                         $query,
-                        $queryCenter,
+                        $querySegments,
                         $job_id,
                         $password
                 )
         );
 
         return $this->_buildResult( $result );
+    }
+
+    /**
+     * @param $job_id int
+     *
+     * @return array|mixed
+     * @throws Exception
+     */
+    public function getTranslationMismatches( $job_id ) {
+        if ( empty( $job_id ) ) {
+            throw new Exception( "Job id required" );
+        }
+
+        $queryBefore = "select segment_hash,
+                        COUNT( DISTINCT translation ) -1 AS translation_mismatch
+                        FROM segment_translations
+                        JOIN jobs ON id_job = id
+                                  AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
+                        WHERE id_job = %d
+                        AND segment_translations.status <> 'NEW'
+                        GROUP BY segment_hash,
+                                 CONCAT( id_job, '-', password )";
+
+        $result = $this->_fetch_array(
+                sprintf(
+                        $queryBefore,
+                        $job_id
+                )
+        );
+
+        return $result;
     }
 
     /**

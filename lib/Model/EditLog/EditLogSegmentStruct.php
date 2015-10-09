@@ -54,6 +54,11 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     public $suggestion_position;
 
     /**
+     * @var string
+     */
+    public $segment_hash;
+
+    /**
      * @var float
      */
     public $mt_qe;
@@ -91,9 +96,51 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     public $secs_per_word;
 
     /**
+     * @var string
+     */
+    public $warnings;
+
+    /**
      * @return float
      */
-    public function getSecsPerWord(){
+    public function getSecsPerWord() {
         return round( $this->time_to_edit / 1000 / $this->raw_word_count, 1 );
+    }
+
+    /**
+     * @return array
+     */
+    public function getWarning() {
+        $result = array();
+
+        $QA = new QA( $this->source, $this->translation );
+        $QA->performConsistencyCheck();
+
+        if ( $QA->thereAreNotices() ) {
+            $notices = $QA->getNoticesJSON();
+            $notices = json_decode( $notices, true );
+
+            //the outer if it's here because $notices can be
+            //an empty string and json_decode will fail into null value
+            if ( !empty( $notices ) ) {
+                    $result = array_merge( $result, array_column( $notices, 'debug' ) );
+            }
+
+            $tag_mismatch = $QA->getMalformedXmlStructs();
+            $tag_order_mismatch = $QA->getTargetTagPositionError();
+            if ( count( $tag_mismatch ) > 0 ) {
+                $result[] = sprintf(
+                        "Tag Mismatch ( %d )",
+                        count( $tag_mismatch )
+                );
+            }
+            if ( count( $tag_order_mismatch ) > 0 ) {
+                $result[] = sprintf(
+                        "Tag order mismatch ( %d )",
+                        count( $tag_order_mismatch )
+                );
+            }
+        }
+        $this->warnings = $result;
     }
 }

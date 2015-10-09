@@ -117,6 +117,12 @@ class EditLog_EditLogModel {
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
         $data       = $editLogDao->getSegments( $this->getJid(), $this->getPassword(), self::$start_id );
 
+        //get translation mismatches and convert the array in a hashmap
+        $translationMismatchList = $editLogDao->getTranslationMismatches( $this->getJid() );
+        foreach ( $translationMismatchList as $idx => $translMismRow ) {
+            $translMismRow[ $translMismRow[ 'segment_hash' ] ] = (bool)$translMismRow[ 'translation_mismatch' ];
+        }
+
         $__pagination_prev = PHP_INT_MAX;
         $__pagination_next = -2147483648;     //PHP_INT_MIN
 
@@ -195,9 +201,7 @@ class EditLog_EditLogModel {
                 $stat_too_fast[] = $seg->raw_word_count;
             }
 
-
             $displaySeg->pe_effort_perc = $displaySeg->getPeePerc();
-
 
             if ( $displaySeg->pe_effort_perc < 0 ) {
                 $displaySeg->pe_effort_perc = 0;
@@ -273,7 +277,6 @@ class EditLog_EditLogModel {
                     rtrim( CatUtils::nbspPlaceholderRegex, 'g' ),
             );
 
-
             $array_replacements_csv      = array(
                     '\n',
                     '\r',
@@ -302,6 +305,9 @@ class EditLog_EditLogModel {
             if ( $seg->mt_qe == 0 ) {
                 $displaySeg->mt_qe = 'N/A';
             }
+
+            $displaySeg->num_translation_mismatch = (int)$translationMismatchList[ $displaySeg->segment_hash ];
+            $displaySeg->evaluateWarningString();
 
             $output_data[] = $displaySeg;
         }

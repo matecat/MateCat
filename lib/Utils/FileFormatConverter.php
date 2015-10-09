@@ -72,8 +72,8 @@ class FileFormatConverter {
             self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
         }
 
-        self::$converters = array('10.30.1.32' => 1);//for debugging purposes
-        self::$Storage_Lookup_IP_Map = array('10.30.1.32' => '10.30.1.32');//for debugging purposes
+//        self::$converters = array('10.30.1.32' => 1);//for debugging purposes
+//        self::$Storage_Lookup_IP_Map = array('10.30.1.32' => '10.30.1.32');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
