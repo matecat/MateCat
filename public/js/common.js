@@ -34,7 +34,7 @@ APP = {
             }
             APP.waitingConfirm = false;
             APP.cancelValue = false;
-        } ).on( 'click', '.modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
+        } ).on( 'click', '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
             el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
