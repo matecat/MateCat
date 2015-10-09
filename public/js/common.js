@@ -17,7 +17,7 @@ APP = {
                     APP.confirmValue = true;
                 }
             }
-        } ).on( 'click', '.modal[data-type=confirm] .btn-ok, .modal[data-type=confirm_checkbox] .btn-ok', function ( e ) {
+        } ).on( 'click', '.modal[data-type=confirm] .btn-ok:not(.disabled), .modal[data-type=confirm_checkbox] .btn-ok:not(.disabled)', function ( e ) {
             e.preventDefault();
             var dataType = $('.modal' ).attr('data-type');
 
