@@ -125,7 +125,6 @@ APP = {
             closeOnSuccess: (options.closeOnSuccess || false),
             checkbox_label: options['checkbox-label']
         } );
-        return APP.confirmValue;
     },
     initMessageBar: function () {
         if ( !$( 'header #messageBar' ).length ) {
