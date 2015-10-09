@@ -245,8 +245,11 @@ class ProjectManager {
                 //not used at moment but needed if we want to do a poll for status
                 if( DetectProprietaryXliff::isGlossaryFile() ) $this->checkGlossary = 1;
 
+                //prepend in front of the list
                 array_unshift( $sortedFiles, $fileName );
             } else {
+
+                //append at the end of the list
                 array_push( $sortedFiles, $fileName );
             }
 
@@ -261,8 +264,10 @@ class ProjectManager {
         $this->fileStorage =  new FilesStorage();
         $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
 
-        //associate the hash to the right file in upload directory
-
+        /*
+            loop through all input files to
+            1) upload TMX and Glossaries
+        */
         try {
             $this->_pushTMXToMyMemory();
         } catch ( Exception $e ) {
@@ -273,7 +278,6 @@ class ProjectManager {
 
         /*
             loop through all input files to
-            1)upload TMX
             2)convert, in case, non standard XLIFF files to a format that Matecat understands
 
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
@@ -335,6 +339,7 @@ class ProjectManager {
             //get sha
             $sha1_original = $hashFile[ 0 ];
 
+            //associate the hash to the right file in upload directory
             //get original file name, to insert into DB and cp in storage
             //PLEASE NOTE, this can be an array when the same file added more
             // than once and with different names

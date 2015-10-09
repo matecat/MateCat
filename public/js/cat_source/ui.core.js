@@ -3253,12 +3253,12 @@ console.log('changeStatus');
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
 				console.log('operation: ', operation);
-                UI.blockUIForNoConnection();
+                UI.startOfflineMode();
 //				UI.failedConnection(0, 'no');
 			}
             if (this.code == '-101') {
                 console.log('ERROR -101');
-                UI.blockUIForNoConnection();
+                UI.startOfflineMode();
             }
 		});
 	},

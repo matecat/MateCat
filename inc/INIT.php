@@ -270,6 +270,7 @@ class INIT {
                     'properties'  => array( '', '', 'extpro' ),
                     'resx'        => array( '', '', 'extres' ),
                     'xml'         => array( '', '', 'extxml' ),
+                    'sxml'        => array( '', '', 'extxml' ),
                     'txml'        => array( '', '', 'extxml' ),
                     'dita'        => array( '', '', 'extdit' ),
                     'Android xml' => array( '', '', 'extxml' ),
@@ -284,6 +285,10 @@ class INIT {
     public static $UNSUPPORTED_FILE_TYPES = array(
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
+    );
+
+    public static $LEGACY_CONVERSION_SUPPORT = array(
+            'sxml'
     );
 
     /*

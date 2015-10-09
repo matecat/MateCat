@@ -144,7 +144,14 @@ class ConversionHandler {
 
             // By default, use always the new converters...
             $useLegacyConverters = false;
-            if ($this->segmentation_rule !== null) {
+            if ( $this->segmentation_rule !== null ) {
+                // ...but new converters don't support custom segmentation rules.
+                // if $this->segmentation_rule is set use the old ones.
+                $useLegacyConverters = true;
+            }
+
+            $info = FilesStorage::pathinfo_fix( $file_path );
+            if ( $info == null ) {
                 // ...but new converters don't support custom segmentation rules.
                 // if $this->segmentation_rule is set use the old ones.
                 $useLegacyConverters = true;
