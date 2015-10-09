@@ -107,7 +107,6 @@ APP = {
             context: options.context,
             closeOnSuccess: (options.closeOnSuccess || false)
         } );
-        this.checkConfirmation();
         return APP.confirmValue;
     },
     confirmAndCheckbox: function(options){
@@ -126,7 +125,6 @@ APP = {
             closeOnSuccess: (options.closeOnSuccess || false),
             checkbox_label: options['checkbox-label']
         } );
-        this.checkConfirmation();
         return APP.confirmValue;
     },
     initMessageBar: function () {
@@ -157,26 +155,6 @@ APP = {
         $( 'body' ).addClass( 'incomingMsg' );
     },
 
-    checkConfirmation: function () {
-//        if(this.waitingConfirm) {
-//            setTimeout(function() {
-//                APP.checkConfirmation();
-//            }, 200);
-//        } else {
-//        console.log('this.confirmCallbackFunction: ' + this.confirmCallbackFunction);
-//        console.log('this.cancelCallbackFunction: ' + this.cancelCallbackFunction);
-//            if(this.confirmCallbackFunction) {
-//                UI[this.confirmCallbackFunction](this.confirmValue);
-//                this.confirmValue = null;
-//                this.confirmCallbackFunction = null;
-//            }
-//            if(this.cancelCallbackFunction) {
-//                UI[this.cancelCallbackFunction](this.cancelValue);
-//                this.cancelValue = null;
-//                this.cancelCallbackFunction = null;
-//            }
-//        }
-    },
     doRequest: function ( req, log ) {
 //        console.log('req: ', req);
         logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
