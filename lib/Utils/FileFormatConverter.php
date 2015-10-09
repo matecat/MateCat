@@ -39,8 +39,10 @@ class FileFormatConverter {
      * If $useLegacyConverters is false, this function will filter only the
      * row of the table with the column 'conversion_api_version' starting with
      * 'open '.
+     *
+     * @param bool $useLegacyConverters
      */
-    public function __construct($useLegacyConverters = true) {
+    public function __construct( $useLegacyConverters = true ) {
         $this->useLegacyConverters = $useLegacyConverters;
 
         if ( !class_exists( "INIT" ) ) {
