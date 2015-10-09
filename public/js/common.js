@@ -200,13 +200,13 @@ APP = {
 
         _tpl_popupInner = '' +
                 '<div class="popup">' +
-                ' <a href="#" class="x-popup remove"></a>' +
+                ' <a href="javascript:;" class="x-popup remove"></a>' +
                 ' <h1></h1>' +
                 ' <p></p>' +
                 '</div>';
 
         _tpl_button = '' +
-                '<a href="#" class="btn-ok">Ok</a>';
+                '<a href="javascript:;" class="btn-ok">Ok</a>';
 
         _tpl_checkbox = '' +
                         '<div class="boxed">' +
