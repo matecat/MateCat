@@ -17,7 +17,7 @@ APP = {
                     APP.confirmValue = true;
                 }
             }
-        } ).on( 'click', '.modal[data-type=confirm] .btn-ok, .modal[data-type=confirm_checkbox] .btn-ok', function ( e ) {
+        } ).on( 'click', '.modal[data-type=confirm] .btn-ok:not(.disabled), .modal[data-type=confirm_checkbox] .btn-ok:not(.disabled)', function ( e ) {
             e.preventDefault();
             var dataType = $('.modal' ).attr('data-type');
 
@@ -34,7 +34,7 @@ APP = {
             }
             APP.waitingConfirm = false;
             APP.cancelValue = false;
-        } ).on( 'click', '.modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
+        } ).on( 'click', '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
             el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
@@ -107,7 +107,6 @@ APP = {
             context: options.context,
             closeOnSuccess: (options.closeOnSuccess || false)
         } );
-        this.checkConfirmation();
         return APP.confirmValue;
     },
     confirmAndCheckbox: function(options){
@@ -126,8 +125,6 @@ APP = {
             closeOnSuccess: (options.closeOnSuccess || false),
             checkbox_label: options['checkbox-label']
         } );
-        this.checkConfirmation();
-        return APP.confirmValue;
     },
     initMessageBar: function () {
         if ( !$( 'header #messageBar' ).length ) {
@@ -157,26 +154,6 @@ APP = {
         $( 'body' ).addClass( 'incomingMsg' );
     },
 
-    checkConfirmation: function () {
-//        if(this.waitingConfirm) {
-//            setTimeout(function() {
-//                APP.checkConfirmation();
-//            }, 200);
-//        } else {
-//        console.log('this.confirmCallbackFunction: ' + this.confirmCallbackFunction);
-//        console.log('this.cancelCallbackFunction: ' + this.cancelCallbackFunction);
-//            if(this.confirmCallbackFunction) {
-//                UI[this.confirmCallbackFunction](this.confirmValue);
-//                this.confirmValue = null;
-//                this.confirmCallbackFunction = null;
-//            }
-//            if(this.cancelCallbackFunction) {
-//                UI[this.cancelCallbackFunction](this.cancelValue);
-//                this.cancelValue = null;
-//                this.cancelCallbackFunction = null;
-//            }
-//        }
-    },
     doRequest: function ( req, log ) {
 //        console.log('req: ', req);
         logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
@@ -223,13 +200,13 @@ APP = {
 
         _tpl_popupInner = '' +
                 '<div class="popup">' +
-                ' <a href="#" class="x-popup remove"></a>' +
+                ' <a href="javascript:;" class="x-popup remove"></a>' +
                 ' <h1></h1>' +
                 ' <p></p>' +
                 '</div>';
 
         _tpl_button = '' +
-                '<a href="#" class="btn-ok">Ok</a>';
+                '<a href="javascript:;" class="btn-ok">Ok</a>';
 
         _tpl_checkbox = '' +
                         '<div class="boxed">' +
@@ -249,6 +226,11 @@ APP = {
 
             if ( typeof options['txt'] != 'undefined' ) {
                 filled_tpl.html( options['txt'] );
+            }
+
+            if ( typeof options['context'] != 'undefined' ) {
+                filled_tpl.data( 'context', options['context'] )
+                        .attr( 'data-context', options['context'] );
             }
 
             return filled_tpl;
@@ -369,6 +351,7 @@ APP = {
                     case 'alert' :
                         filled_tpl.find( '.popup' )
                                 .append( renderOkButton( {
+                                            'context' : options['context'],
                                             'callback': options['onConfirm'],
                                             'txt': options['okTxt']
                                         }
@@ -381,10 +364,12 @@ APP = {
                                 .addClass('confirm_checkbox')
                                 .addClass('popup-confirm')
                                 .append( renderCancelButton( {
+                                    'context' : options['context'],
                                     'callback': options['onCancel'],
                                     'txt': options['cancelTxt']
                                 } )
                                 ).append( renderOkButton( {
+                                    'context' : options['context'],
                                     'callback': options['onConfirm'],
                                     'txt': options['okTxt']
                                 })

@@ -1384,8 +1384,12 @@ $.extend(UI, {
     addMTEngine: function (provider, providerName) {
         providerData = {};
         $('.insert-tm .provider-data .provider-field').each(function () {
-            field = $(this).find('input').first();
-            providerData[field.attr('data-field-name')] = field.val();
+            field = $(this).find('input, select').first();
+            if (field.prop('type') === 'checkbox') {
+                providerData[field.attr('data-field-name')] = field.prop('checked');
+            } else {
+                providerData[field.attr('data-field-name')] = field.val();
+            }
         })
 //        console.log(providerData);
         name = $('#new-engine-name').val();
@@ -1411,15 +1415,20 @@ $.extend(UI, {
                     console.log('error');
                     $('#mt-provider-details .error').text(d.errors[0].message);
                 } else {
-                    console.log('success');
-                    UI.renderNewMT(this, d.data.id);
-                    if(!APP.isCattool) {
-                        UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
-                        $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
-                        $('#mt_engine option:selected').removeAttr('selected');
-                        $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                    if(d.data.config && Object.keys(d.data.config).length) {
+                        UI.renderMTConfig(provider, d.name, d.data.config);
                     }
-                    $('#mt_engine_int').val('none').trigger('change');
+                    else {
+                        console.log('success');
+                        UI.renderNewMT(this, d.data.id);
+                        if(!APP.isCattool) {
+                            UI.activateMT($('table.mgmt-mt tr[data-id=' + d.data.id + '] .enable-mt input'));
+                            $('#mt_engine').append('<option value="' + d.data.id + '">' + this.name + '</option>');
+                            $('#mt_engine option:selected').removeAttr('selected');
+                            $('#mt_engine option[value="' + d.data.id + '"]').attr('selected', 'selected');
+                        }
+                        $('#mt_engine_int').val('none').trigger('change');
+                    }
                 }
 
             }
@@ -1549,5 +1558,60 @@ $.extend(UI, {
         };
         this.dd = el;
         this.initEvents();
+    },
+    
+    renderMTConfig: function(provider, newEngineName, configData) {
+        // $('#add-mt-provider-cancel').hide();
+        // $('#mt-provider-details .error').empty();
+
+        // $(".insert-tm").show();
+        
+        if(provider == 'none') {
+            $('.step2 .fields').html('');
+            $(".step2").hide();
+            $(".step3").hide();
+            $('#add-mt-provider-cancel').show();
+        } else {
+            $('.step2 .fields').html($('#mt-provider-' + provider + '-config-fields').html());
+            $('.step3 .text-left').html($('#mt-provider-' + provider + '-config-msg').html());
+            $(".step2").show();
+            $(".step3").show();
+            $("#add-mt-provider-confirm").removeClass('hide');
+        }
+        
+        $('#new-engine-name').val(newEngineName);
+        
+        // Populate the template fields with given values and store extra data within their data attributes
+        var selectorBase = '.insert-tm .provider-data .provider-field';
+        for (var fieldName in configData){
+            var field = $(selectorBase + " [data-field-name='" + fieldName +"']");
+            var tagName = field.prop('tagName');
+            if (tagName == 'INPUT'){
+                var fieldContents = configData[fieldName]['value'];
+                field.val(fieldContents);
+
+                var fieldData = configData[fieldName]['data'];
+                for (var dataKey in fieldData) {
+                    field.attr("data-" + dataKey, fieldData[dataKey]);
+                }
+            } else if (tagName == 'SELECT'){
+                for (var optionKey in configData[fieldName]) {
+                    var optionName = configData[fieldName][optionKey]['value'];
+                    var option = $("<option value='" + optionKey + "'>" + optionName + "</option>");
+
+                    var optionData = configData[fieldName][optionKey]['data'];
+                    for (var dataKey in optionData) {
+                        option.attr("data-" + dataKey, optionData[dataKey]);
+                    }
+
+                    field.append(option);
+                }
+            }
+        }
+        
+        // notify the template's javascript that the template has been populated
+        if (typeof renderMTConfigCallback == 'function') {
+            renderMTConfigCallback();
+        }
     }
 });

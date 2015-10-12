@@ -225,6 +225,8 @@ class getContributionController extends ajaxController {
             $mt_result = $mt->get( $config );
 
             if ( isset( $mt_result['error']['code'] ) ) {
+                $mt_result['error']['created_by_type'] = 'MT';
+                $this->result[ 'errors' ][] = $mt_result['error'];
                 $mt_result = false;
             }
 
@@ -256,7 +258,7 @@ class getContributionController extends ajaxController {
             $fuzzy = levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
 
             //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
-            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
+            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy >= 0 ) ) {
 
                 $qaRealign = new QA( $this->text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
                 $qaRealign->tryRealignTagID();
@@ -333,7 +335,6 @@ class getContributionController extends ajaxController {
         }
 
         $this->result[ 'data' ][ 'matches' ] = $matches;
-
     }
 
     private function setSuggestionReport( $matches ) {
