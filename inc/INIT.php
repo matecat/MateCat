@@ -181,6 +181,8 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
 
+    public static $LEGACY_CONVERSION = false;
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
@@ -192,6 +194,11 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
+
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if( getenv( 'LEGACY_CONVERSION' ) !== false ){
+            self::$LEGACY_CONVERSION = true;
+        }
 
     }
 

@@ -173,7 +173,7 @@ class ConversionHandler {
             }
 
             //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-            if( getenv( 'LEGACY_CONVERSION' ) !== false ){
+            if( INIT::$LEGACY_CONVERSION !== false ){
                 $useLegacyConverters = true;
             }
 
