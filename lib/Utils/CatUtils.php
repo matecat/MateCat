@@ -562,6 +562,8 @@ class CatUtils {
         $temp = self::parse_time_to_edit(round(array_sum($stat_valid_tte)));
         $stats['total-valid-tte'] = "$temp[0]h:$temp[1]m:$temp[2]s";
 
+        $stats['total-tte-seconds'] = $temp[0] * 3600 + $temp[1] * 60 + $temp[2];
+
         return array($data, $stats);
     }
 

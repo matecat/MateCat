@@ -245,8 +245,11 @@ class ProjectManager {
                 //not used at moment but needed if we want to do a poll for status
                 if( DetectProprietaryXliff::isGlossaryFile() ) $this->checkGlossary = 1;
 
+                //prepend in front of the list
                 array_unshift( $sortedFiles, $fileName );
             } else {
+
+                //append at the end of the list
                 array_push( $sortedFiles, $fileName );
             }
 
@@ -261,8 +264,10 @@ class ProjectManager {
         $this->fileStorage =  new FilesStorage();
         $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
 
-        //associate the hash to the right file in upload directory
-
+        /*
+            loop through all input files to
+            1) upload TMX and Glossaries
+        */
         try {
             $this->_pushTMXToMyMemory();
         } catch ( Exception $e ) {
@@ -273,7 +278,6 @@ class ProjectManager {
 
         /*
             loop through all input files to
-            1)upload TMX
             2)convert, in case, non standard XLIFF files to a format that Matecat understands
 
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
@@ -282,7 +286,7 @@ class ProjectManager {
 
             /*
                Conversion Enforce
-               Checking Extension is no more sufficient, we want check content if this is an idiom xlf file type, conversion are enforced
+               Checking Extension is no more sufficient, we want check content
                $enforcedConversion = true; //( if conversion is enabled )
              */
             $isAFileToConvert = $this->isConversionToEnforce( $fileName );
@@ -335,6 +339,7 @@ class ProjectManager {
             //get sha
             $sha1_original = $hashFile[ 0 ];
 
+            //associate the hash to the right file in upload directory
             //get original file name, to insert into DB and cp in storage
             //PLEASE NOTE, this can be an array when the same file added more
             // than once and with different names
@@ -1683,65 +1688,173 @@ class ProjectManager {
 
     }
 
-    protected function _strip_external( $a ) {
-        $a               = str_replace( "\n", " NL ", $a );
-        $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
-        $pattern_x_end   = '/(.*)(<x .*?\/>\s*)$/mis';
+    protected function _strip_external( $segment ) {
+        // With regular expressions you can't strip a segment like this:
+        //   <g>hello <g>world</g></g>
+        // While keeping untouched this other:
+        //   <g>hello</g> <g>world</g>
 
-        //TODO:
-        //What happens here? this regexp fails for
-        //<g id="pt1497"><g id="pt1498"><x id="nbsp"/></g></g>
-        //And this
-        /* $pattern_g       = '/^(\s*<g [^>]*?>)(.*?)(<\/g>\s*)$/mis'; */
-        //break document consistency in project Manager
-        //where is the bug? there or in extract segments?
+        // For this reason, regular expression are not suitable for this task.
+        // The previous version of this function used regular expressions,
+        // but was limited. The new version works in every situation and is
+        // equally fast (tested in a batch execution on the segments of 500
+        // real docs).
 
-        $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
-        $found     = false;
-        $prec      = "";
-        $succ      = "";
+        // The function scans the entire string looking for tags and letters.
+        // Spaces and self-closing tags are ignored. After the string scan,
+        // the function remembers the first and last letter, and the positions
+        // of all tags openings/closures. In the second step the function checks
+        // all the tags opened or closed between the first and last letter, and
+        // ensures that closures and openings of those tags are not stripped out.
 
-        $c = 0;
+        $segmentLength = strlen($segment);
 
-        do {
-            $c += 1;
-            $found = false;
-
-            do {
-                $r = preg_match_all( $pattern_x_start, $a, $res );
-                if ( isset( $res[ 1 ][ 0 ] ) ) {
-                    $prec .= $res[ 1 ][ 0 ];
-                    $a     = $res[ 2 ][ 0 ];
-                    $found = true;
+        // This is the fastest way I found to spot Unicode whitespaces in the string.
+        // Removing this step gives a gain of 7% in speed.
+        $isSpace = array();
+        if (preg_match_all('|[\pZ\pC]+|u', $segment, $matches, PREG_OFFSET_CAPTURE)) {
+            foreach ($matches[0] as $match) {
+                // All the bytes in the matched groups are whitespaces and must be
+                // ignored in the next steps
+                $start = $match[1];
+                $end = $start + strlen($match[0]);
+                for ($i = $start; $i < $end; $i++) {
+                    $isSpace[$i] = true;
                 }
-            } while ( isset( $res[ 1 ][ 0 ] ) );
+            }
+        }
 
-            do {
-                $r = preg_match_all( $pattern_x_end, $a, $res );
-                if ( isset( $res[ 2 ][ 0 ] ) ) {
-                    $succ  = $res[ 2 ][ 0 ] . $succ;
-                    $a     = $res[ 1 ][ 0 ];
-                    $found = true;
+        // Used as a stack: push on tag openings, pop on tag closure
+        $openings = array();
+        // Stores all the tags found: key is '<' position of the opening tag,
+        // value is '>' position of the closure tag.
+        $tags = array();
+        // If the XML in the segment is malformed, no stripping is performed and the
+        // segment is returned as it is
+        $malformed = false;
+
+        // The positions of first and last letters
+        $firstLetter = -1;
+        $lastLetter = -1;
+
+        // Scan the input segment
+        for ($i = 0; $i < $segmentLength; $i++) {
+            if (isset($isSpace[$i])) {  // Using isset is faster than checking the addressed value
+                // The current char is a space, skip it
+                continue;
+
+            } elseif ($segment[$i] == '<') {
+                // A tag is starting here
+                $tagStart = $i;
+
+                if ($i == $segmentLength - 1) {
+                    // If this is the last char of the string, we have a problem
+                    $malformed = true;
+                    break;
                 }
-            } while ( isset( $res[ 2 ][ 0 ] ) );
 
-            do {
-                $r = preg_match_all( $pattern_g, $a, $res );
-                if ( isset( $res[ 1 ][ 0 ] ) ) {
-                    $prec .= $res[ 1 ][ 0 ];
-                    $succ  = $res[ 3 ][ 0 ] . $succ;
-                    $a     = $res[ 2 ][ 0 ];
-                    $found = true;
+                $i++;
+                // It's a closure tag if it starts with '</'
+                $closureTag = ($segment[$i] == '/');
+
+                // Fast forward to the '>' char
+                while ($i < $segmentLength && $segment[$i] != '>') {
+                    $i++;
                 }
-            } while ( isset( $res[ 1 ][ 0 ] ) );
 
-        } while ( $found );
-        $prec = str_replace( " NL ", "\n", $prec );
-        $succ = str_replace( " NL ", "\n", $succ );
-        $a    = str_replace( " NL ", "\n", $a );
-        $r    = array( 'prec' => $prec, 'seg' => $a, 'succ' => $succ );
+                if ($i == $segmentLength && $segment[$i] != '>') {
+                    // If we reached the end of the string and no '>' was found
+                    // the segment is malformed
+                    $malformed = true;
+                    break;
+                }
 
-        return $r;
+                if ($segment[$i - 1] == '/') {
+                    // If the tag ends with '/>' it's a self-closing tag, and
+                    // it can be skipped
+                    continue;
+
+                } else {
+                    if ($closureTag) {
+                        // It's a closure tag
+                        if (count($openings) == 0) {
+                            // If there are no openings in the stack the input is malformed
+                            $malformed = true;
+                            break;
+                        }
+                        $opening = array_pop($openings);
+                        // Remember the tag opening and closure for later
+                        $tags[$opening] = $i;
+
+                    } else {
+                        // It's an opening tag, add it to the stack
+                        $openings[] = $tagStart;
+                        // Following line ensures that the tags in the array
+                        // are sorted by openings; leaving just the assignment in the
+                        // closure handling code would make the array sorted by
+                        // closures, breaking the logic of the loop in the next step
+                        $tags[$tagStart] = -1;
+                    }
+                }
+
+            } else {
+                // If here, the char is not a space and it's not inside a tag
+                if ($firstLetter == -1) {
+                    $firstLetter = $i;
+                }
+                $lastLetter = $i;
+            }
+        }
+
+        if (count($openings) != 0) {
+            // If after the entire string scan we have pending openings in the stack,
+            // the input is malformed
+            $malformed = true;
+        }
+
+        if ($malformed) {
+            // If malformed don't strip nothing, return the input as it is
+            $before = '';
+            $cleanSegment = $segment;
+            $after = '';
+
+        } elseif ($firstLetter == -1) {
+            // No letters found, so the entire segment can be stripped
+            $before = $segment;
+            $cleanSegment = '';
+            $after = '';
+
+        } else {
+            // Here is the regular situation.
+            // Start supposing that the output segment starts at the first letter
+            // and ends at the last one.
+            $segStart = $firstLetter;
+            $segEnd = $lastLetter;
+
+            // Loop through all the tags found
+            foreach ($tags as $start => $end) {
+                // At the first tag starting after the last letter we're done here
+                if ($start > $lastLetter) break;
+                if ($start > $firstLetter && $start < $lastLetter) {
+                    // Found an opening tag in the meaningful slice: ensure that
+                    // the closure tag is not stripped out
+                    $segEnd = max($segEnd, $end);
+                } elseif ($end > $firstLetter && $end < $lastLetter) {
+                    // Found a closure tag in the meaningful slice: ensure that
+                    // the opening tag is not stripped out
+                    $segStart = min($segStart, $start);
+                }
+            }
+
+            // Almost finished
+            $before = substr($segment, 0, $segStart);
+            $cleanSegment = substr($segment, $segStart, $segEnd - $segStart + 1);
+            $after = substr($segment, $segEnd + 1);
+            // Following line needed in case $segEnd points to the last char of $segment
+            if ($after === false) $after = '';
+        }
+
+        return array( 'prec' => $before, 'seg' => $cleanSegment, 'succ' => $after );
     }
 
     public static function getExtensionFromMimeType( $mime_type ) {

@@ -61,8 +61,7 @@ class ConversionHandler {
                     //conversion enforce
                     if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
 
-                        //ONLY IDIOM is forced to be converted
-                        //if file is not proprietary like idiom AND Enforce is disabled
+                        //if file is not proprietary AND Enforce is disabled
                         //we take it as is
                         if ( !$fileType[ 'proprietary' ] || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ] = 1; // OK for client
@@ -73,9 +72,13 @@ class ConversionHandler {
 
                     } else {
 
-                        //if conversion enforce is active
-                        //we force all xliff files but not files produced by SDL Studio because we can handle them
-                        if ( $fileType[ 'proprietary_short_name' ] == 'trados' || DetectProprietaryXliff::getMemoryFileType() ) {
+                        // if conversion enforce is active
+                        // we force all xliff files but not files produced by
+                        // SDL Studio or by the MateCAT converters, because we
+                        // can handle them
+                        if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter'
+                                || $fileType[ 'proprietary_short_name' ] == 'trados'
+                                || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ]     = 1; // OK for client
                             $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
 
@@ -139,7 +142,42 @@ class ConversionHandler {
         if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
-            $converter = new FileFormatConverter( $this->segmentation_rule );
+            // By default, use always the new converters...
+            $useLegacyConverters = false;
+            if ( $this->segmentation_rule !== null ) {
+                // ...but new converters don't support custom segmentation rules.
+                // if $this->segmentation_rule is set use the old ones.
+                $useLegacyConverters = true;
+            }
+
+            //TODO: Remove after filters upgrade in new converters ( or Alfred introduction )
+            $info = FilesStorage::pathinfo_fix( $file_path );
+            if ( $info[ 'extension' ] == 'sxml' ) {
+                // ...but new converters don't support some xml customizations
+                if( !rename( $file_path, $file_path . ".xml" ) ){
+
+                    //custom error message passed directly to javascript client and displayed as is
+                    $convertResult[ 'errorMessage' ] = "Error: there is a problem with this file, it cannot be converted.";
+                    $this->result[ 'code' ]          = -110;
+                    $this->result[ 'errors' ][]      = array(
+                            "code"  => -110, "message" => $convertResult[ 'errorMessage' ],
+                            'debug' => FilesStorage::basename_fix( $this->file_name )
+                    );
+
+                    return false;
+
+                }
+                $file_path = $file_path . ".xml";
+                $this->setFileName( $info[ 'filename' ] . ".xml" );
+                $useLegacyConverters = true;
+            }
+
+            //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+            if( getenv( 'LEGACY_CONVERSION' ) !== false ){
+                $useLegacyConverters = true;
+            }
+
+            $converter = new FileFormatConverter($useLegacyConverters);
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );

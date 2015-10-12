@@ -829,7 +829,7 @@ console.log('e.target: ', e.target);
             } else {
                 UI.continueDownload();
             }
-		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
+		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .tmx, .header-menu .omegat', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();
                 var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {

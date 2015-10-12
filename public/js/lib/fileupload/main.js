@@ -801,7 +801,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                         $( rowClone ).find( '.name' ).first()
                                 .data( "zipfile", zipFile )
                                 .attr( "data-zipfile", zipFile )
-                                .html( "<span class=\"zip_internal_file\">" + file['name'] + "</span>" );
+                                .html( "<span class=\"zip_internal_file\">" + file['name'].replace(/&/g,"&amp;") + "</span>" );
 
                         $( rowClone ).find( '.size' ).first().html( UI.getPrintableFileSize( file['size'] ) );
 
@@ -900,33 +900,25 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
 //	progressBar(filerow,0,filesize);
 }
 
-testProgress = function ( filerow, filesize, session, progress ) {
-//    console.log('session: ' + session);
-//    console.log('data-session: ' + $(filerow).data('session'));
-    if ( session != $( filerow ).data( 'session' ) ) return;
+testProgress = function(filerow,filesize,session,progress) {
+    if(session != $(filerow).data('session')) return;
 
-    if ( typeof filesize == 'undefined' ) filesize = 1000000;
-//	console.log('filesize: ' + filesize);
-    var ob = $( '.ui-progressbar-value', filerow );
-    if ( ob.hasClass( 'completed' ) ) return;
-//	var step = 50000/filesize;
-    var step = 1;
-    var stepWait = Math.pow( 1.2, Math.log( filesize / 1000 ) / Math.LN10 - 1 ) / 10;
+	if(typeof filesize == 'undefined') filesize = 1000000;
+	var ob = $('.ui-progressbar-value', filerow);
+	if (ob.hasClass('completed')) return;
 
-    stepWait *= 2;
+    var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/30;
 
-    progress = progress + step;
-//	console.log(progress);
+	progress++;
 
-    ob.css( 'width', progress + '%' );
-    if ( progress > 98 ) {
-        return;
-    }
+	ob.css('width', progress+'%');
+	if (progress > 98) {
+		return;
+	}
 
-    setTimeout( function () {
-        testProgress( filerow, filesize, session, progress );
-//        console.log()
-    }, Math.round( stepWait * 1000 ) );
+	setTimeout(function(){
+        testProgress(filerow,filesize,session,progress);
+    }, Math.round(stepWait*1000));
 }
 
 checkInit = function () {

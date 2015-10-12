@@ -239,6 +239,7 @@
                                                 <option value="iptranslator" >IPTranslator from Iconic</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
+                                                <option value="letsmt" >Tilde MT</option>
                                         </select>
                                       <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
                                           <span class="text">Cancel</span>
@@ -472,6 +473,350 @@
         <a href="mailto:support@matecat.com" class="continuebtn btn-ok">Contact MateCat</a>
     </template>
     <!-- fine blocco moses -->
+    <!-- sakam letsmt bloku -->
+    <template id="mt-provider-letsmt-fields">
+        <style>
+            .clientid-link {
+                float: right;
+                margin-top: -10px;
+            }
+        </style>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>Client ID<sup>*</sup></label>
+                <input class="required" data-field-name="client_id" placeholder="here" />
+            </div>
+            <a href="https://readymt.tilde.com/Account/LoginApp?Client=matecat" target="_blank" class="clientid-link">Get my Client ID</a>
+            <br class="clear" />
+        </div>
+        <script>
+            $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Continue');
+        </script>
+    </template>
+
+    <template id="mt-provider-letsmt-msg">
+        <style>
+            .msg-button-container .continuebtn {
+                width: 122px!important;
+                display: inline-block!important;
+            }
+            .msg-button-container {
+                text-align: center!important;
+            }
+            @media screen and (min-width: 901px) {
+                .push-left {
+                    margin-left: 15px!important;
+                }
+                .push-right {
+                    margin-right: 15px!important;
+                }
+            }
+
+            @media screen and (max-width: 900px) {
+                .push-left, .push-right {
+                    margin: 0px 0px 10px 0px!important;
+                }
+            }
+        </style>
+        <p><strong>Tilde</strong> develops custom MT systems for specific language pairs and domains. We specialize in fully customized, terminology-savvy MT for complex languages like the Nordic, Baltic, Russian, and Central and Eastern European languages.</p>
+        <p>In order to boost translation accuracy, Tilde MT systems can fully integrate your domain-specific terminology in the right inflectional forms.</p>
+        <p>Contact Tilde MT to get a custom MT system for your language pair and domain.</p>
+        <p><i>Please note: it may take several moments for a system to become available.</i></p>
+        <div class="msg-button-container">
+            <a href="http://www.tilde.com/mt/contacts" target="_blank" class="continuebtn btn-ok">Contact Tilde MT</a>
+        </div>
+    </template>
+    
+    <template id="mt-provider-letsmt-config-fields">
+        <script>
+        <![CDATA[
+            // The first template set this text to "Continue". Set it back now.
+            $('#mt-provider-details #add-mt-provider-confirm .uploadkey').text('Confirm');
+
+            // for some reason the javascript gets escaped without the CDATA tag. TODO: find out why
+            function fetchTerms() {
+                var termsFieldSelector = '.insert-tm .provider-data .provider-field [data-field-name="terms_id"]';
+                $(termsFieldSelector).html("");
+                
+                var providerData = {};
+                $('.insert-tm .provider-data .provider-field').each(function () {
+                    var field = $(this).find('input, select').first();
+                    if (field.prop('type') === 'checkbox') {
+                        providerData[field.attr('data-field-name')] = field.prop('checked');
+                    } else {
+                        providerData[field.attr('data-field-name')] = field.val();
+                    }
+                });
+                
+                if (!providerData['system_id']) {
+                    return;
+                }
+
+                providerData['function'] = 'getTermList';
+
+                var provider = 'letsmt';
+                var name = 'temp engine';
+                var providerName = 'Tilde MT';
+                data = {
+                    action: 'engine',
+                    exec: 'execute',
+                    name: name,
+                    provider: provider,
+                    data: JSON.stringify(providerData)
+                };
+                context = data;
+                context.providerName = providerName;
+
+                APP.doRequest({
+                    data: data,
+                    context: context,
+                    error: function() {
+                        console.log('error');
+                    },
+                    success: function(d) {
+                        console.log('AJAX response received.');
+                        if(d.errors.length) {
+                            console.log('error');
+                            $('#mt-provider-details .error').text(d.errors[0].message);
+                        } else {
+                            $('#mt-provider-details .error').text("");
+                            if(d.data.result && d.data.result.terms && Object.keys(d.data.result.terms).length) {
+                                $(termsFieldSelector).append("<option value=''>--</option>");
+                                $terms = d.data.result.terms;
+                                console.log('success');
+                                for (var key in $terms){
+                                    $(termsFieldSelector).append("<option value='" + key + "'>" + $terms[key] + "</option>");
+                                }
+                            }
+                        }
+
+                    }
+                });
+            }
+            
+            function toggleQEEnabled(checkbox) {
+                var disabled = !checkbox.checked;
+                $('#minimum_qe_field input').prop('disabled', disabled);
+                if (disabled) {
+                    $('#minimum_qe_field').addClass('disabled');
+                } else {
+                    $('#minimum_qe_field').removeClass('disabled');
+                }
+            }
+            
+            function createFilters() {
+                var sourceSelect = $('#source_lang_field select');
+                var targetSelect = $('#target_lang_field select');
+                var systemSelect = $('#system_field select');
+                var systemOptions = $('#system_field select option');
+                var sourceLangIdInput = $('#source-lang-id');
+                var targetLangIdInput = $('#target-lang-id');
+                var showOnlyRunningCheckbox = $('#filter_running_field input');
+                var showOnlyRunning = showOnlyRunningCheckbox.prop('checked');
+                var runningStatuses = { running: true, standby: true };
+                sourceSelect.empty();
+                
+                // a mapping from available source languages to respective target languages
+                var directions = [];
+                systemOptions.each(function (){
+                    var systemStatus = $(this).data('status');
+                    if(!(systemStatus in runningStatuses) && showOnlyRunning) {
+                        return;
+                    }
+                    var sourceCode = $(this).data('source-language-code');
+                    var targetCode = $(this).data('target-language-code');
+                    var sourceName = $(this).data('source-language-name');
+                    var targetName = $(this).data('target-language-name');
+                   
+                    if(!(sourceCode in directions)){
+                        directions[sourceCode] = {};
+                        directions[sourceCode].name = sourceName;
+                        directions[sourceCode].target = {};
+                    }
+                    directions[sourceCode].target[targetCode] = targetName;
+                });
+                
+                var sortedSourceCodes = [];
+                for (var sourceCode in directions) {
+                    sortedSourceCodes.push(sourceCode);
+                }
+                sortedSourceCodes.sort();
+
+                for (var i=0; i<sortedSourceCodes.length; i++) {
+                    var sourceCode = sortedSourceCodes[i];
+                    var option = $('<option value="' + sourceCode + '">' + directions[sourceCode].name + '</option>');
+                    sourceSelect.append(option);
+                }
+                
+                var filterSystems = function() {
+                    var selectedSourceCode = sourceSelect.val();
+                    var selectedTargetCode = targetSelect.val();
+                    
+                    systemOptions.each(function () {
+                       var systemSourceCode = $(this).data('source-language-code');
+                       var systemTargetCode = $(this).data('target-language-code');
+                       var systemStatus = $(this).data('status');
+
+                       if (systemSourceCode == selectedSourceCode
+                        && systemTargetCode == selectedTargetCode
+                        &&((systemStatus in runningStatuses) || !showOnlyRunning)) {
+                           $(this).show();
+                       } else {
+                           $(this).hide();
+                       }
+                    });
+
+                    var firstAvailableTargetCode = $(systemSelect.find('option').not(function() { return $(this).css("display") == "none" })[0]).val();
+                    systemSelect.val(firstAvailableTargetCode).change();
+                }
+                
+                var fillTargetLanguages = function () {
+                    targetSelect.empty();
+                    var selectedSourceCode = sourceSelect.val();
+                    var targetChoices = directions[selectedSourceCode].target
+
+                    var sortedTargetCodes = [];
+                    for (var targetCode in targetChoices) {
+                        sortedTargetCodes.push(targetCode);
+                    }
+                    sortedTargetCodes.sort();
+
+                    for (var i=0; i<sortedTargetCodes.length; i++) {
+                        var targetCode = sortedTargetCodes[i];
+                        var option = $('<option value="' + targetCode + '">' + targetChoices[targetCode] + '</option>');
+                        targetSelect.append(option);
+                    }
+                    
+                    targetSelect.val(targetSelect.find("option:first").val()).change();
+                }
+
+                var setLanguageCodes = function () {
+                    var systemSourceCode = $("option:selected", this).data('source-language-code');
+                    var systemTargetCode = $("option:selected", this).data('target-language-code');
+
+                    sourceLangIdInput.val(systemSourceCode);
+                    targetLangIdInput.val(systemTargetCode);
+                }
+                
+                // this method can get called multiple times. remove previously added event handlers
+                sourceSelect.off('change');
+                targetSelect.off('change');
+                sourceSelect.change(fillTargetLanguages);
+                targetSelect.change(filterSystems);
+                systemSelect.change(setLanguageCodes);
+                sourceSelect.val(sourceSelect.find("option:first").val()).change();
+            }
+
+            function renderMTConfigCallback () {
+                createFilters();
+            }
+        ]]>
+        </script>
+        <style>
+            .insert-tm select {
+                width: 324px!important;
+            }
+            .insert-tm input[type="number"] {
+                width: 50px!important;
+            }
+            #source_lang_field select, #target_lang_field select {
+                width: 130px!important;
+            }
+            #target_lang_field label {
+                width: 40px!important;
+            }
+            .clear {
+                clear: both;
+            }
+            #filter_running_field {
+                margin-top: -10px!important;
+                height: 40px!important;
+            }
+            #filter_running_field label:last-of-type {
+                width: 273px!important;
+                text-align: left!important;
+                margin-left: 10px!important;
+                /* font-weight: normal!important; */
+                position: relative!important;
+                top: -10px!important;
+            }
+            .lighttext {
+                font-size: small!important;
+                color: #999!important;
+                font-weight: normal!important;
+            }
+            .info{
+                background: url(../../public/img/info.png) no-repeat center;
+                background-size: 24px 24px;
+                display: inline-block;
+                width: 22px;
+                height: 22px;
+                margin: 0;
+            }
+        </style>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <input class="required hide" id="new-engine-name" placeholder="here" />
+        <br class="clear" />
+        <div class="provider-data">
+            <div class="provider-field hide">
+                <label>Client ID<sup>*</sup></label>
+                <input class="required" data-field-name="client_id" placeholder="here" />
+            </div>
+            <div id="source_lang_field" class="pull-left">
+                <label>From</label>
+                <select/>
+            </div>
+            <div id="target_lang_field" class="pull-right">
+                <label>To</label>
+                <select/>
+            </div>
+            <div class="clear"></div>
+            <div id="system_field" class="provider-field">
+                <label>Translation system<sup>*</sup></label>
+                <select class="required" data-field-name="system_id" onchange="fetchTerms()"/>
+            </div>
+            <div id="filter_running_field">
+                <label></label>
+                <input type="checkbox" checked="checked" onchange="createFilters()"/>
+                <label class="lighttext">Show running systems only</label>
+            </div>
+            <div class="provider-field">
+                <label>Terms corpora</label>
+                <select class="required" data-field-name="terms_id" />
+            </div>
+            <div id="use_qe_field" class="provider-field pull-left">
+                <label>QE beta</label>
+                <input type="checkbox" data-field-name="use_qe" onchange="toggleQEEnabled(this)" />
+                <a href="http://www.tilde.com/mt/tools/matecat" target="_blank"  class="info" title="You will see a translation only for segments with a QE (Quality Estimation) beta score above the selected figure."> </a>
+            </div>
+            <div id="minimum_qe_field" class="provider-field pull-right disabled">
+                <label class="lighttext">Don't show translation if its QE score is below</label>
+                <input type="number" step="0.01" min="0" max="1" value="0" data-field-name="minimum_qe" disabled="true"/>
+            </div>
+            <div class="provider-field hide">
+                <input id="source-lang-id" data-field-name="source_lang" />
+            </div>
+            <div class="provider-field hide">
+                <input id="target-lang-id" data-field-name="target_lang" />
+            </div>
+            <div class="clear"></div>
+        </div>
+    </template>
+
+    <template id="mt-provider-letsmt-config-msg">
+        <p>Please select your source and target languages. Then choose a translation system from the provided list.</p>
+        <p>You can also select a terms corpora from your terminology sets. The terms corpora will complement the MT engine to boost translation quality, accuracy, and consistency.</p>
+        <p>By clicking the QE beta box, users can select the minumum Quality Estimation score for translated segments. Segments that fall bellow the indicated QE score will not be displayed.</p>
+        <p>If you have any questions, please contact Tilde MT support at: <a href="mailto:mt@tilde.com">mt@tilde.com</a>.</p>
+    </template>
+    <!-- beidzam letsmt bloku -->
 
 
 </div>

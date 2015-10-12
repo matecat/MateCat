@@ -35,20 +35,11 @@
                 <a href="${basepath}" class="logo"></a>
 
                 <!--tal:block metal:fill-slot="actions"-->
-                <form action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="editlogDownload"/>
-                    <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
-                    <input type="hidden" name="password" tal:attributes="value password" value=""/>
 
-                    <input name="submit" class="downloadtr-button backbtn" type="submit" value="Export All Data in CSV" />
                     <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
-                </form>
                 <!--/tal:block -->
 
-                <div class="breadcrumbs">    
-                    <span id="pname" tal:content="pname">Project</span>
-                    <span >&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
-                </div>
+
             </div>
         </header>
 
@@ -56,40 +47,54 @@
 
             <!--	<h1>Field test - 1</h1> -->
 
-            <h1 style="margin-bottom:0px">Job <span tal:replace="jid | default"></span> - Editing Log</h1>
-            <h3>Slowest 5.000 segments by time-to-edit</h3>
+            <h1 style="margin-bottom:0px">Editing Log - Project: <span id="pname" tal:content="pname">Project</span></h1>
 
 		<div tal:condition="showDQF" id="editlog-boxed"><strong>DQF</strong> is being used to collect editing statistics.
                 Log in to the dashboard to check the data for this job. <a href="https://dqf.taus.net/login" target="blanck"> https://dqf.taus.net/login </a></div>
 
 
-            <h2 style="margin-top:20px;margin-bottom:10px">Summary</h2>
+            <h2 style="margin-top:20px;margin-bottom:10px">
+                Stats for translation job <span tal:replace="jid | default"></span> -
+                <b><span tal:replace="source_code">---</span> </b> &gt; <b>
+                    <span tal:replace="target_code">---</span></b>
+            </h2>
 
 
             <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <th>Words</th>
-                    <th>Avg Secs per Word</th>
-                    <th>% of MT</th>
-                    <th>% of TM</th>
-                    <th>Total Time-to-edit</th>
-                    <th>Avg PEE %</th>
-                    <!--th >Avg HTER %</th -->
-                    <th>% of words in too SLOW edits</th>
-                    <th>% of words in too FAST edits</th>
+                    <th>Total Time To Edit</th>
+                    <th>Avg secs/word <br/>
+                        <b><span tal:replace="source_code">---</span></b> &gt;
+                        <b><span tal:replace="target_code">---</span></b>
+                    </th>
+                    <th>MateCat users' avg secs/word<br/>
+                        <b><span tal:replace="source_code">---</span></b> &gt;
+                        <b><span tal:replace="target_code">---</span></b>
+                    </th>
+                    <th>Avg PEE <br/>
+                        <b><span tal:replace="source_code">---</span></b> &gt;
+                        <b><span tal:replace="target_code">---</span></b>
+                    </th>
+                    <th>MateCat users' <br/> avg PEE <br/><b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></th>
                 </tr>
                 <tr>
                     <td tal:content="stats/edited-word-count | default">N/A</td>
-                    <td><span tal:replace="stats/avg-secs-per-word | string:--"></span>s</td>
-                    <td><span tal:replace="stats/mt-words | string:--"></span>%</td>
-                    <td><span tal:replace="stats/tm-words | string:--"></span>%</td>
                     <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
-                    <td><span tal:replace="stats/avg-pee | string:--"></span></td>
-                    <!-- <td><span tal:replace="stats/avg-ter | string:-"></span></td> -->
-                    <td><span tal:replace="stats/too-slow-words | string:--"></span>%</td>
-                    <td><span tal:replace="stats/too-fast-words | string:--"></span>%</td>
+                    <td tal:attributes="class php:tte_fast ? 'color_green' : NULL" ><span tal:replace="stats/avg-secs-per-word | string:--"></span>s <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span></td>
+                    <td><span tal:replace="overall_tte | string:--"></span>s</td>
+                    <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL"><span tal:replace="stats/avg-pee | string:--"></span></td>
+                    <td><span tal:replace="overall_pee | string:--"></span>%</td>
                 </tr>
             </table>
+            <form action="${basepath}" method="post">
+                <input type="hidden" name="action" value="editlogDownload"/>
+                <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
+                <input type="hidden" name="password" tal:attributes="value password" value=""/>
+
+                <span class="pull-right" id="export_edit_log_csv_link">(<a  name="submit" value="Export All Data in CSV" href="javascript:;" onclick="parentNode.submit();">Export detailed log as CSV</a>)</span>
+                <span class="clearfix"></span>
+            </form>
 
             <h2 style="margin-top:20px;margin-bottom:10px">Editing Details</h2>
 

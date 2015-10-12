@@ -1178,7 +1178,7 @@ margin-left: 10px;
 	    background-size: 22px;
     }
 
-    .popup .x-popup:hover, .slide-panel .x-popup:hover {
+    .popup .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
         color:red;
     }
 	
@@ -1943,6 +1943,10 @@ margin-bottom: -7px;
 tr.disabled td {
 background: #F3F3F3!important;
 }
+.provider-field.disabled, .provider-field.disabled:hover {
+    border: initial;
+    background: initial;
+}
 
 .mgmt-add-gl input {
 		width: 225px;
@@ -2216,6 +2220,11 @@ body.filterOpen .searchbox
     height: 25px;
     padding: 2px 5px;
     border-radius: 2px;
+}
+
+.insert-tm input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
 }
 
 .insert-tm {
@@ -2593,6 +2602,12 @@ font-weight: normal !important;
 .exttmx {background: url(../img/matecat_file_icons.png) 6px -722px no-repeat !important;} /* .tmx */
 .extstr {background: url(../img/matecat_file_icons.png) 6px -758px no-repeat !important;} /* .str */
 .extzip {background: url(../img/matecat_file_icons.png) 6px -792px no-repeat !important;} /* .zip */
+.exticml {background: url(../img/matecat_file_icons.png) 6px -826px no-repeat !important;} /* .icml */
+.extimg {background: url(../img/matecat_file_icons.png) 6px -860px no-repeat !important;} /* .bmp, .gif, .jpeg, .png, .tiff */
+.extwix {background: url(../img/matecat_file_icons.png) 6px -894px no-repeat !important;} /* .wix */
+.extsrt {background: url(../img/matecat_file_icons.png) 6px -928px no-repeat !important;} /* .srt */
+.extpo {background: url(../img/matecat_file_icons.png) 6px -962px no-repeat !important;} /* .po */
+.extg {background: url(../img/matecat_file_icons.png) 6px -996px no-repeat !important;} /* .g */
 
 
 #jobMenu span {height: 25px;
@@ -2664,29 +2679,36 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 	.preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-	.extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
-	.extppt {background: url(../img/matecat_file_icons2x.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
-	.exthtm {background: url(../img/matecat_file_icons2x.png) 6px -70px no-repeat !important;} /* .htm, .html , .xhtml*/
-	.extpdf {background: url(../img/matecat_file_icons2x.png) 6px -104px no-repeat !important;} /* .pdf */
-	.extxls {background: url(../img/matecat_file_icons2x.png) 6px -138px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
-	.exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;} /* .txt */
-	.extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;} /* .xliff */
-	.extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;} /* .ttx */
-	.extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;} /* .itd */
-	.extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;} /* .xlf */
-	.extmif {background: url(../img/matecat_file_icons2x.png) 6px -342px no-repeat !important;} /* .mif */
-	.extidd {background: url(../img/matecat_file_icons2x.png) 6px -378px no-repeat !important;} /* .idml, .inx, .icml */
-	.extqxp {background: url(../img/matecat_file_icons2x.png) 6px -412px no-repeat !important;} /* .xtg */
-	.extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;} /* .xml */
-	.extrcc {background: url(../img/matecat_file_icons2x.png) 6px -482px no-repeat !important;} /* .rc */
-	.extres {background: url(../img/matecat_file_icons2x.png) 6px -516px no-repeat !important;} /* .resx */
-	.extsgl {background: url(../img/matecat_file_icons2x.png) 6px -550px no-repeat !important;} /* .sgml */
-	.extsgm {background: url(../img/matecat_file_icons2x.png) 6px -584px no-repeat !important;}  /* .sgm */
-	.extpro {background: url(../img/matecat_file_icons2x.png) 6px -618px no-repeat !important;} /* .properties */
-	.extdit {background: url(../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dita */
-	.exttag {background: url(../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
-	.exttmx {background: url(../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
+    .extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
+    .extppt {background: url(../img/matecat_file_icons2x.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
+    .exthtm {background: url(../img/matecat_file_icons2x.png) 6px -70px no-repeat !important;} /* .htm, .html, .xhtml */
+    .extpdf {background: url(../img/matecat_file_icons2x.png) 6px -104px no-repeat !important;} /* .pdf */
+    .extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
+    .exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;} /* .txt */
+    .extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;} /* .xliff */
+    .extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;} /* .ttx */
+    .extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;} /* .itd */
+    .extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;} /* .xlf */
+    .extmif {background: url(../img/matecat_file_icons2x.png) 6px -342px no-repeat !important;} /* .mif */
+    .extidd {background: url(../img/matecat_file_icons2x.png) 6px -378px no-repeat !important;} /* .idml, .inx, .icml */
+    .extqxp {background: url(../img/matecat_file_icons2x.png) 6px -412px no-repeat !important;} /* .xtg */
+    .extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;} /* .xml */
+    .extrcc {background: url(../img/matecat_file_icons2x.png) 6px -484px no-repeat !important;} /* .rc */
+    .extres {background: url(../img/matecat_file_icons2x.png) 6px -516px no-repeat !important;} /* .resx */
+    .extsgl {background: url(../img/matecat_file_icons2x.png) 6px -552px no-repeat !important;} /* .sgml */
+    .extsgm {background: url(../img/matecat_file_icons2x.png) 6px -584px no-repeat !important;}  /* .sgm */
+    .extpro {background: url(../img/matecat_file_icons2x.png) 6px -618px no-repeat !important;} /* .properties */
+    .extdit {background: url(../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dita */
+    .exttag {background: url(../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
+    .exttmx {background: url(../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
     .extstr {background: url(../img/matecat_file_icons2x.png) 6px -758px no-repeat !important;} /* .str */
+    .extzip {background: url(../img/matecat_file_icons2x.png) 6px -792px no-repeat !important;} /* .zip */
+    .exticml {background: url(../img/matecat_file_icons2x.png) 6px -826px no-repeat !important;} /* .icml */
+    .extimg {background: url(../img/matecat_file_icons2x.png) 6px -860px no-repeat !important;} /* .bmp, .gif, .jpeg, .png, .tiff */
+    .extwix {background: url(../img/matecat_file_icons2x.png) 6px -894px no-repeat !important;} /* .wix */
+    .extsrt {background: url(../img/matecat_file_icons2x.png) 6px -928px no-repeat !important;} /* .srt */
+    .extpo {background: url(../img/matecat_file_icons2x.png) 6px -962px no-repeat !important;} /* .po */
+    .extg {background: url(../img/matecat_file_icons2x.png) 6px -996px no-repeat !important;} /* .g */
 
 .popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 
@@ -2825,6 +2847,7 @@ color: #000;
 .sorting:after,
 .splitbtn:before,
 .x-popup:before,
+.x-popup2:before,
 .popup .x-popup:before, 
 .mgmt-panel .x-popup:before, 
 .popup-tm .x-popup:before,
@@ -3178,7 +3201,8 @@ float: right;
 
 }
 
-.x-popup:before {
+.x-popup:before,
+.x-popup2:before {
     content: "\f057";
 }
 
