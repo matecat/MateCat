@@ -134,6 +134,24 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'http_code' ]                            = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
+            //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
+            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
+
+            //TIMING
+            $timing = array(
+                    'Total Time: '          => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ],
+                    'Connect Time: '        => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ],
+                    'Pre-Transfer Time: '   => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_pretransfer_time' ],
+                    'Start Transfer Time: ' => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_starttransfer_transfer_time' ],
+                    'Transfer Time: '       => round( (
+                                    (
+                                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ] -
+                                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_starttransfer_transfer_time' ]
+                                    ) * 1000000 ) ) . "μs"
+            );
+            $this->multi_curl_info[ $tokenHash ][ 'timing' ] = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
+
+            //HEADERS
             if ( isset( $this->curl_headers_requests[ $tokenHash ] ) ) {
                 $header = substr( $this->multi_curl_results[ $tokenHash ], 0, $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ] );
                 $header = explode( "\r\n", $header );
@@ -144,10 +162,7 @@ class MultiCurlHandler {
                 $this->curl_headers_requests[ $tokenHash ] = $header;
             }
 
-            //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
-            $this->multi_curl_info[ $tokenHash ][ 'errno' ] = $_info[ (int)$curl_resource ][ 'result' ];
-
-            Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "  --> Time: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ] );
+            Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
 
         }
 

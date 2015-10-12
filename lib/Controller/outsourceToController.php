@@ -33,6 +33,18 @@ class outsourceToController extends ajaxController {
     private $timezone;
 
     /**
+     * The delivery date the customer has chosen with 'need it faster' feature
+     * @var string (representing a date)
+     */
+    private $fixedDelivery;
+
+    /**
+     * The type of service the customer has chosen
+     * @var string (can be only "premium" or "professional")
+     */
+    private $typeOfService;
+
+    /**
      * A list of job_id/job_password for quote request
      *
      * <pre>
@@ -64,6 +76,8 @@ class outsourceToController extends ajaxController {
                 'ppassword'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
                 'currency'        => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'timezone'        => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'fixedDelivery'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'typeOfService'   => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'jobs'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY  | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
@@ -77,6 +91,8 @@ class outsourceToController extends ajaxController {
         $this->ppassword = $__postInput[ 'ppassword' ];
         $this->currency  = $__postInput[ 'currency' ];
         $this->timezone  = $__postInput[ 'timezone' ];
+        $this->fixedDelivery = $__postInput[ 'fixedDelivery' ];
+        $this->typeOfService = $__postInput[ 'typeOfService' ];
         $this->jobList   = $__postInput[ 'jobs' ];
 
         if( empty( $this->pid ) ){
@@ -94,6 +110,11 @@ class outsourceToController extends ajaxController {
         if ( empty( $this->timezone ) && $this->timezone !== "0" ) {
             $this->timezone = @$_COOKIE[ "matecat_timezone" ];
         }
+
+        if ( !in_array( $this->typeOfService, array( "premium" , "professional") ) ) {
+            $this->typeOfService = "professional";
+        }
+
         //        Log::doLog(  $this->jobList  );
         /**
          * The Job List form
@@ -131,6 +152,8 @@ class outsourceToController extends ajaxController {
                     ->setCurrency( $this->currency )
                     ->setTimezone( $this->timezone )
                     ->setJobList( $this->jobList )
+                    ->setFixedDelivery( $this->fixedDelivery )
+                    ->setTypeOfService( $this->typeOfService )
                     ->performQuote();
 
         /*

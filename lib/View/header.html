@@ -49,19 +49,13 @@
                                 <span class="icon-download"></span>ORIGINAL
                             </a>
                         </li>
-<!--
-                        <li>
+
+                        <li tal:condition="php: ( getenv( 'LEGACY_CONVERSION' ) !== false )">
                             <a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank" >
                                 <span class="icon-download"></span>EXPORT SDLXLIFF
                             </a>
                         </li>
--->
-                        <li>
-                            <a class="tmx" title="EXPORT JOB TMX FOR QA" alt="EXPORT JOB TMX FOR QA" href="/TMX/${jid}/${password}" target="_blank" >
-                                <span class="icon-download"></span>EXPORT JOB TMX FOR QA
-                            </a>
-                        </li>
-                        <li>
+                        <li tal:condition="php: ( getenv( 'LEGACY_CONVERSION' ) !== false )">
                             <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&filename=${downloadFileName}.zip&download_type=omegat&forceXliff=1">
                                 <span class="icon-download"></span>EXPORT OMEGAT
                             </a>

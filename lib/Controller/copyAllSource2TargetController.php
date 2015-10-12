@@ -124,10 +124,6 @@ class copyAllSource2TargetController extends ajaxController {
                 )
         );
 
-        if ( $result !== true ) {
-            throw new Exception( $db->error, -1 );
-        }
-
         return $db->affected_rows;
     }
 
