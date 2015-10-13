@@ -310,7 +310,7 @@ div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn {display:
 
 
 
-.subfile p{margin:0 -35px 0 0px;	word-break: break-word;
+.subfile p{margin:0;	word-break: break-word;
 		   padding:0 5px;}
 .totaltable td{font-size:18px;}
 .totaltable td.languages{border-left:1px solid #ccc;}
