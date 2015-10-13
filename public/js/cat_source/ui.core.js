@@ -2185,7 +2185,17 @@ console.log('changeStatus');
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
-                    if ( token == downloadToken ) {
+                    if ( token ) {
+                        /*
+                         * the token is a json and must be read with "parseJSON"
+                         * in case of failure:
+                         *      error_message = Object {code: -110, message: "Download failed. Please contact the owner of this MateCat instance"}
+                         *
+                         * in case of success:
+                         *      error_message = Object {code: 0, message: "Download Complete."}
+                         *
+                         */
+                        var error_message = $.parseJSON( token );
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, { path: '/', expires: -1 });
