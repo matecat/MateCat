@@ -5,9 +5,8 @@
 
 #pagination_box{
     position: absolute;
-    left: 50%;
+    left: 49%;
     width: 30%;
-    margin-left: -150px;
 }
 
 #pagination_box nav {
