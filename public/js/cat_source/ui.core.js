@@ -2167,7 +2167,7 @@ console.log('changeStatus');
                 id:'iframeDownload',
                 src: ''
             });
-
+console.log('iFrameDownload: ', iFrameDownload);
             //append iFrame to the DOM
             $("body").append( iFrameDownload );
 
@@ -2182,10 +2182,11 @@ console.log('changeStatus');
 
                     //check for cookie
                     var token = $.cookie( downloadToken );
-
+console.log('eccolo: ', typeof token);
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
-                    if ( token ) {
+                    if ( typeof token != 'undefined' ) {
+                        console.log('token: ', token);
                         /*
                          * the token is a json and must be read with "parseJSON"
                          * in case of failure:
@@ -2196,6 +2197,7 @@ console.log('changeStatus');
                          *
                          */
                         var error_message = $.parseJSON( token );
+                        console.log('error_message: ', error_message);
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, { path: '/', expires: -1 });
