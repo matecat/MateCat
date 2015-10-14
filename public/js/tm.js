@@ -1289,15 +1289,15 @@ $.extend(UI, {
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
-                    if ( token == downloadToken ) {
-                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
-                        $(tm).find('span.notify').remove();
+                    if ( token ) {
+                        $( tm ).find( '.' + button_class ).removeClass( 'disabled' ).removeClass( 'downloading' );
+                        $( tm ).find( 'span.notify' ).remove();
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
-                        errorMsg = $('#' + iFrameID).contents().find('body').text();
-                        errorKey = $(tm).attr('data-key');
-                        if(errorMsg != '') {
-                            APP.alert('Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg);
+                        errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
+                        errorKey = $( tm ).attr( 'data-key' );
+                        if ( errorMsg != '' ) {
+                            APP.alert( 'Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg );
                         }
 
                         $( '#' + iFrameID ).remove();

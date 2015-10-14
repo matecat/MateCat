@@ -72,7 +72,7 @@ class INIT {
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
     public static $AUTHCOOKIENAME = 'matecat_login_v2';
-    public static $SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
+    public static $SUPPORT_MAIL = 'the owner of this MateCat instance';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
@@ -181,6 +181,8 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
 
+    public static $LEGACY_CONVERSION = false;
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
@@ -192,6 +194,11 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
+
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if( getenv( 'LEGACY_CONVERSION' ) !== false ){
+            self::$LEGACY_CONVERSION = true;
+        }
 
     }
 

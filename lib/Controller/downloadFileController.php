@@ -334,32 +334,53 @@ class downloadFileController extends downloadController {
 
             $this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
 
-        } else {
+        }
+        else {
 
-            $output_content = $this->getOutputContentsWithZipFiles( $output_content );
+            try {
 
-            if ( count( $output_content ) > 1 ) {
+                $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
-                //cast $output_content elements to ZipContentObject
-                foreach ( $output_content as $key => $__output_content_elem ) {
-                    $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
-                }
+                if ( count( $output_content ) > 1 ) {
 
-                if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                    if ( $this->forceXliff ) {
-                        $this->_filename = $this->id_job . ".zip";
-                    } else {
-                        $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                    //cast $output_content elements to ZipContentObject
+                    foreach ( $output_content as $key => $__output_content_elem ) {
+                        $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
                     }
+
+                    if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                        if ( $this->forceXliff ) {
+                            $this->_filename = $this->id_job . ".zip";
+                        } else {
+                            $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                        }
+                    }
+
+                    $this->content = self::composeZip( $output_content ); //add zip archive content here;
+
+                } else {
+                    //always an array with 1 element, pop it, Ex: array( array() )
+                    $output_content = array_pop( $output_content );
+                    $this->setContent( $output_content );
                 }
-
-                $this->content = self::composeZip( $output_content ); //add zip archive content here;
-
-            } else {
-                //always an array with 1 element, pop it, Ex: array( array() )
-                $output_content = array_pop( $output_content );
-                $this->setContent( $output_content );
             }
+            catch ( Exception $e ){
+
+                $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
+                $msg .= "\n\n Request: " . var_export( $_REQUEST, true );
+                Log::$fileName = 'fatal_errors.txt';
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+                $this->unlockToken(
+                    array(
+                            "code" => -110,
+                            "message" => "Download failed. Please contact " . INIT::$SUPPORT_MAIL
+                    )
+                );
+                throw $e; // avoid sent Headers and empty file content with finalize method
+
+            }
+
         }
 
         $debug[ 'total' ][] = time();
