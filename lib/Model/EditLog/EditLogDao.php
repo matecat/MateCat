@@ -166,12 +166,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         $queryBefore = "select * from (
                             SELECT segments.id AS __sid
                             FROM segments
-                            JOIN segment_translations ON id = id_segment
+                            JOIN segment_translations st ON id = id_segment
                             JOIN jobs ON jobs.id =  id_job
                             WHERE id_job = %d
                                 AND password = '%s'
                                 AND show_in_cattool = 1
                                 AND segments.id < jobs.job_last_segment
+                                AND st.status <> 'NEW'
                             ORDER BY __sid DESC
                             LIMIT %u
                       ) x
@@ -207,12 +208,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
 
         $queryBefore = "SELECT min(segments.id) AS __sid
                         FROM segments
-                        JOIN segment_translations ON id = id_segment
+                        JOIN segment_translations st ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
                         WHERE id_job = %d
                             AND password = '%s'
                             AND show_in_cattool = 1
                             AND segments.id >= jobs.job_first_segment
+                            AND st.status <> 'NEW'
                         ORDER BY __sid DESC";
 
         $result = $this->_fetch_array(
@@ -246,12 +248,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         select start_segment, floor(idx / %d ) +1 as page from (
           SELECT segments.id AS start_segment, @page := ( @page + 1 ) as idx
 		  FROM segments
-			JOIN segment_translations ON id = id_segment
+			JOIN segment_translations st ON id = id_segment
 			JOIN jobs ON jobs.id =  id_job
 	        JOIN ( SELECT @page:= -1 ) AS page
 		  WHERE id_job = %d
             AND password = '%s'
             AND show_in_cattool = 1
+            AND st.status <> 'NEW'
 			ORDER BY start_segment asc
         ) x
         group by 2;";
