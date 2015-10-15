@@ -2416,6 +2416,40 @@ function updateWordCount( WordCount_Struct $wStruct ) {
     return $affectedRows;
 }
 
+/**
+ * @param $job_id int
+ * @param $jobPass string
+ * @param $segmentTimeToEdit int
+ * @return int|mixed
+ */
+function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ){
+    $db = Database::obtain();
+
+    //Update in Transaction
+    $query = "UPDATE jobs AS j SET
+                  total_time_to_edit = coalesce( total_time_to_edit, 0 ) + %d
+               WHERE j.id = %d
+               AND j.password = '%s'";
+
+    try {
+        $db->query(
+            sprintf(
+                $query,
+                (int)$segmentTimeToEdit,
+                (int)$job_id,
+                $jobPass
+            )
+        );
+
+    } catch( PDOException $e ) {
+        Log::doLog( $e->getMessage() );
+        return $e->getCode() * -1;
+    }
+    $affectedRows = $db->affected_rows;
+    Log::doLog( "Affected: " . $affectedRows . "\n" );
+    return $affectedRows;
+}
+
 function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     // query  da incorporare nella changeProjectStatus
     $db                             = Database::obtain();

@@ -190,15 +190,7 @@ class FilesStorage {
                 return $outcome1;
             }
 
-            //check if manifest from a LongHorn conversion exists
-            $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
-            if ( file_exists( $manifestFile ) ) {
-                Log::doLog( "Alternative Conversion detected" );
-                $file_extension = '.xlf';
-            } else {
-                Log::doLog( "Normal Conversion detected" );
-                $file_extension = '.sdlxliff';
-            }
+            $file_extension = '.sdlxliff';
 
             //set naming for converted xliff
             $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . $file_name . $file_extension;
@@ -420,14 +412,6 @@ class FilesStorage {
             }
         }
         $res &= $this->link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
-
-        //check if manifest from a LongHorn conversion exists
-        $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
-        if ( file_exists( $manifestFile ) ) {
-            $res &= $this->link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
-            $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
-            $res &= $this->link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
-        }
 
         if( !$res ){
             throw new UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );

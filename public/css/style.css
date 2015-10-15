@@ -2167,6 +2167,51 @@ textarea, input, .editarea, .search-editarea, select  {
 .addline-suggestion{display:none;float:left;height:50px;background:#fff}
 .add-ul{background:#efefef !important}
 
+/*engine errror messages*/
+.engine-errrors summary {
+    text-align: left;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.engine-errrors summary:focus {
+    outline: 0;
+}
+
+.engine-errrors .error {
+    color: red;
+}
+
+.engine-error {
+    padding-left: 40px!important;
+}
+
+.error-img {
+    background: #c5351c url(../img/warning.png) no-repeat center;
+    background-size: 12px;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    border-radius: 5px;
+    margin-left: -20px;
+    top: 2px;
+    position: relative;
+    float: left;
+}
+
+.warning-img {
+    background: #FF9900 url(../img/warning.png) no-repeat center;
+    background-size: 12px;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    border-radius: 5px;
+    margin-left: -20px;
+    top: 2px;
+    position: relative;
+    float: left;
+}
+
 
 /*status*/
 .status-container .status{width:11px;display:block;position:absolute;height:100%;padding:0;background:#dddedf;right:0;border-left:1px solid #ccc;	margin:0px 0px 0px 0 !Important;z-index:99;border-bottom:1px solid #ccc	}
@@ -3873,4 +3918,18 @@ body.cattool .nav-tabs li.mgmt-mt {
     background: yellow;
     border: 1px solid yellow;
     border-radius: 3px;
+}
+
+#export_edit_log_csv_link{
+	top: 30px;
+	position: relative;
+	font-style: italic;
+}
+
+.color_green{
+	color: #6AA84F;
+}
+
+.bg_orange{
+	background: #ee6633;
 }

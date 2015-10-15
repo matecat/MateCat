@@ -384,7 +384,7 @@ console.log('changeStatus');
     copyAllSources: function() {
         console.log('copy all sources');
         if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
-            APP.confirm({
+            APP.confirmAndCheckbox({
                 title: 'Copy all new segments',
                 name: 'confirmCopyAllSources',
                 okTxt: 'Yes',
@@ -392,7 +392,9 @@ console.log('changeStatus');
                 callback: 'continueCopyAllSources',
                 onCancel: 'abortCopyAllSources',
                 closeOnSuccess: true,
-                msg: "Copy source to target for all new segments?<br/>This action cannot be undone."
+                msg: "Copy source to target for all new segments?<br/><b>This action cannot be undone.</b>",
+                'checkbox-label': "I want to fill all untranslated target segments with a copy "+
+                                    "of the corresponding source segments."
             });
         } else {
             this.consecutiveCopySourceNum = [];
@@ -527,6 +529,7 @@ console.log('changeStatus');
                     UI.footerHTML = UI.footerHTML +
 					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + sid + '-matches">' +
 					'	<div class="overflow"></div>' +
+                    '   <div class="engine-errors"></div>' +
                     '</div>' ;
 
                     if ( SegmentNotes.enabled() ) {
@@ -3035,12 +3038,12 @@ console.log('changeStatus');
 			if (this.code == '-1000') {
 				console.log('ERROR -1000');
 				console.log('operation: ', operation);
-                UI.blockUIForNoConnection();
+                UI.startOfflineMode();
 //				UI.failedConnection(0, 'no');
 			}
             if (this.code == '-101') {
                 console.log('ERROR -101');
-                UI.blockUIForNoConnection();
+                UI.startOfflineMode();
             }
 		});
 	},

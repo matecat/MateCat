@@ -95,11 +95,27 @@ class downloadFileController extends downloadController {
            5)the temporary file is deleted
          */
 
+        // Detect which type of converter was used to create this project, just
+        // checking the XLIFF type of the project's first file.
+        // Is it possible for a project to have some files converted with SDL
+        // and others with the new MateCAT converter? No. Because all the files
+        // of the new projects are converted with the new MateCAT converter,
+        // while all the old projects were converted with SDL Trados Studio.
+        // It's not possible to have a project with files converted using both
+        // converters.
+        $fileType = DetectProprietaryXliff::getInfo($files_job[0]['xliffFilePath']);
+        if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter') {
+            $useLegacyConverters = false;
+        } else {
+            // Use SDL Trados Studio in case of SDLXLIFF and GlobalSight
+            $useLegacyConverters = true;
+        }
+
         //file array is chuncked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
         foreach ( $files_job as $chunk ) {
 
-            $converter = new FileFormatConverter();
+            $converter = new FileFormatConverter($useLegacyConverters);
 
             $files_to_be_converted = array();
 
@@ -194,7 +210,13 @@ class downloadFileController extends downloadController {
                     //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
                     $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $mime_type == 'sdlxliff' ) or $this->forceXliff ) {
+                    $fileType = DetectProprietaryXliff::getInfo($file[ 'xliffFilePath' ]);
+                    // When the 'proprietary' flag is set to false, the xliff
+                    // is not passed to any converter, because is handled
+                    // directly inside MateCAT.
+                    $xliffWasNotConverted = ($fileType['proprietary'] === false);
+
+                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
                         $convertBackToOriginal = false;
                         Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
                     } else {

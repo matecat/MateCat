@@ -158,6 +158,7 @@ $.extend(UI, {
 		} else {
 			$(".sbm > .matches", segment).hide();
 		}
+                this.renderContributionErrors(d.errors, segment);
 
     },
 	renderContributions: function(d, segment) {
@@ -273,6 +274,42 @@ $.extend(UI, {
 		}
     $(window).trigger('renderContribution:complete', segment);
 	},
+        renderContributionErrors: function(errors, segment) {
+            $('.tab.sub-editor.matches .engine-errors', segment).empty();
+            $('.tab.sub-editor.matches .engine-errors', segment).hide();
+            $.each(errors, function(){
+                var percentClass = "";
+                var messageClass = "";
+                var imgClass = "";
+                var  messageTypeText = '';
+                if(this.code == '-2001') {
+                    console.log('ERROR -2001');
+                    percentClass = "per-red";
+                    messageClass = 'error';
+                    imgClass = 'error-img';
+                    messageTypeText = 'Error: ';
+                }
+                else if (this.code == '-2002') {
+                    console.log('WARNING -2002');
+                    percentClass = "per-orange";
+                    messageClass = 'warning';
+                    imgClass = 'warning-img';
+                    messageTypeText = 'Warning: ';
+                }
+                else {
+                    return;
+                }
+                $('.tab.sub-editor.matches .engine-errors', segment).show();
+                var percentText = this.created_by_type;
+                var suggestion_info = '';
+                var cb = this.created_by;
+
+                $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
+                        '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
+                        '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText +
+                        '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
+        },
 	setContribution: function(segment_id, status, byStatus) {
 //        console.log('setContribution');
         this.addToSetContributionTail('setContribution', segment_id, status, byStatus);

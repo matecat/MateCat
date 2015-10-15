@@ -423,6 +423,20 @@ class setTranslationController extends ajaxController {
             $newTotals = $old_wStruct;
         }
 
+        //update total time to edit
+        try{
+            updateTotalTimeToEdit($this->id_job, $this->password, $this->time_to_edit);
+        }
+        catch ( Exception $e ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+            Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+//                $x1 = explode( "\n" , var_export( $old_translation, true) );
+//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
+            $db->rollback();
+
+            return $e->getCode();
+        }
+
         $job_stats = CatUtils::getFastStatsForJob( $newTotals );
         $project   = getProject( $this->jobData[ 'id_project' ] );
         $project   = array_pop( $project );

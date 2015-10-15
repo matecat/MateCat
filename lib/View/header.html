@@ -55,17 +55,22 @@
                         </li>
 
                         <li>
-                            <a class="originalDownload" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&filename=${downloadFileName}.zip&download_type=all" target="_blank" >
+                            <a class="originalDownload" title="ORIGINAL" alt="ORIGINAL" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&filename=${downloadFileName}.zip&download_type=all" target="_blank" >
                                 <span class="icon-download"></span>ORIGINAL
                             </a>
                         </li>
 
-                        <li>
+                        <li tal:condition="php: INIT::$LEGACY_CONVERSION !== false">
                             <a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank" >
                                 <span class="icon-download"></span>EXPORT SDLXLIFF
                             </a>
                         </li>
                         <li>
+                            <a class="tmx" title="Export job TMX for QA" alt="Export job TMX for QA" href="/TMX/${jid}/${password}" target="_blank" >
+                                <span class="icon-download"></span>EXPORT JOB TMX
+                            </a>
+                        </li>
+                        <li tal:condition="php: INIT::$LEGACY_CONVERSION !== false">
                             <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&filename=${downloadFileName}.zip&download_type=omegat&forceXliff=1">
                                 <span class="icon-download"></span>EXPORT OMEGAT
                             </a>

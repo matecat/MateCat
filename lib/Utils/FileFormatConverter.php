@@ -9,10 +9,12 @@ class FileFormatConverter {
     private $port = "8732"; //port the convertrs listen to
     private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
     private $fromXliffFunction = "AutomationService/xliff2original"; //action string for the converters to convert to original
+    const testFunction = "test"; // action check connection
     private $opt = array(); //curl options
     private $lang_handler; //object that exposes language utilities
     private $storage_lookup_map;
-    private $segmentation_rule;
+
+    private $useLegacyConverters;
 
     private $conversionObject;
 
@@ -30,16 +32,18 @@ class FileFormatConverter {
     //http://stackoverflow.com/questions/2222643/php-preg-replace
     private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
 
-    /**
-     * Set more curl option for conversion call ( fw/bw )
-     *
-     * @param array $options
-     */
-    public function setCurlOpt( $options = array() ) {
-        $this->opt = array_merge( $this->opt, $options );
-    }
 
-    public function __construct() {
+    /**
+     * Create a new FileFormatConverter, using old or new converters.
+     * This function looks for converters in the 'converters' table in the db.
+     * If $useLegacyConverters is false, this function will filter only the
+     * row of the table with the column 'conversion_api_version' starting with
+     * 'open '.
+     *
+     * @param bool $useLegacyConverters
+     */
+    public function __construct( $useLegacyConverters = true ) {
+        $this->useLegacyConverters = $useLegacyConverters;
 
         if ( !class_exists( "INIT" ) ) {
             include_once( "../../inc/config.inc.php" );
@@ -49,22 +53,25 @@ class FileFormatConverter {
         $this->lang_handler        = Langs_Languages::getInstance();
 
         $this->conversionObject = new ArrayObject( array(
-                'ip_machine'      => null,
-                'ip_client'       => null,
-                'path_name'       => null,
-                'file_name'       => null,
-                'path_backup'     => null,
-                'file_size'       => 0,
-                'direction'       => null,
-                'error_message'   => null,
-                'src_lang'        => null,
-                'trg_lang'        => null,
-                'status'          => 'ok',
-                'conversion_time' => 0
+            'ip_machine'      => null,
+            'ip_client'       => null,
+            'path_name'       => null,
+            'file_name'       => null,
+            'path_backup'     => null,
+            'file_size'       => 0,
+            'direction'       => null,
+            'error_message'   => null,
+            'src_lang'        => null,
+            'trg_lang'        => null,
+            'status'          => 'ok',
+            'conversion_time' => 0
         ), ArrayObject::ARRAY_AS_PROPS );
 
+        // Get converters instances list from database,
+        // according to the $useLegacyConverters parameter.
         $db         = Database::obtain();
-        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0" );
+        $filterLegacyConvertersCondition = 'conversion_api_version ' . ($useLegacyConverters ? 'NOT LIKE' : 'LIKE') . ' "open %"';
+        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0 AND $filterLegacyConvertersCondition" );
 
         foreach ( $converters as $converter_storage ) {
             self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
@@ -78,6 +85,17 @@ class FileFormatConverter {
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
     }
+
+
+    /**
+     * Set more curl option for conversion call ( fw/bw )
+     *
+     * @param array $options
+     */
+    public function setCurlOpt( $options = array() ) {
+        $this->opt = array_merge( $this->opt, $options );
+    }
+
 
     //add UTF-8 BOM
     public function addBOM( $string ) {
@@ -284,7 +302,15 @@ class FileFormatConverter {
             throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
         }
 
-        if ( $this->checkOpenService( $url ) ) {
+        // The new converters need a new way to check if they are
+        // online, so we have two different methods for this task.
+        if ($this->useLegacyConverters) {
+            $isServiceAvailable = $this->checkOpenLegacyService($url);
+        } else {
+            $isServiceAvailable = $this->checkOpenService();
+        }
+
+        if ( $isServiceAvailable ) {
 
             $ch = curl_init();
 
@@ -332,41 +358,56 @@ class FileFormatConverter {
         if ( !file_exists( $file_path ) ) {
             throw new Exception( "Conversion Error : the file <$file_path> not exists" );
         }
-        $fileContent = file_get_contents( $file_path );
-        $extension   = FilesStorage::pathinfo_fix( $file_path, PATHINFO_EXTENSION );
+
         $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
-        if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
-            $encoding = mb_detect_encoding( $fileContent );
+        $extension = FilesStorage::pathinfo_fix($file_path, PATHINFO_EXTENSION);
 
-            //in case of .strings, they may be in UTF-16
-            if ( strtoupper( $extension ) == 'STRINGS' ) {
-                //use this function to convert stuff
-                $convertedFile = CatUtils::convertEncoding( 'UTF-8', $fileContent );
+        if ($this->useLegacyConverters) {
+            // Legacy converters need encode sanitize
 
-                //retrieve new content
-                $fileContent = $convertedFile[ 1 ];
-            } else {
-                if ( $encoding != 'UTF-8' ) {
-                    $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+            $fileContent = file_get_contents($file_path);
+            if (strtoupper($extension) == 'TXT' or strtoupper($extension) == 'STRINGS') {
+                $encoding = mb_detect_encoding($fileContent);
+
+                //in case of .strings, they may be in UTF-16
+                if (strtoupper($extension) == 'STRINGS') {
+                    //use this function to convert stuff
+                    $convertedFile = CatUtils::convertEncoding('UTF-8', $fileContent);
+
+                    //retrieve new content
+                    $fileContent = $convertedFile[1];
+                } else {
+                    if ($encoding != 'UTF-8') {
+                        $fileContent = iconv($encoding, "UTF-8//IGNORE", $fileContent);
+                    }
+                }
+
+                if (!$this->hasBOM($fileContent)) {
+                    $fileContent = $this->addBOM($fileContent);
                 }
             }
 
-            if ( !$this->hasBOM( $fileContent ) ) {
-                $fileContent = $this->addBOM( $fileContent );
-            }
+            //get random name for temporary location
+            $tmp_name = tempnam("/tmp", "MAT_FW");
+
+            //write encoded file to temporary location
+            $fileSize = file_put_contents($tmp_name, ($fileContent));
+
+            //assign file pointer for POST
+            $data[ 'documentContent' ] = "@$tmp_name";
+
+            //flush memory
+            unset( $fileContent );
+
+        } else {
+
+            //write encoded file to temporary location
+            $fileSize = filesize($file_path);
+
+            //assign file pointer for POST
+            $data[ 'documentContent' ] = "@$file_path";
+
         }
-
-        //get random name for temporary location
-        $tmp_name = tempnam( "/tmp", "MAT_FW" );
-
-        //write encoded file to temporary location
-        $fileSize = file_put_contents( $tmp_name, ( $fileContent ) );
-
-        //assign file pointer for POST
-        $data[ 'documentContent' ] = "@$tmp_name";
-
-        //flush memory
-        unset( $fileContent );
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
@@ -405,13 +446,33 @@ class FileFormatConverter {
         $curl_result = null;
         $res         = $this->__parseOutput( $decode );
 
-        //remove temporary file
-        unlink( $tmp_name );
+        //remove temporary file (used only by legacy converters)
+        if (isset($tmp_name)) unlink( $tmp_name );
 
         return $res;
     }
 
-    private function checkOpenService( $url ) {
+    /**
+     * Check that the conversion service is working.
+     * This method works with the new conversion service only.
+     */
+    private function checkOpenService() {
+        $url = "http://{$this->ip}:{$this->port}/".self::testFunction;
+        $cl = curl_init($url);
+        curl_setopt($cl,CURLOPT_CONNECTTIMEOUT,3);
+        curl_setopt($cl,CURLOPT_HEADER,true);
+        curl_setopt($cl,CURLOPT_NOBODY,true);
+        curl_setopt($cl,CURLOPT_RETURNTRANSFER,true);
+        curl_exec($cl);
+        $httpcode = curl_getinfo($cl, CURLINFO_HTTP_CODE);
+        curl_close($cl);
+        return $httpcode >= 200 && $httpcode < 300;
+    }
+
+    /**
+     * Check that the legacy conversion service is working.
+     */
+    private function checkOpenLegacyService( $url ) {
         //default is failure
         $open = false;
 
