@@ -49,7 +49,7 @@ if ( SegmentNotes.enabled() )
         $.each(notes, function() {
             var li = $('<li/>');
             var label = $('<span class="note-label">Note: </span>');
-            var text = $('<span />').text( this.note );
+            var text = $('<span />').html( this.note );
 
             li .append( label ) .append( text ) ;
 

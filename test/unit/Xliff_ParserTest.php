@@ -58,4 +58,18 @@ class Xliff_ParserTest extends AbstractTest {
 
     }
 
+    function testFileWithMaliciousNote() {
+        $file = test_file_path('xliff/file-with-notes-and-malicious-code.xliff');
+        $content = file_get_contents( $file );
+
+        $xliff_obj = new Xliff_Parser();
+        $xliff     = $xliff_obj->Xliff2Array( $content );
+
+        $this->assertEquals(
+           "&lt;script&gt;alert(&#039;This is malicious code&#039;);&lt;/script&gt;",
+            $xliff['files'][3]['trans-units'][1]['notes'][0]['raw-content']
+        );
+
+    }
+
 }
