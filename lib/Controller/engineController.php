@@ -162,7 +162,34 @@ class engineController extends ajaxController {
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
+            case strtolower( Constants_Engines::APERTIUM ):                            
 
+                /**
+                 * Create a record of type APERTIUM
+                 */
+                $newEngine = EnginesModel_ApertiumStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;                
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+                
+                break;                
+
+            case strtolower( Constants_Engines::ALTLANG ):                            
+
+                /**
+                 * Create a record of type ALTLANG
+                 */
+                $newEngine = EnginesModel_AltlangStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;                
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+                
+                break;                                
+                
             default:
                 $validEngine = false;
         }
