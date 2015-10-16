@@ -17,6 +17,8 @@ class Constants_Engines {
     const MICROSOFT_HUB = 'MicrosoftHub';
     const IP_TRANSLATOR = 'IPTranslator';
     const DEEPLINGO     = 'DeepLingo';
+    const APERTIUM      = 'Apertium';
+    const ALTLANG	    = 'Altlang';
     const LETSMT        = 'LetsMT';
 
 } 
