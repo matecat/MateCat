@@ -1244,8 +1244,8 @@ class ProjectManager {
      * @param ArrayObject $projectStructure
      */
     public function applySplit( ArrayObject $projectStructure ) {
-        $this->_splitJob( $projectStructure );
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        $this->_splitJob( $projectStructure );
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
