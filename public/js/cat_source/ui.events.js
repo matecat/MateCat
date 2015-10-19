@@ -1501,6 +1501,7 @@ console.log('e.target: ', e.target);
 			UI.draggingTagIsOpening = ($(this).text().match(/^<\//gi))? false : true;
 			UI.draggingTagText = $(this).text();
 		}).on('drop', '.editor .editarea', function(e) {
+            console.log('DROP');
 			if (e.stopPropagation) {
 				e.stopPropagation(); // stops the browser from redirecting.
 			}
@@ -1542,6 +1543,7 @@ console.log('e.target: ', e.target);
 
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
+                UI.lockTags(UI.editarea);
 				UI.saveInUndoStack('drop');
             }, 100);
 		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
