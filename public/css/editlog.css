@@ -5,19 +5,30 @@
 
 #pagination_box{
     position: absolute;
-    left: 49%;
+    left: 35%;
     width: 30%;
 }
 
 #pagination_box nav {
     float: none;
-    /* hack to center this nav */
+    text-align: center;
+}
+
+#pagination_box nav ul {
+        position: relative;
     width: 100%;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 #pagination_box nav li{
     border: 0;
+    text-align: center;
+    display: inline-block;
+    float: none;
+    margin: 0 auto;
+    overflow: hidden;
+    text-align: center;
 }
 
 #pagination_box nav li a {
