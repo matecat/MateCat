@@ -70,8 +70,11 @@ class FileFormatConverter {
         // Get converters instances list from database,
         // according to the $useLegacyConverters parameter.
         $db         = Database::obtain();
-        $filterLegacyConvertersCondition = 'conversion_api_version ' . ($useLegacyConverters ? 'NOT LIKE' : 'LIKE') . ' "open %"';
-        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0 AND $filterLegacyConvertersCondition" );
+        $query = 'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
+                . ' FROM converters'
+                . ' WHERE status_active = 1 AND status_offline = 0'
+                . ' AND conversion_api_version ' . ($this->useLegacyConverters ? 'NOT LIKE' : 'LIKE') . ' "open %"';
+        $converters = $db->fetch_array( $query );
 
         foreach ( $converters as $converter_storage ) {
             self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
