@@ -3640,4 +3640,8 @@ width: 100px;
 width: 250px;
 }
 
+    #template-upload, #template-download{
+        display:none;
+    }
+
 }

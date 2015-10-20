@@ -764,6 +764,9 @@ UI = {
 						//						$('.dosplit').removeClass('disabled');
 						$('#longloading .approved-bar').css('width', '100%');
 						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
+                        elementsToAskQuoteFor = $( '.uploadbtn.translate');
+                        precomputeOutsourceQuotesRecursive();
+                        precomputeOutsourceQuotesRecursive();
 						setTimeout(function() {
 								$('#shortloading').remove();
 								$('#longloading .meter').remove();
@@ -938,6 +941,16 @@ function fit_text_to_container(container, child) {
 			break;
 		}
 	}
+}
+
+function precomputeOutsourceQuotesRecursive() {
+    if( elementsToAskQuoteFor.length == 0 ) {
+        return;
+    }
+
+    var currentElement = $( elementsToAskQuoteFor[ 0 ] );
+    elementsToAskQuoteFor.splice(0, 1);
+    getOutsourceQuote( currentElement, "precomputeOutsourceQuotesRecursive" );
 }
 
 $(document).ready(function() {
