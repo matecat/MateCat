@@ -34,6 +34,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'currency'            => 'EUR',
             'timezone'            => '0',
             'quote_result'        => null,
+            'outsourced'          => null,
             'quote_available'     => null,
             'typeOfService'       => "",
             'price'               => 0,
@@ -57,6 +58,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             't_subjects'          => null,
             'show_revisor_data'   => null,
             'r_vote'              => null,
+            'link_to_status'      => null
     );
 
     /**
