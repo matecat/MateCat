@@ -228,7 +228,15 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
     }
 
     if( chunk.outsourced == 1 ) {
+        $('.modal.outsource').removeClass('loading');
         $(".outsourceto").addClass("outsourced");
+        $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').hide();
+        $('.time').html(chunk.delivery);
+        $('.displayprice').html(chunk.price);
+        $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
+        $('.outsource.modal .tprice').append('<a href="'+chunk.link_to_status+'" target="_blank">check status</a>');
+
+        chunk.link_to_status
         return false;
     }
 

@@ -181,6 +181,22 @@ p.translator_name {
     border-left: none;
 }
 
+.outsourced .delivery_details .time,
+.outsourced .tprice .euro,
+.outsourced .tprice .displayprice
+
+ {
+    color: green!important;
+}
+
+.outsourced .outsource_notify {
+    float: right;
+    color:green;
+        font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
 .outsource.modal.loading .tprice.compress {
     padding: 133px 1% 6px 1%;
 }
