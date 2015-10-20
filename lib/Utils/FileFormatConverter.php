@@ -70,8 +70,20 @@ class FileFormatConverter {
         // Get converters instances list from database,
         // according to the $useLegacyConverters parameter.
         $db         = Database::obtain();
-        $filterLegacyConvertersCondition = 'conversion_api_version ' . ($useLegacyConverters ? 'NOT LIKE' : 'LIKE') . ' "open %"';
-        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0 AND $filterLegacyConvertersCondition" );
+        $query = 'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
+                . ' FROM converters'
+                . ' WHERE status_active = 1 AND status_offline = 0'
+                . ' AND conversion_api_version ' . ($this->useLegacyConverters ? 'NOT LIKE' : 'LIKE') . ' "open %"';
+        $converters = $db->fetch_array( $query );
+
+        // SUUUPER ugly, those variables should not be static at all! No way!
+        // But now the class works around these 3 static variables, and a
+        // refactoring is too risky. Enter this patch: I empty these 3 vars
+        // every time I create a new FileFormatConverter to be sure that new
+        // converters never mix with old converters
+        self::$converters = array();
+        self::$Storage_Lookup_IP_Map = array();
+        self::$converter2segmRule = array();
 
         foreach ( $converters as $converter_storage ) {
             self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
