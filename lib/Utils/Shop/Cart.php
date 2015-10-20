@@ -148,14 +148,13 @@ class Shop_Cart {
      * @param $item_id
      */
     public function delItem( $item_id ) {
-
         foreach ( $this->cart as $key => $item ) {
-            if ( $item[ 'id' ] == $item_id ) {
+            if ( strpos( $item[ 'id' ], $item_id ) !== false ) {
                 unset ( $this->cart[ $key ] );
             }
         }
-
     }
+
 
     /**
      * Clean cart content by removing all items

@@ -67,7 +67,7 @@ $.extend(UI, {
                 $('body').addClass('showingOutsourceTo');
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
                 $('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
-                resetOutsourcePopupSoft();
+                resetOutsourcePopup( false );
                 getOutsourceQuote( $( this ), "updateOutsourcePopupValues" );
 				$('.outsource.modal').show();
 				return false;
@@ -198,15 +198,15 @@ function getOutsourceQuote( clickedButton, callbackFunction ) {
 function updateOutsourcePopupValues( functionReference, returnedData, clickedButton ) {
     //IMPORTANT this store the quote response to a class variable
     //to be posted out when Order Button is pressed
-    UI.quoteResponse = returnedData.data;
+    UI.quoteResponse = returnedData.data[0];
 
-    var chunks = returnedData.data;
+    var chunks = returnedData.data[0];
     var chunkId = functionReference;
     var ind = 0;
     $.each(chunks, function(index) {
         if(clickedButton.id == chunkId) ind = index;
     });
-    var chunk = returnedData.data[ind];
+    var chunk = returnedData.data[0][ind];
     var row = clickedButton.parents('.tablestats');
 
     UI.url_ok = returnedData.return_url.url_ok;
@@ -224,6 +224,11 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
         $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
         $('.needitfaster').html('Change delivery date');
         $('.outsource.modal .continuebtn').addClass('hide');
+        return false;
+    }
+
+    if( chunk.outsourced == 1 ) {
+        $(".outsourceto").addClass("outsourced");
         return false;
     }
 
@@ -431,41 +436,29 @@ function updateCartParameters() {
 
 }
 
-                
-function resetOutsourcePopupSoft() {
+
+function resetOutsourcePopup( resetHard ) {
     $( ".outsourceto").attr( "class", "outsourceto" );
     $('.ErrorMsg').addClass('hide');
     $('#delivery_not_available').addClass('hide');
     $('.needitfaster').removeClass('hide').html('Need it faster?');
-    $('.trustbox2').attr( "class", "trustbox2" ).addClass("hide");
+    $('.trustbox2').attr( "class", "trustbox2 hide" );
     $('.trustbox1').attr( "class", "trustbox1" );
-    $('.translator_info_box').attr( "class", "translator_info_box" ).addClass("hide");
-    $('.translator_bio').attr( "class", "translator_bio" );
+    $('.translator_info_box').attr( "class", "translator_info_box hide" );
     $('.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').removeClass('hide');
-    $( ".show_translator.more").attr( "class", "" ).addClass("show_translator more");
-    $('.revision_delivery').attr( "class", "" ).addClass('revision_delivery');
-    $('.revision_price_box').attr( "class", "" ).addClass('revision_price_box');
-    $( ".hide_translator.more").attr( "class", "" ).addClass("hide_translator more hide");
+    $('.translator_bio').attr( "class", "translator_bio" );
+    $( ".show_translator.more").attr( "class", "show_translator more" );
+    $('.revision_delivery').attr( "class", "revision_delivery" );
+    $('.revision_price_box').attr( "class", "revision_price_box" );
+    $( ".hide_translator.more").attr( "class", "hide_translator more hide" );
     $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
     $('.tprice.compress').attr( "class", "tprice" );
     $('.modal.outsource .tooltip').addClass('hide');
     $('.delivery_before_time').addClass('hide');
     $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,').removeClass('hide');
-    $('.popup-box.pricebox.compress').attr( "class", "" ).addClass("popup-box pricebox");
+    $('.popup-box.pricebox.compress').attr( "class", "popup-box pricebox" );
     $('.delivery').appendTo(".delivery_container").attr("class","delivery");
-}
 
-function resetOutsourcePopup( resetHard ) {
-    $( ".outsourceto").attr( "class", "outsourceto" );
-    $( ".show_translator.more").attr( "class", "" ).addClass("show_translator more");
-    $( ".hide_translator.more").attr( "class", "" ).addClass("hide_translator more hide");
-    $('#forceDeliveryContainer').addClass("hide");
-    $('.trustbox2').attr( "class", "trustbox2" ).addClass("hide");
-    $('.trustbox1').attr( "class", "trustbox1" );
-    $('.translator_info_box').attr( "class", "translator_info_box" ).addClass("hide");
-    $('.translator_bio').attr( "class", "translator_bio" );
-    $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
-    $('.tprice.compress').attr( "class", "tprice" );
-    $('.popup-box.pricebox.compress').attr( "class", "" ).addClass("popup-box pricebox");
-    $('.delivery').appendTo(".delivery_container").attr("class","delivery");
+    if( resetHard )
+        $('#forceDeliveryContainer').addClass("hide");
 }
