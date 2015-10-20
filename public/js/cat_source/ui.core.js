@@ -3434,12 +3434,14 @@ console.log('eccolo: ', typeof token);
     propagateTranslation: function(segment, status, evenTranslated) {
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
-        if( status == 'translated' ){
-            plusTranslated = ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated';
-//            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+        console.log('status: ', status);
+        console.log(status == 'translated');
+        console.log(config.isReview && (status == 'approved'));
+        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
+            plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function() {
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
                 $('.editarea', this).html( $('.editarea', segment).html() );
 
                 // if status is not set to draft, the segment content is not displayed
