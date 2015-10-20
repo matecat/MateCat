@@ -2195,7 +2195,10 @@ console.log('changeStatus');
                          *      error_message = Object {code: 0, message: "Download Complete."}
                          *
                          */
-                        var error_message = $.parseJSON( token );
+                        tokenData = $.parseJSON(token);
+                        if(parseInt(tokenData.code) < 0) {
+                            UI.showMessage({msg: tokenData.message})
+                        }
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, { path: '/', expires: -1 });
