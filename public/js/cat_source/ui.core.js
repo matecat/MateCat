@@ -2196,7 +2196,7 @@ console.log('eccolo: ', typeof token);
                          *
                          */
                         tokenData = $.parseJSON(token);
-                        if(tokenData.code == '-110') {
+                        if(parseInt(tokenData.code) < 0) {
                             UI.showMessage({msg: tokenData.message})
                         }
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
