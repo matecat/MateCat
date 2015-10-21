@@ -146,10 +146,11 @@ class commentController extends ajaxController {
         Log::doLog($url);
 
         $users = $this->resolveUsers();
+        $project_data = $this->projectData(); 
 
         foreach($users as $user) {
             $email = new Comments_CommentEmail($user, $this->struct, $url,
-                $this->projectData()[0]['name']
+                $project_data[0]['name']
             );
             $email->deliver();
         }
