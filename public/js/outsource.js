@@ -68,7 +68,7 @@ $.extend(UI, {
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
                 $('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
                 resetOutsourcePopup( false );
-                getOutsourceQuote( $( this ), "updateOutsourcePopupValues" );
+                getOutsourceQuote( $( this ), "parseResult" );
 				$('.outsource.modal').show();
 				return false;
 			}
@@ -163,7 +163,6 @@ $.extend(UI, {
 
 
 function getOutsourceQuote( clickedButton, callbackFunction ) {
-    var chunkId = clickedButton.parents('.totaltable').find('.languages .splitnum').text();
     var row = clickedButton.parents('.tablestats');
 
     APP.doRequest({
@@ -180,13 +179,13 @@ function getOutsourceQuote( clickedButton, callbackFunction ) {
                 }
             ]
         },
-        context: chunkId,
+        context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
         error: function() {
-            //						UI.failedConnection(0, 'outsourceToTranslated');
+            // UI.failedConnection(0, 'outsourceToTranslated');
         },
         success: function(d) {
-            if( callbackFunction == "updateOutsourcePopupValues" ) {
-                updateOutsourcePopupValues( this, d, clickedButton );
+            if( callbackFunction == "parseResult" ) {
+                parseResult( this, d, clickedButton );
             } else if( callbackFunction == "precomputeOutsourceQuotesRecursive" ) {
                 precomputeOutsourceQuotesRecursive();
             }
@@ -195,13 +194,12 @@ function getOutsourceQuote( clickedButton, callbackFunction ) {
 }
 
 
-function updateOutsourcePopupValues( functionReference, returnedData, clickedButton ) {
+function parseResult( chunkId, returnedData, clickedButton ) {
     //IMPORTANT this store the quote response to a class variable
     //to be posted out when Order Button is pressed
     UI.quoteResponse = returnedData.data[0];
 
     var chunks = returnedData.data[0];
-    var chunkId = functionReference;
     var ind = 0;
     $.each(chunks, function(index) {
         if(clickedButton.id == chunkId) ind = index;
@@ -213,8 +211,14 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
     UI.url_ko = returnedData.return_url.url_ko;
     UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
 
-    $( ".outsourceto").attr( "class", "outsourceto" );
+    //this tell to the ui if price box sould be displayed immediately
+    if( chunk.show_info == '1' ){
+        $(".showprices" ).click();
+    } else {
+        $(".showprices" ).show();
+    }
 
+    // a generic error
     if( chunk.quote_result != 1 ){
         $(".outsourceto").addClass( "quoteError" );
         $('.modal.outsource').removeClass('loading');
@@ -227,19 +231,13 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
         return false;
     }
 
+    // job already outsourced
     if( chunk.outsourced == 1 ) {
-        $('.modal.outsource').removeClass('loading');
-        $(".outsourceto").addClass("outsourced");
-        $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').hide();
-        $('.time').html(chunk.delivery);
-        $('.displayprice').html(chunk.price);
-        $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
-        $('.outsource.modal .tprice').append('<a href="'+chunk.link_to_status+'" target="_blank">check status</a>');
-
-        chunk.link_to_status
+        renderOutsourcedQuote( chunk );
         return false;
     }
 
+    // delivery date too strict
     if( chunk.quote_available != 1 ) {
         $(".outsourceto").addClass("quoteNotAvailable");
         $('.modal.outsource').removeClass('loading');
@@ -251,22 +249,18 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
         return false;
     }
 
-    var isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
+    renderNormalQuote( chunk );
+}
 
+
+function renderNormalQuote( chunk ) {
     // if the customer has a timezone in the cookie, then use it
-    // otherwise attemp to guess it from his browser infos
-    var timezoneToShow = readCookie( "matecat_timezone" );
-    if ( timezoneToShow == "" ) {
-        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-    }
-
-    // update the timezone (both the displayed and the stored ones)
+    // otherwise attempt to guess it from his browser infos
+    var isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
     var deliveryToShow = ( isRevisionChecked ) ?  chunk.r_delivery : chunk.delivery;
-    changeTimezone(deliveryToShow, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
-    changeTimezone(chunk.r_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
-    updateTimezonesDescriptions( timezoneToShow );
+    var priceToShow = ( isRevisionChecked ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
 
-    $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
+    renderLocalizationInfos( priceToShow, deliveryToShow, chunk.r_price, chunk.r_delivery );
 
     if( new Date( deliveryToShow ).getTime() < $( "#forceDeliveryChosenDate" ).text() ) {
         $( ".delivery_container > .delivery").addClass( "faster" );
@@ -280,34 +274,8 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
         $('.modal.outsource .tooltip').addClass('hide');
     }
 
-    /**
-     * Removed Timezone with Intl because of too much different behaviours on different operating systems
-     *
-     */
 
-
-    //this tell to the ui if price box sould be displayed immediately
-    if( chunk.show_info == '1' ){
-        $(".showprices" ).click();
-    } else {
-        $(".showprices" ).show();
-    }
-
-    // if the customer has a currency in the cookie, then use it
-    // otherwise use the default one
-    var currToShow = readCookie( "matecat_currency" );
-    if ( currToShow == "" ) {
-        currToShow = "EUR";
-    }
-
-    // update the currency (both the displayed and the stored ones)
-    var priceToShow = ( isRevisionChecked ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
-    changeCurrency( priceToShow, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
-    changeCurrency( chunk.r_price, "EUR", currToShow, ".revision_currency", ".revision_price", "" );
-
-    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
-
-    // setting information about translator
+    // no info available about translator
     if( chunk.show_translator_data != 1 ) {
         $('.outsourceto').addClass("translatorNotAvailable");
         $('.outsource.modal .minus,').hide();
@@ -339,6 +307,58 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
     }
 
     $(".score_number").text(parseInt(voteToShow) + "%");
+}
+
+
+function renderOutsourcedQuote( chunk ) {
+    $(".outsourceto").addClass("outsourced");
+    $('.modal.outsource').removeClass('loading');
+    $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').hide();
+    $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
+    $('.outsource.modal .tprice').append('<a href="' + chunk.link_to_status + '" target="_blank">check status</a>');
+
+    if (chunk.typeOfService == "premium") {
+        $('.revision_heading').removeClass('hide');
+    } else {
+        $('.revision_heading').addClass('hide');
+    }
+
+    renderLocalizationInfos( chunk.price, chunk.delivery );
+    $( 'span.zone2').html( $( '#changeTimezone option:selected').attr( "data-description-long" ) );
+}
+
+
+function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
+    // if the customer has a timezone in the cookie, then use it
+    // otherwise attemp to guess it from his browser infos
+    var timezoneToShow = readCookie( "matecat_timezone" );
+    if ( timezoneToShow == "" ) {
+        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+    }
+
+    // update the timezone (both the displayed and the stored ones)
+    changeTimezone(delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
+    if( revision_delivery ) {
+        changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
+    }
+    updateTimezonesDescriptions( timezoneToShow );
+    $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
+
+
+    // if the customer has a currency in the cookie, then use it
+    // otherwise use the default one
+    var currToShow = readCookie( "matecat_currency" );
+    if ( currToShow == "" ) {
+        currToShow = "EUR";
+    }
+
+    // update the currency (both the displayed and the stored ones)
+    changeCurrency( price, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
+    if( revision_price ) {
+        changeCurrency(revision_price, "EUR", currToShow, ".revision_currency", ".revision_price", "");
+    }
+
+    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
 }
 
 
