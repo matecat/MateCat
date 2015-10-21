@@ -230,11 +230,11 @@ function updateOutsourcePopupValues( functionReference, returnedData, clickedBut
     if( chunk.outsourced == 1 ) {
         $('.modal.outsource').removeClass('loading');
         $(".outsourceto").addClass("outsourced");
-        $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').hide();
+        $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').addClass('hide');
         $('.time').html(chunk.delivery);
         $('.displayprice').html(chunk.price);
         $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
-        $('.outsource.modal .tprice').append('<a href="'+chunk.link_to_status+'" target="_blank">check status</a>');
+        $('.outsource.modal .tprice').append('<a class="checkstatus standardbtn" href="'+chunk.link_to_status+'" target="_blank">View status</a>').removeClass('hide');
 
         chunk.link_to_status
         return false;
@@ -447,7 +447,7 @@ function updateCartParameters() {
 
 function resetOutsourcePopup( resetHard ) {
     $( ".outsourceto").attr( "class", "outsourceto" );
-    $('.ErrorMsg').addClass('hide');
+    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus').addClass('hide');
     $('#delivery_not_available').addClass('hide');
     $('.needitfaster').removeClass('hide').html('Need it faster?');
     $('.trustbox2').attr( "class", "trustbox2 hide" );
@@ -461,8 +461,6 @@ function resetOutsourcePopup( resetHard ) {
     $( ".hide_translator.more").attr( "class", "hide_translator more hide" );
     $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
     $('.tprice.compress').attr( "class", "tprice" );
-    $('.modal.outsource .tooltip').addClass('hide');
-    $('.delivery_before_time').addClass('hide');
     $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,').removeClass('hide');
     $('.popup-box.pricebox.compress').attr( "class", "popup-box pricebox" );
     $('.delivery').appendTo(".delivery_container").attr("class","delivery");
