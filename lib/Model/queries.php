@@ -1963,7 +1963,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 				   %s
 				   %s
 				   GROUP BY f.id, j.id, j.password
-				   ORDER BY j.create_date, j.job_first_segment
+				   ORDER BY j.id,j.create_date, j.job_first_segment
 				   ";
 
     $and_1 = $and_2 = $and_3 = null;
