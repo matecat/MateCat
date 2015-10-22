@@ -1810,7 +1810,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data                        = array();
     $data[ 'password' ]          = $password;
     $data[ 'id_project' ]        = $projectStructure[ 'id_project' ];
-    $data[ 'id_translator' ]     = $projectStructure[ 'private_tm_user' ];
+    $data[ 'id_translator' ]     = is_null($projectStructure[ 'private_tm_user' ]) ?  "" : $projectStructure[ 'private_tm_user' ] ;
     $data[ 'source' ]            = $projectStructure[ 'source_language' ];
     $data[ 'target' ]            = $target_language;
     $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];

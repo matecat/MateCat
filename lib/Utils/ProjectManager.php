@@ -142,7 +142,7 @@ class ProjectManager {
 
                     if ( !isset( $keyExists ) || $keyExists === false ) {
                         Log::doLog( __METHOD__ . " -> TM key is not valid." );
-                        throw new Exception( "TM key is not valid.", -4 );
+                        throw new Exception( "TM key is not valid: ".$_tmKey[ 'key' ] , -4 );
                     }
 
                 } catch ( Exception $e ) {
