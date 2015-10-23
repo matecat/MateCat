@@ -311,7 +311,7 @@ $.extend(UI, {
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
 //            UI.toggleTM(this);
-        }).on('change', '.mgmt-table-mt tr .enable-mt input', function() {
+        }).on('click', '.mgmt-table-mt tr .enable-mt input', function() {
 //            console.log($(this).prop('checked'));
 //            $(this).prop('checked', true);
             if($(this).is(':checked')) {
