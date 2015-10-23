@@ -3605,7 +3605,7 @@ background: #3aa9dd!important;
 }
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) { 
-header, .wrapper-claim, .wrapper-upload, footer, #SnapABug_Button {display: none;}
+header, .wrapper-claim, .wrapper-upload, footer, #SnapABug_Button, #template-upload, #template-download {display: none;}
 .nobrowser {display: block!important;}
 .iepopup.nobrowser {width:100%;}
 .iepopup .col-2 {

@@ -118,7 +118,6 @@ class TMSService {
      * @throws Exception
      */
     public function addTmxInMyMemory() {
-
         $this->checkCorrectKey();
 
         Log::doLog( $this->file );
