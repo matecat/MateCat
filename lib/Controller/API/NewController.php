@@ -1,4 +1,5 @@
 <?php
+include_once INIT::$UTILS_ROOT . "/array_column.php";
 
 set_time_limit( 180 );
 
@@ -160,7 +161,14 @@ class NewController extends ajaxController {
             }
         }
 
-        $subjectList = array_column( $subjectList, 'key' );
+        //Array_column() is not supported on PHP 5.4, so i'll rewrite it
+        if ( !function_exists( 'array_column' ) ) {
+            $subjectList = Utils::array_column( $subjectList, 'key' );
+        } else {
+            $subjectList = array_column( $subjectList, 'key' );
+        }
+
+
 
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
