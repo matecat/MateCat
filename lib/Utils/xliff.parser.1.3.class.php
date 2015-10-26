@@ -273,7 +273,8 @@ class Xliff_Parser {
 	<g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
 	<g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
 	 */
-	function fix_non_well_formed_xml($content) {
+	public static function fix_non_well_formed_xml($content) {
+
 		if (self::$find_xliff_tags_reg === null) {
 			// List of the tags that we don't want to escape
 			$xliff_tags = array('g', 'x', 'bx', 'ex', 'bpt', 'ept', 'ph', 'it', 'mrk');
@@ -331,6 +332,7 @@ class Xliff_Parser {
         $tests = array(
             '' => '',
             'just text' => 'just text',
+        	'<gap>Hey</gap>' => '&lt;gap&gt;Hey&lt;/gap&gt;',
             '<mrk>Hey</mrk>' => '<mrk>Hey</mrk>',
             '<g >Hey</g >' => '<g >Hey</g >',
             '<g    >Hey</g   >' => '<g    >Hey</g   >',
