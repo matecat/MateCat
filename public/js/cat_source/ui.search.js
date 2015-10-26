@@ -354,13 +354,16 @@ $.extend(UI, {
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
             var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
             regTxt = regTxt.replace(/(\W)/gi, "\\$1");
-//            console.log('regTxt: ', regTxt);
+            regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
+
 //			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder).replace(/\W/gi, "$1" );
-			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-//			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
+
+            var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase);
+
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
-				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
+				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg1, q, txt, ignoreCase);
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
@@ -396,6 +399,7 @@ $.extend(UI, {
 	execSearchResultsMarking: function(areas, regex, testRegex) {
         searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
+            provaRegex = /(\(S)/;
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html()
                     .replace(/&lt;/g, UI.openTagPlaceholder)
