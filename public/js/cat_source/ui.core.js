@@ -2167,7 +2167,7 @@ console.log('changeStatus');
                 id:'iframeDownload',
                 src: ''
             });
-
+console.log('iFrameDownload: ', iFrameDownload);
             //append iFrame to the DOM
             $("body").append( iFrameDownload );
 
@@ -2182,10 +2182,10 @@ console.log('changeStatus');
 
                     //check for cookie
                     var token = $.cookie( downloadToken );
-
+console.log('eccolo: ', typeof token);
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
-                    if ( token ) {
+                    if ( typeof token != 'undefined' ) {
                         /*
                          * the token is a json and must be read with "parseJSON"
                          * in case of failure:
@@ -2195,7 +2195,10 @@ console.log('changeStatus');
                          *      error_message = Object {code: 0, message: "Download Complete."}
                          *
                          */
-                        var error_message = $.parseJSON( token );
+                        tokenData = $.parseJSON(token);
+                        if(parseInt(tokenData.code) < 0) {
+                            UI.showMessage({msg: tokenData.message})
+                        }
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, { path: '/', expires: -1 });
@@ -3431,12 +3434,14 @@ console.log('changeStatus');
     propagateTranslation: function(segment, status, evenTranslated) {
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
-        if( status == 'translated' ){
-            plusTranslated = ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated';
-//            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+        console.log('status: ', status);
+        console.log(status == 'translated');
+        console.log(config.isReview && (status == 'approved'));
+        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
+            plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function() {
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
                 $('.editarea', this).html( $('.editarea', segment).html() );
 
                 // if status is not set to draft, the segment content is not displayed

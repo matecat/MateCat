@@ -2652,6 +2652,11 @@ footer nav
 
 	.text .item,.white li{width: 46.67% !important;}
 
+	.track-changes {
+    width: 46.1%!important;
+    margin-right: 2.8%!important;
+}
+
 }
 
 
@@ -3763,9 +3768,9 @@ box-shadow: inset 0 0 1px 1px #888;
 
 .sub-editor.review .error-type
 {
-    width: 49%;
+    width: 45.6%;
     padding: 0 1%;
-	margin: 0 0 2% 0;
+    margin: 0 0 2% 0;
     float: left;
     border: 3px solid #fff;
 }
@@ -3779,9 +3784,8 @@ color:red !important;
 .track-changes {
   float: right;
   width: 45%;
-  margin-right: 3%;
+  margin-right: 2.9%;
   margin-top: 2px;
-  max-width: 520px;
 }
 
 

@@ -60,176 +60,15 @@ $.extend(UI, {
 			$( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
 			$( ".title-words" ).text( words );
 
-
 			if(config.enable_outsource) {
 				e.preventDefault();
-				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
-				row = $(this).parents('.tablestats');
 				$('.modal.outsource').addClass('loading');
                 $('.outsource.modal .continuebtn').addClass('loading disabled');
                 $('body').addClass('showingOutsourceTo');
-                resetOutsourcePopupSoft();
-
-
-				APP.doRequest({
-					data: {
-						action: 'outsourceTo',
-						pid: $('#pid').attr('data-pid'),
-						ppassword: $("#pid").attr("data-pwd"),
-                        fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
-                        typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
-						jobs: [
-							{
-								jid: row.attr('data-jid'),
-								jpassword: row.attr('data-pwd')
-							}
-						]
-					},
-					context: chunkId,
-					error: function() {
-		//						UI.failedConnection(0, 'outsourceToTranslated');
-					},
-					success: function(d) {
-
-                        //IMPORTANT this store the quote response to a class variable
-                        //to be posted out when Order Button is pressed
-                        UI.quoteResponse = d.data;
-
-						chunks = d.data;
-						chunkId = this;
-						ind = 0;
-						$.each(chunks, function(index) {
-							if(this.id == chunkId) ind = index;
-						});
-						chunk = d.data[ind];
-
-                        UI.url_ok = d.return_url.url_ok;
-                        UI.url_ko = d.return_url.url_ko;
-                        UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
-
-
-                        $( ".outsourceto").attr( "class", "outsourceto" );
-                        console.log('richiedo preventivo');
-
-
-                        if( chunk.quote_result != 1 ){
-                            $(".outsourceto").addClass( "quoteError" );
-                            $('.modal.outsource').removeClass('loading');
-                            $('.outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
-                            $('.ErrorMsgQuoteError').removeClass('hide');
-                            $('#forceDeliveryContainer').css('top','465px');
-                            $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
-                            $('.needitfaster').html('Change delivery date');
-                            $('.outsource.modal .continuebtn').addClass('hide');
-                            return false;
-                        }
-                        
-                        if( chunk.quote_available != 1 ) {
-                            $(".outsourceto").addClass("quoteNotAvailable");
-                            $('.modal.outsource').removeClass('loading');   
-                            $('.ErrorMsgquoteNotAvailable').removeClass('hide');
-                            $('.guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .revision_delivery, .revision_price_box,#delivery_before_time').addClass('hide');
-                            $('.needitfaster').html('Change delivery date');
-                            $('#forceDeliveryContainer #delivery_not_available').removeClass('hide');
-                            $('.outsource.modal .forceDeliveryButtonOk').addClass('disabled');
-                            return false;
-                        }
-
-                        var isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
-
-                        // if the customer has a timezone in the cookie, then use it
-                        // otherwise attemp to guess it from his browser infos
-                        var timezoneToShow = readCookie( "matecat_timezone" );
-                        if ( timezoneToShow == "" ) {
-                            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-                        }
-
-                        // update the timezone (both the displayed and the stored ones)
-                        var deliveryToShow = ( isRevisionChecked ) ?  chunk.r_delivery : chunk.delivery;
-                        changeTimezone(deliveryToShow, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
-                        changeTimezone(chunk.r_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
-                        updateTimezonesDescriptions( timezoneToShow );
-
-                        $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
-
-                        if( new Date( deliveryToShow ).getTime() < $( "#forceDeliveryChosenDate" ).text() ) {
-                            $( ".delivery_container > .delivery").addClass( "faster" );
-                            $('#delivery_before_time').removeClass('hide');   
-                            $("#delivery_manual_error").addClass( "hide" );
-                            $('.modal.outsource .tooltip').removeClass('hide');
-
-                        } else {
-                            $( ".delivery_container > .delivery").removeClass( "faster" );
-                            $('#delivery_before_time').addClass('hide');
-                            $('.modal.outsource .tooltip').addClass('hide');
-                        }
-
-                        /**
-                         * Removed Timezone with Intl because of too much different behaviours on different operating systems
-                         *
-                         */
-
-
-						//this tell to the ui if price box sould be displayed immediately
-						if( chunk.show_info == '1' ){
-							$(".showprices" ).click();
-						} else {
-							$(".showprices" ).show();
-						}
-
-                        // if the customer has a currency in the cookie, then use it
-                        // otherwise use the default one
-                        var currToShow = readCookie( "matecat_currency" );
-                        if ( currToShow == "" ) {
-                            currToShow = "EUR";
-                        }
-
-                        // update the currency (both the displayed and the stored ones)
-                        var priceToShow = ( isRevisionChecked ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
-                        changeCurrency( priceToShow, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
-                        changeCurrency( chunk.r_price, "EUR", currToShow, ".revision_currency", ".revision_price", "" );
-
-                        $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
-
-                        // setting information about translator
-                        if( chunk.show_translator_data != 1 ) {
-                            $('.outsourceto').addClass("translatorNotAvailable");
-                            $('.outsource.modal .minus,').hide();
-                            $('.trustbox2').removeClass('hide');
-                            $('.translator_bio,.outsource.modal .more,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').addClass('hide');
-                        return false;
-                        }
-
-
-                        var subjectsString = "";
-                        if (chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0) {
-                            subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>, " + chunk.t_subjects;
-                        } else if (chunk.t_chosen_subject.length > 0) {
-                            subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>";
-                        } else {
-                            subjectsString = chunk.t_subjects;
-                        }
-
-                        $(".translator_name > strong").text(chunk.t_name);
-                        $(".experience").text(chunk.t_experience_years);
-                        $(".subjects").html(subjectsString);
-                        $(".translated_words").html(chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
-
-                        var voteToShow = ( isRevisionChecked ) ? chunk.r_vote : chunk.t_vote;
-
-                        if( chunk.show_revisor_data != 1 ) {
-                            $(".outsourceto").addClass("revisorNotAvailable");
-                            voteToShow = chunk.t_vote;
-                        }
-
-                        $(".score_number").text(parseInt(voteToShow) + "%");
-
-                    }
-                });
-                         console.log('richiedo preventivo fine');
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
-
+                $('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
+                resetOutsourcePopup( false );
+                getOutsourceQuote( $( this ), "parseResult" );
 				$('.outsource.modal').show();
 				return false;
 			}
@@ -322,6 +161,205 @@ $.extend(UI, {
 //	},
 });
 
+
+function getOutsourceQuote( clickedButton, callbackFunction ) {
+    var row = clickedButton.parents('.tablestats');
+
+    APP.doRequest({
+        data: {
+            action: 'outsourceTo',
+            pid: $('#pid').attr('data-pid'),
+            ppassword: $("#pid").attr("data-pwd"),
+            fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
+            typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
+            jobs: [
+                {
+                    jid: row.attr('data-jid'),
+                    jpassword: row.attr('data-pwd')
+                }
+            ]
+        },
+        context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
+        error: function() {
+            // UI.failedConnection(0, 'outsourceToTranslated');
+        },
+        success: function(d) {
+            if( callbackFunction == "parseResult" ) {
+                parseResult( this, d, clickedButton );
+            } else if( callbackFunction == "precomputeOutsourceQuotesRecursive" ) {
+                precomputeOutsourceQuotesRecursive();
+            }
+        }
+    });
+}
+
+
+function parseResult( chunkId, returnedData, clickedButton ) {
+    //IMPORTANT this store the quote response to a class variable
+    //to be posted out when Order Button is pressed
+    UI.quoteResponse = returnedData.data[0];
+
+    var chunks = returnedData.data[0];
+    var ind = 0;
+    $.each(chunks, function(index) {
+        if(clickedButton.id == chunkId) ind = index;
+    });
+    var chunk = returnedData.data[0][ind];
+    var row = clickedButton.parents('.tablestats');
+
+    UI.url_ok = returnedData.return_url.url_ok;
+    UI.url_ko = returnedData.return_url.url_ko;
+    UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
+
+    //this tell to the ui if price box sould be displayed immediately
+    if( chunk.show_info == '1' ){
+        $(".showprices" ).click();
+    } else {
+        $(".showprices" ).show();
+    }
+
+    // a generic error
+    if( chunk.quote_result != 1 ){
+        $(".outsourceto").addClass( "quoteError" );
+        $('.modal.outsource').removeClass('loading');
+        $('.outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
+        $('.ErrorMsgQuoteError').removeClass('hide');
+        $('#forceDeliveryContainer').css('top','465px');
+        $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
+        $('.needitfaster').html('Change delivery date');
+        $('.outsource.modal .continuebtn').addClass('hide');
+        return false;
+    }
+
+    // job already outsourced
+    if( chunk.outsourced == 1 ) {
+        renderOutsourcedQuote( chunk );
+        return false;
+    }
+
+    // delivery date too strict
+    if( chunk.quote_available != 1 ) {
+        $(".outsourceto").addClass("quoteNotAvailable");
+        $('.modal.outsource').removeClass('loading');
+        $('.ErrorMsgquoteNotAvailable').removeClass('hide');
+        $('.guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .revision_delivery, .revision_price_box,#delivery_before_time').addClass('hide');
+        $('.needitfaster').html('Change delivery date');
+        $('#forceDeliveryContainer #delivery_not_available').removeClass('hide');
+        $('.outsource.modal .forceDeliveryButtonOk').addClass('disabled');
+        return false;
+    }
+
+    renderNormalQuote( chunk );
+}
+
+
+function renderNormalQuote( chunk ) {
+    // if the customer has a timezone in the cookie, then use it
+    // otherwise attempt to guess it from his browser infos
+    var isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
+    var deliveryToShow = ( isRevisionChecked ) ?  chunk.r_delivery : chunk.delivery;
+    var priceToShow = ( isRevisionChecked ) ? parseFloat( chunk.r_price ) + parseFloat( chunk.price ) : chunk.price;
+
+    renderLocalizationInfos( priceToShow, deliveryToShow, chunk.r_price, chunk.r_delivery );
+
+    if( new Date( deliveryToShow ).getTime() < $( "#forceDeliveryChosenDate" ).text() ) {
+        $( ".delivery_container > .delivery").addClass( "faster" );
+        $('#delivery_before_time').removeClass('hide');
+        $("#delivery_manual_error").addClass( "hide" );
+        $('.modal.outsource .tooltip').removeClass('hide');
+
+    } else {
+        $( ".delivery_container > .delivery").removeClass( "faster" );
+        $('#delivery_before_time').addClass('hide');
+        $('.modal.outsource .tooltip').addClass('hide');
+    }
+
+
+    // no info available about translator
+    if( chunk.show_translator_data != 1 ) {
+        $('.outsourceto').addClass("translatorNotAvailable");
+        $('.outsource.modal .minus,').hide();
+        $('.trustbox2').removeClass('hide');
+        $('.translator_bio,.outsource.modal .more,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').addClass('hide');
+        return false;
+    }
+
+
+    var subjectsString = "";
+    if (chunk.t_chosen_subject.length > 0 && chunk.t_subjects.length > 0) {
+        subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>, " + chunk.t_subjects;
+    } else if (chunk.t_chosen_subject.length > 0) {
+        subjectsString = "<strong>" + chunk.t_chosen_subject + "</strong>";
+    } else {
+        subjectsString = chunk.t_subjects;
+    }
+
+    $(".translator_name > strong").text(chunk.t_name);
+    $(".experience").text(chunk.t_experience_years);
+    $(".subjects").html(subjectsString);
+    $(".translated_words").html(chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
+
+    var voteToShow = ( isRevisionChecked ) ? chunk.r_vote : chunk.t_vote;
+
+    if( chunk.show_revisor_data != 1 ) {
+        $(".outsourceto").addClass("revisorNotAvailable");
+        voteToShow = chunk.t_vote;
+    }
+
+    $(".score_number").text(parseInt(voteToShow) + "%");
+}
+
+
+function renderOutsourcedQuote( chunk ) {
+    $(".outsourceto").addClass("outsourced");
+    $('.modal.outsource').removeClass('loading');
+    $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').addClass('hide');
+    $('.outsource.modal .tprice').append('<a class="checkstatus standardbtn" href="'+chunk.link_to_status+'" target="_blank">View status</a>').removeClass('hide');
+    $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
+
+    if (chunk.typeOfService == "premium") {
+        $('.revision_heading').removeClass('hide');
+    } else {
+        $('.revision_heading').addClass('hide');
+    }
+
+    renderLocalizationInfos( chunk.price, chunk.delivery );
+    $( 'span.zone2').html( $( '#changeTimezone option:selected').attr( "data-description-long" ) );
+}
+
+
+function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
+    // if the customer has a timezone in the cookie, then use it
+    // otherwise attemp to guess it from his browser infos
+    var timezoneToShow = readCookie( "matecat_timezone" );
+    if ( timezoneToShow == "" ) {
+        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+    }
+
+    // update the timezone (both the displayed and the stored ones)
+    changeTimezone(delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
+    if( revision_delivery ) {
+        changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
+    }
+    updateTimezonesDescriptions( timezoneToShow );
+    $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
+
+
+    // if the customer has a currency in the cookie, then use it
+    // otherwise use the default one
+    var currToShow = readCookie( "matecat_currency" );
+    if ( currToShow == "" ) {
+        currToShow = "EUR";
+    }
+
+    // update the currency (both the displayed and the stored ones)
+    changeCurrency( price, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
+    if( revision_price ) {
+        changeCurrency(revision_price, "EUR", currToShow, ".revision_currency", ".revision_price", "");
+    }
+
+    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
+}
 
 
 function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol, elementToUpdateValue, elementToUpdatePPW ) {
@@ -426,43 +464,25 @@ function updateCartParameters() {
 
 }
 
-                
-function resetOutsourcePopupSoft() {
-    console.log('soft reset');
-    $( ".outsourceto").attr( "class", "outsourceto" );
-    $('.ErrorMsg').addClass('hide');
-    $('#delivery_not_available').addClass('hide');
-    $('.needitfaster').removeClass('hide').html('Need it faster?');
-    $('.trustbox2').attr( "class", "trustbox2" ).addClass("hide");
-    $('.trustbox1').attr( "class", "trustbox1" );
-    $('.translator_info_box').attr( "class", "translator_info_box" ).addClass("hide");
-    $('.translator_bio').attr( "class", "translator_bio" );
-    $('.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').removeClass('hide');
-    $( ".show_translator.more").attr( "class", "" ).addClass("show_translator more");
-    $('.revision_delivery').attr( "class", "" ).addClass('revision_delivery');
-    $('.revision_price_box').attr( "class", "" ).addClass('revision_price_box');
-    $( ".hide_translator.more").attr( "class", "" ).addClass("hide_translator more hide");
-    $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
-    $('.tprice.compress').attr( "class", "tprice" );
-    $('.modal.outsource .tooltip').addClass('hide');
-    $('.delivery_before_time').addClass('hide');
-    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,').removeClass('hide');
-    $('.popup-box.pricebox.compress').attr( "class", "" ).addClass("popup-box pricebox");
-    $('.delivery').appendTo(".delivery_container").attr("class","delivery");
-}
 
 function resetOutsourcePopup( resetHard ) {
-    console.log('hard reset');
     $( ".outsourceto").attr( "class", "outsourceto" );
-    $( ".show_translator.more").attr( "class", "" ).addClass("show_translator more");
-    $( ".hide_translator.more").attr( "class", "" ).addClass("hide_translator more hide");
-    $('#forceDeliveryContainer').addClass("hide");
-    $('.trustbox2').attr( "class", "trustbox2" ).addClass("hide");
+    $('.needitfaster').html('Need it faster?');
+    $('.trustbox2').attr( "class", "trustbox2" );
     $('.trustbox1').attr( "class", "trustbox1" );
-    $('.translator_info_box').attr( "class", "translator_info_box" ).addClass("hide");
     $('.translator_bio').attr( "class", "translator_bio" );
+    $('.translator_info_box').attr( "class", "translator_info_box" );
+    $('.revision_delivery').attr( "class", "revision_delivery" );
+    $('.revision_price_box').attr( "class", "revision_price_box" );
     $('.guaranteed_by.expanded').attr( "class", "guaranteed_by" );
     $('.tprice.compress').attr( "class", "tprice" );
-    $('.popup-box.pricebox.compress').attr( "class", "" ).addClass("popup-box pricebox");
+    $( ".show_translator.more").attr( "class", "show_translator more" );
+    $( ".hide_translator.more").attr( "class", "hide_translator more" );
+    $('.popup-box.pricebox.compress').attr( "class", "popup-box pricebox" );
     $('.delivery').appendTo(".delivery_container").attr("class","delivery");
+    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster').removeClass('hide');
+    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more').addClass('hide');
+
+    if( resetHard )
+        $('#forceDeliveryContainer').addClass("hide");
 }

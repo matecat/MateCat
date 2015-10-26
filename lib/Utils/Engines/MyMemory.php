@@ -508,13 +508,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         if ( !$this->result->responseStatus == 200 ) {
             Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
-            throw new Exception( "Error: The private TM key you entered seems to be invalid. Please, check that the key is correct.", -2 );
+            throw new Exception( "Error: The private TM key you entered ( $apiKey ) seems to be invalid. Please, check that the key is correct.", -2 );
         }
 
         $isValidKey = filter_var( $this->result->responseData, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
         if ( $isValidKey === null ) {
-            throw new Exception( "Error: The private TM key you entered seems to be invalid.", -3 );
+            throw new Exception( "Error: The private TM key you entered seems to be invalid: $apiKey", -3 );
         }
 
         return $isValidKey;

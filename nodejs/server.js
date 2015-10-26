@@ -104,7 +104,7 @@ var stompMessageReceived = function( body ) {
 
     var candidate = (
       ele._matecatJobId == message.data.id_job &&
-      ele._matecatPw == message.data.password &&
+      message.data.passwords.indexOf( ele._matecatPw ) !== -1  &&
       ele._clientId != message.data.id_client
     );
 
