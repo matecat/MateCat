@@ -23,6 +23,7 @@ class Bootstrap {
         $current_env = trim(preg_replace('/\s\s+/', ' ', $current_env));
 
         if ( $current_env == null || $current_env == '' ) {
+            echo "Environment is not defined.";
             throw new Exception ( __METHOD__ . " -> ENV is not set." );
         }
 
