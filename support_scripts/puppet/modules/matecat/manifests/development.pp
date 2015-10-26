@@ -37,12 +37,30 @@ package {'grunt-cli':
 }
 
 # runtime required packages
-package {[
-  'php5', 'libapache2-mod-php5',
-  'php5-curl', 'php5-mysql',
-  'php-pear'
-  ]:
-  ensure  => installed
+
+file {'php53.list':
+  path    => '/etc/apt/sources.list.d/php53.list',
+  source  => 'puppet:///modules/matecat/php53.list',
+  owner   => 'root',
+  group   => 'root'
+} ->
+file { 'apt-preferences-php53':
+  path    => '/etc/apt/preferences.d/php53',
+  source  => 'puppet:///modules/matecat/apt-preferences-php53',
+  owner   => 'root',
+  group   => 'root'
+} ->
+package {['php5-cli', 'php5',
+  'php5-mysql', 'php5-common', 'php5-curl',
+  'php-pear' ]:
+  ensure => installed
+} ->
+file { 'php.ini':
+  path    => '/etc/php5/apache2/php.ini',
+  source  => 'puppet:///modules/php/php.ini',
+  owner   => 'root',
+  group   => 'root',
+  notify  => Service["apache2"]
 }
 
 package {['redis-server', 'screen', 'postfix']:
@@ -84,16 +102,6 @@ concat::fragment { "matecat-custom-fragment":
   content => template('matecat/development-vhost.conf-fragment.erb')
 }
 
-# php configuration
-file { 'php.ini':
-  path    => '/etc/php5/apache2/php.ini',
-  source  => 'puppet:///modules/php/php.ini',
-  owner   => 'root',
-  group   => 'root',
-  notify  => Service["apache2"],
-  require => Package['php5']
-}
-
 class { 'java':
   distribution => 'jre',
 } ->
@@ -110,22 +118,16 @@ activemq::instance { 'matecat':
 }
 
 # MateCAT config
-file { 'config.ini':
-  path   => '/vagrant/inc/config.ini',
-  source => 'puppet:///modules/matecat/config.ini',
-  owner  => 'vagrant',
-  group  => 'vagrant',
-  mode   => '0755',
-  replace => false
+exec { 'cp inc/config.ini.sample inc/config.ini':
+  path    => '/bin',
+  cwd     => '/vagrant',
+  creates => '/vagrant/inc/config.ini'
 }
 
-file { 'oauth_config.ini':
-  path   => '/vagrant/inc/oauth_config.ini',
-  source => 'puppet:///modules/matecat/oauth_config.ini',
-  owner  => 'vagrant',
-  group  => 'vagrant',
-  mode   => '0755',
-  replace => false
+exec { 'cp inc/oauth_config.ini.sample inc/oauth_config.ini':
+  path    => '/bin',
+  cwd     => '/vagrant',
+  creates => '/vagrant/inc/config.ini'
 }
 
 class { '::mysql::server':

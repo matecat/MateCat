@@ -1371,7 +1371,8 @@ $.extend(UI, {
 
 				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
-				UI.saveInUndoStack('drop');
+                UI.lockTags(UI.editarea);
+                UI.saveInUndoStack('drop');
             }, 100);
 		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();

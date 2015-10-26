@@ -95,187 +95,206 @@ class downloadFileController extends downloadController {
            5)the temporary file is deleted
          */
 
-        // Detect which type of converter was used to create this project, just
-        // checking the XLIFF type of the project's first file.
-        // Is it possible for a project to have some files converted with SDL
-        // and others with the new MateCAT converter? No. Because all the files
-        // of the new projects are converted with the new MateCAT converter,
-        // while all the old projects were converted with SDL Trados Studio.
-        // It's not possible to have a project with files converted using both
-        // converters.
-        $fileType = DetectProprietaryXliff::getInfo($files_job[0]['xliffFilePath']);
-        if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter') {
-            $useLegacyConverters = false;
-        } else {
-            // Use SDL Trados Studio in case of SDLXLIFF and GlobalSight
-            $useLegacyConverters = true;
+        // This array will contain all the files of $files_job split by the
+        // proper converter to use for each one.
+        // At index 0 there will be all the files that need new converters.
+        // At index 1 all the files that need legacy converters
+        $files_job_by_converter_type = array(array(), array());
+
+        // Detect the type of converter to use for each file, then store
+        // file infos accordingly.
+        foreach ( $files_job as $file ) {
+            $fileType = DetectProprietaryXliff::getInfo($file['xliffFilePath']);
+            if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter') {
+                // Use new converters
+                $converter_type = 0;
+            } else {
+                // Use legacy converters in case of SDLXLIFF and GlobalSight
+                $converter_type = 1;
+            }
+            $files_job_by_converter_type[$converter_type][] = $file;
         }
 
-        //file array is chuncked. Each chunk will be used for a parallel conversion request.
-        $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
-        foreach ( $files_job as $chunk ) {
-
-            $converter = new FileFormatConverter($useLegacyConverters);
-
-            $files_to_be_converted = array();
-
-            foreach ( $chunk as $file ) {
-
-                $mime_type        = $file[ 'mime_type' ];
-                $fileID           = $file[ 'id_file' ];
-                $current_filename = $file[ 'filename' ];
-
-                //get path for the output file converted to know it's right extension
-                $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
-                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
-
-                //make dir if doesn't exist
-                if ( !file_exists( dirname( $outputPath ) ) ) {
-
-                    Log::doLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) . '' );
-                    mkdir( dirname( $outputPath ), 0775, true );
-
-                }
-
-                $debug[ 'get_segments' ][] = time();
-                $data                      = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
-                $debug[ 'get_segments' ][] = time();
-
-                //prepare regexp for nest step
-                $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
-                $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
-
-                foreach ( $data as $i => $k ) {
-                    //create a secondary indexing mechanism on segments' array; this will be useful
-                    //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
-                    $data[ 'matecat|' . $k[ 'internal_id' ] ][] = $i;
-
-                    //FIXME: temporary patch
-                    $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
-                    $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
-
-                    //remove binary chars in some xliff files
-                    $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
-                    $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
-
-                    //clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
-                    $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
-                    $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
-                    if ( $sanitized_src != null ) {
-                        $data[ $i ][ 'segment' ] = $sanitized_src;
-                    }
-                    if ( $sanitized_trg != null ) {
-                        $data[ $i ][ 'translation' ] = $sanitized_trg;
-                    }
-
-                }
-
-                $debug[ 'replace' ][] = time();
-
-                //instatiate parser
-                $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
-
-                if ( $this->download_type == 'omegat' ) {
-                    $xsp->setSourceInTarget( true );
-                }
-
-                //run parsing
-                Log::doLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation();
-
-                //free memory
-                unset( $xsp );
-                unset( $data );
-
-                $debug[ 'replace' ][] = time();
-
-                $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
-                $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
-
-                if ( $this->forceXliff ) {
-                    $file_info_details                              = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ] );
-
-                    //clean the output filename by removing
-                    // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
-                    $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
-                }
-
-                /**
-                 * Conversion Enforce
-                 */
-                $convertBackToOriginal = true;
-                try {
-
-
-                    //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
-
-                    $fileType = DetectProprietaryXliff::getInfo($file[ 'xliffFilePath' ]);
-                    // When the 'proprietary' flag is set to false, the xliff
-                    // is not passed to any converter, because is handled
-                    // directly inside MateCAT.
-                    $xliffWasNotConverted = ($fileType['proprietary'] === false);
-
-                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
-                        $convertBackToOriginal = false;
-                        Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                    } else {
-                        //TODO: dos2unix ??? why??
-                        //force unix type files
-                        Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                    }
-
-
-                } catch ( Exception $e ) {
-                    Log::doLog( $e->getMessage() );
-                }
-
-                if ( $convertBackToOriginal ) {
-
-                    $output_content[ $fileID ][ 'out_xliff_name' ] = $outputPath;
-                    $output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
-                    $output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
-
-                    $files_to_be_converted [ $fileID ] = $output_content[ $fileID ];
-
-                } elseif ( $this->forceXliff ) {
-
-                    $this->cleanFilePath( $output_content[ $fileID ][ 'document_content' ] );
-
-                }
-
+        // Process files according to the converters needed, one converter
+        // at a time
+        foreach ($files_job_by_converter_type as $converter_type => $files_job) {
+            switch ($converter_type) {
+                case 0:
+                    $useLegacyConverters = false;
+                    break;
+                case 1:
+                    $useLegacyConverters = true;
+                    break;
+                default:
+                    throw new Exception("Unexpected converter type: " . $converter_type);
             }
 
-            $debug[ 'do_conversion' ][] = time();
-            $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
+            //file array is chuncked. Each chunk will be used for a parallel conversion request.
+            $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
+            foreach ( $files_job as $chunk ) {
 
-            foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
+                $converter = new FileFormatConverter($useLegacyConverters);
 
-                $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
+                $files_to_be_converted = array();
 
-                //in case of .strings, they are required to be in UTF-16
-                //get extension to perform file detection
-                $extension = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
-                if ( strtoupper( $extension ) == 'STRINGS' ) {
-                    //use this function to convert stuff
-                    $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'document_content' ] );
+                foreach ( $chunk as $file ) {
+
+                    $mime_type        = $file[ 'mime_type' ];
+                    $fileID           = $file[ 'id_file' ];
+                    $current_filename = $file[ 'filename' ];
+
+                    //get path for the output file converted to know it's right extension
+                    $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
+                    $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
+
+                    //make dir if doesn't exist
+                    if ( !file_exists( dirname( $outputPath ) ) ) {
+
+                        Log::doLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) . '' );
+                        mkdir( dirname( $outputPath ), 0775, true );
+
+                    }
+
+                    $debug[ 'get_segments' ][] = time();
+                    $data                      = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
+                    $debug[ 'get_segments' ][] = time();
+
+                    //prepare regexp for nest step
+                    $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
+                    $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
+
+                    foreach ( $data as $i => $k ) {
+                        //create a secondary indexing mechanism on segments' array; this will be useful
+                        //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
+                        $data[ 'matecat|' . $k[ 'internal_id' ] ][] = $i;
+
+                        //FIXME: temporary patch
+                        $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
+                        $data[ $i ][ 'segment' ]     = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'segment' ] );
+
+                        //remove binary chars in some xliff files
+                        $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
+                        $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
+
+                        //clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
+                        $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
+                        $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
+                        if ( $sanitized_src != null ) {
+                            $data[ $i ][ 'segment' ] = $sanitized_src;
+                        }
+                        if ( $sanitized_trg != null ) {
+                            $data[ $i ][ 'translation' ] = $sanitized_trg;
+                        }
+
+                    }
+
+                    $debug[ 'replace' ][] = time();
+
+                    //instatiate parser
+                    $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
+
+                    if ( $this->download_type == 'omegat' ) {
+                        $xsp->setSourceInTarget( true );
+                    }
+
+                    //run parsing
+                    Log::doLog( "work on " . $fileID . " " . $current_filename );
+                    $xsp->replaceTranslation();
+
+                    //free memory
+                    unset( $xsp );
+                    unset( $data );
+
+                    $debug[ 'replace' ][] = time();
+
+                    $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
+                    $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
+
+                    if ( $this->forceXliff ) {
+                        $file_info_details                              = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ] );
+
+                        //clean the output filename by removing
+                        // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
+                        $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
+                    }
+
+                    /**
+                     * Conversion Enforce
+                     */
+                    $convertBackToOriginal = true;
+                    try {
 
 
-                    //strip previously added BOM
-                    $encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
+                        //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
+                        $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-                    //store new content
-                    $output_content[ $fileID ][ 'document_content' ] = $encodingConvertedFile[ 1 ];
+                        $fileType = DetectProprietaryXliff::getInfo($file[ 'xliffFilePath' ]);
+                        // When the 'proprietary' flag is set to false, the xliff
+                        // is not passed to any converter, because is handled
+                        // directly inside MateCAT.
+                        $xliffWasNotConverted = ($fileType['proprietary'] === false);
 
-                    //trash temporary data
-                    unset( $encodingConvertedFile );
+                        if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
+                            $convertBackToOriginal = false;
+                            Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                        } else {
+                            //TODO: dos2unix ??? why??
+                            //force unix type files
+                            Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                        }
+
+
+                    } catch ( Exception $e ) {
+                        Log::doLog( $e->getMessage() );
+                    }
+
+                    if ( $convertBackToOriginal ) {
+
+                        $output_content[ $fileID ][ 'out_xliff_name' ] = $outputPath;
+                        $output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
+                        $output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
+
+                        $files_to_be_converted [ $fileID ] = $output_content[ $fileID ];
+
+                    } elseif ( $this->forceXliff ) {
+
+                        $this->cleanFilePath( $output_content[ $fileID ][ 'document_content' ] );
+
+                    }
+
                 }
 
+                $debug[ 'do_conversion' ][] = time();
+                $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
 
+                foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
+
+                    $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
+
+                    //in case of .strings, they are required to be in UTF-16
+                    //get extension to perform file detection
+                    $extension = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
+                    if ( strtoupper( $extension ) == 'STRINGS' ) {
+                        //use this function to convert stuff
+                        $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'document_content' ] );
+
+
+                        //strip previously added BOM
+                        $encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
+
+                        //store new content
+                        $output_content[ $fileID ][ 'document_content' ] = $encodingConvertedFile[ 1 ];
+
+                        //trash temporary data
+                        unset( $encodingConvertedFile );
+                    }
+
+
+                }
+                //            $output_content[ $fileID ][ 'document_content' ] = $convertResult[ 'document_content' ];
+                unset( $convertResult );
+                $debug[ 'do_conversion' ][] = time();
             }
-            //            $output_content[ $fileID ][ 'document_content' ] = $convertResult[ 'document_content' ];
-            unset( $convertResult );
-            $debug[ 'do_conversion' ][] = time();
         }
 
         foreach ( $output_content as $idFile => $fileInformations ) {
@@ -334,32 +353,53 @@ class downloadFileController extends downloadController {
 
             $this->createOmegaTZip( $output_content, $jobData[ 'source' ], $jobData[ 'target' ] ); //add zip archive content here;
 
-        } else {
+        }
+        else {
 
-            $output_content = $this->getOutputContentsWithZipFiles( $output_content );
+            try {
 
-            if ( count( $output_content ) > 1 ) {
+                $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
-                //cast $output_content elements to ZipContentObject
-                foreach ( $output_content as $key => $__output_content_elem ) {
-                    $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
-                }
+                if ( count( $output_content ) > 1 ) {
 
-                if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                    if ( $this->forceXliff ) {
-                        $this->_filename = $this->id_job . ".zip";
-                    } else {
-                        $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                    //cast $output_content elements to ZipContentObject
+                    foreach ( $output_content as $key => $__output_content_elem ) {
+                        $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
                     }
+
+                    if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                        if ( $this->forceXliff ) {
+                            $this->_filename = $this->id_job . ".zip";
+                        } else {
+                            $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                        }
+                    }
+
+                    $this->content = self::composeZip( $output_content ); //add zip archive content here;
+
+                } else {
+                    //always an array with 1 element, pop it, Ex: array( array() )
+                    $output_content = array_pop( $output_content );
+                    $this->setContent( $output_content );
                 }
-
-                $this->content = self::composeZip( $output_content ); //add zip archive content here;
-
-            } else {
-                //always an array with 1 element, pop it, Ex: array( array() )
-                $output_content = array_pop( $output_content );
-                $this->setContent( $output_content );
             }
+            catch ( Exception $e ){
+
+                $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
+                $msg .= "\n\n Request: " . var_export( $_REQUEST, true );
+                Log::$fileName = 'fatal_errors.txt';
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+                $this->unlockToken(
+                    array(
+                            "code" => -110,
+                            "message" => "Download failed. Please contact " . INIT::$SUPPORT_MAIL
+                    )
+                );
+                throw $e; // avoid sent Headers and empty file content with finalize method
+
+            }
+
         }
 
         $debug[ 'total' ][] = time();

@@ -11,6 +11,7 @@ class commentController extends ajaxController {
     private $struct ;
     private $new_record ;
     private $current_user ;
+    private $project_data ;
 
     public function __destruct() {
     }
@@ -145,16 +146,24 @@ class commentController extends ajaxController {
         Log::doLog($url);
 
         $users = $this->resolveUsers();
-
-        // FIXME: this is not optimal, should make use of DAO and
-        // return just one record, not an array of records.
-        $project_data = getProjectData( $this->job[ 'id_project' ] );
+        $project_data = $this->projectData(); 
 
         foreach($users as $user) {
             $email = new Comments_CommentEmail($user, $this->struct, $url,
-                $project_data[0]['name'] );
+                $project_data[0]['name']
+            );
             $email->deliver();
         }
+    }
+
+    private function projectData() {
+        if ( $this->project_data == null ) {
+            // FIXME: this is not optimal, should make use of DAO and
+            // return just one record, not an array of records.
+            $this->project_data = getProjectData( $this->job[ 'id_project' ] );
+        }
+
+        return $this->project_data ;
     }
 
     private function resolveUsers() {
@@ -238,7 +247,7 @@ class commentController extends ajaxController {
             '_type' => 'comment',
             'data' => array(
                 'id_job'    => $this->__postInput['id_job'],
-                'password'  => $this->__postInput['password'],
+                'passwords'  => $this->getProjectPasswords(),
                 'id_client' => $this->__postInput['id_client'],
                 'payload'   => $this->payload
             )
@@ -250,6 +259,14 @@ class commentController extends ajaxController {
             $message,
             array( 'persistent' => 'true' )
         );
+    }
+
+    private function getProjectPasswords() {
+        $pws = array();
+        foreach($this->projectData() as $chunk) {
+            array_push( $pws, $chunk['jpassword'] );
+        }
+        return $pws;
     }
 
 }
