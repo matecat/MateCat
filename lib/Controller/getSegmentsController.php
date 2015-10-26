@@ -186,7 +186,8 @@ class getSegmentsController extends ajaxController {
 
     private function prepareNotes( $segments ) {
         $start = $segments[0]['sid'];
-        $stop = end($segments)['sid'];
+        $last = end($segments);
+        $stop = $last['sid'];
 
         $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
 
