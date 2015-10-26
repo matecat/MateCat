@@ -63,6 +63,13 @@ file { 'php.ini':
   notify  => Service["apache2"]
 }
 
+file { '.env': 
+  path    => '/vagrant/inc/.env',
+  owner   => 'vagrant',
+  group   => 'vagrant',
+  content => 'development'
+}
+
 package {['redis-server', 'screen', 'postfix']:
   ensure => installed
 }
@@ -138,11 +145,23 @@ class { '::mysql::server':
 
 exec { 'cat lib/Model/matecat.sql lib/Model/comments.sql > /var/tmp/matecat-schema.sql':
   path    => '/bin',
-  cwd     => '/vagrant'
-} ->
+  cwd     => '/vagrant', 
+  creates => '/vagrant/lib/Model/matecat-schema.sql'
+} 
+
 mysql::db { 'matecat':
-  user     => 'matecat',
-  password => 'matecat01',
+  dbname   => 'matecat', 
+  user     => 'matecat_user',
+  password => 'matecat_user',
+  host     => 'localhost',
+  grant    => ['ALL'],
+  sql      => '/var/tmp/matecat-schema.sql'
+} 
+
+mysql::db { 'matecat_test':
+  dbname   => 'matecat_test', 
+  user     => 'matecat_user',
+  password => 'matecat_user',
   host     => 'localhost',
   grant    => ['ALL'],
   sql      => '/var/tmp/matecat-schema.sql'
