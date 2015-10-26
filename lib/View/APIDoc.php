@@ -8,6 +8,8 @@ foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
 }
 
 $nr_supoported_files = $count;
+
+$max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -55,8 +57,8 @@ $nr_supoported_files = $count;
                 <dd>POST ( multipart/form-data )</dd>
                 <dt>Files To Upload</dt>
                 <dd>
-                    <p><span class="req">required</span> The file(s) to be uploaded.</p>
-                    <p><span class="opt">optional</span> The TMX(s) to be uploaded.</p>
+                    <p><span class="req">required</span> The file(s) to be uploaded. You may also upload your own translation memories (TMX)</p>
+<!--                    <p><span class="opt">optional</span> The TMX(s) to be uploaded.</p>-->
                 </dd>
                 <dt>Parameters</dt>
                 <dd>
@@ -69,21 +71,23 @@ $nr_supoported_files = $count;
                         <li><span class="req">required</span> <code class="param">target_lang</code> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
                             <br />Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> <b>case sensitive</b>)
                         </li>
-                        <li><span class="opt">optional (default 1)</span> <code class="param">tms_engine</code> <code>(int)</code> Identifier for Memory Server
+                        <li><span class="opt">optional (default: 1)</span> <code class="param">tms_engine</code> <code>(int)</code> Identifier for Memory Server
                             <code>0</code> means disabled, <code>1</code> means MyMemory)
                         </li>
-                        <li><span class="opt">optional (default 1)</span> <code class="param"> mt_engine</code> <code>(int)</code> Identifier for Machine Translation Service
+                        <li><span class="opt">optional (default: 1)</span> <code class="param"> mt_engine</code> <code>(int)</code> Identifier for Machine Translation Service
                             <code>0</code> means disabled, <code>1</code> means get MT from MyMemory)
                         </li>
-                        <li><span class="opt">optional (default: empty if no TMX uploaded. Otherwise new)</span> <code class="param"> private_tm_key</code> <code>(string)</code>
+                        <li><span class="opt">optional</span> <code class="param"> private_tm_key</code> <code>(string)</code>
                             Private key(s) for MyMemory.
-                            <br />Exixting MyMemory private keys or <code>new</code> to create a new key.
-                            <br />Multiple keys must be comma separated. Up to 5 keys allowed. (<code>xxx345cvf,new,S342f234fc</code>)<br/>
-                            Only available if <code>tms_engine</code> is set to 1 or if is not used
+                            <br />- If a TMX file is uploaded and no key is provided, a <code>new</code> key will be created.
+                            <br />- Existing MyMemory private keys or <code>new</code> to create a new key.
+                            <br />- Multiple keys must be comma separated. Up to 5 keys allowed. (<code>xxx345cvf,new,s342f234fc</code>)
+                            <br />- Only available if <code>tms_engine</code> is set to 1 or if is not used
+
                         </li>
                         <li><span class="opt">optional  (default: general)</span> <code class="param"> subject</code> <code>(string)</code> The subject of the project you want to create.
                         </li>
-                        <li><span class="opt">optional (default: empty)</span> <code class="param"> segmentation_rule</code> <code>(string)</code> The segmentation rule you want to use to parse your file .
+                        <li><span class="opt">optional</span> <code class="param"> segmentation_rule</code> <code>(string)</code> The segmentation rule you want to use to parse your file .
                         </li>
                     </ul>
                 </dd>
@@ -230,7 +234,7 @@ $nr_supoported_files = $count;
 
                 </dd>
                 <dt>Notes</dt>
-                <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
+                <dd><p><code>/new</code> has a maximum file size limit of <?= $max_file_size_in_MB ?> MB per file and a max number of files of <?= INIT::$MAX_NUM_FILES ?>.</p></dd>
                 <dd><p>Matecat PRO accept only <?= $nr_supoported_files ?> file formats. A list of all accepted file are available
                         <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#file-format">here</a></p>
                 </dd>
