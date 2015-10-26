@@ -271,7 +271,9 @@ if ( Review.enabled() ) {
                     //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
                     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
                 $(editarea).text().replace(/(<([^>]+)>)/ig,""));
-//            console.log('diff: ', diff);
+
+            UI.dmp.diff_cleanupSemantic( diff ) ;
+
             diffTxt = '';
             $.each(diff, function (index) {
                 if(this[0] == -1) {
