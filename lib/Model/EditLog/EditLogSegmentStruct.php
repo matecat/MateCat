@@ -123,7 +123,7 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
             //the outer if it's here because $notices can be
             //an empty string and json_decode will fail into null value
             if ( !empty( $notices ) ) {
-                    $result = array_merge( $result, array_column( $notices, 'debug' ) );
+                    $result = array_merge( $result, Utils::array_column( $notices, 'debug' ) );
             }
 
             $tag_mismatch = $QA->getMalformedXmlStructs();

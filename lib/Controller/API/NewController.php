@@ -160,7 +160,7 @@ class NewController extends ajaxController {
             }
         }
 
-        $subjectList = array_column( $subjectList, 'key' );
+        $subjectList = Utils::array_column( $subjectList, 'key' );
 
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
@@ -461,7 +461,7 @@ class NewController extends ajaxController {
                 $zipFiles = json_decode( $zipFiles, true );
 
 
-                $fileNames = array_column( $zipFiles, 'name' );
+                $fileNames = Utils::array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }
