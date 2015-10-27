@@ -1,6 +1,6 @@
 <?
 
-class formLoginController extends ajaxController {
+class formLogoutController extends ajaxController {
     private $login = '';
     private $pass  = '';
 
@@ -21,11 +21,6 @@ class formLoginController extends ajaxController {
     }
 
     function doAction() {
-        //if parameters are set
-        if ( !empty( $this->login ) or !empty( $this->pass ) and !isset( $_POST[ 'logout' ] ) ) {
-            //check login
-            $this->doLogin();
-        }
         if ( isset( $_POST[ 'logout' ] ) ) {
             unset( $_SESSION[ 'cid' ] );
             AuthCookie::destroyAuthentication();
@@ -33,16 +28,5 @@ class formLoginController extends ajaxController {
         }
     }
 
-
-    private function doLogin() {
-        $result = checkLogin( $this->login, $this->pass );
-        if ( $result ) {
-            //if ok, write in session
-            $_SESSION[ 'cid' ] = $_POST[ 'login' ];
-            $this->result      = 'logged';
-        }
-
-    }
 }
 
-?>
