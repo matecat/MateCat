@@ -16,7 +16,6 @@ class EditLog_EditLogModel {
     private static $start_id = -1;
     private static $sort_by = "sid";
 
-
     private $jid = "";
     private $password = "";
     private $project_status = "";
@@ -25,6 +24,7 @@ class EditLog_EditLogModel {
     private $job_owner_email;
     private $jobData;
     private $job_stats;
+    private $jobEmpty = false;
     private $stats;
     private $data;
     private $pagination;
@@ -53,33 +53,40 @@ class EditLog_EditLogModel {
         }
 
         //TODO: portare dentro il codice
-        $tmp = $this->getEditLogData();
+        try {
+            $tmp = $this->getEditLogData();
 
-        $this->data       = $tmp[ 0 ];
-        $this->pagination = $tmp[ 2 ];
+            $this->data       = $tmp[ 0 ];
+            $this->pagination = $tmp[ 2 ];
 
-        foreach ( $this->data as $i => $dataRow ) {
-            /**
-             * @var $dataRow EditLog_EditLogSegmentClientStruct
-             */
-            $this->data[ $i ] = $dataRow->toArray();
+            foreach ( $this->data as $i => $dataRow ) {
+                /**
+                 * @var $dataRow EditLog_EditLogSegmentClientStruct
+                 */
+                $this->data[ $i ] = $dataRow->toArray();
+            }
+
+            $this->stats = $tmp[ 1 ];
+
+            $proj                 = getProject( $this->jobData[ 'id_project' ] );
+            $this->project_status = $proj[ 0 ];
+
+            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
+            $maxDate        = $__langStatsDao->getLastDate();
+
+            $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
+            $languageSearchObj->date   = $maxDate;
+            $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
+            $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
+
+            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
+            $this->languageStatsData = $this->languageStatsData[ 0 ];
         }
-
-        $this->stats = $tmp[ 1 ];
-
-        $proj                 = getProject( $this->jobData[ 'id_project' ] );
-        $this->project_status = $proj[ 0 ];
-
-        $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
-        $maxDate        = $__langStatsDao->getLastDate();
-
-        $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
-        $languageSearchObj->date   = $maxDate;
-        $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
-        $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
-
-        $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-        $this->languageStatsData = $this->languageStatsData[ 0 ];
+        catch (Exception $exn){
+            if($exn->getCode() == -1){
+                $this->jobEmpty = true;
+            }
+        }
     }
 
     //TODO: change this horrible name
@@ -133,7 +140,7 @@ class EditLog_EditLogModel {
         $stat_too_fast = array();
 
         if ( !$data ) {
-            return false;
+            throw new Exception( 'There are no changes in this job', -1);
         }
 
         $stats[ 'total-word-count' ] = 0;
@@ -395,7 +402,7 @@ class EditLog_EditLogModel {
             $pagination[ 'current' ] = $pagination[ 'prev' ];
         }
 
-        if ( $pagination[ 'next' ] == $pagination[ 'current' ] ) {
+        if ( $pagination[ 'next' ] <= $pagination[ 'current' ] ) {
             unset( $pagination[ 'next' ] );
         }
 
@@ -548,5 +555,13 @@ class EditLog_EditLogModel {
     public function getPagination() {
         return $this->pagination;
     }
+
+    /**
+     * @return boolean
+     */
+    public function isJobEmpty() {
+        return $this->jobEmpty;
+    }
+
 
 }

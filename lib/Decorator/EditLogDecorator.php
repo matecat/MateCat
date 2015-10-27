@@ -23,7 +23,7 @@ class EditLogDecorator {
 
         $this->template->job_archived = ( $model->isJobArchived() ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->owner_email  = $model->getJobOwnerEmail();
-
+        $this->template->emptyJob = $model->isJobEmpty();
         /**
          * @var $data EditLog_EditLogSegmentClientStruct[]
          */

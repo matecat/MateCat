@@ -1,9 +1,9 @@
-#current_page{
+#current_page {
     font-weight: bold;
     font-size: 1.1em;
 }
 
-#pagination_box{
+#pagination_box {
     position: absolute;
     left: 35%;
     width: 30%;
@@ -15,13 +15,13 @@
 }
 
 #pagination_box nav ul {
-        position: relative;
+    position: relative;
     width: 100%;
     margin: 0 auto;
     overflow: hidden;
 }
 
-#pagination_box nav li{
+#pagination_box nav li {
     border: 0;
     text-align: center;
     display: inline-block;
@@ -35,11 +35,11 @@
     text-decoration: none;
 }
 
-#sort_box{
-    padding:20px 10px 30px 10px;
+#sort_box {
+    padding: 20px 10px 30px 10px;
 }
 
-#sort_box label{
+#sort_box label {
     padding-right: 20px;
     font-size: 18px;
 }
@@ -53,3 +53,10 @@
     margin: 0 0 5px 0;
 }
 
+.article.msg {
+    width: 100%;
+    margin: 20px auto;
+    font-size: 26px;
+    font-style: italic;
+    color: #999;
+}

@@ -44,7 +44,16 @@
             </div>
         </header>
 
-        <div class="wrapper">
+        <div class="wrapper" tal:condition="emptyJob">
+                <div id="projects">
+                    <p class="article msg">
+                        <i>There are no edited segments in this job.</i>
+                    </p>
+                </div>
+
+        </div>
+
+        <div class="wrapper" tal:condition="not: emptyJob">
 
             <!--	<h1>Field test - 1</h1> -->
 
@@ -198,7 +207,7 @@
                     
                 </nav>
 
-                <div id="pagination_box" >
+                <div id="pagination_box" tal:condition="not: emptyJob">
                     <nav>
                         <ul>
                             <li id="prev_page" tal:condition="exists: pagination/prev">
@@ -218,7 +227,7 @@
                                    tal:content="php: pagination['current_page']-1">
                                 </a>
                             </li>
-                            <li id="current_page">
+                            <li id="current_page" tal:condition="exists: pagination/current">
                                 <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/current}">${pagination/current_page}</a>
                             </li>
                             <li tal:condition="exists: pagination/next">
