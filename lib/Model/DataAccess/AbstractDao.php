@@ -6,6 +6,8 @@
  * Date: 29/09/14
  * Time: 17.55
  */
+//TODO: DAO methods are not static because the Connection object (Singleton) is passed while
+//TODO: initializing the object. This is useless. Methods can be static.
 abstract class DataAccess_AbstractDao {
 
     /**

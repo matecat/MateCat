@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    APP.fitText($('.breadcrumbs'), $('#pname'), 30, 75);
+    APP.fitText($('body'), $('#pname'), 30, 33);
 });
 
 

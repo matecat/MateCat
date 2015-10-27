@@ -38,9 +38,9 @@ abstract class viewController extends controller {
     protected $authURL;
 
     /**
-     * Flag to get info about user authentication
+     * The logged user's object
      *
-     * @var bool
+     * @var Users_UserStruct
      */
     protected $logged_user = false;
 
@@ -169,8 +169,18 @@ abstract class viewController extends controller {
 
         //even if no login in required, if user data is present, pull it out
         if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
-            $this->logged_user['short'] = trim( mb_substr($this->logged_user[ 'first_name' ],0,1) . "" . mb_substr($this->logged_user[ 'last_name' ],0,1) );
+            $userSearch = new Users_UserStruct();
+            $userSearch->email = $_SESSION[ 'cid' ];
+
+            $userDao = new Users_UserDao(Database::obtain());
+            $userObject = $userDao->read($userSearch);
+
+            /**
+             * @var $userObject Users_UserStruct
+             */
+            $userObject = $userObject[0];
+//            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
+            $this->logged_user = $userObject;
         }
 
         if( $isAuthRequired  ) {
@@ -349,4 +359,17 @@ abstract class viewController extends controller {
         return $is_revision_url;
     }
 
+    /**
+     * @return Users_UserStruct
+     */
+    public function getLoggedUser(){
+        return $this->logged_user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthUrl(){
+        return $this->authURL;
+    }
 }
