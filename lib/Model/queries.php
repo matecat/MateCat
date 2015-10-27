@@ -352,42 +352,6 @@ function mailer( $toUser, $toMail, $fromUser, $fromMail, $subject, $message ) {
     mail( $toMail, $subject, $message, $header );
 }
 
-function sendResetLink( $mail ) {
-
-    //generate new random pass and unique salt
-    $clear_pass = randomString( 15 );
-    $newSalt    = randomString( 15 );
-
-    //hash pass
-    $newPass = encryptPass( $clear_pass, $newSalt );
-
-    //get link
-    $db = Database::obtain();
-
-    //escape untrusted input
-    $user = $db->escape( $mail );
-
-    //get data
-    $q_get_name = "select first_name, last_name from users where email='$mail'";
-    $result     = $db->query_first( $q_get_name );
-    if ( 2 == count( $result ) ) {
-        $toName = $result[ 'first_name' ] . " " . $result[ 'last_name' ];
-
-        //query
-        $q_new_credentials = "update users set pass='$newPass', salt='$newSalt' where email='$mail'";
-        $result            = $db->query_first( $q_new_credentials );
-
-        $message = "New pass for $mail is: $clear_pass";
-        mailer( $toName, $mail, "Matecat", "noreply@matecat.com", "Password reset", $message );
-
-        $outcome = true;
-    } else {
-        $outcome = false;
-    }
-
-    return $outcome;
-}
-
 function checkLogin( $user, $pass ) {
     //get link
     $db = Database::obtain();
