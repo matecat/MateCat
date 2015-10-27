@@ -454,10 +454,8 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extxls"></span>
             {% mimeok=1} %}
 			
-		  {% if ( (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type =="application/x-xml" ) ) { %}
-                {% if ( /resx/.test( o.files[i].name.split('.').pop() == false ) ) { %}
-                <span class="extxml"></span>
-                {% } %}
+		    {% if ( (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type =="application/x-xml" ) ) { %}
+            <span class="extxml"></span>
             {% mimeok=1} %}
 			
 			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
@@ -605,10 +603,11 @@ Connect your TAUS DQF account to measure productivity.
 					
             <span class="extxls"></span>
             {% mimeok=1} %}
-			
+
 			{% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
-					
-            <span class="extxml"></span>
+                {% if (/resx/.test( o.files[i].name.split('.').pop() ) == false) { %}
+                <span class="extxml"></span>
+                {% } %}
             {% mimeok=1} %}
 			
 			
@@ -652,12 +651,12 @@ Connect your TAUS DQF account to measure productivity.
 			 {% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extrcc"></span>
             {% mimeok=1} %}
-			
+
 			{% if (/resx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extres"></span>
             {% mimeok=1} %}
-			
-			{% if (/sgml/.test( o.files[i].name.split('.').pop() ) ) { %}
+
+            {% if (/sgml/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extsgl"></span>
             {% mimeok=1} %}
 			
