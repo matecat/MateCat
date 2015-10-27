@@ -83,6 +83,11 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                             <br />- Existing MyMemory private keys or <code>new</code> to create a new key.
                             <br />- Multiple keys must be comma separated. Up to 5 keys allowed. (<code>xxx345cvf,new,s342f234fc</code>)
                             <br />- Only available if <code>tms_engine</code> is set to 1 or if is not used
+                            <br />
+                            <b>Be careful! All TMX files provided will be uploaded only into the first tm key. <br/>
+                                Other keys will have no content at the project start time and will be populated with the contributions coming from the translation process <br/>
+                                All the keys provided will join the project in read/write mode
+                            </b>
 
                         </li>
                         <li><span class="opt">optional  (default: general)</span> <code class="param"> subject</code> <code>(string)</code> The subject of the project you want to create.
