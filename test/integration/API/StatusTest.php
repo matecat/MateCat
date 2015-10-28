@@ -12,11 +12,11 @@ class StatusTest extends IntegrationTest {
     function testsRequiredProjectIdAndPassword() {
         $expected = array(
             'status' => 'FAIL',
-            "message" => [-1,"No id project provided"]
+            "message" => array(-1,"No id project provided")
         );
 
-        $response = $this->makeRequest()['body'];
-        $this->assertJSONResponse( $expected, $response );
+        $response = $this->makeRequest();
+        $this->assertJSONResponse( $expected, $response['body'] );
     }
 
     function testsStatusOnNewProject() {
@@ -28,9 +28,9 @@ class StatusTest extends IntegrationTest {
         );
 
 
-        $response = json_decode ( $this->makeRequest()['body'] ) ;
+        $response = json_decode ( $this->makeRequest() ) ;
 
-        $this->assertEquals( $response->status, 'ANALYZING' );
+        $this->assertEquals( $response['body']->status, 'ANALYZING' );
     }
 
     function testStatusOnTranslated() {
@@ -68,7 +68,9 @@ class StatusTest extends IntegrationTest {
         }
 
         // iterate all segments and setTranslations
-        $response = json_decode ( $this->makeRequest()['body'] ) ;
+
+        $request = $this->makeRequest() ;
+        $response = json_decode ( $request['body'] ) ;
 
     }
 }
