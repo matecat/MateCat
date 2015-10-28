@@ -6,8 +6,10 @@ class API_V2_ProtectedKleinController extends API_V2_KleinController {
     protected $api_record ;
 
     private function validateAuth() {
-        $this->api_key    = $this->request->headers()['x-matecat-key'];
-        $this->api_secret = $this->request->headers()['x-matecat-secret'];
+        $headers = $this->request->headers();
+
+        $this->api_key    = $headers['x-matecat-key'];
+        $this->api_secret = $headers['x-matecat-secret'];
 
         if ( ! $this->validKeys() ) {
             $this->response->code(403);

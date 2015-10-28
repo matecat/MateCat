@@ -21,13 +21,14 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             " :source, :create_date, :remote_ip_address, :uid " .
             " ); ");
 
+        $validSources = self::validSources() ;
         $stmt->execute( array(
             'id_project'        => $chunk->getProject()->id,
             'id_job'            => $chunk->id,
             'password'          => $chunk->password,
             'job_first_segment' => $chunk->job_first_segment,
             'job_last_segment'  => $chunk->job_last_segment,
-            'source'            => self::validSources()[ $params['source'] ],
+            'source'            => $validSources[ $params['source'] ],
             'create_date'       => date('Y-m-d H:i:s'),
             'remote_ip_address' => $params['remote_ip_address'],
             'uid'               => $params['uid']

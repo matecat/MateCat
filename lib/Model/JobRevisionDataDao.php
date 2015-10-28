@@ -88,10 +88,11 @@ class JobRevisionDataDao {
       $jobQA->retrieveJobErrorTotals();
       $jobQA->evalJobVote();
 
+      $jobVote = $jobQA->getJobVote();
       return array(
           'job_id'          => $job_id,
           'quality_details' => $jobQA->getQaData(),
-          'quality_overall' => $jobQA->getJobVote()['minText']
+          'quality_overall' => $jobVote['minText']
       );
 
   }
