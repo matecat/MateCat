@@ -27,10 +27,9 @@ class StatusTest extends IntegrationTest {
             'project_pass' => $project->project_pass
         );
 
-
-        $response = json_decode ( $this->makeRequest() ) ;
-
-        $this->assertEquals( $response['body']->status, 'ANALYZING' );
+        $response =  $this->makeRequest() ;
+        $body = json_decode( $response['body'] );
+        $this->assertEquals( $body->status, 'ANALYZING' );
     }
 
     function testStatusOnTranslated() {

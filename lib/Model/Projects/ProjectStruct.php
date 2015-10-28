@@ -25,8 +25,8 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     public function getJobs() {
-      return $this->cachable(__function__, func_get_args(), function() {
-        return Jobs_JobDao::getByProjectId( $this->id, func_get_args() );
+      return $this->cachable(__function__, $this->id, function($id) {
+        return Jobs_JobDao::getByProjectId( $id );
       });
     }
 

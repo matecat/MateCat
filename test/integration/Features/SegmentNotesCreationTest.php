@@ -21,12 +21,13 @@ class Features_SegmentNotesCreationTest extends AbstractTest {
         $jobs = $project->getJobs() ;
         $chunks = $jobs[0]->getChunks() ;
         $segments = $chunks[0]->getSegments();
-        $notes = $segments[0]->getNotes() ;
+        $notes_segment_one = $segments[0]->getNotes() ;
+        $notes_segment_two = $segments[1]->getNotes() ;
 
         $this->assertEquals( 4, count($segments) );
-        $this->assertEquals( 'This is a comment', $notes[0]->note);
-        $this->assertEquals( 'This is another comment for the same segment', $notes[1]->note);
-        $this->assertEquals( 'This is another comment', $notes[0]->note);
+        $this->assertEquals( 'This is a comment', $notes_segment_one[0]->note);
+        $this->assertEquals( 'This is another comment for the same segment', $notes_segment_one[1]->note);
+        $this->assertEquals( 'This is another comment', $notes_segment_two[0]->note);
         $this->assertEquals( 0,  count( $segments[2]->getNotes()));
         $this->assertEquals( 0,  count( $segments[3]->getNotes()));
 
@@ -97,8 +98,8 @@ class Features_SegmentNotesCreationTest extends AbstractTest {
         $notes_segment_one = $segments[0]->getNotes();
         $notes_segment_two = $segments[1]->getNotes();
 
-        $this->assertEquals('Test note', $notes_segment_one );
-        $this->assertEquals('Test note', $notes_segment_two );
+        $this->assertEquals('Test note', $notes_segment_one[0]->note );
+        $this->assertEquals('Test note', $notes_segment_two[0]->note );
 
         // expect the internal_id is saved appropriately
         $this->assertEquals(
