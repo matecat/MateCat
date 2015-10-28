@@ -153,7 +153,8 @@ abstract class viewController extends controller {
         //load Template Engine
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
 
-        $this->supportedBrowser = $this->isSupportedWebBrowser();
+//        $this->supportedBrowser = $this->isSupportedWebBrowser();
+        $this->supportedBrowser = 1;
 
         //try to get user name from cookie if it is not present and put it in session
         if ( empty( $_SESSION[ 'cid' ] ) ) {
