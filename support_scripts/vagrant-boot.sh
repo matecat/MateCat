@@ -5,14 +5,14 @@ cd /vagrant
 set -e
 
 function removeDownloads {
-  rm -f puppetlabs-release-wheezy.deb
+  rm -f puppetlabs-release-precise.deb
 }
 
-if ! ( dpkg -l puppet > /dev/null 2>&1 ); then
+if ! ( which puppet ) ; then
   removeDownloads
 
-  wget https://apt.puppetlabs.com/puppetlabs-release-wheezy.deb
-  sudo dpkg -i puppetlabs-release-wheezy.deb
+  wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
+  sudo dpkg -i puppetlabs-release-precise.deb
   sudo apt-get update
   sudo apt-get install -y puppet
 fi

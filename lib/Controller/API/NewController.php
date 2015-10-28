@@ -1,4 +1,5 @@
 <?php
+include_once INIT::$UTILS_ROOT . "/array_column.php";
 
 set_time_limit( 180 );
 
@@ -18,15 +19,49 @@ set_time_limit( 180 );
  */
 class NewController extends ajaxController {
 
+    /**
+     * @var string
+     */
     private $project_name;
+
+    /**
+     * @var string
+     */
     private $source_lang;
+
+    /**
+     * @var string
+     */
     private $target_lang;
+
     private $mt_engine;  //1 default MyMemory
     private $tms_engine;  //1 default MyMemory
+
+    /**
+     * @var array
+     */
     private $private_tm_key;
+
+    /**
+     * @var string
+     */
+    private $subject;
+
+    /**
+     * @var string
+     */
+    private $seg_rule;
 
     private $private_tm_user = null;
     private $private_tm_pass = null;
+
+    private $new_keys = array();
+
+    const MAX_NUM_KEYS = 5;
+
+    private static $allowed_seg_rules = array(
+            'standard', 'patent', ''
+    );
 
     protected $api_output = array(
             'status'  => 'FAIL',
@@ -37,21 +72,24 @@ class NewController extends ajaxController {
 
     private function filterPostParams() {
         $filterArgs = array(
-                'project_name'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'source_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'target_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tms_engine'     => array(
+                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'source_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'target_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'tms_engine'        => array(
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
                         'options' => array( 'default' => 1, 'min_range' => 0 )
                 ),
-                'mt_engine'      => array(
+                'mt_engine'         => array(
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
                         'options' => array( 'default' => 1, 'min_range' => 0 )
                 ),
-                'private_tm_key' => array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW,
-                    'options' => array( 'default' => 'new')
+                'private_tm_key'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'subject'           => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
+                'segmentation_rule' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -136,7 +174,12 @@ class NewController extends ajaxController {
         $this->target_lang    = $__postInput[ 'target_lang' ];
         $this->tms_engine     = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
         $this->mt_engine      = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->private_tm_key = $__postInput[ 'private_tm_key' ];
+        $this->private_tm_key = array_map(
+                'trim',
+                explode( ",", $__postInput[ 'private_tm_key' ] )
+        );
+        $this->seg_rule       = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
+        $this->subject        = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
 
         // ------------------ INPUT VALIDATION ENDS HERE
         //
@@ -149,38 +192,52 @@ class NewController extends ajaxController {
             return -1;
         }
 
-        //from api a key is sent and the value is 'new'
-        if ( $this->private_tm_key == 'new' ) {
-            try {
-                $this->askNewMyMemoryKey();
-            } catch ( Exception $e ) {
-                $this->api_output[ 'message' ] = 'Project Creation Failure';
-                $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+        if ( count( $this->private_tm_key ) > self::MAX_NUM_KEYS ) {
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS;
+            Log::doLog( "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS );
 
-                return -1;
-            }
-
-        } else {
-
-            //if a string is sent, transform it into a valid array
-            if ( !empty( $this->private_tm_key ) ) {
-                $this->private_tm_key = array(
-                        array(
-                                'key'  => $this->private_tm_key,
-                                'name' => null,
-                                'r'    => true,
-                                'w'    => true
-                        )
-                );
-            } else {
-                $this->private_tm_key = array();
-            }
-
+            return -2;
         }
 
-        //This is only an element, this seems redundant,
-        // but if we need more than a key in the next api version we can easily handle them here
-        $this->private_tm_key = array_filter( $this->private_tm_key, array( "self", "sanitizeTmKeyArr" ) );
+        $langDomains = Langs_LanguageDomains::getInstance();
+        $subjectList = $langDomains::getEnabledDomains();
+        // In this list there is an item whose key is "----".
+        // It is useful for UI purposes, but not here. So we unset it
+        foreach ( $subjectList as $idx => $subject ) {
+            if ( $subject[ 'key' ] == '----' ) {
+                unset( $subjectList[ $idx ] );
+                break;
+            }
+        }
+
+        //Array_column() is not supported on PHP 5.4, so i'll rewrite it
+        if ( !function_exists( 'array_column' ) ) {
+            $subjectList = Utils::array_column( $subjectList, 'key' );
+        } else {
+            $subjectList = array_column( $subjectList, 'key' );
+        }
+
+        if ( !in_array( $this->subject, $subjectList ) ) {
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = "Subject not allowed: " . $this->subject;
+            Log::doLog( "Subject not allowed: " . $this->subject );
+
+            return -3;
+        }
+
+        if ( !in_array( $this->seg_rule, self::$allowed_seg_rules ) ) {
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = "Segmentation rule not allowed: " . $this->seg_rule;
+            Log::doLog( "Segmentation rule not allowed: " . $this->seg_rule );
+
+            return -4;
+        }
+
+        //normalize segmentation rule to what it's used internally
+        if ( $this->seg_rule == 'standard' || $this->seg_rule == '' ) {
+            $this->seg_rule = null;
+        }
 
         if ( empty( $_FILES ) ) {
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Missing file. Not Sent." );
@@ -188,6 +245,69 @@ class NewController extends ajaxController {
             return -1;
         }
 
+        $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
+
+        //If a TMX file has been uploaded and no key was provided, create a new key.
+        if( empty($this->private_tm_key) ){
+            foreach ( $_FILES as $_fileinfo ) {
+                $pathinfo = FilesStorage::pathinfo_fix($_fileinfo['name']);
+                if($pathinfo['extension'] == 'tmx'){
+                    $this->private_tm_key[] = 'new';
+                    break;
+                }
+            }
+        }
+
+        //remove all empty entries
+        foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
+            //from api a key is sent and the value is 'new'
+            if ( $tm_key == 'new' ) {
+
+                try {
+
+                    $APIKeySrv = new TMSService();
+
+                    $newUser = $APIKeySrv->createMyMemoryKey();
+
+                    //TODO: i need to store an array of these
+                    $this->private_tm_user = $newUser->id;
+                    $this->private_tm_pass = $newUser->pass;
+
+                    $this->private_tm_key[ $__key_idx ] =
+                            array(
+                                    'key'  => $newUser->key,
+                                    'name' => null,
+                                    'r'    => true,
+                                    'w'    => true
+
+                            );
+                    $this->new_keys[]                   = $newUser->key;
+
+                } catch ( Exception $e ) {
+
+                    $this->api_output[ 'message' ] = 'Project Creation Failure';
+                    $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+
+                    return -1;
+                }
+
+            } //if a string is sent, transform it into a valid array
+            else if ( !empty( $tm_key ) ) {
+                $this->private_tm_key[ $__key_idx ] =
+                        array(
+                                'key'  => $tm_key,
+                                'name' => null,
+                                'r'    => true,
+                                'w'    => true
+
+                        );
+            }
+
+            $this->private_tm_key[ $__key_idx ] = array_filter(
+                    $this->private_tm_key[ $__key_idx ],
+                    array( "self", "sanitizeTmKeyArr" )
+            );
+        }
     }
 
     public function finalize() {
@@ -195,12 +315,16 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
-    public function doAction() {
 
+    public function doAction() {
         if ( ! $this->validateAuthHeader() ) {
             header('HTTP/1.0 401 Unauthorized');
             $this->api_output[ 'message' ] = 'Authentication failed';
             return -1 ;
+        }
+
+        if ( count( $this->api_output[ 'debug' ] ) > 0 ) {
+            return;
         }
 
         $uploadFile = new Upload();
@@ -264,6 +388,7 @@ class NewController extends ajaxController {
             $conversionHandler->setFileName( $file_name );
             $conversionHandler->setSourceLang( $this->source_lang );
             $conversionHandler->setTargetLang( $this->target_lang );
+            $conversionHandler->setSegmentationRule( $this->seg_rule );
             $conversionHandler->setCookieDir( $cookieDir );
             $conversionHandler->setIntDir( $intDir );
             $conversionHandler->setErrDir( $errDir );
@@ -390,15 +515,6 @@ class NewController extends ajaxController {
             }
         }
 
-//        /* Do conversions here */
-//        $converter              = new ConvertFileWrapper( $stdResult );
-//        $converter->intDir      = $uploadFile->getUploadPath();
-//        $converter->errDir      = INIT::$CONVERSIONERRORS_REPOSITORY . DIRECTORY_SEPARATOR . $uploadFile->getDirUploadToken();
-//        $converter->cookieDir   = $uploadFile->getDirUploadToken();
-//        $converter->source_lang = $this->source_lang;
-//        $converter->target_lang = $this->target_lang;
-//        $converter->doAction();
-
         $status = array_values( $status );
 
         if ( !empty( $status ) ) {
@@ -458,7 +574,9 @@ class NewController extends ajaxController {
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
 
-        $projectStructure[ 'project_name' ]         = $this->project_name;
+        $projectStructure[ 'project_name' ] = $this->project_name;
+        $projectStructure[ 'job_subject' ]  = $this->subject;
+
         $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
@@ -493,14 +611,22 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ]      = 'Success';
             $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
             $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
+
             $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
                 $projectStructure[ 'project_name' ] . "/" .
                 $projectStructure[ 'result' ][ 'id_project' ] . "-" .
                 $projectStructure[ 'result' ][ 'ppassword' ];
+
+            $this->api_output[ 'new_keys' ]     = $this->new_keys;
         }
 
     }
 
+    /**
+     * @param $elem
+     *
+     * @return array
+     */
     private static function sanitizeTmKeyArr( $elem ) {
 
         $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );

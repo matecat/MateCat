@@ -11,15 +11,14 @@ class ZipArchiveExtended extends ZipArchive {
     const MAX_VISITED_DEPTH = 5;
     const MAX_VISITED_FOLDERS_PER_DEPTH = 10;
     const MAX_FOLDERS = 100;
-    const MAX_FILES = 100;
-
     const INTERNAL_SEPARATOR = "___SEP___";
-    const ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
+    const ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
     public $tree;
     public $treeList;
 
+    protected static $MAX_FILES;
 
     public function message( $code ) {
         switch ( $code ) {
@@ -108,6 +107,9 @@ class ZipArchiveExtended extends ZipArchive {
      * @throws Exception
      */
     public function createTree() {
+
+        self::$MAX_FILES = INIT::$MAX_NUM_FILES;
+
         $Tree              = array();
         $path2numOfFolders = array();
         $filePaths         = array();
@@ -150,7 +152,7 @@ class ZipArchiveExtended extends ZipArchive {
                 throw new Exception( "Max allowed depth exceeded.", -1 );
             }
 
-            if ( $numOfFiles > self::MAX_FILES || $numOfFolders > self::MAX_FOLDERS ) {
+            if ( $numOfFiles > self::$MAX_FILES || $numOfFolders > self::MAX_FOLDERS ) {
                 throw new Exception( "Max number of files or folders exceeded.", -2 );
             }
 

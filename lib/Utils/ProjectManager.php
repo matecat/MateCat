@@ -143,7 +143,7 @@ class ProjectManager {
 
                     if ( !isset( $keyExists ) || $keyExists === false ) {
                         Log::doLog( __METHOD__ . " -> TM key is not valid." );
-                        throw new Exception( "TM key is not valid.", -4 );
+                        throw new Exception( "TM key is not valid: ".$_tmKey[ 'key' ] , -4 );
                     }
 
                 } catch ( Exception $e ) {
@@ -1263,8 +1263,8 @@ class ProjectManager {
      * @param ArrayObject $projectStructure
      */
     public function applySplit( ArrayObject $projectStructure ) {
-        $this->_splitJob( $projectStructure );
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        $this->_splitJob( $projectStructure );
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
