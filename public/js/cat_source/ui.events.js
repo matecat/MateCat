@@ -901,6 +901,8 @@ console.log('e.target: ', e.target);
 			restoreSelection();
         }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
 //            console.log('MOUSEDOWN');
+        }).on('click', '.footerSwitcher', function(e) {
+            UI.switchFooter();
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
             if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -1664,18 +1666,25 @@ console.log('e.target: ', e.target);
 			UI.copySource();
 		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
 			return false;
-		}).on('click', '.tab-switcher-tm', function(e) {
+        }).on('click', 'section .footer .tab-switcher', function(e) {
+            e.preventDefault();
+            UI.currentSegment.trigger('showMatchesLocal');
+//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
+        }).on('showMatchesLocal', '.editor', function(e) {
+            UI.currentSegment.find('.footer').addClass('showMatches');
+//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
+        }).on('click', '.tab-switcher-tm', function(e) {
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');
 			$(this).addClass('active');
-			$('.editor .sub-editor').hide();
-			$('.editor .sub-editor.matches').show();
+			$('.editor .sub-editor').removeClass('open');
+			$('.editor .sub-editor.matches').addClass('open');
 		}).on('click', '.tab-switcher-cc', function(e) {
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');
 			$(this).addClass('active');
-			$('.editor .sub-editor').hide();
-			$('.editor .sub-editor.concordances').show();
+			$('.editor .sub-editor').removeClass('open');
+			$('.editor .sub-editor.concordances').addClass('open');
 			$('.cc-search .search-source').focus();
 //        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
 			//if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
@@ -1683,15 +1692,15 @@ console.log('e.target: ', e.target);
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');
 			$(this).addClass('active');
-			$('.editor .sub-editor').hide();
-			$('.editor .sub-editor.glossary').show();
+			$('.editor .sub-editor').removeClass('open');
+			$('.editor .sub-editor.glossary').addClass('open');
 			$('.gl-search .search-source').focus();
 		}).on('click', '.tab-switcher-al', function(e) {
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');
 			$(this).addClass('active');
-			$('.editor .sub-editor').hide();
-			$('.editor .sub-editor.alternatives').show();
+			$('.editor .sub-editor').removeClass('open');
+			$('.editor .sub-editor.alternatives').addClass('open');
 		}).on('click', '.alternatives a', function(e) {
 			e.preventDefault();
 			$('.editor .tab-switcher-al').click();
