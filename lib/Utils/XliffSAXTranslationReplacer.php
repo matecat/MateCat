@@ -264,10 +264,10 @@ class XliffSAXTranslationReplacer {
 
                     //init translation
                     $translation = '';
-                    $lastMrkId = -1;
+                    $lastMrkId = -2;
 
                     foreach ( $id_list as $pos => $id ) {
-                        empty( $this->segments[ $id ][ "mrk_id" ] ) && ( $this->segments[ $id ][ "mrk_id" ] = 0 );
+                        empty( $this->segments[ $id ][ "mrk_id" ] ) && ( $this->segments[ $id ][ "mrk_id" ] = -1 );
 
                         if( $this->segments[ $id ][ "mrk_id" ] <= $lastMrkId ) {
                             break;
@@ -391,7 +391,7 @@ class XliffSAXTranslationReplacer {
 
         }
 
-        if ( !empty($seg['mrk_id']) || $seg['mrk_id'] == 0 ) {
+        if ( $seg['mrk_id'] >= 0 ) {
             $translation = "<mrk mid=\"" . $seg['mrk_id'] . "\" mtype=\"seg\">" . $seg['mrk_prev_tags'] . $translation . $seg['mrk_succ_tags'] . "</mrk>";
         }
 
