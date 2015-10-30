@@ -118,8 +118,8 @@ exec { 'cat lib/Model/matecat.sql lib/Model/comments.sql > /var/tmp/matecat-sche
   cwd     => '/vagrant'
 } ->
 mysql::db { 'matecat':
-  user     => 'matecat',
-  password => 'matecat01',
+  user     => 'matecat_user',
+  password => 'matecat_user',
   host     => 'localhost',
   grant    => ['ALL'],
   sql      => '/var/tmp/matecat-schema.sql'
