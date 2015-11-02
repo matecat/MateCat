@@ -764,9 +764,7 @@ UI = {
 						//						$('.dosplit').removeClass('disabled');
 						$('#longloading .approved-bar').css('width', '100%');
 						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
-                        elementsToAskQuoteFor = $( '.uploadbtn.translate');
-                        precomputeOutsourceQuotesRecursive();
-                        precomputeOutsourceQuotesRecursive();
+                        precomputeOutsourceQuotes( $( '.uploadbtn.translate') );
 						setTimeout(function() {
 								$('#shortloading').remove();
 								$('#longloading .meter').remove();
@@ -943,14 +941,20 @@ function fit_text_to_container(container, child) {
 	}
 }
 
-function precomputeOutsourceQuotesRecursive() {
+// as soon as the analysis is done, start pre-fetching outsources quotes
+function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
+    // if no elements left to ask quote for then return
     if( elementsToAskQuoteFor.length == 0 ) {
         return;
     }
 
-    var currentElement = $( elementsToAskQuoteFor[ 0 ] );
-    elementsToAskQuoteFor.splice(0, 1);
-    getOutsourceQuote( currentElement, "precomputeOutsourceQuotesRecursive" );
+    getOutsourceQuote( $( elementsToAskQuoteFor.splice( 0, 1 ) ), function( quoteData ) {
+        // remember whether outsource popup should be rendered compressed (0) or expanded (1)
+        UI.showPopupDetails = quoteData.data[0][0].show_info;
+
+        // recursively call self with the remaining elements ( Array.splice(0,1) has already reduced the size )
+        precomputeOutsourceQuotes( elementsToAskQuoteFor );
+    });
 }
 
 $(document).ready(function() {

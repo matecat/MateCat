@@ -65,15 +65,17 @@
                         <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
                         <a  href='javascript:void(0)' onclick='trackClick( "translate" );' class="uploadbtn in-popup" target="_blank">Open</a>
                     </div>
+                    <div class="viewvendors">
+                        <h3>Outsource to a translation company</h3>
+                        <a onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show Prices</a>
+                        <div class="showpricesloading loading"></div>
+                    </div>
                     <div class="outsourceto">
                             <div class="total_outsource">
                                 <div class="heading">
                                     <h3>Outsource Project Management + Translation<span class="revision_heading hide"> + Revision</span></h3>
-                        
-                                    <a  href='javascript:void(0)' onclick='trackClick( "showprices" ); return false;' class="uploadbtn showprices">Show prices</a> 
 
-                                             
-                                             <select id="changecurrency">
+                                    <select id="changecurrency">
                                         <option value="EUR" data-symbol="€">Euro (EUR)</option>
                                         <option value="USD" data-symbol="US$">US dollar (USD)</option>
                                         <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
@@ -88,7 +90,7 @@
                                         <option value="KRW" data-symbol="￦">Won (KRW)</option>
                                         <option value="JPY" data-symbol="￥">Yen (JPY)</option>
                                         <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
-                                        </select>
+                                    </select>
 
                                     <select id="changeTimezone">
                                         <option value="-11" data-description-short="GMT -11:00" data-description-long="(GMT -11:00 ) Midway Islands, American Samoa">GMT -11:00</option>
