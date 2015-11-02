@@ -74,27 +74,21 @@
                 <tr>
                     <th>Words</th>
                     <th>Total Time To Edit</th>
-                    <th>Avg secs/word <br/>
-                        <b><span tal:replace="source_code">---</span></b> &gt;
-                        <b><span tal:replace="target_code">---</span></b>
-                    </th>
-                    <th>MateCat users' avg secs/word<br/>
-                        <b><span tal:replace="source_code">---</span></b> &gt;
-                        <b><span tal:replace="target_code">---</span></b>
-                    </th>
-                    <th>Avg PEE <br/>
-                        <b><span tal:replace="source_code">---</span></b> &gt;
-                        <b><span tal:replace="target_code">---</span></b>
-                    </th>
-                    <th>MateCat users' <br/> avg PEE <br/><b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></th>
+                    <th>Your avg secs/word</th>
+                    <th>Your avg PEE</th>
                 </tr>
                 <tr>
-                    <td tal:content="stats/edited-word-count | default">N/A</td>
+                    <td tal:content="stats/valid-word-count | default">N/A</td>
                     <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
-                    <td tal:attributes="class php:tte_fast ? 'color_green' : NULL" ><span tal:replace="stats/avg-secs-per-word | string:--"></span>s <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span></td>
-                    <td><span tal:replace="overall_tte | string:--"></span>s</td>
-                    <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL"><span tal:replace="stats/avg-pee | string:--"></span></td>
-                    <td><span tal:replace="overall_pee | string:--"></span>%</td>
+                    <td tal:attributes="class php:tte_fast ? 'color_green' : NULL">
+                        <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span>
+                        <span tal:replace="stats/avg-secs-per-word | string:--"></span>s
+                        <small style="color:#000">(avg <span tal:replace="overall_tte | string:--"></span>s)</small>
+                    </td>
+                    <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL" >
+                        <span tal:replace="stats/avg-pee | string:--"></span>
+                        <small>(avg <span tal:replace="overall_pee | string:--"></span>%)</small>
+                    </td>
                 </tr>
             </table>
             <form action="${basepath}" method="post">
@@ -129,21 +123,21 @@
                     <tr>
                         <th>Segment ID</th>
                         <th>Words</th>
-                        <th width="100">Secs/Word</th>
                         <th>Time-to-edit (TTE)</th>
+                        <th width="100">Secs/Word</th>
                         <th>Post-editing effort (PEE)</th>
-                        <th>Suggestion source</th>
-                        <th>Match percentage</th>
                     </tr>
 
                     <tr>
                         <td><a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}#${file_data/id}"><span tal:replace="file_data/id | default" /></a></td>
                         <td tal:content="file_data/raw_word_count | default">N/A</td>
-                        <td title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics." tal:attributes="style string:background:${file_data/stats_valid_color}" tal:content="file_data/secs_per_word | default">N/A</td>
                         <td tal:content="file_data/display_time_to_edit"></td>
+                        <td tal:content="file_data/secs_per_word | default"
+                            title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics."
+                            tal:attributes="class php: file_data['stats_valid'] ? '' : 'invalid_td'"> N/A </td>
                         <td tal:content="file_data/pe_effort_perc | default">%</td>
-                        <td tal:content="file_data/suggestion_source | default">N/A</td>
-                        <td tal:content="file_data/suggestion_match | default">%</td>
+                        <!--<td tal:content="file_data/suggestion_source | default">N/A</td>-->
+                        <!--<td tal:content="file_data/suggestion_match | default">%</td>-->
                     </tr>
                 </table>
 
@@ -154,8 +148,11 @@
                         <td style="text-align:left;font-size:16px;" tal:content="structure file_data/source | default">N/A</td>
                     </tr>		
                     <tr>
-                        <th style="width: 100px">Suggestion</th>
-                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/sug_view | default">N/A</td>
+                        <th style="width: 100px">Suggestion<br/>
+                            (<span tal:content="file_data/suggestion_source | default"></span> -
+                             <span tal:content="file_data/suggestion_match | default"></span>)
+                        </th>
+                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/suggestion_view | default">N/A</td>
                     </tr>		
                     <tr>
                         <th style="width: 100px">Translation</th>

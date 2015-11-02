@@ -60,3 +60,8 @@
     font-style: italic;
     color: #999;
 }
+
+.invalid_td {
+    background-color: #ee6633;
+    border:2px solid #EE6633;
+}

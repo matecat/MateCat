@@ -39,13 +39,13 @@ class EditLogDecorator {
         $this->template->data        = $data;
         $this->template->stats       = $stats;
         $this->template->pagination  = $pagination;
-        $this->template->pname       = $data[ 0 ][ 'pname' ];
+        $this->template->pname       = $data[ 0 ][ 'proj_name' ];
         $this->template->source_code = $data[ 0 ][ 'job_source' ];
         $this->template->target_code = $data[ 0 ][ 'job_target' ];
 
         $this->template->overall_tte = $model->evaluateOverallTTE();
         $this->template->overall_pee = $model->evaluateOverallPEE();
-        $this->template->pee_slow    = $model->isPEEslow();
+        $this->template->pee_slow    = false; // temporary fix: this is still not properly implemented  $model->isPEEslow();
         $this->template->tte_fast    = $model->isTTEfast();
 
         $job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
