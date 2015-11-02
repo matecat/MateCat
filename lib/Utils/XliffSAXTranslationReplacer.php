@@ -264,12 +264,33 @@ class XliffSAXTranslationReplacer {
 
                     //init translation
                     $translation = '';
-                    $lastMrkId = -2;
+
+                    //we must reset the lastMrkId found because this is a new segment.
+                    $lastMrkId = -1;
 
                     foreach ( $id_list as $pos => $id ) {
-                        empty( $this->segments[ $id ][ "mrk_id" ] ) && ( $this->segments[ $id ][ "mrk_id" ] = -1 );
 
-                        if( $this->segments[ $id ][ "mrk_id" ] <= $lastMrkId ) {
+                        /*
+                         * This routine works to respect the positional orders of markers.
+                         * In every cycle we check if the mrk of the segment is below or equal the last one.
+                         * When this is true, means that the mrk id belongs to the next segment with the same internal_id
+                         * so we MUST stop to apply markers and translations
+                         *
+                         * Begin:
+                         * pre-assign zero to the new mrk if this is the first one ( in this segment )
+                         * If it is null leave it NULL
+                         */
+                        if( (int) $this->segments[ $id ][ "mrk_id" ] < 0 && $this->segments[ $id ][ "mrk_id" ] !== null ){
+                            $this->segments[ $id ][ "mrk_id" ] = 0;
+                        }
+
+                        /*
+                         * WARNING:
+                         * For those seg-source that does'nt have a mrk ( having a mrk id === null )
+                         * ( null <= -1 ) === true
+                         * so, cast to int
+                         */
+                        if( (int) $this->segments[ $id ][ "mrk_id" ] <= $lastMrkId ) {
                             break;
                         }
 
@@ -366,14 +387,11 @@ class XliffSAXTranslationReplacer {
     /*
        prepare segment tagging for xliff insertion
      */
-    protected function prepareSegment( $seg, $transunit_translation = "" ) {
+    protected function prepareSegment( $seg, $trans_unit_translation = "" ) {
         $end_tags = "";
 
-//        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
-//        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
-//        We don't need transform/sanitize from wiew to xliff because the values comes from Database
-
-        //QA non sense for source/source check until source can be changed. For now SKIP
+        //We don't need transform/sanitize from wiew to xliff because the values comes from Database
+        //QA non sense for source/source check, until source can be changed. For now SKIP
         if ( is_null( $seg [ 'translation' ] ) || $seg [ 'translation' ] == '' ) {
             $translation = $seg [ 'segment' ];
         } else {
@@ -391,13 +409,13 @@ class XliffSAXTranslationReplacer {
 
         }
 
-        if ( $seg['mrk_id'] >= 0 ) {
+        if ( $seg['mrk_id'] !== null ) {
             $translation = "<mrk mid=\"" . $seg['mrk_id'] . "\" mtype=\"seg\">" . $seg['mrk_prev_tags'] . $translation . $seg['mrk_succ_tags'] . "</mrk>";
         }
 
-        $transunit_translation .= $seg[ 'prev_tags' ] . $translation . $end_tags . $seg[ 'succ_tags' ];
+        $trans_unit_translation .= $seg[ 'prev_tags' ] . $translation . $end_tags . $seg[ 'succ_tags' ];
 
-        return $transunit_translation;
+        return $trans_unit_translation;
 
     }
 
