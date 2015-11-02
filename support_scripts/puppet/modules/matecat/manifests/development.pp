@@ -38,30 +38,7 @@ package {'grunt-cli':
 
 # runtime required packages
 
-file {'php53.list':
-  path    => '/etc/apt/sources.list.d/php53.list',
-  source  => 'puppet:///modules/matecat/php53.list',
-  owner   => 'root',
-  group   => 'root'
-} ->
-file { 'apt-preferences-php53':
-  path    => '/etc/apt/preferences.d/php53',
-  source  => 'puppet:///modules/matecat/apt-preferences-php53',
-  owner   => 'root',
-  group   => 'root'
-} ->
-package {['php5-cli', 'php5',
-  'php5-mysql', 'php5-common', 'php5-curl',
-  'php-pear' ]:
-  ensure => installed
-} ->
-file { 'php.ini':
-  path    => '/etc/php5/apache2/php.ini',
-  source  => 'puppet:///modules/php/php.ini',
-  owner   => 'root',
-  group   => 'root',
-  notify  => Service["apache2"]
-}
+class {'matecat::php': }
 
 package {['redis-server', 'screen', 'postfix']:
   ensure => installed
@@ -141,8 +118,8 @@ exec { 'cat lib/Model/matecat.sql lib/Model/comments.sql > /var/tmp/matecat-sche
   cwd     => '/vagrant'
 } ->
 mysql::db { 'matecat':
-  user     => 'matecat',
-  password => 'matecat01',
+  user     => 'matecat_user',
+  password => 'matecat_user',
   host     => 'localhost',
   grant    => ['ALL'],
   sql      => '/var/tmp/matecat-schema.sql'
