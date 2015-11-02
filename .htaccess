@@ -19,8 +19,6 @@ RewriteRule $ / [R=307,L]
 RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 
-SetEnv LEGACY_CONVERSION "true"
-
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
