@@ -237,6 +237,7 @@ class Bootstrap {
                 self::$_ROOT . "/lib/Utils",
                 self::$_ROOT . "/lib/Utils/Predis/src",
                 self::$_ROOT . "/lib/Model",
+                self::$_ROOT . "/lib/Decorator",
         );
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );

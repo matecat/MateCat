@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/array_column.php";
 
 set_time_limit( 180 );
 
@@ -167,8 +166,6 @@ class NewController extends ajaxController {
         } else {
             $subjectList = array_column( $subjectList, 'key' );
         }
-
-
 
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
@@ -480,7 +477,7 @@ class NewController extends ajaxController {
                 $zipFiles = json_decode( $zipFiles, true );
 
 
-                $fileNames = array_column( $zipFiles, 'name' );
+                $fileNames = Utils::array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }

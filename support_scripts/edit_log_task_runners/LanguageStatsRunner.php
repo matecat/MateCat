@@ -61,7 +61,7 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
 
             //getlanguage list
             $languages = $langsObj->getEnabledLanguages();
-            $languages = array_column($languages, 'code');
+            $languages = Utils::array_column($languages, 'code');
 
             foreach ($languages as $source_language) {
                 Log::doLog("Current source_language: $source_language");

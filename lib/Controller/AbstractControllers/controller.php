@@ -11,6 +11,7 @@
  */
 abstract class controller {
 
+    protected $model;
     protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
     /**
@@ -119,6 +120,14 @@ abstract class controller {
      */
     public function disableSessions(){
         Bootstrap::sessionClose();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModel()
+    {
+        return $this->model;
     }
 
 }
