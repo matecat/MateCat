@@ -191,8 +191,26 @@ class NewController extends ajaxController {
             $this->seg_rule = null;
         }
 
-        //remove all empty entries
+        if ( empty( $_FILES ) ) {
+            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Missing file. Not Sent." );
+
+            return -1;
+        }
+
         $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
+
+        //If a TMX file has been uploaded and no key was provided, create a new key.
+        if( empty($this->private_tm_key) ){
+            foreach ( $_FILES as $_fileinfo ) {
+                $pathinfo = FilesStorage::pathinfo_fix($_fileinfo['name']);
+                if($pathinfo['extension'] == 'tmx'){
+                    $this->private_tm_key[] = 'new';
+                    break;
+                }
+            }
+        }
+
+        //remove all empty entries
         foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
             //from api a key is sent and the value is 'new'
             if ( $tm_key == 'new' ) {
@@ -242,13 +260,6 @@ class NewController extends ajaxController {
                     array( "self", "sanitizeTmKeyArr" )
             );
         }
-
-        if ( empty( $_FILES ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Missing file. Not Sent." );
-
-            return -1;
-        }
-
     }
 
     public function finalize() {
