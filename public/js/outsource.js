@@ -1,100 +1,81 @@
 $.extend(UI, {
+    showPopupDetails: '1',
+    changeRates: [],
 	outsourceInit: function() {
-		$(".outsourceto .uploadbtn").click(function(e) {
-			e.preventDefault();
-		});
-		$(".outsource").click(function() {
-			$( ".outsourcemodal" ).show();
-		});
 
-		$(".more").click(function(e) {
-			e.preventDefault();
-			$(".content").toggle();
-		});
-		$(".more-table").click(function(e) {
-			e.preventDefault();
-			$(".content-table").toggle();
-		});
-
-        $( ".showprices" ).click(function() {
-            $( this ).hide();
-            $( ".revealprices" ).show();
-        });
-
-        $('.show_translator').click(function() {
-            $(this).addClass('hide');
-            $('.guaranteed_by').addClass('expanded');
-            $('.delivery,.tprice,.pricebox').addClass('compress');
-            $('.delivery').appendTo(".displaypriceperword ");
-            $('.trustbox2').removeClass('hide');
-            $('.translator_info_box').removeClass('hide');
+        // hide/show detailed information about the chosen translator
+        $('.show_translator, .hide_translator').click(function() {
+            $('.show_translator, .hide_translator').toggleClass('hide');
+            $('.guaranteed_by').toggleClass('expanded');
+            $('.delivery,.tprice,.pricebox').toggleClass('compress');
+            $('.trustbox2').toggleClass('hide');
+            $('.translator_info_box').toggleClass('hide');
             $('#forceDeliveryContainer').addClass('hide');
-            $('.hide_translator').removeClass('hide');
-        });
-        $('.hide_translator').click(function() {
-            $(this).addClass('hide');
-            $('.guaranteed_by').removeClass('expanded');
-            $('.delivery').appendTo(".delivery_container");
-            $('.delivery,.tprice,.pricebox').removeClass('compress');
-            $('.trustbox2').addClass('hide');
-            $('.translator_info_box').addClass('hide');
-            $('#forceDeliveryContainer').addClass('hide');
-            $('.show_translator').removeClass('hide');
+            $('.delivery').appendTo( $( this).hasClass( "hide_translator" ) ? ".delivery_container" : ".displaypriceperword" );
         });
 
+        // add/remove revision service to current job
         $( "input[name='revision']" ).click(function() {
             $(this).parent().toggleClass('noopacity');
-            var fullTranslateUrl = $(".onyourown a.uploadbtn").attr("href");
+            var fullTranslateUrl = $(".onyourown a.uploadbtn:not(.showprices)").attr("href");
             $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
             $('.revision_heading').toggleClass('hide');
         });
 
-        //Added .translate class in html button because of double call to
-        //API when displaying prices on showprices button ( class .in-popup was removed and .uploadbtn was too much widely used... )
+        // close and reset the popup to its default state
+        $('.modal.outsource .x-popup').click( function() {
+            resetOutsourcePopup( true );
+        });
+
+        // change the currency prices are shown in
+        $( "#changecurrency" ).change( function(){
+            var currencyFrom = $( ".displayprice").attr( "data-currency" );
+            var currencyTo  = $( "#changecurrency option:selected" ).val();
+            changeCurrency( $( ".displayprice").attr( "data-rawprice" ), currencyFrom, currencyTo, ".euro", ".displayprice", ".price_p_word" );
+            changeCurrency( $( ".revision_price").attr( "data-rawprice" ), currencyFrom, currencyTo, ".revision_currency", ".revision_price", "" );
+        });
+
+        // change the timezone deliveries are shown in
+        $( "#changeTimezone" ).change( function(){
+            var timezoneFrom = $( "span.time").attr( "data-timezone" );
+            var timezoneTo = $( "#changeTimezone option:selected" ).val();
+            changeTimezone( $( "span.time").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.time" );
+            changeTimezone( $( "span.revision_delivery").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.revision_delivery" );
+            updateTimezonesDescriptions( timezoneTo );
+        });
+
+        // expand a compressed popup to show price, delivery and other details
+        $( ".showprices").click( function() {
+            expandOutsourcePopup();
+        });
+
+        // trigger the process for getting and displaying an outsource quote
 		$(".translate").click(function(e) {
 			var linkPieces = $( this ).attr( "href" ).split( "/" );
 			var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
-			var words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text();
 
 			$( ".title-source" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text() );
 			$( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
-			$( ".title-words" ).text( words );
+			$( ".title-words" ).text( $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() );
 
 			if(config.enable_outsource) {
 				e.preventDefault();
-				$('.modal.outsource').addClass('loading');
-                $('.outsource.modal .continuebtn').addClass('loading disabled');
-                $('body').addClass('showingOutsourceTo');
-				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-                $('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
                 resetOutsourcePopup( false );
-                getOutsourceQuote( $( this ), "parseResult" );
-				$('.outsource.modal').show();
-				return false;
-			}
+                $('body').addClass('showingOutsourceTo');
+                $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+                $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
+                showOutsourcePopup( UI.showPopupDetails );
+                renderQuote( $( this ) );
+                $('.outsource.modal').show();
+            }
 		});
 
-		$(".outsourcemodal").on('click', '.chunks input', function(e) {
-			e.stopPropagation();
-			UI.setPrices();
-//		}).on('click', '.outsourcemodal .x-popup', function(e) {
-//			UI.showOutsourceChoice();
-		}).on('click', '.chunks td.outs', function(e) {
-			e.stopPropagation();
-			ch = $(this).find('input');
-			if($(ch).attr('checked')) {
-				$(ch).removeAttr('checked');
-			} else {
-				$(ch).attr('checked', 'checked');
-			}
-			UI.setPrices();
-//		}).on('click', '.back', function(e) {
-//			e.preventDefault();
-//			UI.showOutsourceChoice();
-		})
-
-		$(".outsource.modal").on('click', '.continuebtn:not(.disabled)', function(e) {
+		$(".outsource.modal").on('click', '.continuebtn', function(e) {
 			e.preventDefault();
+
+            if( $( this ).hasClass( 'disabled' ) ) {
+                return;
+            }
 
             updateCartParameters();
 
@@ -106,63 +87,49 @@ $.extend(UI, {
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
-		}).on('click', '.continuebtn.disabled', function(e) {
-			e.preventDefault();
-		});
-
-		$("body").on('click', '.modal.outsource .x-popup', function(e) {
-			$('.modal.outsource .displayprice').empty();
-			$('.modal.outsource .delivery .time').empty();
-			$('.modal.outsource .revealprices, .modal.outsource .showprices').hide();
-            resetOutsourcePopup( true );
-		});
-
-        $( "#changecurrency" ).change( function(){
-            var currencyFrom = $( ".displayprice").attr( "data-currency" );
-            var currencyTo  = $( "#changecurrency option:selected" ).val();
-            changeCurrency( $( ".displayprice").attr( "data-rawprice" ), currencyFrom, currencyTo, ".euro", ".displayprice", ".price_p_word" );
-            changeCurrency( $( ".revision_price").attr( "data-rawprice" ), currencyFrom, currencyTo, ".revision_currency", ".revision_price", "" );
-        });
-
-        $( "#changeTimezone" ).change( function(){
-            var timezoneFrom = $( "span.time").attr( "data-timezone" );
-            var timezoneTo = $( "#changeTimezone option:selected" ).val();
-            changeTimezone( $( "span.time").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.time" );
-            changeTimezone( $( "span.revision_delivery").attr( "data-rawtime" ), timezoneFrom, timezoneTo, "span.revision_delivery" );
-            updateTimezonesDescriptions( timezoneTo );
-        });
-	},
-	getFarthestDate: function() {
-		farthest = new Date(0);
-		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
-			dd = new Date($(this).attr('data-delivery'));
-			if(dd.getTime() > farthest.getTime()) farthest = dd;
 		})
 
-        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
-
-        //check for international API support on ECMAScript
-        if ( window.Intl && typeof window.Intl === "object" ){
-            //Assume it's supported, lets localize
-            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
-            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
-            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
-        } else {
-            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
-            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-        }
-
-		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm") + ' ' + extendedTimeZone;
+        fetchChangeRates();
 	}
-//	showOutsourceChoice: function() {
-//		$('.outsourcemodal h1').text('Here is the link to your new translation job');
-//		$('.outsourcemodal section.outs').hide();
-//		$('.outsourcemodal section.choose').show();
-//	},
 });
 
 
-function getOutsourceQuote( clickedButton, callbackFunction ) {
+function renderQuote( clickedButton ) {
+
+    getOutsourceQuote( clickedButton, function( quoteData ){
+        UI.quoteResponse = quoteData.data[0];
+        var chunk = quoteData.data[0][0];
+
+        showOutsourcePopup( UI.showPopupDetails );
+        UI.url_ok = quoteData.return_url.url_ok;
+        UI.url_ko = quoteData.return_url.url_ko;
+        UI.data_key = chunk.id;
+
+        // a generic error
+        if( chunk.quote_result != 1 ){
+            renderGenericErrorQuote();
+            return false;
+        }
+
+        // job already outsourced
+        if( chunk.outsourced == 1 ) {
+            renderOutsourcedQuote( chunk );
+            return false;
+        }
+
+        // delivery date too strict
+        if( chunk.quote_available != 1 ) {
+            renderNotAvailableQuote();
+            return false;
+        }
+
+        renderNormalQuote( chunk );
+    });
+}
+
+
+
+function getOutsourceQuote( clickedButton, callback ) {
     var row = clickedButton.parents('.tablestats');
 
     APP.doRequest({
@@ -180,76 +147,49 @@ function getOutsourceQuote( clickedButton, callbackFunction ) {
             ]
         },
         context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
-        error: function() {
-            // UI.failedConnection(0, 'outsourceToTranslated');
-        },
         success: function(d) {
-            if( callbackFunction == "parseResult" ) {
-                parseResult( this, d, clickedButton );
-            } else if( callbackFunction == "precomputeOutsourceQuotesRecursive" ) {
-                precomputeOutsourceQuotesRecursive();
-            }
+            if( typeof callback == "function" )
+                callback( d );
         }
     });
 }
 
 
-function parseResult( chunkId, returnedData, clickedButton ) {
-    //IMPORTANT this store the quote response to a class variable
-    //to be posted out when Order Button is pressed
-    UI.quoteResponse = returnedData.data[0];
+function renderGenericErrorQuote() {
+    $('.modal.outsource').removeClass('loading');
+    $('#forceDeliveryContainer').css('top','465px');
+    $('.ErrorMsgQuoteError').removeClass('hide');
+    $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .outsource.modal .continuebtn, .outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass('hide');
+    expandOutsourcePopup();
+}
 
-    var chunks = returnedData.data[0];
-    var ind = 0;
-    $.each(chunks, function(index) {
-        if(clickedButton.id == chunkId) ind = index;
-    });
-    var chunk = returnedData.data[0][ind];
-    var row = clickedButton.parents('.tablestats');
 
-    UI.url_ok = returnedData.return_url.url_ok;
-    UI.url_ko = returnedData.return_url.url_ko;
-    UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd') + "-" + $( "#forceDeliveryChosenDate" ).text();
+function renderOutsourcedQuote( chunk ) {
+    $('.modal.outsource').removeClass('loading');
+    $(".outsourceto").addClass("outsourced");
+    $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').addClass('hide');
+    $('.outsource.modal .tprice').append('<a class="checkstatus standardbtn" href="'+chunk.link_to_status+'" target="_blank">View status</a>').removeClass('hide');
+    $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
 
-    //this tell to the ui if price box sould be displayed immediately
-    if( chunk.show_info == '1' ){
-        $(".showprices" ).click();
+    if (chunk.typeOfService == "premium") {
+        $('.revision_heading').removeClass('hide');
     } else {
-        $(".showprices" ).show();
+        $('.revision_heading').addClass('hide');
     }
 
-    // a generic error
-    if( chunk.quote_result != 1 ){
-        $(".outsourceto").addClass( "quoteError" );
-        $('.modal.outsource').removeClass('loading');
-        $('.outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass("hide");
-        $('.ErrorMsgQuoteError').removeClass('hide');
-        $('#forceDeliveryContainer').css('top','465px');
-        $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2').addClass('hide');
-        $('.needitfaster').html('Change delivery date');
-        $('.outsource.modal .continuebtn').addClass('hide');
-        return false;
-    }
+    renderLocalizationInfos( chunk.price, chunk.delivery );
+    $( 'span.zone2').html( $( '#changeTimezone option:selected').attr( "data-description-long" ) );
+    expandOutsourcePopup();
+}
 
-    // job already outsourced
-    if( chunk.outsourced == 1 ) {
-        renderOutsourcedQuote( chunk );
-        return false;
-    }
 
-    // delivery date too strict
-    if( chunk.quote_available != 1 ) {
-        $(".outsourceto").addClass("quoteNotAvailable");
-        $('.modal.outsource').removeClass('loading');
-        $('.ErrorMsgquoteNotAvailable').removeClass('hide');
-        $('.guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .revision_delivery, .revision_price_box,#delivery_before_time').addClass('hide');
-        $('.needitfaster').html('Change delivery date');
-        $('#forceDeliveryContainer #delivery_not_available').removeClass('hide');
-        $('.outsource.modal .forceDeliveryButtonOk').addClass('disabled');
-        return false;
-    }
-
-    renderNormalQuote( chunk );
+function renderNotAvailableQuote() {
+    $('.modal.outsource').removeClass('loading');
+    $('.needitfaster').html('Change delivery date');
+    $('.outsource.modal .forceDeliveryButtonOk').addClass('disabled');
+    $('#forceDeliveryContainer #delivery_not_available, .ErrorMsgquoteNotAvailable').removeClass('hide');
+    $('.guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .revision_delivery, .revision_price_box,#delivery_before_time').addClass('hide');
+    expandOutsourcePopup();
 }
 
 
@@ -310,24 +250,6 @@ function renderNormalQuote( chunk ) {
 }
 
 
-function renderOutsourcedQuote( chunk ) {
-    $(".outsourceto").addClass("outsourced");
-    $('.modal.outsource').removeClass('loading');
-    $('.needitfaster,#changecurrency,#changeTimezone,.show_translator,.addrevision,.outsource.modal .continuebtn').addClass('hide');
-    $('.outsource.modal .tprice').append('<a class="checkstatus standardbtn" href="'+chunk.link_to_status+'" target="_blank">View status</a>').removeClass('hide');
-    $('.outsourced .heading').append('<span class="outsource_notify"><span class="icon-check"></span> Outsourced</span>');
-
-    if (chunk.typeOfService == "premium") {
-        $('.revision_heading').removeClass('hide');
-    } else {
-        $('.revision_heading').addClass('hide');
-    }
-
-    renderLocalizationInfos( chunk.price, chunk.delivery );
-    $( 'span.zone2').html( $( '#changeTimezone option:selected').attr( "data-description-long" ) );
-}
-
-
 function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
     // if the customer has a timezone in the cookie, then use it
     // otherwise attemp to guess it from his browser infos
@@ -363,37 +285,61 @@ function renderLocalizationInfos( price, delivery, revision_price, revision_deli
 
 
 function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol, elementToUpdateValue, elementToUpdatePPW ) {
-    $('.tprice').removeClass('blink');
-    APP.doRequest({
-        data: {
-            action: 'changeCurrency',
-            amount: amount,
-            currencyFrom: currencyFrom,
-            currencyTo: currencyTo
-        },
-        success: function (d) {
-            $('.tprice').addClass('blink');
-            $( elementToUpdateValue ).attr( "data-rawprice", d.data );
-            $( elementToUpdateValue ).attr( "data-currency", currencyTo );
-            $( elementToUpdateSymbol ).attr( "data-currency", currencyTo );
+    fetchChangeRates( function() {
+        $('.tprice').addClass('blink');
 
-            $( elementToUpdateSymbol ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
-            $( elementToUpdateValue ).text( parseFloat( d.data).toFixed( 2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
+        var changeRates = $.parseJSON( UI.changeRates );
+        var newPrice = amount * changeRates[ currencyTo ] / changeRates[ currencyFrom ];
 
-            if( elementToUpdatePPW.length > 0 ) {
-                var numWords = parseFloat($(".title-words").text().replace(",", ""));
+        $( elementToUpdateValue ).attr( "data-rawprice", newPrice );
+        $( elementToUpdateValue ).attr( "data-currency", currencyTo );
+        $( elementToUpdateSymbol ).attr( "data-currency", currencyTo );
 
-                if(numWords == 0){
-                    numWords = 1;
-                }
+        $( elementToUpdateSymbol ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
+        $( elementToUpdateValue ).text( parseFloat( newPrice ).toFixed( 2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") );
 
-                $(elementToUpdatePPW).text(( parseFloat(d.data) / numWords ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
+        if( elementToUpdatePPW.length > 0 ) {
+            var numWords = parseFloat($(".title-words").text().replace(",", ""));
+
+            if(numWords == 0){
+                numWords = 1;
             }
 
-            $('.outsource.modal .continuebtn').removeClass('disabled');
-            $('.modal.outsource').removeClass('loading');
+            $(elementToUpdatePPW).text(( parseFloat(newPrice) / numWords ).toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"));
+        }
 
-            setCookie( "matecat_currency", currencyTo );
+        $('.outsource.modal .continuebtn').removeClass('disabled');
+        $('.modal.outsource').removeClass('loading');
+        $(".showpricesloading").addClass("hide");
+        $(".showprices").removeClass("hide"); $(".showprices").show();
+
+        setCookie( "matecat_currency", currencyTo );
+    });
+}
+
+
+function fetchChangeRates( callback ) {
+    if( UI.changeRates != "" ) {
+        if( typeof callback == "function" ) callback();
+        return;
+    }
+
+    var changeRates = readCookie( "matecat_changeRates" );
+    if( changeRates != "" ) {
+        UI.changeRates = changeRates;
+        if( typeof callback == "function" ) callback();
+        return;
+    }
+
+    APP.doRequest({
+        data: {
+            action: 'fetchChangeRates'
+        },
+        success: function(d) {
+            var now = new Date();
+            setCookie( "matecat_changeRates", d.data, new Date( now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59 ) );
+            UI.changeRates = d.data;
+            if( typeof callback == "function" ) callback();
         }
     });
 }
@@ -409,6 +355,7 @@ function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
 
     setCookie( "matecat_timezone", timezoneTo );
 }
+
 
 function updateTimezonesDescriptions( selectedTimezone ) {
     $( "#changeTimezone" ).find( "option").each( function() {
@@ -434,9 +381,11 @@ function readCookie( cookieName ) {
 }
 
 
-function setCookie( cookieName, cookieValue ) {
-    var expiration = new Date();
-    expiration.setYear( new Date().getFullYear() + 1);
+function setCookie( cookieName, cookieValue, expiration ) {
+    if( typeof expiration == "undefined" ) {
+        expiration = new Date();
+        expiration.setYear(new Date().getFullYear() + 1);
+    }
     document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
 }
 
@@ -458,15 +407,14 @@ function updateCartParameters() {
                     jpassword: jobData[1]
                 }
             ]
-        },
-        success: function () {}
+        }
     });
 
 }
 
 
 function resetOutsourcePopup( resetHard ) {
-    $( ".outsourceto").attr( "class", "outsourceto" );
+    $('.outsourceto').attr( "class", "outsourceto" );
     $('.needitfaster').html('Need it faster?');
     $('.trustbox2').attr( "class", "trustbox2" );
     $('.trustbox1').attr( "class", "trustbox1" );
@@ -479,10 +427,36 @@ function resetOutsourcePopup( resetHard ) {
     $( ".show_translator.more").attr( "class", "show_translator more" );
     $( ".hide_translator.more").attr( "class", "hide_translator more" );
     $('.popup-box.pricebox.compress').attr( "class", "popup-box pricebox" );
+    $('.modal.outsource, .outsource.modal .continuebtn').addClass('loading');
     $('.delivery').appendTo(".delivery_container").attr("class","delivery");
-    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster').removeClass('hide');
-    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more').addClass('hide');
+    $('.outsource.modal .continuebtn').addClass('disabled');
+    $('.tprice').removeClass('blink');
+    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
+    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more, .showprices').addClass('hide');
 
-    if( resetHard )
-        $('#forceDeliveryContainer').addClass("hide");
+    if( resetHard ) {
+        $('.modal.outsource .displayprice').empty();
+        $('.modal.outsource .delivery .time').empty();
+        $('.modal.outsource .revealprices, .modal.outsource').hide();
+        $('#forceDeliveryContainer, .viewvendors').addClass("hide");
+    }
+}
+
+
+function showOutsourcePopup( showExpanded ) {
+    if( $( ".outsource" ).css("display") == "none" ) {
+        ( showExpanded == '0' ) ? compressOutsourcePopup() : expandOutsourcePopup();
+    }
+}
+
+
+function expandOutsourcePopup() {
+    $( ".outsourceto, .paymentinfo, .contact_box").removeClass( "hide" );
+    $( ".viewvendors").addClass("hide");
+}
+
+
+function compressOutsourcePopup() {
+    $( ".outsourceto, .paymentinfo, .contact_box").addClass( "hide" );
+    $( ".viewvendors").removeClass( "hide" );
 }
