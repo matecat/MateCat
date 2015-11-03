@@ -88,7 +88,7 @@ if ( Review.enabled() ) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
+        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
 
         /*
@@ -109,8 +109,12 @@ if ( Review.enabled() ) {
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
 //        console.log($('.editor .sub-editor'));
+        $('.editor .sub-editor.open').removeClass('open');
+        $('.editor .sub-editor.review').addClass('open');
+/*
         $('.editor .sub-editor').hide();
         $('.editor .sub-editor.review').show();
+*/
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('afterFormatSelection', '.editor .editarea', function() {
