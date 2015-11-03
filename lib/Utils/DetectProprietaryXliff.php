@@ -86,6 +86,7 @@ class DetectProprietaryXliff {
                 self::$fileType[ 'proprietary' ]            = false;
                 self::$fileType[ 'proprietary_name' ]       = 'SDL Studio ';
                 self::$fileType[ 'proprietary_short_name' ] = 'trados';
+				self::$fileType[ 'converter_version' ] = 'legacy';
             }
         }
 
@@ -97,16 +98,24 @@ class DetectProprietaryXliff {
                 self::$fileType[ 'proprietary' ]            = true;
                 self::$fileType[ 'proprietary_name' ]       = 'GlobalSight Download File';
                 self::$fileType[ 'proprietary_short_name' ] = 'globalsight';
+				self::$fileType[ 'converter_version' ] = 'legacy';
             }
         }
     }
 
     protected static function _checkMateCATConverter( $tmp ){
-        if( isset($tmp[0]) ){
-            if( stripos( $tmp[0], 'tool-id="matecat-converter"' ) !== false ) {
+        if( isset($tmp[0]) ) {
+			preg_match('#tool-id\s*=\s*"matecat-converter(\s+([^"]+))?"#i', $tmp[0], $matches);
+            if( ! empty( $matches ) ) {
                 self::$fileType[ 'proprietary' ]            = false;
                 self::$fileType[ 'proprietary_name' ]       = 'MateCAT Converter';
                 self::$fileType[ 'proprietary_short_name' ] = 'matecat_converter';
+				if ($matches[2]) {
+					self::$fileType[ 'converter_version' ] = $matches[2];
+				} else {
+					// First converter release didn't specify version
+					self::$fileType[ 'converter_version' ] = '1.0';
+				}
             }
         }
     }

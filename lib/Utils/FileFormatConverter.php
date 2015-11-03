@@ -14,7 +14,7 @@ class FileFormatConverter {
     private $lang_handler; //object that exposes language utilities
     private $storage_lookup_map;
 
-    private $useLegacyConverters;
+    private $converterVersion;
 
     private $conversionObject;
 
@@ -36,19 +36,18 @@ class FileFormatConverter {
     /**
      * Create a new FileFormatConverter, using old or new converters.
      * This function looks for converters in the 'converters' table in the db.
-     * If $useLegacyConverters is false, this function will filter only the
-     * row of the table with the column 'conversion_api_version' starting with
-     * 'open '.
-     *
-     * @param bool $useLegacyConverters
+     * $converterVersion can be "legacy", "latest", or something like "1.0.0".
+     * In the first case legacy converters will be used; in the second case,
+     * the latest version of new converters will be used; in the third case,
+     * this function will look for the converters with the provided version,
+     * and if not found will use the converters with higher but closest version.
+     * Version check is done on the conversion_api_version field of the
+     * converters db table; new converters are expected to have a value like
+     * "open 1.0.0".
      */
-    public function __construct( $useLegacyConverters = true ) {
-        $this->useLegacyConverters = $useLegacyConverters;
+    public function __construct($converterVersion = null) {
+        $this->converterVersion = $converterVersion;
 
-        if ( !class_exists( "INIT" ) ) {
-            include_once( "../../inc/config.inc.php" );
-            Bootstrap::start();
-        }
         $this->opt[ 'httpheader' ] = array( "Content-Type:multipart/form-data;charset=UTF-8" );
         $this->lang_handler        = Langs_Languages::getInstance();
 
@@ -68,12 +67,41 @@ class FileFormatConverter {
         ), ArrayObject::ARRAY_AS_PROPS );
 
         // Get converters instances list from database,
-        // according to the $useLegacyConverters parameter.
         $db         = Database::obtain();
-        $query = 'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
-                . ' FROM converters'
-                . ' WHERE status_active = 1 AND status_offline = 0'
-                . ' AND conversion_api_version ' . ($this->useLegacyConverters ? 'NOT LIKE' : 'LIKE') . ' "open %"';
+        // The base query to obtain the converters
+        $baseQuery =
+            'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
+            . ' FROM converters'
+            . ' WHERE status_active = 1 AND status_offline = 0';
+
+        // Complete the $baseQuery according to the converter's version
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
+            // Retrieve only old converters
+            $query = $baseQuery
+                . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                . ' AND conversion_api_version NOT LIKE "open %"';
+
+        } else {
+            // Here we use new converters
+
+            if ($this->converterVersion == Constants_ConvertersVersions::LATEST) {
+                // Get the converters with the latest version
+                $query = $baseQuery . ' AND conversion_api_version = ('
+                    . 'SELECT MAX(conversion_api_version)'
+                    . ' FROM converters'
+                    . ' WHERE conversion_api_version LIKE "open %"'
+                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                    . ' AND status_active = 1 AND status_offline = 0'
+                    . ')';
+
+            } else {
+                $closest_conversion_api_version = self::getClosestConversionApiVersion($this->converterVersion);
+                $query = $baseQuery
+                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                    . ' AND conversion_api_version = "' . $closest_conversion_api_version . '"';
+            }
+        }
+
         $converters = $db->fetch_array( $query );
 
         // SUUUPER ugly, those variables should not be static at all! No way!
@@ -96,6 +124,50 @@ class FileFormatConverter {
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
+    }
+
+    /**
+     * Returns the value of conversion_api_version for the provided version.
+     * If no converters in db match the provided version, use the higher closest
+     * converter version.
+     */
+    private static function getClosestConversionApiVersion($version) {
+        $db = Database::obtain();
+
+        // First, obtain a list of all the versions sorted from oldest
+        // to newest
+        $query = 'SELECT DISTINCT conversion_api_version'
+            . ' FROM converters'
+            . ' WHERE conversion_api_version LIKE "open %"'
+            . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+            . ' AND status_active = 1 AND status_offline = 0'
+            . ' ORDER BY conversion_api_version ASC';
+        $db_list = $db->fetch_array( $query );
+
+        if (empty($db_list)) {
+            throw new Exception("There are no new converters enabled in the converters table!");
+        }
+
+        // Look for the exact version required, or at least the
+        // higher but closest version we have in db.
+        foreach ($db_list as $db_row) {
+            $examined_version = $db_row['conversion_api_version'];
+            if ($examined_version >= "open $version") {
+                // We found the same version, or we are on the
+                // closest higher one.
+                $candidate_version = $examined_version;
+                break;
+            }
+        }
+
+        if (empty($candidate_version)) {
+            // The previous loop ended, but all versions were
+            // lower than the one provided: as fallback, use the
+            // highest version we have, i.e. the last examined.
+            $candidate_version = $examined_version;
+        }
+
+        return $candidate_version;
     }
 
 
@@ -316,7 +388,7 @@ class FileFormatConverter {
 
         // The new converters need a new way to check if they are
         // online, so we have two different methods for this task.
-        if ($this->useLegacyConverters) {
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
             $isServiceAvailable = $this->checkOpenLegacyService($url);
         } else {
             $isServiceAvailable = $this->checkOpenService();
@@ -374,7 +446,7 @@ class FileFormatConverter {
         $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
         $extension = FilesStorage::pathinfo_fix($file_path, PATHINFO_EXTENSION);
 
-        if ($this->useLegacyConverters) {
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
             // Legacy converters need encode sanitize
 
             $fileContent = file_get_contents($file_path);

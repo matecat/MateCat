@@ -501,7 +501,7 @@ console.log('changeStatus');
 
 
 		UI.footerHTML =	'<ul class="submenu">' +
-                    '	<li class="footerSwitcher">' +
+                    '	<li class="footerSwitcher btn">' +
                     '	</li>' +
                     '	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
