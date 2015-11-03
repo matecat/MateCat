@@ -162,7 +162,7 @@ class copyAllSource2TargetController extends ajaxController {
         if ( !function_exists( 'array_column' ) ) {
             $result = Utils::array_column( $result, 'id' );
         } else {
-            $result = array_column( $result, 'id' );
+            $result = Utils::array_column( $result, 'id' );
         }
 
         return $result;

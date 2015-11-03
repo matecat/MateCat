@@ -88,8 +88,8 @@ if ( Review.enabled() ) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
-        div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
+        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review untouched" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
+        div.append('<div class="tab sub-editor review" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
 
         /*
                setTimeout(function() {// fixes a bug in setting defaults in radio buttons
@@ -98,15 +98,35 @@ if ( Review.enabled() ) {
                }, 100);
         */
         UI.footerHTML = div.html();
+ /*
+        if(UI.body.hasClass('hideMatches')) {
+            UI.currentSegment.find('.tab-switcher.active').removeClass('active');
+            UI.currentSegment.find('.tab-switcher-review').addClass('active');
+        } else {
+            UI.currentSegment.find('.tab-switcher-review').click();
+        }
+*/
         UI.currentSegment.find('.tab-switcher-review').click();
 
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
+
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
 //        console.log($('.editor .sub-editor'));
+        $('.editor .sub-editor.open').removeClass('open');
+        if($(this).hasClass('untouched')) {
+            $(this).removeClass('untouched');
+            if(!UI.body.hasClass('hideMatches')) {
+                $('.editor .sub-editor.review').addClass('open');
+            }
+        } else {
+            $('.editor .sub-editor.review').addClass('open');
+        }
+/*
         $('.editor .sub-editor').hide();
         $('.editor .sub-editor.review').show();
+*/
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('afterFormatSelection', '.editor .editarea', function() {

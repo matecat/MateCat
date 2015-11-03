@@ -37,6 +37,12 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param Users_UserStruct $obj
+     *
+     * @return Users_UserStruct|Users_UserStruct[]
+     * @throws Exception
+     */
     public function read( Users_UserStruct $obj ) {
         $obj = $this->sanitize( $obj );
 

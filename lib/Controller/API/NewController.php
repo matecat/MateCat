@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/array_column.php";
 
 set_time_limit( 180 );
 

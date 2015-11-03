@@ -8,8 +8,9 @@ module.exports = function(grunt) {
         basePath + '../css/style.css',
         basePath + '../css/mbc-style.css',
         basePath + '../css/segment-notes.css',
-        basePath + '../css/project-completion-feature.css'
-    ]
+        basePath + '../css/project-completion-feature.css',
+        basePath + '../css/editlog.css'
+   ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");

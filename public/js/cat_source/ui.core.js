@@ -507,6 +507,8 @@ console.log('changeStatus');
         }
 
 		UI.footerHTML =	'<ul class="submenu">' +
+                    '	<li class="footerSwitcher">' +
+                    '	</li>' +
 					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + sid + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
@@ -527,7 +529,7 @@ console.log('changeStatus');
                     UI.footerHTML = UI.footerHTML + '</ul>'  ;
 
                     UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor matches" ' + ((config.isReview)? 'style="display: none"' : '') + ' id="segment-' + sid + '-matches">' +
+					'<div class="tab sub-editor matches" ' + ((config.isReview)? ' style="display: none"' : '') + ' id="segment-' + sid + '-matches">' +
 					'	<div class="overflow"></div>' +
                     '   <div class="engine-errors"></div>' +
                     '</div>' ;
@@ -3086,6 +3088,9 @@ console.log('eccolo: ', typeof token);
 
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
+        if(typeof d.pee_error_level != 'undefined') {
+            UI.body.addClass('peeError');
+        }
 		if (d.data == 'OK') {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
@@ -3260,6 +3265,29 @@ console.log('eccolo: ', typeof token);
         });
 
     },
+    switchFooter: function() {
+        console.log('switchFooter');
+        this.currentSegment.find('.footer').removeClass('showMatches');
+        this.body.toggleClass('hideMatches');
+        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+    },
+    setHideMatches: function () {
+        console.log('setHideMatches');
+        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+
+        if(typeof $.cookie(cookieName + '-' + config.job_id) != 'undefined') {
+            if($.cookie(cookieName + '-' + config.job_id) == 'true') {
+                UI.body.addClass('hideMatches')
+            } else {
+                UI.body.removeClass('hideMatches')
+            }
+        } else {
+            $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+        }
+
+    },
+
 
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');

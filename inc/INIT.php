@@ -248,7 +248,7 @@ class INIT {
                     'xhtml' => array( '', '', 'exthtm' ),
                     'xml'   => array( '', '', 'extxml' ),
                     'dtd'   => array( '', '', 'extxml' ),
-                    'php'   => array( '', '', 'extxml' ),
+//                    'php'   => array( '', '', 'extxml' ),
                     'json'  => array( '', '', 'extxml'),
                     'yaml'   => array( '', '', 'extxml' )
             ),

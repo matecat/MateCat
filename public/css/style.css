@@ -398,7 +398,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	display: block;
 	font-size: 12px;
 	z-index: 999;
-	color: #999;
+	color: #aaa;
 	text-decoration: none;
 	cursor: default;
 	height: inherit;
@@ -409,7 +409,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 .sid .txt {
     padding: 10px 0;
     background:#fff;
-    margin:20px 8px 0 8px;
+    margin:12px 8px 0 8px;
 }
 
 
@@ -605,7 +605,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 
-.buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin:20px 0 0 0;position:absolute;right:0;}
+.buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin: 0;position:absolute;right:0;}
 .buttons li{float:left;text-align:center;margin:0px 0 20px 0px;height:35px;width:auto !important;padding:0 !Important}
 .buttons p {margin:2px 0 0 5px;font-size:11px;font-weight:normal;color:#666;display:none;text-align:center;}
 
@@ -803,7 +803,7 @@ box-shadow: 0 1px 2px #ccc;
     display: none;
     position: absolute;
     float: left;
-    margin-left: 47.4%;
+    margin-left: 47%;
     margin-top: 5px;
     background: url(../img/outercopy.png) center 1px no-repeat;
     width: 50px !important;
@@ -1085,6 +1085,7 @@ section.loaded .submenu {display: block; }
     background: #efefef url(../img/point.gif) 0 0 repeat-x;
     z-index: 9999999999999;
 }
+
 .tab-switcher-al
 {
 	display: none;
@@ -1135,14 +1136,26 @@ body.noGlossary .tab-switcher-gl
 	float: left;
 	width: 100%;
     background: #fff !important;
-}   
+}
+.sub-editor.open
+{
+    display: block;
+}
+/*
 .sub-editor.matches
 {
 	display: block;
 }
+*/
+body.hideMatches .sub-editor {
+    display: none !important;
+}
+body .footer.showMatches .sub-editor.open {
+    display: block !important;
+}
 .sub-editor.matches .overflow
 {
-    min-height: 30px;;
+    min-height: 27px;
 }
 .addtmx-tr .open-popup-addtm-tr {
 height: 17px;
@@ -1594,7 +1607,20 @@ body.review .loader
 
 .source-title{margin:3px 0 0 20px !important;}
 .target-title{float:right; margin:3px 30px 0 0}
-.header{height: 20px; width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
+.header
+{
+    height: 20px;
+    width:100%;
+    color:#a7a9ac;
+    font-size:12px;
+    float:left;
+    text-align:left;
+    background:#efefef;
+    border-bottom:1px solid #ccc;
+    margin-bottom: 0px;
+    -webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;
+    box-shadow: inset 0 1px 1px 1px #f4f7f9;
+}
 
 
 .header .repetition
@@ -1647,7 +1673,7 @@ body.review .loader
     height:20px;
     text-align:center;
     width:25px;
-    top:-9px;
+    top: -9px;
     position:absolute;
     left:46.8%;
     color:#fff;
@@ -1656,6 +1682,7 @@ body.review .loader
     font-weight:bold;
     cursor:default;
     padding:0 10px;
+    z-index: 999;
 }
 /*
 .editor .percentuage{display:block !important;}
@@ -1712,7 +1739,11 @@ z-index: 10000;
   height: 100%;
 }
 
-.source{line-height:30px;padding-top:9px !important;}
+.source
+{
+    line-height: 27px;
+    padding-top: 9px !important;
+}
 .editor .source
 {
     padding-top: 4px !important;
@@ -1741,7 +1772,9 @@ z-index: 10000;
     word-wrap: break-word;
     word-break: normal;
 }
-
+.text .source.item {
+    padding-bottom: 10px;
+}
 
 
 /*
@@ -1762,8 +1795,8 @@ z-index: 10000;
 	/*float:right;*/
 	width: 100%;
 	height:96%;
-	line-height:30px;
-	min-height: 70px;
+	line-height: 27px;
+	min-height: 54px;
 	resize: none;
 	overflow:hidden;
 	margin:2px 0 0px -11px;
@@ -1985,8 +2018,8 @@ textarea, input, .editarea, .search-editarea, select  {
 	float:left;
     width: 99%;
 	height:100%;
-	padding-bottom:8px;
-	padding-top:15px;
+	padding-bottom: 0px;
+	padding-top: 5px;
 
 }
 .editor .wrap{/*padding-bottom:25px; */height:87% !important;}
@@ -2221,7 +2254,19 @@ body.archived section .status-container a.status:hover
     cursor: default !important;
 }
 
-.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:15px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
+.editor .status
+{
+    width: 8px;
+    display: block;
+    position: absolute;
+    right: 0;
+    height: 97%;
+    padding-bottom: 15px;
+    background: #f5f5f5;
+    top: 3%;
+    margin: -6px 0 0 0 !important;
+    border-bottom: 0;
+}
 
 
 
@@ -3186,7 +3231,7 @@ float: left;
 	display: block;
 	visibility: hidden;
 	margin-top: -6px;
-	padding-top:10px;
+	padding-top: 4px;
 }
 .editToolbar.visible
 {
@@ -3409,7 +3454,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 
 
 .tagModeToggle {
-padding: 10px 2px;
+padding: 3px 2px 0px 2px;
 border: 1px solid #fff;
 color: #444!important;
 }
@@ -3423,7 +3468,12 @@ color: #444!important;
 }
 
 section .toolbar {
-margin-left: -10px;
+    display: none;
+    margin-left: -10px;
+}
+
+section.editor .toolbar {
+    display: block;
 }
 
 .tagModeToggle span {
@@ -3583,8 +3633,9 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 
 
 .outersource .copy {
-background: url(../img/outercopy@2x.png) center 1px no-repeat;
-background-size: 12px 11px;
+    top: 7px;
+    background: url(../img/outercopy@2x.png) center 1px no-repeat;
+    background-size: 12px 11px;
 }
 
 .outersource .copy:hover {
@@ -3795,7 +3846,7 @@ color:red !important;
 
 .track-changes p {
   width: 100%;
-  line-height: 30px;
+  line-height: 27px;
   margin: 36px auto 17px auto;
   min-height: 70px;
   text-align: left;
@@ -3861,7 +3912,7 @@ body.cattool .nav-tabs li.mgmt-mt {
   outline:0;
   text-align: left;
   border-radius: 2px;
-  line-height: 30px;
+  line-height: 27px;
   font-size: 18px;
   color: #000;
   border: 1px solid #727272;
@@ -3937,3 +3988,25 @@ body.cattool .nav-tabs li.mgmt-mt {
 .bg_orange{
 	background: #ee6633;
 }
+.submenu li.footerSwitcher {
+    float: left;
+    width: 23px !important;
+    height: 27px;
+    border-right: 1px solid #000;
+    background: #fff url(../img/matches-down.png) 5px 9px no-repeat !important;
+/*    background-size: 10px !important; */
+    cursor: pointer;
+}
+body.hideMatches .submenu li.footerSwitcher {
+    -moz-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+    filter: FlipV;
+    -ms-filter: "FlipV";
+}
+
+body.hideMatches .submenu {
+    margin-bottom: 5px;
+}
+

@@ -74,6 +74,10 @@ class Bootstrap {
         //get the environment configuration
         self::getEnvConfig();
 
+        if ( empty( INIT::$STORAGE_DIR ) ) {
+            INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage" ;
+        }
+
         INIT::$LOG_REPOSITORY                  = INIT::$STORAGE_DIR . "/log_archive";
         INIT::$UPLOAD_REPOSITORY               = INIT::$STORAGE_DIR . "/upload";
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
@@ -253,7 +257,7 @@ class Bootstrap {
                 self::$_ROOT . "/lib/Utils",
                 self::$_ROOT . "/lib/Utils/Predis/src",
                 self::$_ROOT . "/lib/Model",
-                self::$_ROOT . "/lib/Decorators",
+                self::$_ROOT . "/lib/Decorator",
         );
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
