@@ -3304,6 +3304,9 @@ console.log('eccolo: ', typeof token);
 //        console.log('setTranslation_success');
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
+        if(typeof d.pee_error_level != 'undefined') {
+            UI.body.addClass('peeError');
+        }
 		if (d.data == 'OK') {
 //            console.log('setTranslation_success - segment: ', segment);
 			this.setStatus(segment, status);
