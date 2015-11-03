@@ -3489,18 +3489,21 @@ console.log('eccolo: ', typeof token);
         console.log('switchFooter');
         this.currentSegment.find('.footer').removeClass('showMatches');
         this.body.toggleClass('hideMatches');
-        $.cookie('hideMatches-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+        $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
     },
     setHideMatches: function () {
         console.log('setHideMatches');
-        if(typeof $.cookie('hideMatches-' + config.job_id) != 'undefined') {
-            if($.cookie('hideMatches-' + config.job_id) == 'true') {
+        var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
+
+        if(typeof $.cookie(cookieName + '-' + config.job_id) != 'undefined') {
+            if($.cookie(cookieName + '-' + config.job_id) == 'true') {
                 UI.body.addClass('hideMatches')
             } else {
                 UI.body.removeClass('hideMatches')
             }
         } else {
-            $.cookie('hideMatches-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+            $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
         }
 
     },

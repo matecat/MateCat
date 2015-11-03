@@ -112,7 +112,7 @@
     </body>
 
 
-    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl} hideMatches" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
+    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
