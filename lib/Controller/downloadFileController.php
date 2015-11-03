@@ -85,7 +85,6 @@ class downloadFileController extends downloadController {
         $debug[ 'get_file' ][] = time();
         $nonew                 = 0;
         $output_content        = array();
-        $thereIsAZipFile       = false;
         /*
            the procedure:
            1)original xliff file is read directly from disk; a file handler is obtained
@@ -191,8 +190,6 @@ class downloadFileController extends downloadController {
                     $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
 
                     if ( $this->forceXliff ) {
-                        $file_info_details                              = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ] );
-
                         //clean the output filename by removing
                         // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
                         $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
@@ -280,7 +277,6 @@ class downloadFileController extends downloadController {
         foreach ( $output_content as $idFile => $fileInformations ) {
             $zipPathInfo = ZipArchiveExtended::zipPathInfo( $output_content[ $idFile ][ 'output_filename' ] );
             if ( is_array( $zipPathInfo ) ) {
-                $thereIsAZipFile                                = true;
                 $output_content[ $idFile ][ 'zipfilename' ]     = $zipPathInfo[ 'zipfilename' ];
                 $output_content[ $idFile ][ 'zipinternalPath' ] = $zipPathInfo[ 'dirname' ];
                 $output_content[ $idFile ][ 'output_filename' ] = $zipPathInfo[ 'basename' ];

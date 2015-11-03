@@ -150,28 +150,6 @@ class ConversionHandler {
                 $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
-            //TODO: Remove after filters upgrade in new converters ( or Alfred introduction )
-            $info = FilesStorage::pathinfo_fix( $file_path );
-            if ( $info[ 'extension' ] == 'sxml' ) {
-                // ...but new converters don't support some xml customizations
-                if( !rename( $file_path, $file_path . ".xml" ) ){
-
-                    //custom error message passed directly to javascript client and displayed as is
-                    $convertResult[ 'errorMessage' ] = "Error: there is a problem with this file, it cannot be converted.";
-                    $this->result[ 'code' ]          = -110;
-                    $this->result[ 'errors' ][]      = array(
-                            "code"  => -110, "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => FilesStorage::basename_fix( $this->file_name )
-                    );
-
-                    return false;
-
-                }
-                $file_path = $file_path . ".xml";
-                $this->setFileName( $info[ 'filename' ] . ".xml" );
-                $converterVersion = Constants_ConvertersVersions::LEGACY;
-            }
-
             //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
             if( INIT::$LEGACY_CONVERSION !== false ){
                 $converterVersion = Constants_ConvertersVersions::LEGACY;

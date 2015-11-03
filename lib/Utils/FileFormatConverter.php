@@ -48,10 +48,6 @@ class FileFormatConverter {
     public function __construct($converterVersion = null) {
         $this->converterVersion = $converterVersion;
 
-        if ( !class_exists( "INIT" ) ) {
-            include_once( "../../inc/config.inc.php" );
-            Bootstrap::start();
-        }
         $this->opt[ 'httpheader' ] = array( "Content-Type:multipart/form-data;charset=UTF-8" );
         $this->lang_handler        = Langs_Languages::getInstance();
 
