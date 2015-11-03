@@ -125,7 +125,11 @@ class MyMemory {
         $a = array_filter( $a, "trim" );
         $b = array_filter( $b, "trim" );
 
-        $result = self::TMS_ARRAY_MATCH( $a, $b, $for_semantix ) - ( $penalty + $penalty_formatting + $penalty_placeable );
+
+        $tms_match = self::TMS_ARRAY_MATCH( $a, $b, $for_semantix );
+        // if ($tms_match > 0 ) is true, the following member is considered, otherwise it is multiplied by 0 ( = false)
+        // This is useful to skip penalty in case that one of the 2 strings is empty;
+        $result = $tms_match - ($tms_match > 0 ) * ( $penalty + $penalty_formatting + $penalty_placeable );
 
         return $result;
     }
