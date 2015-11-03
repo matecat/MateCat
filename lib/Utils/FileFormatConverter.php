@@ -79,25 +79,30 @@ class FileFormatConverter {
             . ' WHERE status_active = 1 AND status_offline = 0';
 
         // Complete the $baseQuery according to the converter's version
-        if ($this->converterVersion == "legacy") {
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
             // Retrieve only old converters
-            $query = $baseQuery . ' AND conversion_api_version NOT LIKE "open %"';
+            $query = $baseQuery
+                . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                . ' AND conversion_api_version NOT LIKE "open %"';
 
         } else {
             // Here we use new converters
 
-            if ($this->converterVersion == "latest") {
+            if ($this->converterVersion == Constants_ConvertersVersions::LATEST) {
                 // Get the converters with the latest version
                 $query = $baseQuery . ' AND conversion_api_version = ('
                     . 'SELECT MAX(conversion_api_version)'
                     . ' FROM converters'
                     . ' WHERE conversion_api_version LIKE "open %"'
+                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
                     . ' AND status_active = 1 AND status_offline = 0'
                     . ')';
 
             } else {
                 $closest_conversion_api_version = self::getClosestConversionApiVersion($this->converterVersion);
-                $query = $baseQuery . ' AND conversion_api_version = "' . $closest_conversion_api_version . '"';
+                $query = $baseQuery
+                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                    . ' AND conversion_api_version = "' . $closest_conversion_api_version . '"';
             }
         }
 
@@ -138,6 +143,7 @@ class FileFormatConverter {
         $query = 'SELECT DISTINCT conversion_api_version'
             . ' FROM converters'
             . ' WHERE conversion_api_version LIKE "open %"'
+            . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
             . ' AND status_active = 1 AND status_offline = 0'
             . ' ORDER BY conversion_api_version ASC';
         $db_list = $db->fetch_array( $query );
@@ -386,7 +392,7 @@ class FileFormatConverter {
 
         // The new converters need a new way to check if they are
         // online, so we have two different methods for this task.
-        if ($this->converterVersion == "legacy") {
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
             $isServiceAvailable = $this->checkOpenLegacyService($url);
         } else {
             $isServiceAvailable = $this->checkOpenService();
@@ -444,7 +450,7 @@ class FileFormatConverter {
         $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
         $extension = FilesStorage::pathinfo_fix($file_path, PATHINFO_EXTENSION);
 
-        if ($this->converterVersion == "legacy") {
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
             // Legacy converters need encode sanitize
 
             $fileContent = file_get_contents($file_path);
