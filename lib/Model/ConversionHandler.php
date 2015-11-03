@@ -143,11 +143,11 @@ class ConversionHandler {
             //we have to convert it
 
             // By default, use always the new converters...
-            $converterVersion = "latest";
+            $converterVersion = Constants_ConvertersVersions::LATEST;
             if ( $this->segmentation_rule !== null ) {
                 // ...but new converters don't support custom segmentation rules.
                 // if $this->segmentation_rule is set use the old ones.
-                $converterVersion = "legacy";
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
             //TODO: Remove after filters upgrade in new converters ( or Alfred introduction )
@@ -169,12 +169,12 @@ class ConversionHandler {
                 }
                 $file_path = $file_path . ".xml";
                 $this->setFileName( $info[ 'filename' ] . ".xml" );
-                $converterVersion = "legacy";
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
             //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
             if( INIT::$LEGACY_CONVERSION !== false ){
-                $converterVersion = "legacy";
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
             $converter = new FileFormatConverter($converterVersion);

@@ -63,9 +63,6 @@ class INIT {
     public static $REFERENCE_REPOSITORY;
     public static $DQF_ENABLED = false;
 
-    public static $CONVERTER_SERVER_ADDRESS;
-    public static $CONVERTER_SERVER_PORT;
-
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
@@ -122,6 +119,7 @@ class INIT {
      *
      */
     public static $CONVERSION_ENABLED = false;
+    public static $USE_ONLY_STABLE_CONVERTERS = true;
 
     /**
      * The MateCat Version
