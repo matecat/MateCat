@@ -457,7 +457,7 @@ function getJobData( $id_job, $password = null ) {
 
     $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key, payable_rates
+		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key, payable_rates, total_time_to_edit
 			FROM jobs
 			WHERE id = %u";
 

@@ -104,7 +104,7 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
      * @return float
      */
     public function getSecsPerWord() {
-        return round( $this->time_to_edit / 1000 / $this->raw_word_count, 1 );
+        return round( ($this->time_to_edit / 1000) / $this->raw_word_count, 1 );
     }
 
     /**
@@ -142,5 +142,21 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
             }
         }
         $this->warnings = $result;
+    }
+
+    /**
+     * @return float|int
+     */
+    public function getPEE(){
+        $post_editing_effort = round(
+                (1 - MyMemory::TMS_MATCH($this->suggestion, $this->translation)) * 100
+        );
+
+        if ($post_editing_effort < 0) {
+            $post_editing_effort = 0;
+        } else if ($post_editing_effort > 100) {
+            $post_editing_effort = 100;
+        }
+        return $post_editing_effort;
     }
 }

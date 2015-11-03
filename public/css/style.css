@@ -3997,7 +3997,7 @@ body.cattool .nav-tabs li.mgmt-mt {
     width: 23px !important;
     height: 27px;
     border-right: 1px solid #000;
-    background: #fff url(../img/matches-up.png) 5px 9px no-repeat !important;
+    background: #fff url(../img/matches-down.png) 5px 9px no-repeat !important;
 /*    background-size: 10px !important; */
     cursor: pointer;
 }

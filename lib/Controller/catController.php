@@ -543,6 +543,7 @@ class catController extends viewController {
 
         $this->template->isReview    = var_export( self::isRevision(), true );
         $this->template->reviewClass = ( self::isRevision() ? ' review' : '' );
+        $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
 

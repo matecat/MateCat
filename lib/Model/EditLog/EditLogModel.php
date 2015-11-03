@@ -11,6 +11,8 @@ class EditLog_EditLogModel {
     const PEE_THRESHOLD = 1;
     const MAX_SEGMENTS_PER_PAGE = 50;
     const CACHETIME = 108000;
+    const EDIT_TIME_SLOW_CUT = 30;
+    const EDIT_TIME_FAST_CUT = 0.25;
 
     private static $segments_per_page = 10;
     private static $start_id = -1;
@@ -81,9 +83,8 @@ class EditLog_EditLogModel {
 
             $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
             $this->languageStatsData = $this->languageStatsData[ 0 ];
-        }
-        catch (Exception $exn){
-            if($exn->getCode() == -1){
+        } catch ( Exception $exn ) {
+            if ( $exn->getCode() == -1 ) {
                 $this->jobEmpty = true;
             }
         }
@@ -133,14 +134,11 @@ class EditLog_EditLogModel {
         $__pagination_prev = PHP_INT_MAX;
         $__pagination_next = -2147483648;     //PHP_INT_MIN
 
-        $slow_cut = 30;
-        $fast_cut = 0.25;
-
         $stat_too_slow = array();
         $stat_too_fast = array();
 
         if ( !$data ) {
-            throw new Exception( 'There are no changes in this job', -1);
+            throw new Exception( 'There are no changes in this job', -1 );
         }
 
         $stats[ 'total-word-count' ] = 0;
@@ -172,7 +170,7 @@ class EditLog_EditLogModel {
 
             $displaySeg->suggestion_match .= "%";
             $displaySeg->job_id               = $this->jid;
-            $tte                              = CatUtils::parse_time_to_edit( $seg->time_to_edit );
+            $tte                              = CatUtils::parse_time_to_edit( $displaySeg->time_to_edit );
             $displaySeg->display_time_to_edit = "$tte[1]m:$tte[2]s";
 
             $stat_rwc[] = $seg->raw_word_count;
@@ -185,28 +183,26 @@ class EditLog_EditLogModel {
             //todo: remove this
             $displaySeg->secs_per_word = $seg->getSecsPerWord();
 
-            if ( ( $displaySeg->secs_per_word < $slow_cut ) AND ( $displaySeg->secs_per_word > $fast_cut ) ) {
-                $displaySeg->stats_valid       = 'Yes';
-                $displaySeg->stats_valid_color = '';
-                $displaySeg->stats_valid_style = '';
+            if ( ( $displaySeg->secs_per_word < self::EDIT_TIME_SLOW_CUT ) &&
+                    ( $displaySeg->secs_per_word > self::EDIT_TIME_FAST_CUT )
+            ) {
+                $displaySeg->stats_valid = true;
 
                 $stat_valid_rwc[] = $seg->raw_word_count;
-                $stat_valid_tte[] = $displaySeg->display_time_to_edit;
                 $stat_spw[]       = $displaySeg->secs_per_word;
             } else {
-                $displaySeg->stats_valid       = 'No';
-                $displaySeg->stats_valid_color = '#ee6633';
-                $displaySeg->stats_valid_style = 'border:2px solid #EE6633';
+                $displaySeg->stats_valid = false;
             }
-
 
             // Stats
-            if ( $displaySeg >= $slow_cut ) {
+            if ( $displaySeg->secs_per_word >= self::EDIT_TIME_SLOW_CUT ) {
                 $stat_too_slow[] = $seg->raw_word_count;
             }
-            if ( $displaySeg <= $fast_cut ) {
+            if ( $displaySeg->secs_per_word <= self::EDIT_TIME_FAST_CUT ) {
                 $stat_too_fast[] = $seg->raw_word_count;
             }
+
+            $displaySeg->secs_per_word .= "s";
 
             $displaySeg->pe_effort_perc = $displaySeg->getPeePerc();
 
@@ -226,10 +222,6 @@ class EditLog_EditLogModel {
 
             $sug_for_diff = CatUtils::placehold_xliff_tags( $seg->suggestion );
             $tra_for_diff = CatUtils::placehold_xliff_tags( $seg->translation );
-
-//            possible patch
-//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
-//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
             //with this patch we have warnings when accessing indexes
             if ( $use_ter_diff ) {
@@ -258,23 +250,18 @@ class EditLog_EditLogModel {
 
             } else {
                 $displaySeg->diff = '';
-                //$seg[ 'diff_ter' ] = '';
             }
 
             $displaySeg->diff = CatUtils::restore_xliff_tags_for_view( $displaySeg->diff );
-            //$seg['diff_ter'] = self::restore_xliff_tags_for_view($seg['diff_ter']);
 
             // BUG: While suggestions source is not correctly set
-            if ( ( $displaySeg->suggestion_match == "85%" ) OR ( $displaySeg->suggestion_match == "86%" ) ) {
+            if ( ( $displaySeg->suggestion_match == "85%" ) || ( $displaySeg->suggestion_match == "86%" ) ) {
                 $displaySeg->suggestion_source = 'Machine Translation';
                 $stat_mt[]                     = $seg->raw_word_count;
             } else {
-                $displaySeg->suggestion_source = 'Translation Memory';
+                $displaySeg->suggestion_source = 'TM';
             }
 
-            $displaySeg->suggestion_view = trim( CatUtils::rawxliff2view( $seg->suggestion ) );
-            $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );
-            $displaySeg->translation     = trim( CatUtils::rawxliff2view( $seg->translation ) );
 
             $array_patterns = array(
                     rtrim( CatUtils::lfPlaceholderRegex, 'g' ),
@@ -306,47 +293,51 @@ class EditLog_EditLogModel {
             );
             $displaySeg->source          = preg_replace( $array_patterns, $array_replacements, $seg->source );
             $displaySeg->translation     = preg_replace( $array_patterns, $array_replacements, $seg->translation );
-            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $displaySeg->sug_view );
+            $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $displaySeg->suggestion_view );
             $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
+
+            $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );
+            $displaySeg->suggestion_view = trim( CatUtils::rawxliff2view( $seg->suggestion ) );
+            $displaySeg->translation     = trim( CatUtils::rawxliff2view( $seg->translation ) );
+
 
             if ( $seg->mt_qe == 0 ) {
                 $displaySeg->mt_qe = 'N/A';
             }
 
-            $displaySeg->num_translation_mismatch = (int)$translationMismatchList[ $displaySeg->segment_hash ];
+            $displaySeg->num_translation_mismatch = @(int)$translationMismatchList[ $displaySeg->segment_hash ];
             $displaySeg->evaluateWarningString();
 
             $output_data[] = $displaySeg;
         }
 
-        $pagination = $this->evaluatePagination( $__pagination_prev, $__pagination_next + 1 );
+        $pagination  = $this->evaluatePagination( $__pagination_prev, $__pagination_next + 1 );
+        $globalStats = $this->evaluateGlobalStats();
 
+
+        $stats[ 'valid-word-count' ]  = $globalStats[ 'raw_words' ];
+
+        //TODO: this will not work anymore
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
-        $stats[ 'valid-word-count' ]  = array_sum( $stat_valid_rwc );
-
         if ( $stats[ 'edited-word-count' ] > 0 ) {
             $stats[ 'too-slow-words' ] = round( array_sum( $stat_too_slow ) / $stats[ 'edited-word-count' ], 2 ) * 100;
             $stats[ 'too-fast-words' ] = round( array_sum( $stat_too_fast ) / $stats[ 'edited-word-count' ], 2 ) * 100;
             $stats[ 'avg-pee' ]        = round( array_sum( $stat_pee ) / array_sum( $stat_rwc ) ) . "%";
             $stats[ 'avg-ter' ]        = round( array_sum( $stat_ter ) / array_sum( $stat_rwc ) ) . "%";
         }
-//        echo array_sum($stat_ter);
-//        echo "@@@";
-//        echo array_sum($stat_rwc);
-//        exit;
 
         $stats[ 'mt-words' ]        = round( array_sum( $stat_mt ) / $stats[ 'edited-word-count' ], 2 ) * 100;
         $stats[ 'tm-words' ]        = 100 - $stats[ 'mt-words' ];
-        $stats[ 'total-valid-tte' ] = round( array_sum( $stat_valid_tte ) / 1000 );
+        $stats[ 'total-valid-tte' ] = round( $globalStats[ 'tot_tte' ] );
 
         // Non weighted...
         // $stats['avg-secs-per-word'] = round(array_sum($stat_spw)/count($stat_spw),1);
         // Weighted
-        $stats[ 'avg-secs-per-word' ] = round( $stats[ 'total-valid-tte' ] / $stats[ 'valid-word-count' ], 1 );
+        $stats[ 'avg-secs-per-word' ] = round( $globalStats[ 'secs_per_word' ] / 1000, 1 );
         $stats[ 'est-words-per-day' ] = number_format( round( 3600 * 8 / $stats[ 'avg-secs-per-word' ] ), 0, '.', ',' );
 
         // Last minute formatting (after calculations)
-        $temp                       = CatUtils::parse_time_to_edit( round( array_sum( $stat_valid_tte ) ) );
+        $temp                       = CatUtils::parse_time_to_edit( round( $stats[ 'total-valid-tte' ] ) );
         $stats[ 'total-valid-tte' ] = "$temp[0]h:$temp[1]m:$temp[2]s";
 
         $stats[ 'total-tte-seconds' ] = $temp[ 0 ] * 3600 + $temp[ 1 ] * 60 + $temp[ 2 ];
@@ -424,6 +415,16 @@ class EditLog_EditLogModel {
     }
 
     /**
+     * @return array
+     * @throws Exception
+     */
+    private function evaluateGlobalStats() {
+        $dao = new EditLog_EditLogDao( Database::obtain() );
+
+        return $dao->getGlobalStats( $this->jid, $this->password );
+    }
+
+    /**
      * @return float
      */
     public function evaluateOverallTTE() {
@@ -454,7 +455,7 @@ class EditLog_EditLogModel {
      * @return bool
      */
     public function isTTEfast() {
-        return $this->stats[ 'total-tte-seconds' ] < $this->evaluateOverallTTE();
+        return $this->stats[ 'avg-secs-per-word' ] < $this->evaluateOverallTTE();
     }
 
     // GETTERS AND SETTERS

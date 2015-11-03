@@ -42,7 +42,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         AND password = '%s'
                         AND show_in_cattool = 1
                         AND segments.id >= %d
-                        AND st.status<>'NEW'
+                        AND st.status not in( '%s', '%s' )
                     LIMIT %u
                     UNION
                     SELECT * from(
@@ -54,7 +54,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                             AND password = '%s'
                             AND show_in_cattool = 1
                             AND segments.id < %d
-                            AND st.status<>'NEW'
+                            AND st.status not in( '%s', '%s' )
                         ORDER BY __sid DESC
                         LIMIT %u
                     ) as TT
@@ -89,7 +89,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 id_job = %d AND
                 j.password = '%s' AND
                 translation IS NOT NULL AND
-                st.status<>'NEW'
+                st.status not in( '%s', '%s' )
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                 ORDER BY time_to_edit DESC";
 
@@ -98,10 +98,14 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 $job_id,
                 $password,
                 $ref_segment,
+                Constants_TranslationStatus::STATUS_NEW,
+                Constants_TranslationStatus::STATUS_DRAFT,
                 self::NUM_SEGS,
                 $job_id,
                 $password,
                 $ref_segment,
+                Constants_TranslationStatus::STATUS_NEW,
+                Constants_TranslationStatus::STATUS_DRAFT,
                 self::NUM_SEGS
         );
 
@@ -110,7 +114,9 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $query,
                         $querySegments,
                         $job_id,
-                        $password
+                        $password,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT
                 )
         );
 
@@ -134,14 +140,16 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         JOIN jobs ON id_job = id
                                   AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
                         WHERE id_job = %d
-                        AND segment_translations.status <> 'NEW'
+                        AND segment_translations.status not in( '%s', '%s' )
                         GROUP BY segment_hash,
                                  CONCAT( id_job, '-', password )";
 
         $result = $this->_fetch_array(
                 sprintf(
                         $queryBefore,
-                        $job_id
+                        $job_id,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT
                 )
         );
 
@@ -174,7 +182,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                                 AND password = '%s'
                                 AND show_in_cattool = 1
                                 AND segments.id < jobs.job_last_segment
-                                AND st.status <> 'NEW'
+                                AND st.status not in( '%s', '%s' )
                             ORDER BY __sid DESC
                             LIMIT %u
                       ) x
@@ -185,7 +193,10 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 sprintf(
                         $queryBefore,
                         $job_id,
-                        $password, self::NUM_SEGS
+                        $password,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT,
+                        self::NUM_SEGS
                 )
         );
 
@@ -216,14 +227,17 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                             AND password = '%s'
                             AND show_in_cattool = 1
                             AND segments.id >= jobs.job_first_segment
-                            AND st.status <> 'NEW'
+                            AND st.status not in ( '%s', '%s' )
                         ORDER BY __sid DESC";
 
         $result = $this->_fetch_array(
                 sprintf(
                         $queryBefore,
                         $job_id,
-                        $password, self::NUM_SEGS
+                        $password,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT,
+                        self::NUM_SEGS
                 )
         );
 
@@ -256,7 +270,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
 		  WHERE id_job = %d
             AND password = '%s'
             AND show_in_cattool = 1
-            AND st.status <> 'NEW'
+            AND st.status not in ( '%s', '%s' )
 			ORDER BY start_segment asc
         ) x
         group by 2;";
@@ -266,12 +280,58 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         $queryBefore,
                         self::NUM_SEGS,
                         $job_id,
-                        $password
+                        $password,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT
                 )
         );
 
         return $result;
 
+    }
+
+    /**
+     * @param $job_id   int
+     * @param $password string
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getGlobalStats( $job_id, $password ) {
+        if ( empty( $job_id ) ) {
+            throw new Exception( "Job id required" );
+        }
+
+        if ( empty( $password ) ) {
+            throw new Exception( "Job password required" );
+        }
+        $query = "
+        select
+            sum(time_to_edit) as tot_tte,
+            sum(raw_word_count) as raw_words,
+            sum(time_to_edit)/sum(raw_word_count) as secs_per_word,
+            count(*) as num_segs
+        from segment_translations st
+        join segments s on s.id = st.id_segment
+        join jobs j on j.id = st.id_job
+        where id_job = %d
+            and  password = '%s'
+            and st.status not in( '%s', '%s' )
+            and time_to_edit/raw_word_count between %d and %d";
+
+        $result = $this->_fetch_array(
+                sprintf(
+                        $query,
+                        $job_id,
+                        $password,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT,
+                        1000 * EditLog_EditLogModel::EDIT_TIME_FAST_CUT,
+                        1000 * EditLog_EditLogModel::EDIT_TIME_SLOW_CUT
+                )
+        );
+
+        return $result[ 0 ];
     }
 
     /**
