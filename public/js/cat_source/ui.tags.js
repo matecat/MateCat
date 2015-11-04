@@ -7,7 +7,13 @@ $('html').on('copySourceToTarget', 'section', function() {
 });
 
 $.extend(UI, {
-	noTagsInSegment: function(options) {
+/*
+    tagLockCustomize: function(e) {
+        e.preventDefault();
+        console.log('vediamo');
+    },
+*/
+    noTagsInSegment: function(options) {
         editarea = options.area;
         starting = options.starting;
         if(starting) return false;

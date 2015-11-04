@@ -3510,7 +3510,20 @@ body.tagModes .editor.hasTags .textarea-container .tagMode {
 body.tagModes .editor.hasTags .toolbar .tagModeToggle {
     display: block;
 }
-
+body.tagmarkDisabled .toolbar .tagModeToggle {
+	display: none !important;
+}
+body.tagModes .editor .toolbar .tagLockCustomize {
+	float: left;
+	margin-right: 8px;
+	width: 16px;
+	height: 17px;
+	background: url(../img/icon-lock.png) center 1px no-repeat;
+	background-size: 16px 16px;
+}
+body.tagModes .editor .toolbar .tagLockCustomize.unlock {
+	background-image: url(../img/icon-unlock.png);
+}
 .tagModeToggle span.icon-expand, .tagModeToggle span.icon-compress {
 -ms-transform: rotate(45deg);
 -webkit-transform: rotate(45deg);
