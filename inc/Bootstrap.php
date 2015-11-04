@@ -22,9 +22,8 @@ class Bootstrap {
 
         $current_env = trim(preg_replace('/\s\s+/', ' ', $current_env));
 
-        if ( $current_env == null || $current_env == '' ) {
-            echo "Environment is not defined.";
-            throw new Exception ( __METHOD__ . " -> ENV is not set." );
+        if ( empty( $current_env ) ) {
+            throw new Exception ( __METHOD__ . " -> Current environment is not set. Set the name of your current environment in inc/.env" );
         }
 
         new self( $current_env );
