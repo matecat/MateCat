@@ -518,19 +518,11 @@ class setTranslationController extends ajaxController {
     //TODO: put this method into Job model and use Segnent object
     private function updateJobPEE( Array $old_translation, Array $new_translation ) {
         usleep( 1 );
-        $total_words = $this->jobData[ 'new_words' ] +
-                $this->jobData[ 'draft_words' ] +
-                $this->jobData[ 'translated_words' ] +
-                $this->jobData[ 'approved_words' ] +
-                $this->jobData[ 'rejected_words' ];
-
         $segmentEquivalentWordCount = $old_translation[ 'eq_word_count' ];
-
-        $segmentPercentageInJob = round( $segmentEquivalentWordCount / $total_words, 2 );
 
         $segment = new EditLog_EditLogSegmentClientStruct(
                 array(
-                        'source'      => $old_translation[ 'suggestion' ],
+                        'suggestion'  => $old_translation[ 'suggestion' ],
                         'translation' => $old_translation[ 'translation' ]
                 )
         );
@@ -541,9 +533,10 @@ class setTranslationController extends ajaxController {
         } else if ( $oldPEE > 100 ) {
             $oldPEE = 100;
         }
+        $oldPee_weighted = $oldPEE * $segmentEquivalentWordCount;
 
-        $segment->source      = $new_translation[ 'suggestion' ];
         $segment->translation = $new_translation[ 'translation' ];
+        $segment->pe_effort_perc = null;
         $newPEE               = $segment->getPeePerc();
 
         if ( $newPEE < 0 ) {
@@ -551,25 +544,24 @@ class setTranslationController extends ajaxController {
         } else if ( $newPEE > 100 ) {
             $newPEE = 100;
         }
+        $newPee_weighted = $newPEE * $segmentEquivalentWordCount;
 
-        $newJobAvgPEE = $this->jobData[ 'avg_post_editing_effort' ] -
-                $oldPEE * $segmentPercentageInJob +
-                $newPEE * $segmentPercentageInJob;
+        $newTotalJobPee = ($this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted);
 
         $queryUpdateJob = "update jobs
                                 set avg_post_editing_effort = %f
                                 where id = %d and password = '%s'";
 
-        usleep( 1 );
         $db = Database::obtain();
         $db->query(
                 sprintf(
                         $queryUpdateJob,
-                        $newJobAvgPEE,
+                        $newTotalJobPee,
                         $this->id_job,
                         $this->password
                 )
         );
+        usleep(1);
     }
 
 }

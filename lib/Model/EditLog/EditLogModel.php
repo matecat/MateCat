@@ -315,7 +315,7 @@ class EditLog_EditLogModel {
         $globalStats = $this->evaluateGlobalStats();
 
 
-        $stats[ 'valid-word-count' ]  = $globalStats[ 'raw_words' ];
+        $stats[ 'valid-word-count' ] = $globalStats[ 'raw_words' ];
 
         //TODO: this will not work anymore
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
@@ -341,7 +341,10 @@ class EditLog_EditLogModel {
         $stats[ 'total-valid-tte' ] = "$temp[0]h:$temp[1]m:$temp[2]s";
 
         $stats[ 'total-tte-seconds' ] = $temp[ 0 ] * 3600 + $temp[ 1 ] * 60 + $temp[ 2 ];
-
+        $stats[ 'avg-pee' ]           = round(
+                $this->jobData[ 'avg_post_editing_effort' ] / $this->jobData[ 'translated_words' ]
+        ,2);
+        $stats[ 'avg-pee' ] .= "%";
         return array( $output_data, $stats, $pagination );
 
     }
@@ -448,7 +451,7 @@ class EditLog_EditLogModel {
      * @return bool
      */
     public function isPEEslow() {
-        return $this->stats[ 'avg-pee' ] + self::PEE_THRESHOLD < $this->evaluateOverallPEE();
+        return (int)(str_replace("%","",$this->stats[ 'avg-pee' ])) - self::PEE_THRESHOLD > $this->evaluateOverallPEE();
     }
 
     /**
