@@ -233,6 +233,7 @@ class setTranslationController extends ajaxController {
         $db->begin();
 
         $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+        if ( false === $old_translation ) $old_translation = array() ; // $old_translation if `false` sometimes
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
