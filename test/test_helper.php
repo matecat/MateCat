@@ -18,8 +18,8 @@ setEnvFile('test');
 
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 register_shutdown_function(function() {
-  echo "Resetting environment to development\n\n" ;
-  setEnvFile('development');
+  echo "** Resetting environment to development\n\n" ;
+  restoreEnvFile();
 });
 
 Bootstrap::start();
