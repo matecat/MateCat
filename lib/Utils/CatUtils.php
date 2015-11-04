@@ -326,7 +326,7 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
 
         //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace('/\s{2}/', " &nbsp;", $segment);
+        $segment = preg_replace('/[[:blank:]]{2}/', " &nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
