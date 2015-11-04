@@ -509,16 +509,16 @@ console.log('changeStatus');
 		UI.footerHTML =	'<ul class="submenu">' +
                     '	<li class="footerSwitcher">' +
                     '	</li>' +
-					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher-tm" id="segment-' + sid + '-tm">' +
+					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher tab-switcher-tm" id="segment-' + sid + '-tm">' +
 					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-cc" id="segment-' + sid + '-cc">' +
+					'	<li class="tab-switcher tab-switcher-cc" id="segment-' + sid + '-cc">' +
 					'		<a tabindex="-1" href="#">Concordance</a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-gl" id="segment-' + sid + '-gl">' +
+					'	<li class="tab-switcher tab-switcher-gl" id="segment-' + sid + '-gl">' +
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
-					'	<li class="tab-switcher-al" id="segment-' + sid + '-al">' +
+					'	<li class="tab-switcher tab-switcher-al" id="segment-' + sid + '-al">' +
 					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
                     '	</li>' ;
 

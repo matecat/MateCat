@@ -24,7 +24,7 @@ if ( SegmentNotes.enabled() )
 
         if ( notes != null ) {
             output = '' +
-            '<li class="tab-switcher-notes" id="segment-' + sid + '-notes">' +
+            '<li class="tab-switcher tab-switcher-notes" id="segment-' + sid + '-notes">' +
             '   <a tabindex="-1" href="#">Messages<span class="number"></span></a>' +
             '</li>';
         }
@@ -78,8 +78,8 @@ if ( SegmentNotes.enabled() )
         $('.editor .submenu .active').removeClass('active');
         $('.tab-switcher-notes').addClass('active');
 
-        $('.editor .sub-editor').hide();
-        $('.editor .sub-editor.segment-notes').show();
+        $('.editor .sub-editor.open').removeClass('open');
+        $('.editor .sub-editor.segment-notes').addClass('open');
     }
 
     $(window).on('segmentOpened', function(e) {
