@@ -85,7 +85,6 @@ class downloadFileController extends downloadController {
         $debug[ 'get_file' ][] = time();
         $nonew                 = 0;
         $output_content        = array();
-        $thereIsAZipFile       = false;
         /*
            the procedure:
            1)original xliff file is read directly from disk; a file handler is obtained
@@ -95,45 +94,25 @@ class downloadFileController extends downloadController {
            5)the temporary file is deleted
          */
 
-        // This array will contain all the files of $files_job split by the
-        // proper converter to use for each one.
-        // At index 0 there will be all the files that need new converters.
-        // At index 1 all the files that need legacy converters
-        $files_job_by_converter_type = array(array(), array());
+        // This array will contain all the files of $files_job split by
+        // converter version.
+        $files_job_by_converter_version = array();
 
-        // Detect the type of converter to use for each file, then store
+        // Detect the converter's version to use for each file, then store
         // file infos accordingly.
         foreach ( $files_job as $file ) {
             $fileType = DetectProprietaryXliff::getInfo($file['xliffFilePath']);
-            if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter') {
-                // Use new converters
-                $converter_type = 0;
-            } else {
-                // Use legacy converters in case of SDLXLIFF and GlobalSight
-                $converter_type = 1;
-            }
-            $files_job_by_converter_type[$converter_type][] = $file;
+            $files_job_by_converter_version[$fileType[ 'converter_version' ]][] = $file;
         }
 
-        // Process files according to the converters needed, one converter
+        // Process files according to the converters' versions, one version
         // at a time
-        foreach ($files_job_by_converter_type as $converter_type => $files_job) {
-            switch ($converter_type) {
-                case 0:
-                    $useLegacyConverters = false;
-                    break;
-                case 1:
-                    $useLegacyConverters = true;
-                    break;
-                default:
-                    throw new Exception("Unexpected converter type: " . $converter_type);
-            }
-
+        foreach ($files_job_by_converter_version as $converter_version => $files_job) {
             //file array is chuncked. Each chunk will be used for a parallel conversion request.
             $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
             foreach ( $files_job as $chunk ) {
 
-                $converter = new FileFormatConverter($useLegacyConverters);
+                $converter = new FileFormatConverter($converter_version);
 
                 $files_to_be_converted = array();
 
@@ -211,8 +190,6 @@ class downloadFileController extends downloadController {
                     $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
 
                     if ( $this->forceXliff ) {
-                        $file_info_details                              = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ] );
-
                         //clean the output filename by removing
                         // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
                         $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
@@ -300,7 +277,6 @@ class downloadFileController extends downloadController {
         foreach ( $output_content as $idFile => $fileInformations ) {
             $zipPathInfo = ZipArchiveExtended::zipPathInfo( $output_content[ $idFile ][ 'output_filename' ] );
             if ( is_array( $zipPathInfo ) ) {
-                $thereIsAZipFile                                = true;
                 $output_content[ $idFile ][ 'zipfilename' ]     = $zipPathInfo[ 'zipfilename' ];
                 $output_content[ $idFile ][ 'zipinternalPath' ] = $zipPathInfo[ 'dirname' ];
                 $output_content[ $idFile ][ 'output_filename' ] = $zipPathInfo[ 'basename' ];

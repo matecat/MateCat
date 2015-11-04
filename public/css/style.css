@@ -3991,9 +3991,11 @@ body.cattool .nav-tabs li.mgmt-mt {
 .submenu li.footerSwitcher {
     float: left;
     width: 23px !important;
-    height: 27px;
+    height: 25px;
     border-right: 1px solid #000;
-    background: #fff url(../img/matches-down.png) 5px 9px no-repeat !important;
+	border-left: 0 !important;
+/*    background: #fff url(../img/matches-down.png) 5px 9px no-repeat !important; */
+	background: #09beec url(../img/matches-down.png) 5px 9px no-repeat !important;
 /*    background-size: 10px !important; */
     cursor: pointer;
 }

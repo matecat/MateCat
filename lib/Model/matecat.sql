@@ -39,6 +39,7 @@ CREATE TABLE `converters` (
   `status_offline` tinyint(4) NOT NULL DEFAULT '0',
   `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
   `conversion_api_version` varchar(100) DEFAULT '2011',
+  `stable` TINYINT DEFAULT 1 NOT NULL,
   `segmentation_rule` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
