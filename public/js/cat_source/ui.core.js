@@ -1513,6 +1513,7 @@ console.log('changeStatus');
 //        segment.version = '12345678';
         // END TEMP
         splitGroup = segment.split_group || splitGroup || '';
+
         splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
         newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-propagable="' + autoPropagable + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
             '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
@@ -1544,6 +1545,7 @@ console.log('changeStatus');
 //                        tagModes +
             '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + segment.sid + '-editarea" data-sid="' + segment.sid + '">' + ((!segment.translation) ? '' : UI.decodePlaceholdersToText(segment.translation, true, segment.sid, 'translation')) + '</div>' +
             '                       <div class="toolbar">' +
+            '                           ' + $('#tpl-taglock-customize').html() +
             ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
             '                           <ul class="editToolbar">' +
             '                               <li class="uppercase" title="Uppercase"></li>' +
@@ -3493,7 +3495,6 @@ console.log('eccolo: ', typeof token);
         $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
     },
     setHideMatches: function () {
-        console.log('setHideMatches');
         var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
 
         if(typeof $.cookie(cookieName + '-' + config.job_id) != 'undefined') {
@@ -3504,6 +3505,30 @@ console.log('eccolo: ', typeof token);
             }
         } else {
             $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+        }
+
+    },
+    setTagLockCustomizeCookie: function (first) {
+        if(first && !config.tagLockCustomizable) return;
+        var cookieName = 'tagLockDisabled';
+
+        if(typeof $.cookie(cookieName + '-' + config.job_id) != 'undefined') {
+            if(first) {
+                if($.cookie(cookieName + '-' + config.job_id) == 'true') {
+                    UI.body.addClass('tagmarkDisabled');
+                    setTimeout(function() {
+                        $('.editor .tagLockCustomize').addClass('unlock');
+                    }, 100);
+                } else {
+                    UI.body.removeClass('tagmarkDisabled')
+                }
+            } else {
+                cookieVal = (UI.body.hasClass('tagmarkDisabled'))? 'true' : 'false';
+                $.cookie(cookieName + '-' + config.job_id, cookieVal,  { expires: 30 });
+            }
+
+        } else {
+            $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
         }
 
     },

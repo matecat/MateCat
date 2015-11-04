@@ -156,6 +156,15 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
+		}).on('click', '.tagLockCustomize', function(e) {
+			e.preventDefault();
+			$(this).toggleClass('unlock');
+			if ($(this).hasClass('unlock')) {
+				UI.disableTagMark();
+			} else {
+				UI.enableTagMark();
+			}
+			UI.setTagLockCustomizeCookie(false);
 
 //		}).bind('keydown', 'Backspace', function(e) {
 
@@ -778,7 +787,7 @@ $.extend(UI, {
 //            console.log('cliccato: ', e.target);
 //            console.log('a: ', !UI.currentSegment.is(e.target));
 //            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
-console.log('e.target: ', e.target);
+//console.log('e.target: ', e.target);
             var container = $(UI.currentSegment);
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container

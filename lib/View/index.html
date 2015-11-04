@@ -39,6 +39,7 @@
                 firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
                 fileCounter: ${structure php: fileCounter },
                 taglockEnabled: ${taglockEnabled | string:1},
+                tagLockCustomizable: ${tagLockCustomizable},
                 alternativesEnabled: true,
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 survey: false,
@@ -461,7 +462,12 @@ $(window).resize(function() {
             <p></p>
         </div>
     </template>
-<!--
+    <template id="tpl-taglock-customize" tal:condition="true:tagLockCustomizable">
+        <a href="#" class="tagLockCustomize" title="Toggle Tag Lock"></a>
+    </template>
+    <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
+    </template>
+    <!--
     <template id="tpl-review-stat-quality">
 
         <div class="popup-outer outer-stat-quality hide"></div>
