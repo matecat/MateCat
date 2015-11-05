@@ -450,7 +450,7 @@ class EditLog_EditLogModel {
      */
     public function isPEEslow() {
 
-        return (int)( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD > $this->evaluateOverallPEE();
+        return (int)( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD < $this->evaluateOverallPEE();
     }
 
     /**

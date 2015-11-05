@@ -158,15 +158,15 @@ a[class^='edit_'] {
     text-decoration: none;
 }
 
-.edit_1 {
+a.edit_1:before {
     color: #09beec;
 }
 
-.edit_2 {
+a.edit_2:before {
     color: #FFCC00;
 }
 
-.edit_3 {
+a.edit_3:before{
     color: #FF5656;
 }
 
