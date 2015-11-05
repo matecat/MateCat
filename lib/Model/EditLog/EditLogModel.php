@@ -429,6 +429,19 @@ class EditLog_EditLogModel {
      * @return float
      */
     public function evaluateOverallTTE() {
+        if(empty($this->languageStatsData)){
+            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
+            $maxDate        = $__langStatsDao->getLastDate();
+
+            $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
+            $languageSearchObj->date   = $maxDate;
+            $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
+            $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
+
+            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
+            $this->languageStatsData = $this->languageStatsData[ 0 ];
+        }
+
         return round(
                 $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_wordcount ),
                 2
@@ -450,7 +463,7 @@ class EditLog_EditLogModel {
      */
     public function isPEEslow() {
 
-        return (int)( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD < $this->evaluateOverallPEE();
+        return ( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD < $this->evaluateOverallPEE();
     }
 
     /**
