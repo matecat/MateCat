@@ -4006,16 +4006,19 @@ body.cattool .nav-tabs li.mgmt-mt {
 	background: #ee6633;
 }
 .submenu li.footerSwitcher {
-    float: left;
-    width: 23px !important;
-    height: 25px;
-    border-right: 1px solid #000;
+	float: left;
+	width: 23px !important;
+	height: 25px;
+	border: 1px solid #666666;
 	border-left: 0 !important;
-/*    background: #fff url(../img/matches-down.png) 5px 9px no-repeat !important; */
-	background: #09beec url(../img/matches-down.png) 5px 9px no-repeat !important;
-/*    background-size: 10px !important; */
-    cursor: pointer;
+	background: #3aa9dd url(../img/matches-down.png) 5px 9px no-repeat !important;
+	cursor: pointer;
 }
+.submenu li.footerSwitcher:hover {
+	opacity: 0.85;
+	border: 1px solid #000;
+}
+
 body.hideMatches .submenu li.footerSwitcher {
     -moz-transform: scaleY(-1);
     -o-transform: scaleY(-1);
