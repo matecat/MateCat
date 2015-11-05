@@ -9,21 +9,36 @@ date_default_timezone_set( "Europe/Rome" );
  *
  */
 class Bootstrap {
-
     public static $_INI_VERSION;
     protected static $CONFIG;
     protected static $_ROOT;
 
     public static function start() {
-        new self();
+        $current_env = "";
+
+        if ( getenv('ENV') ) {
+            $current_env = getenv('ENV');
+        } else if ( file_exists( __DIR__ . '/.env') ) {
+            $current_env = file_get_contents( __DIR__ . '/.env' );
+        }
+
+        $current_env = trim(preg_replace('/\s\s+/', ' ', $current_env));
+
+        if ( empty( $current_env ) ) {
+            $current_env = 'development' ;
+        }
+
+        new self( $current_env );
     }
 
-    private function __construct() {
-
+    private function __construct($env) {
         self::$CONFIG       = parse_ini_file( 'config.ini', true );
         self::$_ROOT        = realpath( dirname( __FILE__ ) . '/../' );
         $OAUTH_CONFIG       = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
-        register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
+
+        if (!getenv('phpunit')) {
+            register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
+        }
 
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];
@@ -45,6 +60,8 @@ class Bootstrap {
             }
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
         }
+
+        INIT::$ENV = $env ;
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
         INIT::obtain();
@@ -274,7 +291,7 @@ class Bootstrap {
      */
     public static function getEnvConfig() {
 
-        $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
+        $env = self::$CONFIG[ INIT::$ENV ];
 
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
 
@@ -288,7 +305,7 @@ class Bootstrap {
 
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
 
-        if ( self::$CONFIG['ENV'] == 'production' ) {
+        if ( INIT::$ENV == 'production' ) {
             if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
                 die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
             }

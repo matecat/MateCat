@@ -29,3 +29,14 @@ unitTest/xhGui/
 unitTest/coverage/*
 internal_scripts
 local_storage
+
+# advised local folder for test files
+test-storage
+
+# composer files
+composer.phar
+vendor
+
+.env
+
+phinx.yml

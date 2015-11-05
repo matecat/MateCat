@@ -1,0 +1,11 @@
+#markAsCompleteButton.isMarkableAsComplete {
+  background: #09beec;
+  color: #fff!important;
+  width: auto!important;
+  border-radius: 2px 0 0 2px;
+  padding: 0 18px!important;
+  text-transform: uppercase;
+  margin: 0!important
+}
+
+

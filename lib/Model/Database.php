@@ -77,6 +77,10 @@ class Database implements IDatabase {
             ));
     }
 
+    public function getConnection() {
+      $this->connect();
+      return $this->connection ;
+    }
 
     /**
      * @Override
@@ -84,6 +88,11 @@ class Database implements IDatabase {
      */
     public function close() {
         $this->connection = null;
+    }
+
+    public function reconnect() {
+      $this->close();
+      $this->getConnection();
     }
 
 

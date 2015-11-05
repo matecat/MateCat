@@ -18,6 +18,9 @@ class getSegmentsController extends ajaxController {
     private $start_from = 0;
     private $page = 0;
 
+    private $segment_notes ;
+
+
     public function __construct() {
 
         parent::__construct();
@@ -63,6 +66,8 @@ class getSegmentsController extends ajaxController {
 		}
 
         $data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
+
+        $this->prepareNotes( $data );
 
 		foreach ($data as $i => $seg) {
 
@@ -126,19 +131,12 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['jid'] = $seg['jid'];
                 $this->data["$id_file"]["filename"] = ZipArchiveExtended::getFileName($seg['filename']);
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-//                $this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
-//                $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];
                 $this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source']);
                 $this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target']);
                 $this->data["$id_file"]['source_code'] = $seg['source'];
                 $this->data["$id_file"]['target_code'] = $seg['target'];
-//                $time = microtime(true);
-//                $this->data["$id_file"]['file_stats'] = CatUtils::getStatsForJob( $seg['jid'], $id_file, $this->password );
-//                Log::doLog( microtime(true) - $time );
                 $this->data["$id_file"]['segments'] = array();
             }
-
-//            $this->filetype_handler = new filetype($seg['mime_type']);
 
             unset($seg['id_file']);
             unset($seg['source']);
@@ -164,16 +162,36 @@ class getSegmentsController extends ajaxController {
             $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
             $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
 
-            $seg['segment'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit( $seg['segment'] , $seg['source_chunk_lengths'] ) );
-            $seg['translation'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit( $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] ) );
+            $seg['segment'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
+                $seg['segment'] , $seg['source_chunk_lengths'] )
+            );
+
+            $seg['translation'] = CatUtils::rawxliff2view( CatUtils::reApplySegmentSplit(
+                $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
+            );
+
+            $this->attachNotes( $seg );
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
-
 
         $this->result['data']['files'] = $this->data;
 
         $this->result['data']['where'] = $this->where;
     }
+
+    private function attachNotes( &$segment ) {
+        $segment['notes'] = $this->segment_notes[ (int) $segment['sid'] ] ;
+    }
+
+    private function prepareNotes( $segments ) {
+        $start = $segments[0]['sid'];
+        $last = end($segments);
+        $stop = $last['sid'];
+
+        $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+
+    }
+
 
 }

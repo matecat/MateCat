@@ -38,6 +38,8 @@ class ProjectManager {
 
     protected $langService;
 
+    const TRANSLATED_USER  = 'translated_user'  ;
+
     public function __construct( ArrayObject $projectStructure = null ) {
 
         if ( $projectStructure == null ) {
@@ -45,7 +47,7 @@ class ProjectManager {
                     array(
                             'id_project'           => null,
                             'create_date'          => date( "Y-m-d H:i:s" ),
-                            'id_customer'          => null,
+                            'id_customer'          => self::TRANSLATED_USER ,
                             'user_ip'              => null,
                             'project_name'         => null,
                             'result'               => null,
@@ -70,6 +72,7 @@ class ProjectManager {
                             'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
                             'segments'             => array(), //array of files_id => segmentsArray()
                             'translations'         => array(),
+                            'notes'                => array(),
                             //one translation for every file because translations are files related
                             'query_translations'   => array(),
                             'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
@@ -120,11 +123,9 @@ class ProjectManager {
             return false;
         }
 
-        // create project
-        $this->projectStructure[ 'ppassword' ]   = $this->_generatePassword();
-        $this->projectStructure[ 'user_ip' ]     = Utils::getRealIpAddr();
-        $this->projectStructure[ 'id_customer' ] = 'translated_user';
-
+        // create project?
+        $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
+        $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
         $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
 
 
@@ -851,8 +852,8 @@ class ProjectManager {
             //get payable rates
             $projectStructure[ 'payable_rates' ] = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
 
-            $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment
-				FROM segments WHERE id_file IN ( %s )";
+            $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment " .
+				        " FROM segments WHERE id_file IN ( %s )";
 
             $string_file_list    = implode( ",", $projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $last_segments_query = sprintf( $query_min_max, $string_file_list );
@@ -918,12 +919,30 @@ class ProjectManager {
                     Utils::sendErrMailReport( $msg );
                 }
 
+                if (! empty($this->projectStructure['notes'])) {
+                    $this->insertSegmentNotesForFile( );
+                }
                 insertFilesJob( $jid, $fid );
-
             }
-
         }
+    }
 
+    private function insertSegmentNotesForFile( ) {
+        foreach( $this->projectStructure['notes'] as $internal_id => $v) {
+            $entries = $v['entries'];
+            $segments = $v['segment_ids'] ;
+
+            // TODO: refactor using bulk insert
+            foreach( $segments as $segment ) {
+                foreach( $entries as $note ) {
+                    Segments_SegmentNoteDao::insertRecord( array(
+                        'internal_id' => $internal_id,
+                        'id_segment' => $segment,
+                        'note' => $note
+                    ));
+                }
+            }
+        }
     }
 
     /**
@@ -1349,6 +1368,7 @@ class ProjectManager {
         $xliff_obj = new Xliff_Parser();
         $xliff     = $xliff_obj->Xliff2Array( $xliff_file_content );
 
+
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
             Log::doLog( "Xliff Import: Error parsing. " . join( "\n", $xliff[ 'parser-errors' ] ) );
@@ -1386,7 +1406,6 @@ class ProjectManager {
 
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
-
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
                             //rest flag because if the first mrk of the seg-source is not translatable the rest of
@@ -1444,7 +1463,7 @@ class ProjectManager {
 
                             //Log::doLog( $xliff_trans_unit ); die();
 
-//                            $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
+                            // $seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
 
                             $mid               = $this->dbHandler->escape( $seg_source[ 'mid' ] );
                             $ext_tags          = $this->dbHandler->escape( $seg_source[ 'ext-prec-tags' ] );
@@ -1464,7 +1483,9 @@ class ProjectManager {
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( "('$trans_unit_id',$fid,$file_reference,'$source','$source_hash',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
 
-                        }
+                        } // end foreach seg-source
+
+                        $this->addNotesToProjectStructure( $xliff_trans_unit);
 
                     } else {
 
@@ -1500,7 +1521,10 @@ class ProjectManager {
                                 }
 
                             }
+
                         }
+
+                        $this->addNotesToProjectStructure( $xliff_trans_unit );
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
 
@@ -1553,7 +1577,6 @@ class ProjectManager {
 
         Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 
-
         foreach ( $this->projectStructure[ 'segments' ][ $fid ] as $i => $chunk ) {
 
             try {
@@ -1567,10 +1590,14 @@ class ProjectManager {
 
         }
 
-        //Log::doLog( $this->projectStructure );
-
-        if ( !empty( $this->projectStructure[ 'translations' ] ) ) {
-
+        // Here we make a query for the last inserted segments. This is the point where we
+        // can read the id of the segments table to reference it in other inserts in other tables.
+        //
+        if ( !(
+            empty( $this->projectStructure[ 'notes' ] ) &&
+            empty( $this->projectStructure[ 'translations' ] )
+            )
+        ) {
             //natural order id ASC the same as the translations was inserted in the ArrayObject
             $last_segments_query = "SELECT id, internal_id, segment_hash, xliff_mrk_id from segments WHERE id_file = %u";
             $last_segments_query = sprintf( $last_segments_query, $fid );
@@ -1581,6 +1608,11 @@ class ProjectManager {
             $_last_segments = $this->dbHandler->fetch_array( $last_segments_query );
             foreach ( $_last_segments as $k => $row ) {
 
+                // The following call is to save `id_segment` for notes,
+                // to be used later to insert the record in notes table.
+                $this->setSegmentIdForNotes( $row );
+
+                // The following block of code is for translations
                 if ( $this->projectStructure[ 'translations' ]->offsetExists( "" . $row[ 'internal_id' ] ) ) {
 
                     if( !array_key_exists( "" . $row[ 'internal_id' ], $array_internal_segmentation_counter ) ){
@@ -1611,9 +1643,6 @@ class ProjectManager {
                     //set this var only for easy reading
                     $short_var_counter = $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ];
 
-//                    Log::doLog( $row[ 'internal_id' ] );
-//                    Log::doLog( $short_var_counter );
-
                     if( !$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetExists( $short_var_counter ) ){
                         continue;
                     }
@@ -1623,12 +1652,30 @@ class ProjectManager {
                     //WARNING offset 2 are the target translations
                     $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
 
-//                    Log::doLog(  $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ] );
-
                 }
 
             }
 
+        }
+    }
+
+    /**
+     * setSegmentIdForNotes
+     *
+     * Adds notes to segment, taking into account that a same note may be assigned to
+     * more than one MateCat segment, to the <mrk> tags.
+     *
+     * Example:
+     * ['notes'][ $internal_id] => array( 'xxx' );
+     * ['notes'][ $internal_id] => array( 'xxx', 'yyy' ); // in case of mrk tags
+     *
+     */
+
+    private function setSegmentIdForNotes( $row ) {
+        $internal_id = "" . $row['internal_id'] ;
+
+        if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
+            array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row['id']);
         }
     }
 
@@ -1639,8 +1686,6 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
 
             if ( empty( $struct ) ) {
-                //this should not be
-                //Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
                 continue;
             }
 
@@ -1665,7 +1710,7 @@ class ProjectManager {
 
             Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
 
-//            Log::doLog( print_r( $this->projectStructure['translations'],true ) );
+            // Log::doLog( print_r( $this->projectStructure['translations'],true ) );
 
             foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
 
@@ -1980,6 +2025,40 @@ class ProjectManager {
 
     private function sortByStrLenAsc( $a, $b ) {
         return strlen( $a ) >= strlen( $b );
+    }
+
+    private function addNotesToProjectStructure( $trans_unit ) {
+        /**
+         * notes structure is the following:
+         *
+         *  ... ['notes'][ $internal_id ] = array(
+         *      'entries' => array( // one item per comment in the trans unit ),
+         *      'id_segment' => (int) to be populated later for the database insert
+         */
+
+        $internal_id = self::sanitizedUnitId( $trans_unit );
+        if ( isset( $trans_unit[ 'notes' ] ) ) {
+            foreach( $trans_unit['notes'] as $note ) {
+                $this->initArrayObject( 'notes', $internal_id );
+
+                if ( ! $this->projectStructure['notes'][$internal_id]->offsetExists('entries') ) {
+                    $this->projectStructure['notes'][$internal_id]->offsetSet( 'entries',  new ArrayObject());
+                    $this->projectStructure['notes'][$internal_id]->offsetSet( 'segment_ids', array() );
+                }
+
+                $this->projectStructure[ 'notes' ][ $internal_id ]['entries']->append( $note['raw-content'] )  ;
+            }
+        }
+    }
+
+    private function initArrayObject($key, $id) {
+        if ( !$this->projectStructure[ $key ]->offsetExists( $id ) ) {
+            $this->projectStructure[ $key ]->offsetSet( $id, new ArrayObject( ) );
+        }
+    }
+
+    private static function sanitizedUnitId( $unit ) {
+        return "" . $unit[ 'attr' ][ 'id' ] ;
     }
 
     private function isConversionToEnforce( $fileName ) {

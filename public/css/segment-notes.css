@@ -1,0 +1,7 @@
+div.segment-notes ul.graysmall li {
+  width: 90%;
+}
+
+div.segment-notes ul.graysmall li span.note-label {
+  font-weight: bold ;
+}

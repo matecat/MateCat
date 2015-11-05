@@ -13,6 +13,9 @@ class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements Dat
     public $create_date;
     public $first_name;
     public $last_name;
+    public $salt;
+    public $api_key;
+    public $pass;
 
     public static function getStruct() {
         return new Users_UserStruct();
@@ -25,4 +28,9 @@ class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements Dat
     public function shortName() {
         return trim( mb_substr( $this->first_name, 0, 1 ) . "" . mb_substr( $this->last_name, 0, 1 ) );
     }
+
+    public function getEmail() {
+        return $this->email ;
+    }
+
 }

@@ -293,161 +293,6 @@ $.extend(UI, {
 
             }
 
-
-/*
-// web worker implementation
-
-            if(typeof(Worker) !== "undefined") {
-                // Yes! Web worker support!
-
-                var worker = new Worker('http://matecat.local/public/js/addtm.js');
-                worker.onmessage = function(e) {
-                    alert(e.data);
-                }
-                worker.onerror =werror;
-
-                // Setup the dnd listeners.
-                var dropZone = document.getElementById('drop_zone');
-                dropZone.addEventListener('dragover', handleDragOver, false);
-                dropZone.addEventListener('drop', handleFileSelect, false);
-                document.getElementById('files').addEventListener('change', handleFileSelect, false);
-            } else {
-                // Sorry! No Web Worker support..
-            }
-*/
-
-/*
-            $('#addtm-add').addClass('disabled');
-
-            //create an iFrame element
-            var iFrameAddTM = $( document.createElement( 'iframe' ) ).hide().prop({
-                id: 'iFrameAddTM',
-                src: ''
-            });
-
-            //append iFrame to the DOM
-            $("body").append( iFrameAddTM );
-*/
-
-/*
-            //generate a token addTM
-            var addTMToken = new Date().getTime();
-
-            //set event listner, on ready, attach an interval that check for finished download
-            iFrameAddTM.ready(function () {
-
-                //create a GLOBAL setInterval so in anonymous function it can be disabled
-                addTMTimer = window.setInterval(function () {
-
-                    //check for cookie
-                    var token = $.cookie('addTMToken');
-                    console.log('TOKEN: ', token);
-
-                    //if the cookie is found, download is completed
-                    //remove iframe an re-enable download button
-                    if ( token == addTMToken ) {
-                        $('#addtm-add').removeClass('disabled').val( $('#addtm-add' ).data('oldValue') ).removeData('oldValue');
-                        window.clearInterval( addTMTimer );
-                        $.cookie('addTMToken', null, { path: '/', expires: -1 });
-                        iFrameAddTM.remove();
-                    }
-
-                }, 2000);
-
-            });
-
-            //clone the html form and append a token for download
-            var iFrameAddTMForm = $("#addTMForm").clone().append(
-                $( document.createElement( 'input' ) ).prop({
-                    type: 'hidden',
-                    name: 'addTMToken',
-                    value: addTMToken
-                })
-            );
-*/
-/*
-            var iFrameAddTMForm = $("#addTMForm").clone();
-            //append from to newly created iFrame and submit form post
-            iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
-            console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
-            iFrameAddTM.contents().find("#addTMForm").submit();
-*/
-            /*
-                        //check if we are in download status
-                        if ( !$('#downloadProject').hasClass('disabled') ) {
-
-                            //disable download button
-                            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
-
-                            //create an iFrame element
-                            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
-                                id:'iframeDownload',
-                                src: ''
-                            });
-
-                            //append iFrame to the DOM
-                            $("body").append( iFrameDownload );
-
-                            //generate a token download
-                            var downloadToken = new Date().getTime();
-
-                            //set event listner, on ready, attach an interval that check for finished download
-                            iFrameDownload.ready(function () {
-
-                                //create a GLOBAL setInterval so in anonymous function it can be disabled
-                                downloadTimer = window.setInterval(function () {
-
-                                    //check for cookie
-                                    var token = $.cookie('downloadToken');
-
-                                    //if the cookie is found, download is completed
-                                    //remove iframe an re-enable download button
-                                    if ( token == downloadToken ) {
-                                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
-                                        window.clearInterval( downloadTimer );
-                                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
-                                        iFrameDownload.remove();
-                                    }
-
-                                }, 2000);
-
-                            });
-
-                            //clone the html form and append a token for download
-                            var iFrameForm = $("#fileDownload").clone().append(
-                                $( document.createElement( 'input' ) ).prop({
-                                    type:'hidden',
-                                    name:'downloadToken',
-                                    value: downloadToken
-                                })
-                            );
-
-                            //append from to newly created iFrame and submit form post
-                            iFrameDownload.contents().find('body').append( iFrameForm );
-                            iFrameDownload.contents().find("#fileDownload").submit();
-
-                        } else {
-                            //we are in download status
-                        }
-             */
- /*
-            APP.doRequest({
-                data: {
-                    action: 'addTM',
-                    job_id: config.job_id,
-                    job_pass: config.password,
-                    tm_key: $('#addtm-tr-key').val(),
-                    name: $('#addtm-tr-name').val(),
-                    tmx_file: ''
-                },
-                error: function() {
-                    console.log('addTM error!!');
-                },
-                success: function(d) {
-                    console.log('addTM success!!');
-                }
-            });
-*/
         // end addtmx
 
 		}).on('click', '.popup-settings #settings-restore', function(e) {
@@ -784,10 +629,6 @@ $.extend(UI, {
 		});
 
         $('#outer').click(function(e) {
-//            console.log('cliccato: ', e.target);
-//            console.log('a: ', !UI.currentSegment.is(e.target));
-//            console.log('b: ', UI.currentSegment.has(e.target).length === 0);
-//console.log('e.target: ', e.target);
             var container = $(UI.currentSegment);
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container
@@ -796,7 +637,6 @@ $.extend(UI, {
                 && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
                 )
             {
-//                console.log('STO PER CHIUDERE IL SEGMENTO PERCHE HANNO CLICCATO FUORI');
                 UI.closeSegment(UI.currentSegment, 1);
             }
 
@@ -818,27 +658,15 @@ $.extend(UI, {
             };
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
-            $('#downloadProject').click();
+            runDownload();
+
         }).on('click', '#previewDropdown .previewLink a', function(e) {
             e.preventDefault();
             $('.downloadtr-button.draft').click();
         }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
-            if( $('#downloadProject').hasClass('disabled') ) return false;
-            //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-            if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
-                APP.confirm({
-                    name: 'confirmDownload',
-                    cancelTxt: 'Fix errors',
-                    onCancel: 'goToFirstError',
-                    callback: 'continueDownload',
-                    okTxt: 'Continue',
-                    msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
-                });
-            } else {
-                UI.continueDownload();
-            }
-		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .tmx, .header-menu .omegat', function( e ){
+            runDownload();
+		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();
                 var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {

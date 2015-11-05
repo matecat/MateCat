@@ -108,10 +108,6 @@ if ( Review.enabled() ) {
 */
         UI.currentSegment.find('.tab-switcher-review').click();
 
-    }).on('afterFooterCreation', 'section', function() {
-//        setTimeout(function() {
-//            UI.currentSegment.find('.tab-switcher-review').click();
-//        }, 100);
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
 
