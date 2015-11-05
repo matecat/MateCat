@@ -14,9 +14,11 @@ class Bootstrap {
     protected static $_ROOT;
 
     public static function start() {
+        $current_env = "";
+
         if ( getenv('ENV') ) {
             $current_env = getenv('ENV');
-        } else {
+        } else if ( file_exists( __DIR__ . '/.env') ) {
             $current_env = file_get_contents( __DIR__ . '/.env' );
         }
 
