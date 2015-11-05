@@ -4,6 +4,12 @@
 UI = null;
 
 UI = {
+    pee_error_level_map: {
+        0: "",
+        1: "edit_1",
+        2: "edit_2",
+        3: "edit_3"
+    },
 	toggleFileMenu: function() {
         jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
@@ -3307,6 +3313,7 @@ console.log('eccolo: ', typeof token);
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
         if(typeof d.pee_error_level != 'undefined') {
+            $('#edit_log_link' ).removeClass( "edit_1 edit_2 edit_3" ). addClass( UI.pee_error_level_map[d.pee_error_level] );
             UI.body.addClass('peeError');
         }
 		if (d.data == 'OK') {
