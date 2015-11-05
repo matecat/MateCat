@@ -607,8 +607,12 @@ class catController extends viewController {
         $editLogModel = new EditLog_EditLogModel( $this->jid, $this->password );
         $issue = $editLogModel->getMaxIssueLevel();
 
-        if ( $issue > 0 ) {
-            $return = "edit_" . $issue;
+        $dao = new EditLog_EditLogDao(Database::obtain());
+
+        if( !$dao->isEditLogEmpty($this->jid, $this->password)) {
+            if ( $issue > 0 ) {
+                $return = "edit_" . $issue;
+            }
         }
 
         return $return;
