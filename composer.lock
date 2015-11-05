@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3877421d09beddc53c3b169352be6d4d",
-    "content-hash": "7c1a41eabe6536b9549e0265490f8353",
+    "hash": "c47cb9a265962adb090e9e555d1af65e",
+    "content-hash": "25d1656e570c43bcee6b622b02033d2c",
     "packages": [
         {
             "name": "klein/klein",
@@ -65,11 +65,17 @@
         },
         {
             "name": "robmorgan/phinx",
-            "version": "dev-dryrun-feature",
+            "version": "v0.4.6",
             "source": {
                 "type": "git",
-                "url": "https://github.com/matecat/phinx",
-                "reference": "73fafded54c77d446fd6d9c475e381a66ab44a10"
+                "url": "https://github.com/robmorgan/phinx.git",
+                "reference": "1351ca36dd2419d7de02afd1aaa415929112d7f1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/robmorgan/phinx/zipball/1351ca36dd2419d7de02afd1aaa415929112d7f1",
+                "reference": "1351ca36dd2419d7de02afd1aaa415929112d7f1",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2",
@@ -90,11 +96,7 @@
                     "Phinx\\": "src/Phinx"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Test\\Phinx\\": "tests/Phinx"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -121,7 +123,7 @@
                 "migrations",
                 "phinx"
             ],
-            "time": "2015-11-03 15:23:04"
+            "time": "2015-09-11 15:44:41"
         },
         {
             "name": "symfony/config",
@@ -1225,9 +1227,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "robmorgan/phinx": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

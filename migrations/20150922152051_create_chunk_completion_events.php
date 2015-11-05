@@ -4,31 +4,34 @@ use Phinx\Migration\AbstractMigration;
 
 class CreateChunkCompletionEvents extends AbstractMigration
 {
+
+  public $sql_up = <<<EOF
+CREATE TABLE `chunk_completion_events` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `job_first_segment` bigint(20) unsigned NOT NULL,
+  `job_last_segment` bigint(20) unsigned NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `source` varchar(45) NOT NULL,
+  `create_date` datetime NOT NULL,
+  `remote_ip_address` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_project` (`id_project`) USING BTREE,
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `create_date` (`create_date`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+EOF;
+
+  public $sql_down = 'DROP TABLE `chunk_completion_events`';
+
     public function up() {
-      $table = $this->table('chunk_completion_events');
-      $table
-        ->addColumn('id_project', 'biginteger', array('null' => false))
-        ->addColumn('id_job', 'biginteger', array('null' => false))
-        ->addColumn('uid', 'biginteger', array('null' => true))
-
-        ->addColumn('job_first_segment', 'biginteger',
-          array('signed' => false, 'null' => false))
-
-        ->addColumn('job_last_segment', 'biginteger',
-          array('signed' => false, 'null' => false))
-
-        ->addColumn('password', 'string', array('null' => false, 'limit' => 45 ))
-        ->addColumn('source', 'string', array('null' => false, 'limit' => 45))
-        ->addColumn('create_date', 'datetime', array('null' => false ))
-        ->addColumn('remote_ip_address', 'string', array('limit' => 45, 'null' => false ))
-
-        ->addIndex(array('id_project'))
-        ->addIndex(array('id_job', 'password'))
-        ->addIndex(array('create_date' ))
-        ->save();
+      $this->execute($this->sql_up);
     }
 
     public function down() {
-      $this->dropTable('chunk_completion_events');
+      $this->execute($this->sql_down);
     }
 }

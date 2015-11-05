@@ -4,26 +4,28 @@ use Phinx\Migration\AbstractMigration;
 
 class CreateOwnerFeatures extends AbstractMigration
 {
+
+    public $sql_up = <<<EOF
+CREATE TABLE `owner_features` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `uid` bigint(20) NOT NULL,
+    `feature_code` varchar(45) NOT NULL,
+    `options` text,
+    `create_date` datetime NOT NULL,
+    `last_update` datetime NOT NULL,
+    `enabled` tinyint(1) NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uid_feature` (`uid`, `feature_code`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+EOF;
+
+    public $sql_down = 'DROP TABLE `owner_features`';
+
     public function up() {
-        $table = $this->table('owner_features');
-
-        $table
-            ->addColumn('uid', 'biginteger', array('null' => false))
-            ->addColumn('feature_code', 'string', array(
-                'limit' => '45', 'null' => false
-            ))
-            ->addColumn('options', 'text')
-            ->addColumn('create_date', 'datetime', array('null' => false))
-            ->addColumn('last_update', 'datetime', array('null' => false))
-            ->addColumn('enabled', 'boolean', array(
-                'null' => false, 'default' => true
-            ))
-
-            ->addIndex(array('uid', 'feature_code' ), array('unique' => true))
-            ->save();
+        $this->execute($this->sql_up);
     }
 
     public function down() {
-        $this->dropTable('owner_features');
+        $this->execute($this->sql_down);
     }
 }

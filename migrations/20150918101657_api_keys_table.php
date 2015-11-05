@@ -3,28 +3,27 @@
 use Phinx\Migration\AbstractMigration;
 
 class ApiKeysTable extends AbstractMigration {
+    public $sql_up = <<<EOF
+CREATE TABLE `api_keys` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `uid` bigint(20) NOT NULL,
+    `api_key` varchar(50) NOT NULL,
+    `api_secret` varchar(45) NOT NULL,
+    `create_date` datetime NOT NULL,
+    `last_update` datetime NOT NULL,
+    `enabled` tinyint(1) NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `api_key` (`api_key`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+EOF;
+
+    public $sql_down = 'DROP TABLE `api_keys`';
+
     public function up() {
-
-        $table = $this->table('api_keys');
-
-        $table->addColumn('uid', 'biginteger', array('null' => false))
-            ->addColumn('api_key', 'string', array(
-                'limit' => '45', 'null' => false
-            ))
-            ->addColumn('api_secret', 'string', array(
-                'limit' => '45', 'null' => false
-            ))
-            ->addColumn('create_date', 'datetime', array('null' => false))
-            ->addColumn('last_update', 'datetime', array('null' => false))
-            ->addColumn('enabled', 'boolean', array(
-                'null' => false, 'default' => true
-            ))
-            ->save();
+        $this->execute($this->sql_up);
     }
 
     public function down() {
-
-        $this->dropTable('api_keys');
-
+        $this->execute($this->sql_down);
     }
 }
