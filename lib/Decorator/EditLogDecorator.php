@@ -6,20 +6,18 @@
  * Date: 01/10/15
  * Time: 13.09
  */
-class EditLogDecorator {
-    private $controller;
-    private $template;
-
-    public function __construct( editlogController $controller, PHPTAL $template ) {
-        $this->controller = $controller;
-        $this->template   = $template;
-    }
+class EditLogDecorator extends AbstractDecorator {
 
     public function decorate() {
         /**
+         * @var $controller editlogController
+         */
+        $controller = $this->controller;
+
+        /**
          * @var $model EditLog_EditLogModel
          */
-        $model = $this->controller->getModel();
+        $model = $controller->getModel();
 
         $this->template->job_archived = ( $model->isJobArchived() ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->owner_email  = $model->getJobOwnerEmail();
@@ -54,7 +52,7 @@ class EditLogDecorator {
 
         $this->template->showDQF = ( INIT::$DQF_ENABLED && !empty( $jobData[ 'dqf_key' ] ) );
 
-        $loggedUser = $this->controller->getLoggedUser();
+        $loggedUser = $controller->getLoggedUser();
 
         $this->template->extended_user = "";
         $this->template->logged_user   = "";
@@ -67,8 +65,8 @@ class EditLogDecorator {
         }
 
         $this->template->build_number = INIT::$BUILD_NUMBER;
-        $this->template->incomingUrl  = '/login?incomingUrl=' . $this->controller->getThisUrl();
-        $this->template->authURL      = $this->controller->getAuthUrl();
+        $this->template->incomingUrl  = '/login?incomingUrl=' . $controller->getThisUrl();
+        $this->template->authURL      = $controller->getAuthUrl();
 
 
     }

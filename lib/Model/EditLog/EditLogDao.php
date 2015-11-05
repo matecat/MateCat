@@ -310,7 +310,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             sum(time_to_edit) as tot_tte,
             sum(raw_word_count) as raw_words,
             sum(time_to_edit)/sum(raw_word_count) as secs_per_word,
-            count(*) as num_segs
+            avg_post_editing_effort / translated_words as avg_pee
         from segment_translations st
         join segments s on s.id = st.id_segment
         join jobs j on j.id = st.id_job

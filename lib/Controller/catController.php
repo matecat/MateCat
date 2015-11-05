@@ -285,7 +285,7 @@ class catController extends viewController {
         $fileInfo     = getFirstSegmentOfFilesInJob( $this->jid );
         $TotalPayable = array();
         foreach ( $fileInfo as &$file ) {
-            $file['file_name'] = ZipArchiveExtended::getFileName( $file['file_name'] );
+            $file[ 'file_name' ] = ZipArchiveExtended::getFileName( $file[ 'file_name' ] );
 
             $TotalPayable[ $file[ 'id_file' ] ][ 'TOTAL_FORMATTED' ] = $file[ 'TOTAL_FORMATTED' ];
         }
@@ -296,7 +296,7 @@ class catController extends viewController {
         list( $uid, $user_email ) = $this->getLoginUserParams();
 
         if ( self::isRevision() ) {
-            $this->userRole   = TmKeyManagement_Filter::ROLE_REVISOR;
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
         } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
@@ -396,15 +396,15 @@ class catController extends viewController {
 
                 }
 
-                $this->_keyList[ 'job_keys' ][ ] = $jobKey;
+                $this->_keyList[ 'job_keys' ][] = $jobKey;
 
             } else {
                 /*
                  * This user is anonymous or it has no keys in its keyring, obfuscate all
                  */
-                $jobKey->r                       = true;
-                $jobKey->w                       = true;
-                $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( -1 );
+                $jobKey->r                      = true;
+                $jobKey->w                      = true;
+                $this->_keyList[ 'job_keys' ][] = $jobKey->hideKey( -1 );
 
             }
 
@@ -427,7 +427,7 @@ class catController extends viewController {
         );
 
         $jobQA->retrieveJobErrorTotals();
-        $jobVote = $jobQA->evalJobVote();
+        $jobVote          = $jobQA->evalJobVote();
         $this->qa_data    = json_encode( $jobQA->getQaData() );
         $this->qa_overall = $jobVote[ 'minText' ];
 
@@ -435,25 +435,27 @@ class catController extends viewController {
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
 
         //this gets all engines of the user
-        if( $this->isLoggedIn() ){
+        if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
             $engineQuery->type   = 'MT';
             $engineQuery->uid    = $uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
-        } else $mt_engines = array();
+        } else {
+            $mt_engines = array();
+        }
 
         // this gets MyMemory
-        $engineQuery                      = new EnginesModel_EngineStruct();
-        $engineQuery->type                = 'TM';
-        $engineQuery->active              = 1;
-        $tms_engine                       = $engine->setCacheTTL( 3600 * 24 * 30 )->read( $engineQuery );
+        $engineQuery         = new EnginesModel_EngineStruct();
+        $engineQuery->type   = 'TM';
+        $engineQuery->active = 1;
+        $tms_engine          = $engine->setCacheTTL( 3600 * 24 * 30 )->read( $engineQuery );
 
         //this gets MT engine active for the job
-        $engineQuery                            = new EnginesModel_EngineStruct();
-        $engineQuery->id                        = $this->project_status[ 'id_mt_engine' ];
-        $engineQuery->active                    = 1;
-        $active_mt_engine                       = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
+        $engineQuery         = new EnginesModel_EngineStruct();
+        $engineQuery->id     = $this->project_status[ 'id_mt_engine' ];
+        $engineQuery->active = 1;
+        $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -467,8 +469,8 @@ class catController extends viewController {
 
     public function setTemplateVars() {
 
-        $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS ;
-        $this->template->copySourceInterval = INIT::$COPY_SOURCE_INTERVAL;
+        $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS;
+        $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
 
         if ( $this->job_not_found || $this->job_cancelled ) {
             $this->template->pid                 = null;
@@ -485,6 +487,7 @@ class catController extends viewController {
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
         }
+
         $this->template->page        = 'cattool';
         $this->template->jid         = $this->jid;
         $this->template->password    = $this->password;
@@ -498,8 +501,8 @@ class catController extends viewController {
 
         $this->template->authURL = $this->authURL;
 
-        $this->template->mt_engines         = $this->translation_engines;
-        $this->template->mt_id              = $this->project_status[ 'id_mt_engine' ];
+        $this->template->mt_engines = $this->translation_engines;
+        $this->template->mt_id      = $this->project_status[ 'id_mt_engine' ];
 
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_job_segment    = $this->last_job_segment;
@@ -507,8 +510,8 @@ class catController extends viewController {
         $this->template->owner_email         = $this->job_owner;
         $this->template->jobOwnerIsMe        = ( $this->logged_user->email == $this->job_owner );
 
-        $this->template->isLogged            = $this->isLoggedIn(); // used in template
-        $this->template->isAnonymousUser     = var_export( !$this->isLoggedIn() , true );  // used by the client
+        $this->template->isLogged        = $this->isLoggedIn(); // used in template
+        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );  // used by the client
 
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
@@ -530,8 +533,8 @@ class catController extends viewController {
         $this->template->job_not_found          = $this->job_not_found;
         $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
-        $this->template->logged_user            = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->extended_user          = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+        $this->template->logged_user            = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
+        $this->template->extended_user          = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
@@ -545,6 +548,8 @@ class catController extends viewController {
         $this->template->reviewClass = ( self::isRevision() ? ' review' : '' );
         $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
         $this->template->tagLockCustomizable = false;
+        $this->template->editLogClass = $this->getEditLogClass();
+
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
 
@@ -591,9 +596,25 @@ class catController extends viewController {
         }
 
         if ( INIT::$COMMENTS_ENABLED ) {
-          $this->template->comments_enabled  = true ;
-          $this->template->sse_base_url      = INIT::$SSE_BASE_URL ;
+            $this->template->comments_enabled = true;
+            $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
+    }
+
+    /**
+     * @return string
+     */
+    private function getEditLogClass() {
+        $return = "";
+
+        $editLogModel = new EditLog_EditLogModel( $this->jid, $this->password );
+        $issue = $editLogModel->getMaxIssueLevel();
+
+        if ( $issue > 0 ) {
+            $return = "edit_" . $issue;
+        }
+
+        return $return;
     }
 
 }

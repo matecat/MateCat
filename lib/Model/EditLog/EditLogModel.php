@@ -314,7 +314,6 @@ class EditLog_EditLogModel {
         $pagination  = $this->evaluatePagination( $__pagination_prev, $__pagination_next + 1 );
         $globalStats = $this->evaluateGlobalStats();
 
-
         $stats[ 'valid-word-count' ] = $globalStats[ 'raw_words' ];
 
         //TODO: this will not work anymore
@@ -341,10 +340,9 @@ class EditLog_EditLogModel {
         $stats[ 'total-valid-tte' ] = "$temp[0]h:$temp[1]m:$temp[2]s";
 
         $stats[ 'total-tte-seconds' ] = $temp[ 0 ] * 3600 + $temp[ 1 ] * 60 + $temp[ 2 ];
-        $stats[ 'avg-pee' ]           = round(
-                $this->jobData[ 'avg_post_editing_effort' ] / $this->jobData[ 'translated_words' ]
-        ,2);
+        $stats[ 'avg-pee' ]           = round( $globalStats[ 'avg_pee' ], 2 );
         $stats[ 'avg-pee' ] .= "%";
+
         return array( $output_data, $stats, $pagination );
 
     }
@@ -421,7 +419,7 @@ class EditLog_EditLogModel {
      * @return array
      * @throws Exception
      */
-    private function evaluateGlobalStats() {
+    public function evaluateGlobalStats() {
         $dao = new EditLog_EditLogDao( Database::obtain() );
 
         return $dao->getGlobalStats( $this->jid, $this->password );
@@ -451,14 +449,33 @@ class EditLog_EditLogModel {
      * @return bool
      */
     public function isPEEslow() {
-        return (int)(str_replace("%","",$this->stats[ 'avg-pee' ])) - self::PEE_THRESHOLD > $this->evaluateOverallPEE();
+
+        return (int)( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD > $this->evaluateOverallPEE();
     }
 
     /**
      * @return bool
      */
     public function isTTEfast() {
+
         return $this->stats[ 'avg-secs-per-word' ] < $this->evaluateOverallTTE();
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxIssueLevel(){
+        $globalStats = $this->evaluateGlobalStats();
+        $this->stats['avg-pee'] = round( $globalStats[ 'avg_pee' ], 2 );
+        $this->stats['avg-secs-per-word'] = round( $globalStats[ 'secs_per_word' ] / 1000, 1 );
+
+        $returnIssue = Constants_EditLogIssue::OK;
+
+        if($this->isTTEfast() || $this->isPEEslow()){
+            $returnIssue = Constants_EditLogIssue::ERROR;
+        }
+
+        return $returnIssue;
     }
 
     // GETTERS AND SETTERS
