@@ -288,6 +288,8 @@ class setTranslationController extends ajaxController {
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
         $this->updateJobPEE( $old_translation, $_Translation );
+        $editLogModel = new EditLog_EditLogModel($this->id_job, $this->password);
+        $this->result['pee_error_level'] = $editLogModel->getMaxIssueLevel();
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -517,7 +519,6 @@ class setTranslationController extends ajaxController {
 
     //TODO: put this method into Job model and use Segnent object
     private function updateJobPEE( Array $old_translation, Array $new_translation ) {
-        usleep( 1 );
         $segmentEquivalentWordCount = $old_translation[ 'eq_word_count' ];
 
         $segment = new EditLog_EditLogSegmentClientStruct(
@@ -561,7 +562,8 @@ class setTranslationController extends ajaxController {
                         $this->password
                 )
         );
-        usleep(1);
     }
+
+
 
 }
