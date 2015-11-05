@@ -23,7 +23,7 @@ class EditLogDecorator {
 
         $this->template->job_archived = ( $model->isJobArchived() ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->owner_email  = $model->getJobOwnerEmail();
-        $this->template->emptyJob = $model->isJobEmpty();
+        $this->template->emptyJob     = $model->isJobEmpty();
         /**
          * @var $data EditLog_EditLogSegmentClientStruct[]
          */
@@ -45,7 +45,7 @@ class EditLogDecorator {
 
         $this->template->overall_tte = $model->evaluateOverallTTE();
         $this->template->overall_pee = $model->evaluateOverallPEE();
-        $this->template->pee_slow    = false; // temporary fix: this is still not properly implemented  $model->isPEEslow();
+        $this->template->pee_slow    = $model->isPEEslow();
         $this->template->tte_fast    = $model->isTTEfast();
 
         $job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
@@ -56,13 +56,20 @@ class EditLogDecorator {
 
         $loggedUser = $this->controller->getLoggedUser();
 
-        $this->template->build_number  = INIT::$BUILD_NUMBER;
-        $this->template->extended_user = trim( $loggedUser->fullName() );
-        $this->template->logged_user   = $loggedUser->shortName();
-        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->controller->getThisUrl();
-        $this->template->authURL       = $this->controller->getAuthUrl();
+        $this->template->extended_user = "";
+        $this->template->logged_user   = "";
+        $this->template->jobOwnerIsMe  = false;
 
-        $this->template->jobOwnerIsMe = ( $loggedUser->email == $jobData[ 'owner' ] );
+        if ( !empty( $loggedUser ) ) {
+            $this->template->extended_user = trim( $loggedUser->fullName() );
+            $this->template->logged_user   = $loggedUser->shortName();
+            $this->template->jobOwnerIsMe  = ( $loggedUser->email == $jobData[ 'owner' ] );
+        }
+
+        $this->template->build_number = INIT::$BUILD_NUMBER;
+        $this->template->incomingUrl  = '/login?incomingUrl=' . $this->controller->getThisUrl();
+        $this->template->authURL      = $this->controller->getAuthUrl();
+
 
     }
 }
