@@ -288,6 +288,8 @@ class setTranslationController extends ajaxController {
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
         $this->updateJobPEE( $old_translation, $_Translation );
+        $editLogModel = new EditLog_EditLogModel($this->id_job, $this->password);
+        $this->result['pee_error_level'] = $editLogModel->getMaxIssueLevel();
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -571,5 +573,54 @@ class setTranslationController extends ajaxController {
                 )
         );
     }
+
+    //TODO: put this method into Job model and use Segnent object
+    private function updateJobPEE( Array $old_translation, Array $new_translation ) {
+        $segmentEquivalentWordCount = $old_translation[ 'eq_word_count' ];
+
+        $segment = new EditLog_EditLogSegmentClientStruct(
+                array(
+                        'suggestion'  => $old_translation[ 'suggestion' ],
+                        'translation' => $old_translation[ 'translation' ]
+                )
+        );
+        $oldPEE  = $segment->getPeePerc();
+
+        if ( $oldPEE < 0 ) {
+            $oldPEE = 0;
+        } else if ( $oldPEE > 100 ) {
+            $oldPEE = 100;
+        }
+        $oldPee_weighted = $oldPEE * $segmentEquivalentWordCount;
+
+        $segment->translation = $new_translation[ 'translation' ];
+        $segment->pe_effort_perc = null;
+        $newPEE               = $segment->getPeePerc();
+
+        if ( $newPEE < 0 ) {
+            $newPEE = 0;
+        } else if ( $newPEE > 100 ) {
+            $newPEE = 100;
+        }
+        $newPee_weighted = $newPEE * $segmentEquivalentWordCount;
+
+        $newTotalJobPee = ($this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted);
+
+        $queryUpdateJob = "update jobs
+                                set avg_post_editing_effort = %f
+                                where id = %d and password = '%s'";
+
+        $db = Database::obtain();
+        $db->query(
+                sprintf(
+                        $queryUpdateJob,
+                        $newTotalJobPee,
+                        $this->id_job,
+                        $this->password
+                )
+        );
+    }
+
+
 
 }

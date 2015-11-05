@@ -12,8 +12,8 @@ class badConfigurationController extends viewController{
 
 	public function __construct(){
 		$this->error_mail_content    .= "<h1>Matecat is not working.</h1>";
-		$this->error_mail_content    .= "<h2>You are using an older version of config.ini.php<br/>";
-		$this->error_mail_content    .= "Verify that the current version of config.ini.php is aligned with config.ini.sample.php ";
+		$this->error_mail_content    .= "<h2>You are using an older version of config.ini<br/>";
+		$this->error_mail_content    .= "Verify that the current version of config.ini is aligned with config.ini.sample.php ";
 		$this->error_mail_content    .= "</h2>";
 	}
 

@@ -150,6 +150,34 @@ width: 91.6%;
 margin-left: 5%;
 }
 
+a[class^='edit_'] span {
+    text-decoration: underline;
+}
+
+a[class^='edit_'] {
+    text-decoration: none;
+}
+
+a.edit_1:before {
+    color: #09beec;
+}
+
+a.edit_2:before {
+    color: #FFCC00;
+}
+
+a.edit_3:before{
+    color: #FF5656;
+}
+
+
+a[class^='edit_']:before {
+    content: "a";
+    content: ' \25CF';
+    text-decoration: none;
+    padding-right: 3px;
+}
+
 footer nav li:first-child
 {
 	border-left: none;
