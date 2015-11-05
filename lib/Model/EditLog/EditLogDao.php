@@ -125,6 +125,35 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
 
     /**
      * @param $job_id int
+     * @param $password string
+     *
+     * @return bool
+     */
+    public function isEditLogEmpty( $job_id, $password ) {
+        $query  = "SELECT count(segments.id) as num_segs
+                    FROM segments
+                    JOIN segment_translations st ON id = id_segment
+                    JOIN jobs ON jobs.id = id_job
+                    WHERE id_job = %d
+                        AND password = '%s'
+                        AND show_in_cattool = 1
+                        AND st.status not in( '%s', '%s' )";
+
+        $result = $this->con->query_first(
+                sprintf(
+                        $query,
+                        $job_id,
+                        $password,
+                        Constants_TranslationStatus::STATUS_NEW,
+                        Constants_TranslationStatus::STATUS_DRAFT
+                )
+        );
+        return (int)$result['num_segs'] == 0;
+    }
+
+
+    /**
+     * @param $job_id int
      *
      * @return array|mixed
      * @throws Exception
