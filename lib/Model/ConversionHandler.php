@@ -127,6 +127,11 @@ class ConversionHandler {
         //get storage object
         $fs = new FilesStorage();
 
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if ( INIT::$LEGACY_CONVERSION !== false ) {
+            INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
+        }
+
         //if already present in database cache get the converted without convert it again
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
@@ -200,9 +205,11 @@ class ConversionHandler {
                    put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
                    (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
                  */
-
-                //save in cache
-                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
+                $res_insert = true;
+                if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED !== false ) {
+                    //save in cache
+                    $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
+                }
 
                 if ( !$res_insert ) {
                     //custom error message passed directly to javascript client and displayed as is
