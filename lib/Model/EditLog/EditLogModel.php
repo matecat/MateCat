@@ -429,14 +429,25 @@ class EditLog_EditLogModel {
      * @return float
      */
     public function evaluateOverallTTE() {
+        if(empty($this->data)) {
+            $this->data = $this->getEditLogData();
+            $this->data = $this->data[0];
+        }
+
         if(empty($this->languageStatsData)){
             $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
             $maxDate        = $__langStatsDao->getLastDate();
 
             $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
             $languageSearchObj->date   = $maxDate;
-            $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
-            $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
+            if(is_array($this->data[ 0 ])) {
+                $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
+                $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
+            }
+            else if($this->data[ 0 ] instanceof EditLog_EditLogSegmentClientStruct){
+                $languageSearchObj->source = $this->data[ 0 ]->job_source;
+                $languageSearchObj->target = $this->data[ 0 ]->job_target;
+            }
 
             $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
             $this->languageStatsData = $this->languageStatsData[ 0 ];
@@ -484,7 +495,7 @@ class EditLog_EditLogModel {
 
         $returnIssue = Constants_EditLogIssue::OK;
 
-        if($this->isTTEfast() || $this->isPEEslow()){
+        if( $this->isPEEslow()){
             $returnIssue = Constants_EditLogIssue::ERROR;
         }
 
