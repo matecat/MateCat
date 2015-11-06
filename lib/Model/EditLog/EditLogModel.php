@@ -429,29 +429,7 @@ class EditLog_EditLogModel {
      * @return float
      */
     public function evaluateOverallTTE() {
-        if(empty($this->data)) {
-            $this->data = $this->getEditLogData();
-            $this->data = $this->data[0];
-        }
-
-        if(empty($this->languageStatsData)){
-            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
-            $maxDate        = $__langStatsDao->getLastDate();
-
-            $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
-            $languageSearchObj->date   = $maxDate;
-            if(is_array($this->data[ 0 ])) {
-                $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
-                $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
-            }
-            else if($this->data[ 0 ] instanceof EditLog_EditLogSegmentClientStruct){
-                $languageSearchObj->source = $this->data[ 0 ]->job_source;
-                $languageSearchObj->target = $this->data[ 0 ]->job_target;
-            }
-
-            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-            $this->languageStatsData = $this->languageStatsData[ 0 ];
-        }
+        $this->loadLanguageStats();
 
         return round(
                 $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_wordcount ),
@@ -463,29 +441,7 @@ class EditLog_EditLogModel {
      * @return float
      */
     public function evaluateOverallPEE() {
-        if(empty($this->data)) {
-            $this->data = $this->getEditLogData();
-            $this->data = $this->data[0];
-        }
-
-        if(empty($this->languageStatsData)){
-            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
-            $maxDate        = $__langStatsDao->getLastDate();
-
-            $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
-            $languageSearchObj->date   = $maxDate;
-            if(is_array($this->data[ 0 ])) {
-                $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
-                $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
-            }
-            else if($this->data[ 0 ] instanceof EditLog_EditLogSegmentClientStruct){
-                $languageSearchObj->source = $this->data[ 0 ]->job_source;
-                $languageSearchObj->target = $this->data[ 0 ]->job_target;
-            }
-
-            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-            $this->languageStatsData = $this->languageStatsData[ 0 ];
-        }
+        $this->loadLanguageStats();
 
         return round(
                 $this->languageStatsData->total_postediting_effort / ( $this->languageStatsData->job_count ),
@@ -494,10 +450,32 @@ class EditLog_EditLogModel {
     }
 
     /**
+     * @throws Exception Throws Exception on empty query parameters
+     */
+    private function loadLanguageStats() {
+        if ( empty( $this->jobData ) ) {
+            $this->jobData = getJobData( $this->jid, $this->password );
+        }
+
+        if ( empty( $this->languageStatsData ) ) {
+            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
+            $maxDate        = $__langStatsDao->getLastDate();
+
+            $languageSearchObj       = new LanguageStats_LanguageStatsStruct();
+            $languageSearchObj->date = $maxDate;
+
+            $languageSearchObj->source = $this->jobData[ 'source' ];
+            $languageSearchObj->target = $this->jobData[ 'target' ];
+
+            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
+            $this->languageStatsData = $this->languageStatsData[ 0 ];
+        }
+    }
+
+    /**
      * @return bool
      */
     public function isPEEslow() {
-
         return ( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD < $this->evaluateOverallPEE();
     }
 
@@ -512,14 +490,14 @@ class EditLog_EditLogModel {
     /**
      * @return int
      */
-    public function getMaxIssueLevel(){
-        $globalStats = $this->evaluateGlobalStats();
-        $this->stats['avg-pee'] = round( $globalStats[ 'avg_pee' ], 2 );
-        $this->stats['avg-secs-per-word'] = round( $globalStats[ 'secs_per_word' ] / 1000, 1 );
+    public function getMaxIssueLevel() {
+        $globalStats                        = $this->evaluateGlobalStats();
+        $this->stats[ 'avg-pee' ]           = round( $globalStats[ 'avg_pee' ], 2 );
+        $this->stats[ 'avg-secs-per-word' ] = round( $globalStats[ 'secs_per_word' ] / 1000, 1 );
 
         $returnIssue = Constants_EditLogIssue::OK;
 
-        if( $this->isPEEslow()){
+        if ( $this->isPEEslow() ) {
             $returnIssue = Constants_EditLogIssue::ERROR;
         }
 
