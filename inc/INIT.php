@@ -180,6 +180,7 @@ class INIT {
     public static $OAUTH_SCOPES;
 
     public static $LEGACY_CONVERSION = false;
+    public static $UNLOCKABLE_TAGS = false;
 
     public function __construct(){
 
@@ -196,6 +197,10 @@ class INIT {
         //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
         if( getenv( 'LEGACY_CONVERSION' ) !== false ){
             self::$LEGACY_CONVERSION = true;
+        }
+
+        if ( getenv( 'UNLOCKABLE_TAGS' ) !== false ) {
+            self::$UNLOCKABLE_TAGS = true;
         }
 
     }
