@@ -109,8 +109,17 @@ abstract class downloadController extends controller {
 
         $pathinfo = FilesStorage::pathinfo_fix( $filename );
 
-        if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
-            $filename = $pathinfo[ 'basename' ] . ".docx";
+        switch (strtolower( $pathinfo[ 'extension' ] )) {
+            case 'pdf':
+            case 'bmp':
+            case 'png':
+            case 'gif':
+            case 'jpg':
+            case 'jpeg':
+            case 'tiff':
+            case 'tif':
+                $filename = $pathinfo[ 'basename' ] . ".docx";
+                break;
         }
 
         return $filename;

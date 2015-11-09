@@ -550,7 +550,9 @@ class catController extends viewController {
         $this->template->isReview    = var_export( self::isRevision(), true );
         $this->template->reviewClass = ( self::isRevision() ? ' review' : '' );
         $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
-        $this->template->tagLockCustomizable = false;
+
+        $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
+
         $this->template->editLogClass = $this->getEditLogClass();
 
 
