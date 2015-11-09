@@ -59,6 +59,10 @@ class DetectProprietaryXliff {
 			//we want to check extension and content
 			$info = FilesStorage::pathinfo_fix( $fullPathToFile );
 
+		} else {
+
+			$info = FilesStorage::pathinfo_fix( $fullPathToFile );
+
 		}
 
 		self::$fileType['info'] = $info;
