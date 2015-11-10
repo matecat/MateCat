@@ -11,7 +11,7 @@ if ( !defined( 'LOG_FILENAME' ) ) {
 }
 
 // Be sure Monolog is installed via composer
-if( include 'vendor/autoload.php' ) {
+if( @include 'vendor/autoload.php' ) {
     Log::$useMonolog = true ;
 }
 
@@ -65,7 +65,7 @@ class Log {
 
             //Log on file
             $fileHandler   = new StreamHandler( self::$fileNamePath );
-            $fileFormatter = new LineFormatter( null, null, false, true );
+            $fileFormatter = new LineFormatter( null, null, true, true );
             $fileHandler->setFormatter( $fileFormatter );
 
             // Create a Logger instance with the RedisHandler
