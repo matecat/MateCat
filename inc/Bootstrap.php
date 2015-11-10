@@ -41,16 +41,16 @@ class Bootstrap {
 
         } else {
             if ( INIT::$DEBUG ) {
-                echo "\nPHP Running in CLI mode.\n\n";
+//                echo "\nDebug: PHP Running in CLI mode.\n\n";
             }
-            //Possible CLI configurations. We definitly don't want sessions in our cron scripts
+            //Possible CLI configurations. We definitely don't want sessions in our cron scripts
         }
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
         INIT::obtain();
 
-        INIT::$ROOT                           = self::$_ROOT; // Accesible by Apache/PHP
-        INIT::$BASEURL                        = "/"; // Accesible by the browser
+        INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
+        INIT::$BASEURL                        = "/"; // Accessible by the browser
         INIT::$TIME_TO_EDIT_ENABLED           = false;
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
@@ -72,6 +72,8 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
+        Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
 
         if ( !is_dir( INIT::$STORAGE_DIR ) ) {
             mkdir( INIT::$STORAGE_DIR, 0755, true );

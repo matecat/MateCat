@@ -128,12 +128,7 @@ class NewController extends ajaxController {
         $this->subject        = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
 
         try {
-            if ( $this->tms_engine != 0 ) {
-                $test_valid_TMS = Engine::getInstance( $this->tms_engine );
-            }
-            if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-                $test_valid_MT = Engine::getInstance( $this->mt_engine );
-            }
+            $this->validateEngines();
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = $ex->getMessage();
             Log::doLog( $ex->getMessage() );
@@ -259,6 +254,18 @@ class NewController extends ajaxController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
+    private function validateEngines() {
+        if ( $this->tms_engine != 0 ) {
+            Engine::getInstance( $this->tms_engine );
+        }
+        if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
+            Engine::getInstance( $this->mt_engine );
+        }
+    }
+
     public function finalize() {
         $toJson = json_encode( $this->api_output );
         echo $toJson;
@@ -267,7 +274,7 @@ class NewController extends ajaxController {
 
     public function doAction() {
 
-        if ( count( $this->api_output[ 'debug' ] ) > 0 ) {
+        if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
             return;
         }
 
@@ -327,7 +334,6 @@ class NewController extends ajaxController {
 
         foreach ( $arFiles as $file_name ) {
             $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
-
 
             $conversionHandler = new ConversionHandler();
             $conversionHandler->setFileName( $file_name );

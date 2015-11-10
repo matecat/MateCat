@@ -1,12 +1,12 @@
 <?php
 set_time_limit( 0 );
+define( 'LOG_FILENAME', 'tm_analysis.log' );
 include "main.php";
 
 $UNIQUID = uniqid( '', true );
 $my_pid     = getmypid();
 $parent_pid = posix_getppid();
 $RUNNING = true;
-Log::$fileName = "tm_analysis.log";
 
 try {
 
@@ -47,15 +47,15 @@ function sigSwitch( $signo ) {
 
 function cleanShutDown( ){
 
-    global $amqHandlerSubscriber, $db;
+    global $amqHandlerSubscriber;
 
     //SHUTDOWN
     $amqHandlerSubscriber->getRedisClient()->disconnect();
-    $db->close();
-    $amqHandlerSubscriber->disconnect();
 
     $msg = str_pad( " CHILD " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg, true );
+
+    $amqHandlerSubscriber->disconnect();
 
     die();
 

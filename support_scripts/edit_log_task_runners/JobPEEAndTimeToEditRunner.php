@@ -6,10 +6,6 @@ Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-$db->debug = false;
-$db->connect();
-
 /**
  * Created by PhpStorm.
  * User: roberto
