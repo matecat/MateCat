@@ -4,6 +4,8 @@
     },
     "require": {
         "robmorgan/phinx": "^0.4.6",
-        "klein/klein": "^2.1"
+        "klein/klein": "^2.1",
+        "psr/log": "~1.0",
+        "monolog/monolog": "1.11.*"
     }
 }
