@@ -303,7 +303,7 @@ class XliffSAXTranslationReplacer {
                         }
 
                         $translation = $this->prepareSegment( $seg, $translation );
-                        unset(  $this->segments[ 'matecat|' . $this->currentId ][ $pos ] );
+
                         $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
                     }
 

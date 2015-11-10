@@ -68,7 +68,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                             $id_list = $this->segments[ 'matecat|' . $this->currentId ];
                             $seg = $this->segments[ $id_list[ $this->markerPos ] ];
                             //append definition attribute
-                            $tag .= $statusDefinition = $this->prepareTargetStatuses( $seg );
+                            $tag .= $this->prepareTargetStatuses( $seg );
 
                             //prepare for an eventual next cycle
                             $this->markerPos++;
@@ -163,7 +163,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                 'REJECTED'   => 'RejectedTranslation',
         );
 
-        return "conf=\"{$statusMap[ $seg[ 'status' ] ]}\" ";
+        return "conf=\"{$statusMap[ $seg[ 'status' ] ]}\" id=\"{$seg['mrk_id']}\"";
 
     }
 
