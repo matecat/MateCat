@@ -29,3 +29,4 @@ unitTest/xhGui/
 unitTest/coverage/*
 internal_scripts
 local_storage
+vendor
