@@ -1,6 +1,5 @@
 <?php
 error_reporting( E_ALL );
-
 define( 'DEBUG', 1 );
 
 if ( !defined( 'LOG_REPOSITORY' ) ) {
@@ -11,17 +10,39 @@ if ( !defined( 'LOG_FILENAME' ) ) {
     define( 'LOG_FILENAME', 'log.txt' );
 }
 
+// Be sure Monolog is installed via composer
+if( include 'vendor/autoload.php' ) {
+    Log::$useMonolog = true ;
+}
+
+use Monolog\Logger;
+use Monolog\Handler\RedisHandler;
+use Monolog\Formatter\LogstashFormatter;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+
 class Log {
 
     protected static $fileNamePath;
+
+    /**
+     * @var Monolog\Logger
+     */
+    protected static $logger;
+
+    /**
+     * @var bool
+     */
+    public static $useMonolog = false;
 
     public static $fileName;
 
     public static $uniqID;
 
     protected static function _writeTo( $stringData ) {
-        if ( !file_exists( LOG_REPOSITORY ) || !is_dir( LOG_REPOSITORY ) ) {
-            mkdir( LOG_REPOSITORY );
+
+        if ( !file_exists( INIT::$LOG_REPOSITORY ) || !is_dir( INIT::$LOG_REPOSITORY ) ) {
+            mkdir( INIT::$LOG_REPOSITORY );
         }
 
         if( !empty( self::$fileName ) ){
@@ -30,7 +51,32 @@ class Log {
             self::$fileNamePath = LOG_REPOSITORY . "/" . LOG_FILENAME;
         }
 
-        file_put_contents( self::$fileNamePath, $stringData, FILE_APPEND );
+        if( self::$useMonolog ) {
+
+            $matecatRedisHandler = new \RedisHandler();
+
+            // Init a RedisHandler with a LogstashFormatter.
+            // The parameters may differ depending on your configuration of Redis.
+            // Important: The parameter 'logs' must be equal to the key you defined
+            // in your logstash configuration.
+            $redisHandler      = new RedisHandler( $matecatRedisHandler->getConnection(), 'phplogs' );
+            $logStashFormatter = new LogstashFormatter( 'MateCat', gethostname() );
+            $redisHandler->setFormatter( $logStashFormatter );
+
+            //Log on file
+            $fileHandler   = new StreamHandler( self::$fileNamePath );
+            $fileFormatter = new LineFormatter( null, null, false, true );
+            $fileHandler->setFormatter( $fileFormatter );
+
+            // Create a Logger instance with the RedisHandler
+            self::$logger = new Logger( 'MateCat', array( $redisHandler, $fileHandler ) );
+
+            self::$logger->debug( $stringData, array() );
+
+        } else {
+            file_put_contents( self::$fileNamePath, $stringData, FILE_APPEND );
+        }
+
     }
 
     protected static function _getHeader() {
@@ -84,6 +130,7 @@ class Log {
         }
 
         self::_writeTo( $string );
+
     }
 
     /**

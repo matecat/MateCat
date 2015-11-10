@@ -41,7 +41,7 @@ foreach($migrations as $migration) {
 
 }
 
-include $root . '/vendor/autoload.php'; 
+include $root . '/vendor/autoload.php';
 
 $createSchemaTable = <<<EOF
 -- phinxlog table

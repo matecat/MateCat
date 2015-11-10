@@ -1,6 +1,8 @@
 <?php
 ini_set("memory_limit","2048M");
 set_time_limit(0);
+define( 'LOG_FILENAME', 'fastAnalysis.log' );
+
 include_once 'main.php';
 
 /* Write my pid to a file */
@@ -17,7 +19,6 @@ try {
     die();
 }
 
-Log::$fileName = "fastAnalysis.log";
 $RUNNING = true;
 
 function sigSwitch( $signo ) {
@@ -34,27 +35,27 @@ function sigSwitch( $signo ) {
             cleanShutDown();
             break;
         default :
-            $msg = str_pad( " CHILD " . getmypid() . " Received Signal $signo ", 50, "-", STR_PAD_BOTH );
+            $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Received Signal $signo ", 50, "-", STR_PAD_BOTH );
             _TimeStampMsg( $msg );
             break;
     }
 
-    $msg = str_pad( " CHILD " . getmypid() . " Caught Signal $signo ", 50, "-", STR_PAD_BOTH );
+    $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Caught Signal $signo ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg );
 
 }
 
 function cleanShutDown(  ){
 
-    global $queueHandler, $db;
+    global $queueHandler;
 
     //SHUTDOWN
     $queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, getmypid() );
-    $queueHandler->getRedisClient()->disconnect();
-    $db->close();
 
     $msg = str_pad( " FAST ANALYSIS " . getmypid() . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg );
+
+    $queueHandler->getRedisClient()->disconnect();
 
 }
 

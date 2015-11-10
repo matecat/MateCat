@@ -1,10 +1,11 @@
 <?php
 set_time_limit(0);
-require "main.php";
-
-define( 'NUM_WORKERS', INIT::$UTILS_ROOT . "/Analysis/.num_processes" );
+$root = realpath( dirname(__FILE__) . '/../../../' );
+define( 'NUM_WORKERS', $root . "/Analysis/.num_processes" );
 define( 'DEFAULT_NUM_WORKERS', require( 'DefaultNumTMWorkers.php' ) );
+define( 'LOG_FILENAME', 'tm_analysis.log' );
 $my_pid = getmypid();
+require "main.php";
 
 
 try {
@@ -23,24 +24,21 @@ try {
     die();
 }
 
-
-Log::$fileName = "tm_analysis.log";
 $RUNNING = true;
 
 // PROCESS CONTROL FUNCTIONS
 
 function cleanShutDown( ){
 
-    global $queueHandler, $db;
+    global $queueHandler;
 
     //SHUTDOWN
     deletePid();
     $queueHandler->getRedisClient()->del( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
-    $queueHandler->getRedisClient()->disconnect();
-    $db->close();
-
     $msg = str_pad( " TM ANALYSIS " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg, true );
+
+    $queueHandler->getRedisClient()->disconnect();
 
 }
 
