@@ -242,7 +242,7 @@ class downloadFileController extends downloadController {
                 }
 
                 $debug[ 'do_conversion' ][] = time();
-                $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
+                    $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
 
                 foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
 
@@ -750,10 +750,10 @@ class downloadFileController extends downloadController {
 
                 //fix the file names inside the zip file, so we compare with our files
                 // and if matches we can substitute them with the converted ones
-                $fileName_fixed = array_pop( explode( DIRECTORY_SEPARATOR, str_replace( " ", "_", $realPath ) ) );
+//                $fileName_fixed = array_pop( explode( DIRECTORY_SEPARATOR, str_replace( " ", "_", $realPath ) ) );
                 foreach ( $internalFiles as $index => $internalFile ) {
-                    $__ourFileName = array_pop( explode( DIRECTORY_SEPARATOR, $internalFile->output_filename ) );
-                    if( $__ourFileName == $fileName_fixed ) {
+//                    $__ourFileName = array_pop( explode( DIRECTORY_SEPARATOR, $internalFile->output_filename ) );
+                    if( $internalFile->output_filename == $realPath ) {
                         $zip->deleteName( $realPath );
                         if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'pdf' ) $realPath .= '.docx';
                         $zip->addFromString( $realPath, $internalFile->getContent() );
