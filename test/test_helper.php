@@ -14,19 +14,12 @@ require( 'SeedLoader.php');
 
 prepareTestDatabase();
 
-setEnvFile('test');
-
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 register_shutdown_function(function() {
   echo "** Resetting environment to development\n\n" ;
-  restoreEnvFile();
 });
 
 Bootstrap::start();
-
-// delete all stored work files
-shell_exec("rm -rf " . INIT::$CACHE_REPOSITORY );
-shell_exec("rm -rf " . INIT::$FILES_REPOSITORY );
 
 function startConnection() {
     $conn = Database::obtain (
