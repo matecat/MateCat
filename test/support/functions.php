@@ -30,34 +30,6 @@ function prepareTestSchema($testDatabase, $devDatabase) {
   }
 }
 
-function setEnvFile($env) {
-    $env_path = PROJECT_ROOT . 'inc/.env';
-    if ( file_exists( $env_path ) )  {
-        $previous_env = file_get_contents( $env_path );
-        if ( false !== $previous_env ) {
-            file_put_contents(PROJECT_ROOT . 'inc/.env.saved', $previous_env);
-        }
-    }
-
-    file_put_contents(PROJECT_ROOT . 'inc/.env', $env);
-
-    echo "** Using environment: $env";
-}
-
-function restoreEnvFile() {
-    unlink(PROJECT_ROOT . 'inc/.env');
-    $env_path = PROJECT_ROOT . 'inc/.env.saved';
-
-    if ( file_exists( $env_path ) )  {
-        $previous_env = file_get_contents($env_path);
-        unlink($env_path);
-
-        if ( false !== $previous_env ) {
-            file_put_contents(PROJECT_ROOT . 'inc/.env', $previous_env);
-        }
-    }
-}
-
 function integrationSetChunkAsComplete( $options ) {
     $test = new CurlTest();
 
