@@ -473,6 +473,7 @@ $.extend(UI, {
                 if(!UI.isSafari) saveSelection();
             }
             $('.editor .rangySelectionBoundary').addClass('focusOut');
+            if($('.editor .search-source .rangySelectionBoundary.focusOut, .editor .search-target .rangySelectionBoundary.focusOut').length) $('.editor .search-source .rangySelectionBoundary.focusOut, .editor .search-target .rangySelectionBoundary.focusOut').remove();
 
             if ( UI.editarea != '') {
                 hasFocusBefore = UI.editarea.is(":focus");
