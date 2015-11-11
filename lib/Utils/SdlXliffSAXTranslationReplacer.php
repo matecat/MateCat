@@ -45,7 +45,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
             //because the "conf" attribute could be not present in the tag,
             // so the check on it's name is not enough
             $_sdlStatus_confWritten = false;
-            $i = 1;
+
             foreach ( $attr as $k => $v ) {
 
                 //if tag name is file, we must replace the target-language attribute
@@ -53,20 +53,15 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                     //replace Target language with job language provided from constructor
                     $tag .= "$k=\"$this->target_lang\" ";
                     //Log::doLog($k . " => " . $this->target_lang);
-                }
-                elseif ( 'sdl:seg' == $name ){
+                } elseif ( 'sdl:seg' == $name ) {
 
-                    if(
-                            $k == 'conf' ||
-                            // whe reached the last attribute without write the conf
-                            ( $_sdlStatus_confWritten == false && count( $attr ) == $i )
-                    ){
+                    //write the confidence level for this segment ( Translated, Draft, etc. )
+                    if ( isset( $this->segments[ 'matecat|' . $this->currentId ] ) && $_sdlStatus_confWritten == false ) {
 
-                        if ( isset( $this->segments[ 'matecat|' . $this->currentId ] )  ) {
                             //get translation of current segment, by indirect indexing: id -> positional index -> segment
                             //actually there may be more that one segment to that ID if there are two mrk of the same source segment
                             $id_list = $this->segments[ 'matecat|' . $this->currentId ];
-                            $seg = $this->segments[ $id_list[ $this->markerPos ] ];
+                            $seg     = $this->segments[ $id_list[ $this->markerPos ] ];
                             //append definition attribute
                             $tag .= $this->prepareTargetStatuses( $seg );
 
@@ -74,21 +69,18 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                             $this->markerPos++;
                             $_sdlStatus_confWritten = true;
 
-                        }
-
                     }
-                    else {
-                        //put attributes in it
+
+                    //Warning, this is NOT an elseif
+                    if( $k != 'conf' ){
+                        //put also the current attribute in it if it is not a "conf" attribute
                         $tag .= "$k=\"$v\" ";
                     }
 
-                }
-                else {
-                    //put attributes in it
+                } else {
+                    //normal tag flux, put attributes in it
                     $tag .= "$k=\"$v\" ";
                 }
-
-                $i++; //increment attribute number ( needed to count the attributes inside the sld:seg )
 
             }
 
@@ -163,7 +155,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                 'REJECTED'   => 'RejectedTranslation',
         );
 
-        return "conf=\"{$statusMap[ $seg[ 'status' ] ]}\" id=\"{$seg['mrk_id']}\"";
+        return "conf=\"{$statusMap[ $seg[ 'status' ] ]}\" ";
 
     }
 
