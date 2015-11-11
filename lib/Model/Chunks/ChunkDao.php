@@ -6,17 +6,18 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare(
-            "SELECT * FROM jobs WHERE id = :id_job "  .
-            " AND password = :password "
+                "SELECT * FROM jobs WHERE id = :id_job " .
+                " AND password = :password "
         );
 
         $params = array(
-            'id_job' => $id,
-            'password' => $password ) ;
+                ':id_job'   => $id,
+                ':password' => $password
+        );
 
-        $stmt->execute(  $params );
+        $stmt->execute( $params );
 
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkStruct' );
         $fetched = $stmt->fetch();
 
         if ( $fetched == false ) {
@@ -24,6 +25,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         } else {
             return $fetched;
         }
+
     }
 
     public function getByProjectID( $id_project ) {

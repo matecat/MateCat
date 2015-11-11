@@ -4,10 +4,6 @@ $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-$db->debug = false;
-$db->connect();
-
 # Generate and insert a new enabled api keys pair for
 # the give email, and print the result on screen .
 

@@ -181,7 +181,7 @@ class getSegmentsController extends ajaxController {
     }
 
     private function attachNotes( &$segment ) {
-        $segment['notes'] = $this->segment_notes[ (int) $segment['sid'] ] ;
+        $segment['notes'] = @$this->segment_notes[ (int) $segment['sid'] ] ;
     }
 
     private function prepareNotes( $segments ) {
