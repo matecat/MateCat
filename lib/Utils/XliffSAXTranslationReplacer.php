@@ -304,7 +304,13 @@ class XliffSAXTranslationReplacer {
 
                         $translation = $this->prepareSegment( $seg, $translation );
 
+                        /*
+                         * WARNING: this unset needs to manage the duplicated Trans-unit IDs
+                         */
+                        unset(  $this->segments[ 'matecat|' . $this->currentId ][ $pos ] );
+
                         $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
+
                     }
 
                     //append translation
