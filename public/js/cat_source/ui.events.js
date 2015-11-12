@@ -1580,6 +1580,12 @@ $.extend(UI, {
 					$('.editor .sub-editor.concordances .results').empty();
 				}
 			}
+        }).on('keydown', function(e) {
+            if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
+                $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
+                e.preventDefault();
+                e.stopPropagation();
+            }
 		}).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
