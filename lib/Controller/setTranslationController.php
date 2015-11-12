@@ -210,7 +210,9 @@ class setTranslationController extends ajaxController {
         $check = new QA( $segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
 
+
         if ( $check->thereAreWarnings() ) {
+
             $err_json    = $check->getWarningsJSON();
             $translation = $this->translation;
         } else {
@@ -231,6 +233,7 @@ class setTranslationController extends ajaxController {
         $db->begin();
 
         $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+        if ( false === $old_translation ) $old_translation = array() ; // $old_translation if `false` sometimes
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
@@ -365,6 +368,8 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
+
+
         $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
@@ -392,21 +397,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        //Recount Job Totals
-        $old_wStruct = new WordCount_Struct();
-        $old_wStruct->setIdJob( $this->id_job );
-        $old_wStruct->setJobPassword( $this->password );
-        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
-        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
-        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
-        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
-        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
-
-        $old_wStruct->setIdSegment( $this->id_segment );
-
-        //redundant, this is made into WordCount_Counter::updateDB
-        $old_wStruct->setOldStatus( $old_translation[ 'status' ] );
-        $old_wStruct->setNewStatus( $this->status );
+        $old_wStruct = $this->recountJobTotals( $old_translation['status'] );
 
         //redundant because the update is made only where status = old status
         if ( $this->status != $old_translation[ 'status' ] ) {
@@ -433,10 +424,9 @@ class setTranslationController extends ajaxController {
 
             try {
                 $newTotals = $counter->updateDB( $newValues );
-
             } catch ( Exception $e ) {
-                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
-                Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 return $e->getCode();
@@ -463,8 +453,9 @@ class setTranslationController extends ajaxController {
         $project   = getProject( $this->jobData[ 'id_project' ] );
         $project   = array_pop( $project );
 
-        $job_stats[ 'ANALYSIS_COMPLETE' ] = ( $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+        $job_stats[ 'ANALYSIS_COMPLETE' ] = (
+          $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+          $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
         $file_stats = array();
@@ -515,6 +506,25 @@ class setTranslationController extends ajaxController {
             Utils::sendErrMailReport( $msg );
         }
 
+    }
+
+    private function recountJobTotals( $old_status ) {
+        $old_wStruct = new WordCount_Struct();
+        $old_wStruct->setIdJob( $this->id_job );
+        $old_wStruct->setJobPassword( $this->password );
+        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
+        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
+        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
+        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
+        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
+
+        $old_wStruct->setIdSegment( $this->id_segment );
+
+        //redundant, this is made into WordCount_Counter::updateDB
+        $old_wStruct->setOldStatus( $old_status );
+        $old_wStruct->setNewStatus( $this->status );
+
+        return $old_wStruct ;
     }
 
     //TODO: put this method into Job model and use Segnent object

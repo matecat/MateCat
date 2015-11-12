@@ -645,13 +645,9 @@ article .translated:active, article .draft:active, article .btn:active, article 
 .draft:hover{background:#eee;}
 
 
-
-
-
 .translated:active, .draft:active, .btn:active, .copysource:active{
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
-
 
 .approved
     {

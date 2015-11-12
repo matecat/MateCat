@@ -67,6 +67,8 @@ class NewController extends ajaxController {
             'message' => 'Untraceable error (sorry, not mapped)'
     );
 
+
+
     public function __construct() {
 
         //limit execution time to 300 seconds

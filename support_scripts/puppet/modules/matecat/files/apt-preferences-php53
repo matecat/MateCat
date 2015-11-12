@@ -1,0 +1,21 @@
+
+Package: php5*
+Pin: release n=squeeze
+Pin-Priority: 700
+
+Package: libapache2-mod-php5    
+Pin: release n=squeeze
+Pin-Priority: 700
+
+Package: libapache2-mod-php5
+Pin: release n=squeeze
+Pin-Priority: 700
+
+Package: php-pear
+Pin: release n=squeeze
+Pin-Priority: 700
+
+Package: *
+Pin: release a=stable
+Pin-Priority: 600
+

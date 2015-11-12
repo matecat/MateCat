@@ -42,6 +42,8 @@ class catController extends viewController {
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
+    private $job ;
+
     /**
      * @var string
      */
@@ -54,6 +56,7 @@ class catController extends viewController {
         $this->start_time = microtime( 1 ) * 1000;
 
         parent::__construct( false );
+
         parent::makeTemplate( "index.html" );
 
         $filterArgs = array(
@@ -70,6 +73,7 @@ class catController extends viewController {
         $this->password   = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
+        $this->job        = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
 
         if ( isset( $_GET[ 'step' ] ) ) {
             $this->step = $_GET[ 'step' ];
@@ -132,7 +136,6 @@ class catController extends viewController {
 
         if ( $data[ 0 ][ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
             $this->job_archived = true;
-//			$this->setTemplateVars();
             //stop execution
             return;
         }
@@ -601,6 +604,17 @@ class catController extends viewController {
             $this->template->comments_enabled = true;
             $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
+
+        $this->decorator = new CatDecorator( $this, $this->template );
+        $this->decorator->decorate();
+    }
+
+    public function getJobStats() {
+      return $this->job_stats ;
+    }
+
+    public function getJob() {
+      return $this->job ;
     }
 
     /**

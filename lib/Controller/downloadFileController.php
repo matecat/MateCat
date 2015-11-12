@@ -48,7 +48,6 @@ class downloadFileController extends downloadController {
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
-
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
 
         if ( empty( $this->id_job ) ) {
@@ -57,8 +56,6 @@ class downloadFileController extends downloadController {
     }
 
     public function doAction() {
-        $debug              = array();
-        $debug[ 'total' ][] = time();
 
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
@@ -76,13 +73,10 @@ class downloadFileController extends downloadController {
             return null;
         }
 
-        $debug[ 'get_file' ][] = time();
-
         //get storage object
         $fs        = new FilesStorage();
         $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
 
-        $debug[ 'get_file' ][] = time();
         $nonew                 = 0;
         $output_content        = array();
         /*
@@ -134,9 +128,7 @@ class downloadFileController extends downloadController {
 
                     }
 
-                    $debug[ 'get_segments' ][] = time();
-                    $data                      = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
-                    $debug[ 'get_segments' ][] = time();
+                    $data = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
 
                     //prepare regexp for nest step
                     $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
@@ -167,8 +159,6 @@ class downloadFileController extends downloadController {
 
                     }
 
-                    $debug[ 'replace' ][] = time();
-
                     //instatiate parser
                     $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
 
@@ -183,8 +173,6 @@ class downloadFileController extends downloadController {
                     //free memory
                     unset( $xsp );
                     unset( $data );
-
-                    $debug[ 'replace' ][] = time();
 
                     $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
                     $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
@@ -241,8 +229,7 @@ class downloadFileController extends downloadController {
 
                 }
 
-                $debug[ 'do_conversion' ][] = time();
-                    $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
+                $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
 
                 foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
 
@@ -268,9 +255,9 @@ class downloadFileController extends downloadController {
 
 
                 }
-                //            $output_content[ $fileID ][ 'document_content' ] = $convertResult[ 'document_content' ];
+
                 unset( $convertResult );
-                $debug[ 'do_conversion' ][] = time();
+                
             }
         }
 
@@ -377,8 +364,6 @@ class downloadFileController extends downloadController {
             }
 
         }
-
-        $debug[ 'total' ][] = time();
 
         try {
             Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
