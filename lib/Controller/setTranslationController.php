@@ -215,7 +215,9 @@ class setTranslationController extends ajaxController {
         $db->begin();
 
         $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
-        if ( false === $old_translation ) $old_translation = array() ; // $old_translation if `false` sometimes
+        if ( false === $old_translation ) {
+            $old_translation = array();
+        } // $old_translation if `false` sometimes
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
@@ -273,8 +275,8 @@ class setTranslationController extends ajaxController {
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
         $this->updateJobPEE( $old_translation, $_Translation );
-        $editLogModel = new EditLog_EditLogModel($this->id_job, $this->password);
-        $this->result['pee_error_level'] = $editLogModel->getMaxIssueLevel();
+        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
+        $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -352,7 +354,7 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
 
 
-        $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
+        $TPropagation[ 'warning' ] = $check->thereAreWarnings();
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
@@ -379,7 +381,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $old_wStruct = $this->recountJobTotals( $old_translation['status'] );
+        $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
 
         //redundant because the update is made only where status = old status
         if ( $this->status != $old_translation[ 'status' ] ) {
@@ -407,8 +409,8 @@ class setTranslationController extends ajaxController {
             try {
                 $newTotals = $counter->updateDB( $newValues );
             } catch ( Exception $e ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
-                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
+                Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 return $e->getCode();
@@ -436,8 +438,8 @@ class setTranslationController extends ajaxController {
         $project   = array_pop( $project );
 
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
-          $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-          $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
         $file_stats = array();
@@ -512,40 +514,42 @@ class setTranslationController extends ajaxController {
         $old_wStruct->setOldStatus( $old_status );
         $old_wStruct->setNewStatus( $this->status );
 
-        return $old_wStruct ;
+        return $old_wStruct;
     }
 
     //TODO: put this method into Job model and use Segnent object
     private function updateJobPEE( Array $old_translation, Array $new_translation ) {
-        $segmentEquivalentWordCount = $old_translation[ 'eq_word_count' ];
+        $segmentDao       = new Segments_SegmentDao( Database::obtain() );
+        $segment_original = $segmentDao->getById( $this->id_segment );
 
+        $segmentRawWordCount = $segment_original->raw_word_count;
         $segment = new EditLog_EditLogSegmentClientStruct(
                 array(
                         'suggestion'  => $old_translation[ 'suggestion' ],
                         'translation' => $old_translation[ 'translation' ]
                 )
         );
-        $oldPEE  = $segment->getPeePerc();
+        $oldPEE                     = $segment->getPeePerc();
 
         if ( $oldPEE < 0 ) {
             $oldPEE = 0;
         } else if ( $oldPEE > 100 ) {
             $oldPEE = 100;
         }
-        $oldPee_weighted = $oldPEE * $segmentEquivalentWordCount;
+        $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
-        $segment->translation = $new_translation[ 'translation' ];
+        $segment->translation    = $new_translation[ 'translation' ];
         $segment->pe_effort_perc = null;
-        $newPEE               = $segment->getPeePerc();
+        $newPEE                  = $segment->getPeePerc();
 
         if ( $newPEE < 0 ) {
             $newPEE = 0;
         } else if ( $newPEE > 100 ) {
             $newPEE = 100;
         }
-        $newPee_weighted = $newPEE * $segmentEquivalentWordCount;
+        $newPee_weighted = $newPEE * $segmentRawWordCount;
 
-        $newTotalJobPee = ($this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted);
+        $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
 
         $queryUpdateJob = "update jobs
                                 set avg_post_editing_effort = %f
@@ -561,7 +565,6 @@ class setTranslationController extends ajaxController {
                 )
         );
     }
-
 
 
 }
