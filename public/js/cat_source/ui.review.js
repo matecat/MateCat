@@ -88,7 +88,7 @@ if ( Review.enabled() ) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review untouched" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
+        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
 
         /*
@@ -294,13 +294,17 @@ if ( Review.enabled() ) {
             $.each(diff, function (index) {
 
                 if(this[0] == -1) {
-                    var newElem = $.parseHTML('<span class="deleted"/>');
-                    $(newElem).text(this[1]);
-                    diffTxt +=  $(newElem).html();
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="deleted"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
                 } else if(this[0] == 1) {
-                    var newElem = $.parseHTML('<span class="added"/>');
-                    $(newElem).text(this[1]);
-                    diffTxt +=  $(newElem).html();
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="added"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
                 } else {
                     diffTxt += this[1];
                 }
