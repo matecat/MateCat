@@ -24,4 +24,4 @@ class currency_translatedCurrencyConverter extends currency_currencyConverter {
         $this->newAmount = ( $result[ 0 ] == 1 ) ? $result[ 1 ] : 0;
     }
 
-} 
+}
