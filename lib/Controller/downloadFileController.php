@@ -369,7 +369,7 @@ class downloadFileController extends downloadController {
             Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
         }
         catch(Exception $e){
-            Log::doLog('Failed to delete dir:'.$e->getMessage());
+            Log::doLog( 'Failed to delete dir:'.$e->getMessage() );
         }
     }
 
@@ -738,7 +738,8 @@ class downloadFileController extends downloadController {
 //                $fileName_fixed = array_pop( explode( DIRECTORY_SEPARATOR, str_replace( " ", "_", $realPath ) ) );
                 foreach ( $internalFiles as $index => $internalFile ) {
 //                    $__ourFileName = array_pop( explode( DIRECTORY_SEPARATOR, $internalFile->output_filename ) );
-                    if( $internalFile->output_filename == $realPath ) {
+                    $_tmpRealPath = str_replace( array( " ", " " ), "_", $realPath );
+                    if( $internalFile->output_filename == $_tmpRealPath ) {
                         $zip->deleteName( $realPath );
                         if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'pdf' ) $realPath .= '.docx';
                         $zip->addFromString( $realPath, $internalFile->getContent() );
