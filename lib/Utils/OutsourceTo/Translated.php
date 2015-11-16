@@ -257,7 +257,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // NOTE: the vendor returns an error in case words = 0 -> make sure $words is at least 1
             $words = max( (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ], 1 );
 
-            $url =  "https://www.translated.net/hts/matecat-endpoint.php?f=outsourced&cid=htsdemo&p=htsdemo5" .
+            $url =  "http://www.translated.net/hts/matecat-endpoint.php?f=outsourced&cid=htsdemo&p=htsdemo5" .
                 "&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_words=$words" .
                 "&matecat_jid=" . $job[ 'jid' ] . "&matecat_jpass=" . $job[ 'jpassword' ] . "&of=json";
 
@@ -357,7 +357,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // and provide a MySQL -like date format. E.g. "1989-10-15 18:24:00"
             $fixedDeliveryDateForQuote = ( $this->fixedDelivery > 0 ) ? date( "Y-m-d H:i:s", $this->fixedDelivery / 1000 ) : "0";
 
-            $url =  "https://www.translated.net/hts/matecat-endpoint.php?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target" .
+            $url =  "http://www.translated.net/hts/matecat-endpoint.php?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target" .
                 "&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$words&df=matecat&matecat_pid=" . $this->pid .
                 "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
                 "&subject=$subject&jt=R&fd=" . urlencode( $fixedDeliveryDateForQuote ) . "&of=json";
