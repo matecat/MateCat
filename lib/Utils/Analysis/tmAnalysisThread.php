@@ -1,7 +1,7 @@
 <?php
 set_time_limit(0);
 $root = realpath( dirname(__FILE__) . '/../../../' );
-define( 'NUM_WORKERS', $root . "/Analysis/.num_processes" );
+define( 'NUM_WORKERS', $root . "/lib/Utils/Analysis/.num_processes" );
 define( 'DEFAULT_NUM_WORKERS', require( 'DefaultNumTMWorkers.php' ) );
 define( 'LOG_FILENAME', 'tm_analysis.log' );
 $my_pid = getmypid();

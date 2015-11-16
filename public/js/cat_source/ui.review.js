@@ -88,7 +88,7 @@ if ( Review.enabled() ) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review untouched" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
+        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
         div.append('<div class="tab sub-editor review" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
 
         /*
@@ -286,16 +286,25 @@ if ( Review.enabled() ) {
                     .replace( config.tabPlaceholderRegex, "\t" )
                     //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
                     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-                $(editarea).text().replace(/(<([^>]+)>)/ig,""));
+                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
 
             UI.dmp.diff_cleanupSemantic( diff ) ;
 
             diffTxt = '';
             $.each(diff, function (index) {
+
                 if(this[0] == -1) {
-                    diffTxt += '<span class="deleted">' + this[1] + '</span>';
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="deleted"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
                 } else if(this[0] == 1) {
-                    diffTxt += '<span class="added">' + this[1] + '</span>';
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="added"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
                 } else {
                     diffTxt += this[1];
                 }
