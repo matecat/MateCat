@@ -82,6 +82,7 @@ class FileFormatConverter {
             $query = $baseQuery
                 . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
                 . ' AND conversion_api_version NOT LIKE "open %"';
+            $converters = $db->fetch_array( $query );
 
         } else {
             // Here we use new converters
@@ -95,16 +96,12 @@ class FileFormatConverter {
                     . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
                     . ' AND status_active = 1 AND status_offline = 0'
                     . ')';
+                $converters = $db->fetch_array( $query );
 
             } else {
-                $closest_conversion_api_version = self::getClosestConversionApiVersion($this->converterVersion);
-                $query = $baseQuery
-                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
-                    . ' AND conversion_api_version = "' . $closest_conversion_api_version . '"';
+                $converters = self::getSuitableConvertersByVersion($db, $this->converterVersion);
             }
         }
-
-        $converters = $db->fetch_array( $query );
 
         // SUUUPER ugly, those variables should not be static at all! No way!
         // But now the class works around these 3 static variables, and a
@@ -129,47 +126,108 @@ class FileFormatConverter {
     }
 
     /**
-     * Returns the value of conversion_api_version for the provided version.
-     * If no converters in db match the provided version, use the higher closest
-     * converter version.
+     * Returns the most suitable converters for the version provided.
+     *
+     * The $USE_ONLY_STABLE_CONVERTERS setting is ignored here because if this
+     * class is processing a XLIFF created by an unstable converter, and this
+     * converter is also listed in the db and marked unstable, it's better to
+     * make them match, instead of ignoring the unstable converter and
+     * processing the input XLIFF with a stable converter with a close version.
+     *
+     * This is the list of the fallbacks:
+     *   1. Return stable converters matching provided version.
+     *   2. Return unstable converters matching provided version.
+     *   3. Return stable converters with the greater closest version.
+     *   4. Return unstable converters with the greater closest version.
+     *   5. Return stable converters with the higher version in the db.
+     *   6. Return unstable converters with the higher version in the db.
      */
-    private static function getClosestConversionApiVersion($version) {
-        $db = Database::obtain();
-
+    private static function getSuitableConvertersByVersion($db, $version) {
         // First, obtain a list of all the versions sorted from oldest
         // to newest
-        $query = 'SELECT DISTINCT conversion_api_version'
+        $query = 'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule, conversion_api_version, stable'
             . ' FROM converters'
             . ' WHERE conversion_api_version LIKE "open %"'
-            . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
             . ' AND status_active = 1 AND status_offline = 0'
             . ' ORDER BY conversion_api_version ASC';
-        $db_list = $db->fetch_array( $query );
+        $dbList = $db->fetch_array( $query );
 
-        if (empty($db_list)) {
+        if (empty($dbList)) {
             throw new Exception("There are no new converters enabled in the converters table!");
         }
 
-        // Look for the exact version required, or at least the
-        // higher but closest version we have in db.
-        foreach ($db_list as $db_row) {
-            $examined_version = $db_row['conversion_api_version'];
-            if ($examined_version >= "open $version") {
-                // We found the same version, or we are on the
-                // closest higher one.
-                $candidate_version = $examined_version;
-                break;
+        // Loops over all the versions, stops when stopFn returns true, and
+        // returns the current version
+        $loopVersionsFn = function($stable, $stopFn) use ($dbList) {
+            foreach ($dbList as $dbRow) {
+                if ($dbRow['stable'] != $stable) continue;
+                $curVersion = $dbRow['conversion_api_version'];
+                if ($stopFn($curVersion)) {
+                    return $curVersion;
+                }
+            }
+            return null;
+        };
+
+        // At the end of the next loops, we want actual values in these vars
+        $candidateVersion = null;
+        $candidateStable = null;
+
+        // Array to loop on 'stable' values; stable converters first
+        $stableFlagValues = array(1, 0);
+
+        // Look for matching version first
+        $stopOnMatchingVersionFn = function($curVersion) use ($version) {
+            return $curVersion == "open $version";
+        };
+        foreach ($stableFlagValues as $candidateStable) {
+            $candidateVersion = $loopVersionsFn($candidateStable, $stopOnMatchingVersionFn);
+            if ($candidateVersion != null) break;
+        }
+
+        if ($candidateVersion == null) {
+            // Look for greater closest version
+            $stopOnGreaterClosestVersionFn = function($curVersion) use ($version) {
+                return $curVersion > "open $version";
+            };
+            foreach ($stableFlagValues as $candidateStable) {
+                $candidateVersion = $loopVersionsFn($candidateStable, $stopOnGreaterClosestVersionFn);
+                if ($candidateVersion != null) break;
             }
         }
 
-        if (empty($candidate_version)) {
-            // The previous loop ended, but all versions were
-            // lower than the one provided: as fallback, use the
-            // highest version we have, i.e. the last examined.
-            $candidate_version = $examined_version;
+        if ($candidateVersion == null) {
+            // No converter have greater version than the provided one;
+            // take the greatest version we have in db (hopefully stable)
+            foreach ($dbList as $dbRow) {
+                switch ($dbRow['stable']) {
+                    case 1:
+                        $highestStableVersion = $dbRow['conversion_api_version'];
+                        break;
+                    case 0:
+                        $highestUnstableVersion = $dbRow['conversion_api_version'];
+                        break;
+                }
+            }
+            if (isset($highestStableVersion)) {
+                $candidateVersion = $highestStableVersion;
+                $candidateStable = 1;
+            } else {
+                $candidateVersion = $highestUnstableVersion;
+                $candidateStable = 0;
+            }
         }
 
-        return $candidate_version;
+        // Filter the rows with the candidate version and the 'stable' flag
+        $suitableConvertersDbRows = array();
+        foreach ($dbList as $dbRow) {
+            if ($dbRow['stable'] == $candidateStable &&
+                    $dbRow['conversion_api_version'] == $candidateVersion) {
+                $suitableConvertersDbRows[] = $dbRow;
+            }
+        }
+
+        return $suitableConvertersDbRows;
     }
 
 
