@@ -68,7 +68,6 @@ class NewController extends ajaxController {
     );
 
 
-
     public function __construct() {
 
         //limit execution time to 300 seconds
@@ -97,6 +96,9 @@ class NewController extends ajaxController {
                 ),
                 'segmentation_rule' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'owner_email'       => array(
+                        'filter' => FILTER_VALIDATE_EMAIL
                 )
         );
 
@@ -113,6 +115,7 @@ class NewController extends ajaxController {
             $__postInput[ $key ] = urldecode( $val );
         }
 
+
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
@@ -128,6 +131,26 @@ class NewController extends ajaxController {
         );
         $this->seg_rule       = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
         $this->subject        = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner          = $__postInput[ 'owner_email' ];
+
+
+        if ( $this->owner === false ) {
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = "Email is not valid";
+            Log::doLog( "Email is not valid" );
+
+            return -5;
+        } else if ( !is_null( $this->owner ) ) {
+            $domain = explode( "@", $this->owner );
+            $domain = $domain[ 1 ];
+            if ( !checkdnsrr( $domain ) ) {
+                $this->api_output[ 'message' ] = "Project Creation Failure";
+                $this->api_output[ 'debug' ]   = "Email is not valid";
+                Log::doLog( "Email is not valid" );
+
+                return -5;
+            }
+        }
 
         try {
             $this->validateEngines();
@@ -194,10 +217,10 @@ class NewController extends ajaxController {
         $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
 
         //If a TMX file has been uploaded and no key was provided, create a new key.
-        if( empty($this->private_tm_key) ){
+        if ( empty( $this->private_tm_key ) ) {
             foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = FilesStorage::pathinfo_fix($_fileinfo['name']);
-                if($pathinfo['extension'] == 'tmx'){
+                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $this->private_tm_key[] = 'new';
                     break;
                 }
@@ -549,6 +572,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'tms_engine' ]           = $this->tms_engine;
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
+        $projectStructure[ 'owner' ]                = $this->owner;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
