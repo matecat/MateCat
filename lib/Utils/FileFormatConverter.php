@@ -5,8 +5,10 @@ define ( "BOM", "\xEF\xBB\xBF" );
 
 class FileFormatConverter {
 
+    const DEFAULT_PORT = '8732';
+
     private $ip; //current converter chosen for this job
-    private $port = "8732"; //port the convertrs listen to
+    private $port; //port the convertrs listen to
     private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
     private $fromXliffFunction = "AutomationService/xliff2original"; //action string for the converters to convert to original
     const testFunction = "test"; // action check connection
@@ -228,8 +230,17 @@ class FileFormatConverter {
         //pick random
         $num = rand( 0, $tot_cpu - 1 );
 
-        return $converters_map[ $num ];
+        $address = $converters_map[ $num ];
+        $addressParts = explode(':', $address);
+        if (!isset($addressParts[1])) {
+            // If port not found, set the default port
+            $addressParts[1] = self::DEFAULT_PORT;
+        }
+        if (count($addressParts) > 2) {
+            log::doLog("WARNING! Bad converter address detected: \"$address\"");
+        }
 
+        return $addressParts;
     }
 
     /**
@@ -495,9 +506,10 @@ class FileFormatConverter {
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
-            $this->ip = $this->pickRandConverter( $segm_rule );
+            list($this->ip, $this->port) = $this->pickRandConverter( $segm_rule );
         } else {
             $this->ip = $chosen_by_user_machine;
+            $this->port = self::DEFAULT_PORT;
         }
 
         $url = "$this->ip:$this->port/$this->toXliffFunction";
@@ -507,14 +519,14 @@ class FileFormatConverter {
         $data[ 'sourceLocale' ]  = $this->lang_handler->getLangRegionCode( $source_lang );
         $data[ 'targetLocale' ]  = $this->lang_handler->getLangRegionCode( $target_lang );
 
-        log::doLog( $this->ip . " start conversion to xliff of $file_path" );
+        log::doLog( "$this->ip:$this->port start conversion to xliff of $file_path" );
 
         $start_time  = microtime( true );
         $curl_result = $this->curl_post( $url, $data, $this->opt );
         $end_time    = microtime( true );
 
         $time_diff = $end_time - $start_time;
-        log::doLog( $this->ip . " took $time_diff secs for $file_path" );
+        log::doLog( "$this->ip:$this->port took $time_diff secs for $file_path" );
 
         $this->conversionObject->ip_machine      = $this->ip;
         $this->conversionObject->ip_client       = Utils::getRealIpAddr();
@@ -584,7 +596,7 @@ class FileFormatConverter {
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
-            $this->ip = $this->pickRandConverter();
+            list($this->ip, $this->port) = $this->pickRandConverter();
             $storage  = $this->getValidStorage();
 
             //add replace/regexp pattern because we have more than 1 replacement
@@ -592,6 +604,7 @@ class FileFormatConverter {
             $xliffContent = self::replacedAddress( $storage, $xliffContent );
         } else {
             $this->ip = $chosen_by_user_machine;
+            $this->port = self::DEFAULT_PORT;
         }
 
         $url = "$this->ip:$this->port/$this->fromXliffFunction";
@@ -609,7 +622,7 @@ class FileFormatConverter {
         //$data['xliffContent'] = $xliffContent;
         $data[ 'xliffContent' ] = "@$tmp_name";
 
-        log::doLog( $this->ip . " start conversion back to original" );
+        log::doLog( "$this->ip:$this->port start conversion back to original" );
         $start_time = microtime( true );
 
         //TODO: this helper doesn't help!
@@ -617,7 +630,7 @@ class FileFormatConverter {
         $curl_result = $this->curl_post( $url, $data, $this->opt );
         $end_time    = microtime( true );
         $time_diff   = $end_time - $start_time;
-        log::doLog( $this->ip . " took $time_diff secs" );
+        log::doLog( "$this->ip:$this->port took $time_diff secs" );
 
         $this->conversionObject->ip_machine      = $this->ip;
         $this->conversionObject->ip_client       = Utils::getRealIpAddr();
@@ -660,7 +673,7 @@ class FileFormatConverter {
 
             //assign converter
             if ( !$chosen_by_user_machine ) {
-                $this->ip = $this->pickRandConverter();
+                list($this->ip, $this->port) = $this->pickRandConverter();
                 $storage  = $this->getValidStorage();
 
                 //add replace/regexp pattern because we have more than 1 replacement
@@ -668,6 +681,7 @@ class FileFormatConverter {
                 $xliffContent = self::replacedAddress( $storage, $xliffContent );
             } else {
                 $this->ip = $chosen_by_user_machine;
+                $this->port = self::DEFAULT_PORT;
             }
 
             $url = "$this->ip:$this->port/$this->fromXliffFunction";
