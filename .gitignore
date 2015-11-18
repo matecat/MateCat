@@ -9,7 +9,7 @@ inc/login_secret.dat
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
-inc/config.ini.test
+inc/config.test.ini
 lib/Utils/Analysis/.num_processes
 
 # Ignore artifacts

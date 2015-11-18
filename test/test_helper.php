@@ -11,6 +11,7 @@ require( 'lib/IntegrationTest.php');
 require( 'functions.php');
 require( 'SchemaCopy.php');
 require( 'SeedLoader.php');
+require( 'php_versions_override.php');
 
 prepareTestDatabase();
 

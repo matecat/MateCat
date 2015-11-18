@@ -29,13 +29,13 @@ class CurlTest {
 
     $ch = curl_init();
 
-    $this->url = "http://localhost$this->path";
+    $this->url = "http://" . $GLOBALS['TEST_URL_BASE'] . $this->path;
 
     if ( count($this->files) > 0 ) {
       $this->method = 'POST' ;
 
       foreach($this->files as $key => $file) {
-        $this->params["upload_$key"] = "@" . $file;
+        $this->params["upload_$key"] = curl_file_create($file);
       }
     }
 
