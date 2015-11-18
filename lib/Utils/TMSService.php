@@ -118,7 +118,6 @@ class TMSService {
      * @throws Exception
      */
     public function addTmxInMyMemory() {
-
         $this->checkCorrectKey();
 
         Log::doLog( $this->file );
@@ -135,7 +134,7 @@ class TMSService {
                 );
 
                 //check for errors during the import
-                switch ( $importStatus ) {
+                switch ( $importStatus->responseStatus ) {
                     case "400" :
                         throw new Exception( "Can't load TMX files right now, try later", -15 );
                         break;
@@ -151,6 +150,55 @@ class TMSService {
         }
         else {
             throw new Exception( "Can't find uploaded TMX files", -15 );
+        }
+
+    }
+
+    /**
+     * Import TMX file in MyMemory
+     * @return bool
+     * @throws Exception
+     */
+    public function addGlossaryInMyMemory() {
+
+        $this->checkCorrectKey();
+
+        Log::doLog( $this->file );
+
+        //if there are files, add them into MyMemory
+        if ( count( $this->file ) > 0 ) {
+
+            foreach ( $this->file as $k => $fileInfo ) {
+
+                $importStatus = $this->mymemory_engine->glossaryImport(
+                        $fileInfo->file_path,
+                        $this->tm_key,
+                        $this->name
+                );
+
+                //check for errors during the import
+                /**
+                 * @var $importStatus Engines_Results_MyMemory_TmxResponse
+                 */
+                switch ( $importStatus->responseStatus ) {
+                    case "400" :
+                        throw new Exception( "Can't load Glossary file right now, try later", -15 );
+                        break;
+                    case "403" :
+                        throw new Exception( "Invalid key provided", -15 );
+                        break;
+                    case "406" :
+                        throw new Exception( $importStatus->responseDetails, -15 );
+                        break;
+                    default:
+                }
+            }
+
+            return true;
+
+        }
+        else {
+            throw new Exception( "Can't find uploaded Glossary files", -15 );
         }
 
     }
@@ -386,6 +434,45 @@ class TMSService {
         $tmpFile->fwrite( "
     </body>
 </tmx>" );
+
+        $tmpFile->rewind();
+
+        return $tmpFile;
+
+    }
+
+    /**
+     * Export Job as Tmx File
+     *
+     * @param $jid
+     * @param $jPassword
+     * @param $sourceLang
+     * @param $targetLang
+     *
+     * @return SplTempFileObject $tmpFile
+     *
+     */
+    public function exportJobAsCSV( $jid, $jPassword, $sourceLang, $targetLang ) {
+
+        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 15MB */ );
+
+        $csv_fields = array(
+                "Source: $sourceLang", "Target: $targetLang"
+        );
+
+        $tmpFile->fputcsv( $csv_fields );
+
+        $result = getTranslationsForTMXExport( $jid, $jPassword );
+
+        foreach ( $result as $k => $row ) {
+
+            $row_array = array(
+                    $row[ 'segment' ], $row[ 'translation' ]
+            );
+
+            $tmpFile->fputcsv( $row_array );
+
+        }
 
         $tmpFile->rewind();
 

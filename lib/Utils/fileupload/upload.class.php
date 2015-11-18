@@ -172,6 +172,8 @@ class UploadHandler {
     }
 
     protected function validate( $uploaded_file, $file, $error, $index ) {
+        //TODO: these errors are shown in the UI but are not user friendly.
+
         if ( $error ) {
             $file->error = $error;
 
@@ -182,6 +184,11 @@ class UploadHandler {
 
             return false;
         }
+        else if(mb_strlen($file->name) > INIT::$MAX_FILENAME_LENGTH){
+            $file->error = "filenameTooLong";
+            return false;
+        }
+
         if ( !preg_match( $this->options[ 'accept_file_types' ], $file->name ) ) {
             $file->error = 'acceptFileTypes';
 
@@ -474,12 +481,18 @@ class UploadHandler {
             $file->name = $this->trim_file_name( $matches[1], trim( $matches[2] ), null );
             $file->size = null;
             $file->type = trim( $matches[2] );
-            $file->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max header post size value in php.ini.\"";
+            $file->error = "The file is too large. ".
+                           "Please Contact support@matecat.com and report these details: ".
+                           "\"The server configuration does not conform with Matecat configuration. ".
+                           "Check for max header post size value in the virtualhost configuration or php.ini.\"";
 
             $info = array( $file );
 
         } elseif( $_SERVER['CONTENT_LENGTH'] >= $uploadParams->getUploadMaxFilesize() ){
-            $info[0]->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max file upload value in php.ini.\"";
+            $info[0]->error = "The file is too large.  ".
+                              "Please Contact support@matecat.com and report these details: ".
+                              "\"The server configuration does not conform with Matecat configuration. ".
+                              "Check for max file upload value in the virtualhost configuration or php.ini.\"";
         }
         //check for server misconfiguration
 

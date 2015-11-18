@@ -37,12 +37,14 @@ package {'grunt-cli':
 }
 
 # runtime required packages
-package {[
-  'php5', 'libapache2-mod-php5',
-  'php5-curl', 'php5-mysql',
-  'php-pear'
-  ]:
-  ensure  => installed
+
+class {'matecat::php': }
+
+file { '.env': 
+  path    => '/vagrant/inc/.env',
+  owner   => 'vagrant',
+  group   => 'vagrant',
+  content => 'development'
 }
 
 package {['redis-server', 'screen', 'postfix']:
@@ -84,16 +86,6 @@ concat::fragment { "matecat-custom-fragment":
   content => template('matecat/development-vhost.conf-fragment.erb')
 }
 
-# php configuration
-file { 'php.ini':
-  path    => '/etc/php5/apache2/php.ini',
-  source  => 'puppet:///modules/php/php.ini',
-  owner   => 'root',
-  group   => 'root',
-  notify  => Service["apache2"],
-  require => Package['php5']
-}
-
 class { 'java':
   distribution => 'jre',
 } ->
@@ -110,22 +102,16 @@ activemq::instance { 'matecat':
 }
 
 # MateCAT config
-file { 'config.ini':
-  path   => '/vagrant/inc/config.ini',
-  source => 'puppet:///modules/matecat/config.ini',
-  owner  => 'vagrant',
-  group  => 'vagrant',
-  mode   => '0755',
-  replace => false
+exec { 'cp inc/config.ini.sample inc/config.ini':
+  path    => '/bin',
+  cwd     => '/vagrant',
+  creates => '/vagrant/inc/config.ini'
 }
 
-file { 'oauth_config.ini':
-  path   => '/vagrant/inc/oauth_config.ini',
-  source => 'puppet:///modules/matecat/oauth_config.ini',
-  owner  => 'vagrant',
-  group  => 'vagrant',
-  mode   => '0755',
-  replace => false
+exec { 'cp inc/oauth_config.ini.sample inc/oauth_config.ini':
+  path    => '/bin',
+  cwd     => '/vagrant',
+  creates => '/vagrant/inc/config.ini'
 }
 
 class { '::mysql::server':
@@ -136,11 +122,23 @@ class { '::mysql::server':
 
 exec { 'cat lib/Model/matecat.sql lib/Model/comments.sql > /var/tmp/matecat-schema.sql':
   path    => '/bin',
-  cwd     => '/vagrant'
-} ->
+  cwd     => '/vagrant', 
+  creates => '/vagrant/lib/Model/matecat-schema.sql'
+} 
+
 mysql::db { 'matecat':
-  user     => 'matecat',
-  password => 'matecat01',
+  dbname   => 'matecat', 
+  user     => 'matecat_user',
+  password => 'matecat_user',
+  host     => 'localhost',
+  grant    => ['ALL'],
+  sql      => '/var/tmp/matecat-schema.sql'
+} 
+
+mysql::db { 'matecat_test':
+  dbname   => 'matecat_test', 
+  user     => 'matecat_user',
+  password => 'matecat_user',
   host     => 'localhost',
   grant    => ['ALL'],
   sql      => '/var/tmp/matecat-schema.sql'

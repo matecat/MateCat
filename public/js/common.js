@@ -1,30 +1,32 @@
 APP = null;
 
 APP = {
-    init: function() {
+    init: function () {
 //        this.waitingConfirm = false;
 //        this.confirmValue = null;
-        this.isCattool = $('body').hasClass('cattool');
-        $("body").on('click', '.modal .x-popup', function(e) {
+        this.isCattool = $( 'body' ).hasClass( 'cattool' );
+        $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
-        }).on('click', '.modal[data-type=alert] .btn-ok', function(e) {
+        } ).on( 'click', '.modal[data-type=alert] .btn-ok', function ( e ) {
             e.preventDefault();
             APP.closePopup();
-            if($(this).attr('data-callback')) {
-                if( typeof UI[$(this).attr('data-callback')] === 'function' ){
-                    UI[$(this).attr('data-callback')]();
+            if ( $( this ).attr( 'data-callback' ) ) {
+                if ( typeof UI[$( this ).attr( 'data-callback' )] === 'function' ) {
+                    UI[$( this ).attr( 'data-callback' )]();
                     APP.confirmValue = true;
                 }
             }
-	    }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
+        } ).on( 'click', '.modal[data-type=confirm] .btn-ok:not(.disabled), .modal[data-type=confirm_checkbox] .btn-ok:not(.disabled)', function ( e ) {
             e.preventDefault();
-            if(!$('.modal[data-type=confirm]').hasClass('closeOnSuccess')) APP.closePopup();
+            var dataType = $('.modal' ).attr('data-type');
+
+            if ( !$( '.modal[data-type='+dataType+']' ).hasClass( 'closeOnSuccess' ) ) APP.closePopup();
 //            APP.closePopup();
-            if($(this).attr('data-callback')) {
-                if( typeof UI[$(this).attr('data-callback')] === 'function' ){
-                    var context = $(this).attr('data-context') || '';
-                    UI[$(this).attr('data-callback')](decodeURI(context));
+            if ( $( this ).attr( 'data-callback' ) ) {
+                if ( typeof UI[$( this ).attr( 'data-callback' )] === 'function' ) {
+                    var context = $( this ).attr( 'data-context' ) || '';
+                    UI[$( this ).attr( 'data-callback' )]( decodeURI( context ) );
                     APP.confirmValue = true;
                 } else {
                     APP.confirmValue = APP.confirmCallbackFunction();
@@ -32,14 +34,14 @@ APP = {
             }
             APP.waitingConfirm = false;
             APP.cancelValue = false;
-        }).on('click', '.modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function(e) {
+        } ).on( 'click', '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
-            el = $(this).parents('.modal').find('.btn-cancel');
-            if($(el).attr('data-callback')) {
-                if( typeof UI[$(el).attr('data-callback')] === 'function' ){
-                    var context = $(this).attr('data-context') || '';
-                    UI[$(this).attr('data-callback')](decodeURI(context));
+            el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
+            if ( $( el ).attr( 'data-callback' ) ) {
+                if ( typeof UI[$( el ).attr( 'data-callback' )] === 'function' ) {
+                    var context = $( this ).attr( 'data-context' ) || '';
+                    UI[$( this ).attr( 'data-callback' )]( decodeURI( context ) );
                 } else {
                     APP.cancelValue = APP.cancelCallbackFunction();
                 }
@@ -47,39 +49,40 @@ APP = {
             APP.confirmValue = false;
             APP.waitingConfirm = false;
             APP.cancelValue = true;
-        }).on('click', '.popup-outer.closeClickingOutside', function(e) {
-			e.preventDefault();
-			$(this).parents('.modal').find('.x-popup').click();
-        });
-
-        $('#sign-in').click(function(e){
+        } ).on( 'click', '.popup-outer.closeClickingOutside', function ( e ) {
             e.preventDefault();
-            APP.googole_popup($(this).data('oauth'));
-        });
+            $( this ).parents( '.modal' ).find( '.x-popup' ).click();
+        } );
 
-        $('#sign-in-o').click(function(e){
-            $('#sign-in' ).trigger('click');
-        });
+        $( '#sign-in' ).click( function ( e ) {
+            e.preventDefault();
+            APP.googole_popup( $( this ).data( 'oauth' ) );
+        } );
+
+        $( '#sign-in-o' ).click( function ( e ) {
+            $( '#sign-in' ).trigger( 'click' );
+        } );
 
     },
-    alert: function(options) {
+    alert: function ( options ) {
         //FIXME
         // Alert message, NEVER displayed if there are a redirect after it because html div popups are no-blocking
         // Transform alert to a function like confirm with a callable function passed as callback
-		
-		if(typeof options == 'string') {
-			options.callback = false;
-			options.msg = options;
-		};
-		var callback = (typeof options == 'string')? false : options.callback;
-		var content = (typeof options == 'string')? options : options.msg;
-		this.popup({
-			type: 'alert',
-			onConfirm: callback,
-			closeClickingOutside: true,
-			title: 'Warning',
-			content: content
-		});
+
+        if ( typeof options == 'string' ) {
+            options.callback = false;
+            options.msg = options;
+        }
+        ;
+        var callback = (typeof options == 'string') ? false : options.callback;
+        var content = (typeof options == 'string') ? options : options.msg;
+        this.popup( {
+            type: 'alert',
+            onConfirm: callback,
+            closeClickingOutside: true,
+            title: 'Warning',
+            content: content
+        } );
     },
     googole_popup: function ( url ) {
         //var rid=$('#rid').text();
@@ -89,13 +92,13 @@ APP = {
             newWindow.focus();
         }
     },
-    confirm: function(options) {
+    confirm: function ( options ) {
         this.waitingConfirm = true;
-        this.popup({
+        this.popup( {
             type: 'confirm',
             name: options.name,
             onConfirm: options.callback,
-			caller: options.caller,
+            caller: options.caller,
             onCancel: options.onCancel,
             title: (options.title || 'Confirmation required'),
             cancelTxt: options.cancelTxt,
@@ -103,65 +106,61 @@ APP = {
             content: options.msg,
             context: options.context,
             closeOnSuccess: (options.closeOnSuccess || false)
-        });
-        this.checkConfirmation();
+        } );
         return APP.confirmValue;
     },
-	initMessageBar: function() {
-		if(!$('header #messageBar').length) {
-			console.log('no messageBar found');
-			$('header').prepend('<div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>');
-		}
-		$("body").on('click', '#messageBar .close', function(e) {
-			e.preventDefault();
-			$('body').removeClass('incomingMsg');
-            $('#messageBar').html('<span class="msg"></span><a href="#" class="close"></a>');
-			if(typeof $('#messageBar').attr('data-token') != 'undefined') {
-				var expireDate = new Date($('#messageBar').attr('data-expire'));
-				$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });				
-			}
-		});
-	},
-	showMessage: function(options) {
-		$('#messageBar .msg').html(options.msg);
-		if(options.showOnce) {
-			$('#messageBar').attr({'data-token': 'msg-' + options.token, 'data-expire': options.expire});
-		}
-		if(typeof options.fixed != 'undefined') {
-			$('#messageBar').addClass('fixed');
-		} else {
-			$('#messageBar').removeClass('fixed');			
-		}
-		$('body').addClass('incomingMsg');
-	},
-
-    checkConfirmation: function() {
-//        if(this.waitingConfirm) {
-//            setTimeout(function() {
-//                APP.checkConfirmation();
-//            }, 200);
-//        } else {
-//        console.log('this.confirmCallbackFunction: ' + this.confirmCallbackFunction);
-//        console.log('this.cancelCallbackFunction: ' + this.cancelCallbackFunction);
-//            if(this.confirmCallbackFunction) {
-//                UI[this.confirmCallbackFunction](this.confirmValue);
-//                this.confirmValue = null;
-//                this.confirmCallbackFunction = null;
-//            }
-//            if(this.cancelCallbackFunction) {
-//                UI[this.cancelCallbackFunction](this.cancelValue);
-//                this.cancelValue = null;
-//                this.cancelCallbackFunction = null;
-//            }
-//        }
+    confirmAndCheckbox: function(options){
+        this.waitingConfirm = true;
+        this.popup( {
+            type: 'confirm_checkbox',
+            name: options.name,
+            onConfirm: options.callback,
+            caller: options.caller,
+            onCancel: options.onCancel,
+            title: (options.title || 'Confirmation required'),
+            cancelTxt: options.cancelTxt,
+            okTxt: options.okTxt,
+            content: options.msg,
+            context: options.context,
+            closeOnSuccess: (options.closeOnSuccess || false),
+            checkbox_label: options['checkbox-label']
+        } );
     },
-	doRequest: function(req,log) {
+    initMessageBar: function () {
+        if ( !$( 'header #messageBar' ).length ) {
+            console.log( 'no messageBar found' );
+            $( 'header' ).prepend( '<div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>' );
+        }
+        $( "body" ).on( 'click', '#messageBar .close', function ( e ) {
+            e.preventDefault();
+            $( 'body' ).removeClass( 'incomingMsg' );
+            $( '#messageBar' ).html( '<span class="msg"></span><a href="#" class="close"></a>' );
+            if ( typeof $( '#messageBar' ).attr( 'data-token' ) != 'undefined' ) {
+                var expireDate = new Date( $( '#messageBar' ).attr( 'data-expire' ) );
+                $.cookie( $( '#messageBar' ).attr( 'data-token' ), '', {expires: expireDate} );
+            }
+        } );
+    },
+    showMessage: function ( options ) {
+        $( '#messageBar .msg' ).html( options.msg );
+        if ( options.showOnce ) {
+            $( '#messageBar' ).attr( {'data-token': 'msg-' + options.token, 'data-expire': options.expire} );
+        }
+        if ( typeof options.fixed != 'undefined' ) {
+            $( '#messageBar' ).addClass( 'fixed' );
+        } else {
+            $( '#messageBar' ).removeClass( 'fixed' );
+        }
+        $( 'body' ).addClass( 'incomingMsg' );
+    },
+
+    doRequest: function ( req, log ) {
 //        console.log('req: ', req);
-		logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
-		version = (typeof config.build_number == 'undefined')? '' : '-v' + config.build_number;
-		builtURL = (req.url)? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.job_id + ((typeof req.data.id_segment != 'undefined')? ',sid=' + req.data.id_segment : '');
-		var setup = {
-			url: builtURL,
+        logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
+        version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
+        builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.job_id + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var setup = {
+            url: builtURL,
 //			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
 			data: req.data,
 			type: 'POST',
@@ -180,75 +179,307 @@ APP = {
 			setup.error = req.error;
 		if (typeof req.beforeSend === 'function')
 			setup.beforeSend = req.beforeSend;
-		$.ajax(setup);        
+
+		return $.ajax(setup);
 	}, 
     appendTime: function() {
         var t = new Date();
         return '&time=' + t.getTime();
     },
-    popup: function(conf) {
-console.log('closeOnSuccess: ', conf.closeOnSuccess);
-/*
-        // 
-        {
-            type: '', // ? (optional) alert|confirm|view:  set the popup as an alert box, a confirm box, a view (the markup is already loaded in the page, it is only showed/hidden), or if not specified as a custom popup
-            closeClickingOutside: false, // (optional) default is false
-            width: '30%', // (optional) default is 500px in the css rule
-            title: '', // (optional)
-            onConfirm: 'functionName' // (optional) UI function to call after confirmation. Confirm value is anyway stored in APP.confirmValue, but a UI function can be automatically called when the user confirm true or false (checks are done every 0.2 seconds)
-            content: '', // html
-            context: '', // ACTUALLY ENABLED ONLY FOR CONFIRM: a string that will be passed to the callbacks, may be a JSON. Escaping and unescaping are done automatically.
-            buttons:    [ // (optional) list from left
-                                {
-                                    type: '', // "ok" (default) or "cancel"
-                                    text: '', 
-                                    callback: '', // name of a UI function to execute
-                                    params: '', // (optional) parameters to pass at the callback function
-                                    closeOnClick: '' // (optional) true||false
-                                },
-                                ...                        
-                        ]
-        }
- */
-        this.closePopup();
-//        console.log('conf: ', conf);
-
-        newPopup = '<div class="modal' + ((conf.closeOnSuccess)? ' closeOnSuccess' : '') + '" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
-                    '   <div class="popup-outer"></div>' +
-                    '   <div class="popup' + ((conf.type == 'alert')? ' popup-alert' : (conf.type == 'confirm')? ' popup-confirm' : '') + '">' +
-                    '       <a href="#" class="x-popup remove"></a>' +
-                    '       <h1>' + conf.title + '</h1>' +
-                    '       <p>' + conf.content + '</p>';
-        if(conf.type == 'alert') {
-            newPopup += '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>Ok<\a>';
-        } else if(conf.type == 'confirm') {
-            newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +
-                             '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';
-            APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
-            APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
-            APP.callerObject = (conf.caller)? conf.caller : null;
-        } else if(conf.type == 'free') {
-            var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
-            newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
-        } else {
-            $.each(conf.buttons, function(index) {
-                var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
-                newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); ' + ((this.closeOnClick)? "$('.x-popup').click(); " : '') + 'return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
-            });
-        }
-        newPopup += '</div>';
-        $('body').append(newPopup);
-//        $('.modal:not([data-type=view])').show();
-//        $('.popup').fadeIn('fast');
-		if(conf.closeClickingOutside) $('.popup-outer').addClass('closeClickingOutside');
+    disableLink : function(e){
+        e.preventDefault();
     },
-    closePopup: function() {
-        $('.modal[data-type=view]').hide();
-        $('.modal:not([data-type=view])').remove();
+    popup: function ( conf ) {
+        console.log( 'closeOnSuccess: ', conf.closeOnSuccess );
+
+        this.closePopup();
+
+        _tpl_newPopup = '' +
+                '<div class="modal">' +
+                ' <div class="popup-outer"></div>' +
+                '</div>';
+
+        _tpl_popupInner = '' +
+                '<div class="popup">' +
+                ' <a href="javascript:;" class="x-popup remove"></a>' +
+                ' <h1></h1>' +
+                ' <p></p>' +
+                '</div>';
+
+        _tpl_button = '' +
+                '<a href="javascript:;" class="btn-ok">Ok</a>';
+
+        _tpl_checkbox = '' +
+                        '<div class="boxed">' +
+                        ' <input type="checkbox" id="popup-checkbox"><label></label>' +
+                        '</div>';
+
+        var renderOkButton = function ( options ) {
+            var filled_tpl = $(_tpl_button);
+            filled_tpl.attr("class","")
+                    .addClass( 'btn-ok' )
+                    .html("Ok");
+
+            if ( typeof options[ 'callback'] != 'undefined' ) {
+                filled_tpl.data( 'callback', options['callback'] )
+                        .attr( 'data-callback', options['callback'] );
+            }
+
+            if ( typeof options['txt'] != 'undefined' ) {
+                filled_tpl.html( options['txt'] );
+            }
+
+            if ( typeof options['context'] != 'undefined' ) {
+                filled_tpl.data( 'context', options['context'] )
+                        .attr( 'data-context', options['context'] );
+            }
+
+            return filled_tpl;
+        };
+
+        var renderCancelButton = function ( options ) {
+            var filled_tpl = $( _tpl_button );
+
+            filled_tpl.attr("class","")
+                    .addClass( 'btn-cancel' )
+                    .html("Cancel");
+
+            if ( typeof options['callback'] != 'undefined' ) {
+                filled_tpl.data( 'callback', options['callback'] )
+                        .attr( 'data-callback', options['callback'] );
+            }
+
+            if ( typeof options['context'] != 'undefined' ) {
+                filled_tpl.data( 'context', options['context'] )
+                        .attr( 'data-context', options['context'] );
+            }
+
+            if ( typeof options['txt'] != 'undefined' ) {
+                filled_tpl.html( options['txt'] );
+            }
+            return filled_tpl;
+        };
+
+        var renderButton = function ( options ){
+            var filled_tpl = $( _tpl_button );
+
+            if ( typeof options['callback'] != 'undefined' ) {
+                var params = '';
+
+                if ( typeof options['params'] != 'undefined' ) {
+                    params = options['params'];
+                }
+
+                filled_tpl.attr( 'onClick', "UI."+options['callback'] +"(\'"+params+"\');return false;" );
+            }
+
+            if ( typeof options['btn-type'] != 'undefined' ) {
+                filled_tpl.addClass('btn-'+options['btn-type']);
+            }
+
+            if ( typeof options['context'] != 'undefined' ) {
+                filled_tpl.data( 'context', options['context'] )
+                        .attr( 'data-context', options['context'] );
+            }
+
+            if ( typeof options['txt'] != 'undefined' ) {
+                filled_tpl.html( options['txt'] );
+            }
+            return filled_tpl;
+        };
+
+        var renderCheckbox = function ( options ) {
+            var filled_tpl = $( _tpl_checkbox );
+
+            if ( typeof options['checkbox_label'] != 'undefined' ) {
+                filled_tpl.find('label').html(options['checkbox_label']);
+            }
+            return filled_tpl;
+        };
+
+        var renderPopupInner = function ( options ) {
+            var filled_tpl = $( _tpl_popupInner );
+            if ( typeof options['type'] != 'undefined' ) {
+                switch ( options['type'] ) {
+                    case 'alert' :
+                        filled_tpl.addClass( 'popup-alert' );
+                        break;
+
+                    case 'confirm':
+                        filled_tpl.addClass( 'popup-confirm' );
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if ( typeof options['title'] != 'undefined' ) {
+                filled_tpl.find( 'h1' ).html( options['title'] );
+            }
+
+            if ( typeof options['content'] != 'undefined' ) {
+                filled_tpl.find( 'p' ).html( options['content'] );
+            }
+
+            return filled_tpl;
+        };
+
+        var renderPopup = function ( options ) {
+            var filled_tpl = $( _tpl_newPopup );
+
+            if ( typeof options['closeOnSuccess'] != 'undefined' ) {
+                filled_tpl.addClass( 'closeOnSuccess' );
+            }
+
+            if ( conf.closeClickingOutside ){
+                filled_tpl.find( '.popup-outer' ).addClass( 'closeClickingOutside' );
+            }
+
+            filled_tpl.attr( 'data-name', '' ).
+                    data( 'name', '' );
+
+            if ( typeof options['name'] != 'undefined' ) {
+                filled_tpl.attr( 'data-name', options['name'] ).
+                        data( 'name', options['name'] );
+            }
+
+            filled_tpl.append( renderPopupInner( options ) );
+
+            if ( typeof options['type'] != 'undefined' ) {
+                filled_tpl.attr( 'data-type', options['type'] ).
+                        data( 'type', options['type'] );
+                switch ( options['type'] ) {
+                    case 'alert' :
+                        filled_tpl.find( '.popup' )
+                                .append( renderOkButton( {
+                                            'context' : options['context'],
+                                            'callback': options['onConfirm'],
+                                            'txt': options['okTxt']
+                                        }
+                                )
+                        );
+                        break;
+                    case 'confirm':
+                    case 'confirm_checkbox' :
+                        filled_tpl.find( '.popup' )
+                                .addClass('confirm_checkbox')
+                                .addClass('popup-confirm')
+                                .append( renderCancelButton( {
+                                    'context' : options['context'],
+                                    'callback': options['onCancel'],
+                                    'txt': options['cancelTxt']
+                                } )
+                                ).append( renderOkButton( {
+                                    'context' : options['context'],
+                                    'callback': options['onConfirm'],
+                                    'txt': options['okTxt']
+                                })
+                        );
+
+                        APP.confirmCallbackFunction = (options.onConfirm) ? options.onConfirm : null;
+                        APP.cancelCallbackFunction = (options.onCancel) ? options.onCancel : null;
+                        APP.callerObject = (options.caller) ? options.caller : null;
+
+                        if ( options['type'] == 'confirm_checkbox' ) {
+                            filled_tpl.find( '.popup' )
+                                    .append( renderCheckbox( options ) );
+
+                            disableOk(filled_tpl);
+
+
+                            $('body').on('click','.modal input[type=checkbox]', function(){
+                                if($('#popup-checkbox').is(':checked')){
+                                    enableOk(filled_tpl);
+
+                                }
+                                else{
+                                    disableOk(filled_tpl);
+                                }
+                            })
+                        }
+                        break;
+
+                    case 'free':
+                        filled_tpl.find( '.popup' ).append(
+                                renderButton( {
+                                    'callback': this.callback,
+                                    'btn-type': this.type,
+                                    'params': this.params,
+                                    'txt': this.text
+                                } )
+                        );
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return filled_tpl;
+        };
+
+        var disableOk = function( context ){
+            var callback = context.find('.btn-ok' ).attr('data-callback');
+
+            context.find('.btn-ok' )
+                    .addClass('disabled' )
+                    .attr('disabled','disabled' )
+                    .removeAttr('data-callback' )
+                    .attr('data-callback-disabled', callback)
+                    .bind("click",UI.disableLink);
+        };
+
+        var enableOk = function ( context ) {
+            var callback = context.find('.btn-ok' ).attr('data-callback-disabled');
+            context.find('.btn-ok' )
+                    .removeClass('disabled' )
+                    .removeAttr('disabled')
+                    .removeAttr('data-callback-disabled' )
+                    .attr('data-callback', callback)
+                    .unbind('click', UI.disableLink);
+        };
+
+
+        newPopup = renderPopup( conf );
+
+        //newPopup = '<div class="modal' + ((conf.closeOnSuccess)? ' closeOnSuccess' : '') + '" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
+        //            '   <div class="popup-outer"></div>' +
+        //            '   <div class="popup' + ((conf.type == 'alert')? ' popup-alert' : (conf.type == 'confirm')? ' popup-confirm' : '') + '">' +
+        //            '       <a href="#" class="x-popup remove"></a>' +
+        //            '       <h1>' + conf.title + '</h1>' +
+        //            '       <p>' + conf.content + '</p>';
+        //if(conf.type == 'alert') {
+        //    newPopup += '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>Ok<\a>';
+        //} else if(conf.type == 'confirm') {
+        //    newPopup += renderCancelButton ({
+        //        callback : conf.onCancel,
+        //        context  : conf.context,
+        //        txt      : conf.cancelTxt
+        //    } ) +
+        //            '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +
+        //                     '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';
+        //    APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
+        //    APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
+        //    APP.callerObject = (conf.caller)? conf.caller : null;
+        //} else if(conf.type == 'free') {
+        //    var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
+        //    newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
+        //} else {
+        //    $.each(conf.buttons, function(index) {
+        //        var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
+        //        newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); ' + ((this.closeOnClick)? "$('.x-popup').click(); " : '') + 'return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
+        //    });
+        //}
+        //newPopup += '</div>';
+
+        $( 'body' ).append( newPopup );
+
+    },
+    closePopup: function () {
+        $( '.modal[data-type=view]' ).hide();
+        $( '.modal:not([data-type=view])' ).remove();
 //            $('.popup.hide, .popup-outer.hide').hide();
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
-    fitText: function( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ){
+    fitText: function ( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ) {
 
         if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;
         if ( typeof $( child ).attr( 'data-originalText' ) == 'undefined' ) {
@@ -262,7 +493,7 @@ console.log('closeOnSuccess: ', conf.closeOnSuccess);
             return false;
         }
 
-        if( typeof actualTextHi == 'undefined' && typeof actualTextLow == 'undefined' ){
+        if ( typeof actualTextHi == 'undefined' && typeof actualTextLow == 'undefined' ) {
 
             //we are in window.resize
             if ( originalText.match( /\[\.\.\.]/ ) ) {
@@ -274,61 +505,64 @@ console.log('closeOnSuccess: ', conf.closeOnSuccess);
         }
 
         actualTextHi = actualTextHi.substr( 1 );
-        actualTextLow = actualTextLow.substr( 0, actualTextLow.length -1 );
+        actualTextLow = actualTextLow.substr( 0, actualTextLow.length - 1 );
 
         child.text( actualTextLow + '[...]' + actualTextHi );
 
         var test = true;
         // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
-        while( container.height() >= limitHeight && $( window ).width() > 1024 && test == true ){
-             test = this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
+        while ( container.height() >= limitHeight && $( window ).width() > 1024 && test == true ) {
+            test = this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
         }
 
         return false;
 
     },
-    objectSize: function(obj) {
+    objectSize: function ( obj ) {
         var size = 0, key;
-        for (key in obj) {
-            if (obj.hasOwnProperty(key)) size++;
+        for ( key in obj ) {
+            if ( obj.hasOwnProperty( key ) ) size++;
         }
         return size;
     },
-    addCommas: function(nStr) {
+    addCommas: function ( nStr ) {
         nStr += '';
-        x = nStr.split('.');
+        x = nStr.split( '.' );
         x1 = x[0];
         x2 = x.length > 1 ? '.' + x[1] : '';
         var rgx = /(\d+)(\d{3})/;
-        while (rgx.test(x1)) {
-            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        while ( rgx.test( x1 ) ) {
+            x1 = x1.replace( rgx, '$1' + ',' + '$2' );
         }
         return x1 + x2;
     },
-	zerofill: function(i, l, s) {
-		var o = i.toString();
-		if (!s) {
-			s = '0';
-		}
-		while (o.length < l) {
-			o = s + o;
-		}
-		return o;
-	}
+    zerofill: function ( i, l, s ) {
+        var o = i.toString();
+        if ( !s ) {
+            s = '0';
+        }
+        while ( o.length < l ) {
+            o = s + o;
+        }
+        return o;
+    }
 };
 
-$.extend($.expr[":"], {
-    "containsNC": function(elem, i, match) {
-        return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+$.extend( $.expr[":"], {
+    "containsNC": function ( elem, i, match ) {
+        return (elem.textContent || elem.innerText || "").toLowerCase().indexOf( (match[3] || "").toLowerCase() ) >= 0;
     }
-});
+} );
 
-var _prum = [['id', '54fdb531abe53d014cfbfea5'],
-             ['mark', 'firstbyte', (new Date()).getTime()]];
-(function() {
-    var s = document.getElementsByTagName('script')[0]
-      , p = document.createElement('script');
+var _prum = [['id',
+    '54fdb531abe53d014cfbfea5'],
+    ['mark',
+        'firstbyte',
+        (new Date()).getTime()]];
+(function () {
+    var s = document.getElementsByTagName( 'script' )[0]
+            , p = document.createElement( 'script' );
     p.async = 'async';
     p.src = '//rum-static.pingdom.net/prum.min.js';
-    s.parentNode.insertBefore(p, s);
+    s.parentNode.insertBefore( p, s );
 })();

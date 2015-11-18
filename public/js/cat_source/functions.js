@@ -352,21 +352,21 @@ var re_gt = new RegExp(GTPLACEHOLDER, "g");
 function placehold_xliff_tags(segment) {
 	segment = segment.replace(/<(g\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
 	segment = segment.replace(/<(\/g)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
-	segment = segment.replace(/<(x.*?\/?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
-	segment = segment.replace(/<(bx.*?\/?])>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(ex.*?\/?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(bpt\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(\/bpt)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(ept\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(\/ept)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(ph\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(\/it)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(mrk\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
-	segment = segment.replace(/<(\/mrk)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER, segment);
+	segment = segment.replace(/<(x\s*.*?\/)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(bx\s*.*?\/)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(ex\s*.*?\/)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(bpt\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(\/bpt)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(ept\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(\/ept)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(ph\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(\/it)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(mrk\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+	segment = segment.replace(/<(\/mrk)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
 	return segment;
 }
 
@@ -459,6 +459,42 @@ function selectText(element) {
 		selection.removeAllRanges();
 		selection.addRange(range);
 	}
+}
+
+function runDownload() {
+    if( $('#downloadProject').hasClass('disabled') ) return false;
+
+    //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+    if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
+        APP.confirm({
+            name: 'confirmDownload',
+            cancelTxt: 'Fix errors',
+            onCancel: 'goToFirstError',
+            callback: 'continueDownload',
+            okTxt: 'Continue',
+            msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
+        });
+    } else {
+        UI.continueDownload();
+    }
+}
+
+function translationStatus(stats) {
+    var t = 'approved';
+    var app = parseFloat(stats.APPROVED);
+    var tra = parseFloat(stats.TRANSLATED);
+    var dra = parseFloat(stats.DRAFT);
+    var rej = parseFloat(stats.REJECTED);
+    if (tra)
+    t = 'translated';
+    if (dra)
+    t = 'draft';
+    if (rej)
+    t = 'draft';
+    if( !tra && !dra && !rej && !app ){
+        t = 'draft';
+    }
+    return t ;
 }
 
 function getSelectionHtml() {

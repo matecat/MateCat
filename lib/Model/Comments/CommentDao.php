@@ -8,6 +8,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
   const TYPE_COMMENT = 1 ;
   const TYPE_RESOLVE = 2 ;
 
+  const SOURCE_PAGE_REVISE = 2 ;
+  const SOURCE_PAGE_TRANSLATE = 2 ;
+
   public function saveComment( $input ) {
       if ($input->message_type == null) {
           $input->message_type = self::TYPE_COMMENT ;

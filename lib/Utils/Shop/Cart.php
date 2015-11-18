@@ -36,6 +36,11 @@ class Shop_Cart {
     protected $cartName;
 
     /**
+     * @var $redisHandler \Predis\Client
+     */
+    protected $redisHandler;
+
+    /**
      * Retrieve an instance of Cart identified by $cartName in a pool with singleton pattern
      *
      * @param String $cartName
@@ -57,6 +62,7 @@ class Shop_Cart {
      * @param $cartName
      */
     protected function __construct( $cartName ) {
+        $this->redisHandler = new \Predis\Client();
         $this->cartName = $cartName;
         if ( !isset ( $_SESSION[ $this->cartName ] ) ) {
             $_SESSION[ $this->cartName ] = array();
@@ -148,14 +154,13 @@ class Shop_Cart {
      * @param $item_id
      */
     public function delItem( $item_id ) {
-
         foreach ( $this->cart as $key => $item ) {
-            if ( $item[ 'id' ] == $item_id ) {
+            if ( strpos( $item[ 'id' ], $item_id ) !== false ) {
                 unset ( $this->cart[ $key ] );
             }
         }
-
     }
+
 
     /**
      * Clean cart content by removing all items

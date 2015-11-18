@@ -27,7 +27,17 @@
                            <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                            <input type="hidden" name="password" tal:attributes="value password" />
                            <input type="hidden" name="download_type" value="all" />
-                           <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'Download Translation' : 'PREVIEW'" />
+
+                           <!-- Input button duplicated to allow `disabled` attribute to me missing completely -->
+                           <input type="button" class="${header/mainButtonClass}"
+                              id="${header/mainButtonId}" value="${header/mainButtonLabel}"
+                              tal:condition="header/mainButtonEnabled" />
+
+                           <input type="button" class="${header/mainButtonClass}"
+                              id="${header/mainButtonId}" value="${header/mainButtonLabel}"
+                              tal:condition="not: header/mainButtonEnabled" disabled="disabled" />
+
+
                        </form>
                 </a>
                 <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -45,17 +55,22 @@
                         </li>
 
                         <li>
-                            <a class="originalDownload" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&filename=${downloadFileName}.zip&download_type=all" target="_blank" >
+                            <a class="originalDownload" title="ORIGINAL" alt="ORIGINAL" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&filename=${downloadFileName}.zip&download_type=all" target="_blank" >
                                 <span class="icon-download"></span>ORIGINAL
                             </a>
                         </li>
 
-                        <li>
+                        <li tal:condition="php: INIT::$LEGACY_CONVERSION !== false">
                             <a class="sdlxliff" title="Export SDLXLIFF" alt="Export SDLXLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank" >
                                 <span class="icon-download"></span>EXPORT SDLXLIFF
                             </a>
                         </li>
                         <li>
+                            <a class="tmx" title="Export job TMX for QA" alt="Export job TMX for QA" href="/TMX/${jid}/${password}" target="_blank" >
+                                <span class="icon-download"></span>EXPORT JOB TMX
+                            </a>
+                        </li>
+                        <li tal:condition="php: INIT::$LEGACY_CONVERSION !== false">
                             <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&filename=${downloadFileName}.zip&download_type=omegat&forceXliff=1">
                                 <span class="icon-download"></span>EXPORT OMEGAT
                             </a>
@@ -64,6 +79,7 @@
                     </ul>
                 </div>
             </li>
+
             <li id="notifbox" class="notific" title="Well done, no errors found!">
                 <a id="point2seg" href="#"><span class="numbererror"></span></a>
             </li>

@@ -3,6 +3,7 @@
 
 class INIT {
 
+    public static $ENV ;
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
@@ -63,28 +64,17 @@ class INIT {
     public static $REFERENCE_REPOSITORY;
     public static $DQF_ENABLED = false;
 
-
-    public static $LONGHORN_SERVER = false;
-    public static $LONGHORN_OFFICE_SERVER_URL;
-    public static $LONGHORN_OFFICE_SERVER_PORT;
-    public static $LONGHORN_ANT_PATH;
-
-    public static $LONGHORN_PIPELINE_PATH;
-    public static $LONGHORN_SEGMENTATION_PATH;
-    public static $LONGHORN_CONFIGURATION_PATH;
-
-
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
     public static $AUTHCOOKIENAME = 'matecat_login_v2';
-    public static $SUPPORT_MAIL = 'the owner of this Matecat instance';//default string is 'the owner of this Matecat instance'
+    public static $SUPPORT_MAIL = 'the owner of this MateCat instance';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
-    public static $MAX_UPLOAD_TMX_FILE_SIZE = 104857600;    // 100 * 1024 * 1024; // bytes
+    public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
@@ -130,6 +120,7 @@ class INIT {
      *
      */
     public static $CONVERSION_ENABLED = false;
+    public static $USE_ONLY_STABLE_CONVERTERS = true;
 
     /**
      * The MateCat Version
@@ -189,6 +180,9 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
 
+    public static $LEGACY_CONVERSION = false;
+    public static $UNLOCKABLE_TAGS = false;
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
@@ -201,19 +195,16 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-    }
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if( getenv( 'LEGACY_CONVERSION' ) !== false ){
+            self::$LEGACY_CONVERSION = true;
+        }
 
-    public static $LONGHORN_CONVERTIBLE_EXTENSIONS = array(
-            "doc"  => "docx",
-            "dot"  => "docx",
-            "xls"  => "xlsx",
-            "xlt"  => "xlsx",
-            "xlsb" => "xlsx",
-            "xlw"  => "xlsx",
-            "ppt"  => "pptx",
-            "pot"  => "pptx",
-            "pps"  => "pptx"
-    );
+        if ( getenv( 'UNLOCKABLE_TAGS' ) !== false ) {
+            self::$UNLOCKABLE_TAGS = true;
+        }
+
+    }
 
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
@@ -222,73 +213,83 @@ class INIT {
                     'doc'  => array( '', '', 'extdoc' ),
                     'dot'  => array( '', '', 'extdoc' ),
                     'docx' => array( '', '', 'extdoc' ),
-                    'dotx' => array( '', '', 'extdoc' ),
                     'docm' => array( '', '', 'extdoc' ),
+                    'dotx' => array( '', '', 'extdoc' ),
                     'dotm' => array( '', '', 'extdoc' ),
                     'rtf'  => array( '', '', 'extdoc' ),
                     'odt'  => array( '', '', 'extdoc' ),
-                    'sxw'  => array( '', '', 'extdoc' ),
-                    'txt'  => array( '', '', 'exttxt' ),
+                    'ott'  => array( '', '', 'extdoc' ),
                     'pdf'  => array( '', '', 'extpdf' ),
+                    'txt'  => array( '', '', 'exttxt' ),
                     'xls'  => array( '', '', 'extxls' ),
                     'xlt'  => array( '', '', 'extxls' ),
-                    'xlsm' => array( '', '', 'extxls' ),
                     'xlsx' => array( '', '', 'extxls' ),
+                    'xlsm' => array( '', '', 'extxls' ),
                     'xltx' => array( '', '', 'extxls' ),
+                    'xltm' => array( '', '', 'extxls' ),
                     'ods'  => array( '', '', 'extxls' ),
-                    'sxc'  => array( '', '', 'extxls' ),
+                    'ots'  => array( '', '', 'extxls' ),
                     'csv'  => array( '', '', 'extxls' ),
-                    'pot'  => array( '', '', 'extppt' ),
-                    'pps'  => array( '', '', 'extppt' ),
+                    'tsv'  => array( '', '', 'extxls' ),
                     'ppt'  => array( '', '', 'extppt' ),
-                    'potm' => array( '', '', 'extppt' ),
-                    'potx' => array( '', '', 'extppt' ),
-                    'ppsm' => array( '', '', 'extppt' ),
-                    'ppsx' => array( '', '', 'extppt' ),
-                    'pptm' => array( '', '', 'extppt' ),
+                    'pps'  => array( '', '', 'extppt' ),
+                    'pot'  => array( '', '', 'extppt' ),
                     'pptx' => array( '', '', 'extppt' ),
+                    'pptm' => array( '', '', 'extppt' ),
+                    'ppsx' => array( '', '', 'extppt' ),
+                    'ppsm' => array( '', '', 'extppt' ),
+                    'potx' => array( '', '', 'extppt' ),
+                    'potm' => array( '', '', 'extppt' ),
                     'odp'  => array( '', '', 'extppt' ),
-                    'sxi'  => array( '', '', 'extppt' ),
+                    'otp'  => array( '', '', 'extppt' ),
                     'xml'  => array( '', '', 'extxml' ),
                     'zip'  => array( '', '', 'extzip' ),
-                //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
                     'htm'   => array( '', '', 'exthtm' ),
                     'html'  => array( '', '', 'exthtm' ),
                     'xhtml' => array( '', '', 'exthtm' ),
-                    'xml'   => array( '', '', 'extxml' )
+                    'xml'   => array( '', '', 'extxml' ),
+                    'dtd'   => array( '', '', 'extxml' ),
+//                    'php'   => array( '', '', 'extxml' ),
+                    'json'  => array( '', '', 'extxml'),
+                    'yaml'   => array( '', '', 'extxml' )
+            ),
+            'Scanned Files'                 => array(
+                    'pdf'   => array( '', '', 'extpdf' ),
+                    'bmp'   => array( '', '', 'extimg' ),
+                    'png'   => array( '', '', 'extimg' ),
+                    'gif'   => array( '', '', 'extimg' ),
+                    'jpeg'   => array( '', '', 'extimg' ),
+                    'tiff'  => array( '', '', 'extimg' )
             ),
             "Interchange Formats" => array(
                     'xliff'    => array( 'default', '', 'extxif' ),
                     'sdlxliff' => array( 'default', '', 'extxif' ),
                     'tmx'      => array( '', '', 'exttmx' ),
                     'ttx'      => array( '', '', 'extttx' ),
-                    'itd'      => array( '', '', 'extitd' ),
-                    'xlf'      => array( 'default', '', 'extxlf' )
+                    'xlf'      => array( 'default', '', 'extxlf' ),
             ),
             "Desktop Publishing"  => array(
-                //                'fm' => array('', "Try converting to MIF"),
                     'mif'  => array( '', '', 'extmif' ),
-                    'inx'  => array( '', '', 'extidd' ),
                     'idml' => array( '', '', 'extidd' ),
-                    'icml' => array( '', '', 'extidd' ),
-                //                'indd' => array('', "Try converting to INX"),
-                    'xtg'  => array( '', '', 'extqxp' ),
-                    'tag'  => array( '', '', 'exttag' ),
+                    'icml' => array( '', '', 'exticml' ),
                     'xml'  => array( '', '', 'extxml' ),
                     'dita' => array( '', '', 'extdit' )
             ),
             "Localization"        => array(
                     'properties'  => array( '', '', 'extpro' ),
-                    'rc'          => array( '', '', 'extrcc' ),
                     'resx'        => array( '', '', 'extres' ),
                     'xml'         => array( '', '', 'extxml' ),
+                    'sxml'        => array( '', '', 'extxml' ),
+                    'txml'        => array( '', '', 'extxml' ),
                     'dita'        => array( '', '', 'extdit' ),
-                    'sgm'         => array( '', '', 'extsgm' ),
-                    'sgml'        => array( '', '', 'extsgm' ),
                     'Android xml' => array( '', '', 'extxml' ),
-                    'strings'     => array( '', '', 'extstr' )
+                    'strings'     => array( '', '', 'extstr' ),
+                    'srt'         => array( '', '', 'extsrt' ),
+                    'wix'         => array( '', '', 'extwix' ),
+                    'po'          => array( '', '', 'extpo'  ),
+                    'g'           => array( '', '', 'extg' )
             )
     );
 
@@ -296,6 +297,18 @@ class INIT {
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
     );
+
+    public static $LEGACY_CONVERSION_SUPPORT = array(
+            'sxml'
+    );
+
+    /*
+     * The maximum filename length accepted.
+     * Usually OSes accept names of 255 characters at most.
+     * During the execution a hash string can be prepended to the filename.
+     * So we reserve 45 chars for internal purposes.
+     */
+    public static $MAX_FILENAME_LENGTH = 210;
 
     /**
      * Initialize the Class Instance

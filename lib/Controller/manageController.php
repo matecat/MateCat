@@ -46,14 +46,13 @@ class manageController extends viewController {
 		$this->template->languages = $this->lang_handler->getEnabledLanguages('en');
 		$this->template->filtered = $this->filter_enabled;
 		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
-		$this->template->logged_user = $this->logged_user['short'];
+		$this->template->logged_user = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
 		$this->template->build_number = INIT::$BUILD_NUMBER;
         $this->template->basepath = INIT::$BASEURL;
         $this->template->hostpath = INIT::$HTTPHOST;
         $this->template->v_analysis = var_export( INIT::$VOLUME_ANALYSIS_ENABLED, true );
+		$this->template->legacy_conversion = ( INIT::$LEGACY_CONVERSION !== false );
 
 	}
 
 }
-
-?>

@@ -20,7 +20,7 @@
     <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
     <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
 
-    <meta name="description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!"/>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
     <meta property="og:title" content="Translate a file with MateCat" />
     <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
@@ -80,6 +80,7 @@
         <ul class="pull-right" id="menu-site">
             <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
             <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+            <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
             <li><a href="https://www.matecat.com/about/">About</a></li>
             <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
             <li><a href="https://www.matecat.com/support/">Support</a></li>
@@ -453,9 +454,10 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extxls"></span>
             {% mimeok=1} %}
 			
-			{% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
-					
-            <span class="extxml"></span>
+		    {% if ( (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type =="application/x-xml" ) ) { %}
+                {% if (/resx/.test( o.files[i].name.split('.').pop() ) == false) { %}
+                <span class="extxml"></span>
+                {% } %}
             {% mimeok=1} %}
 			
 			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
@@ -477,7 +479,9 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extqxp"></span>
             {% mimeok=1} %}
 			
-		
+			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
 			
 			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extttx"></span>
@@ -601,10 +605,11 @@ Connect your TAUS DQF account to measure productivity.
 					
             <span class="extxls"></span>
             {% mimeok=1} %}
-			
+
 			{% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
-					
-            <span class="extxml"></span>
+                {% if (/resx/.test( o.files[i].name.split('.').pop() ) == false) { %}
+                <span class="extxml"></span>
+                {% } %}
             {% mimeok=1} %}
 			
 			
@@ -626,8 +631,12 @@ Connect your TAUS DQF account to measure productivity.
 					
             <span class="extqxp"></span>
             {% mimeok=1} %}
-			
-		
+
+
+			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
+
 			
 			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extttx"></span>
@@ -644,12 +653,12 @@ Connect your TAUS DQF account to measure productivity.
 			 {% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extrcc"></span>
             {% mimeok=1} %}
-			
+
 			{% if (/resx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extres"></span>
             {% mimeok=1} %}
-			
-			{% if (/sgml/.test( o.files[i].name.split('.').pop() ) ) { %}
+
+            {% if (/sgml/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extsgl"></span>
             {% mimeok=1} %}
 			
@@ -924,6 +933,7 @@ Connect your TAUS DQF account to measure productivity.
 
 <div id="uploadCallback"></div>
 
+
 <script type="text/javascript">
 
     // script per il funzionamento del dropdown menu del profilo utente
@@ -974,8 +984,70 @@ Connect your TAUS DQF account to measure productivity.
 
 </script>
 
-<div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
+<div metal:use-macro="cookiebanner.html/cookieBanner"/>
+<!-- SnapEngage -->
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+<!-- // SnapEngage -->
+<!-- FB Remarketing -->
+<script>(function() {
+    var _fbq = window._fbq || (window._fbq = []);
+    if (!_fbq.loaded) {
+        var fbds = document.createElement('script');
+        fbds.async = true;
+        fbds.src = '//connect.facebook.net/en_US/fbds.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(fbds, s);
+        _fbq.loaded = true;
+    }
+    _fbq.push(['addPixelId', '1445002372422861']);
+})();
+window._fbq = window._fbq || [];
+window._fbq.push(['track', 'PixelInitialized', {}]);
+</script>
+<noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?id=1445002372422861&amp;ev=PixelInitialized" /></noscript>
+<!-- // FB remarketing -->
+<!-- Google Remarketing -->
+<script type="text/javascript">
+    <!-- /* <![CDATA[*/ -->
+    var google_conversion_id = 961218439;
+    var google_custom_params = window.google_tag_params;
+    var google_remarketing_only = true;
+    <!-- /*]]> */ -->
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+    <div style="display:inline;">
+        <img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/961218439/?value=0&amp;guid=ON&amp;script=0"/>
+    </div>
+</noscript>
+<!-- // Google Remarketing -->
+<!-- Google Analytics -->
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-28800161-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+<!-- // Google Analytics -->
+<!-- Clickmeter code -->
+<img style='width:0;height:0;display:none;background:none;' src='https://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
+<!-- //Clickmeter code -->
+<!-- Twitter code -->
+<script src="//platform.twitter.com/oct.js" type="text/javascript"></script>
+<script type="text/javascript">
+    twttr.conversion.trackPid( 'l5dle' );
+</script>
+<noscript>
+    <img height="1" width="1" style="display:none;" alt="" src="https://analytics.twitter.com/i/adsct?txn_id=l5dle&p_id=Twitter"/>
+    <img height="1" width="1" style="display:none;" alt="" src="//t.co/i/adsct?txn_id=l5dle&p_id=Twitter"/>
+</noscript>
+<!-- // Twitter code -->
 </body>
 
 </html>

@@ -2,25 +2,25 @@
 
 class XliffSAXTranslationReplacer {
 
-    private $originalFP;
+    protected $originalFP;
 
-    private $inTU = false;//flag to check whether we are in a <trans-unit>
-    private $inTarget = false;//flag to check whether we are in a <target>, to ignore everything
-    private $isEmpty = false; //flag to check whether we are in an empty tag (<tag/>)
+    protected $inTU = false;//flag to check whether we are in a <trans-unit>
+    protected $inTarget = false;//flag to check whether we are in a <target>, to ignore everything
+    protected $isEmpty = false; //flag to check whether we are in an empty tag (<tag/>)
 
-    private $CDATABuffer = ""; //buffer for special tag
-    private $bufferIsActive = false; //buffer for special tag
+    protected $CDATABuffer = ""; //buffer for special tag
+    protected $bufferIsActive = false; //buffer for special tag
 
-    private $offset = 0;//offset for SAX pointer
-    private $outputFP;//output stream pointer
-    private $currentBuffer;//the current piece of text it's been parsed
-    private $len;//length of the currentBuffer
-    private $segments; //array of translations
-    private $currentId;//id of current <trans-unit>
+    protected $offset = 0;//offset for SAX pointer
+    protected $outputFP;//output stream pointer
+    protected $currentBuffer;//the current piece of text it's been parsed
+    protected $len;//length of the currentBuffer
+    protected $segments; //array of translations
+    protected $currentId;//id of current <trans-unit>
 
-    private $target_lang;
+    protected $target_lang;
 
-    private $sourceInTarget;
+    protected $sourceInTarget;
 
     public function __construct( $originalXliffFilename, $segments, $trg_lang = null, $outputFile = null ) {
 
@@ -58,7 +58,7 @@ class XliffSAXTranslationReplacer {
     public function replaceTranslation() {
 
         //write xml header
-        fwrite( $this->outputFP, '<?xml version="1.0" encoding="utf-8"?>' );
+        fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );
 
         //create parser
         $xml_parser = xml_parser_create( 'UTF-8' );
@@ -79,7 +79,7 @@ class XliffSAXTranslationReplacer {
                preprocess file
              */
             // obfuscate entities because sax automatically does html_entity_decode
-            $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+             $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
 
             $lastByte = $temporary_check_buffer[ strlen( $temporary_check_buffer ) - 1 ];
 
@@ -139,7 +139,7 @@ class XliffSAXTranslationReplacer {
     /*
        callback for tag open event
      */
-    private function tagOpen( $parser, $name, $attr ) {
+    protected function tagOpen( $parser, $name, $attr ) {
 
         //check if we are entering into a <trans-unit>
         if ( 'trans-unit' == $name ) {
@@ -238,7 +238,7 @@ class XliffSAXTranslationReplacer {
     /*
        callback for tag close event
      */
-    private function tagClose( $parser, $name ) {
+    protected function tagClose( $parser, $name ) {
 
         $tag = '';
 
@@ -264,7 +264,36 @@ class XliffSAXTranslationReplacer {
 
                     //init translation
                     $translation = '';
-                    foreach ( $id_list as $id ) {
+
+                    //we must reset the lastMrkId found because this is a new segment.
+                    $lastMrkId = -1;
+
+                    foreach ( $id_list as $pos => $id ) {
+
+                        /*
+                         * This routine works to respect the positional orders of markers.
+                         * In every cycle we check if the mrk of the segment is below or equal the last one.
+                         * When this is true, means that the mrk id belongs to the next segment with the same internal_id
+                         * so we MUST stop to apply markers and translations
+                         *
+                         * Begin:
+                         * pre-assign zero to the new mrk if this is the first one ( in this segment )
+                         * If it is null leave it NULL
+                         */
+                        if( (int) $this->segments[ $id ][ "mrk_id" ] < 0 && $this->segments[ $id ][ "mrk_id" ] !== null ){
+                            $this->segments[ $id ][ "mrk_id" ] = 0;
+                        }
+
+                        /*
+                         * WARNING:
+                         * For those seg-source that does'nt have a mrk ( having a mrk id === null )
+                         * ( null <= -1 ) === true
+                         * so, cast to int
+                         */
+                        if( (int) $this->segments[ $id ][ "mrk_id" ] <= $lastMrkId ) {
+                            break;
+                        }
+
                         $seg = $this->segments[ $id ];
 
                         //delete translations so the prepareSegment
@@ -274,10 +303,18 @@ class XliffSAXTranslationReplacer {
                         }
 
                         $translation = $this->prepareSegment( $seg, $translation );
+
+                        /*
+                         * WARNING: this unset needs to manage the duplicated Trans-unit IDs
+                         */
+                        unset(  $this->segments[ 'matecat|' . $this->currentId ][ $pos ] );
+
+                        $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
+
                     }
 
                     //append translation
-                    $tag = "<target>$translation</target>";
+                    $tag = "<target xml:lang=\"" . strtolower( $this->target_lang ) . "\">$translation</target>";
                 }
 
                 //signal we are leaving a target
@@ -323,7 +360,7 @@ class XliffSAXTranslationReplacer {
     /*
        callback for CDATA event
      */
-    private function characterData( $parser, $data ) {
+    protected function characterData( $parser, $data ) {
         //don't write <target> data
         if ( !$this->inTarget && !$this->bufferIsActive ) {
 
@@ -339,7 +376,7 @@ class XliffSAXTranslationReplacer {
     /*
        postprocess escaped data and write to disk
      */
-    private function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
+    protected function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
         //postprocess string
         $data = preg_replace( "/#%(.*?)#%/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
@@ -356,14 +393,11 @@ class XliffSAXTranslationReplacer {
     /*
        prepare segment tagging for xliff insertion
      */
-    private function prepareSegment( $seg, $transunit_translation = "" ) {
+    protected function prepareSegment( $seg, $trans_unit_translation = "" ) {
         $end_tags = "";
 
-//        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
-//        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
-//        We don't need transform/sanitize from wiew to xliff because the values comes from Database
-
-        //QA non sense for source/source check until source can be changed. For now SKIP
+        //We don't need transform/sanitize from wiew to xliff because the values comes from Database
+        //QA non sense for source/source check, until source can be changed. For now SKIP
         if ( is_null( $seg [ 'translation' ] ) || $seg [ 'translation' ] == '' ) {
             $translation = $seg [ 'segment' ];
         } else {
@@ -381,13 +415,13 @@ class XliffSAXTranslationReplacer {
 
         }
 
-        if (!empty($seg['mrk_id'])) {
-            $translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
+        if ( $seg['mrk_id'] !== null ) {
+            $translation = "<mrk mid=\"" . $seg['mrk_id'] . "\" mtype=\"seg\">" . $seg['mrk_prev_tags'] . $translation . $seg['mrk_succ_tags'] . "</mrk>";
         }
 
-        $transunit_translation .= $seg[ 'prev_tags' ] . $translation . $end_tags . $seg[ 'succ_tags' ];
+        $trans_unit_translation .= $seg[ 'prev_tags' ] . $translation . $end_tags . $seg[ 'succ_tags' ];
 
-        return $transunit_translation;
+        return $trans_unit_translation;
 
     }
 

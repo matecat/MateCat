@@ -54,17 +54,16 @@ class ConversionHandler {
 
             $fileType = DetectProprietaryXliff::getInfo( $file_path );
 
-            if ( DetectProprietaryXliff::isXliffExtension() ) {
+            if ( DetectProprietaryXliff::isXliffExtension() || DetectProprietaryXliff::getMemoryFileType() ) {
 
                 if ( INIT::$CONVERSION_ENABLED ) {
 
                     //conversion enforce
                     if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
 
-                        //ONLY IDIOM is forced to be converted
-                        //if file is not proprietary like idiom AND Enforce is disabled
+                        //if file is not proprietary AND Enforce is disabled
                         //we take it as is
-                        if ( !$fileType[ 'proprietary' ] || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
+                        if ( !$fileType[ 'proprietary' ] || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ] = 1; // OK for client
 
                             //This file has to be linked to cache!
@@ -73,9 +72,13 @@ class ConversionHandler {
 
                     } else {
 
-                        //if conversion enforce is active
-                        //we force all xliff files but not files produced by SDL Studio because we can handle them
-                        if ( $fileType[ 'proprietary_short_name' ] == 'trados' || $fileType[ 'info' ][ 'extension' ] == 'tmx' ) {
+                        // if conversion enforce is active
+                        // we force all xliff files but not files produced by
+                        // SDL Studio or by the MateCAT converters, because we
+                        // can handle them
+                        if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter'
+                                || $fileType[ 'proprietary_short_name' ] == 'trados'
+                                || DetectProprietaryXliff::getMemoryFileType() ) {
                             $this->result[ 'code' ]     = 1; // OK for client
                             $this->result[ 'errors' ][] = array( "code" => 0, "message" => "OK" );
 
@@ -124,6 +127,11 @@ class ConversionHandler {
         //get storage object
         $fs = new FilesStorage();
 
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if ( INIT::$LEGACY_CONVERSION !== false ) {
+            INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
+        }
+
         //if already present in database cache get the converted without convert it again
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
@@ -139,7 +147,20 @@ class ConversionHandler {
         if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
-            $converter = new FileFormatConverter( $this->segmentation_rule );
+            // By default, use always the new converters...
+            $converterVersion = Constants_ConvertersVersions::LATEST;
+            if ( $this->segmentation_rule !== null ) {
+                // ...but new converters don't support custom segmentation rules.
+                // if $this->segmentation_rule is set use the old ones.
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
+            }
+
+            //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+            if( INIT::$LEGACY_CONVERSION !== false ){
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
+            }
+
+            $converter = new FileFormatConverter($converterVersion);
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );
@@ -184,7 +205,6 @@ class ConversionHandler {
                    put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
                    (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
                  */
-
                 //save in cache
                 $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
 

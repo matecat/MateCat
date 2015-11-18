@@ -124,10 +124,6 @@ class copyAllSource2TargetController extends ajaxController {
                 )
         );
 
-        if ( $result !== true ) {
-            throw new Exception( $db->error, -1 );
-        }
-
         return $db->affected_rows;
     }
 
@@ -166,7 +162,7 @@ class copyAllSource2TargetController extends ajaxController {
         if ( !function_exists( 'array_column' ) ) {
             $result = Utils::array_column( $result, 'id' );
         } else {
-            $result = array_column( $result, 'id' );
+            $result = Utils::array_column( $result, 'id' );
         }
 
         return $result;

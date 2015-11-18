@@ -1,0 +1,23 @@
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
+    backupGlobals="false"
+    backupStaticAttributes="false"
+    bootstrap="test/test_helper.php"
+    colors="true"
+    verbose="true"
+    reportUselessTests="true"
+    >
+    <php>
+        <includePath>test/support</includePath>
+        <includePath>test/support/lib</includePath>
+    </php>
+    <testsuites>
+        <testsuite name="cURL based tests">
+            <directory>test/integration</directory>
+        </testsuite>
+        <testsuite name="Unit tests">
+            <directory>test/unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -9,10 +9,12 @@ class FileFormatConverter {
     private $port = "8732"; //port the convertrs listen to
     private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
     private $fromXliffFunction = "AutomationService/xliff2original"; //action string for the converters to convert to original
+    const testFunction = "test"; // action check connection
     private $opt = array(); //curl options
     private $lang_handler; //object that exposes language utilities
     private $storage_lookup_map;
-    private $segmentation_rule;
+
+    private $converterVersion;
 
     private $conversionObject;
 
@@ -30,6 +32,145 @@ class FileFormatConverter {
     //http://stackoverflow.com/questions/2222643/php-preg-replace
     private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
 
+
+    /**
+     * Create a new FileFormatConverter, using old or new converters.
+     * This function looks for converters in the 'converters' table in the db.
+     * $converterVersion can be "legacy", "latest", or something like "1.0.0".
+     * In the first case legacy converters will be used; in the second case,
+     * the latest version of new converters will be used; in the third case,
+     * this function will look for the converters with the provided version,
+     * and if not found will use the converters with higher but closest version.
+     * Version check is done on the conversion_api_version field of the
+     * converters db table; new converters are expected to have a value like
+     * "open 1.0.0".
+     */
+    public function __construct($converterVersion = null) {
+        $this->converterVersion = $converterVersion;
+
+        $this->opt[ 'httpheader' ] = array( "Content-Type:multipart/form-data;charset=UTF-8" );
+        $this->lang_handler        = Langs_Languages::getInstance();
+
+        $this->conversionObject = new ArrayObject( array(
+            'ip_machine'      => null,
+            'ip_client'       => null,
+            'path_name'       => null,
+            'file_name'       => null,
+            'path_backup'     => null,
+            'file_size'       => 0,
+            'direction'       => null,
+            'error_message'   => null,
+            'src_lang'        => null,
+            'trg_lang'        => null,
+            'status'          => 'ok',
+            'conversion_time' => 0
+        ), ArrayObject::ARRAY_AS_PROPS );
+
+        // Get converters instances list from database,
+        $db         = Database::obtain();
+        // The base query to obtain the converters
+        $baseQuery =
+            'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
+            . ' FROM converters'
+            . ' WHERE status_active = 1 AND status_offline = 0';
+
+        // Complete the $baseQuery according to the converter's version
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
+            // Retrieve only old converters
+            $query = $baseQuery
+                . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                . ' AND conversion_api_version NOT LIKE "open %"';
+
+        } else {
+            // Here we use new converters
+
+            if ($this->converterVersion == Constants_ConvertersVersions::LATEST) {
+                // Get the converters with the latest version
+                $query = $baseQuery . ' AND conversion_api_version = ('
+                    . 'SELECT MAX(conversion_api_version)'
+                    . ' FROM converters'
+                    . ' WHERE conversion_api_version LIKE "open %"'
+                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                    . ' AND status_active = 1 AND status_offline = 0'
+                    . ')';
+
+            } else {
+                $closest_conversion_api_version = self::getClosestConversionApiVersion($this->converterVersion);
+                $query = $baseQuery
+                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+                    . ' AND conversion_api_version = "' . $closest_conversion_api_version . '"';
+            }
+        }
+
+        $converters = $db->fetch_array( $query );
+
+        // SUUUPER ugly, those variables should not be static at all! No way!
+        // But now the class works around these 3 static variables, and a
+        // refactoring is too risky. Enter this patch: I empty these 3 vars
+        // every time I create a new FileFormatConverter to be sure that new
+        // converters never mix with old converters
+        self::$converters = array();
+        self::$Storage_Lookup_IP_Map = array();
+        self::$converter2segmRule = array();
+
+        foreach ( $converters as $converter_storage ) {
+            self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
+            self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
+            self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
+        }
+
+//        self::$converters = array('10.30.1.32' => 1);//for debugging purposes
+//        self::$Storage_Lookup_IP_Map = array('10.30.1.32' => '10.30.1.32');//for debugging purposes
+
+        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
+
+    }
+
+    /**
+     * Returns the value of conversion_api_version for the provided version.
+     * If no converters in db match the provided version, use the higher closest
+     * converter version.
+     */
+    private static function getClosestConversionApiVersion($version) {
+        $db = Database::obtain();
+
+        // First, obtain a list of all the versions sorted from oldest
+        // to newest
+        $query = 'SELECT DISTINCT conversion_api_version'
+            . ' FROM converters'
+            . ' WHERE conversion_api_version LIKE "open %"'
+            . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
+            . ' AND status_active = 1 AND status_offline = 0'
+            . ' ORDER BY conversion_api_version ASC';
+        $db_list = $db->fetch_array( $query );
+
+        if (empty($db_list)) {
+            throw new Exception("There are no new converters enabled in the converters table!");
+        }
+
+        // Look for the exact version required, or at least the
+        // higher but closest version we have in db.
+        foreach ($db_list as $db_row) {
+            $examined_version = $db_row['conversion_api_version'];
+            if ($examined_version >= "open $version") {
+                // We found the same version, or we are on the
+                // closest higher one.
+                $candidate_version = $examined_version;
+                break;
+            }
+        }
+
+        if (empty($candidate_version)) {
+            // The previous loop ended, but all versions were
+            // lower than the one provided: as fallback, use the
+            // highest version we have, i.e. the last examined.
+            $candidate_version = $examined_version;
+        }
+
+        return $candidate_version;
+    }
+
+
     /**
      * Set more curl option for conversion call ( fw/bw )
      *
@@ -39,45 +180,6 @@ class FileFormatConverter {
         $this->opt = array_merge( $this->opt, $options );
     }
 
-    public function __construct() {
-
-        if ( !class_exists( "INIT" ) ) {
-            include_once( "../../inc/config.inc.php" );
-            Bootstrap::start();
-        }
-        $this->opt[ 'httpheader' ] = array( "Content-Type:multipart/form-data;charset=UTF-8" );
-        $this->lang_handler        = Langs_Languages::getInstance();
-
-        $this->conversionObject = new ArrayObject( array(
-                'ip_machine'      => null,
-                'ip_client'       => null,
-                'path_name'       => null,
-                'file_name'       => null,
-                'path_backup'     => null,
-                'file_size'       => 0,
-                'direction'       => null,
-                'error_message'   => null,
-                'src_lang'        => null,
-                'trg_lang'        => null,
-                'status'          => 'ok',
-                'conversion_time' => 0
-        ), ArrayObject::ARRAY_AS_PROPS );
-
-        $db         = Database::obtain();
-        $converters = $db->fetch_array( "SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule FROM converters WHERE status_active = 1 AND status_offline = 0" );
-
-        foreach ( $converters as $converter_storage ) {
-            self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
-            self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
-            self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
-        }
-
-//        self::$converters = array('10.11.0.98' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.11.0.98' => '10.11.0.99');//for debugging purposes
-
-        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
-
-    }
 
     //add UTF-8 BOM
     public function addBOM( $string ) {
@@ -284,7 +386,15 @@ class FileFormatConverter {
             throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
         }
 
-        if ( $this->checkOpenService( $url ) ) {
+        // The new converters need a new way to check if they are
+        // online, so we have two different methods for this task.
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
+            $isServiceAvailable = $this->checkOpenLegacyService($url);
+        } else {
+            $isServiceAvailable = $this->checkOpenService();
+        }
+
+        if ( $isServiceAvailable ) {
 
             $ch = curl_init();
 
@@ -332,41 +442,56 @@ class FileFormatConverter {
         if ( !file_exists( $file_path ) ) {
             throw new Exception( "Conversion Error : the file <$file_path> not exists" );
         }
-        $fileContent = file_get_contents( $file_path );
-        $extension   = FilesStorage::pathinfo_fix( $file_path, PATHINFO_EXTENSION );
+
         $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
-        if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
-            $encoding = mb_detect_encoding( $fileContent );
+        $extension = FilesStorage::pathinfo_fix($file_path, PATHINFO_EXTENSION);
 
-            //in case of .strings, they may be in UTF-16
-            if ( strtoupper( $extension ) == 'STRINGS' ) {
-                //use this function to convert stuff
-                $convertedFile = CatUtils::convertEncoding( 'UTF-8', $fileContent );
+        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
+            // Legacy converters need encode sanitize
 
-                //retrieve new content
-                $fileContent = $convertedFile[ 1 ];
-            } else {
-                if ( $encoding != 'UTF-8' ) {
-                    $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
+            $fileContent = file_get_contents($file_path);
+            if (strtoupper($extension) == 'TXT' or strtoupper($extension) == 'STRINGS') {
+                $encoding = mb_detect_encoding($fileContent);
+
+                //in case of .strings, they may be in UTF-16
+                if (strtoupper($extension) == 'STRINGS') {
+                    //use this function to convert stuff
+                    $convertedFile = CatUtils::convertEncoding('UTF-8', $fileContent);
+
+                    //retrieve new content
+                    $fileContent = $convertedFile[1];
+                } else {
+                    if ($encoding != 'UTF-8') {
+                        $fileContent = iconv($encoding, "UTF-8//IGNORE", $fileContent);
+                    }
+                }
+
+                if (!$this->hasBOM($fileContent)) {
+                    $fileContent = $this->addBOM($fileContent);
                 }
             }
 
-            if ( !$this->hasBOM( $fileContent ) ) {
-                $fileContent = $this->addBOM( $fileContent );
-            }
+            //get random name for temporary location
+            $tmp_name = tempnam("/tmp", "MAT_FW");
+
+            //write encoded file to temporary location
+            $fileSize = file_put_contents($tmp_name, ($fileContent));
+
+            //assign file pointer for POST
+            $data[ 'documentContent' ] = "@$tmp_name";
+
+            //flush memory
+            unset( $fileContent );
+
+        } else {
+
+            //write encoded file to temporary location
+            $fileSize = filesize($file_path);
+
+            //assign file pointer for POST
+            $data[ 'documentContent' ] = "@$file_path";
+
         }
-
-        //get random name for temporary location
-        $tmp_name = tempnam( "/tmp", "MAT_FW" );
-
-        //write encoded file to temporary location
-        $fileSize = file_put_contents( $tmp_name, ( $fileContent ) );
-
-        //assign file pointer for POST
-        $data[ 'documentContent' ] = "@$tmp_name";
-
-        //flush memory
-        unset( $fileContent );
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
@@ -405,13 +530,33 @@ class FileFormatConverter {
         $curl_result = null;
         $res         = $this->__parseOutput( $decode );
 
-        //remove temporary file
-        unlink( $tmp_name );
+        //remove temporary file (used only by legacy converters)
+        if (isset($tmp_name)) unlink( $tmp_name );
 
         return $res;
     }
 
-    private function checkOpenService( $url ) {
+    /**
+     * Check that the conversion service is working.
+     * This method works with the new conversion service only.
+     */
+    private function checkOpenService() {
+        $url = "http://{$this->ip}:{$this->port}/".self::testFunction;
+        $cl = curl_init($url);
+        curl_setopt($cl,CURLOPT_CONNECTTIMEOUT,3);
+        curl_setopt($cl,CURLOPT_HEADER,true);
+        curl_setopt($cl,CURLOPT_NOBODY,true);
+        curl_setopt($cl,CURLOPT_RETURNTRANSFER,true);
+        curl_exec($cl);
+        $httpcode = curl_getinfo($cl, CURLINFO_HTTP_CODE);
+        curl_close($cl);
+        return $httpcode >= 200 && $httpcode < 300;
+    }
+
+    /**
+     * Check that the legacy conversion service is working.
+     */
+    private function checkOpenLegacyService( $url ) {
         //default is failure
         $open = false;
 

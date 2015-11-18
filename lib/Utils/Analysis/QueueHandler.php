@@ -50,25 +50,10 @@ class Analysis_QueueHandler extends Stomp {
      * @throws \Predis\Connection\ConnectionException
      */
     public function getRedisClient( ){
-
-        $resource = null;
-        if( $this->redisHandler != null ){
-            $reflectorClass = new ReflectionClass( $this->redisHandler->getConnection() );
-            $reflectorProperty = $reflectorClass->getParentClass()->getProperty( 'resource' );
-            $reflectorProperty->setAccessible( true );
-            $resource = $reflectorProperty->getValue( $this->redisHandler->getConnection() );
+        if( empty( $this->redisHandler ) ){
+            $this->redisHandler = new RedisHandler();
         }
-
-        if(
-                $this->redisHandler === null
-                || !$this->redisHandler->getConnection()->isConnected()
-                || !is_resource( $resource )
-        ){
-            $this->redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
-        }
-
-        return $this->redisHandler;
-
+        return $this->redisHandler->getConnection();
     }
 
     /**

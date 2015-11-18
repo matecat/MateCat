@@ -13,7 +13,7 @@ class currency_translatedCurrencyConverter extends currency_currencyConverter {
 
         $ch = curl_init();
 
-        curl_setopt( $ch, CURLOPT_URL, "www.translated.net/hts/?f=changeRate&cid=htsdemo&p=htsdemo5&from=$this->currencyFrom&to=$this->currencyTo&amount=$this->amount" );
+        curl_setopt( $ch, CURLOPT_URL, "http://www.translated.net/hts/?f=changeRate&cid=htsdemo&p=htsdemo5&from=$this->currencyFrom&to=$this->currencyTo&amount=$this->amount" );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $result = curl_exec ($ch);

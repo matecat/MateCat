@@ -155,6 +155,11 @@ class FilesStorage {
 //            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
 //        }
 
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if ( INIT::$LEGACY_CONVERSION !== false &&  is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+            return true;
+        }
+
         //create cache dir structure
         mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
@@ -190,15 +195,7 @@ class FilesStorage {
                 return $outcome1;
             }
 
-            //check if manifest from a LongHorn conversion exists
-            $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
-            if ( file_exists( $manifestFile ) ) {
-                Log::doLog( "Alternative Conversion detected" );
-                $file_extension = '.xlf';
-            } else {
-                Log::doLog( "Normal Conversion detected" );
-                $file_extension = '.sdlxliff';
-            }
+            $file_extension = '.sdlxliff';
 
             //set naming for converted xliff
             $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . $file_name . $file_extension;
@@ -282,7 +279,7 @@ class FilesStorage {
         }
 
         //link original
-        $outcome1 = link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
+        $outcome1 = $this->link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
 
         if( !$outcome1 ){
             //Failed to copy the original file zip
@@ -403,7 +400,7 @@ class FilesStorage {
             if ( !empty( $newFileName ) ){
                 $tmpOrigFileName = $newFileName;
             }
-            $res &= link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
+            $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
 
         }
 
@@ -419,15 +416,7 @@ class FilesStorage {
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
-        $res &= link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
-
-        //check if manifest from a LongHorn conversion exists
-        $manifestFile = $cacheDir . DIRECTORY_SEPARATOR . "manifest.rkm";
-        if ( file_exists( $manifestFile ) ) {
-            $res &= link( $manifestFile, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $manifestFile ) );
-            $res &= link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
-            $res &= link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
-        }
+        $res &= $this->link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
 
         if( !$res ){
             throw new UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
@@ -718,6 +707,10 @@ class FilesStorage {
         }
 
         return $return_array;
+    }
+
+    private function link($source, $destination) {
+        return EnvWrap::link($source, $destination);
     }
 }
 

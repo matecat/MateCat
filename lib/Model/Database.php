@@ -62,21 +62,33 @@ class Database implements IDatabase {
         return self::$instance;
     }
 
+    /**
+     * Class destructor
+     */
+    public function __destruct(){
+        $this->close();
+    }
 
     /**
      * @Override
      * {@inheritdoc}
      */
-    public function connect() {
-        $this->connection = new PDO(
-            "mysql:host={$this->server};dbname={$this->database};charset=UTF8",
-            $this->user,
-            $this->password,
-            array(
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Raise exceptions on errors
-            ));
+    public function getConnection() {
+        if ( empty( $this->connection ) || !$this->connection instanceof PDO ) {
+            $this->connection = new PDO(
+                    "mysql:host={$this->server};dbname={$this->database};charset=UTF8",
+                    $this->user,
+                    $this->password,
+                    array(
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Raise exceptions on errors
+                    ) );
+        }
+        return $this->connection;
     }
 
+    public function connect() {
+        $this->getConnection();
+    }
 
     /**
      * @Override
@@ -86,13 +98,18 @@ class Database implements IDatabase {
         $this->connection = null;
     }
 
+    public function reconnect() {
+      $this->close();
+      $this->getConnection();
+    }
+
 
     /**
      * @Override
      * {@inheritdoc}
      */
     public function useDb($name){
-        $this->connection->query("USE ".$name);
+        $this->getConnection()->query("USE ".$name);
         $this->database = $name;
     }
 
@@ -102,7 +119,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function begin() {
-        $this->connection->beginTransaction();
+        $this->getConnection()->beginTransaction();
     }
 
 
@@ -111,7 +128,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function commit() {
-        $this->connection->commit();
+        $this->getConnection()->commit();
     }
 
 
@@ -120,7 +137,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function rollback() {
-        $this->connection->rollBack();
+        $this->getConnection()->rollBack();
     }
 
 
@@ -129,7 +146,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function query($sql) {
-        $result = $this->connection->query($sql);
+        $result = $this->getConnection()->query($sql);
         $this->affected_rows = $result->rowCount();
         return $result;
     }
@@ -175,7 +192,7 @@ class Database implements IDatabase {
         }
         $query = rtrim($query,', ');
         $query .= " WHERE $where;";
-        $preparedStatement = $this->connection->prepare($query);
+        $preparedStatement = $this->getConnection()->prepare($query);
 
         // Execute it
         $preparedStatement->execute($valuesToBind);
@@ -205,12 +222,12 @@ class Database implements IDatabase {
         $keys = rtrim($keys,', ');
         $values = rtrim($values,', ');
         $query = "INSERT INTO $table ($keys) VALUES ($values);";
-        $preparedStatement = $this->connection->prepare($query);
+        $preparedStatement = $this->getConnection()->prepare($query);
 
         // Execute it
         $preparedStatement->execute($valuesToBind);
         $this->affected_rows = $preparedStatement->rowCount();
-        return $this->connection->lastInsertId();
+        return $this->getConnection()->lastInsertId();
     }
 
 
@@ -219,7 +236,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function last_insert() {
-        $result = $this->connection->query("SELECT LAST_INSERT_ID() as last");
+        $result = $this->getConnection()->query("SELECT LAST_INSERT_ID() as last");
         $out = $result->fetch(PDO::FETCH_ASSOC);
         return $out['last'];
     }
@@ -231,7 +248,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function escape( $string ) {
-        return substr( $this->connection->quote( $string ), 1, -1 );
+        return substr( $this->getConnection()->quote( $string ), 1, -1 );
     }
 
 }

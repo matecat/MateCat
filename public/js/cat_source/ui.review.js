@@ -88,8 +88,8 @@ if ( Review.enabled() ) {
         UI.segmentButtons = div.html();
     }).on('footerCreation', 'section', function() {
         var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="active tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
-        div.append('<div class="tab sub-editor review" style="display: block" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
+        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
+        div.append('<div class="tab sub-editor review" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
 
         /*
                setTimeout(function() {// fixes a bug in setting defaults in radio buttons
@@ -98,19 +98,35 @@ if ( Review.enabled() ) {
                }, 100);
         */
         UI.footerHTML = div.html();
+ /*
+        if(UI.body.hasClass('hideMatches')) {
+            UI.currentSegment.find('.tab-switcher.active').removeClass('active');
+            UI.currentSegment.find('.tab-switcher-review').addClass('active');
+        } else {
+            UI.currentSegment.find('.tab-switcher-review').click();
+        }
+*/
         UI.currentSegment.find('.tab-switcher-review').click();
 
-    }).on('afterFooterCreation', 'section', function() {
-//        setTimeout(function() {
-//            UI.currentSegment.find('.tab-switcher-review').click();
-//        }, 100);
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
+
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
 //        console.log($('.editor .sub-editor'));
+        $('.editor .sub-editor.open').removeClass('open');
+        if($(this).hasClass('untouched')) {
+            $(this).removeClass('untouched');
+            if(!UI.body.hasClass('hideMatches')) {
+                $('.editor .sub-editor.review').addClass('open');
+            }
+        } else {
+            $('.editor .sub-editor.review').addClass('open');
+        }
+/*
         $('.editor .sub-editor').hide();
         $('.editor .sub-editor.review').show();
+*/
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('afterFormatSelection', '.editor .editarea', function() {
@@ -270,14 +286,25 @@ if ( Review.enabled() ) {
                     .replace( config.tabPlaceholderRegex, "\t" )
                     //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
                     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-                $(editarea).text().replace(/(<([^>]+)>)/ig,""));
-//            console.log('diff: ', diff);
+                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
+
+            UI.dmp.diff_cleanupSemantic( diff ) ;
+
             diffTxt = '';
             $.each(diff, function (index) {
+
                 if(this[0] == -1) {
-                    diffTxt += '<span class="deleted">' + this[1] + '</span>';
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="deleted"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
                 } else if(this[0] == 1) {
-                    diffTxt += '<span class="added">' + this[1] + '</span>';
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="added"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
                 } else {
                     diffTxt += this[1];
                 }

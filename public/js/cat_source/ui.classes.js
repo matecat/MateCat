@@ -16,6 +16,10 @@
         this.isFirstOfSplit = function() {
             return Number(this.chunkId) == 1 ;
         }
+
+        this.isFooterCreated = function() {
+            return $('.footer', this.el).text() === '';
+        }
     }
 
     Segment.findEl = function( number ) {

@@ -6,8 +6,11 @@ module.exports = function(grunt) {
     var cssFiles = [
         basePath + '../css/common.css',
         basePath + '../css/style.css',
-        basePath + '../css/mbc-style.css'
-    ]
+        basePath + '../css/mbc-style.css',
+        basePath + '../css/segment-notes.css',
+        basePath + '../css/project-completion-feature.css',
+        basePath + '../css/editlog.css'
+   ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
@@ -37,6 +40,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
+                    basePath + 'cat_source/project_completion.*.js',
+                    basePath + 'cat_source/segment_notes.*.js',
                     basePath + 'tm.js'
 				],
 				dest: buildPath + 'cat.js'
@@ -67,7 +72,9 @@ module.exports = function(grunt) {
 				src: [
 					basePath + '../css/common.css',
 					basePath + '../css/style.css',
-					basePath + '../css/mbc-style.css'
+                    basePath + '../css/mbc-style.css',
+                    basePath + '../css/segment-notes.css',
+                    basePath + '../css/project-completion-feature.css'
 				],
 				dest: basePath + '../css/app.css'
 			}
@@ -78,7 +85,9 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
                 ].concat( cssFiles ) ,
+
                 tasks: ['development'],
+
                 options: {
                     interrupt: true,
                     livereload : true

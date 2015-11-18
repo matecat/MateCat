@@ -42,6 +42,10 @@
 
 class Xliff_Parser {
 
+	// This var wants to be like a "static final" in Java, but this is PHP...
+	// It's used by fix_non_well_formed_xml() to speed up things.
+	private static $find_xliff_tags_reg = null;
+
 	public static function Xliff2Array($file_content) {
 		// Pre-Processing.
 		// Fixing non UTF-8 encoding (often I get Unicode UTF-16)
@@ -52,7 +56,7 @@ class Xliff_Parser {
 		}
 
 		// Checking Requirements (By specs, I know that xliff version is in the first 1KB)
-		preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\']|si', substr($file_content, 0, 1000), $tmp);
+		preg_match('|<xliff.*?\sversion\s?=\s?["\'](.*?)["\']|si', substr($file_content, 0, 1000), $tmp);
 		if (!isset($tmp[1])) {
 			$xliff['parser-errors'][] = "Cannot import. This does not seems a valid XLIFF, we support version 1.0, 1.1, 1.2.";
 			return $xliff;
@@ -176,6 +180,8 @@ class Xliff_Parser {
 							$xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] = $temp[1];
 						}
 
+                        self::evalNotes($xliff, $i, $j, $trans_unit);
+
 						// Add here other trans-unit sub-elements you need, copying and pasting the 3 lines below
 
 						unset($temp);
@@ -254,102 +260,119 @@ class Xliff_Parser {
 		return $xliff;
 	}
 
+
+	/**
+	This function exists because many developers started adding html tags directly into the XLIFF source since:
+	1) XLIFF tag remapping is too complex for them
+	2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tollerant to html tags in <source>
+
+	in short people typed:
+	<source>The <b>red</d> house</source> or worst <source>5 > 3</source>
+	instead of
+	<source>The <g id="1">red</g> house.</source> and <source>5 &gt; 3</source>
+
+	This function will do the following
+	<g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
+	<g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
+	 */
 	public static function fix_non_well_formed_xml($content) {
 
-		/*
-		   This function exists because many developers started adding html tags directly into the XLIFF source since:
-		   1) XLIFF tag remapping is too complex for them
-		   2) Trados does not lock Tags within the <source> that are expressed as &gt;b&lt; but is tollerant to html tags in <source>
-
-		   in shor people typed:
-		   <source>The <b>red</d> house</source> or worst <source>5 > 3</source>
-		   instead of
-		   <source>The <g id="1">red</g> house.</source> and <source>5 &gt; 3</source>
-		   But this also became
-
-
-		   This function will do the following
-		   <g id="1">Hello</g>, 4 > 3 -> <g id="1">Hello</g>, 4 &gt; 3
-		   <g id="1">Hello</g>, 4 > 3 &gt; -> <g id="1">Hello</g>, 4 &gt; 3 &gt; 2
-
-
-		   BUG / KNOWN ISSUE, is not very tollerante in tag writing style. These will not work:
-		   </ g> instead of </g>
-		   <g /> since g is not an empty tag
-		   <x> instead of <x /> since x if an empty tag
-
-
-		   Replace <g> <ph> etc etc in ##XLIFF-TAG1-erwsldf##
-		   <g>, <x/>, <bx/>, <ex/>, <bpt> , <ept>, <ph>, <it> , <mrk>
-		 */
-
-
-		// Performance: I do a quick check before doing many preg
-		if (preg_match('|<.*?>|si', $content, $tmp)) {
-			$tags = array();
-			$tmp = array();
-
-			preg_match_all('|<g\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</g>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<x.*?/?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<bx.*?/?]>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<ex.*?/?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<bpt\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</bpt>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<ept\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</ept>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<ph\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</ph>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<it\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</ph>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<it\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</it>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|<mrk\s.*?>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
-			preg_match_all('|</mrk>|si', $content, $tmp);
-			$tags = array_merge($tags, (array) $tmp[0]);
+		if (self::$find_xliff_tags_reg === null) {
+			// List of the tags that we don't want to escape
+			$xliff_tags = array('g', 'x', 'bx', 'ex', 'bpt', 'ept', 'ph', 'it', 'mrk');
+			// Convert the list of tags in a regexp list, for example "g|x|bx|ex"
+			$xliff_tags_reg_list = implode('|', $xliff_tags);
+			// Regexp to find all the XLIFF tags:
+			//   </?               -> matches the tag start, for both opening and
+			//                        closure tags (see the optional slash)
+			//   ($xliff_tags_reg) -> matches one of the XLIFF tags in the list above
+			//   (\s[^>]*)?        -> matches attributes and so on; ensures there's a
+			//                        space after the tag, to not confuse for example a
+			//                        "g" tag with a "gblabla"; [^>]* matches anything,
+			//                        including additional spaces; the entire block is
+			//                        optional, to allow tags with no spaces or attrs
+			//   /? >              -> matches tag end, with optional slash for
+			//                        self-closing ones
+			// If you are wondering about spaces inside tags, look at this:
+			//   http://www.w3.org/TR/REC-xml/#sec-starttags
+			// It says that there cannot be any space between the '<' and the tag name,
+			// between '</' and the tag name, or inside '/>'. But you can add white
+			// space after the tag name, though.
+			self::$find_xliff_tags_reg = "#</?($xliff_tags_reg_list)(\\s[^>]*)?/?>#si";
 		}
 
-		if (isset($tags[0])) {
-			$i = 0;
-			$tag_map = array();
+		// Find all the XLIFF tags
+		preg_match_all(self::$find_xliff_tags_reg, $content, $matches);
+		$tags = (array) $matches[0];
 
-			foreach ($tags as $tag) {
-				$key = '##XLIFF-PLACEHOLDER-TAG' . $i . '-erwsldf##';
-				$tag_map[$key] = $tag;
-				$content = str_replace($tag, $key, $content);
-				$i++;
-			}
+		// Prepare placeholders
+		$tags_placeholders = array();
+		for ($i = 0; $i < count($tags); $i++) {
+			$tag = $tags[$i];
+			$tags_placeholders[$tag] = "#@!XLIFF-TAG-$i!@#";
 		}
-		// In PHP 5.2.3 this became magically a single line of code with 'double encode'=false!
-		// Waiting php 5.4 for ENT_SUBSTITUTE, ENT_XML1 or ENT_DISALLOWED
-		// This means that £ will be converted wrongly in &pound;
-		// $content = htmlentities($content,ENT_QUOTES,'UTF-8',false);
+
+		// Replace all XLIFF tags with placeholders that will not be escaped
+		foreach ($tags_placeholders as $tag => $placeholder) {
+			$content = str_replace($tag, $placeholder, $content);
+		}
+
+		// Escape the string with the remaining non-XLIFF tags
 		$content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8', false);
 
-		if (isset($tags[0])) {
-			foreach ($tag_map as $key => $tag) {
-				$content = str_replace($key, $tag, $content);
-			}
+		// Put again in place the original XLIFF tags replacing placeholders
+		foreach ($tags_placeholders as $tag => $placeholder) {
+			$content = str_replace($placeholder, $tag, $content);
 		}
 
-
 		return $content;
+
+		/*
+        I wrote a sort of unit-test to test the function. Obviously, it passes.
+        TODO: move this code to a real unit-test ASAP.
+
+        $tests = array(
+            '' => '',
+            'just text' => 'just text',
+        	'<gap>Hey</gap>' => '&lt;gap&gt;Hey&lt;/gap&gt;',
+            '<mrk>Hey</mrk>' => '<mrk>Hey</mrk>',
+            '<g >Hey</g >' => '<g >Hey</g >',
+            '<g    >Hey</g   >' => '<g    >Hey</g   >',
+            '<g id="99">Hey</g>' => '<g id="99">Hey</g>',
+            'Hey<x/>' => 'Hey<x/>',
+            'Hey<x />' => 'Hey<x />',
+            'Hey<x   />' => 'Hey<x   />',
+            'Hey<x id="15"/>' => 'Hey<x id="15"/>',
+            'Hey<bx id="1"/>' => 'Hey<bx id="1"/>',
+            'Hey<ex id="1"/>' => 'Hey<ex id="1"/>',
+            '<bpt id="1">Hey</bpt>' => '<bpt id="1">Hey</bpt>',
+            '<ept id="1">Hey</ept>' => '<ept id="1">Hey</ept>',
+            '<ph id="1">Hey</ph>' => '<ph id="1">Hey</ph>',
+            '<it id="1">Hey</it>' => '<it id="1">Hey</it>',
+            '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/><b id="dunno">Hey man & hey girl!</b></mrk>' => '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/>&lt;b id=&quot;dunno&quot;&gt;Hey man &amp; hey girl!&lt;/b&gt;</mrk>',
+        );
+
+        foreach ($tests as $in => $expected) {
+            $out = fix_non_well_formed_xml($in);
+            if (strcmp($out, $expected) !== 0) {
+                echo "ERROR!\nInput:    $in\nOutput:   $out\nExpected: $expected\n";
+            }
+        }
+        */
 	}
+
+    private static function evalNotes(&$xliff, $i, $j, $trans_unit) {
+        $temp = null;
+        preg_match_all('|<note>(.+?)</note>|si', $trans_unit, $temp);
+        $matches = array_values( $temp[1] );
+        if ( count($matches) > 0 ) {
+            foreach($matches as $match) {
+                $note = array(
+                    'raw-content' => self::fix_non_well_formed_xml($match)
+                );
+                $xliff['files'][$i]['trans-units'][$j]['notes'][] = $note ;
+            }
+        }
+    }
 
 }

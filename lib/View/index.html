@@ -24,7 +24,11 @@
                 server_load_time: '${load_time}',
                 tms_enabled: ${tms_enabled | string:true},
                 mt_enabled: ${mt_enabled | string:true},
-                job_id: '${jid}',
+                id_job: '${jid}',
+                get job_id() {
+                  console.info('job_id is deprecated, use id_job instead');
+                  return this.id_job ;
+                },
                 password: '${password}',
                 source_rfc: '${source_code}',
                 target_rfc: '${target_code}',
@@ -39,6 +43,7 @@
                 firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
                 fileCounter: ${structure php: fileCounter },
                 taglockEnabled: ${taglockEnabled | string:1},
+                tagLockCustomizable: ${tagLockCustomizable},
                 alternativesEnabled: true,
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 survey: false,
@@ -48,7 +53,8 @@
                 overall_quality: '${overall_quality}',
                 offlineModeEnabled: true,
                 splitSegmentEnabled: true,
-                copySourceInterval: ${copySourceInterval}
+                copySourceInterval: ${copySourceInterval},
+                projectCompletionFeature : ${projectCompletionFeature}
             };
             var renderStart = new Date();
             /*]]>*/
@@ -112,7 +118,7 @@
     </body>
 
 
-    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
+    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled&&!job_archived" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -239,7 +245,7 @@
                                     href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>
 
-                        <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
+                        <li><a id="edit_log_link" tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="${editLogClass}"><span>Editing Log</span></a></li>
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 
@@ -331,41 +337,7 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
-<!-- Actually unused -->
-<!--
-        <div id="alertConfirmTranslation" class="dialog" title="Attention">
-            <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
-            <form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
-        </div>
--->
-        <!--
-                        <div class="end-message-box">
-                        <div class="end-message-col1">
-                        <h3>Faxová úloha<span>*</span>!</h3>
-                       <img src="${basepath}public/img/end-message.jpg" /> 
-                       <p><span>*</span>Now you know how to say “<strong>Good Job</strong>” in Czech.</p>
-                       </div>
-                        <div class="end-message-col2">
-                <h4>It took you only <strong>30 minutes</strong> <br />
-                  to finish the translation!</h4>
-				
-                                                <form id="fileDownload" action="${basepath}" method="post">
-                                                        <input type="hidden" name="action" value="downloadFile" />
-                                                        <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                                                        <input type="hidden" name="id_file" value="" />
-                                                        <input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
-                                                        <input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                                                </form>
-						
-                               <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
-				
-				  
-                                <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
-                <span>that you are available for new work</span></a>
-                <input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
-                                </div>
-                                </div>
-        -->
+        <script src="${basepath}public/js/lib/snapengage.js"></script>
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
@@ -461,7 +433,12 @@ $(window).resize(function() {
             <p></p>
         </div>
     </template>
-<!--
+    <template id="tpl-taglock-customize" tal:condition="true:tagLockCustomizable">
+        <a href="#" class="tagLockCustomize" title="Toggle Tag Lock"></a>
+    </template>
+    <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
+    </template>
+    <!--
     <template id="tpl-review-stat-quality">
 
         <div class="popup-outer outer-stat-quality hide"></div>
@@ -493,4 +470,19 @@ $(window).resize(function() {
     </template>
 -->
 <div class="offline_stuffs" ></div>
+<!-- Snapengage -->
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+<!-- // Snapengage -->
+<!-- Google Analytics -->
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-28800161-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+<!-- // Google Analytics -->
 </html>
