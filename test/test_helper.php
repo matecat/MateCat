@@ -14,9 +14,12 @@ require( 'SeedLoader.php');
 
 prepareTestDatabase();
 
+setTestConfigFile();
+
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 register_shutdown_function(function() {
   echo "** Resetting environment to development\n\n" ;
+  restoreDevelopmentConfigFile();
 });
 
 Bootstrap::start();
