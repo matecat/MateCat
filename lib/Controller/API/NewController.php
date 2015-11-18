@@ -587,6 +587,10 @@ class NewController extends ajaxController {
             $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
         }
 
+        if ( $this->current_user != null ) {
+            $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
+        }
+
         $projectManager = new ProjectManager( $projectStructure );
         $projectManager->createProject();
 
