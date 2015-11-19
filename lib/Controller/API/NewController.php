@@ -140,7 +140,8 @@ class NewController extends ajaxController {
             Log::doLog( "Email is not valid" );
 
             return -5;
-        } else if ( !is_null( $this->owner ) ) {
+        }
+        else if ( !is_null( $this->owner ) && !empty($this->owner) ) {
             $domain = explode( "@", $this->owner );
             $domain = $domain[ 1 ];
             if ( !checkdnsrr( $domain ) ) {
