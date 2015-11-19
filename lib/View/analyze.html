@@ -17,7 +17,7 @@
             totalAnalyzed: '${num_segments_analyzed}',
             isLoggedIn: '${isLoggedIn}',
             showModalBoxLogin: '${showModalBoxLogin}',
-            enable_outsource: ${enable_outsource},
+            enable_outsource: ${enable_outsource | string:true},
             daemon_warning: ${daemon_misconfiguration},
             support_mail: '${support_mail}'
         };
@@ -286,7 +286,7 @@
                         <thead>
                         <tr>
                             <th></th>
-                            <th>Payable</th>
+                            <th tal:condition="enable_outsource">Payable</th>
                             <th>Total</th>
                             <th class="new" width="100">New</th>
                             <th class="repetition">Repetition</th>
@@ -317,7 +317,9 @@
                         </thead>
                         <tbody>
                         <tr>
-                            <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
+
+                            <td tal:condition="enable_outsource" class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
+                            <td tal:condition="not:enable_outsource" class="payable-rate-breakdown" colspan="2"></td>
                             <td class="editarea">${id_for_job/rates/NO_MATCH}%</td>
                             <td class="editarea">${id_for_job/rates/REPETITIONS}%</td>
                             <td class="editarea">${id_for_job/rates/INTERNAL}%</td>
@@ -347,7 +349,7 @@
                                     <a href="#" class="filedetails part3">File details</a>
                                     <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
                                 </td>
-                                <td class="stat-payable">
+                                <td tal:condition="enable_outsource" class="stat-payable">
                                     <strong class="stat_tot" tal:content="job/total_eq_word_count_print">11,500</strong></td>
                                 <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
                                 <td class="stat_new">0</td>
@@ -371,7 +373,7 @@
                                     <td class="stat-name">
                                         <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>
                                             filename1.xliff</p></td>
-                                    <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong>
+                                    <td tal:condition="enable_outsource" class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong>
                                     </td>
                                     <td class="stat-total" tal:content="f/file_raw_word_count">7,500</td>
                                     <td class="stat_new">0</td>
