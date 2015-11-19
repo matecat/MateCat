@@ -86,6 +86,7 @@ class INIT {
      * @var int Interval in seconds
      */
     public static $COPY_SOURCE_INTERVAL = 300;
+    public static $MAX_NUM_SEGMENTS = 500;
 
     /**
      * Default Matecat user agent string

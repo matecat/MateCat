@@ -1,8 +1,8 @@
 <?php
 
 function setTestConfigFile() {
-    renameFile('config.ini', 'config.ini.development');
-    renameFile('config.ini.test', 'config.ini');
+    renameFile('config.ini', 'config.development.ini');
+    renameFile('config.test.ini', 'config.ini');
 }
 
 function renameFile( $source, $destination) {
@@ -15,8 +15,8 @@ function renameFile( $source, $destination) {
 }
 
 function restoreDevelopmentConfigFile() {
-    renameFile('config.ini', 'config.ini.test');
-    renameFile('config.ini.development', 'config.ini');
+    renameFile('config.ini', 'config.test.ini');
+    renameFile('config.development.ini', 'config.ini');
 }
 
 function test_file_path( $file ) {
@@ -25,7 +25,16 @@ function test_file_path( $file ) {
 
 function prepareTestDatabase() {
   $dev_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.ini', true);
-  $test_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.ini.test', true);
+  $test_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.test.ini', true);
+
+  // TODO: move this TEST_URL_BASE config somewhere else
+  if ( @$test_ini['TEST_URL_BASE'] != null ) {
+      $GLOBALS['TEST_URL_BASE'] = $test_ini['TEST_URL_BASE'];
+  }
+  else {
+      echo "** TEST_URL_BASE is not set, using localhost \n" ;
+      $GLOBALS['TEST_URL_BASE'] = 'localhost';
+  }
 
   if ( $dev_ini['ENV'] != 'development') {
       throw new Exception('Source config must be development');
