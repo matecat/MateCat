@@ -1,13 +1,48 @@
 <?php
 
+function setTestConfigFile() {
+    renameFile('config.ini', 'config.ini.development');
+    renameFile('config.ini.test', 'config.ini');
+}
+
+function renameFile( $source, $destination) {
+    $source = PROJECT_ROOT . '/inc/' . $source;
+    $destination = PROJECT_ROOT . '/inc/' . $destination ;
+
+    if (! rename($source, $destination) ){
+        throw new Exception("Error moving $source to $destination");
+    }
+}
+
+function restoreDevelopmentConfigFile() {
+    renameFile('config.ini', 'config.ini.test');
+    renameFile('config.ini.development', 'config.ini');
+}
+
 function test_file_path( $file ) {
   return realpath(TEST_DIR . '/support/files/' . $file );
 }
 
 function prepareTestDatabase() {
-  $config = parse_ini_file(PROJECT_ROOT . '/inc/config.ini', true);
-  $testDatabase = new SchemaCopy($config['test']);
-  $devDatabase = new SchemaCopy($config['development']);
+  $dev_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.ini', true);
+  $test_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.ini.test', true);
+
+  if ( $dev_ini['ENV'] != 'development') {
+      throw new Exception('Source config must be development');
+  }
+
+  if ( $test_ini['ENV'] != 'test') {
+      throw new Exception('Destination config must be test');
+  }
+
+  if (
+      $dev_ini['development']['DB_DATABASE'] == $test_ini['test']['DB_DATABASE']
+  ) {
+      throw new Exception("Development database and test database cannot have the same name");
+  }
+
+  $testDatabase = new SchemaCopy($test_ini['test']);
+  $devDatabase = new SchemaCopy($dev_ini['development']);
 
   prepareTestSchema($testDatabase, $devDatabase);
   loadSeedData($testDatabase);

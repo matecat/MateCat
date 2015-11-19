@@ -182,7 +182,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
 
                 //Curl Error also ( Timeout/DNS/Socket )
                 $decoded = new Engines_Results_MT( $rawValue );
-                if ( $decoded->error->code < 0 ) {
+                if ( $decoded->error->code <= 0 ) {
                     $decoded            = $decoded->get_as_array();
                     $decoded[ 'error' ] = (array)$decoded[ 'error' ];
                 }
