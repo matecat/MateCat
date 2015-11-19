@@ -66,13 +66,26 @@ UI = {
 		 $("body").removeClass("popup-opened");
 		 });
 		 */
+
+        function wordCountTotalOrPayable( job ) {
+            var total = 0;
+            if ( $('.stat-payable').length > 0 ) {
+                total = Number( $('.stat-payable', job).first().text().replace(",", "") );
+            }
+
+            if (total == 0) {
+                total = Number( $('.stat-total', job).first().text().replace(",", "") );
+            }
+            return total;
+        }
+
 		$("body").on('click', '.dosplit:not(.disabled)', function(e) {
 
 			e.preventDefault();
 			var jobContainer = $(this).parents('.jobcontainer');
 			var job = jobContainer.find('tbody.tablestats');
 			jid = job.attr('data-jid');
-			total = $('.stat-payable', job).first().text().replace(",", "");
+			total = wordCountTotalOrPayable( job ) ;
 			numsplit = $('.splitselect', jobContainer).first().val();
 			wordsXjob = total / numsplit;
 			wordsXjob = Math.floor(wordsXjob);
@@ -275,6 +288,7 @@ UI = {
 				split_values: ar
 			},
 			success: function(d) {
+                var pretranslated = ( null == d.eq_word_count );
 				var total = $('.popup-split .wordsum .total-w').attr('data-val');
 				var prog = 0;
 				if (!$.isEmptyObject(d.data)) {
@@ -291,7 +305,14 @@ UI = {
                             $( editAreaList[key] ).addClass( 'empty' );
 
                         } else {
+
+                          if ( pretranslated ) {
+                            val = parseInt( d.data.chunks[key].raw_word_count );
+                          }
+                          else {
                             val = parseInt( d.data.chunks[key].eq_word_count ); //this is d.data.chunks[ index ]
+                          }
+
                         }
 
                         $( editAreaList[key] ).attr( 'value', val );
