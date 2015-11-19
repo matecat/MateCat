@@ -523,47 +523,62 @@ class setTranslationController extends ajaxController {
         $segment_original = $segmentDao->getById( $this->id_segment );
 
         $segmentRawWordCount = $segment_original->raw_word_count;
-        $segment = new EditLog_EditLogSegmentClientStruct(
+        $segment             = new EditLog_EditLogSegmentClientStruct(
                 array(
-                        'suggestion'  => $old_translation[ 'suggestion' ],
-                        'translation' => $old_translation[ 'translation' ]
+                        'suggestion'     => $old_translation[ 'suggestion' ],
+                        'translation'    => $old_translation[ 'translation' ],
+                        'raw_word_count' => $segmentRawWordCount,
+                        'time_to_edit'   => $old_translation[ 'time_to_edit' ] + $new_translation[ 'time_to_edit' ]
                 )
         );
-        $oldPEE                     = $segment->getPeePerc();
 
-        if ( $oldPEE < 0 ) {
-            $oldPEE = 0;
-        } else if ( $oldPEE > 100 ) {
-            $oldPEE = 100;
-        }
-        $oldPee_weighted = $oldPEE * $segmentRawWordCount;
+        if ( $segment->isValidForEditLog() ) {
+            $oldPEE = $segment->getPeePerc();
 
-        $segment->translation    = $new_translation[ 'translation' ];
-        $segment->pe_effort_perc = null;
-        $newPEE                  = $segment->getPeePerc();
+            if ( $oldPEE < 0 ) {
+                $oldPEE = 0;
+            } else if ( $oldPEE > 100 ) {
+                $oldPEE = 100;
+            }
+            $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
-        if ( $newPEE < 0 ) {
-            $newPEE = 0;
-        } else if ( $newPEE > 100 ) {
-            $newPEE = 100;
-        }
-        $newPee_weighted = $newPEE * $segmentRawWordCount;
+            $segment->translation    = $new_translation[ 'translation' ];
+            $segment->pe_effort_perc = null;
+            $newPEE                  = $segment->getPeePerc();
 
-        $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
+            if ( $newPEE < 0 ) {
+                $newPEE = 0;
+            } else if ( $newPEE > 100 ) {
+                $newPEE = 100;
+            }
 
-        $queryUpdateJob = "update jobs
+            $newPee_weighted = $newPEE * $segmentRawWordCount;
+
+            $oldSegment               = clone $segment;
+            $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
+
+            //if the segment was not valid for editlog and now it is, then just add the weighted pee
+            if ( !$oldSegment->isValidForEditLog() ) {
+                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] + $newPee_weighted );
+            } //otherwise, evaluate it normally
+            else {
+                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
+
+            }
+            $queryUpdateJob = "update jobs
                                 set avg_post_editing_effort = %f
                                 where id = %d and password = '%s'";
 
-        $db = Database::obtain();
-        $db->query(
-                sprintf(
-                        $queryUpdateJob,
-                        $newTotalJobPee,
-                        $this->id_job,
-                        $this->password
-                )
-        );
+            $db = Database::obtain();
+            $db->query(
+                    sprintf(
+                            $queryUpdateJob,
+                            $newTotalJobPee,
+                            $this->id_job,
+                            $this->password
+                    )
+            );
+        }
     }
 
 

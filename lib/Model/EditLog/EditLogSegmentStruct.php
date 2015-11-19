@@ -104,7 +104,18 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
      * @return float
      */
     public function getSecsPerWord() {
-        return round( ($this->time_to_edit / 1000) / $this->raw_word_count, 1 );
+        return round( ( $this->time_to_edit / 1000 ) / $this->raw_word_count, 1 );
+    }
+
+    /**
+     * Returns true if the number of seconds per word
+     * @return bool
+     */
+    public function isValidForEditLog() {
+        $secsPerWord = $this->getSecsPerWord();
+
+        return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT ) &&
+                ( $secsPerWord  < EditLog_EditLogModel::EDIT_TIME_SLOW_CUT );
     }
 
     /**
@@ -123,10 +134,10 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
             //the outer if it's here because $notices can be
             //an empty string and json_decode will fail into null value
             if ( !empty( $notices ) ) {
-                    $result = array_merge( $result, Utils::array_column( $notices, 'debug' ) );
+                $result = array_merge( $result, Utils::array_column( $notices, 'debug' ) );
             }
 
-            $tag_mismatch = $QA->getMalformedXmlStructs();
+            $tag_mismatch       = $QA->getMalformedXmlStructs();
             $tag_order_mismatch = $QA->getTargetTagPositionError();
             if ( count( $tag_mismatch ) > 0 ) {
                 $result[] = sprintf(
@@ -147,16 +158,17 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     /**
      * @return float|int
      */
-    public function getPEE(){
+    public function getPEE() {
         $post_editing_effort = round(
-                (1 - MyMemory::TMS_MATCH($this->suggestion, $this->translation)) * 100
+                ( 1 - MyMemory::TMS_MATCH( $this->suggestion, $this->translation ) ) * 100
         );
 
-        if ($post_editing_effort < 0) {
+        if ( $post_editing_effort < 0 ) {
             $post_editing_effort = 0;
-        } else if ($post_editing_effort > 100) {
+        } else if ( $post_editing_effort > 100 ) {
             $post_editing_effort = 100;
         }
+
         return $post_editing_effort;
     }
 }
