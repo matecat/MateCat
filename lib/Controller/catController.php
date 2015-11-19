@@ -554,6 +554,7 @@ class catController extends viewController {
         $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
 
         $this->template->editLogClass = $this->getEditLogClass();
+        $this->template->maxNumSegments = INIT::$MAX_NUM_SEGMENTS;
 
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
