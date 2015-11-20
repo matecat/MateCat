@@ -94,6 +94,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                         </li>
                         <li><span class="opt">optional</span> <code class="param"> segmentation_rule</code> <code>(string)</code> The segmentation rule you want to use to parse your file .
                         </li>
+                        <li><span class="opt">optional</span> <code class="param"> owner_email (default: anonymous)</code> <code>(string)</code> The email of the owner of the project.
+                        </li>
                     </ul>
                 </dd>
                 <dt>Returns</dt>
