@@ -21,15 +21,6 @@
   margin-bottom: 100px;
 }
 
-/* Comment speech balloon style */
-.mbc-comment-balloon-header {
-  border-bottom: 1px solid #dadada;
-  box-shadow: 0px 3px 6px -5px rgba(0,0,0,0.3);
-  height: 25px;
-  position: relative;
-  z-index: 2; /* Allow box-shadow to shine */
-}
-
 /*
  ******
  Post new comment

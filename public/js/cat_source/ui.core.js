@@ -264,6 +264,9 @@ console.log('changeStatus');
     },
 
     checkHeaviness: function() {
+        if ($('section').length > config.maxNumSegments) {
+            UI.reloadToSegment(UI.currentSegmentId);
+        }
 //		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
 //		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
 //		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
