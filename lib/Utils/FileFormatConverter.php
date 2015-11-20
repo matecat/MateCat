@@ -1,23 +1,20 @@
 <?php
 
 set_time_limit( 0 );
-define ( "BOM", "\xEF\xBB\xBF" );
+define( "BOM", "\xEF\xBB\xBF" );
 
 class FileFormatConverter {
 
     const DEFAULT_PORT = '8732';
+    const testFunction = "test"; // action check connection
 
     private $ip; //current converter chosen for this job
     private $port; //port the convertrs listen to
-    private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
+    private $toXliffFunction   = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
     private $fromXliffFunction = "AutomationService/xliff2original"; //action string for the converters to convert to original
-    const testFunction = "test"; // action check connection
-    private $opt = array(); //curl options
+    private $opt               = array(); //curl options
     private $lang_handler; //object that exposes language utilities
-    private $storage_lookup_map;
-
     private $converterVersion;
-
     private $conversionObject;
 
     /**
@@ -27,9 +24,9 @@ class FileFormatConverter {
      */
     public $sendErrorReport = true;
 
-    public static $Storage_Lookup_IP_Map = array();
-    public static $converters = array();
-    public static $converter2segmRule = array();
+    public $Storage_Lookup_IP_Map = array();
+    public $converters            = array();
+    public $converter2segmRule    = array();
 
     //http://stackoverflow.com/questions/2222643/php-preg-replace
     private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
@@ -47,81 +44,72 @@ class FileFormatConverter {
      * converters db table; new converters are expected to have a value like
      * "open 1.0.0".
      */
-    public function __construct($converterVersion = null) {
+    public function __construct( $converterVersion = null ) {
         $this->converterVersion = $converterVersion;
 
         $this->opt[ 'httpheader' ] = array( "Content-Type:multipart/form-data;charset=UTF-8" );
         $this->lang_handler        = Langs_Languages::getInstance();
 
         $this->conversionObject = new ArrayObject( array(
-            'ip_machine'      => null,
-            'ip_client'       => null,
-            'path_name'       => null,
-            'file_name'       => null,
-            'path_backup'     => null,
-            'file_size'       => 0,
-            'direction'       => null,
-            'error_message'   => null,
-            'src_lang'        => null,
-            'trg_lang'        => null,
-            'status'          => 'ok',
-            'conversion_time' => 0
+                'ip_machine'      => null,
+                'ip_client'       => null,
+                'path_name'       => null,
+                'file_name'       => null,
+                'path_backup'     => null,
+                'file_size'       => 0,
+                'direction'       => null,
+                'error_message'   => null,
+                'src_lang'        => null,
+                'trg_lang'        => null,
+                'status'          => 'ok',
+                'conversion_time' => 0
         ), ArrayObject::ARRAY_AS_PROPS );
 
         // Get converters instances list from database,
-        $db         = Database::obtain();
+        $db = Database::obtain();
         // The base query to obtain the converters
         $baseQuery =
-            'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
-            . ' FROM converters'
-            . ' WHERE status_active = 1 AND status_offline = 0';
+                'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule'
+                . ' FROM converters'
+                . ' WHERE status_active = 1 AND status_offline = 0';
 
         // Complete the $baseQuery according to the converter's version
-        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
+        if ( $this->converterVersion == Constants_ConvertersVersions::LEGACY ) {
             // Retrieve only old converters
-            $query = $baseQuery
-                . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
-                . ' AND conversion_api_version NOT LIKE "open %"';
+            $query      = $baseQuery
+                    . ( INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '' )
+                    . ' AND conversion_api_version NOT LIKE "open %"';
             $converters = $db->fetch_array( $query );
 
         } else {
             // Here we use new converters
 
-            if ($this->converterVersion == Constants_ConvertersVersions::LATEST) {
+            if ( $this->converterVersion == Constants_ConvertersVersions::LATEST ) {
                 // Get the converters with the latest version
-                $query = $baseQuery . ' AND conversion_api_version = ('
-                    . 'SELECT MAX(conversion_api_version)'
-                    . ' FROM converters'
-                    . ' WHERE conversion_api_version LIKE "open %"'
-                    . (INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '')
-                    . ' AND status_active = 1 AND status_offline = 0'
-                    . ')';
+                $query      = $baseQuery . ' AND conversion_api_version = ('
+                        . 'SELECT MAX(conversion_api_version)'
+                        . ' FROM converters'
+                        . ' WHERE conversion_api_version LIKE "open %"'
+                        . ( INIT::$USE_ONLY_STABLE_CONVERTERS ? ' AND stable = 1' : '' )
+                        . ' AND status_active = 1 AND status_offline = 0'
+                        . ')';
                 $converters = $db->fetch_array( $query );
 
             } else {
-                $converters = self::getSuitableConvertersByVersion($db, $this->converterVersion);
+                $converters = self::__getSuitableConvertersByVersion( $db, $this->converterVersion );
             }
         }
 
-        // SUUUPER ugly, those variables should not be static at all! No way!
-        // But now the class works around these 3 static variables, and a
-        // refactoring is too risky. Enter this patch: I empty these 3 vars
-        // every time I create a new FileFormatConverter to be sure that new
-        // converters never mix with old converters
-        self::$converters = array();
-        self::$Storage_Lookup_IP_Map = array();
-        self::$converter2segmRule = array();
+
 
         foreach ( $converters as $converter_storage ) {
-            self::$converters[ $converter_storage[ 'ip_converter' ] ]            = $converter_storage[ 'cpu_weight' ];
-            self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
-            self::$converter2segmRule[ $converter_storage[ 'ip_converter' ] ]    = $converter_storage[ 'segmentation_rule' ];
+            $this->converters[ $converter_storage[ 'ip_converter' ] ]         = $converter_storage[ 'cpu_weight' ];
+            $this->storage_lookup_map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
+            $this->converter2segmRule[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'segmentation_rule' ];
         }
 
-//        self::$converters = array('10.30.1.32' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.30.1.32' => '10.30.1.32');//for debugging purposes
-
-        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
+//        $this->converters = array('10.30.1.32' => 1);//for debugging purposes
+//        $this->storage_lookup_map = array('10.30.1.32' => '10.30.1.32');//for debugging purposes
 
     }
 
@@ -142,27 +130,29 @@ class FileFormatConverter {
      *   5. Return stable converters with the higher version in the db.
      *   6. Return unstable converters with the higher version in the db.
      */
-    private static function getSuitableConvertersByVersion($db, $version) {
+    private static function __getSuitableConvertersByVersion( $db, $version ) {
         // First, obtain a list of all the versions sorted from oldest
         // to newest
-        $query = 'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule, conversion_api_version, stable'
-            . ' FROM converters'
-            . ' WHERE conversion_api_version LIKE "open %"'
-            . ' AND status_active = 1 AND status_offline = 0'
-            . ' ORDER BY conversion_api_version ASC';
+        $query  = 'SELECT ip_converter, cpu_weight, ip_storage, segmentation_rule, conversion_api_version, stable'
+                . ' FROM converters'
+                . ' WHERE conversion_api_version LIKE "open %"'
+                . ' AND status_active = 1 AND status_offline = 0'
+                . ' ORDER BY conversion_api_version ASC';
         $dbList = $db->fetch_array( $query );
 
-        if (empty($dbList)) {
-            throw new Exception("There are no new converters enabled in the converters table!");
+        if ( empty( $dbList ) ) {
+            throw new Exception( "There are no new converters enabled in the converters table!" );
         }
 
         // Loops over all the versions, stops when stopFn returns true, and
         // returns the current version
-        $loopVersionsFn = function($stable, $stopFn) use ($dbList) {
-            foreach ($dbList as $dbRow) {
-                if ($dbRow['stable'] != $stable) continue;
-                $curVersion = $dbRow['conversion_api_version'];
-                if ($stopFn($curVersion)) {
+        $loopVersionsFn = function ( $stable, $stopFn ) use ( $dbList ) {
+            foreach ( $dbList as $dbRow ) {
+                if ( $dbRow[ 'stable' ] != $stable ) {
+                    continue;
+                }
+                $curVersion = $dbRow[ 'conversion_api_version' ];
+                if ( $stopFn( $curVersion ) ) {
                     return $curVersion;
                 }
             }
@@ -171,58 +161,63 @@ class FileFormatConverter {
 
         // At the end of the next loops, we want actual values in these vars
         $candidateVersion = null;
-        $candidateStable = null;
+        $candidateStable  = null;
 
         // Array to loop on 'stable' values; stable converters first
-        $stableFlagValues = array(1, 0);
+        $stableFlagValues = array( 1, 0 );
 
         // Look for matching version first
-        $stopOnMatchingVersionFn = function($curVersion) use ($version) {
+        $stopOnMatchingVersionFn = function ( $curVersion ) use ( $version ) {
             return $curVersion == "open $version";
         };
-        foreach ($stableFlagValues as $candidateStable) {
-            $candidateVersion = $loopVersionsFn($candidateStable, $stopOnMatchingVersionFn);
-            if ($candidateVersion != null) break;
-        }
-
-        if ($candidateVersion == null) {
-            // Look for greater closest version
-            $stopOnGreaterClosestVersionFn = function($curVersion) use ($version) {
-                return $curVersion > "open $version";
-            };
-            foreach ($stableFlagValues as $candidateStable) {
-                $candidateVersion = $loopVersionsFn($candidateStable, $stopOnGreaterClosestVersionFn);
-                if ($candidateVersion != null) break;
+        foreach ( $stableFlagValues as $candidateStable ) {
+            $candidateVersion = $loopVersionsFn( $candidateStable, $stopOnMatchingVersionFn );
+            if ( $candidateVersion != null ) {
+                break;
             }
         }
 
-        if ($candidateVersion == null) {
+        if ( $candidateVersion == null ) {
+            // Look for greater closest version
+            $stopOnGreaterClosestVersionFn = function ( $curVersion ) use ( $version ) {
+                return $curVersion > "open $version";
+            };
+            foreach ( $stableFlagValues as $candidateStable ) {
+                $candidateVersion = $loopVersionsFn( $candidateStable, $stopOnGreaterClosestVersionFn );
+                if ( $candidateVersion != null ) {
+                    break;
+                }
+            }
+        }
+
+        if ( $candidateVersion == null ) {
             // No converter have greater version than the provided one;
             // take the greatest version we have in db (hopefully stable)
-            foreach ($dbList as $dbRow) {
-                switch ($dbRow['stable']) {
+            foreach ( $dbList as $dbRow ) {
+                switch ( $dbRow[ 'stable' ] ) {
                     case 1:
-                        $highestStableVersion = $dbRow['conversion_api_version'];
+                        $highestStableVersion = $dbRow[ 'conversion_api_version' ];
                         break;
                     case 0:
-                        $highestUnstableVersion = $dbRow['conversion_api_version'];
+                        $highestUnstableVersion = $dbRow[ 'conversion_api_version' ];
                         break;
                 }
             }
-            if (isset($highestStableVersion)) {
+            if ( isset( $highestStableVersion ) ) {
                 $candidateVersion = $highestStableVersion;
-                $candidateStable = 1;
+                $candidateStable  = 1;
             } else {
                 $candidateVersion = $highestUnstableVersion;
-                $candidateStable = 0;
+                $candidateStable  = 0;
             }
         }
 
         // Filter the rows with the candidate version and the 'stable' flag
         $suitableConvertersDbRows = array();
-        foreach ($dbList as $dbRow) {
-            if ($dbRow['stable'] == $candidateStable &&
-                    $dbRow['conversion_api_version'] == $candidateVersion) {
+        foreach ( $dbList as $dbRow ) {
+            if ( $dbRow[ 'stable' ] == $candidateStable &&
+                    $dbRow[ 'conversion_api_version' ] == $candidateVersion
+            ) {
                 $suitableConvertersDbRows[] = $dbRow;
             }
         }
@@ -271,14 +266,14 @@ class FileFormatConverter {
     }
 
     //get a converter at random, weighted on number of CPUs per node
-    private function pickRandConverter( $segm_rule = null ) {
+    private function __pickRandConverter( $segm_rule = null ) {
 
         $converters_map = array();
 
         $tot_cpu = 0;
-        foreach ( self::$converters as $ip => $cpu ) {
+        foreach ( $this->converters as $ip => $cpu ) {
 
-            if ( self::$converter2segmRule[ $ip ] == $segm_rule ) {
+            if ( $this->converter2segmRule[ $ip ] == $segm_rule ) {
                 $tot_cpu += $cpu;
                 $converters_map = array_merge( $converters_map, array_fill( 0, $cpu, $ip ) );
             }
@@ -288,14 +283,14 @@ class FileFormatConverter {
         //pick random
         $num = rand( 0, $tot_cpu - 1 );
 
-        $address = $converters_map[ $num ];
-        $addressParts = explode(':', $address);
-        if (!isset($addressParts[1])) {
+        $address      = $converters_map[ $num ];
+        $addressParts = explode( ':', $address );
+        if ( !isset( $addressParts[ 1 ] ) ) {
             // If port not found, set the default port
-            $addressParts[1] = self::DEFAULT_PORT;
+            $addressParts[ 1 ] = self::DEFAULT_PORT;
         }
-        if (count($addressParts) > 2) {
-            log::doLog("WARNING! Bad converter address detected: \"$address\"");
+        if ( count( $addressParts ) > 2 ) {
+            log::doLog( "WARNING! Bad converter address detected: \"$address\"" );
         }
 
         return $addressParts;
@@ -353,9 +348,9 @@ class FileFormatConverter {
         return $top;
     }
 
-    private function pickIdlestConverter() {
+    private function __pickIdlestConverter() {
         //scan each server load
-        foreach ( self::$converters as $ip => $weight ) {
+        foreach ( $this->converters as $ip => $weight ) {
             $load = self::checkNodeLoad( $ip );
             log::doLog( "load for $ip is $load" );
             //add load as numeric index to an array
@@ -374,7 +369,7 @@ class FileFormatConverter {
         return $this->storage_lookup_map[ $this->ip ];
     }
 
-    private function extractUidandExt( &$content ) {
+    private function __extractUidandExt( &$content ) {
         $pattern = '|<file original=".+?([a-f\-0-9]{36}).+?\.(.*)".*?>|';
         $matches = array();
         preg_match( $pattern, substr( $content, 0, 2048 ), $matches );
@@ -382,7 +377,7 @@ class FileFormatConverter {
         return array( $matches[ 1 ], $matches[ 2 ] );
     }
 
-    private function is_assoc( $array ) {
+    private function __is_assoc( $array ) {
         return is_array( $array ) AND (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
     }
 
@@ -451,16 +446,16 @@ class FileFormatConverter {
 
     private function curl_post( $url, $data, $opt = array() ) {
 
-        if ( !$this->is_assoc( $data ) ) {
+        if ( !$this->__is_assoc( $data ) ) {
             throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
         }
 
         // The new converters need a new way to check if they are
         // online, so we have two different methods for this task.
-        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
-            $isServiceAvailable = $this->checkOpenLegacyService($url);
+        if ( $this->converterVersion == Constants_ConvertersVersions::LEGACY ) {
+            $isServiceAvailable = $this->__checkOpenLegacyService( $url );
         } else {
-            $isServiceAvailable = $this->checkOpenService();
+            $isServiceAvailable = $this->__checkOpenService();
         }
 
         if ( $isServiceAvailable ) {
@@ -475,7 +470,7 @@ class FileFormatConverter {
             curl_setopt( $ch, CURLOPT_POST, true );
             @curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
 
-            if ( $this->is_assoc( $opt ) and !empty( $opt ) ) {
+            if ( $this->__is_assoc( $opt ) and !empty( $opt ) ) {
                 foreach ( $opt as $k => $v ) {
 
                     if ( stripos( $k, "curlopt_" ) === false or stripos( $k, "curlopt_" ) !== 0 ) {
@@ -501,7 +496,10 @@ class FileFormatConverter {
             }
 
         } else {
-            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "Internal connection issue. Try converting it again." ) );
+            $output = json_encode( array(
+                    "isSuccess"    => false,
+                    "errorMessage" => "Internal connection issue. Try converting it again."
+            ) );
         }
 
         return $output;
@@ -512,39 +510,39 @@ class FileFormatConverter {
             throw new Exception( "Conversion Error : the file <$file_path> not exists" );
         }
 
-        $filename    = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
-        $extension = FilesStorage::pathinfo_fix($file_path, PATHINFO_EXTENSION);
+        $filename  = FilesStorage::pathinfo_fix( $file_path, PATHINFO_FILENAME );
+        $extension = FilesStorage::pathinfo_fix( $file_path, PATHINFO_EXTENSION );
 
-        if ($this->converterVersion == Constants_ConvertersVersions::LEGACY) {
+        if ( $this->converterVersion == Constants_ConvertersVersions::LEGACY ) {
             // Legacy converters need encode sanitize
 
-            $fileContent = file_get_contents($file_path);
-            if (strtoupper($extension) == 'TXT' or strtoupper($extension) == 'STRINGS') {
-                $encoding = mb_detect_encoding($fileContent);
+            $fileContent = file_get_contents( $file_path );
+            if ( strtoupper( $extension ) == 'TXT' or strtoupper( $extension ) == 'STRINGS' ) {
+                $encoding = mb_detect_encoding( $fileContent );
 
                 //in case of .strings, they may be in UTF-16
-                if (strtoupper($extension) == 'STRINGS') {
+                if ( strtoupper( $extension ) == 'STRINGS' ) {
                     //use this function to convert stuff
-                    $convertedFile = CatUtils::convertEncoding('UTF-8', $fileContent);
+                    $convertedFile = CatUtils::convertEncoding( 'UTF-8', $fileContent );
 
                     //retrieve new content
-                    $fileContent = $convertedFile[1];
+                    $fileContent = $convertedFile[ 1 ];
                 } else {
-                    if ($encoding != 'UTF-8') {
-                        $fileContent = iconv($encoding, "UTF-8//IGNORE", $fileContent);
+                    if ( $encoding != 'UTF-8' ) {
+                        $fileContent = iconv( $encoding, "UTF-8//IGNORE", $fileContent );
                     }
                 }
 
-                if (!$this->hasBOM($fileContent)) {
-                    $fileContent = $this->addBOM($fileContent);
+                if ( !$this->hasBOM( $fileContent ) ) {
+                    $fileContent = $this->addBOM( $fileContent );
                 }
             }
 
             //get random name for temporary location
-            $tmp_name = tempnam("/tmp", "MAT_FW");
+            $tmp_name = tempnam( "/tmp", "MAT_FW" );
 
             //write encoded file to temporary location
-            $fileSize = file_put_contents($tmp_name, ($fileContent));
+            $fileSize = file_put_contents( $tmp_name, ( $fileContent ) );
 
             //assign file pointer for POST
             $data[ 'documentContent' ] = "@$tmp_name";
@@ -555,7 +553,7 @@ class FileFormatConverter {
         } else {
 
             //write encoded file to temporary location
-            $fileSize = filesize($file_path);
+            $fileSize = filesize( $file_path );
 
             //assign file pointer for POST
             $data[ 'documentContent' ] = "@$file_path";
@@ -564,9 +562,9 @@ class FileFormatConverter {
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
-            list($this->ip, $this->port) = $this->pickRandConverter( $segm_rule );
+            list( $this->ip, $this->port ) = $this->__pickRandConverter( $segm_rule );
         } else {
-            $this->ip = $chosen_by_user_machine;
+            $this->ip   = $chosen_by_user_machine;
             $this->port = self::DEFAULT_PORT;
         }
 
@@ -601,7 +599,9 @@ class FileFormatConverter {
         $res         = $this->__parseOutput( $decode );
 
         //remove temporary file (used only by legacy converters)
-        if (isset($tmp_name)) unlink( $tmp_name );
+        if ( isset( $tmp_name ) ) {
+            unlink( $tmp_name );
+        }
 
         return $res;
     }
@@ -610,23 +610,24 @@ class FileFormatConverter {
      * Check that the conversion service is working.
      * This method works with the new conversion service only.
      */
-    private function checkOpenService() {
-        $url = "http://{$this->ip}:{$this->port}/".self::testFunction;
-        $cl = curl_init($url);
-        curl_setopt($cl,CURLOPT_CONNECTTIMEOUT,3);
-        curl_setopt($cl,CURLOPT_HEADER,true);
-        curl_setopt($cl,CURLOPT_NOBODY,true);
-        curl_setopt($cl,CURLOPT_RETURNTRANSFER,true);
-        curl_exec($cl);
-        $httpcode = curl_getinfo($cl, CURLINFO_HTTP_CODE);
-        curl_close($cl);
+    private function __checkOpenService() {
+        $url = "http://{$this->ip}:{$this->port}/" . self::testFunction;
+        $cl  = curl_init( $url );
+        curl_setopt( $cl, CURLOPT_CONNECTTIMEOUT, 3 );
+        curl_setopt( $cl, CURLOPT_HEADER, true );
+        curl_setopt( $cl, CURLOPT_NOBODY, true );
+        curl_setopt( $cl, CURLOPT_RETURNTRANSFER, true );
+        curl_exec( $cl );
+        $httpcode = curl_getinfo( $cl, CURLINFO_HTTP_CODE );
+        curl_close( $cl );
+
         return $httpcode >= 200 && $httpcode < 300;
     }
 
     /**
      * Check that the legacy conversion service is working.
      */
-    private function checkOpenLegacyService( $url ) {
+    private function __checkOpenLegacyService( $url ) {
         //default is failure
         $open = false;
 
@@ -654,20 +655,20 @@ class FileFormatConverter {
 
         //assign converter
         if ( !$chosen_by_user_machine ) {
-            list($this->ip, $this->port) = $this->pickRandConverter();
-            $storage  = $this->getValidStorage();
+            list( $this->ip, $this->port ) = $this->__pickRandConverter();
+            $storage = $this->getValidStorage();
 
             //add replace/regexp pattern because we have more than 1 replacement
             //http://stackoverflow.com/questions/2222643/php-preg-replace
             $xliffContent = self::replacedAddress( $storage, $xliffContent );
         } else {
-            $this->ip = $chosen_by_user_machine;
+            $this->ip   = $chosen_by_user_machine;
             $this->port = self::DEFAULT_PORT;
         }
 
         $url = "$this->ip:$this->port/$this->fromXliffFunction";
 
-        $uid_ext       = $this->extractUidandExt( $xliffContent );
+        $uid_ext       = $this->__extractUidandExt( $xliffContent );
         $data[ 'uid' ] = $uid_ext[ 0 ];
 
         //get random name for temporary location
@@ -705,8 +706,8 @@ class FileFormatConverter {
         $res = $this->__parseOutput( $decode );
         unset( $decode );
 
-	//remove temporary file
-	unlink($tmp_name);
+        //remove temporary file
+        unlink( $tmp_name );
 
         return $res;
     }
@@ -731,25 +732,25 @@ class FileFormatConverter {
 
             //assign converter
             if ( !$chosen_by_user_machine ) {
-                list($this->ip, $this->port) = $this->pickRandConverter();
-                $storage  = $this->getValidStorage();
+                list( $this->ip, $this->port ) = $this->__pickRandConverter();
+                $storage = $this->getValidStorage();
 
                 //add replace/regexp pattern because we have more than 1 replacement
                 //http://stackoverflow.com/questions/2222643/php-preg-replace
                 $xliffContent = self::replacedAddress( $storage, $xliffContent );
             } else {
-                $this->ip = $chosen_by_user_machine;
+                $this->ip   = $chosen_by_user_machine;
                 $this->port = self::DEFAULT_PORT;
             }
 
             $url = "$this->ip:$this->port/$this->fromXliffFunction";
 
-            $uid_ext       = $this->extractUidandExt( $xliffContent );
+            $uid_ext       = $this->__extractUidandExt( $xliffContent );
             $data[ 'uid' ] = $uid_ext[ 0 ];
 
             //get random name for temporary location
-            $tmp_name           = tempnam( "/tmp", "MAT_BW" );
-            $temporary_files[ ] = $tmp_name;
+            $tmp_name          = tempnam( "/tmp", "MAT_BW" );
+            $temporary_files[] = $tmp_name;
 
             //write encoded file to temporary location
             $fileSize = file_put_contents( $tmp_name, ( $xliffContent ) );
