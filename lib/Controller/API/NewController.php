@@ -102,7 +102,11 @@ class NewController extends ajaxController {
                 ),
                 'owner_email'       => array(
                         'filter' => FILTER_VALIDATE_EMAIL
+                ),
+                'revision_type' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
                 )
+
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -162,6 +166,8 @@ class NewController extends ajaxController {
                 return -5;
             }
         }
+
+        $this->revision_type   = $__postInput['revision_type'];
 
         try {
             $this->validateEngines();
@@ -307,7 +313,10 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
+<<<<<<< 830d406cda38ca60e337c0c126c6b7b7aef329bf
 
+=======
+>>>>>>> adds revision_type param to project creation API
     public function doAction() {
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
@@ -583,6 +592,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
+        $projectStructure[ 'revision_type' ]        = $this->revision_type ;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
@@ -599,7 +609,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = array_values( $projectStructure[ 'result' ][ 'errors' ] );
 
         } else {
-
             //everything ok
             $this->api_output[ 'status' ]       = 'OK';
             $this->api_output[ 'message' ]      = 'Success';

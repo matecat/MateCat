@@ -30,6 +30,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
       });
     }
 
+    public function getMetadata() {
+      return Projects_MetadataDao::getByProjectId( $this->id );
+    }
+
     public function isFeatureEnabled( $feature_code ) {
       return $this->getOwnerFeature( $feature_code ) !== false ;
     }

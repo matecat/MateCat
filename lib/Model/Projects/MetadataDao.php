@@ -1,6 +1,12 @@
 <?php
 
 class Projects_MetadataDao {
+
+  public static function getByProjectId( $id ) {
+      $dao = new Projects_MetadataDao(Database::obtain());
+      return $dao->allByProjectId( $id );
+  }
+
   public function allByProjectId( $id ) {
       $conn = Database::obtain()->getConnection();
       $stmt = $conn->prepare(

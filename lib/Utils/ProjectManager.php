@@ -110,6 +110,21 @@ class ProjectManager {
     public function getProjectStructure() {
         return $this->projectStructure;
     }
+    private function evalMetadata () {
+        if ($this->projectStructure['revision_type'] == null) {
+            return ;
+        }
+
+
+        // TODO:
+
+        $dao = new Projects_MetadataDao( Database::obtain() );
+        $dao->set(
+            $this->projectStructure['id_project'],
+            'revision_type',
+            $this->projectStructure['revision_type']
+        );
+    }
 
 
     public function createProject() {
@@ -132,10 +147,12 @@ class ProjectManager {
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
         $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
 
+        $this->evalMetadata();
 
         //create user (Massidda 2013-01-24)
         //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
+            // TODO: move this 100 lines IF condition elsewhere to reduce scope
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
 
@@ -649,11 +666,7 @@ class ProjectManager {
 
                 Utils::sendErrMailReport( $output, $exn->getMessage() );
             }
-
-
         }
-
-
     }
 
     /**
