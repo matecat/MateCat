@@ -221,7 +221,8 @@ function doReplaceAll( Array $queryParams ) {
 
         //we get the spaces before needed string and re-apply before substitution because we can't know if there are
         //and how much they are
-        $trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '$1' . $replacement, $tRow[ 'translation' ] );
+        $trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '$1', $tRow[ 'translation' ] );
+        $trMod .= $replacement;
 
         /**
          * Escape for database
@@ -2413,7 +2414,7 @@ function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ){
         return $e->getCode() * -1;
     }
     $affectedRows = $db->affected_rows;
-    Log::doLog( "Affected: " . $affectedRows . "\n" );
+    Log::doLog( "Affected: " . $affectedRows );
     return $affectedRows;
 }
 
@@ -2899,6 +2900,7 @@ function setJobCompleteness( $jid, $is_completed ) {
     try {
         $result = $db->query_first($query);
     } catch( PDOException $e ) {
+        Log::doLog( $query );
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
