@@ -1,22 +1,22 @@
 <?php
 
 function setTestConfigFile() {
-    renameFile('config.ini', 'config.development.ini');
-    renameFile('config.test.ini', 'config.ini');
+    copyFile('config.ini', 'config.development.ini');
+    copyFile('config.test.ini', 'config.ini');
 }
 
-function renameFile( $source, $destination) {
+function copyFile( $source, $destination) {
     $source = PROJECT_ROOT . '/inc/' . $source;
     $destination = PROJECT_ROOT . '/inc/' . $destination ;
 
-    if (! rename($source, $destination) ){
-        throw new Exception("Error moving $source to $destination");
+    if (! copy($source, $destination) ){
+        throw new Exception("Error copying $source to $destination");
     }
 }
 
 function restoreDevelopmentConfigFile() {
-    renameFile('config.ini', 'config.test.ini');
-    renameFile('config.development.ini', 'config.ini');
+    copyFile('config.ini', 'config.test.ini');
+    copyFile('config.development.ini', 'config.ini');
 }
 
 function test_file_path( $file ) {
