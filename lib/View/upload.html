@@ -110,20 +110,20 @@
     <h2>From</h2>
     <select name="source-lang" id="source-lang">
         <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
-            <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code" tal:content="language/name"></option>
-            <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code" tal:content="language/name"></option>
+            <option class="custom" tal:condition="language/selected" selected="selected"  tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
+            <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
         </tal:block>
 
         <option class="separator" disabled="disabled">---</option>
 
         <tal:block tal:repeat="language source_languages">
-            <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code" tal:content="language/name">
+            <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
                 ---
             </option>
-            <option tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="value language/code" tal:content="language/name">
+            <option tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
                 ---
             </option>
-            <option tal:condition="php: language['code'] NE 'en-US'" tal:attributes="value language/code" tal:content="language/name">
+            <option tal:condition="php: language['code'] NE 'en-US'" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
                 ---
             </option>
         </tal:block>
@@ -136,20 +136,20 @@
     <h2>To</h2>
     <select name="target-lang" id="target-lang">
         <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
-            <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code" tal:content="language/name"></option>
-            <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code" tal:content="language/name"></option>
+            <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
+            <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
         </tal:block>
 
         <option class="separator" disabled="disabled">---</option>
 
         <tal:block tal:repeat="language target_languages">
-            <option tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" selected="selected" tal:attributes="value language/code" tal:content="language/name">
+            <option tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
                 ---
             </option>
-            <option tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="value language/code" tal:content="language/name">
+            <option tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
                 ---
             </option>
-            <option tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="value language/code" tal:content="language/name">
+            <option tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name">
                 ---
             </option>
         </tal:block>
