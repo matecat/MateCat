@@ -17,8 +17,9 @@ UI = null;
 
 UI = {
     init: function () {
-        UI.conversionBlocked = false;
-        UI.skipLangDetectArr = {}
+        this.conversionBlocked = false;
+        this.RTLAlertSent = false;
+        this.skipLangDetectArr = {}
 
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
@@ -48,6 +49,20 @@ UI = {
     },
     enableAnalyze: function () {
         enableAnalyze();
+    },
+    checkRTL: function () {
+        if(!this.RTLAlertSent) {
+            sourceDirection = $('#source-lang option[value="' + $('#source-lang').val() + '"]').attr('data-direction');
+            targetDirection = $('#target-lang option[value="' + $('#target-lang').val() + '"]').attr('data-direction');
+            console.log('sourceDirection: ', sourceDirection);
+            if((sourceDirection == 'rtl') || (targetDirection == 'rtl')) {
+                APP.alert("Support for RTL languages is in beta. <br />Before starting your translation, download the Preview from the Translate page and check the target file.");
+                this.RTLAlertSent = true;
+            }
+        }
+    },
+    checkMultilangRTL: function () {
+        return false;
     },
     conversionsAreToRestart: function () {
         var num = 0;

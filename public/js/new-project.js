@@ -56,6 +56,7 @@ $(document).ready(function() {
 
 	$("#source-lang").on('change', function(e){
 		console.log('source language changed');
+        UI.checkRTL();
 		if(!$('.template-download').length) return;
 		if (UI.conversionsAreToRestart()) {
 			APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
@@ -66,6 +67,7 @@ $(document).ready(function() {
 	});
 
 	$("#target-lang").change(function(e) {
+        UI.checkRTL();
 		$('.popup-languages li.on').each(function(){
 			$(this).removeClass('on').find('input').removeAttr('checked');
 		});
