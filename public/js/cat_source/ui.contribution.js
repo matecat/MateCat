@@ -137,13 +137,15 @@ $.extend(UI, {
 	getContribution_complete: function(n) {
 		$(".loader", n).removeClass('loader_on');
 	},
-  getContribution_success: function(d, segment) {
-    this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
-    this.processContributions(d, segment);
-    this.currentSegmentQA();
-    console.log('getContribution:complete');
-    $(document).trigger('getContribution:complete', segment);
-  },
+    getContribution_success: function(d, segment) {
+        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
+        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
+
+        this.processContributions(d, segment);
+        this.currentSegmentQA();
+        console.log('getContribution:complete');
+        $(document).trigger('getContribution:complete', segment);
+    },
   processContributions: function(d, segment) {
     if(!d) return true;
     this.renderContributions(d, segment);
@@ -233,7 +235,6 @@ $.extend(UI, {
 			});
             // start addtmxTmp
 //            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
-			$('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
