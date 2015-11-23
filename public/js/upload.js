@@ -49,10 +49,13 @@ $(document).ready(function(){
         if ($('.popup-languages li.on').length) {
             var str = '';
             var vals = '';
+            var direction ="ltr";
             $('.popup-languages li.on input').each(function(){
                 str += $(this).parent().find('label').text() + ',';
                 vals += $(this).val() + ',';
+                if (UI.checkMultilangRTL()) direction = "rtl";
             })
+            console.log('direction: ', direction);
             str = str.substring(0, str.length - 1);
             vals = vals.substring(0, vals.length - 1);
             var op = '<option id="extraTarget" selected="selected" value="' + vals + '">' + str + '</option>';
