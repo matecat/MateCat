@@ -221,8 +221,7 @@ function doReplaceAll( Array $queryParams ) {
 
         //we get the spaces before needed string and re-apply before substitution because we can't know if there are
         //and how much they are
-        $trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '$1', $tRow[ 'translation' ] );
-        $trMod .= $replacement;
+        $trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '${1}' . $replacement, $tRow[ 'translation' ] );
 
         /**
          * Escape for database
