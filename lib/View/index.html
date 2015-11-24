@@ -27,7 +27,7 @@
                 mt_enabled: ${mt_enabled | string:true},
                 id_job: '${jid}',
                 get job_id() {
-                  console.info('job_id is deprecated, use id_job instead');
+                  /* console.info('job_id is deprecated, use id_job instead'); */
                   return this.id_job ;
                 },
                 password: '${password}',

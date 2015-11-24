@@ -86,7 +86,8 @@ class ProjectManager {
                             'uid'                  => null,
                             'skip_lang_validation' => false,
                             'pretranslate_100'     => 0,
-                            'dqf_key'              => null
+                            'dqf_key'              => null,
+                            'owner'                => ''
                     ) );
         }
 
@@ -457,8 +458,10 @@ class ProjectManager {
 
         if ( isset( $_SESSION[ 'cid' ] ) and !empty( $_SESSION[ 'cid' ] ) ) {
             $owner = $_SESSION[ 'cid' ];
+            $this->projectStructure['owner'] = $owner;
         } else {
             $_SESSION[ '_anonym_pid' ] = $this->projectStructure[ 'id_project' ];
+
             //default user
             $owner = '';
         }
@@ -467,7 +470,7 @@ class ProjectManager {
         $isEmptyProject = false;
         //Throws exception
         try {
-            $this->_createJobs( $this->projectStructure, $owner );
+            $this->_createJobs( $this->projectStructure );
 
             //FIXME for project with pre translation this query is not enough,
             //we need compare the number of segments with translations, but take an eye to the opensource
@@ -841,7 +844,7 @@ class ProjectManager {
 
     }
 
-    protected function _createJobs( ArrayObject $projectStructure, $owner ) {
+    protected function _createJobs( ArrayObject $projectStructure ) {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
@@ -901,7 +904,7 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
-            $jid = insertJob( $projectStructure, $password, $target, $job_segments, $owner );
+            $jid = insertJob( $projectStructure, $password, $target, $job_segments, $projectStructure['owner'] );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $jid );
             $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $password );

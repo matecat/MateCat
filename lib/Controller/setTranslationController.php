@@ -20,18 +20,6 @@ class setTranslationController extends ajaxController {
 
     protected $client_target_version;
 
-    /**
-     * This constant represent the job progress percentage over
-     * which the wordcount could be updated by a massive query.
-     */
-//    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
-
-    /**
-     * The probability over which the wordcount massive query
-     * will be triggered
-     */
-//    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
-
     public function __construct() {
 
         parent::__construct();
@@ -97,9 +85,6 @@ class setTranslationController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
-//        $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "prova" );
-//        throw new Exception( "prova", -1 );
-
         //strtoupper transforms null to "" so check for the first element to be an empty string
         if ( !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num ) ) {
 
@@ -123,9 +108,6 @@ class setTranslationController extends ajaxController {
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
         } else {
-
-//            $this->result[ 'error' ][ ] = array( "code" => -1000, "message" => "test 1" );
-//            throw new Exception( 'prova', -1 );
 
             //get Job Info, we need only a row of jobs ( split )
             $this->jobData = $job_data = getJobData( (int)$this->id_job, $this->password );
@@ -498,14 +480,20 @@ class setTranslationController extends ajaxController {
 
         $db->commit();
 
-        if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' ) {
+        //EVERY time an user changes a row in his job when the job is completed,
+        // a query to do the update is executed...
+        // Avoid this by setting a key on redis with an reasonable TTL
+        $redisHandler = new RedisHandler();
+        $job_status = $redisHandler->getConnection()->get( 'job_completeness:' .  $this->id_job );
+        if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' && empty( $job_status ) ) {
+            $redisHandler->getConnection()->setex( 'job_completeness:' . $this->id_job, 60 * 60 * 24 * 15, true ); //15 days
             $update_completed = setJobCompleteness( $this->id_job, 1 );
-        }
-
-        if ( @$update_completed < 0 ) {
-            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
+            if ( $update_completed < 0 ) {
+                $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
+                $redisHandler->getConnection()->del( 'job_completeness:' .  $this->id_job );
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
         }
 
     }

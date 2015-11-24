@@ -4,11 +4,11 @@
 [server_configuration]
 Host       = localhost
 Port       = 25
-Sender     = cattool@matecat.com
+Sender     = cattool@matecat.loc
 Hostname   = matecat.com
-From       = cattool@matecat.com
+From       = cattool@matecat.loc
 FromName   = Matecat Tool
-ReturnPath = no-reply@matecat.com
+ReturnPath = no-reply@matecat.loc
 
 [email_list]
 admin@example.org = John Doe

@@ -660,11 +660,13 @@ $.extend(UI, {
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();
-
         }).on('click', '#previewDropdown .previewLink a', function(e) {
             e.preventDefault();
             $('.downloadtr-button.draft').click();
-        }).on('click', '#downloadProject', function(e) {
+		}).on('click', '#previewDropdown a.tmx', function(e) {
+			e.preventDefault();
+			window.open($(this).attr('href'));
+		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             runDownload();
 		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
@@ -1506,7 +1508,9 @@ $.extend(UI, {
 			return false;
         }).on('click', 'section .footer .tab-switcher', function(e) {
             e.preventDefault();
-            UI.currentSegment.trigger('showMatchesLocal');
+			if(UI.body.hasClass('hideMatches')) UI.switchFooter();
+
+//            UI.currentSegment.trigger('showMatchesLocal');
 //            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
         }).on('showMatchesLocal', '.editor', function(e) {
             UI.currentSegment.find('.footer').addClass('showMatches');
