@@ -179,7 +179,7 @@ class EditLog_EditLogModel {
             if ( $seg->raw_word_count < 1 ) {
                 $displaySeg->raw_word_count = 1;
             }
-
+            $displaySeg->raw_word_count = round($displaySeg->raw_word_count);
             //todo: remove this
             $displaySeg->secs_per_word = $seg->getSecsPerWord();
 
@@ -314,7 +314,7 @@ class EditLog_EditLogModel {
         $pagination  = $this->evaluatePagination( $__pagination_prev, $__pagination_next + 1 );
         $globalStats = $this->evaluateGlobalStats();
 
-        $stats[ 'valid-word-count' ] = $globalStats[ 'raw_words' ];
+        $stats[ 'valid-word-count' ] = round($globalStats[ 'raw_words' ]);
 
         //TODO: this will not work anymore
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
