@@ -402,6 +402,10 @@ class EditLog_EditLogModel {
             unset( $pagination[ 'prev' ] );
         }
 
+        //there is only one page: pagination is useless
+        if( $pagination['current_page'] == $pagination['last_page']){
+            $pagination = array();
+        }
 
         return $pagination;
     }
