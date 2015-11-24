@@ -175,3 +175,27 @@ function integrationSetTranslation($options) {
 
 
 }
+
+function sig_handler($signo) {
+     switch ($signo) {
+         case SIGTERM:
+             // handle shutdown tasks
+             restoreDevelopmentConfigFile();
+             exit;
+             break;
+         case SIGHUP:
+             restoreDevelopmentConfigFile();
+             break;
+         case SIGUSR1:
+             restoreDevelopmentConfigFile();
+             break;
+         default:
+             // handle all other signals
+     }
+}
+
+function setupSignalHandler() {
+    pcntl_signal(SIGTERM, "sig_handler");
+    pcntl_signal(SIGHUP,  "sig_handler");
+    pcntl_signal(SIGUSR1, "sig_handler");
+}

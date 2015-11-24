@@ -14,7 +14,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
     public static function insertRecord( $values ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "INSERT INTO segment_notes " . 
-            " ( id_segment, internal_id, note ) values " .
+            " ( id_segment, internal_id, note ) VALUES " .
             " ( :id_segment, :internal_id, :note ) "
         ); 
 

@@ -8,13 +8,16 @@ $db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$
 $db->debug = false;
 $db->connect();
 
-$valid_codes = array('project_completion');  // TODO move this elsewhere
+$valid_codes = array(
+    'project_completion', 'translation_versions'
+);  // TODO move this elsewhere
 
 # Generate and insert a new enabled api keys pair for
 # the give email, and print the result on screen .
 
 function usage() {
   global $valid_codes; 
+
   $valid_codes_string = implode(', ', $valid_codes);
 
   echo <<<END

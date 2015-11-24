@@ -2,6 +2,22 @@
 
 class Utils {
 
+    public static function validate_required($params, $required_keys) {
+        $missing = array();
+
+        foreach( $required_keys as $key ) {
+            if ( !array_key_exists($key, $params) ) {
+                $missing[] = $key;
+            }
+        }
+
+        if ( count($missing) > 0 ) {
+            throw new Exception( "Missing keys: " . implode(', ', $missing) );
+        }
+
+        return $params ;
+    }
+
 	public static function is_assoc($array) {
 		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));
 	}

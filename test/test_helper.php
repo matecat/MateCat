@@ -14,8 +14,8 @@ require( 'SeedLoader.php');
 require( 'php_versions_override.php');
 
 prepareTestDatabase();
-
 setTestConfigFile();
+setupSignalHandler();
 
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 register_shutdown_function(function() {

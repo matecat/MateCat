@@ -69,7 +69,6 @@ class setTranslationController extends ajaxController {
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
-
         if ( is_null( $this->propagate ) || !isset( $this->propagate ) ) {
             $this->propagate = true;
         }
@@ -169,7 +168,6 @@ class setTranslationController extends ajaxController {
     }
 
     public function doAction() {
-
         try {
 
             $this->_checkData();
@@ -185,6 +183,9 @@ class setTranslationController extends ajaxController {
             return $e->getCode();
 
         }
+
+        $this->checkLogin();
+        $this->initVersionHandler();
 
         //check tag mismatch
         //get original source segment, first
@@ -276,15 +277,27 @@ class setTranslationController extends ajaxController {
          * - get $_jobTotalPEE
          * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
          */
+
         $this->updateJobPEE( $old_translation, $_Translation );
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
         /**
+         * Translation version handler: save old translation.
+         */
+
+        $this->VersionsHandler->saveVersion(array(
+            'old_translation' => $old_translation,
+            'new_translation' => $_Translation
+        ));
+
+        /**
          * when the status of the translation changes, the auto propagation flag
          * must be removed
          */
-        if ( $_Translation[ 'translation' ] != $old_translation[ 'translation' ] || $this->status == Constants_TranslationStatus::STATUS_TRANSLATED || $this->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+        if ( $_Translation[ 'translation' ] != $old_translation[ 'translation' ] ||
+            $this->status == Constants_TranslationStatus::STATUS_TRANSLATED ||
+            $this->status == Constants_TranslationStatus::STATUS_APPROVED ) {
             $_Translation[ 'autopropagated_from' ] = 'NULL';
         }
 
@@ -293,7 +306,8 @@ class setTranslationController extends ajaxController {
         if ( !empty( $res[ 'errors' ] ) ) {
             $this->result[ 'errors' ] = $res[ 'errors' ];
 
-            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " .
+                var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
             $db->rollback();
@@ -343,10 +357,6 @@ class setTranslationController extends ajaxController {
         //propagate translations
         $TPropagation = array();
 
-        //Warning: this value will NOT be used to update values,
-        //but to exclude current segment from auto-propagation
-        $_idSegment = $this->id_segment;
-
         ( $propagateToTranslated ) ? $TPropagation[ 'status' ] = $this->status : null /* NO OP */
         ;
 
@@ -362,14 +372,23 @@ class setTranslationController extends ajaxController {
 
         $propagationTotal = array();
         if ( $propagateToTranslated && in_array( $this->status, array(
-                        Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
-                        Constants_TranslationStatus::STATUS_REJECTED
-                ) )
+            Constants_TranslationStatus::STATUS_TRANSLATED,
+            Constants_TranslationStatus::STATUS_APPROVED,
+            Constants_TranslationStatus::STATUS_REJECTED
+            ) )
         ) {
 
             try {
+                $this->VersionsHandler->savePropagation( array(
+                    'propagation'             => $TPropagation,
+                    'propagate_to_translated' => $propagateToTranslated,
+                    'old_translation'         => $old_translation,
+                    'job_data'                => $this->jobData
+                ));
 
-                $propagationTotal = propagateTranslation( $TPropagation, $this->jobData, $_idSegment, $propagateToTranslated );
+                $propagationTotal = propagateTranslation(
+                    $TPropagation, $this->jobData, $this->id_segment, $propagateToTranslated
+                );
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
@@ -480,6 +499,7 @@ class setTranslationController extends ajaxController {
 
         }
 
+
         $db->commit();
 
         //EVERY time an user changes a row in his job when the job is completed,
@@ -586,9 +606,13 @@ class setTranslationController extends ajaxController {
                     )
             );
         }
-
-
     }
 
-
+    private function initVersionHandler() {
+        $this->VersionsHandler = new SegmentTranslationVersionHandler(
+            $this->id_job, $this->id_segment, $this->uid,
+            $this->jobData['id_project'],
+            $this->isRevision()
+        );
+    }
 }

@@ -25,5 +25,4 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     public $warning ;
     public $serialized_errors_list ;
 
-
 }
