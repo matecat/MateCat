@@ -2982,80 +2982,6 @@ console.log('eccolo: ', typeof token);
     beforePropagateTranslation: function(segment, status) {
         if($(segment).attr('id').split('-').length > 2) return false;
         UI.propagateTranslation(segment, status, false);
-/*
-        return false;
-
-        if ( UI.propagationsAvailable ){
-
-            if ( typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined' ) { // cookie already set
-                if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
-                    UI.propagateTranslation(segment, status, true);
-                } else {
-                    UI.propagateTranslation(segment, status, false);
-                }
-
-            } else {
-//            var sid = segment.attr('id').split('-')[1];
-                APP.popup({
-                    name: 'confirmPropagation',
-                    title: 'Warning',
-                    buttons: [
-                        {
-                            type: 'ok',
-                            text: 'Yes',
-                            callback: 'doPropagate',
-                            params: 'true',
-                            closeOnClick: 'true'
-                        },
-                        {
-                            type: 'cancel',
-                            text: 'No, thanks',
-                            callback: 'doPropagate',
-                            params: 'false',
-                            closeOnClick: 'true'
-                        }
-                    ],
-                    content: "Do you want to extend the autopropagation of this translation even to " + UI.propagationsAvailable + " already translated segments?"
-                });
-            }
-
-        }
-*/
-  /*
-        if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
-            console.log('cookie already set');
-
-        } else {
-            console.log('cookie not yet set');
-            APP.popup({
-                name: 'confirmPropagation',
-                title: 'Warning',
-                buttons: [
-                    {
-                        type: 'ok',
-                        text: 'Yes',
-                        callback: 'doPropagate',
-                        params: 'true',
-                        closeOnClick: 'true'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'No, thanks',
-                        callback: 'doPropagate',
-                        params: 'false',
-                        closeOnClick: 'true'
-                    }
-                ],
-                content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
-            });
-        }
-        checkBefore = false;
-        if(checkBefore) {
-
-        } else {
-            this.propagateTranslation(segment, status);
-        }
-        */
     },
 
     propagateTranslation: function(segment, status, evenTranslated) {
@@ -3090,25 +3016,6 @@ console.log('eccolo: ', typeof token);
 
         }
 //        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
-    },
-    doPropagate: function (trans) {
-        reqData = this.tempReqArguments;
-        reqData.action = 'setAutoPropagation';
-        reqData.propagateAll = trans;
-
-        this.tempReqArguments = null;
-
-        APP.doRequest({
-            data: reqData,
-            context: [reqData, trans],
-            error: function() {
-            },
-            success: function() {
-                console.log('success setAutoPropagation');
-                UI.propagateTranslation($('#segment-' + this[0].id_segment), this[0].status, this[1]);
-            }
-        });
-
     },
     switchFooter: function() {
         console.log('switchFooter');
