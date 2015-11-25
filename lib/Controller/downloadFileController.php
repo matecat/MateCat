@@ -93,7 +93,7 @@ class downloadFileController extends downloadController {
         $files_job_by_converter_version = array();
 
         // Detect the converter's version to use for each file, then store
-        // file infos accordingly.
+        // file info accordingly.
         foreach ( $files_job as $file ) {
             $fileType = DetectProprietaryXliff::getInfo($file['xliffFilePath']);
             $files_job_by_converter_version[$fileType[ 'converter_version' ]][] = $file;

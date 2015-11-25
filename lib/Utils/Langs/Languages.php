@@ -148,7 +148,7 @@ class Langs_Languages {
             if ( $lang[ 'enabled' ] ) {
                 $code    = $rfc;
                 $top     = isset( $lang[ 'top' ] ) ? $lang[ 'top' ] : '';
-                $list[ ] = array( 'code' => $code, 'name' => $lang[ 'localized' ][ $localizationLang ], 'top' => $top );
+                $list[ ] = array( 'code' => $code, 'name' => $lang[ 'localized' ][ $localizationLang ], 'top' => $top, 'direction' => ( $lang['rtl'] ) ? 'rtl' : 'ltr' );
             }
         }
 

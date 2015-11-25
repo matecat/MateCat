@@ -1508,7 +1508,9 @@ $.extend(UI, {
 			return false;
         }).on('click', 'section .footer .tab-switcher', function(e) {
             e.preventDefault();
-            UI.currentSegment.trigger('showMatchesLocal');
+			if(UI.body.hasClass('hideMatches')) UI.switchFooter();
+
+//            UI.currentSegment.trigger('showMatchesLocal');
 //            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
         }).on('showMatchesLocal', '.editor', function(e) {
             UI.currentSegment.find('.footer').addClass('showMatches');

@@ -61,6 +61,7 @@ class newProjectController extends viewController {
                             $ar[ 'name' ]     = $this->lang_handler->getLocalizedName( $lang );
                             $ar[ 'code' ]     = $lang;
                             $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
+                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
                             array_push( $tmpSourceArAs, $ar );
                         }
                     }
@@ -105,6 +106,7 @@ class newProjectController extends viewController {
 
                             $ar               = array();
                             $ar[ 'name' ]     = $cl;
+                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
                             $ar[ 'code' ]     = $lang;
                             $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
                             array_push( $tmpTargetArAs, $ar );
@@ -269,7 +271,7 @@ class newProjectController extends viewController {
 
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 //        foreach ( $target_languages as $k => $v ) {
-//            //if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
+//            if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
 //            if ( in_array( $v[ 'code' ], array( 'ja-JP' ) ) ) {
 //                unset ( $target_languages[ $k ] );
 //            }
