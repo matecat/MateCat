@@ -16,6 +16,7 @@
             };
         </script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
@@ -37,7 +38,7 @@
 
                 <!--tal:block metal:fill-slot="actions"-->
 
-                    <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
+                    <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
                 <!--/tal:block -->
 
 
@@ -129,7 +130,9 @@
                     </tr>
 
                     <tr>
-                        <td><a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}#${file_data/id}"><span tal:replace="file_data/id | default" /></a></td>
+                        <td><a
+                                tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}#${file_data/id}"><span
+                                tal:replace="file_data/id | default" /></a></td>
                         <td tal:content="file_data/raw_word_count | default">N/A</td>
                         <td tal:content="file_data/display_time_to_edit"></td>
                         <td tal:content="file_data/secs_per_word | default"
