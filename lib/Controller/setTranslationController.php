@@ -484,13 +484,13 @@ class setTranslationController extends ajaxController {
         // a query to do the update is executed...
         // Avoid this by setting a key on redis with an reasonable TTL
         $redisHandler = new RedisHandler();
-        $job_status = $redisHandler->getConnection()->get( 'job_completeness:' .  $this->id_job );
+        $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
         if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' && empty( $job_status ) ) {
             $redisHandler->getConnection()->setex( 'job_completeness:' . $this->id_job, 60 * 60 * 24 * 15, true ); //15 days
             $update_completed = setJobCompleteness( $this->id_job, 1 );
             if ( $update_completed < 0 ) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
-                $redisHandler->getConnection()->del( 'job_completeness:' .  $this->id_job );
+                $redisHandler->getConnection()->del( 'job_completeness:' . $this->id_job );
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );
             }
@@ -532,31 +532,19 @@ class setTranslationController extends ajaxController {
                 )
         );
 
+        $oldSegment               = clone $segment;
+        $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
+
+        $oldPEE          = $segment->getPeePerc();
+        $oldPee_weighted = $oldPEE * $segmentRawWordCount;
+
+        $segment->translation    = $new_translation[ 'translation' ];
+        $segment->pe_effort_perc = null;
+
+        $newPEE          = $segment->getPeePerc();
+        $newPee_weighted = $newPEE * $segmentRawWordCount;
+
         if ( $segment->isValidForEditLog() ) {
-            $oldPEE = $segment->getPeePerc();
-
-            if ( $oldPEE < 0 ) {
-                $oldPEE = 0;
-            } else if ( $oldPEE > 100 ) {
-                $oldPEE = 100;
-            }
-            $oldPee_weighted = $oldPEE * $segmentRawWordCount;
-
-            $segment->translation    = $new_translation[ 'translation' ];
-            $segment->pe_effort_perc = null;
-            $newPEE                  = $segment->getPeePerc();
-
-            if ( $newPEE < 0 ) {
-                $newPEE = 0;
-            } else if ( $newPEE > 100 ) {
-                $newPEE = 100;
-            }
-
-            $newPee_weighted = $newPEE * $segmentRawWordCount;
-
-            $oldSegment               = clone $segment;
-            $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
-
             //if the segment was not valid for editlog and now it is, then just add the weighted pee
             if ( !$oldSegment->isValidForEditLog() ) {
                 $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] + $newPee_weighted );
@@ -578,7 +566,26 @@ class setTranslationController extends ajaxController {
                             $this->password
                     )
             );
+        } //segment was valid but now it is no more
+        else if ( $oldSegment->isValidForEditLog() ) {
+            $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted );
+
+            $queryUpdateJob = "update jobs
+                                set avg_post_editing_effort = %f
+                                where id = %d and password = '%s'";
+
+            $db = Database::obtain();
+            $db->query(
+                    sprintf(
+                            $queryUpdateJob,
+                            $newTotalJobPee,
+                            $this->id_job,
+                            $this->password
+                    )
+            );
         }
+
+
     }
 
 
