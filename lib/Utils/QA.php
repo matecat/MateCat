@@ -210,6 +210,7 @@ class QA {
     const ERR_STARSIGN_MISMATCH = 25;
     const ERR_GLOSSARY_MISMATCH = 26;
     const ERR_SPECIAL_ENTITY_MISMATCH = 27;
+    const ERR_EUROSIGN_MISMATCH = 28;
 
     const ERR_TAG_MISMATCH = 1000;
 
@@ -440,6 +441,7 @@ class QA {
             case self::ERR_AT_MISMATCH :
             case self::ERR_HASH_MISMATCH :
             case self::ERR_POUNDSIGN_MISMATCH :
+            case self::ERR_EUROSIGN_MISMATCH :
             case self::ERR_PERCENT_MISMATCH :
             case self::ERR_EQUALSIGN_MISMATCH :
             case self::ERR_TAB_MISMATCH :
@@ -1855,7 +1857,7 @@ class QA {
     protected function _checkSymbolConsistency() {
 
         $symbols = array(
-                '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '*'
+                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '*'
         );
 
         $specialSymbols = array( '$', '#' );
@@ -1868,6 +1870,9 @@ class QA {
             for ( $i = 0; $i < abs( $symbolOccurrencesInSource - $symbolOccurrencesInTarget ); $i++ ) {
 
                 switch ( $sym ) {
+		    case '€':
+                        $this->_addError( self::ERR_EUROSIGN_MISMATCH );
+                        break;
                     case '@':
                         $this->_addError( self::ERR_AT_MISMATCH );
                         break;
