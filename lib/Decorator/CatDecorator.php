@@ -19,15 +19,39 @@ class CatDecorator {
   }
 
   public function decorate() {
-    $this->template->header = new HeaderDecorator( $this->controller ) ;
+    $this->decorateMainView();
 
+    $this->decorateHeader();
     $this->projectCompletionFeature();
     // TODO: add future presentation logic here
   }
 
   private function projectCompletionFeature() {
     $this->template->projectCompletionFeature = $this->project_completion_feature_enabled ;
-
   }
+
+  private function decorateMainView() {
+      $this->reviewSettings();
+  }
+
+  private function decorateHeader() {
+      $this->template->header = new HeaderDecorator( $this->controller ) ;
+  }
+
+  private function reviewSettings() {
+      $this->template->isReview = $this->controller->isRevision();
+
+      $this->template->reviewClass = (
+          $this->controller->isRevision() ?
+          ' review' :
+          '' );
+
+      $this->template->reviewType = (
+          $this->job->isFeatureEnabled( Features::REVIEW_IMPROVED ) ?
+          'improved' :  # TODO: constantize
+          'simple'
+      );
+  }
+
 
 }

@@ -564,8 +564,9 @@ class catController extends viewController {
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
-        $this->template->isReview         = var_export( self::isRevision(), true );
-        $this->template->reviewClass      = ( self::isRevision() ? ' review' : '' );
+        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+
         $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;

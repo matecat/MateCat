@@ -8,9 +8,7 @@ $db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$
 $db->debug = false;
 $db->connect();
 
-$valid_codes = array(
-    'project_completion', 'translation_versions'
-);  // TODO move this elsewhere
+$valid_codes = Features::$VALID_CODES ;
 
 # Generate and insert a new enabled api keys pair for
 # the give email, and print the result on screen .
@@ -18,12 +16,12 @@ $valid_codes = array(
 function usage() {
   global $valid_codes; 
 
-  $valid_codes_string = implode(', ', $valid_codes);
+  $valid_codes_string = implode(', ', $valid_codes );
 
   echo <<<END
 Usage: 
 
---email   foo@example.org       The email address of the user
+--email    foo@example.org       The email address of the user
 --feature  feature_code          Feature code to enable for the user
 
 Valid feature codes are: $valid_codes_string
@@ -35,7 +33,6 @@ END;
 
 function validateFeature($feature) {
   global $valid_codes; 
-  echo $feature ; 
   return in_array($feature,  $valid_codes) ; 
 }
 

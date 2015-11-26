@@ -6,10 +6,11 @@ Review = {
     enabled : function() {
         return config.enableReview && config.isReview ;
     },
+    type : config.reviewType
 };
 
 if ( Review.enabled() )
-(function(Review, window) {
+(function(Review, undefined) {
     var alertNotTranslatedYet = function( sid ) {
         APP.confirm({
             name: 'confirmNotYetTranslated',
@@ -30,9 +31,9 @@ if ( Review.enabled() )
             return false ;
         },
     });
-})(Review, window);
+})(Review);
 
-if ( Review.enabled() ) {
+if ( Review.enabled() && Review.type == 'simple' ) {
 
     UI.SegmentFooter.registerTab({
         code                : 'review',
