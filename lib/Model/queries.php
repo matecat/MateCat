@@ -1115,7 +1115,8 @@ function addTranslation( array $_Translation ) {
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = {$_Translation['translation']},
                 translation_date = {$_Translation['translation_date']},
-                warning = " . $_Translation[ 'warning' ];
+                warning = {$_Translation[ 'warning' ]},
+                version_number = version_number + 1 ;" ;
 
     if ( isset( $_Translation[ 'autopropagated_from' ] ) ) {
         $query .= " , autopropagated_from = NULL";
