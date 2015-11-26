@@ -204,7 +204,7 @@ class EditLog_EditLogModel {
 
             $displaySeg->secs_per_word .= "s";
 
-            $displaySeg->pe_effort_perc = $displaySeg->getPeePerc();
+            $displaySeg->pe_effort_perc = $displaySeg->getPEE();
 
             if ( $displaySeg->pe_effort_perc < 0 ) {
                 $displaySeg->pe_effort_perc = 0;
@@ -480,7 +480,7 @@ class EditLog_EditLogModel {
      * @return bool
      */
     public function isPEEslow() {
-        return ( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD < $this->evaluateOverallPEE();
+        return ( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) + self::PEE_THRESHOLD < $this->evaluateOverallPEE();
     }
 
     /**

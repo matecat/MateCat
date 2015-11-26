@@ -83,13 +83,7 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
      */
     public function getPeePerc() {
         if ( is_null( $this->pe_effort_perc ) ) {
-            $this->pe_effort_perc = round( ( 1 - MyMemory::TMS_MATCH( $this->suggestion, $this->translation ) ) * 100 );
-        }
-
-        if ( $this->pe_effort_perc < 0 ) {
-            $this->pe_effort_perc = 0;
-        } else if ( $this->pe_effort_perc > 100 ) {
-            $this->pe_effort_perc = 100;
+            $this->pe_effort_perc = $this->getPEE();
         }
 
         return $this->pe_effort_perc;

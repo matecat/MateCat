@@ -27,14 +27,13 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
 
         do {
             //TODO: create DAO for this
-
             $today = date("Y-m-d");
             $queryJobs = "SELECT
                         source,
                         target,
                         sum( total_time_to_edit ) as total_time_to_edit,
-                        sum(translated_words) + sum(approved_words) + sum(rejected_words) as total_words,
-                        sum( COALESCE (avg_post_editing_effort, 0) ) as total_post_editing_effort,
+                        sum( total_raw_wc ) as total_words,
+                        sum( COALESCE (avg_post_editing_effort, 0) / coalesce(total_raw_wc, 1) ) as total_post_editing_effort,
                         count(*) as job_count
                       FROM
                         jobs j
@@ -49,7 +48,8 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
                         ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
-                          job_count = values( job_count )";
+                          job_count = values( job_count ),
+                          total_word_count = values(total_word_count)";
 
             $updateTuplesTemplate = "( '%s', '%s', '%s', %f, %f, %f, %u )";
 
