@@ -110,4 +110,3 @@ class Features_SegmentNotesCreationTest extends AbstractTest {
     }
 
 }
-
