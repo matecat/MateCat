@@ -8,7 +8,7 @@ CREATE TABLE `segment_translation_versions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_segment` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
-  `translation` text,
+  `replaced_translation` text,
   `source_page` tinyint(4) DEFAULT NULL,
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `uid` bigint(20) DEFAULT NULL,

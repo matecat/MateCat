@@ -64,7 +64,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $this->assertEquals( 1,  count( $versions ) );
         $version = $versions[0];
-        $this->assertEquals('This is the original translation', $version['translation']);
+        $this->assertEquals('This is the original translation', $version['replaced_translation']);
 
     }
 
@@ -160,7 +160,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $i=0; while($i < 7) {
           $version = $versions[0];
-          $this->assertEquals('Palavra En Inglês', $version['translation']);
+          $this->assertEquals('Palavra En Inglês', $version['replaced_translation']);
           $i++;
         }
 
@@ -217,7 +217,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $i=0; while($i < 7) {
           $version = $versions[0];
-          $this->assertEquals('Palavra En Inglês', $version['translation']);
+          $this->assertEquals('Palavra En Inglês', $version['replaced_translation']);
           $i++;
         }
 

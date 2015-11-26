@@ -74,7 +74,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $sql = "INSERT INTO segment_translation_versions " .
             " ( " .
-            " id_job, id_segment, translation, uid, source_page, " .
+            " id_job, id_segment, replaced_translation, uid, source_page, " .
             " propagated_from " .
             " ) " .
             " SELECT id_job, id_segment, translation, :uid, :source_page, " .
@@ -115,18 +115,18 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     public function saveVersion($old_translation) {
 
         $sql = "INSERT INTO segment_translation_versions " .
-            " (id_job, id_segment, translation, uid, source_page) " .
+            " ( id_job, id_segment, replaced_translation, uid, source_page ) " .
             " VALUES " .
-            " (:id_job, :id_segment, :translation, :uid, :source_page) ";
+            " (:id_job, :id_segment, :replaced_translation, :uid, :source_page) ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql );
         $stmt->execute( array(
-            'id_job'      => $old_translation['id_job'],
-            'id_segment'  => $old_translation['id_segment'] ,
-            'translation' => $old_translation['translation'],
-            'uid'         => $this->uid,
-            'source_page' => $this->source_page
+            'id_job'               => $old_translation['id_job'],
+            'id_segment'           => $old_translation['id_segment'] ,
+            'replaced_translation' => $old_translation['translation'],
+            'uid'                  => $this->uid,
+            'source_page'          => $this->source_page
         ));
     }
 
