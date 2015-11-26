@@ -1,16 +1,14 @@
 <?php
 
-class setTranslationWithVerioningDisabledTest extends IntegrationTest {
+class increaseVersionNumberTest extends IntegrationTest {
 
     function setUp() {
         $this->test_data->user = Factory_User::create();
 
-        // Feature TRANSLATION_VERSIONS is not set for this test
-        //
-        // $feature = Factory_OwnerFeature::create( array(
-        //     'uid'          => $this->test_data->user->uid,
-        //     'feature_code' => Features::TRANSLATION_VERSIONS
-        // ) );
+        $feature = Factory_OwnerFeature::create( array(
+            'uid'          => $this->test_data->user->uid,
+            'feature_code' => Features::TRANSLATION_VERSIONS
+        ) );
 
         $this->test_data->api_key = Factory_ApiKey::create( array(
             'uid' => $this->test_data->user->uid,
@@ -22,8 +20,7 @@ class setTranslationWithVerioningDisabledTest extends IntegrationTest {
         );
     }
 
-    function tests_no_versioning_on_translation() {
-
+    function tests_increases_version_number_in_segment_translations() {
         $project = integrationCreateTestProject( array(
             'headers' => $this->test_data->headers
         ));
@@ -43,32 +40,40 @@ class setTranslationWithVerioningDisabledTest extends IntegrationTest {
         $segment = $segments[0];
 
         integrationSetTranslation( array(
-          'id_segment' => $segment->id ,
-          'id_job' => $chunk->id,
-          'password' => $chunk->password,
-          'status' => 'translated',
-          'translation' => 'This is the original translation'
+            'id_segment' => $segment->id ,
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'status' => 'translated',
+            'translation' => 'This is the original translation'
         ) ) ;
 
         integrationSetTranslation( array(
-          'id_segment' => $segment->id ,
-          'id_job' => $chunk->id,
-          'password' => $chunk->password,
-          'status' => 'translated',
-          'translation' => 'New Translation!' # <-- this changed
+            'id_segment' => $segment->id ,
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'status' => 'translated',
+            'translation' => 'New Translation!' # <-- this changed
         ) ) ;
 
         $translations = $chunk->getTranslations();
 
-        $versions = Translations_TranslationVersionDao::getVersionsForTranslation(
-          $translations[0]->id_job, $translations[0]->id_segment
-        );
+        $this->assertEquals(1, $translations[0]->version_number );
 
-        $this->assertEquals( 0,  count( $versions ) );
+        integrationSetTranslation( array(
+            'id_segment' => $segment->id ,
+            'id_job' => $chunk->id,
+            'password' => $chunk->password,
+            'status' => 'translated',
+            'translation' => 'New Translation!' # <-- this changed
+        ));
+
+        $translations = $chunk->getTranslations();
+
+        $this->assertEquals(2, $translations[0]->version_number );
 
     }
 
-    function tests_no_versioning_on_propagation() {
+    function tests_increases_version_number_in_translation_propagation() {
         $project = integrationCreateTestProject( array(
             'headers' => $this->test_data->headers,
             'files' => array( test_file_path('test-propagation.xlf'))
@@ -97,16 +102,16 @@ class setTranslationWithVerioningDisabledTest extends IntegrationTest {
           'propagate'   => true
         ) ) ;
 
-
         $translations = $chunk->getTranslations();
 
-        $versions = Translations_TranslationVersionDao::getVersionsForJob(
-          $translations[0]->id_job
-        );
+        foreach( $translations as $key => $translation) {
+            $this->assertEquals(1, $translation->version_number, "On record number $key " );
+        }
 
-        $this->assertEquals( 0,  count( $versions ) );
+        // $versions = Translations_TranslationVersionDao::getVersionsForJob(
+        //   $translations[0]->id_job
+        // );
+
 
     }
-
-
 }

@@ -27,14 +27,13 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-
     public static function getVersionsForTranslation($id_job, $id_segment) {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job AND id_segment = :id_segment " .
             " ORDER BY creation_date DESC ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql );
+        $stmt = $conn->prepare( $sql );
 
         $stmt->execute(
             array( 'id_job' => $id_job, 'id_segment' => $id_segment )
@@ -48,7 +47,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public function savePropagation($propagation, $id_segment, $job_data, $propagateToTranslated) {
+    public function savePropagation($propagation, $id_segment, $job_data, $propagate_to_translated) {
 
         $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
         $st_rejected   = Constants_TranslationStatus::STATUS_REJECTED;
@@ -56,7 +55,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $st_new        = Constants_TranslationStatus::STATUS_NEW;
         $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
 
-        if ( $propagateToTranslated ) {
+        if ( $propagate_to_translated ) {
             $status_condition = "AND status IN (
                 '$st_draft',
                 '$st_new',
@@ -67,68 +66,105 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
             $status_condition = '';
         }
 
+        $where_condition = " WHERE " .
+            " id_job = :id_job AND " .
+            " segment_hash = :segment_hash AND " .
+            " id_segment != :id_segment AND " .
+            " id_segment BETWEEN :first_segment AND :last_segment " ;
+
+        $where_options = array(
+            'id_job'          => $job_data['id'],
+            'id_segment'      => $id_segment,
+            'first_segment'   => $job_data['job_first_segment'],
+            'last_segment'    => $job_data['job_last_segment'],
+            'segment_hash'    => $propagation['segment_hash'],
+        );
+
+        $this->insertVersionRecords(array(
+            'status_condition' => $status_condition,
+            'where_condition' => $where_condition,
+            'where_options' => $where_options
+        ));
+
+        $this->updateVersionNumberOnFutureUpdates(array(
+            'status_condition' => $status_condition,
+            'where_condition' => $where_condition,
+            'where_options' => $where_options
+        ));
+    }
+
+    public function saveVersion($old_translation) {
+        $sql = "INSERT INTO segment_translation_versions " .
+            " ( id_job, id_segment, translation, version_number ) " .
+            " VALUES " .
+            " (:id_job, :id_segment, :translation, :version_number )";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql );
+        $stmt->execute( array(
+            'id_job'         => $old_translation['id_job'],
+            'id_segment'     => $old_translation['id_segment'] ,
+            'translation'    => $old_translation['translation'],
+            'version_number' => $old_translation['version_number']
+        ));
+    }
+
+    private function insertVersionRecords($params) {
+        $params = Utils::ensure_keys($params, array(
+            'status_condition', 'where_condition', 'where_options'
+        ));
+        extract($params);
+
         /**
          * This query makes and insert while reading from segment_translations.
          * This is done to avoid roundtrips between MySQL and PHP.
          */
 
-        $sql = "INSERT INTO segment_translation_versions " .
+        $insert_sql = "INSERT INTO segment_translation_versions " .
             " ( " .
-            " id_job, id_segment, replaced_translation, uid, source_page, " .
-            " propagated_from " .
+            " id_job, id_segment, translation, version_number, propagated_from " .
             " ) " .
-            " SELECT id_job, id_segment, translation, :uid, :source_page, " .
-            " :propagated_from " .
+            " SELECT id_job, id_segment, translation, version_number, :propagated_from " .
             " FROM segment_translations " .
-            " WHERE " .
-            " id_job = :id_job AND " .
-            " segment_hash = :segment_hash AND " .
-            " id_segment != :id_segment AND " .
-            " id_segment BETWEEN :first_segment AND :last_segment " .
+            " $where_condition " .
             " $status_condition " ;
 
-            Log::doLog( $sql );
-
-            $options =  array(
-                'id_job'        => $job_data['id'],
-                'id_segment'    => $id_segment,
-                'uid'           => $this->uid,
-                'source_page'   => $this->source_page,
-                'first_segment' => $job_data['job_first_segment'],
-                'last_segment'  => $job_data['job_last_segment'],
-                'segment_hash'  => $propagation['segment_hash'],
-                'propagated_from' => $propagation['autopropagated_from']
-            );
-
-            Log::doLog( $options ) ;
-
-            Log::doLog( $job_data );
-            Log::doLog( $propagation );
-
-            $conn = Database::obtain()->getConnection();
-            $stmt = $conn->prepare( $sql );
-
-            $stmt->execute(  $options );
-
-    }
-
-    public function saveVersion($old_translation) {
-
-        $sql = "INSERT INTO segment_translation_versions " .
-            " ( id_job, id_segment, replaced_translation, uid, source_page ) " .
-            " VALUES " .
-            " (:id_job, :id_segment, :replaced_translation, :uid, :source_page) ";
+        $insert_options = array_merge( $where_options, array(
+            'propagated_from' => $propagation['autopropagated_from']
+        ));
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql );
-        $stmt->execute( array(
-            'id_job'               => $old_translation['id_job'],
-            'id_segment'           => $old_translation['id_segment'] ,
-            'replaced_translation' => $old_translation['translation'],
-            'uid'                  => $this->uid,
-            'source_page'          => $this->source_page
-        ));
+
+        $insert = $conn->prepare( $insert_sql );
+        $insert->execute(  $insert_options );
+
     }
 
+    private function updateVersionNumberOnFutureUpdates($params) {
+        $params = Utils::ensure_keys($params, array(
+            'status_condition', 'where_condition', 'where_options'
+        ));
+        extract($params);
+
+        /**
+         * Update segment_translations to change the version number
+         * for the future changes using the same filter we used for the
+         * insert.
+         * This is done because we don't want to modify the update SQL
+         * in queries.php which is invoked with logic which is not
+         * necessarily related to the versioning feature.
+         */
+
+        $update_sql = "UPDATE segment_translations " .
+            " SET version_number = version_number + 1  " .
+            " $where_condition " .
+            " $status_condition " ;
+
+        $update_options = $where_options ;
+
+        $conn = Database::obtain()->getConnection();
+        $update = $conn->prepare( $update_sql );
+        $update->execute( $update_options );
+    }
 
 }
