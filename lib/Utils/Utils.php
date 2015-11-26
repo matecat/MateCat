@@ -2,7 +2,7 @@
 
 class Utils {
 
-    public static function validate_required($params, $required_keys) {
+    public static function ensure_keys($params, $required_keys) {
         $missing = array();
 
         foreach( $required_keys as $key ) {

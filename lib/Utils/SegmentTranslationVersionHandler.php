@@ -31,7 +31,7 @@ class SegmentTranslationVersionHandler {
     }
 
     public function savePropagation( $params ) {
-        $params = Utils::validate_required($params, array(
+        $params = Utils::ensure_keys($params, array(
             'propagation', 'job_data', 'propagate_to_translated'
         ));
 
@@ -50,7 +50,7 @@ class SegmentTranslationVersionHandler {
     }
 
     public function saveVersion( $params ) {
-        $params = (object) Utils::validate_required($params, array(
+        $params = (object) Utils::ensure_keys($params, array(
             'old_translation', 'new_translation'
         ));
 
