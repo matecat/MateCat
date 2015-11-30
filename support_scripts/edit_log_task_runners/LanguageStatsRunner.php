@@ -1,5 +1,5 @@
 <?php
-$root = realpath(dirname(__FILE__) . '/../../');
+$root = realpath( dirname( __FILE__ ) . '/../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
@@ -10,24 +10,21 @@ require_once INIT::$MODEL_ROOT . '/queries.php';
  * Date: 21/09/15
  * Time: 16.06
  */
-class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
-{
+class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon {
 
 
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
-        Log::$fileName = "languageStats.log";
+        Log::$fileName   = "languageStats.log";
         self::$sleeptime = 10; //60 * 60 * 24 * 30 * 1;
     }
 
-    function main($args)
-    {
+    function main( $args ) {
         $db = Database::obtain();
 
         do {
             //TODO: create DAO for this
-            $today = date("Y-m-d");
+            $today     = date( "Y-m-d" );
             $queryJobs = "SELECT
                         source,
                         target,
@@ -57,50 +54,50 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
 
             //getlanguage list
             $languages = $langsObj->getEnabledLanguages();
-            $languages = Utils::array_column($languages, 'code');
+            $languages = Utils::array_column( $languages, 'code' );
 
-            foreach ($languages as $source_language) {
-                Log::doLog("Current source_language: $source_language");
+            foreach ( $languages as $source_language ) {
+                Log::doLog( "Current source_language: $source_language" );
                 echo "Current source_language: $source_language\n";
 
                 $languageStats = $db->fetch_array(
-                    sprintf(
-                        $queryJobs,
-                        $source_language
-                    )
+                        sprintf(
+                                $queryJobs,
+                                $source_language
+                        )
                 );
 
                 $languageTuples = array();
 
-                foreach ($languageStats as $languageCoupleStat) {
-                    Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat['target']);
-                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat['target'] . "\n";
+                foreach ( $languageStats as $languageCoupleStat ) {
+                    Log::doLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat[ 'target' ] );
+                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat[ 'target' ] . "\n";
 
                     $languageTuples[] = sprintf(
-                        $updateTuplesTemplate,
-                        $today,
-                        $languageCoupleStat['source'],
-                        $languageCoupleStat['target'],
-                        round($languageCoupleStat['total_words'], 4),
-                        round($languageCoupleStat['total_post_editing_effort'], 4),
-                        round($languageCoupleStat['total_time_to_edit'], 4),
-                        $languageCoupleStat['job_count']
+                            $updateTuplesTemplate,
+                            $today,
+                            $languageCoupleStat[ 'source' ],
+                            $languageCoupleStat[ 'target' ],
+                            round( $languageCoupleStat[ 'total_words' ], 4 ),
+                            round( $languageCoupleStat[ 'total_post_editing_effort' ], 4 ),
+                            round( $languageCoupleStat[ 'total_time_to_edit' ], 4 ),
+                            $languageCoupleStat[ 'job_count' ]
                     );
                 }
 
-                if (count($languageTuples) > 0) {
+                if ( count( $languageTuples ) > 0 ) {
 
-                    Log::doLog("Found some stats. Saving in DB..");
+                    Log::doLog( "Found some stats. Saving in DB.." );
                     echo "Found some stats. Saving in DB..\n";
                     $db->query(
-                        sprintf(
-                            $queryInsert,
-                            implode(", ", $languageTuples)
-                        )
+                            sprintf(
+                                    $queryInsert,
+                                    implode( ", ", $languageTuples )
+                            )
                     );
                 }
 
-                usleep(100);
+                usleep( 100 );
             }
 
             //for the moment, this daemon is single-loop-execution
@@ -109,8 +106,8 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
             if ( self::$RUNNING ) {
                 sleep( self::$sleeptime );
             }
-            
-        } while (self::$RUNNING);
+
+        } while ( self::$RUNNING );
     }
 
 }
@@ -120,4 +117,4 @@ $lsr = LanguageStatsRunner::getInstance();
 /**
  * @var $lsr LanguageStatsRunner
  */
-$lsr->main(null);
+$lsr->main( null );

@@ -125,9 +125,9 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
                         foreach ( $segments as $i => $segment ) {
                             $segment = new EditLog_EditLogSegmentStruct( $segment );
 
-                            $raw_wc_job                  += $segment->raw_word_count;
-                            $time_to_edit_job            += $segment->time_to_edit;
-                            if( $segment->isValidForEditLog() ) {
+                            $raw_wc_job += $segment->raw_word_count;
+                            $time_to_edit_job += $segment->time_to_edit;
+                            if ( $segment->isValidForEditLog() ) {
                                 $raw_post_editing_effort_job += $segment->getPEE() * $segment->raw_word_count;
                             }
                         }
