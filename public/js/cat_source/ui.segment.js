@@ -1,9 +1,12 @@
 (function($, undefined) {
     $.extend(UI, { 
-        getSegmentMarkup: function ( 
+        getSegmentTemplate : function() {
+            return MateCat.Templates['translate/segment'];
+        },
+        getSegmentTemplateData : function(
             segment, t, readonly, autoPropagated, autoPropagable, 
-            escapedSegment, splitAr, splitGroup, originalId) {
-
+            escapedSegment, splitAr, splitGroup, originalId
+        ) {
             var splitGroup = segment.split_group || splitGroup || '';
 
             var classes = new Array();
@@ -59,35 +62,39 @@
                 segment.segment || '', 
                 true, segment.sid, 'source');
 
-            var shortened_sid = UI.shortenId( segment.sid ) ; 
-
             var templateData = {
-                t : t, 
-                originalId : originalId, 
-                autoPropagated : autoPropagated, 
-                autoPropagable : autoPropagable, 
-                escapedSegment : escapedSegment, 
-                segment : segment, 
-                readonly : readonly,
-                splitGroup : splitGroup , 
-                segment_classes : classes.join(' '), 
-                shortened_sid : UI.shortenId( segment.sid ), 
-                start_job_marker : segment.sid == config.first_job_segment, 
-                end_job_marker : segment.sid == config.last_job_segment , 
-                decoded_text : decoded_source, 
-                editarea_classes_string : editarea_classes.join(' '), 
-                lang : config.target_lang.toLowerCase(), 
-                tagLockCustomizable : $('#tpl-taglock-customize').html(), 
-                tagModesEnabled : UI.tagModesEnabled, 
-                decoded_translation : decoded_translation  , 
-                status_change_title : status_change_title , 
-                segment_edit_sec : segment_edit_sec, 
-                segment_edit_min : segment_edit_min
+                t                       : t,
+                originalId              : originalId,
+                autoPropagated          : autoPropagated,
+                autoPropagable          : autoPropagable,
+                escapedSegment          : escapedSegment,
+                segment                 : segment,
+                readonly                : readonly,
+                splitGroup              : splitGroup ,
+                segment_classes         : classes.join(' '),
+                shortened_sid           : UI.shortenId( segment.sid ),
+                start_job_marker        : segment.sid == config.first_job_segment,
+                end_job_marker          : segment.sid == config.last_job_segment ,
+                decoded_text            : decoded_source,
+                editarea_classes_string : editarea_classes.join(' '),
+                lang                    : config.target_lang.toLowerCase(),
+                tagLockCustomizable     : $('#tpl-taglock-customize').html(),
+                tagModesEnabled         : UI.tagModesEnabled,
+                decoded_translation     : decoded_translation  ,
+                status_change_title     : status_change_title ,
+                segment_edit_sec        : segment_edit_sec,
+                segment_edit_min        : segment_edit_min
             }
 
-            var template = MateCat.Templates['translate/segment'];
-            return template( templateData ); 
+            return templateData ;
+        },
 
+        getSegmentMarkup: function (
+            segment, t, readonly, autoPropagated, autoPropagable,
+            escapedSegment, splitAr, splitGroup, originalId
+        ) {
+            var data = UI.getSegmentTemplateData.apply( this, arguments )
+            return UI.getSegmentTemplate()( data );
         }
     }); 
 })(jQuery); 
