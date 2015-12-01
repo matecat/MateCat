@@ -30,6 +30,7 @@ unitTest/xhGui/
 unitTest/coverage/*
 internal_scripts
 local_storage
+lib/Utils/fileupload/thumbnails/*
 
 # advised local folder for test files
 test-storage
@@ -41,3 +42,4 @@ vendor
 .env
 
 phinx.yml
+
