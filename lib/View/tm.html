@@ -239,6 +239,8 @@
                                                 <option value="iptranslator" >IPTranslator from Iconic</option>
                                                 <option value="deeplingo" >DeepLingo</option>
                                                 <option value="moses" >Moses</option>
+                                                <option value="apertium">Apertium</option>
+                                                <option value="altlang">AltLang</option>
                                                 <option value="letsmt" >Tilde MT</option>
                                         </select>
                                       <a id="add-mt-provider-cancel" class="pull-right btn-grey canceladdtmx">
@@ -531,7 +533,7 @@
             <a href="http://www.tilde.com/mt/contacts" target="_blank" class="continuebtn btn-ok">Contact Tilde MT</a>
         </div>
     </template>
-    
+
     <template id="mt-provider-letsmt-config-fields">
         <script>
         <![CDATA[
@@ -542,7 +544,7 @@
             function fetchTerms() {
                 var termsFieldSelector = '.insert-tm .provider-data .provider-field [data-field-name="terms_id"]';
                 $(termsFieldSelector).html("");
-                
+
                 var providerData = {};
                 $('.insert-tm .provider-data .provider-field').each(function () {
                     var field = $(this).find('input, select').first();
@@ -552,7 +554,7 @@
                         providerData[field.attr('data-field-name')] = field.val();
                     }
                 });
-                
+
                 if (!providerData['system_id']) {
                     return;
                 }
@@ -598,7 +600,7 @@
                     }
                 });
             }
-            
+
             function toggleQEEnabled(checkbox) {
                 var disabled = !checkbox.checked;
                 $('#minimum_qe_field input').prop('disabled', disabled);
@@ -608,7 +610,7 @@
                     $('#minimum_qe_field').removeClass('disabled');
                 }
             }
-            
+
             function createFilters() {
                 var sourceSelect = $('#source_lang_field select');
                 var targetSelect = $('#target_lang_field select');
@@ -620,7 +622,7 @@
                 var showOnlyRunning = showOnlyRunningCheckbox.prop('checked');
                 var runningStatuses = { running: true, standby: true };
                 sourceSelect.empty();
-                
+
                 // a mapping from available source languages to respective target languages
                 var directions = [];
                 systemOptions.each(function (){
@@ -632,7 +634,7 @@
                     var targetCode = $(this).data('target-language-code');
                     var sourceName = $(this).data('source-language-name');
                     var targetName = $(this).data('target-language-name');
-                   
+
                     if(!(sourceCode in directions)){
                         directions[sourceCode] = {};
                         directions[sourceCode].name = sourceName;
@@ -640,7 +642,7 @@
                     }
                     directions[sourceCode].target[targetCode] = targetName;
                 });
-                
+
                 var sortedSourceCodes = [];
                 for (var sourceCode in directions) {
                     sortedSourceCodes.push(sourceCode);
@@ -652,11 +654,11 @@
                     var option = $('<option value="' + sourceCode + '">' + directions[sourceCode].name + '</option>');
                     sourceSelect.append(option);
                 }
-                
+
                 var filterSystems = function() {
                     var selectedSourceCode = sourceSelect.val();
                     var selectedTargetCode = targetSelect.val();
-                    
+
                     systemOptions.each(function () {
                        var systemSourceCode = $(this).data('source-language-code');
                        var systemTargetCode = $(this).data('target-language-code');
@@ -674,7 +676,7 @@
                     var firstAvailableTargetCode = $(systemSelect.find('option').not(function() { return $(this).css("display") == "none" })[0]).val();
                     systemSelect.val(firstAvailableTargetCode).change();
                 }
-                
+
                 var fillTargetLanguages = function () {
                     targetSelect.empty();
                     var selectedSourceCode = sourceSelect.val();
@@ -691,7 +693,7 @@
                         var option = $('<option value="' + targetCode + '">' + targetChoices[targetCode] + '</option>');
                         targetSelect.append(option);
                     }
-                    
+
                     targetSelect.val(targetSelect.find("option:first").val()).change();
                 }
 
@@ -702,7 +704,7 @@
                     sourceLangIdInput.val(systemSourceCode);
                     targetLangIdInput.val(systemTargetCode);
                 }
-                
+
                 // this method can get called multiple times. remove previously added event handlers
                 sourceSelect.off('change');
                 targetSelect.off('change');
@@ -817,7 +819,73 @@
         <p>If you have any questions, please contact Tilde MT support at: <a href="mailto:mt@tilde.com">mt@tilde.com</a>.</p>
     </template>
     <!-- beidzam letsmt bloku -->
+    <!-- inizio blocco apertium -->
+    <template id="mt-provider-apertium-fields">
+        <p>Fill out the form with the connection data to your own Apertium MT system.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>Key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" placeholder="here" />
+            </div>
+        </div>
+    </template>
 
+    <template id="mt-provider-apertium-msg">
+        <p><strong>Apertium</strong> is a free/open-source platform for rule-based machine
+            translation systems. It is aimed at related-language pairs, i.e.
+            Spanish and Portuguese, Norwegian Nynorsk and Norwegian Bokmål or
+            Kazakh and Tatar. We provide you with all language pairs released in
+            the platform, but please take into account that not all of them are
+            useful for postediting. A rule of thumb: the closer the languages,
+            the better the performance.</p>
+        <p><strong>Apertium</strong> is superfast, fully customisable and
+            very good for closely-related languages. Don't think twice and
+            contact us if you want to try it out integrated in MateCat!</p>
+        <p>More info on <a href="http://wiki.apertium.org/wiki/Main_Page"
+                           title="Apertium">http://wiki.apertium.org/wiki/Main_Page</a></p>
+        <a href="mailto:info@prompsit.com" class="continuebtn btn-ok">Contact Prompsit</a>
+    </template>
+    <!-- fine blocco apertium -->
+
+    <!-- inizio blocco altlang -->
+    <template id="mt-provider-altlang-fields">
+        <p>Fill out the form with the connection data to your own AltLang MT system.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>Key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" placeholder="here" />
+            </div>
+        </div>
+    </template>
+
+    <template id="mt-provider-altlang-msg">
+        <p><strong>AltLang</strong> is a language variant converter. It
+            automatically replaces the existing differences between two
+            varieties of the same language. By perfoming only the necessary
+            changes, AltLang reliably adapts content from one variety to another
+            in seconds. A quick review of the changes and the work is done!</p>
+        <p>The main phenomena covered by <strong>AltLang</strong> include vocabulary, syntax,
+            spelling, style (i.e. different use of punctuation, dates and hour
+            formats, etc.) as well as other socio-linguistic differences. It
+            currently supports English, French, Spanish and Portuguese language
+            variants.</p>
+        <p><strong>AltLang</strong> is really fast, fully customisable,
+            smart and accurate. Give it a try inside MateCat!</p>
+        <p>More info on <a href="http://www.altlang.net/"
+                           title="AltLang">http://www.altlang.net/</a></p>
+        <a href="mailto:info@altlang.net" class="continuebtn btn-ok">Contact AltLang</a>
+    </template>
+    <!-- fine blocco altlang -->
 
 </div>
 
