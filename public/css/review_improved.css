@@ -1,0 +1,14 @@
+
+
+section.reviewImproved.editor .outersource .copy {
+
+  display: none;
+}
+
+section.reviewImproved .errorTaggingArea {
+  padding: 3px;
+}
+
+section.reviewImproved.editor .errorTaggingArea {
+  border: 1px solid #eee;
+}
