@@ -1528,60 +1528,6 @@ console.log('changeStatus');
 			this.init();
 		}
 	},
-    getSegmentMarkup: function (segment, t, readonly, autoPropagated, autoPropagable, escapedSegment, splitAr, splitGroup, originalId) {
-        splitGroup = segment.split_group || splitGroup || '';
-
-        splitPositionClass = (segment.sid == splitGroup[0])? ' splitStart' : (segment.sid == splitGroup[splitGroup.length - 1])? ' splitEnd' : (splitGroup.length)? ' splitInner' : '';
-        newSegmentMarkup = '<section id="segment-' + segment.sid + '" data-hash="' + segment.segment_hash + '" data-autopropagated="' + autoPropagated + '" data-propagable="' + autoPropagable + '" data-version="' + segment.version + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!segment.status) ? 'new' : segment.status.toLowerCase()) + ((segment.has_reference == 'true')? ' has-reference' : '') + splitPositionClass + '" data-split-group="' + ((splitGroup.length)? splitGroup.toString() : '')+ '" data-split-original-id="' + originalId + '" data-tagmode="crunched">' +
-            '	<a tabindex="-1" href="#' + segment.sid + '"></a>' +
-            '	<div class="sid" title="' + segment.sid + '"><div class="txt">' + UI.shortenId(segment.sid) + '</div><div class="actions"><a class="split" href="#" title="Click to split segment"><span class="icon-split"></span></a><p class="split-shortcut">CTRL + S</p></div></div>' +
-            ((segment.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
-            ((segment.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
-            '	<div class="body">' +
-            '		<div class="header toggle" id="segment-' + segment.sid + '-header">' +
-            '		</div>' +
-            '		<div class="text">' +
-            '			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-            '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + segment.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(segment.segment, true, segment.sid, 'source') + '</div>' +
-            '				<div class="copy" title="Copy source to target">' +
-            '                   <a href="#"></a>' +
-            '                   <p>ALT+CTRL+I</p>' +
-            '				</div>' +
-            '				<div class="target item" id="segment-' + segment.sid + '-target">' +
-            '					<span class="hide toggle"> ' +
-            '						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
-            '					</span>' +
-            '					<div class="textarea-container">' +
-            '						<span class="loader"></span>' +
-            '						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + segment.sid + '-editarea" data-sid="' + segment.sid + '">' + ((!segment.translation) ? '' : UI.decodePlaceholdersToText(segment.translation, true, segment.sid, 'translation')) + '</div>' +
-            '                       <div class="toolbar">' +
-            '                           ' + $('#tpl-taglock-customize').html() +
-            ((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></a>' : '') +
-            '                           <ul class="editToolbar">' +
-            '                               <li class="uppercase" title="Uppercase"></li>' +
-            '                               <li class="lowercase" title="Lowercase"></li>' +
-            '                               <li class="capitalize" title="Capitalized"></li>' +
-            '                           </ul>' +
-            '                       </div>' +
-            '						<p class="save-warning" title="Segment modified but not saved"></p>' +
-            '					</div> <!-- .textarea-container -->' +
-            '						<ul class="buttons toggle" id="segment-' + segment.sid + '-buttons"></ul>' +
-            '				</div> <!-- .target -->' +
-            '			</div></div> <!-- .wrap -->' +
-            '			<div class="status-container">' +
-            '				<a href=# title="' + ((!segment.status) ? 'Change segment status' : segment.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + segment.sid + '-changestatus"></a>' +
-            '			</div> <!-- .status-container -->' +
-            '		</div> <!-- .text -->' +
-            '		<div class="timetoedit" data-raw_time_to_edit="' + segment.time_to_edit + '">' +
-            ((t) ? '			<span class=edit-min>' + segment.parsed_time_to_edit[1] + '</span>m:' : '') +
-            ((t) ? '			<span class=edit-sec>' + segment.parsed_time_to_edit[2] + '</span>s' : '') +
-            '		</div>' +
-            '		<div class="footer toggle"></div> <!-- .footer -->     ' +
-            '	</div> <!-- .body -->' +
-            '	<ul class="statusmenu"></ul>' +
-            '</section> ';
-        return newSegmentMarkup;
-    },
     stripSpans: function (str) {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
@@ -2138,7 +2084,7 @@ console.log('changeStatus');
 		var segment = this.currentSegment;
 		tte = $('.timetoedit', segment);
 		this.editTime = this.editStop - this.editStart;
-		this.totalTime = this.editTime + tte.data('raw_time_to_edit');
+		this.totalTime = this.editTime + tte.data('raw-time-to-edit');
 		var editedTime = this.millisecondsToTime(this.totalTime);
 		if (config.time_to_edit_enabled) {
 			var editSec = $('.timetoedit .edit-sec', segment);
@@ -2146,7 +2092,7 @@ console.log('changeStatus');
 			editMin.text(APP.zerofill(editedTime[0], 2));
 			editSec.text(APP.zerofill(editedTime[1], 2));
 		}
-		tte.data('raw_time_to_edit', this.totalTime);
+		tte.data('raw-time-to-edit', this.totalTime);
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
