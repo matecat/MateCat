@@ -74,6 +74,7 @@ $.extend(UI, {
         this.localStorageArray = [];
         this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
         this.consecutiveCopySourceNum = [];
+        this.setComingFrom();
         setInterval(function() {
             UI.consecutiveCopySourceNum = [];
         }, config.copySourceInterval*1000);

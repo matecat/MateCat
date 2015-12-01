@@ -450,6 +450,10 @@ console.log('changeStatus');
         this.consecutiveCopySourceNum = [];
         //$.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
     },
+    setComingFrom: function () {
+        var page = (config.isReview)? 'revise' : 'translate';
+        $.cookie('comingFrom' , page, { path: '/' });
+    },
 
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
