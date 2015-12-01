@@ -203,6 +203,35 @@ class engineController extends ajaxController {
                 }
 
                 break;
+
+            case strtolower( Constants_Engines::APERTIUM ):
+
+                /**
+                 * Create a record of type APERTIUM
+                 */
+                $newEngine = EnginesModel_ApertiumStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::ALTLANG ):
+
+                /**
+                 * Create a record of type ALTLANG
+                 */
+                $newEngine = EnginesModel_AltlangStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
             default:
                 $validEngine = false;
         }
@@ -258,18 +287,18 @@ class engineController extends ajaxController {
         } elseif ( $newEngine instanceof EnginesModel_LetsMTStruct && empty($this->engineData[ 'system_id' ])){
             // the user has not selected a translation system. only the User ID and the engine's name has been entered
             // get the list of available systems and return it to the user
-            
+
             $temp_engine = Engine::getInstance( $result->id );
             $config = $temp_engine->getConfigStruct();
             $systemList = $temp_engine->getSystemList($config);
-            
+
             $engineDAO->delete($result); // delete the newly added engine. this is the first time in engineController::add()
                                          // and the user has not yet selected a translation system
             if ( isset( $systemList['error']['code'] ) ) {
                 $this->result[ 'errors' ][ ] = $systemList['error'];
                 return;
             }
-            
+
             $uiConfig = array(
                 'client_id' => array('value' => $this->engineData['client_id']),
                 'system_id' => array(),
@@ -280,7 +309,7 @@ class engineController extends ajaxController {
                                                           'data'  => $systemInfo['metadata']
                                                     );
             }
-            
+
             $this->result['name'] = $this->name;
             $this->result['data']['config'] = $uiConfig;
         } elseif ( $newEngine instanceof EnginesModel_LetsMTStruct){
@@ -289,7 +318,7 @@ class engineController extends ajaxController {
             $engine_test = Engine::getInstance( $result->id );
             $engine_test->wakeUp();
         }
-        
+
         $this->result['data']['id'] = $result->id;
 
     }
@@ -319,7 +348,7 @@ class engineController extends ajaxController {
         $this->result['data']['id'] = $result->id;
 
     }
-    
+
     /**
      * This method creates a temporary engine and executes one of it's methods
      */
@@ -342,7 +371,7 @@ class engineController extends ajaxController {
                 $tempEngineRecord->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
                 $tempEngineRecord->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ];
                 //$tempEngineRecord->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
-                
+
                 break;
             default:
                 $validEngine = false;
@@ -352,7 +381,7 @@ class engineController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( 'code' => -4, 'message' => "Engine not allowed" );
             return;
         }
-        
+
         $tempEngine = Engine::createTempInstance($tempEngineRecord);
         if(! $tempEngine instanceof Engines_AbstractEngine){
             $this->result[ 'errors' ][ ] = array( 'code' => -12, 'message' => "Creating engine failed. Generic error" );

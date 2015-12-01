@@ -1,12 +1,12 @@
 <?php
 set_time_limit( 0 );
-define( 'LOG_FILENAME', 'tm_analysis.log' );
 include "main.php";
 
 $UNIQUID = uniqid( '', true );
 $my_pid     = getmypid();
 $parent_pid = posix_getppid();
 $RUNNING = true;
+Log::$fileName = "tm_analysis.log";
 
 try {
 
@@ -47,15 +47,15 @@ function sigSwitch( $signo ) {
 
 function cleanShutDown( ){
 
-    global $amqHandlerSubscriber;
+    global $amqHandlerSubscriber, $db;
 
     //SHUTDOWN
     $amqHandlerSubscriber->getRedisClient()->disconnect();
+    $db->close();
+    $amqHandlerSubscriber->disconnect();
 
     $msg = str_pad( " CHILD " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
     _TimeStampMsg( $msg, true );
-
-    $amqHandlerSubscriber->disconnect();
 
     die();
 
@@ -360,7 +360,7 @@ do {
         $fuzzy = @levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
 
         //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
-        if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy >= 0 ) ) {
+        if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
             $qaRealign = new QA( $text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
             $qaRealign->tryRealignTagID();

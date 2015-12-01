@@ -18,5 +18,7 @@ class Constants_Engines {
     const IP_TRANSLATOR = 'IPTranslator';
     const DEEPLINGO     = 'DeepLingo';
     const LETSMT        = 'LetsMT';
+    const APERTIUM      = 'Apertium';
+    const ALTLANG	    = 'Altlang';
 
 } 
