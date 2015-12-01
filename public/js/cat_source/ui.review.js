@@ -42,6 +42,7 @@ if ( Review.enabled() ) {
             $(this).find('.tab-switcher-review').click();
         }
     }).on('start', function() {
+
         // temp
         config.stat_quality = [
             {
