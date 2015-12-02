@@ -119,7 +119,7 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function() {
-//                console.log('getContribution error');
+        console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
@@ -168,53 +168,54 @@ $.extend(UI, {
                 this.renderContributionErrors(d.errors, segment);
 
     },
-	renderContributions: function(d, segment) {
-        if(!d) return true;
-		var isActiveSegment = $(segment).hasClass('editor');
-		var editarea = $('.editarea', segment);
 
-		if ( d.data.matches.length) {
-			var editareaLength = editarea.text().trim().length;
-			if (isActiveSegment) {
-				editarea.removeClass("indent");
-			} else {
-				if (editareaLength === 0)
-					editarea.addClass("indent");
-			}
-			var translation = d.data.matches[0].translation;
-			var perc_t = $(".percentuage", segment).attr("title");
+  renderContributions: function(d, segment) {
+    if(!d) return true;
 
-			$(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
-			var match = d.data.matches[0].match;
+    var isActiveSegment = $(segment).hasClass('editor');
+    var editarea = $('.editarea', segment);
 
-			var copySuggestionDone = false;
-			var segment_id = segment.attr('id');
+    if ( d.data.matches.length) {
+      var editareaLength = editarea.text().trim().length;
+      if (isActiveSegment) {
+        editarea.removeClass("indent");
+      } else {
+        if (editareaLength === 0)
+          editarea.addClass("indent");
+      }
+      var translation = d.data.matches[0].translation;
+      var perc_t = $(".percentuage", segment).attr("title");
+
+      $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
+      var match = d.data.matches[0].match;
+
+      var copySuggestionDone = false;
+      var segment_id = segment.attr('id');
       $(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).empty();
+      $('.sub-editor.matches .overflow', segment).empty();
 
-			$.each(d.data.matches, function(index) {
+      $.each(d.data.matches, function(index) {
+        if ((this.segment === '') || (this.translation === ''))
+          return;
+        var disabled = (this.id == '0') ? true : false;
+        cb = this.created_by;
 
-				if ((this.segment === '') || (this.translation === ''))
-					return;
-				var disabled = (this.id == '0') ? true : false;
-				cb = this.created_by;
-
-				if ("sentence_confidence" in this &&
-						(
-								this.sentence_confidence !== "" &&
-								this.sentence_confidence !== 0 &&
-								this.sentence_confidence != "0" &&
-								this.sentence_confidence !== null &&
-								this.sentence_confidence !== false &&
-								typeof this.sentence_confidence != 'undefined'
-								)
-						) {
+        if ("sentence_confidence" in this &&
+            (
+                this.sentence_confidence !== "" &&
+                this.sentence_confidence !== 0 &&
+                this.sentence_confidence != "0" &&
+                this.sentence_confidence !== null &&
+                this.sentence_confidence !== false &&
+                typeof this.sentence_confidence != 'undefined'
+                )
+            ) {
                     suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
                 } else if (this.match != 'MT') {
-					suggestion_info = this.last_update_date;
-				} else {
-					suggestion_info = '';
-				}
+          suggestion_info = this.last_update_date;
+        } else {
+          suggestion_info = '';
+        }
 //                console.log('typeof fieldTest: ', typeof d.data.fieldTest);
                 if (typeof d.data.fieldTest == 'undefined') {
                     percentClass = UI.getPercentuageClass(this.match);
@@ -277,16 +278,16 @@ $.extend(UI, {
 			if (UI.debug)
 				console.log('no matches');
 
-			$(segment).addClass('loaded');
+      $(segment).addClass('loaded');
 
-			if((config.mt_enabled)&&(!config.id_translator)) {
+      if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
-		}
+    }
     $(window).trigger('renderContribution:complete', segment);
-	},
+  },
         renderContributionErrors: function(errors, segment) {
             $('.tab.sub-editor.matches .engine-errors', segment).empty();
             $('.tab.sub-editor.matches .engine-errors', segment).hide();

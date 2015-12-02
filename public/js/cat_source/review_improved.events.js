@@ -57,6 +57,22 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         }
     });
 
+    $(document).on('click', '.reviewImproved .tabs-menu a', function(event) {
+        event.preventDefault();
+
+        $(this).parent().addClass("current");
+        $(this).parent().siblings().removeClass("current");
+
+        var section = $(event.target).closest('section');
+        var tab = $(this).data("ref");
+
+        console.log(tab);
+
+        section.find('.tab-content').not(tab).css("display", "none");
+        section.find(tab).show();
+
+    });
+
     $(document).on('click', 'a.approved', function(e) {
         console.log('clicked');
 

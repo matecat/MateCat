@@ -1,11 +1,20 @@
 <div class="textarea-container">
+
   <div class="tab">
-    <div class="errorTaggingArea" readonly="readonly">{{{decoded_translation}}}</div>
+    <div class="tab-content errorTaggingArea" readonly="readonly">{{{decoded_translation}}}</div>
+    <div class="tab-content editableTarget" eadonly="readonly">This is editable text area </div>
+    <div class="tab-content trackChanges" readonly="readonly">this is track changes </div>
   </div>
 
   <ul class="tabs-menu">
-    <li class="current"><a href="#tab-1">Error tagging</a></li>
-    <li><a href="#tab-2">Post edited</a></li>
-    <li><a href="#tab-3">Diff</a></li>
+    <li class="current">
+      <a href="#" data-ref=".errorTaggingArea">Error tagging</a>
+    </li>
+    <li>
+      <a href="#" data-ref=".editableTarget">Post edited</a>
+    </li>
+    <li>
+      <a href="#" data-ref=".trackChanges">Track changes</a>
+    </li>
   </ul>
 </div>

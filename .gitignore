@@ -49,3 +49,4 @@ phinx.yml
 
 .sass-cache
 *css.map
+public/css/sources/*
