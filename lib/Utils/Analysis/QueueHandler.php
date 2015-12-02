@@ -24,6 +24,21 @@ class Analysis_QueueHandler extends Stomp {
 
     public $persistent = 'true';
 
+    protected static $QUEUE_INFO = array(
+            'high'   => array(
+                    "redis_key"  => Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
+                    "queue_name" => Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME
+            ),
+            'medium' => array(
+                    "redis_key"  => Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_P2,
+                    "queue_name" => Constants_AnalysisRedisKeys::QUEUE_NAME_P2
+            ),
+            'low'    => array(
+                    "redis_key"  => Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_P3,
+                    "queue_name" => Constants_AnalysisRedisKeys::QUEUE_NAME_P3
+            ),
+    );
+
     /**
      * Handle a string for the queue name
      * @var string
@@ -66,7 +81,7 @@ class Analysis_QueueHandler extends Stomp {
     public function subscribe( $queueName = null ){
 
         if ( empty($queueName) ){
-            $queueName = INIT::$QUEUE_NAME;
+            $queueName = Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME;
         }
 
         if( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_SUBSCRIBER ){
@@ -74,7 +89,7 @@ class Analysis_QueueHandler extends Stomp {
         } elseif( $this->clientType == self::CLIENT_TYPE_SUBSCRIBER ) {
             //already connected, we want to change the queue
             $this->queueName = $queueName;
-            return parent::subscribe( '/queue/' . INIT::$QUEUE_NAME );
+            return parent::subscribe( '/queue/' . Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME );
         }
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
@@ -122,7 +137,7 @@ class Analysis_QueueHandler extends Stomp {
         } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            $queue = INIT::$QUEUE_NAME;
+            $queue = Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME;
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/QueueSize";
@@ -165,7 +180,7 @@ class Analysis_QueueHandler extends Stomp {
         } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            $queue = INIT::$QUEUE_NAME;
+            $queue = Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME;
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/ConsumerCount";
@@ -194,11 +209,13 @@ class Analysis_QueueHandler extends Stomp {
     }
 
     /**
+     * How much segments are in queue before this?
+     *
      * <pre>
      *  $config = array(
      *    'total' => null,
      *    'qid' => null,
-     *    'queueName' => null
+     *    'queueInfo' => @var Analysis_Queue_Info
      *  )
      * </pre>
      *
@@ -207,12 +224,12 @@ class Analysis_QueueHandler extends Stomp {
      * @throws Exception
      */
     public function setTotal( $config = array(
-            'total' => null,
-            'qid' => null,
-            'queueName' => null
-    ) ){
+            'total'            => null,
+            'pid'              => null,
+            'queueInfo'        => null
+    ) ) {
 
-        if( empty( $this->queueTotalID ) && empty( $config[ 'qid' ] ) ){
+        if( empty( $this->queueTotalID ) && empty( $config[ 'pid' ] ) ){
             throw new Exception( 'Can Not set a Total without a Queue ID.' );
         }
 
@@ -220,23 +237,23 @@ class Analysis_QueueHandler extends Stomp {
             $_total = $config[ 'total' ];
         } else {
 
-            if( empty( $config[ 'queueName' ] ) && empty( $this->queueName ) ){
+            if( empty( $config[ 'queueInfo' ] ) && empty( $this->queueName ) ){
                 throw new Exception( 'Need a queue name to get it\'s total or you must provide one' );
             }
 
-            $queueName = ( !empty( $config[ 'queueName' ] ) ? $config[ 'queueName' ] : $this->queueName );
+            $queueName = ( !empty( $config[ 'queueInfo' ] ) ? $config[ 'queueInfo' ]->queue_name : $this->queueName );
             $_total = $this->getQueueLength( $queueName );
 
         }
 
-        if( !empty( $config[ 'qid' ] ) ){
-            $_qid = $config[ 'qid' ];
+        if( !empty( $config[ 'pid' ] ) ){
+            $_pid = $config[ 'pid' ];
         } else {
-            $_qid = $this->queueTotalID;
+            $_pid = $this->queueTotalID;
         }
 
-        $this->getRedisClient()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
-        $this->getRedisClient()->rpush( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, $_qid );
+        $this->getRedisClient()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_pid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
+        $this->getRedisClient()->rpush( $config[ 'queueInfo' ]->redis_key, $_pid );
 
     }
 
@@ -265,6 +282,42 @@ class Analysis_QueueHandler extends Stomp {
     }
 
     /**
+     * Select the right Queue ( and the associated redis Key ) by it's length ( simplest implementation simple )
+     *
+     * @param $queueLen int
+     *
+     * @return Analysis_Queue_Info
+     */
+    public static function getQueueAddressesByPriority( $queueLen ){
+
+        $queueInfo = Analysis_Queue_Levels::build( self::$QUEUE_INFO );
+
+        //anyway take the defaults
+        $queueAddresses = $queueInfo->high;
+
+        //use this kind of construct to easy add/remove queues and to disable feature by: comment rows/change switch flag to false
+        switch ( true ) {
+            case ( $queueLen >= 100000 ):
+                $queueAddresses = $queueInfo->low;
+                break;
+            case ( $queueLen >= 20000 ):
+                $queueAddresses = $queueInfo->medium;
+                break;
+            default:
+                $queueAddresses = $queueInfo->high;
+                break;
+
+        }
+
+        return $queueAddresses;
+
+    }
+
+    public function setQueue(){
+
+    }
+
+    /**
      * @param null $qid
      *
      * @throws Exception
@@ -281,7 +334,7 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        $working_jobs = $this->getRedisClient()->lrange( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, 0, -1 );
+        $working_jobs = $this->getRedisClient()->lrange( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, -1 );
 
         /**
          * We have an unordered list of numeric keys [1,3,2,5,4]
@@ -342,7 +395,7 @@ class Analysis_QueueHandler extends Stomp {
             /*
              * Remove this job from the project list
              */
-            $this->getRedisClient()->lrem( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST, 0, $_pid );
+            $this->getRedisClient()->lrem( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, $_pid );
 
             Log::doLog ( "--- (child $child_process_id) : trying to initialize job total word count." );
             foreach ( $_analyzed_report as $job_info ) {
@@ -417,7 +470,7 @@ class Analysis_QueueHandler extends Stomp {
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->send( INIT::$QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
+            $this->send( Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
         }
 
     }

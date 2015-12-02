@@ -364,7 +364,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
         _TimeStampMsg( "--- trying to initialize job total word count." );
 
-        $project_details = array_pop( $_details ); //remove rollup
+        $project_details = array_pop( $_details ); //needed to remove rollup row
 
         foreach ( $_details as $job_info ) {
             $counter = new WordCount_Counter();
@@ -389,8 +389,12 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
     }
     $db->query( 'COMMIT' );
     $db->query( 'SET autocommit=1' );
-    
-    if ( count( $fastReport ) ) {
+
+
+    $totalSegmentsToAnalyze = count( $fastReport );
+    $queueInfo = $amqHandler->getQueueAddressesByPriority( $totalSegmentsToAnalyze );
+
+    if ( $totalSegmentsToAnalyze ) {
 
 //        $chunks_st_queue = array_chunk( $fastReport, 10 );
 
@@ -398,7 +402,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
         _TimeStampMsg( 'Queries: ' . count( $fastReport ) );
 
         try {
-            $amqHandler->setTotal( array( 'qid' => $pid, 'queueName' => INIT::$QUEUE_NAME ) );
+            $amqHandler->setTotal( array( 'pid' => $pid, 'queueInfo' => $queueInfo ) );
         } catch ( Exception $e ){
             Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString() , "Fast Analysis set Total values failed." );
             _TimeStampMsg(  $e->getMessage() . "" . $e->getTraceAsString() );
@@ -422,7 +426,7 @@ function insertFastAnalysis( $pid, &$fastReport, $equivalentWordMapping, $perfor
 
                     $jsonObj = json_encode( $queue_element );
                     Utils::raiseJsonExceptionError();
-                    $amqHandler->send( INIT::$QUEUE_NAME, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
+                    $amqHandler->send( $queueInfo->queue_name, $jsonObj, array( 'persistent' => $amqHandler->persistent ) );
                     _TimeStampMsg( "AMQ Set Executed " . ( $k +1 ) );
 
                 }

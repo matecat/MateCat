@@ -1,23 +1,18 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/05/15
  * Time: 13.37
- * 
+ *
  */
-
 class Constants_AnalysisRedisKeys {
 
     /**
      * Key that holds the number of segments to wait before this job executed
      */
     const TOTAL_SEGMENTS_TO_WAIT = "seg_to_wait:";
-
-    /**
-     * Key that holds the projects list in the queue
-     */
-    const PROJECTS_QUEUE_LIST = 'p_list';
 
     /**
      * Key that holds the total number of segments in the project
@@ -66,5 +61,40 @@ class Constants_AnalysisRedisKeys {
      * that reach the end of analysis( semaphore )
      */
     const PROJECT_ENDING_SEMAPHORE = 'proj_end_lock:';
+
+
+    ##################################################
+    ######          Queues Definition          #######
+    ##################################################
+    /**
+     * Key that holds the projects list in the default queue
+     */
+    const PROJECTS_QUEUE_LIST_DEFAULT = 'p1_list';
+
+    /**
+     * Default queue name
+     */
+    const DEFAULT_QUEUE_NAME = 'analysis_queue_P1';
+
+    /**
+     * Key that holds the projects list in the Priority 2 queue
+     */
+    const PROJECTS_QUEUE_LIST_P2 = 'p2_list';
+
+    /**
+     * Priority 2 queue name
+     */
+    const QUEUE_NAME_P2 = 'analysis_queue_P3';
+
+
+    /**
+     * Key that holds the projects list in the Priority 2 queue
+     */
+    const PROJECTS_QUEUE_LIST_P3 = 'p3_list';
+
+    /**
+     * Priority 3 queue name
+     */
+    const QUEUE_NAME_P3 = 'analysis_queue_P3';
 
 }
