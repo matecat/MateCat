@@ -48,5 +48,5 @@ vendor
 phinx.yml
 
 .sass-cache
-*css.map
-public/css/sources/*
+public/css/sass/*.css
+public/css/sass/*.css.map

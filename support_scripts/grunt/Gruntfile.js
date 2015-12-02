@@ -2,19 +2,21 @@ module.exports = function(grunt) {
     var basePath = '../../public/js/';
     var buildPath = '../../public/js/build/';
     var incPath = '../../inc/';
+    var cssBase = '../../public/css/';
 
     var cssFiles = [
-        basePath + '../css/common.css',
-        basePath + '../css/style.css',
-        basePath + '../css/mbc-style.css',
-        basePath + '../css/segment-notes.css',
-        basePath + '../css/project-completion-feature.css',
-        basePath + '../css/editlog.css',
-        basePath + '../css/review_improved.css'
+        cssBase + 'common.css',
+        cssBase + 'style.css',
+        cssBase + 'mbc-style.css',
+        cssBase + 'segment-notes.css',
+        cssBase + 'project-completion-feature.css',
+        cssBase + 'editlog.css',
+
+        cssBase + 'sass/review_improved.css'
     ];
 
     var sassFiles = [
-        basePath + '../css/review_improved.scss'
+        cssBase + 'sass/review_improved.scss'
     ];
 
     var conf = grunt.file.read( incPath + 'version.ini' );
@@ -116,12 +118,12 @@ module.exports = function(grunt) {
             },
             styles: {
                 src: [
-                    basePath + '../css/common.css',
-                    basePath + '../css/style.css',
-                    basePath + '../css/mbc-style.css',
-                    basePath + '../css/segment-notes.css',
-                    basePath + '../css/project-completion-feature.css',
-                    basePath + '../css/review_improved.css'
+                    cssBase + 'common.css',
+                    cssBase + 'style.css',
+                    cssBase + 'mbc-style.css',
+                    cssBase + 'segment-notes.css',
+                    cssBase + 'project-completion-feature.css',
+                    cssBase + 'sass/review_improved.css'
                 ],
                 dest: basePath + '../css/app.css'
             }
@@ -152,9 +154,9 @@ module.exports = function(grunt) {
             dist: {
                 files: [{
                     expand: true,
-                    // cwd: basePath,
-                    src: sassFiles,
-                    dest: basePath + '../css/',
+                    // cwd: cssBase :'',
+                    src: cssBase + 'sass/*.scss',
+                    dest: cssBase ,
                     ext: '.css'
                 }]
             }
