@@ -541,6 +541,27 @@ function insertHtmlAfterSelection(html) {
     }
 }
 
+(function(undefined) {
+    SegmentActivator = {};
+    SegmentActivator.registry = [];
+    SegmentActivator.activate = function( sid ) {
+        if ( typeof sid === 'undefined' ) {
+            console.debug( 'sid is undefined', sid);
+            return ;
+        }
+
+        for (var i = 0; i < this.registry.length ; ++i) {
+            var callback = this.registry[i];
+             callback( sid );
+        }
+    };
+})();
+
+SegmentActivator.registry.push(function( sid ) {
+    var el = $("#segment-" + sid + "-target").find(".editarea");
+    $(el).click();
+});
+
 function ParsedHash( hash ) {
     var split ;
     var actionSep = ',' ;
@@ -878,6 +899,7 @@ function getRangeObject(selectionObject) {
         return range;
     }
 }
+
 
 
 if (typeof String.prototype.startsWith != 'function') {

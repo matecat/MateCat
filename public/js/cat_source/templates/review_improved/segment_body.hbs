@@ -1,0 +1,34 @@
+<div class="body">
+  <div class="header toggle" id="segment-{{segment.sid}}-header"></div>
+  <div class="text">
+    <div class="wrap">
+      <div class="outersource">
+        <div class="source item" tabindex="0"
+                                 id="segment-{{segment.sid}}-source"
+                                 data-original="{{escapedSegment}}">{{{decoded_text}}}</div>
+        <div class="copy" title="Copy source to target">
+          <a href="#"></a>
+          <p>ALT+CTRL+I</p>
+        </div>
+        <div class="target item" id="segment-{{segment.sid}}-target">
+          <div data-mount="segment_text_area_container"></div>
+
+          <ul class="buttons toggle" id="segment-{{segment.sid}}-buttons"></ul>
+        </div> <!-- .target -->
+
+      </div>
+    </div> <!-- .wrap -->
+    <div class="status-container">
+      <a href="#" title="{{status_change_title}}"
+                class="status" id="segment-{{segment.sid}}-changestatus"></a>
+    </div> <!-- .status-container -->
+  </div> <!-- .text -->
+  <div class="timetoedit"
+       data-raw-time-to-edit="{{segment.time_to_edit}}">
+    {{#if t}}
+    <span class="edit-min">{{segment_edit_min}}</span>m
+    <span class="edit-sec">{{segment_edit_sec}}</span>s
+    {{/if}}
+  </div>
+  <div class="footer toggle"></div> <!-- .footer -->
+</div>

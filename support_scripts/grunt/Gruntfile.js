@@ -9,8 +9,13 @@ module.exports = function(grunt) {
         basePath + '../css/mbc-style.css',
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
-        basePath + '../css/editlog.css'
-    ]
+        basePath + '../css/editlog.css',
+        basePath + '../css/review_improved.css'
+    ];
+
+    var sassFiles = [
+        basePath + '../css/review_improved.scss'
+    ];
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
@@ -49,6 +54,7 @@ module.exports = function(grunt) {
             components: {
                 src: [
                     basePath + 'build/templates.js',
+
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.scrollsegment.js',
@@ -62,17 +68,23 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.concordance.js',
                     basePath + 'cat_source/ui.glossary.js',
                     basePath + 'cat_source/ui.search.js',
-                    basePath + 'cat_source/functions.js',
+
+                    basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
+
                     basePath + 'cat_source/ui.customization.js',
                     basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
+                    basePath + 'cat_source/ui.opensegment.js',
+
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
+
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
                     basePath + 'cat_source/review_improved.*.js',
+
                     basePath + 'tm.js'
                 ],
                 dest: buildPath + 'cat.js'
@@ -108,25 +120,43 @@ module.exports = function(grunt) {
                     basePath + '../css/style.css',
                     basePath + '../css/mbc-style.css',
                     basePath + '../css/segment-notes.css',
-                    basePath + '../css/project-completion-feature.css'
+                    basePath + '../css/project-completion-feature.css',
+                    basePath + '../css/review_improved.css'
                 ],
                 dest: basePath + '../css/app.css'
             }
         },
         watch: {
-            scripts: {
+            js: {
                 files: [
                     basePath + 'cat_source/templates/**/*.hbs',
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
-                ].concat( cssFiles ) ,
-
-                tasks: ['development'],
-
+                ],
+                tasks: ['development:js'],
                 options: {
                     interrupt: true,
                     livereload : true
                 }
+            },
+            css: {
+                files: cssFiles.concat( sassFiles ),
+                tasks: ['development:css'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            }
+        },
+        sass: {
+            dist: {
+                files: [{
+                    expand: true,
+                    // cwd: basePath,
+                    src: sassFiles,
+                    dest: basePath + '../css/',
+                    ext: '.css'
+                }]
             }
         },
         jshint: {
@@ -163,14 +193,21 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-strip');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
+    grunt.loadNpmTasks('grunt-contrib-sass');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
 
+    grunt.registerTask('development:js', [
+        'concat:libraries',
+        'handlebars', 'concat:components', 'replace:version',
+        'concat:app'
+    ]);
+
+    grunt.registerTask('development:css', ['sass', 'concat:styles'] );
+
     grunt.registerTask('development', [
-        // 'jshint',
-        'concat:libraries', 'handlebars', 'concat:components', 'replace:version',
-        'concat:app', 'concat:styles'
+        'development:js', 'development:css'
     ]);
 
     grunt.registerTask('deploy', [

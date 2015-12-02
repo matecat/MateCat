@@ -54,20 +54,38 @@ UI = {
 		this.createButtons();
 		this.createHeader();
 	},
-	cacheObjects: function(editarea) {
-		this.editarea = $(editarea);
-        // current and last opened object reference caching
-		this.lastOpenedSegment = this.currentSegment;
-		this.lastOpenedEditarea = $('.editarea', this.currentSegment);
-		this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
-		this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
-		this.currentFile = segment.parent();
-		this.currentFileId = this.currentFile.attr('id').split('-')[1];
-		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+    evalCurrentSegmentTranslationAndSourceTags : function() {
+        var sourceTags = $('.source', this.currentSegment).html()
+        .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
         this.currentSegmentTranslation = this.editarea.text();
+    },
+	cacheObjects: function( editarea_or_segment ) {
+        if ( editarea_or_segment instanceof UI.Segment ) {
+            var segment = editarea_or_segment ;
+            this.editarea = segment.el.find('.editarea');
+        }
+        else {
+            this.editarea = $(editarea);
+            var segment = new UI.Segment( editarea_or_segment.closest('section') );
+        }
+
+		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
+                                                      // seems to be the previous current segment
+
+		this.lastOpenedEditarea = $('.editarea', this.currentSegment);
+
+		this.currentSegmentId    = segment.id ;
+        this.lastOpenedSegmentId = segment.id ;
+		this.currentSegment      = segment.el ;
+		this.currentFile         = segment.el.parent();
+		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
+
+        this.evalCurrentSegmentTranslationAndSourceTags();
+
         $(window).trigger('cachedSegmentObjects');
     },
+
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
@@ -180,6 +198,7 @@ UI = {
 
          TODO FIX
          */
+
         try {
             return $(segment).attr('id').replace('segment-', '');
         } catch( e ){
@@ -893,8 +912,12 @@ UI = {
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
 		});
+
+        console.log('startSegmentId', startSegmentId);
+
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
+
 		this.body.addClass('loaded');
 
 
@@ -1074,10 +1097,7 @@ UI = {
         if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
             MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
         } else {
-            // TODO: question: why search for #segment-{id}-target
-            // instead of #segment-{id} as usual?
-            var el = $("#segment-" + id + "-target").find(".editarea");
-            $(el).click();
+            SegmentActivator.activate(id);
         }
     },
 	initSegmentNavBar: function() {
@@ -1122,122 +1142,6 @@ UI = {
 		$('#contextMenu').hide();
 		$('#spellCheck .words').remove();
 	},
-	openSegment: function(editarea, operation) {
-        // TODO: check why this global var is needed
-		segment_id = $(editarea).attr('data-sid');
-		var segment = $('#segment-' + segment_id);
-
-        if (Review.enabled() && !Review.evalOpenableSegment( segment )) {
-            return false ;
-        }
-
-        this.openSegmentStart = new Date();
-		if(UI.warningStopped) {
-			UI.warningStopped = false;
-			UI.checkWarnings(false);
-		}
-		if (!this.byButton) {
-			if (this.justSelecting('editarea'))
-				return;
-		}
-
-        this.numOpenedSegments++;
-		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
-		this.byButton = false;
-		this.cacheObjects(editarea);
-		this.updateJobMenu();
-
-		this.clearUndoStack();
-		this.saveInUndoStack('open');
-		this.autoSave = true;
-
-		var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-		var s2 = $('.source', segment).text();
-		var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
-		var isEqual = (s1 == s2);
-
-		getNormally = isNotSimilar || isEqual;
-
-		this.activateSegment(getNormally);
-
-        segment.trigger('open');
-
-        $('section').first().nextAll('.undoCursorPlaceholder').remove();
-
-        this.getNextSegment(this.currentSegment, 'untranslated');
-
-
-		if ((!this.readonly)&&(!getNormally)) {
-			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
-		}
-
-		this.setCurrentSegment();
-
-		if (!this.readonly) {
-            // XXX Arcane, what's this code for?
-			if(getNormally) {
-				this.getContribution(segment, 0);
-			} else {
-				console.log('riprova dopo 3 secondi');
-				$(segment).removeClass('loaded');
-				$(".loader", segment).addClass('loader_on');
-				setTimeout(function() {
-					$('.alternatives .overflow', segment).show();
-					UI.getContribution(segment, 0);
-				}, 3000);
-			}
-		}
-
-		this.currentSegment.addClass('opened');
-
-		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
-
-		this.fillCurrentSegmentWarnings(this.globalWarnings, true);
-		this.setNextWarnedSegment();
-
-		this.focusEditarea = setTimeout(function() {
-			UI.editarea.focus();
-			clearTimeout(UI.focusEditarea);
-            UI.currentSegment.trigger('EditAreaFocused');
-		}, 100);
-		this.currentIsLoaded = false;
-		this.nextIsLoaded = false;
-
-
-
-		if(!this.noGlossary) this.getGlossary(segment, true, 0);
-		this.opening = true;
-		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
-			var lastOpened = $(this.lastOpenedSegment).attr('id');
-			if (lastOpened != 'segment-' + this.currentSegmentId)
-				this.closeSegment(this.lastOpenedSegment, 0, operation);
-		}
-		this.opening = false;
-		this.body.addClass('editing');
-
-		segment.addClass("editor");
-		if (!this.readonly)
-			this.editarea.attr('contenteditable', 'true');
-		this.editStart = new Date();
-		$(editarea).removeClass("indent");
-
-		this.lockTags();
-		if (!this.readonly) {
-			this.getContribution(segment, 1);
-			this.getContribution(segment, 2);
-
-			if(!this.noGlossary) this.getGlossary(segment, true, 1);
-			if(!this.noGlossary) this.getGlossary(segment, true, 2);
-		}
-		if (this.debug)
-			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
-
-        $(window).trigger({
-            type: "segmentOpened",
-            segment: segment
-        });
-    },
-
     reactivateJob: function() {
         APP.doRequest({
             data: {
@@ -3209,9 +3113,9 @@ console.log('eccolo: ', typeof token);
 //            return;
         }
 
-        if(this.editarea === '') return;
-
+        if (this.editarea === '') return;
 		if (this.editarea.html() === '') return;
+        if (this.editarea.length === 0 ) return ;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);

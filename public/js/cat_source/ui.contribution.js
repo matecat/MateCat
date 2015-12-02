@@ -63,6 +63,7 @@ $.extend(UI, {
 	},
 	getContribution: function(segment, next) {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+
 		if ($(n).hasClass('loaded')) {
             if(segment.find('.footer .matches .overflow').text().length) {
                 this.spellCheck();
@@ -172,8 +173,7 @@ $.extend(UI, {
 		var isActiveSegment = $(segment).hasClass('editor');
 		var editarea = $('.editarea', segment);
 
-
-		if(d.data.matches.length) {
+		if ( d.data.matches.length) {
 			var editareaLength = editarea.text().trim().length;
 			if (isActiveSegment) {
 				editarea.removeClass("indent");

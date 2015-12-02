@@ -584,21 +584,6 @@ $.extend(UI, {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
             UI.copyGlossaryItemInEditarea($(this));
-/*
-// not used anymore?
-		}).on('blur', '.graysmall .translation', function(e) {
-			e.preventDefault();
-			UI.closeInplaceEditor($(this));
-		}).on('click', '.graysmall .edit-buttons .cancel', function(e) {
-			e.preventDefault();
-			UI.closeInplaceEditor($(this).parents('.graysmall').find('.translation'));
-		}).on('click', '.graysmall .edit-buttons .save', function(e) {
-			e.preventDefault();
-			console.log('save');
-			ed = $(this).parents('.graysmall').find('.translation');
-			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
-			UI.closeInplaceEditor(ed);
-*/
 		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
@@ -740,13 +725,13 @@ $.extend(UI, {
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
-            if (typeof operation == 'undefined')
+            if (typeof operation == 'undefined') {
 				operation = 'clicking';
-//            console.log('operation: ', operation);
-//            console.log('action: ', action);
+            }
+
             UI.saveInUndoStack('click');
-//            if(typeof UI.currentSegment != 'undefined') return true;
             this.onclickEditarea = new Date();
+
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
             UI.removeHighlightCorrespondingTags();
@@ -1678,11 +1663,15 @@ $.extend(UI, {
 //            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
+
         if(!$('#segment-' + this.startSegmentId).length) {
             if($('#segment-' + this.startSegmentId + '-1').length) {
-                this.startSegmentId = this.startSegmentId + '-1';
+                if ( typeof this.startSegmentId != 'undefined' ) {
+                    this.startSegmentId = this.startSegmentId + '-1';
+                }
             };
         }
+
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
 

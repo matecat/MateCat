@@ -47,3 +47,5 @@ vendor
 
 phinx.yml
 
+.sass-cache
+*css.map

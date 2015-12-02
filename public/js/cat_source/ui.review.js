@@ -10,7 +10,7 @@ Review = {
 };
 
 if ( Review.enabled() )
-(function(Review, undefined) {
+(function(Review, $, undefined) {
     var alertNotTranslatedYet = function( sid ) {
         APP.confirm({
             name: 'confirmNotYetTranslated',
@@ -31,7 +31,218 @@ if ( Review.enabled() )
             return false ;
         },
     });
-})(Review);
+
+    $.extend(UI, {
+        setRevision: function( data ){
+            APP.doRequest({
+//                data: reqData,
+
+                data: data,
+
+//                context: [reqArguments, segment, status],
+                error: function() {
+                    //UI.failedConnection( this[0], 'setRevision' );
+                    UI.failedConnection( data, 'setRevision' );
+                },
+                success: function(d) {
+//                    console.log('d: ', d);
+                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
+                    // temp
+//                    d.stat_quality = config.stat_quality;
+//                    d.stat_quality[0].found = 2;
+                    //end temp
+//                    UI.populateStatQualityPanel(d.stat_quality);
+                }
+            });
+        },
+        trackChanges: function (editarea) {
+/*
+            console.log('11111: ', $(editarea).text());
+            console.log('22222: ', htmlEncode($(editarea).text()));
+            console.log('a: ', UI.currentSegment.find('.original-translation').text());
+            console.log('b: ', $(editarea).html());
+            console.log('c: ', $(editarea).text());
+            var c = $(editarea).text();
+            console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
+*/
+            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
+                    .replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
+                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
+
+            UI.dmp.diff_cleanupSemantic( diff ) ;
+
+            diffTxt = '';
+            $.each(diff, function (index) {
+
+                if(this[0] == -1) {
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="deleted"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
+                } else if(this[0] == 1) {
+                    var rootElem = $( document.createElement( 'div' ) );
+                    var newElem = $.parseHTML( '<span class="added"/>' );
+                    $( newElem ).text( this[1] );
+                    rootElem.append( newElem );
+                    diffTxt += $( rootElem ).html();
+                } else {
+                    diffTxt += this[1];
+                }
+                $('.editor .sub-editor.review .track-changes p').html(diffTxt);
+            });
+        },
+/*
+        createStatQualityPanel: function () {
+            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
+        },
+        populateStatQualityPanel: function (d) { // no more used
+            tbody = $('#popup-stat-quality .slide-panel-body tbody');
+            tbody.empty();
+            $.each(d, function (index) {
+                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
+            });
+//            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
+        },
+        openStatQualityPanel: function() { // no more used
+            $('body').addClass('side-popup');
+            $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
+//            $("#SnapABug_Button").hide();
+            $(".outer-stat-quality").show();
+//            $.cookie('tmpanel-open', 1, { path: '/' });
+        },
+*/
+        setReviewErrorData: function (d) {
+            $.each(d, function (index) {
+//                console.log(this.type + ' - ' + this.value);
+//                console.log('.editor .error-type input[name=t1][value=' + this.value + ']');
+                if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
+
+            });
+
+        },
+/*
+        gotoNextUntranslated: function () {
+            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
+            //console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
+//                console.log('b: ', UI.currentSegmentId);
+                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+//                console.log('c: ', UI.currentSegmentId);
+
+            } else {
+                UI.reloadWarning();
+            }
+
+        },
+*/
+/*
+        closeNotYetTranslated: function () {
+            return false;
+        },
+*/
+        openNextTranslated: function (sid) {
+            console.log('openNextTranslated');
+            sid = sid || UI.currentSegmentId;
+            el = $('#segment-' + sid);
+//            console.log(el.nextAll('.status-translated, .status-approved'));
+
+            var translatedList = [];
+            var approvedList = [];
+
+            // find in current UI
+            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
+                translatedList = el.nextAll('.status-translated');
+                approvedList   = el.nextAll('.status-approved');
+                console.log('translatedList: ', translatedList);
+                console.log('approvedList: ', approvedList);
+                if( translatedList.length ) {
+                    translatedList.first().find('.editarea').click();
+                } else {
+                    approvedList.first().find('.editarea').click();
+
+//                    UI.reloadWarning();
+//                    approvedList.first().find('.editarea').click();
+                }
+
+            } else {
+                file = el.parents('article');
+                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+
+                    var translatedList = $(this).find('.status-translated');
+                    var approvedList   = $(this).find('.status-approved');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        UI.reloadWarning();
+//                        approvedList.first().find('.editarea').click();
+                    }
+
+                    return false;
+
+                });
+                // else
+                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+
+                    translatedList = $('section.status-translated');
+                    approvedList   = $('section.status-approved');
+
+                    if( translatedList.length ) {
+                        if((translatedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(translatedList.first());
+                        } else {
+                            translatedList.first().find('.editarea').click();
+                        }
+                    } else {
+                        if((approvedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(approvedList.first());
+                        } else {
+                            approvedList.first().find('.editarea').click();
+                        }
+                    }
+
+                } else { // find in not loaded segments
+//                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            if( d.nextId == null ) return false;
+                            UI.render({
+                                firstLoad: false,
+                                segmentToOpen: d.nextId
+                            });
+                        }
+                    });
+                }
+            }
+        }
+
+    });
+})(Review, jQuery);
+
+/**
+ * Events
+ *
+ * Only bind events for specific review type
+ */
 
 if ( Review.enabled() && Review.type == 'simple' ) {
 
@@ -463,6 +674,5 @@ console.log('AAA');
                 }
             }
         }
-
-    })
+    }
 }

@@ -3751,22 +3751,20 @@ box-shadow: inset 0 0 1px 1px #888;
     display: none;
 }
 
-
-
-
-.sub-editor.review .error-type
-{
+.sub-editor.review .error-type {
     width: 45.6%;
     padding: 0 1%;
     margin: 0 0 2% 0;
     float: left;
     border: 3px solid #fff;
 }
+
 .sub-editor.review .error-type.error tbody {
-border: 2px solid red !important;
+  border: 2px solid red !important;
 }
+
 .sub-editor.review .error-type.error h3 {
-color:red !important;
+  color:red !important;
 }
 
 .track-changes {
@@ -3781,9 +3779,6 @@ color:red !important;
 	margin: 20px 0 0 1px;
 	text-align: left;
 }
-
-
-
 
 .track-changes p {
   width: 100%;
