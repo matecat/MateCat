@@ -250,7 +250,10 @@ $.extend(UI, {
 			isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
 			saveSelection();
 
-			if($('span .rangySelectionBoundary', area).length > 1) $('.rangySelectionBoundary', area).last().remove();
+			if ( $('span .rangySelectionBoundary', area).length > 1 ) {
+                $('.rangySelectionBoundary', area).last().remove();
+            }
+
 			if($('span .rangySelectionBoundary', area).length) {
 				spel = $('span', area).has('.rangySelectionBoundary');
 				rsb = $('span .rangySelectionBoundary', area).detach();
@@ -273,49 +276,7 @@ $.extend(UI, {
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
-/*
-		} else {
-	// old cleaning code to be evaluated
-			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-			draggedText = '';
-			$(diff).each(function() {
-				if (this[0] == 1) {
-					draggedText += this[1];
-				}
-			});
-			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2").replace(/(<br>)$/gi, '');
-			div = document.createElement("div");
-			div.innerHTML = draggedText;
-			saveSelection();
-			$('.rangySelectionBoundary', area).last().remove(); // eventually removes a duplicated selectionBoundary
-			if($('span .rangySelectionBoundary', area).length) { // if there's a selectionBoundary inside a span, move the first after the latter
-				spel = $('span', area).has('.rangySelectionBoundary');
-				rsb = $('span .rangySelectionBoundary', area).detach();
-				spel.after(rsb);
-			}
-			phcode = $('.rangySelectionBoundary')[0].outerHTML;
-			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
-
-			newTag = $(div).text();
-			newText = area.text().replace(draggedText, newTag);
-			area.text(newText);
-			area.html(area.html().replace(this.cursorPlaceholder, phcode));
-			restoreSelection();
-			area.html(area.html().replace(this.cursorPlaceholder, ''));			
-		}
-*/
 	},
-/*
-    setExtendedTagMode: function (el) {
-        console.log('setExtendedTagMode');
-        segment = el || UI.currentSegment;
-        $(segment).attr('data-tagMode', 'extended');
-    },
-    setCrunchedTagMode: function (el) {
-        segment = el || UI.currentSegment;
-        $(segment).attr('data-tagMode', 'crunched');
-    },
-*/
     setTagMode: function () {
         if(this.custom.extended_tagmode) {
             this.setExtendedTagMode();
