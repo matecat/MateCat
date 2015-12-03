@@ -245,6 +245,7 @@ class Bootstrap {
                 self::$_ROOT . "/lib/Utils",
                 self::$_ROOT . "/lib/Utils/Predis/src",
                 self::$_ROOT . "/lib/Model",
+                self::$_ROOT . "/lib/View",
                 self::$_ROOT . "/lib/Decorator",
         );
         if ( !empty( $custom_paths ) ) {
