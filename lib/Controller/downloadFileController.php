@@ -187,30 +187,23 @@ class downloadFileController extends downloadController {
                      * Conversion Enforce
                      */
                     $convertBackToOriginal = true;
-                    try {
 
+                    //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
+                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-                        //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-                        $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+                    $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
+                    // When the 'proprietary' flag is set to false, the xliff
+                    // is not passed to any converter, because is handled
+                    // directly inside MateCAT.
+                    $xliffWasNotConverted = ( $fileType[ 'proprietary' ] === false );
 
-                        $fileType = DetectProprietaryXliff::getInfo($file[ 'xliffFilePath' ]);
-                        // When the 'proprietary' flag is set to false, the xliff
-                        // is not passed to any converter, because is handled
-                        // directly inside MateCAT.
-                        $xliffWasNotConverted = ($fileType['proprietary'] === false);
-
-                        if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
-                            $convertBackToOriginal = false;
-                            Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                        } else {
-                            //TODO: dos2unix ??? why??
-                            //force unix type files
-                            Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                        }
-
-
-                    } catch ( Exception $e ) {
-                        Log::doLog( $e->getMessage() );
+                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
+                        $convertBackToOriginal = false;
+                        Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                    } else {
+                        //TODO: dos2unix ??? why??
+                        //force unix type files
+                        Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
                     }
 
                     if ( $convertBackToOriginal ) {
@@ -648,7 +641,14 @@ class downloadFileController extends downloadController {
         foreach ( $zipFiles as $zipFileName => $internalFile ) {
 
             foreach ( $internalFile as $__idx => $fileInformations ) {
-                $zipFiles[ $zipFileName ][ $__idx ][ 'output_filename' ] = $fileInformations[ 'zipinternalPath' ] . DIRECTORY_SEPARATOR . $fileInformations[ 'output_filename' ];
+
+                if( $fileInformations[ 'zipinternalPath' ] != "" ){
+                    $internalDirName = $fileInformations[ 'zipinternalPath' ] . DIRECTORY_SEPARATOR;
+                } else {
+                    $internalDirName = null;
+                }
+
+                $zipFiles[ $zipFileName ][ $__idx ][ 'output_filename' ] = $internalDirName . $fileInformations[ 'output_filename' ];
 
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'zipinternalPath' ] );
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'zipfilename' ] );
