@@ -168,42 +168,6 @@ class engineController extends ajaxController {
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
-
-            case strtolower( Constants_Engines::LETSMT ):
-
-                /**
-                 * Create a record of type LetsMT
-                 */
-                $newEngine = EnginesModel_LetsMTStruct::getStruct();
-
-                $newEngine->name                                = $this->name;
-                $newEngine->uid                                 = $this->uid;
-                $newEngine->type                                = Constants_Engines::MT;
-                $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
-                $newEngine->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
-                                                                                                    // return the newly added system's id or the list of available systems
-                                                                                                    // for the user to choose from. the check happens later on
-                $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
-                $newEngine->extra_parameters[ 'use_qe' ]        = $this->engineData[ 'use_qe' ];
-                $newEngine->extra_parameters[ 'source_lang' ]   = $this->engineData[ 'source_lang' ];
-                $newEngine->extra_parameters[ 'target_lang' ]   = $this->engineData[ 'target_lang' ];
-
-                if ($newEngine->extra_parameters[ 'use_qe' ]) {
-                    $minQEString = $this->engineData[ 'minimum_qe' ];
-                    if (!is_numeric($minQEString)) {
-                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
-                        return;
-                    }
-                    $minimumQEScore = floatval($minQEString);
-                    if ($minimumQEScore < 0 || $minimumQEScore > 1) {
-                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
-                        return;
-                    }
-                    $newEngine->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
-                }
-
-                break;
-
             case strtolower( Constants_Engines::APERTIUM ):
 
                 /**
@@ -229,6 +193,41 @@ class engineController extends ajaxController {
                 $newEngine->uid                                 = $this->uid;
                 $newEngine->type                                = Constants_Engines::MT;
                 $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower( Constants_Engines::LETSMT ):
+
+                /**
+                 * Create a record of type LetsMT
+                 */
+                $newEngine = EnginesModel_LetsMTStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_id' ]     = $this->engineData['client_id'];
+                $newEngine->extra_parameters[ 'system_id' ]     = $this->engineData[ 'system_id' ]; // whether this has been set or not indicates whether we should
+                // return the newly added system's id or the list of available systems
+                // for the user to choose from. the check happens later on
+                $newEngine->extra_parameters[ 'terms_id' ]      = $this->engineData[ 'terms_id' ];
+                $newEngine->extra_parameters[ 'use_qe' ]        = $this->engineData[ 'use_qe' ];
+                $newEngine->extra_parameters[ 'source_lang' ]   = $this->engineData[ 'source_lang' ];
+                $newEngine->extra_parameters[ 'target_lang' ]   = $this->engineData[ 'target_lang' ];
+
+                if ($newEngine->extra_parameters[ 'use_qe' ]) {
+                    $minQEString = $this->engineData[ 'minimum_qe' ];
+                    if (!is_numeric($minQEString)) {
+                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
+                        return;
+                    }
+                    $minimumQEScore = floatval($minQEString);
+                    if ($minimumQEScore < 0 || $minimumQEScore > 1) {
+                        $this->result[ 'errors' ][ ] = array( 'code' => -13, 'message' => "Minimum QE score should be a number between 0 and 1." );
+                        return;
+                    }
+                    $newEngine->extra_parameters[ 'minimum_qe' ] = $minimumQEScore;
+                }
 
                 break;
 
