@@ -12,7 +12,10 @@ module.exports = function(grunt) {
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
 
-        cssBase + 'sass/review_improved.css'
+        cssBase + 'sass/review_improved.css',
+
+        cssBase + 'libs/remodal.css',
+        cssBase + 'libs/remodal-default-theme.css',
     ];
 
     var sassFiles = [
@@ -96,6 +99,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
+                    basePath + 'lib/remodal.min.js',
                     basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/jquery-ui.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
@@ -117,14 +121,7 @@ module.exports = function(grunt) {
                 dest: buildPath + 'app.js'
             },
             styles: {
-                src: [
-                    cssBase + 'common.css',
-                    cssBase + 'style.css',
-                    cssBase + 'mbc-style.css',
-                    cssBase + 'segment-notes.css',
-                    cssBase + 'project-completion-feature.css',
-                    cssBase + 'sass/review_improved.css'
-                ],
+                src: cssFiles,
                 dest: basePath + '../css/app.css'
             }
         },

@@ -1,6 +1,28 @@
 if ( Review.enabled() && Review.type == 'improved' ) {
 (function($, UI, undefined) {
 
+    var mouse_down_inside = false;
+    var mouse_up_inside = false;
+
+    function showModalWindow(selection) {
+        var data = {};
+        data.selected_string = selection.toString() ;
+        data.message = 'message';
+
+        var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
+
+        var modal = template.remodal({});
+        template.on('keydown', function(e)  {
+            var esc = 27 ;
+            e.stopPropagation();
+            if ( e.which == esc ) {
+                modal.close();
+            }
+        });
+
+        modal.open();
+    }
+
     function overrideButtons() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
         div.find('.translated').text('APPROVED')
@@ -8,6 +30,35 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         div.find('.next-untranslated').parent().remove();
         UI.segmentButtons = div.html();
     }
+
+    $(document).on('mousedown', function(e) {
+        mouse_down_inside = false ;
+    });
+
+    $(document).on('mouseup', function(e) {
+        mouse_down_inside = false;
+    });
+
+    $(document).on('mousedown', 'section.opened .errorTaggingArea', function(e) {
+        e.stopPropagation();
+        mouse_down_inside = true ;
+    });
+
+    $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
+        // e.stopPropagation();
+
+        // if ( mouse_down_inside ) {
+            var selection =  rangy.getSelection() ;
+
+            if (
+                selection.focusNode.parentNode.closest('.errorTaggingArea') &&
+                selection.anchorNode.parentNode.closest('.errorTaggingArea') )
+            {
+                showModalWindow( selection );
+            }
+        // }
+
+    });
 
     $('html').on('buttonsCreation', 'section', function() {
         overrideButtons();

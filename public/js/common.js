@@ -190,8 +190,6 @@ APP = {
         e.preventDefault();
     },
     popup: function ( conf ) {
-        console.log( 'closeOnSuccess: ', conf.closeOnSuccess );
-
         this.closePopup();
 
         _tpl_newPopup = '' +

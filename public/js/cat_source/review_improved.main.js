@@ -1,8 +1,11 @@
 if ( Review.enabled() && Review.type == 'improved' ) {
 
 (function($, undefined) {
-
     var segments = {};
+
+    function loadSegmentVersions() {
+
+    }
 
     $.extend(UI, {
         evalCurrentSegmentTranslationAndSourceTags : function() {
@@ -35,6 +38,9 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             return MateCat.Templates['review_improved/segment'];
         }
     });
+
+
+
 
   })(jQuery) ;
 }
