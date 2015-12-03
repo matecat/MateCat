@@ -36,7 +36,7 @@ $klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data/segments', functio
 });
 
 $klein->respond('GET', '/api/v2/project-completion-status/[i:id_project]', function() {
-    $reflect  = new ReflectionClass('API_V2_ProjectCompletionStatus');
+    $reflect  = new ReflectionClass('\API\V2\ProjectCompletionStatus');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('status');
 });
@@ -45,6 +45,18 @@ $klein->respond('GET', '/api/v2/project-translation/[i:id_project]', function() 
     $reflect  = new ReflectionClass('API_V2_ProjectTranslation');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('status');
+});
+
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/versions', function() {
+    $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('index');
+});
+
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/:password/segments/[:id_segment]/versions/[:version_number]', function() {
+    $reflect  = new ReflectionClass('API_V2_SegmentVersion');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('detail');
 });
 
 $klein->dispatch();

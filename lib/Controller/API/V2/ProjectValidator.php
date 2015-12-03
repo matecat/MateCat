@@ -1,6 +1,8 @@
 <?php
 
-class API_V2_ProjectValidator {
+namespace API\V2 ;
+
+class ProjectValidator {
 
   private $api_record ;
   private $id_project ;
@@ -21,7 +23,7 @@ class API_V2_ProjectValidator {
   }
 
   public function validate() {
-    $this->project = Projects_ProjectDao::findById( $this->id_project );
+    $this->project = \Projects_ProjectDao::findById( $this->id_project );
 
     if ($this->project == false) {
       return false;

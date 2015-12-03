@@ -21,7 +21,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $stmt->setFetchMode(
             PDO::FETCH_CLASS,
-            'Segments_SegmentTranslationVersionStruct'
+            'Translations_TranslationVersionStruct'
         );
 
         return $stmt->fetchAll();
@@ -41,7 +41,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $stmt->setFetchMode(
             PDO::FETCH_CLASS,
-            'Segments_SegmentTranslationVersionStruct'
+            'Translations_TranslationVersionStruct'
         );
 
         return $stmt->fetchAll();

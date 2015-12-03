@@ -1,6 +1,8 @@
 <?php
 
-class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
+namespace API\V2 ;
+
+class ProjectCompletionStatus extends ProtectedKleinController {
 
     private $project ;
     private $validator ;
@@ -9,7 +11,7 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
     }
 
     protected function validateRequest() {
-        $this->validator = new API_V2_ProjectValidator(
+        $this->validator = new ProjectValidator(
             $this->api_record,
             $this->request->id_project
         );
@@ -23,7 +25,7 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
 
     public function status() {
         // TODO: move this in to a json presenter class
-        $uncompleted = Projects_ProjectDao::uncompletedChunksByProjectId(
+        $uncompleted = \Projects_ProjectDao::uncompletedChunksByProjectId(
             $this->request->id_project
         );
 
@@ -42,7 +44,7 @@ class API_V2_ProjectCompletionStatus extends API_V2_ProtectedKleinController {
                     $response['jobs'][] = array(
                         'id' => $job->id,
                         'password' => $job->password,
-                        'download_url' => INIT::$HTTPHOST . "/?action=downloadFile" .
+                        'download_url' => \INIT::$HTTPHOST . "/?action=downloadFile" .
                             "&id_job=" .  $job->id .
                             "&password=" . $job->password
 
