@@ -10,6 +10,12 @@
 
         <script type="text/javascript">
             /*<![CDATA[*/
+
+            var getStackTrace = function() {
+              var obj = {};
+              Error.captureStackTrace(obj, getStackTrace);
+              return obj.stack;
+            };
             var config = {
                 basepath: '${basepath | string:/}',
                 maxFileSize: ${maxFileSize},
@@ -27,7 +33,7 @@
                 mt_enabled: ${mt_enabled | string:true},
                 id_job: '${jid}',
                 get job_id() {
-                  /* console.info('job_id is deprecated, use id_job instead'); */
+                  console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
                 },
                 password: '${password}',
