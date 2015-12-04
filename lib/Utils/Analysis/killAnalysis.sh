@@ -5,7 +5,7 @@
 ################
 
 #get PIDs
-pid_fast=`ps faux|grep fastAnalysis.php|grep -v grep|grep -v SCREEN|awk '{print $2}'`
+pid_fast=`ps faux|grep FastAnalysis.php|grep -v grep|grep -v SCREEN|awk '{print $2}'`
 pid_tm=`ps faux|grep tmAnalysisThread.php|grep -v grep|grep -v SCREEN|awk '{print $2}'`
 
 #kill procs, if up

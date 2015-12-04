@@ -16,7 +16,7 @@ if [[ ${rc} -eq 0 ]]; then
 fi
 
 
-pid_fast=`ps faux|grep fastAnalysis.php|grep -v grep|grep -v SCREEN|awk '{print $2}'`
+pid_fast=`ps faux|grep FastAnalysis.php|grep -v grep|grep -v SCREEN|awk '{print $2}'`
 pid_tm=`ps faux|grep tmAnalysisThread.php|grep -v grep|grep -v SCREEN|awk '{print $2}'`
 
 #if up, exit, ERROR
