@@ -158,7 +158,7 @@ APP = {
 //        console.log('req: ', req);
         logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
         version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
-        builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.job_id + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
         var setup = {
             url: builtURL,
 //			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,

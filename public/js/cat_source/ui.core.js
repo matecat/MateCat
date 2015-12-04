@@ -338,7 +338,7 @@ UI = {
     },
     copyAllSources: function() {
         console.log('copy all sources');
-        if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
+        if(typeof $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
             APP.confirmAndCheckbox({
                 title: 'Copy source to target',
                 name: 'confirmCopyAllSources',
@@ -362,7 +362,7 @@ UI = {
         APP.doRequest({
             data: {
                 action: 'copyAllSource2Target',
-                id_job: config.job_id,
+                id_job: config.id_job,
                 pass: config.password
             },
             error: function() {
@@ -379,7 +379,7 @@ UI = {
                         msg: d.errors[0].message
                     });
                 } else {
-                    $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password, '1', { expires:1 });
+                    $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
                     $('#outer').empty();
                     UI.render({
@@ -492,7 +492,7 @@ UI = {
 
         // FIXME: arcane. Whatever it does, it should go in the contribution module.
 		if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-            var d = JSON.parse( UI.getFromStorage('contribution-' + config.job_id + '-' + sid ) );
+            var d = JSON.parse( UI.getFromStorage('contribution-' + config.id_job + '-' + sid ) );
 			UI.processContributions( d, segment );
 		}
 	},
@@ -504,7 +504,7 @@ UI = {
         if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
             return;
         }
-		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.id_job + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
         if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
@@ -550,7 +550,7 @@ UI = {
 				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
 				var found = false;
 				$.each(jobs, function() {
-					if(this == config.job_id) {
+					if(this == config.id_job) {
 						found = true;
 					}
 				});
@@ -753,7 +753,7 @@ UI = {
 		APP.doRequest({
 			data: {
 				action: 'getSegments',
-				jid: config.job_id,
+				jid: config.id_job,
 				password: config.password,
 				step: UI.moreSegNum,
 				segment: segId,
@@ -887,7 +887,7 @@ UI = {
 		APP.doRequest({
 			data: {
 				action: 'getSegments',
-				jid: config.job_id,
+				jid: config.id_job,
 				password: config.password,
 				step: step,
 				segment: seg,
@@ -1148,7 +1148,7 @@ UI = {
                 action:         "changeJobsStatus",
                 new_status:     "active",
                 res:            "job",
-                id:             config.job_id,
+                id:             config.id_job,
                 password:      config.password,
             },
             success: function(d){
@@ -1525,7 +1525,7 @@ UI = {
 				password: config.password,
 				id_segment: id_segment.toString(),
 //				id_segment: id_segment.toString().split('-')[0],
-				id_job: config.job_id
+				id_job: config.id_job
 			},
 			context: [reqArguments, id_segment],
 			error: function() {
@@ -1557,7 +1557,7 @@ console.log('VEDIAMO: ', id_segment);
                 action: 'getTranslationMismatches',
                 password: config.password,
                 id_segment: id_segment.toString(),
-                id_job: config.job_id
+                id_job: config.id_job
             },
             context: id_segment,
             error: function(d) {
@@ -2074,7 +2074,7 @@ console.log('eccolo: ', typeof token);
 		var token = seg + '-' + ts.toString();
         var dataMix = {
             action: 'getWarning',
-            id_job: config.job_id,
+            id_job: config.id_job,
             password: config.password,
             token: token
         };
@@ -2926,19 +2926,19 @@ console.log('eccolo: ', typeof token);
         this.currentSegment.find('.footer').removeClass('showMatches');
         this.body.toggleClass('hideMatches');
         var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
-        $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+        $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
     },
     setHideMatches: function () {
         var cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
 
-        if(typeof $.cookie(cookieName + '-' + config.job_id) != 'undefined') {
-            if($.cookie(cookieName + '-' + config.job_id) == 'true') {
+        if(typeof $.cookie(cookieName + '-' + config.id_job) != 'undefined') {
+            if($.cookie(cookieName + '-' + config.id_job) == 'true') {
                 UI.body.addClass('hideMatches')
             } else {
                 UI.body.removeClass('hideMatches')
             }
         } else {
-            $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('hideMatches'), { expires: 30 });
+            $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('hideMatches'), { expires: 30 });
         }
 
     },
@@ -2946,9 +2946,9 @@ console.log('eccolo: ', typeof token);
         if(first && !config.tagLockCustomizable) return;
         var cookieName = 'tagLockDisabled';
 
-        if(typeof $.cookie(cookieName + '-' + config.job_id) != 'undefined') {
+        if(typeof $.cookie(cookieName + '-' + config.id_job) != 'undefined') {
             if(first) {
-                if($.cookie(cookieName + '-' + config.job_id) == 'true') {
+                if($.cookie(cookieName + '-' + config.id_job) == 'true') {
                     UI.body.addClass('tagmarkDisabled');
                     setTimeout(function() {
                         $('.editor .tagLockCustomize').addClass('unlock');
@@ -2958,11 +2958,11 @@ console.log('eccolo: ', typeof token);
                 }
             } else {
                 cookieVal = (UI.body.hasClass('tagmarkDisabled'))? 'true' : 'false';
-                $.cookie(cookieName + '-' + config.job_id, cookieVal,  { expires: 30 });
+                $.cookie(cookieName + '-' + config.id_job, cookieVal,  { expires: 30 });
             }
 
         } else {
-            $.cookie(cookieName + '-' + config.job_id, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
+            $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
         }
 
     },
