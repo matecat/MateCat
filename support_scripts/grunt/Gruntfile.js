@@ -108,7 +108,9 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
-                    basePath + 'lib/rangy-selectionsaverestore.js'
+                    basePath + 'lib/rangy-selectionsaverestore.js',
+                    basePath + 'lib/lokijs.min.js',
+                    basePath + 'lib/sprintf.min.js',
                 ],
                 dest: buildPath + 'libs.js'
             },

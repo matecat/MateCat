@@ -909,6 +909,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 s.internal_id,
                 IF (st.status='NEW',NULL,st.translation) AS translation,
                 UNIX_TIMESTAMP(st.translation_date) AS version,
+                st.locked AS original_target_provied,
                 st.status,
                 COALESCE(time_to_edit, 0) AS time_to_edit,
                 s.xliff_ext_prec_tags,

@@ -899,6 +899,7 @@ UI = {
 			success: function(d) {
                 if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
+                $(document).trigger('segments:load', d.data);
 			}
 		});
 	},

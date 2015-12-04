@@ -1,5 +1,47 @@
+
+// TODO: move this into a specific file
+//
+// in memory database for MateCat
+//
+
+(function($, root, undefined) {
+    var db = new loki('loki.json');
+    var segments = db.addCollection('segments', { indices: ['sid']} ) ;
+    segments.ensureUniqueIndex('sid');
+
+    $(document).on('segments:load', function(e, data) {
+        $.each(data.files, function() {
+            $.each( this.segments, function() {
+                var seg = segments.findOne( {sid : this.sid} );
+                if ( seg ) {
+                    var update = segments.update( this );
+                }
+                else {
+                    var insert = segments.insert( this );
+                }
+            });
+        });
+    });
+
+    root.MateCat = root.MateCat || {};
+    root.MateCat.DB = db ;
+    root.MateCat.DB.upsert = function(collection, record) {
+        var c = this.getCollection(collection);
+        if ( !c.insert( record ) ) {
+            c.update( record );
+        }
+    }
+    root.MateCat.Segments = segments ;
+
+})(jQuery, window);
+
+//
 if ( Review.enabled() && Review.type == 'improved' ) {
 (function($, UI, undefined) {
+
+    var db = window.MateCat.DB;
+    var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
+    versions.ensureUniqueIndex('id_segment');
 
     var severties = [
         { code: 1, name: 'Low', weight: 0.3 },
@@ -73,16 +115,14 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         overrideButtons();
     });
 
-    $(document).on('click', '.textarea-container .tabs-menu a', function(e) {
-        e.preventDefault();
-    });
-
     $(document).on('click', '.errorTaggingArea', function(e) {
         var section = $(e.target).closest('section') ;
         var segment = new UI.Segment( section );
 
-        UI.openSegment( segment );
-        UI.scrollSegment( segment.el );
+        if ( UI.currentSegmentId != segment.id ) {
+            UI.openSegment( segment );
+            UI.scrollSegment( segment.el );
+        }
     });
 
     $('html').on('footerCreation', 'section', function() {
@@ -133,9 +173,70 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     });
 
-    $(document).on('click', 'a.approved', function(e) {
-        console.log('clicked');
+    $( window ).on( 'segmentOpened', function ( e ) {
+        var segment = new UI.Segment( $( e.segment ) );
+        var versions_path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/versions',
+                  config.id_job, config.password, segment.id);
 
+        var reviews_path = sprintf('/api/v2/jobs/%s/%s/segments/%s/reviews',
+                   config.id_job, config.password, segment.id);
+
+        $.getJSON( versions_path )
+        .done(function( data ) {
+            if ( data.versions.length ) {
+                $.each( data.versions, function() {
+                    MateCat.DB.upsert('segment_versions', this);
+                });
+            }
+        }).complete(function() {
+            updateVersionViews();
+        });
+
+        // $.getJSON( reviews_path ).done( function( data ) {
+        //     if ( date.reviews.length ) {
+        //         console.log( this );
+        //     };
+        // });
+        // renderViews( segment );
+        //
+    });
+
+    function renderViews(segment) {
+
+    }
+
+    function updateVersionViews( ) {
+        var sid = UI.currentSegmentId ;
+        console.log('currentSegmentId', sid );
+
+        var original_target ;
+        var segment = db.getCollection('segments').findOne({sid : sid});
+
+        var data = { segment : segment };
+
+        if ( parseInt(segment.original_target_provied) ) {
+            var first_version = db.getCollection('segment_versions').findOne( {
+                id_segment : sid,
+                version_number : '0'
+            });
+
+            if ( !first_version ) {
+                original_target = segment.translation ;
+            } else {
+                original_target = first_version.translation ;
+            }
+
+            data.original_target = original_target ;
+        }
+
+        var template = $(MateCat.Templates['review_improved/original_target']( data ));
+        UI.Segment.findEl( segment.sid ).find('[data-mount=original-target]').html( template );
+    }
+
+    versions.on('update', updateVersionViews);
+    versions.on('insert', updateVersionViews);
+
+    $(document).on('click', 'a.approved', function(e) {
         e.preventDefault();
 
         UI.tempDisablingReadonlyAlert = true;
@@ -143,46 +244,37 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
         UI.currentSegment.removeClass('modified');
 
-        noneSelected = !(
-            (UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||
-            (UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked'))
-        );
+        original = UI.currentSegment.find('.original-translation').text();
 
-        if ( (noneSelected)&&($('.editor .track-changes p span').length) ) {
+        $('.sub-editor.review .error-type').removeClass('error');
 
-            $('.editor .tab-switcher-review').click();
-            $('.sub-editor.review .error-type').addClass('error');
+        UI.changeStatus(this, 'approved', 0);
 
-        } else {
+        err = $('.sub-editor.review .error-type');
+        err_typing = $(err).find('input[name=t1]:checked').val();
+        err_translation = $(err).find('input[name=t2]:checked').val();
+        err_terminology = $(err).find('input[name=t3]:checked').val();
+        err_language = $(err).find('input[name=t4]:checked').val();
+        err_style = $(err).find('input[name=t5]:checked').val();
 
-            original = UI.currentSegment.find('.original-translation').text();
-            $('.sub-editor.review .error-type').removeClass('error');
-            UI.changeStatus(this, 'approved', 0);
-            sid = UI.currentSegmentId;
-            err = $('.sub-editor.review .error-type');
-            err_typing = $(err).find('input[name=t1]:checked').val();
-            err_translation = $(err).find('input[name=t2]:checked').val();
-            err_terminology = $(err).find('input[name=t3]:checked').val();
-            err_language = $(err).find('input[name=t4]:checked').val();
-            err_style = $(err).find('input[name=t5]:checked').val();
-            UI.openNextTranslated();
 
-            var data = {
-                action: 'setRevision',
-                job: config.job_id,
-                jpassword: config.password,
-                segment: sid,
-                original: original,
-                err_typing: err_typing,
-                err_translation: err_translation,
-                err_terminology: err_terminology,
-                err_language: err_language,
-                err_style: err_style
-            };
+        var data = {
+            action: 'setRevision',
+            job: config.id_job,
+            jpassword: config.password,
+            segment: UI.currentSegmentId,
+            original: original,
+            err_typing: err_typing,
+            err_translation: err_translation,
+            err_terminology: err_terminology,
+            err_language: err_language,
+            err_style: err_style
+        };
 
-            UI.setRevision( data );
+        UI.openNextTranslated();
 
-        }
+        UI.setRevision( data );
+
     });
 
 })($, UI);
