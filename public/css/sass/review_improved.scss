@@ -5,6 +5,17 @@
     }
 }
 
+.error-selection-modal {
+
+    .error-message-container textarea {
+       width: 100%;
+    }
+    text-align: left;
+
+    table {
+        width: 100%;
+    }
+}
 .segment-footer-left-panel {
     width: 45.6%;
     padding: 0 1%;

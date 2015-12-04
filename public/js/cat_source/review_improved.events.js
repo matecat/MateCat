@@ -31,33 +31,15 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.segmentButtons = div.html();
     }
 
-    $(document).on('mousedown', function(e) {
-        mouse_down_inside = false ;
-    });
-
-    $(document).on('mouseup', function(e) {
-        mouse_down_inside = false;
-    });
-
-    $(document).on('mousedown', 'section.opened .errorTaggingArea', function(e) {
-        e.stopPropagation();
-        mouse_down_inside = true ;
-    });
-
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
-        // e.stopPropagation();
-
-        // if ( mouse_down_inside ) {
-            var selection =  rangy.getSelection() ;
-
-            if (
-                selection.focusNode.parentNode.closest('.errorTaggingArea') &&
-                selection.anchorNode.parentNode.closest('.errorTaggingArea') )
-            {
-                showModalWindow( selection );
-            }
-        // }
-
+        var selection =  rangy.getSelection() ;
+        if (
+            selection.focusNode.parentNode.closest('.errorTaggingArea') &&
+            selection.anchorNode.parentNode.closest('.errorTaggingArea') &&
+            selection.toString().length > 0
+        ) {
+            showModalWindow( selection );
+        }
     });
 
     $('html').on('buttonsCreation', 'section', function() {

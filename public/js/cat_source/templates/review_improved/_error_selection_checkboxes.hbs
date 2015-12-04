@@ -1,0 +1,5 @@
+
+{{ log "severities" @root.severities }}
+{{#each @root.severities as |severity| }}
+<input type="radio" name="severity-{{../code}}" value="{{../typology}}" />
+{{/each}}

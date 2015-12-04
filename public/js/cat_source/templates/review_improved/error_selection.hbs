@@ -1,20 +1,29 @@
-<div >
+<div class="error-selection-modal" >
   <button data-remodal-action="close" class="remodal-close"></button>
-  <h1>Error selection</h1>
-  <p>
-  {{ message }}
-  </p>
+  <h2>Error selection</h2>
+  <div> you have selected this piece of text: <strong> {{selected_string}}</strong></div>
 
-  <p>{{selected_string}}</p>
-
+  <h3>Select the issue type</h3>
   <table>
     <tr>
-      <td>Error Type </td>
-      <td>Severity </td>
+      <th>Error Type </th>
+      <th>Severity </th>
     </tr>
+    {{log "Foo" severities }}
+    {{#each typologies as |typology| }}
+    <tr>
+      <td>{{typology.name}}</td>
+      <td>
+        {{> review_improved/_error_selection_checkboxes }}
+      </td>
+    {{/each}}
   </table>
 
-  <textarea class="errorMessage"></textarea>
+  <div class="error-message-container">
+    <h3>Type an optional comment here</h3>
 
-  <input type="submit" id="errorSelectionButton" />
+    <textarea></textarea>
+    <input type="submit" id="error-selection-button" />
+  </div>
+
 </div>
