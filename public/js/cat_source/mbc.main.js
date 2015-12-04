@@ -537,7 +537,7 @@ if ( MBC.enabled() )
                 action: 'comment',
                 _sub: 'create',
                 id_client: config.id_client,
-                id_job: config.job_id,
+                id_job: config.id_job,
                 id_segment: segment.absoluteId,
                 username: getUsername(),
                 password: config.password,
@@ -588,7 +588,7 @@ if ( MBC.enabled() )
             var data = {
                 action: 'comment',
                 _sub: 'getRange',
-                id_job: config.job_id,
+                id_job: config.id_job,
                 first_seg: UI.getSegmentId( UI.firstSegment ),
                 last_seg: UI.getSegmentId( UI.lastSegment ),
                 password: config.password
@@ -691,7 +691,7 @@ if ( MBC.enabled() )
                 var data = {
                     action: 'comment',
                     _sub: 'resolve',
-                    id_job: config.job_id,
+                    id_job: config.id_job,
                     id_client: config.id_client,
                     id_segment: segment.absoluteId,
                     password: config.password,

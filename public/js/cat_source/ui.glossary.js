@@ -18,6 +18,7 @@ $.extend( UI, {
         } );
         dad = $( item ).prevAll( '.glossary-item' ).first();
         $( item ).remove();
+
 //		console.log($(dad).next().length);
         if ( ($( dad ).next().hasClass( 'glossary-item' )) || (!$( dad ).next().length) ) {
             $( dad ).remove();
@@ -77,6 +78,7 @@ $.extend( UI, {
             },
             success: function ( d ) {
                 if ( !$( segment ).hasClass( 'glossary-loaded' ) ) {
+
                     UI.currentSegmentQA();
                 }
                 $( n ).addClass( 'glossary-loaded' );
@@ -269,6 +271,7 @@ $.extend( UI, {
                         return;
                     var disabled = (this.id == '0') ? true : false;
                     cb = this.created_by;
+
 
                     var sourceNoteEmpty = (typeof this.source_note == 'undefined' || this.source_note == '');
                     var targetNoteEmpty = (typeof this.target_note == 'undefined' || this.target_note == '');

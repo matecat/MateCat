@@ -113,7 +113,7 @@ $.extend(UI, {
 				is_concordance: 0,
 				id_segment: id_segment,
 				text: txt,
-				id_job: config.job_id,
+				id_job: config.id_job,
 				num_results: this.numContributionMatchesResults,
 				id_translator: config.id_translator
 			},
@@ -404,7 +404,7 @@ $.extend(UI, {
 		APP.doRequest({
 			data: {
 				action: 'setContribution',
-				id_job: config.job_id,
+				id_job: config.id_job,
 				source: source,
 				target: target,
 				source_lang: config.source_rfc,
@@ -423,8 +423,8 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
-                UI.removeFromStorage('contribution-' + config.job_id + '-' + segment_id );
-//                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
+                UI.removeFromStorage('contribution-' + config.id_job + '-' + segment_id );
+//                localStorage.removeItem('contribution-' + config.id_job + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -491,7 +491,7 @@ $.extend(UI, {
 				target_lang: config.target_lang,
 				password: config.password,
 				time_to_edit: time_to_edit,
-				id_job: config.job_id,
+				id_job: config.id_job,
 				chosen_suggestion_index: chosen_suggestion
 			},
 			context: reqArguments,
@@ -543,7 +543,7 @@ $.extend(UI, {
 					action: 'deleteContribution',
 					source_lang: config.source_lang,
 					target_lang: config.target_lang,
-					id_job: config.job_id,
+					id_job: config.id_job,
 					password: config.password,
 					seg: source,
 					tra: target,
