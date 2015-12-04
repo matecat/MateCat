@@ -2264,39 +2264,6 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     return $results;
 }
 
-function getSegmentsForFastVolumeAnalysys( $pid ) {
-
-    //with this query we decide what segments
-    //must be inserted in segment_translations table
-
-    //we want segments that we decided to show in cattool
-    //and segments that are NOT locked ( already translated )
-
-    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
-
-		s.raw_word_count,
-		group_concat( distinct concat( j.id, ':' , j.target ) ) as target,
-		j.payable_rates
-
-		from segments as s
-		inner join files_job as fj on fj.id_file=s.id_file
-		inner join jobs as j on fj.id_job=j.id
-		left join segment_translations as st on st.id_segment = s.id
-		where j.id_project='$pid'
-		and IFNULL( st.locked, 0 ) = 0
-		and show_in_cattool != 0
-		group by s.id
-		order by s.id";
-    $db      = Database::obtain();
-    try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
-}
-
 /**
  *
  * Not used
@@ -2853,11 +2820,13 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         AND st.locked = 0
         GROUP BY id_job WITH ROLLUP";
     try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
+        $results = $db->fetch_array( $query );
+    } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
+
         return $e->getCode() * -1;
     }
+
     return $results;
 }
 

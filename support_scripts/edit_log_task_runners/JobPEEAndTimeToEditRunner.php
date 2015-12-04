@@ -182,6 +182,11 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
 
         } while ( self::$RUNNING );
     }
+
+    public static function cleanShutDown() {
+        // TODO: Implement cleanShutDown() method.
+    }
+
 }
 
 $jpe = JobPEEAndTimeToEditRunner::getInstance();

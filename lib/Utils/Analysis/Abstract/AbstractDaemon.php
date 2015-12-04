@@ -1,12 +1,12 @@
 <?php
 
-if (PHP_SAPI != 'cli' || isset ( $_SERVER ['HTTP_HOST'] )) {
+if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
     die ( "This script can be run only in CLI Mode.\n\n" );
 }
 
-declare(ticks=1);
+declare( ticks = 1 );
 
-set_time_limit(0);
+set_time_limit( 0 );
 
 /**
  * Created by PhpStorm.
@@ -14,10 +14,10 @@ set_time_limit(0);
  * Date: 17/09/15
  * Time: 15.29
  */
-abstract class Analysis_Abstract_AbstractDaemon
-{
-    public static $RUNNING = true;
-    public static $tHandlerPID;
+abstract class Analysis_Abstract_AbstractDaemon {
+
+    public static    $RUNNING    = true;
+    public static    $tHandlerPID;
     protected static $__INSTANCE = null;
 
     /**
@@ -25,7 +25,7 @@ abstract class Analysis_Abstract_AbstractDaemon
      */
     protected static $sleeptime = 1;
 
-    protected function __construct( ){
+    protected function __construct() {
         static::$tHandlerPID = posix_getpid();
     }
 
@@ -34,20 +34,20 @@ abstract class Analysis_Abstract_AbstractDaemon
      */
     public static function getInstance() {
         if ( static::$__INSTANCE === null ) {
-            if( !extension_loaded("pcntl") && (bool)ini_get( "enable_dl" ) ){
-                dl("pcntl.so");
+            if ( !extension_loaded( "pcntl" ) && (bool)ini_get( "enable_dl" ) ) {
+                dl( "pcntl.so" );
             }
-            if (! function_exists ( 'pcntl_signal' )) {
+            if ( !function_exists( 'pcntl_signal' ) ) {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
                 Log::doLog( $msg );
-                static::_TimeStampMsg( $msg."\n" );
+                static::_TimeStampMsg( $msg );
             } else {
-                Log::doLog('registering signal handlers');
-                static::_TimeStampMsg('registering signal handlers\n');
+                Log::doLog( 'registering signal handlers' );
+                static::_TimeStampMsg( 'registering signal handlers\n' );
 
-                pcntl_signal( SIGTERM, array ( get_called_class(), 'sigSwitch' ) );
-                pcntl_signal( SIGINT,  array ( get_called_class(), 'sigSwitch' ) );
-                pcntl_signal( SIGHUP,  array ( get_called_class(), 'sigSwitch' ) );
+                pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
+                pcntl_signal( SIGINT, array( get_called_class(), 'sigSwitch' ) );
+                pcntl_signal( SIGHUP, array( get_called_class(), 'sigSwitch' ) );
                 $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
 
                 Log::doLog( $msg );
@@ -55,14 +55,16 @@ abstract class Analysis_Abstract_AbstractDaemon
             }
             static::$__INSTANCE = new static();
         }
+
         return static::$__INSTANCE;
     }
 
-    public static function sigSwitch($signo) {
-        Log::doLog("Signo : $signo");
-        static::_TimeStampMsg("Signo : $signo" . "\n");
+    public static function sigSwitch( $sig_no ) {
 
-        switch ($signo) {
+        Log::doLog( "Signo : $sig_no" );
+        static::_TimeStampMsg( "Signo : $sig_no" );
+
+        switch ( $sig_no ) {
             case SIGTERM :
             case SIGINT :
             case SIGHUP :
@@ -73,9 +75,13 @@ abstract class Analysis_Abstract_AbstractDaemon
         }
     }
 
-    protected static function _TimeStampMsg($msg) {
-        echo "[" . date( DATE_RFC822 ) . "] " . $msg;
+    protected static function _TimeStampMsg( $msg ) {
+        echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+        Log::doLog( $msg );
     }
 
-    abstract function main($args);
+    abstract public function main( $args = null );
+
+    abstract public static function cleanShutDown();
+
 }

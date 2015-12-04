@@ -110,6 +110,10 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon {
         } while ( self::$RUNNING );
     }
 
+    public static function cleanShutDown() {
+        // TODO: Implement cleanShutDown() method.
+    }
+
 }
 
 $lsr = LanguageStatsRunner::getInstance();

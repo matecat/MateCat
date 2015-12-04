@@ -84,7 +84,7 @@ class Constants_AnalysisRedisKeys {
     /**
      * Priority 2 queue name
      */
-    const QUEUE_NAME_P2 = 'analysis_queue_P3';
+    const QUEUE_NAME_P2 = 'analysis_queue_P2';
 
 
     /**

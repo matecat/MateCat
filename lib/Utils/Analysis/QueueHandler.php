@@ -300,7 +300,7 @@ class Analysis_QueueHandler extends Stomp {
             case ( $queueLen >= 100000 ):
                 $queueAddresses = $queueInfo->low;
                 break;
-            case ( $queueLen >= 20000 ):
+            case ( $queueLen >= 10000 ):
                 $queueAddresses = $queueInfo->medium;
                 break;
             default:
