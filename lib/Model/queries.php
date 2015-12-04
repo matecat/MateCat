@@ -2560,184 +2560,19 @@ function getCurrentJobsStatus( $pid ) {
     return $results;
 }
 
-// tm analysis threaded
+function setSegmentTranslationError( $sid, $jid ) {
 
-function getNextSegmentAndLock() {
-
-    //get link
-    $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-
-    //start locking
-    $db->query( "SET autocommit=0" );
-    $db->query( "START TRANSACTION" );
-    //query
-
-    //lock row
-    $rnd = mt_rand( 0, 15 ); //rand num should be ( child_num / myMemory_sec_response_time )
-    $q3  = "select id_segment, id_job, pid from matecat_analysis.segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
-    //end transaction
-
-    $res = $db->query_first( $q3 );
-
-    //if nothing useful
-    if ( empty( $res ) ) {
-        //empty result
-        $db->query( "ROLLBACK" );
-        $res = null;
-    } else {
-
-        //DELETE
-        $query = "DELETE FROM matecat_analysis.segment_translations_analysis_queue WHERE id_segment = %u AND id_job = %u";
-        $query = sprintf( $query, $res[ 'id_segment' ], $res[ 'id_job' ] );
-
-        try {
-            $db->query($query);
-            if ($db->affected_rows == 0) {
-                $db->query("ROLLBACK");
-                $res = null;
-            }
-            else {
-                $db->query("COMMIT");
-            }
-        }
-        catch(PDOException $e) {
-            Log::doLog( $e->getMessage() );
-            $db->query( "ROLLBACK" );
-            //return error code
-            $res = null;
-        }
-    }
-
-    //release locks and end transaction
-    $db->query( "SET autocommit=1" );
-
-    $db->useDb( INIT::$DB_DATABASE );
-
-    //return stuff
-    return $res;
-}
-
-function resetLockSegment() {
-    $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-    try {
-        $db->query("UPDATE matecat_analysis.segment_translations_analysis_queue SET locked = 0 WHERE locked = 1");
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return -1;
-    }
-    return 0;
-}
-
-function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
-    //set memcache
+    $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an incostistent state
+    $where                        = " id_segment=$sid and id_job=$jid ";
 
     $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-    if ( $mode == "delete" ) {
-        $q = "delete from matecat_analysis.segment_translations_analysis_queue where id_segment=$id_segment and id_job=$id_job";
-    } else {
-        $db->query( "SET autocommit=0" );
-        $db->query( "START TRANSACTION" );
-        $q = "update matecat_analysis.segment_translations_analysis_queue set locked=0 where id_segment=$id_segment and id_job=$id_job";
-        $db->query( "COMMIT" );
-        $db->query( "SET autocommit=1" );
-    }
     try {
-        $db->query($q);
-        $db->useDb( INIT::$DB_DATABASE );
-    } catch( PDOException $e ) {
-        $db->useDb( INIT::$DB_DATABASE );
-        Log::doLog( $e->getMessage() );
-        return -1;
-    }
-
-    return 0;
-}
-
-function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
-    $query = "select s.id as sid ,s.segment ,raw_word_count,
-		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
-		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid, p.pretranslate_100
-			from segments s
-			inner join segment_translations st on st.id_segment=s.id
-			inner join jobs j on j.id=st.id_job
-			inner join projects p on p.id=j.id_project
-			where
-			p.status_analysis='FAST_OK' and
-			st.id_segment=$id_segment and st.id_job=$id_job
-			and st.locked = 0
-			limit 1";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->query_first($query);
+        $affectedRows = $db->update('segment_translations', $data, $where);
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
-    return $results;
-}
-
-/**
- * @deprecated
- *
- * @param $currentPid
- *
- * @return int
- */
-function getNumSegmentsInQueue( $currentPid ) {
-    $query = "select count(*) as num_segments from matecat_analysis.segment_translations_analysis_queue where pid < $currentPid ";
-
-    $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-    try {
-        $results = $db->query_first($query);
-        $db->useDb( INIT::$DB_DATABASE );
-    } catch( PDOException $e ) {
-        $db->useDb( INIT::$DB_DATABASE );
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    $num_segments = 0;
-    if ( (int)$results[ 'num_segments' ] > 0 ) {
-        $num_segments = (int)$results[ 'num_segments' ];
-    }
-
-    return $num_segments;
-}
-
-/**
- * @deprecated Not Used Anywhere
- *
- * @return array|bool
- */
-function getNextSegmentForTMVolumeAnalysys() {
-    $query = "SELECT s.id AS sid ,s.segment ,raw_word_count,
-		st.match_type, j.source, j.target, j.id AS jid, j.id_translator,
-		p.id_engine_mt,p.id AS pid
-			FROM segments s
-			INNER JOIN segment_translations st ON st.id_segment=s.id
-			INNER JOIN jobs j ON j.id=st.id_job
-			INNER JOIN projects p ON p.id=j.id_project
-
-			WHERE
-			st.tm_analysis_status='UNDONE' AND
-			p.status_analysis='FAST_OK' AND
-			s.raw_word_count>0   AND
-			locked=0
-			ORDER BY s.id
-			LIMIT 1";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
+    return $affectedRows;
 }
 
 /**
