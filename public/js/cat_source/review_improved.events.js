@@ -43,40 +43,12 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
     versions.ensureUniqueIndex('id_segment');
 
-    var severties = [
-        { code: 1, name: 'Low', weight: 0.3 },
-        { code: 2, name: 'Medium', weight: 0.4 },
-        { code: 3, name: 'None', weight: 0 } ,
-        { code: 4, name: 'High', weight: 1 }
-    ];
-
-    var quality_model = {
-        typologies: [
-            { name: 'Mistranslation', severities: severities }
-
-        ]
-    }
-    // TODO: make this dynamic
-    var typologies_map = [
-        { name: '1) Mistranslation', code: 1 },
-        { name: '2) Addition', code: 2 },
-        { name: '3) Omission', code: 3 },
-        { name: '4) Untranslated', code: 4 },
-        { name: '5) Terminology', code: 5 },
-        { name: '5) Spelling', code: 6 },
-        { name: '6) Grammar', code: 7 },
-        { name: '7) Punctuation', code: 8 },
-        { name: '8) Company style', code: 9 },
-    ];
-
     var severities = [1,2,3,4];
 
     function showModalWindow(selection) {
         var data = {};
         data.selected_string = selection.toString() ;
-        data.test_partial = '1234abcd';
-        data.typologies = typologies_map ;
-        data.severities = severities ;
+        data.lqa_model = JSON.parse( config.lqa_model ) ;
 
         var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
         var modal = template.remodal({});

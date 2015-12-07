@@ -1,4 +1,11 @@
 
-{{#each @root.severities as |severity| }}
-<input type="radio" name="severity-{{../code}}" value="{{../typology}}" />
-{{/each}}
+<tr>
+  <td>
+    <label class="noselect" for="et-line-{{id}}">{{label}}</label>
+  </td>
+  <td>
+    {{#each severities as |severity| }}
+      <input type="radio" id="et-line-{{../id}}" name="error-tagging-severity" value="{{../label}}" />
+    {{/each}}
+  </td>
+</tr>

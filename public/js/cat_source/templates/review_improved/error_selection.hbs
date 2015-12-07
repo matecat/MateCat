@@ -9,14 +9,14 @@
       <th>Error Type </th>
       <th>Severity </th>
     </tr>
-    {{log "Foo" severities }}
-    {{#each typologies as |typology| }}
-    <tr>
-      <td>{{typology.name}}</td>
-      <td>
-        {{> review_improved/_error_selection_checkboxes }}
-      </td>
+
+    {{#each lqa_model.categories as |category| }}
+      {{> review_improved/_error_selection_checkboxes category="category" }}
+      {{#each category.subcategories as |category| }}
+        {{> review_improved/_error_selection_checkboxes category="category" }}
+      {{/each}}
     {{/each}}
+
   </table>
 
   <div class="error-message-container">

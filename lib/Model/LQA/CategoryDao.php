@@ -59,7 +59,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
 
                 $out[ $row['id'] ]['label'] = $row['label'];
                 $out[ $row['id'] ]['id'] = $row['id'];
-                $out[ $row['id'] ]['severities'] = json_decode( $row['severities'] );
+                $out[ $row['id'] ]['severities'] = json_decode( $row['severities'], true );
             }
 
             else {
@@ -67,17 +67,23 @@ class CategoryDao extends \DataAccess_AbstractDao {
                 $current = array(
                     'label'      => $row['label'],
                     'id'         => $row['id'],
-                    'severities' => json_decode( $row['severities'] )
+                    'severities' => json_decode( $row['severities'], true)
                 );
-
-                \Log::doLog( $current );
-
 
                 $out[ $row['id_parent'] ]['subcategories'][] = $current ;
             }
         }
 
-        return json_encode( $out );
+        $categories = array_map(function($element) {
+            return array(
+                'label'         => $element['label'],
+                'id'            => $element['id'],
+                'severities'    => $element['severities'] ,
+                'subcategories' => $element['subcategories']
+            );
+        }, array_values($out) );
+
+        return json_encode( array('categories' => $categories ) );
     }
 
 
