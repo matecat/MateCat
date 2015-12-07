@@ -226,7 +226,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
                 original_target = first_version.translation ;
             }
 
-            data.original_target = original_target ;
+            data.original_target = UI.decodePlaceholdersToText(original_target) ;
         }
 
         var template = $(MateCat.Templates['review_improved/original_target']( data ));

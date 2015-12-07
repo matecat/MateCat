@@ -1017,7 +1017,7 @@ UI = {
 	updateSegments: function(segments) {
 		$.each(segments, function() {
 			seg = $('#segment-' + this.sid);
-			$('.editarea, .area', seg).text(this.translation);
+			$(UI.targetContainerSelector() + ', .area', seg).text(this.translation);
 //			if (UI.body.hasClass('searchActive'))
 //				UI.markSearchResults({
 //					singleSegment: segment,
@@ -1035,12 +1035,12 @@ UI = {
 		var next = $('.editor').next();
 		if (next.is('section')) {
 			this.scrollSegment(next);
-			$('.editarea', next).trigger("click", "moving");
+			$(UI.targetContainerSelector(), next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
 			if (next.length) {
 				this.scrollSegment(next);
-				$('.editarea', next).trigger("click", "moving");
+				$(UI.targetContainerSelector(), next).trigger("click", "moving");
 			} else {
                 UI.closeSegment(UI.currentSegment, 1, 'save');
             }
@@ -1054,7 +1054,7 @@ UI = {
 				UI.reloadWarning();
 			}
 		} else {
-			$("#segment-" + UI.nextUntranslatedSegmentId + " .editarea").trigger("click");
+			$("#segment-" + UI.nextUntranslatedSegmentId + " " + UI.targetContainerSelector() ).trigger("click");
 		}
 	},
 
@@ -1078,11 +1078,11 @@ UI = {
 	gotoPreviousSegment: function() {
 		var prev = $('.editor').prev();
 		if (prev.is('section')) {
-			$('.editarea', prev).click();
+			$(UI.targetContainerSelector(), prev).click();
 		} else {
 			prev = $('.editor').parents('article').prev().find('section:last');
 			if (prev.length) {
-				$('.editarea', prev).click();
+				$(UI.targetContainerSelector() , prev).click();
 			} else {
 				this.topReached();
 			}
@@ -2643,8 +2643,12 @@ console.log('eccolo: ', typeof token);
         return logs;
     },
 
+    targetContainerSelector : function() {
+        return '.editarea';
+    },
+
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
-        selector = (typeof selector === "undefined") ? '.editarea' : selector;
+        selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
         area = $( selector, context ).clone();
         /*
          console.log($(area).html());

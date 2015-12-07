@@ -2,7 +2,24 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
 (function($, undefined) {
 
+    var db = window.MateCat.DB;
+
     $.extend(UI, {
+        copySuggestionInEditarea : function() {
+            return ;
+        },
+        targetContainerSelector : function() {
+            return '.errorTaggingArea';
+        },
+        getSegmentTarget : function() {
+            // read status from DOM? wrong approach, read from
+            // database instead
+            var segment = db.getCollection('segments').findOne({sid : sid});
+            var translation =  segment.translation ;
+            console.log('getSegmentTranslation', translation);
+
+            return translation ;
+        },
         evalCurrentSegmentTranslationAndSourceTags : function() {
             var sourceTags = $('.source', this.currentSegment).html()
                 .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
