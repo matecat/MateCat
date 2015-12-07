@@ -45,9 +45,9 @@ function insertRecord($record, $model_id, $parent_id) {
     }
 
     $category = LQA\CategoryDao::createRecord(array(
-        'id_model' => $model_id,
-        'label' => $record['label'],
-        'id_parent' => $parent_id,
+        'id_model'   => $model_id,
+        'label'      => $record['label'],
+        'id_parent'  => $parent_id,
         'severities' => json_encode( $record['severities'] )
     ));
 

@@ -36,4 +36,49 @@ class CategoryDao extends \DataAccess_AbstractDao {
         return self::findById( $lastId );
     }
 
+    public static function getSerializedModel( $id_model ) {
+        $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model " .
+            " ORDER BY COALESCE(id_parent, 0) ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(
+            array(
+                'id_model'  => $id_model
+            )
+        );
+
+        $out = array();
+        $result = $stmt->fetchAll() ;
+
+        foreach($result as $row) {
+            if ( $row['id_parent'] == null ) {
+                // process as parent
+                $out[ $row['id'] ] = array();
+                $out[ $row['id'] ]['subcategories'] = array();
+
+                $out[ $row['id'] ]['label'] = $row['label'];
+                $out[ $row['id'] ]['id'] = $row['id'];
+                $out[ $row['id'] ]['severities'] = json_decode( $row['severities'] );
+            }
+
+            else {
+                // process as child
+                $current = array(
+                    'label'      => $row['label'],
+                    'id'         => $row['id'],
+                    'severities' => json_decode( $row['severities'] )
+                );
+
+                \Log::doLog( $current );
+
+
+                $out[ $row['id_parent'] ]['subcategories'][] = $current ;
+            }
+        }
+
+        return json_encode( $out );
+    }
+
+
 }

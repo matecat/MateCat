@@ -14,6 +14,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $remote_ip_address ;
     public $for_debug ;
     public $pretranslate_100 ;
+    public $id_qa_model ;
 
     protected $cached_results = array();
     // protected static $cachables = array('getJobs') ;

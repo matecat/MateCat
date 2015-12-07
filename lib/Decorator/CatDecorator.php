@@ -40,17 +40,28 @@ class CatDecorator {
 
   private function reviewSettings() {
       $this->template->isReview = $this->controller->isRevision();
-
       $this->template->reviewClass = (
           $this->controller->isRevision() ?
           ' review' :
           '' );
 
-      $this->template->reviewType = (
+      $review_type =
           $this->job->isFeatureEnabled( Features::REVIEW_IMPROVED ) ?
-          'improved' :  # TODO: constantize
-          'simple'
-      );
+          'improved' :
+          'simple' ;
+
+      $this->template->reviewType = $review_type ;
+      $this->template->review_improved = ( $review_type == 'improved' );
+
+      if ( $review_type == 'improved' ) {
+          $project = Projects_ProjectDao::findById( $this->job->id );
+          $model = \LQA\ModelDao::findById( $project->id_qa_model );
+          Log::doLog( $project );
+          Log::doLog( $this->job );
+
+          $this->template->lqa_model = $model->getSerialized();
+
+      }
   }
 
 
