@@ -156,10 +156,12 @@ class glossaryController extends ajaxController {
                 if ( ( $res = mb_stripos( $this->segment, preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $k ) ) ) === false ) {
                     unset( $TMS_RESULT[ $k ] );
                 } else {
-                    $tmp_Result[ $res ] = $k;
+                    $tmp_Result[ $k ] = $res;
                 }
             }
-            ksort( $tmp_Result ); //sort by position in source
+            asort( $tmp_Result );
+            $tmp_Result = array_keys( $tmp_Result );
+
             $ordered_Result = array();
             foreach ( $tmp_Result as $glossary_matches ) {
                 $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
