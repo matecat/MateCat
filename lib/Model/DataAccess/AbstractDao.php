@@ -259,7 +259,7 @@ abstract class DataAccess_AbstractDao {
 
     /**
      * @param $array_result array
-     *
+     * @deprecated Use instead PDO::setFetchMode()
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
     protected abstract function _buildResult( $array_result );
