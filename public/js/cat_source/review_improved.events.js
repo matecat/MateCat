@@ -5,6 +5,13 @@
 //
 
 (function($, root, undefined) {
+
+    window.rangy_backup = window.rangy ;
+    window.rangy = {
+        init: function() { },
+        saveSelection: function() {}
+    };
+
     var db = new loki('loki.json');
     var segments = db.addCollection('segments', { indices: ['sid']} ) ;
     segments.ensureUniqueIndex('sid');
@@ -46,10 +53,13 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     function showModalWindow(selection) {
         var data             = {};
-        var range            = selection.getAllRanges()[0];
 
-        data.start_offset  = range.startOffset ;
-        data.end_offset    = range.endOffset ;
+        var selection = document.getSelection();
+        var offsets = [selection.anchorOffset, selection.focusOffset];
+        offsets.sort();
+
+        data.start_offset  = offsets[0];
+        data.end_offset    = offsets[1];
 
         data.selected_string = selection.toString() ;
         last_selection       = data.selected_string ;
@@ -77,10 +87,9 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.segmentButtons = div.html();
     }
 
-
-
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
-        var selection =  rangy.getSelection() ;
+        var selection = document.getSelection();
+
         if (
             selection.focusNode.parentNode.closest('.errorTaggingArea') &&
             selection.anchorNode.parentNode.closest('.errorTaggingArea') &&
