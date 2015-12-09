@@ -78,6 +78,7 @@ class SegmentTranslationError extends ProtectedKleinController {
             'id_category'         => $this->request->id_category,
             'severity'            => $this->request->severity,
             'translation_version' => $this->translation->version_number,
+            'target_text'         => $this->request->target_text,
             'start_position'      => $this->request->start_position,
             'stop_position'       => $this->request->stop_position,
             'is_full_segment'     => false,

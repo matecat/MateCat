@@ -21,11 +21,13 @@ class EntryDao extends \DataAccess_AbstractDao {
             " ( " .
             " id_segment, id_job, id_category, severity, " .
             " translation_version, start_position, stop_position, " .
-            " is_full_segment, penalty_points, comment " .
+            " is_full_segment, penalty_points, comment, " .
+            " target_text " .
             " ) VALUES ( " .
             " :id_segment, :id_job, :id_category, :severity, " .
             " :translation_version, :start_position, :stop_position, " .
-            " :is_full_segment, :penalty_points, :comment " .
+            " :is_full_segment, :penalty_points, :comment, " .
+            " :target_text " .
             " ) ; " ;
 
         $conn = \Database::obtain()->getConnection();

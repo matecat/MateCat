@@ -15,6 +15,7 @@ CREATE TABLE `qa_entries` (
     `translation_version` int(11) NOT NULL,
     `start_position` INT NOT NULL,
     `stop_position` INT NOT NULL,
+    `target_text` VARCHAR(255),
     `is_full_segment` tinyint(4) NOT NULL,
     `penalty_points` INT(11) NOT NULL,
     `comment` TEXT,
@@ -41,15 +42,6 @@ CREATE TABLE `qa_models` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- CREATE TABLE `qa_severities` (
---     `id` bigint(20) NOT NULL AUTO_INCREMENT,
---     `id_model` bigint(20) NOT NULL,
---     `label` VARCHAR(255) NOT NULL,
---     `value` VARCHAR(255) NOT NULL,
---     PRIMARY KEY (`id`),
---     KEY `id_model` (`id_model`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;;
-
 ALTER TABLE `projects` ADD COLUMN `id_qa_model` int(11) DEFAULT NULL ;
 
 EOF;
@@ -58,7 +50,6 @@ EOF;
 
 DROP TABLE IF EXISTS `qa_models`;
 DROP TABLE IF EXISTS `qa_categories`;
--- DROP TABLE IF EXISTS `qa_severities`;
 DROP TABLE IF EXISTS `qa_entries`;
 ALTER TABLE `projects` DROP COLUMN `id_qa_model` ;
 

@@ -38,6 +38,7 @@
 //
 if ( Review.enabled() && Review.type == 'improved' ) {
 (function($, UI, undefined) {
+    var last_selection;
 
     var db = window.MateCat.DB;
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
@@ -51,6 +52,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         data.end_offset    = range.endOffset ;
 
         data.selected_string = selection.toString() ;
+        last_selection       = data.selected_string ;
         data.lqa_model       = JSON.parse( config.lqa_model ) ;
 
         var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
@@ -154,7 +156,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             // 'id_job'              : config.id_job,
             'id_category'         : id_category,
             'severity'            : severity,
-            // 'translation_version' : translation
+            'target_text'         : last_selection,
             'start_position'      : form.find('input[name=start_offset]').val(),
             'stop_position'       : form.find('input[name=end_offset]').val(),
             // 'is_full_segment'     : $this->request->is_full_segment,
