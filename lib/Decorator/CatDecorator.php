@@ -54,13 +54,10 @@ class CatDecorator {
       $this->template->review_improved = ( $review_type == 'improved' );
 
       if ( $review_type == 'improved' ) {
-          $project = Projects_ProjectDao::findById( $this->job->id );
-          $model = \LQA\ModelDao::findById( $project->id_qa_model );
-          Log::doLog( $project );
-          Log::doLog( $this->job );
+          $project = $this->job->getProject();
+          $model = $project->getLqaModel() ;
 
           $this->template->lqa_model = $model->getSerialized();
-
       }
   }
 

@@ -11,9 +11,14 @@ CREATE TABLE `qa_entries` (
     `id_segment` bigint(20) NOT NULL,
     `id_job` bigint(20) NOT NULL,
     `id_category` bigint(20) NOT NULL,
-    `id_severity` bigint(20) NOT NULL,
+    `severity` VARCHAR(255) NOT NULL,
     `translation_version` int(11) NOT NULL,
+    `start_position` INT NOT NULL,
+    `stop_position` INT NOT NULL,
+    `is_full_segment` tinyint(4) NOT NULL,
+    `penalty_points` INT(11) NOT NULL,
     `comment` TEXT,
+    `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `job_and_segment` (`id_job`, `id_segment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -3,6 +3,7 @@
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
     public static function getChunks() {
+
     }
 
     public static function getByProjectId( $id_project ) {

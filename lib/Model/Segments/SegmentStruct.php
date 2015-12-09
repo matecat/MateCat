@@ -24,4 +24,11 @@ class Segments_SegmentStruct extends DataAccess_AbstractDaoSilentStruct implemen
     });
   }
 
+  public function findTranslation( $id_job ) {
+      return Translations_SegmentTranslationDao::findBySegmentAndJob(
+          $this->id,
+          $id_job
+      );
+  }
+
 }

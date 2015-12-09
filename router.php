@@ -53,10 +53,16 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance->respond('index');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/:password/segments/[:id_segment]/versions/[:version_number]', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/versions/[:version_number]', function() {
     $reflect  = new ReflectionClass('API_V2_SegmentVersion');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('detail');
+});
+
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/errors', function() {
+    $reflect  = new ReflectionClass('API\V2\SegmentTranslationError');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('create');
 });
 
 $klein->dispatch();

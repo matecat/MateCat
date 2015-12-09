@@ -814,33 +814,20 @@ UI = {
 	},
 	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
-
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
 		var n = $(seg).nextAll(rules).first();
-//		console.log('$(seg).nextAll().length: ', $(seg).nextAll().length);
-//		console.log('n.length 1: ', n.length);
 		if (!n.length) {
 			n = $(seg).parents('article').next().find(rules).first();
+            n = $(seg).parents('article').next().find(rules).first();
 		}
-//		console.log('n.length 2: ', n.length);
-//		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
-//		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
+
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
 			this.nextUntranslatedSegmentId = this.getSegmentId($(n));
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
 		}
-//		} else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
-//			console.log('2');
-//			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
-//		} else {
-//			console.log('3');
-//			this.nextUntranslatedSegmentId = 0;
-//		}
-//		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
-//console.log('seg: ', seg);
         var i = $(seg).next();
-//console.log('i: ', i);
+
         if (!i.length) {
 			i = $(seg).parents('article').next().find('section').first();
 		}
@@ -852,7 +839,8 @@ UI = {
 	},
 	getPercentuageClass: function(match) {
 		var percentageClass = "";
-		m_parse = parseInt(match);
+		var m_parse = parseInt(match);
+
 		if (!isNaN(m_parse)) {
 			match = m_parse;
 		}

@@ -47,4 +47,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public function isMarkedComplete() {
       return Chunks_ChunkCompletionEventDao::isProjectCompleted( $this );
     }
+
+    public function getLqaModel() {
+        return \LQA\ModelDao::findById( $this->id_qa_model ) ;
+    }
+
 }

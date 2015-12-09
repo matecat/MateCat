@@ -43,12 +43,15 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
     versions.ensureUniqueIndex('id_segment');
 
-    var severities = [1,2,3,4];
-
     function showModalWindow(selection) {
-        var data = {};
+        var data             = {};
+        var range            = selection.getAllRanges()[0];
+
+        data.start_offset  = range.startOffset ;
+        data.end_offset    = range.endOffset ;
+
         data.selected_string = selection.toString() ;
-        data.lqa_model = JSON.parse( config.lqa_model ) ;
+        data.lqa_model       = JSON.parse( config.lqa_model ) ;
 
         var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
         var modal = template.remodal({});
@@ -71,6 +74,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         div.find('.next-untranslated').parent().remove();
         UI.segmentButtons = div.html();
     }
+
+
 
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
         var selection =  rangy.getSelection() ;
@@ -127,6 +132,44 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         } else {
             $('.editor .sub-editor.review').addClass('open');
         }
+    });
+
+    $(document).on('submit', '#error-selection-form', function(e) {
+        e.preventDefault();
+
+        var form    = $( e.target );
+        var segment = new UI.Segment( UI.currentSegment );
+        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/errors',
+                  config.id_job, config.password, segment.id);
+
+
+        var checked = form.find('input[type=radio]:checked').val() ;
+
+        var id_category = checked.split('-')[0];
+        var severity = checked.split('-')[1];
+        var comment = form.find('textarea').val();
+
+        var modelToSave = {
+            // 'id_segment'          : segment.id,
+            // 'id_job'              : config.id_job,
+            'id_category'         : id_category,
+            'severity'            : severity,
+            // 'translation_version' : translation
+            'start_position'      : form.find('input[name=start_offset]').val(),
+            'stop_position'       : form.find('input[name=end_offset]').val(),
+            // 'is_full_segment'     : $this->request->is_full_segment,
+            // 'penalty_points'   : => $this->request->penalty_points,
+            'comment'             : comment
+        };
+
+        console.log( modelToSave );
+
+        $.post( path, modelToSave )
+            .success(function( data ) {
+                console.log('success', data );
+            });
+
+        return false;
     });
 
     $(document).on('click', '.reviewImproved .tabs-menu a', function(event) {
