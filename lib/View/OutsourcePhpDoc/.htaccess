@@ -1,0 +1,6 @@
+Options -Indexes
+
+<Files *.html>
+    Order Deny,Allow
+    Allow from all
+</Files>
