@@ -501,20 +501,21 @@ console.log('changeStatus');
         UI.segmentButtons = null;
 	},
 
-	createFooter: function(segment, emptyContributions) {
+	createFooter: function(segment, forceEmptyContribution) {
         var sid = UI.getSegmentId( segment );
 
-		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
+
+		forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
 
 		if ( $('.matches .overflow', segment).text() !== '' ) {
-			if (!emptyContributions) {
+			if (!forceEmptyContribution) {
 				$('.matches .overflow', segment).empty();
                 $(document).trigger('createFooter:skipped', segment);
 				return false;
 			}
 		}
 
-		if ( $('.footer', segment).text() !== '' ) {
+		if ( $('.footer ul.submenu', segment).length ) {
             $(document).trigger('createFooter:skipped:cached', segment);
             return false;
         }

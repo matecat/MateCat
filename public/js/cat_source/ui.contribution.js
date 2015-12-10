@@ -5,6 +5,11 @@ $('html').on('copySourceToTarget', 'section', function() {
     UI.setChosenSuggestion(0);
 });
 
+$(document).on('afterFooterCreation', function(e, segment) {
+    console.debug('afterFooterCreation', segment);
+    UI.appendAddTMXButton( segment );
+});
+
 $.extend(UI, {
 	chooseSuggestion: function(w) {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
@@ -137,9 +142,13 @@ $.extend(UI, {
 	getContribution_complete: function(n) {
 		$(".loader", n).removeClass('loader_on');
 	},
+    appendAddTMXButton : function( segment ) {
+        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
+    },
     getContribution_success: function(d, segment) {
         this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
-        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
+
+        this.appendAddTMXButton( segment );
 
         this.processContributions(d, segment);
         this.currentSegmentQA();
