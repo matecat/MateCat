@@ -96,6 +96,19 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.segmentButtons = div.html();
     }
 
+    function restoreFirstTab( segment ) {
+        $( segment ).find('.tabs-menu li').removeClass('current');
+        $( segment ).find('.tabs-menu li:first').addClass('current');
+        $( segment ).find('.tab-content:not(:first)').css("display", "none");
+        $( segment ).find('.tab-content:first').show();
+    }
+
+    $(document).on('segment:deactivate', function(e, lastOpenedSegment, currentSegment) {
+        if ( lastOpenedSegment ) {
+            restoreFirstTab( lastOpenedSegment );
+        }
+    });
+
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
         var selection = document.getSelection();
 
@@ -198,11 +211,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         var section = $(event.target).closest('section');
         var tab = $(this).data("ref");
 
-        console.log(tab);
-
         section.find('.tab-content').not(tab).css("display", "none");
         section.find(tab).show();
-
     });
 
     $( window ).on( 'segmentOpened', function ( e ) {
@@ -243,7 +253,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         var sid = UI.currentSegmentId ;
         // get all issues for the current segment
         var current_issues = issues.findObjects({ id_segment : sid });
-        console.debug('current_issues',  current_issues );
 
         var data = {
             issues : current_issues
@@ -266,7 +275,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
         if ( previous_version ) {
             console.log( 'previous_version', previous_version.translation );
-            changes = trackChangesHTML( segment.translation, previous_version.translation );
+            changes = trackChangesHTML( previous_version.translation, segment.translation);
         }
         else {
             changes = trackChangesHTML( segment.translation, segment.translation );

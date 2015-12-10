@@ -635,9 +635,10 @@ UI = {
 		statusMenu.html(menu).show();
 	},
 	deActivateSegment: function(byButton) {
-		this.removeButtons(byButton);
-		this.removeHeader(byButton);
-		this.removeFooter(byButton);
+		UI.removeButtons(byButton);
+		UI.removeHeader(byButton);
+		UI.removeFooter(byButton);
+        $(document).trigger('segment:deactivate', UI.lastOpenedSegment, UI.currentSegment);
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)

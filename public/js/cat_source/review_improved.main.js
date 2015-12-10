@@ -26,7 +26,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             this.sourceTags = sourceTags || [];
             this.currentSegmentTranslation = $('.errorTaggingArea').text();
         },
-
         getSegmentMarkup : function() {
             var segmentData = arguments[0];
             var data = UI.getSegmentTemplateData.apply( this, arguments ) ;
