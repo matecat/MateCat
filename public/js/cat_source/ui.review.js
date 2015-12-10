@@ -56,15 +56,7 @@ if ( Review.enabled() )
             });
         },
         trackChanges: function (editarea) {
-/*
-            console.log('11111: ', $(editarea).text());
-            console.log('22222: ', htmlEncode($(editarea).text()));
-            console.log('a: ', UI.currentSegment.find('.original-translation').text());
-            console.log('b: ', $(editarea).html());
-            console.log('c: ', $(editarea).text());
-            var c = $(editarea).text();
-            console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
-*/
+            // this function takes an element as input, the editarea
             var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
                     .replace( config.lfPlaceholderRegex, "\n" )
                     .replace( config.crPlaceholderRegex, "\r" )
@@ -78,7 +70,6 @@ if ( Review.enabled() )
 
             diffTxt = '';
             $.each(diff, function (index) {
-
                 if(this[0] == -1) {
                     var rootElem = $( document.createElement( 'div' ) );
                     var newElem = $.parseHTML( '<span class="deleted"/>' );
@@ -94,29 +85,10 @@ if ( Review.enabled() )
                 } else {
                     diffTxt += this[1];
                 }
+
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
         },
-/*
-        createStatQualityPanel: function () {
-            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
-        },
-        populateStatQualityPanel: function (d) { // no more used
-            tbody = $('#popup-stat-quality .slide-panel-body tbody');
-            tbody.empty();
-            $.each(d, function (index) {
-                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
-            });
-//            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
-        },
-        openStatQualityPanel: function() { // no more used
-            $('body').addClass('side-popup');
-            $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
-//            $("#SnapABug_Button").hide();
-            $(".outer-stat-quality").show();
-//            $.cookie('tmpanel-open', 1, { path: '/' });
-        },
-*/
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
 //                console.log(this.type + ' - ' + this.value);
@@ -349,16 +321,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         UI.hideEditToolbar();
         UI.currentSegment.removeClass('modified');
 
-        /*
-                var a = UI.currentSegment.find('.original-translation').text() + '"';
-                var b = $(editarea).text() + '"';
-                console.log('a: "', htmlEncode(a));
-                console.log('b: "', htmlEncode(b));
-                console.log('a = b: ', a == b);
-                console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
-
-                if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
-         */
         noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
         if((noneSelected)&&($('.editor .track-changes p span').length)) {
             $('.editor .tab-switcher-review').click();
@@ -366,7 +328,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         } else {
             original = UI.currentSegment.find('.original-translation').text();
             $('.sub-editor.review .error-type').removeClass('error');
-//            console.log('a: ', UI.currentSegmentId);
             UI.changeStatus(this, 'approved', 0);
             sid = UI.currentSegmentId;
             err = $('.sub-editor.review .error-type');
@@ -375,19 +336,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             err_terminology = $(err).find('input[name=t3]:checked').val();
             err_language = $(err).find('input[name=t4]:checked').val();
             err_style = $(err).find('input[name=t5]:checked').val();
-//            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
             UI.openNextTranslated();
-            // temp fix
-/*
-            setTimeout(function() {
-                UI.tempDisablingReadonlyAlert = false;
-            }, 3000);
-*/
-//            console.log(UI.nextUntranslatedSegmentIdByServer);
-//            UI.gotoNextSegment();
-
-//            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
-
             var data = {
                 action: 'setRevision',
                     job: config.job_id,
@@ -404,48 +353,9 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             UI.setRevision( data );
 
         }
-//        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
-/*
-    }).on('click', '#stat-quality .details', function(e) {
-        e.preventDefault();
-//        UI.openStatQualityPanel();
-    }).on('click', '.popup-stat-quality h1 .btn-ok, .outer-stat-quality', function(e) {
-        e.preventDefault();
-        $( ".popup-stat-quality").removeClass('open').hide("slide", { direction: "right" }, 400);
-        $(".outer-stat-quality").hide();
-        $('body').removeClass('side-popup');
-*/
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
-
-        // temp
-/*
-        d.error_data = [
-            {
-                "type":"Typing",
-                "value": 1
-            },
-            {
-                "type":"Translation",
-                "value": 2
-            },
-            {
-                "type":"Terminology",
-                "value": 0
-            },
-            {
-                "type":"Language Quality",
-                "value": 0
-            },
-            {
-                "type":"Style",
-                "value": 0
-            }
-        ];
-        d.original = UI.editarea.text();
-        */
-        // end temp
         xEditarea = $('#segment-' + id_segment + '-editarea');
         xSegment = $('#segment-' + id_segment);
         if(d.original == '') d.original = xEditarea.text();
