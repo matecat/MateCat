@@ -84,10 +84,8 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             $this->translation->version_number
         );
 
-        \Log::doLog( $result );
-
-        $json = new JsonFormatter( $result );
-        $rendered = $json->render();
+        $json = new JsonFormatter( );
+        $rendered = $json->renderArray( $result );
 
         $this->response->json( array('issues' => $rendered) );
     }
@@ -109,10 +107,10 @@ class SegmentTranslationIssue extends ProtectedKleinController {
         );
 
         $result = \LQA\EntryDao::createEntry( $data );
-        $json = new JsonFormatter( $result );
-        $rendered = $json->render();
+        $json = new JsonFormatter( );
+        $rendered = $json->renderItem( $result );
 
-        $this->response->json( array('issue' => $rendered[0]) );
+        $this->response->json( array('issue' => $rendered) );
 
     }
 

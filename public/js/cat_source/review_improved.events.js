@@ -34,7 +34,9 @@
     root.MateCat.DB = db ;
     root.MateCat.DB.upsert = function(collection, record) {
         var c = this.getCollection(collection);
+        console.debug('upsert', collection, record);
         if ( !c.insert( record ) ) {
+            console.debug('upsert, updating');
             c.update( record );
         }
     }
@@ -52,10 +54,11 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
     versions.ensureUniqueIndex('id_segment');
 
-    var issues = db.addCollection('segment_review_issues', {indices: ['id_segment']});
-    issues.ensureUniqueIndex('id_segment');
+    var issues = db.addCollection('segment_review_issues', {indices: ['id', 'id_segment']});
+    issues.ensureUniqueIndex('id');
 
     var segments = db.getCollection('segments');
+    var modal ;
 
     function showModalWindow(selection) {
         var data             = {};
@@ -72,7 +75,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         data.lqa_model       = JSON.parse( config.lqa_model ) ;
 
         var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
-        var modal = template.remodal({});
+        modal = template.remodal({});
 
         template.on('keydown', function(e)  {
             var esc = 27 ;
@@ -177,7 +180,10 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         $.post( path, modelToSave )
             .success(function( data ) {
                 // push the new data to the store
-                console.log('success creation of entry', data );
+                console.log('success creation of entry', data.issue );
+                MateCat.DB.upsert('segment_review_issues', data.issue );
+                modal.close();
+                //
             });
 
         return false;

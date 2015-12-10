@@ -11,7 +11,7 @@ class EntryDao extends \DataAccess_AbstractDao {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
             " FROM qa_entries " .
             " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
-            " WHERE id = :id LIMIT 1" ;
+            " WHERE qa_entries.id = :id LIMIT 1" ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
