@@ -5,12 +5,31 @@
 .segment-footer-panel {
     h3 {
         margin: 20px 0 0 1px;
+        padding-bottom: 4px;
         text-align: left;
     }
 }
 
 .translation-issues-area {
+    max-height: 200px;
+    overflow-y: auto;
     text-align: left;
+    padding: 10px 0;
+    margin: 0 0 10px;
+
+    .issue-container {
+        border-bottom: 1px solid #d4d4d1;
+        padding: 8px 4px;
+
+    }
+
+    .issue-container:hover {
+        background-color: #eee;
+    }
+
+    .issue-comment-container {
+        padding: 4px 0;
+    }
 }
 
 .trackChanges {
@@ -67,11 +86,11 @@
     margin-top: 2px;
 }
 
-section.reviewImproved.editor .outersource .copy {
+section.reviewImproved.opened .outersource .copy {
     display: none;
 }
 
-section.reviewImproved.editor .textarea-container {
+section.reviewImproved.opened .textarea-container {
     width: 100%;
     padding: 0 4px;
 }
@@ -82,12 +101,18 @@ section.reviewImproved .errorTaggingArea {
     padding: 4px 0 0 0 ;
 }
 
-section.reviewImproved.editor {
+section.reviewImproved.opened {
     .errorTaggingArea, .editableTarget, .trackChanges {
         font-family: "calibri, Arial, Helvetica, sans-serif";
         padding: 3px;
         line-height: 27px;
         padding: 4px 0 0 0 ;
+    }
+
+    .errorTaggingArea {
+        .highlight {
+            background-color: #7EB30C;
+        }
     }
 }
 
@@ -110,7 +135,7 @@ section.reviewImproved .textarea-container {
 
 }
 
-section.reviewImproved.editor .textarea-container {
+section.reviewImproved.opened .textarea-container {
 
     .tabs-menu {
         display: inline ;

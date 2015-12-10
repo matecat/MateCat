@@ -21,6 +21,7 @@ class SegmentTranslationIssue {
             'stop_position'       => $record->stop_position,
             'translation_version' => $record->translation_version,
             'category'            => $record->category,
+            'target_text'         => $record->target_text,
         );
         return $row;
     }

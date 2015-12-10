@@ -3,9 +3,15 @@
       <ul>
         {{#each issues as |issue| }}
           <li>
-            <span class="bold">{{issue.id_category}} - {{issue.severity}}</span>
-            <p> {{issue.comment}} </p>
-            <span class="small">{{issue.create_date}}</span>
+            <div class="issue-container" data-issue-id="{{issue.id}}" >
+              <span class="">{{issue.category}}: {{issue.severity}}</span>
+              <span class="small">{{issue.formattedDate}}</span>
+
+              <div class="issue-comment-container"> {{issue.comment}} </div>
+              <div class="issue-target-text-container"> {{issue.target_text}} </div>
+              <span data-mount="number-of-replies"> 6 replies </span>
+              <a href=":javascript">View</a>
+            </div>
           </li>
         {{/each}}
     {{else}}

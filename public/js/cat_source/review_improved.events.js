@@ -239,6 +239,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         .done(function( data ) {
             if ( data.issues.length ) {
                 $.each( data.issues, function() {
+                    this.formattedDate = moment(this.created_at).format('lll');
+
                     MateCat.DB.upsert('segment_review_issues', this);
                 });
             }
@@ -248,6 +250,52 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         });
 
     });
+
+    var currentHiglight;
+
+    function highlightIssue(e) {
+        var container = $(e.target).closest('.issue-container');
+        var issue = db.getCollection('segment_review_issues').findObject({
+            id : container.data('issue-id') + ''
+        });
+        var segment = db.getCollection('segments').findObject({sid : issue.id_segment});
+
+        if ( currentHiglight == issue.id ) {
+            return ;
+        }
+
+        currentHiglight = issue.id ;
+
+        var area = container.closest('section').find('.errorTaggingArea') ;
+
+        var tt    = segment.translation ;
+        var first = tt.substring(0, issue.start_position);
+        var mid   = tt.substring(issue.start_position, issue.stop_position);
+        var end   = tt.substring(issue.stop_position);
+
+        var span1 = '<span class="highlight">';
+        var span2 = '</span>';
+
+        console.debug( first, mid, end );
+
+        area.html( first + span1 + mid + span2 + end );
+
+    }
+
+    function resetHighlight(e) {
+        // if ( !$(e.target).hasClass('issue-container') ) {
+        //     return ;
+        // };
+        currentHiglight = null;
+        var container = $(e.target).closest('.issue-container');
+        var area = container.closest('section').find('.errorTaggingArea') ;
+        console.debug('resetHighlight');
+        var issue = db.getCollection('segment_review_issues').findObject({
+            id : container.data('issue-id') + ''
+        });
+        var segment = db.getCollection('segments').findObject({sid : issue.id_segment});
+        area.html( segment.translation );
+    }
 
     function updateIssueViews() {
         var sid = UI.currentSegmentId ;
@@ -259,6 +307,10 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         };
 
         var template = $(MateCat.Templates['review_improved/translation_issues']( data ));
+
+        template.find('.issue-container').on('mouseover', highlightIssue);
+        template.find('.issue-container').on('mouseout', resetHighlight);
+
         UI.Segment.findEl( sid ).find('[data-mount=translation-issues]').html( template );
     }
 

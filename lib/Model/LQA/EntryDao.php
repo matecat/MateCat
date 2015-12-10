@@ -43,6 +43,8 @@ class EntryDao extends \DataAccess_AbstractDao {
     }
 
     public static function createEntry( $data ) {
+        self::ensureStartAndStopPositionAreOrdered( $data ) ;
+
         $sql = "INSERT INTO qa_entries " .
             " ( " .
             " id_segment, id_job, id_category, severity, " .
@@ -69,6 +71,18 @@ class EntryDao extends \DataAccess_AbstractDao {
 
         $lastId = $conn->lastInsertId();
         return self::findById( $lastId );
+    }
+
+    private static function ensureStartAndStopPositionAreOrdered(&$data) {
+        $startStop = array(
+            $data['start_position'],
+            $data['stop_position']
+        );
+
+        sort( $startStop, SORT_NUMERIC );
+
+        $data['start_position'] = $startStop[0];
+        $data['stop_position'] = $startStop[1];
     }
 
 }

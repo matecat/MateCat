@@ -97,6 +97,7 @@ module.exports = function(grunt) {
             libraries: {
                 src: [
                     basePath + 'lib/lodash.min.js',
+                    basePath + 'lib/moment.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/remodal.min.js',
