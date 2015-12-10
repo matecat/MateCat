@@ -13,6 +13,18 @@
     text-align: left;
 }
 
+.trackChanges {
+    .deleted {
+        background: #ffc7ca;
+        text-decoration: line-through;
+    }
+
+    .added  {
+        background: #b0ffb3;
+        text-decoration: none;
+    }
+}
+
 .original-target-area {
     padding: 4px;
     width: 100%;

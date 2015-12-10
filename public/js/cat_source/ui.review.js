@@ -55,40 +55,21 @@ if ( Review.enabled() )
                 }
             });
         },
+
         trackChanges: function (editarea) {
-            // this function takes an element as input, the editarea
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
-                    .replace( config.lfPlaceholderRegex, "\n" )
-                    .replace( config.crPlaceholderRegex, "\r" )
-                    .replace( config.crlfPlaceholderRegex, "\r\n" )
-                    .replace( config.tabPlaceholderRegex, "\t" )
-                    //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) ),
-                $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,""));
+            var source = UI.currentSegment.find('.original-translation').text()
+                .replace( config.lfPlaceholderRegex, "\n" )
+                .replace( config.crPlaceholderRegex, "\r" )
+                .replace( config.crlfPlaceholderRegex, "\r\n" )
+                .replace( config.tabPlaceholderRegex, "\t" )
+                .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
 
-            UI.dmp.diff_cleanupSemantic( diff ) ;
+            var target = $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,"");
+            var diffHTML = trackChangesHTML( source, target );
 
-            diffTxt = '';
-            $.each(diff, function (index) {
-                if(this[0] == -1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="deleted"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else if(this[0] == 1) {
-                    var rootElem = $( document.createElement( 'div' ) );
-                    var newElem = $.parseHTML( '<span class="added"/>' );
-                    $( newElem ).text( this[1] );
-                    rootElem.append( newElem );
-                    diffTxt += $( rootElem ).html();
-                } else {
-                    diffTxt += this[1];
-                }
-
-                $('.editor .sub-editor.review .track-changes p').html(diffTxt);
-            });
+            $('.editor .sub-editor.review .track-changes p').html( diffHTML );
         },
+
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
 //                console.log(this.type + ' - ' + this.value);

@@ -112,7 +112,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         overrideButtons();
     });
 
-    $(document).on('click', '.errorTaggingArea', function(e) {
+    $(document).on('click', 'section .textarea-container .tab-content', function(e) {
         var section = $(e.target).closest('section') ;
         var segment = new UI.Segment( section );
 
@@ -239,10 +239,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     });
 
-    function renderViews(segment) {
-
-    }
-
     function updateIssueViews() {
         var sid = UI.currentSegmentId ;
         // get all issues for the current segment
@@ -255,6 +251,30 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
         var template = $(MateCat.Templates['review_improved/translation_issues']( data ));
         UI.Segment.findEl( sid ).find('[data-mount=translation-issues]').html( template );
+    }
+
+    function updateTrackChangesView( segment ) {
+        var changes ;
+
+        var previous_number = parseInt( segment.version_number ) > 0 ?
+             parseInt( segment.version_number -1)  : 0;
+
+        var previous_version = db.getCollection('segment_versions').findObject({
+            id_segment : segment.sid, version_number : ( '' + previous_number )
+        });
+
+
+        if ( previous_version ) {
+            console.log( 'previous_version', previous_version.translation );
+            changes = trackChangesHTML( segment.translation, previous_version.translation );
+        }
+        else {
+            changes = trackChangesHTML( segment.translation, segment.translation );
+        }
+
+        var el = UI.getSegmentById( segment.sid );
+        el.find('.trackChanges').html( changes );
+        return changes;
     }
 
     function updateVersionViews( ) {
@@ -277,6 +297,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
             data.original_target = UI.decodePlaceholdersToText(original_target) ;
         }
+
+        updateTrackChangesView( segment )  ;
 
         var template = $(MateCat.Templates['review_improved/original_target']( data ));
         UI.Segment.findEl( segment.sid ).find('[data-mount=original-target]').html( template );

@@ -1,6 +1,6 @@
 if ( Review.enabled() && Review.type == 'improved' ) {
 
-(function($, undefined) {
+(function($, root, undefined) {
 
     var db = window.MateCat.DB;
 
@@ -33,7 +33,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
             var section            = $( UI.getSegmentTemplate()( data ) );
             var segment_body       = $( MateCat.Templates[ 'review_improved/segment_body' ](data) );
-            var textarea_container = $( MateCat.Templates[ 'review_improved/text_area_container' ](data) )
+            var textarea_container = $( MateCat.Templates[ 'review_improved/text_area_container' ](data) );
 
             segment_body
                 .find('[data-mount="segment_text_area_container"]')
@@ -51,5 +51,5 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         }
     });
 
-  })(jQuery) ;
+  })(jQuery, window) ;
 }

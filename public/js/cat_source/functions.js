@@ -712,6 +712,34 @@ function goodbye(e) {
 
 }
 
+function trackChangesHTML(source, target) {
+    var diff   = UI.dmp.diff_main( source, target );
+    UI.dmp.diff_cleanupSemantic( diff )
+
+    var diffTxt = '';
+
+    $.each(diff, function (index) {
+        if(this[0] == -1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="deleted"/>' );
+            $( newElem ).text( this[1] );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else if(this[0] == 1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="added"/>' );
+            $( newElem ).text( this[1] );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else {
+            diffTxt += this[1];
+        }
+    });
+    return diffTxt ;
+}
+
+
+
 $.fn.isOnScreen = function() {
 
 	var win = $(window);
