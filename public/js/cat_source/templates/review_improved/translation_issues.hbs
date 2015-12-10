@@ -1,0 +1,14 @@
+<div class="translation-issues-area">
+    {{#if issues}}
+      <ul>
+        {{#each issues as |issue| }}
+          <li>
+            <span class="bold">{{issue.id_category}} - {{issue.severity}}</span>
+            <p> {{issue.comment}} </p>
+            <span class="small">{{issue.create_date}}</span>
+          </li>
+        {{/each}}
+    {{else}}
+      No issues registered for this segment
+    {{/if}}
+</div>

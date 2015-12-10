@@ -18,6 +18,14 @@ class Utils {
         return $params ;
     }
 
+    public static function is_assoc_int($array) {
+        if ( !is_int(key($data)) ) {
+            return true ;
+        } else {
+            return false ;
+        }
+    }
+
 	public static function is_assoc($array) {
 		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));
 	}

@@ -1,8 +1,8 @@
 <?php
 namespace API\V2  ;
-use API\V2\Json\SegmentTranslationError as JsonFormatter;
+use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 
-class SegmentTranslationError extends ProtectedKleinController {
+class SegmentTranslationIssue extends ProtectedKleinController {
 
     private $chunk ;
     private $project ;
@@ -36,26 +36,34 @@ class SegmentTranslationError extends ProtectedKleinController {
             $this->chunk->id_project
         );
 
+    }
+
+    private function validateCategoryId() {
         $this->qa_model = \LQA\ModelDao::findById( $this->project->id_qa_model );
         $this->category = \LQA\CategoryDao::findById( $this->request->id_category );
-
         if ( $this->category->id_model != $this->qa_model->id ) {
-            throw new Exceptions_RecordNotFound('QA model id mismatch');
+            throw new \Exception('QA model id mismatch');
         }
     }
 
     private function validate() {
         $this->prepareData() ;
+
+        // TODO: decide how to handle failed validation
+        if ( $this->request->id_category ) {
+            $this->validateCategoryId();
+        }
+
         // TODO: extend validations here, for instance check the
         // project has a QA model.
 
-        if (!$this->segment) {
+        if ( !$this->segment ) {
             return false; // TODO: handle error
         }
 
         $this->translation = $this->segment->findTranslation( $this->request->id_job ) ;
 
-        if (!$this->translation) {
+        if ( !$this->translation ) {
             return false;  // TODO handle error
         }
 
@@ -69,8 +77,22 @@ class SegmentTranslationError extends ProtectedKleinController {
         }
     }
 
-    public function create() {
+    public function index() {
+        $result = \LQA\EntryDao::findAllByTranslationVersion(
+            $this->translation->id_segment,
+            $this->translation->id_job,
+            $this->translation->version_number
+        );
 
+        \Log::doLog( $result );
+
+        $json = new JsonFormatter( $result );
+        $rendered = $json->render();
+
+        $this->response->json( array('issues' => $rendered) );
+    }
+
+    public function create() {
         $data = array(
             // 'uid'                 => null,
             'id_segment'          => $this->request->id_segment,
@@ -86,14 +108,11 @@ class SegmentTranslationError extends ProtectedKleinController {
             'comment'             => $this->request->comment
         );
 
-        \Log::doLog( $data );
-
         $result = \LQA\EntryDao::createEntry( $data );
+        $json = new JsonFormatter( $result );
+        $rendered = $json->render();
 
-        \Log::doLog( $result );
-        // TODO pass the result to a json formatter
-
-        $this->response->json( (array) $result );
+        $this->response->json( array('issue' => $rendered[0]) );
 
     }
 
@@ -104,7 +123,7 @@ class SegmentTranslationError extends ProtectedKleinController {
                 return $severity['penalty'];
             }
         }
-        throw new Exception('Provided severity was not found in model');
+        throw new \Exception('Provided severity was not found in model');
     }
 
 }

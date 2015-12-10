@@ -16,5 +16,6 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $penalty_points      ;
     public $comment             ;
     public $create_date         ;
+    public $category            ;
 
 }

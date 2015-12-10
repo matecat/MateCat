@@ -8,12 +8,38 @@ class EntryDao extends \DataAccess_AbstractDao {
     }
 
     public static function findById( $id ) {
-        $sql = "SELECT * FROM qa_entries WHERE id = :id LIMIT 1" ;
+        $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
+            " FROM qa_entries " .
+            " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
+            " WHERE id = :id LIMIT 1" ;
+
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(array('id' => $id));
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
         return $stmt->fetch();
+    }
+
+    public static function findAllByTranslationVersion($id_segment, $id_job, $version) {
+        $sql = "SELECT qa_entries.*, qa_categories.label as category " .
+            " FROM qa_entries " .
+            " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
+            " WHERE id_job = :id_job AND id_segment = :id_segment " .
+            " AND translation_version = :translation_version " .
+            " ORDER BY create_date DESC ";
+
+        $opts = array(
+            'id_segment' => $id_segment,
+            'id_job' => $id_job,
+            'translation_version' => $version
+        );
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( $opts );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        return $stmt->fetchAll();
     }
 
     public static function createEntry( $data ) {

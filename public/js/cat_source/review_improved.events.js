@@ -48,8 +48,14 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     var last_selection;
 
     var db = window.MateCat.DB;
+
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
     versions.ensureUniqueIndex('id_segment');
+
+    var issues = db.addCollection('segment_review_issues', {indices: ['id_segment']});
+    issues.ensureUniqueIndex('id_segment');
+
+    var segments = db.getCollection('segments');
 
     function showModalWindow(selection) {
         var data             = {};
@@ -150,9 +156,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
         var form    = $( e.target );
         var segment = new UI.Segment( UI.currentSegment );
-        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/errors',
+        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/issues',
                   config.id_job, config.password, segment.id);
-
 
         var checked = form.find('input[type=radio]:checked').val() ;
 
@@ -161,23 +166,18 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         var comment = form.find('textarea').val();
 
         var modelToSave = {
-            // 'id_segment'          : segment.id,
-            // 'id_job'              : config.id_job,
             'id_category'         : id_category,
             'severity'            : severity,
             'target_text'         : last_selection,
             'start_position'      : form.find('input[name=start_offset]').val(),
             'stop_position'       : form.find('input[name=end_offset]').val(),
-            // 'is_full_segment'     : $this->request->is_full_segment,
-            // 'penalty_points'   : => $this->request->penalty_points,
             'comment'             : comment
         };
 
-        console.log( modelToSave );
-
         $.post( path, modelToSave )
             .success(function( data ) {
-                console.log('success', data );
+                // push the new data to the store
+                console.log('success creation of entry', data );
             });
 
         return false;
@@ -204,7 +204,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         var versions_path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/versions',
                   config.id_job, config.password, segment.id);
 
-        var reviews_path = sprintf('/api/v2/jobs/%s/%s/segments/%s/reviews',
+        var issues_path = sprintf('/api/v2/jobs/%s/%s/segments/%s/issues',
                    config.id_job, config.password, segment.id);
 
         $.getJSON( versions_path )
@@ -214,34 +214,51 @@ if ( Review.enabled() && Review.type == 'improved' ) {
                     MateCat.DB.upsert('segment_versions', this);
                 });
             }
-        }).complete(function() {
+        })
+        .complete(function() {
             updateVersionViews();
         });
 
-        // $.getJSON( reviews_path ).done( function( data ) {
-        //     if ( date.reviews.length ) {
-        //         console.log( this );
-        //     };
-        // });
-        // renderViews( segment );
-        //
+        $.getJSON( issues_path )
+        .done(function( data ) {
+            if ( data.issues.length ) {
+                $.each( data.issues, function() {
+                    MateCat.DB.upsert('segment_review_issues', this);
+                });
+            }
+        })
+        .complete(function() {
+            updateIssueViews();
+        });
+
     });
 
     function renderViews(segment) {
 
     }
 
-    function updateVersionViews( ) {
+    function updateIssueViews() {
         var sid = UI.currentSegmentId ;
-        console.log('currentSegmentId', sid );
+        // get all issues for the current segment
+        var current_issues = issues.findObjects({ id_segment : sid });
+        console.debug('current_issues',  current_issues );
 
+        var data = {
+            issues : current_issues
+        };
+
+        var template = $(MateCat.Templates['review_improved/translation_issues']( data ));
+        UI.Segment.findEl( sid ).find('[data-mount=translation-issues]').html( template );
+    }
+
+    function updateVersionViews( ) {
         var original_target ;
-        var segment = db.getCollection('segments').findOne({sid : sid});
-
-        var data = { segment : segment };
+        var sid     = UI.currentSegmentId ;
+        var segment = segments.findOne({sid : sid});
+        var data    = { segment : segment };
 
         if ( parseInt(segment.original_target_provied) ) {
-            var first_version = db.getCollection('segment_versions').findOne( {
+            var first_version = db.getCollection('segment_versions').findObject( {
                 id_segment : sid,
                 version_number : '0'
             });
@@ -259,9 +276,15 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.Segment.findEl( segment.sid ).find('[data-mount=original-target]').html( template );
     }
 
+    issues.on('update', updateIssueViews);
+    issues.on('insert', updateIssueViews);
+
     versions.on('update', updateVersionViews);
     versions.on('insert', updateVersionViews);
 
+    // Event to trigger on approval
+    // TODO: this is to be redone, this should only set the state on the
+    // segment.
     $(document).on('click', 'a.approved', function(e) {
         e.preventDefault();
 
