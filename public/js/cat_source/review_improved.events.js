@@ -187,7 +187,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             'target_text'         : last_selection,
             'start_position'      : form.find('input[name=start_offset]').val(),
             'stop_position'       : form.find('input[name=end_offset]').val(),
-            'comment'             : comment
+            'comment'             : comment,
+            'formattedDate'       : moment().format('lll')
         };
 
         $.post( path, modelToSave )

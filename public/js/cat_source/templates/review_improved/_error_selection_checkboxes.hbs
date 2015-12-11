@@ -1,10 +1,10 @@
-<tr>
-  <td>
+<tr {{#if start}} class="start" {{/if}} >
+  <td class="first">
     <label class="noselect" for="et-line-{{id}}">{{label}}</label>
   </td>
   <td>
     {{#each severities as |severity| }}
-      <input type="radio" id="et-line-{{../id}}" name="severity"
+      {{label}} <input type="radio" id="et-line-{{../id}}" name="severity"
             value="{{../id}}-{{label}}" />
     {{/each}}
   </td>

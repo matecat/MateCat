@@ -6,16 +6,22 @@
   <h3>Select the issue type</h3>
   <form id="error-selection-form" action="#" method="POST">
     <table>
-      <tr>
-        <th>Error Type </th>
-        <th>Severity </th>
-      </tr>
 
       {{#each lqa_model.categories as |category| }}
-        {{> review_improved/_error_selection_checkboxes category="category" }}
-        {{#each category.subcategories as |category| }}
-          {{> review_improved/_error_selection_checkboxes category="category" }}
-        {{/each}}
+        {{#if category.subcategories }}
+          {{!-
+          if it has subcategories then represent as heading, non selectable issue.
+           -}}
+           <tr class="start">
+            <td class="first" colspan="2">{{ category.label }} </td>
+           </tr>
+          {{#each category.subcategories as |category| }}
+            {{> review_improved/_error_selection_checkboxes category="category" }}
+          {{/each}}
+        {{else}}
+          {{!- if it doesn't have subcategories, then make this issue selectable -}}
+          {{> review_improved/_error_selection_checkboxes category="category" start=true }}
+        {{/if}}
       {{/each}}
     </table>
 

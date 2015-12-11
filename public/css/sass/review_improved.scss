@@ -62,6 +62,12 @@
 
 .error-selection-modal {
 
+    #error-selection-form table {
+        tr.start td.first {
+            font-weight: bold;
+        }
+    }
+
     .error-message-container textarea {
        width: 100%;
     }
