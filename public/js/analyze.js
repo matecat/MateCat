@@ -288,7 +288,7 @@ UI = {
 				split_values: ar
 			},
 			success: function(d) {
-                var pretranslated = ( null == d.eq_word_count );
+                var pretranslated = ( null == d.data.eq_word_count );
 				var total = $('.popup-split .wordsum .total-w').attr('data-val');
 				var prog = 0;
 				if (!$.isEmptyObject(d.data)) {
