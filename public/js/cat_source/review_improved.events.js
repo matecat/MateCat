@@ -47,8 +47,6 @@
 //
 if ( Review.enabled() && Review.type == 'improved' ) {
 (function($, UI, undefined) {
-    var last_selection;
-
     var db = window.MateCat.DB;
 
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
@@ -59,6 +57,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     var segments = db.getCollection('segments');
     var modal ;
+    var currentHiglight;
+    var lastSelection;
 
     function showModalWindow(selection, container) {
         var data             = {};
@@ -72,7 +72,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         data.end_offset = selection.focusOffset;
 
         data.selected_string = selection.toString() ;
-        last_selection       = data.selected_string ;
+        lastSelection       = data.selected_string ;
         data.lqa_model       = JSON.parse( config.lqa_model ) ;
 
         var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
@@ -188,7 +188,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         var modelToSave = {
             'id_category'         : id_category,
             'severity'            : severity,
-            'target_text'         : last_selection,
+            'target_text'         : lastSelection,
             'start_node'          : form.find('input[name=start_node]').val(),
             'start_offset'        : form.find('input[name=start_offset]').val(),
             'end_node'            : form.find('input[name=end_node]').val(),
@@ -201,6 +201,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             .success(function( data ) {
                 // push the new data to the store
                 console.log('success creation of entry', data.issue );
+                // TODO make an helper for this date conversion
+                data.issue.formattedDate = moment(data.issue.created_at).format('lll');
                 MateCat.DB.upsert('segment_translation_issues', data.issue );
                 modal.close();
                 //
@@ -258,8 +260,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     });
 
-    var currentHiglight;
-
     function highlightIssue(e) {
 
         var container = $(e.target).closest('.issue-container');
@@ -295,9 +295,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     }
 
     function resetHighlight(e) {
-        // if ( !$(e.target).hasClass('issue-container') ) {
-        //     return ;
-        // };
         var selection = document.getSelection();
         selection.removeAllRanges();
 
@@ -330,8 +327,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     }
 
     function updateTrackChangesView( segment ) {
-        var changes ;
-
         var previous_number = parseInt( segment.version_number ) > 0 ?
              parseInt( segment.version_number -1)  : 0;
 
@@ -339,18 +334,17 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             id_segment : segment.sid, version_number : ( '' + previous_number )
         });
 
+        var target = UI.clenaupTextFromPleaceholders( segment.translation );
+        var el = UI.getSegmentById( segment.sid );
 
         if ( previous_version ) {
-            console.log( 'previous_version', previous_version.translation );
-            changes = trackChangesHTML( previous_version.translation, segment.translation);
+            el.find('.trackChanges').html(
+              trackChangesHTML( previous_version.translation, target )
+            );
         }
-        else {
-            changes = trackChangesHTML( segment.translation, segment.translation );
+        else
+            el.find('.trackChanges').html( target );
         }
-
-        var el = UI.getSegmentById( segment.sid );
-        el.find('.trackChanges').html( changes );
-        return changes;
     }
 
     function updateVersionViews( ) {

@@ -4,8 +4,11 @@
   </td>
   <td>
     {{#each severities as |severity| }}
-      {{label}} <input type="radio" id="et-line-{{../id}}" name="severity"
-            value="{{../id}}-{{label}}" />
+      <span class="checkbox-wrapper">
+        <label for="et-line-{{label}}-{{../id}}">{{label}}</label>
+        <input type="radio" id="et-line-{{label}}-{{../id}}" name="severity"
+              value="{{../id}}-{{label}}" />
+      </span>
     {{/each}}
   </td>
 </tr>
