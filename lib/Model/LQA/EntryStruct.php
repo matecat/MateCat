@@ -10,8 +10,10 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $id_category         ;
     public $severity            ;
     public $translation_version ;
-    public $start_position      ;
-    public $stop_position       ;
+    public $start_node          ;
+    public $start_offset        ;
+    public $end_node            ;
+    public $end_offset          ;
     public $is_full_segment     ;
     public $penalty_points      ;
     public $comment             ;

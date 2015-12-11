@@ -43,17 +43,19 @@ class EntryDao extends \DataAccess_AbstractDao {
     }
 
     public static function createEntry( $data ) {
-        self::ensureStartAndStopPositionAreOrdered( $data ) ;
+        $data = self::ensureStartAndStopPositionAreOrdered( $data ) ;
 
         $sql = "INSERT INTO qa_entries " .
             " ( " .
             " id_segment, id_job, id_category, severity, " .
-            " translation_version, start_position, stop_position, " .
+            " translation_version, start_node, start_offset, " .
+            " end_node, end_offset, " .
             " is_full_segment, penalty_points, comment, " .
             " target_text " .
             " ) VALUES ( " .
             " :id_segment, :id_job, :id_category, :severity, " .
-            " :translation_version, :start_position, :stop_position, " .
+            " :translation_version, :start_node, :start_offset, " .
+            " :end_node, :end_offset, " .
             " :is_full_segment, :penalty_points, :comment, " .
             " :target_text " .
             " ) ; " ;
@@ -67,22 +69,54 @@ class EntryDao extends \DataAccess_AbstractDao {
             // FIXME: this was required because Klein does not handle SQL
             // exceptions correctly.
             Log::doLog( $e->getMessage() );
+            throw new \Exception( $e->getMessage() );
         }
 
         $lastId = $conn->lastInsertId();
         return self::findById( $lastId );
     }
 
-    private static function ensureStartAndStopPositionAreOrdered(&$data) {
-        $startStop = array(
-            $data['start_position'],
-            $data['stop_position']
-        );
+    /**
+     * This funciton is to ensure that start and stop nodes and offsets are
+     * from the minor to the major.
+     *
+     * In normal selection ( left to right )
+     * start and stop nodes are always ordered from minor to major.
+     * When selection is done right to left, nodes may be provided in inverse
+     * order ( from major to minor).
+     *
+     * This silent correction of provided data is to reduce the amount of work
+     * required on the clients.
+     */
+    private static function ensureStartAndStopPositionAreOrdered($data) {
+        \Log::doLog( $data );
 
-        sort( $startStop, SORT_NUMERIC );
+        if ( $data['start_node'] == $data['end_node'] ) {
+            // if start node and stop node are the same, just order the offsets if needed
+            if ( intval( $data['start_offset'] ) < intval( $data['end_offset'] )) {
+                $tmp = $data['start_offset'] ;
+                $data['start_offset'] = $data['end_offset'];
+                $data['end_offset'] = $tmp ;
+                unset($tmp);
+            }
+        }
+        else if ( intval( $data['start_node'] > intval( $data['end_node'] ) ) ) {
+            // in this case selection was backward, invert both nodes and
+            // offsets.
+            $tmp = $data['start_offset'] ;
+            $data['start_offset'] = $data['end_offset'];
+            $data['end_offset'] = $tmp ;
 
-        $data['start_position'] = $startStop[0];
-        $data['stop_position'] = $startStop[1];
+            $tmp = $data['start_node'] ;
+            $data['start_node'] = $data['end_node'];
+            $data['end_node'] = $tmp ;
+        }
+        else {
+            // in any other case leave everything as is
+        }
+
+        return $data;
+
     }
 
 }

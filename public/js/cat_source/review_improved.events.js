@@ -54,21 +54,22 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
     versions.ensureUniqueIndex('id_segment');
 
-    var issues = db.addCollection('segment_review_issues', {indices: ['id', 'id_segment']});
+    var issues = db.addCollection('segment_translation_issues', {indices: ['id', 'id_segment']});
     issues.ensureUniqueIndex('id');
 
     var segments = db.getCollection('segments');
     var modal ;
 
-    function showModalWindow(selection) {
+    function showModalWindow(selection, container) {
         var data             = {};
 
         var selection = document.getSelection();
-        var offsets = [selection.anchorOffset, selection.focusOffset];
-        offsets.sort();
 
-        data.start_offset  = offsets[0];
-        data.end_offset    = offsets[1];
+        data.start_node = $.inArray( selection.anchorNode, container.contents() );
+        data.start_offset = selection.anchorOffset;
+
+        data.end_node = $.inArray( selection.focusNode, container.contents() );
+        data.end_offset = selection.focusOffset;
 
         data.selected_string = selection.toString() ;
         last_selection       = data.selected_string ;
@@ -111,13 +112,16 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
         var selection = document.getSelection();
+        var leftMouseButton = 3 ;
+        var container = $(e.target);
 
         if (
-            selection.focusNode.parentNode.closest('.errorTaggingArea') &&
-            selection.anchorNode.parentNode.closest('.errorTaggingArea') &&
+            // e.which == leftMouseButton &&
+            $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
+            $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
             selection.toString().length > 0
         ) {
-            showModalWindow( selection );
+            showModalWindow( selection, container );
         }
     });
 
@@ -185,8 +189,10 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             'id_category'         : id_category,
             'severity'            : severity,
             'target_text'         : last_selection,
-            'start_position'      : form.find('input[name=start_offset]').val(),
-            'stop_position'       : form.find('input[name=end_offset]').val(),
+            'start_node'          : form.find('input[name=start_node]').val(),
+            'start_offset'        : form.find('input[name=start_offset]').val(),
+            'end_node'            : form.find('input[name=end_node]').val(),
+            'end_offset'          : form.find('input[name=end_offset]').val(),
             'comment'             : comment,
             'formattedDate'       : moment().format('lll')
         };
@@ -195,7 +201,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             .success(function( data ) {
                 // push the new data to the store
                 console.log('success creation of entry', data.issue );
-                MateCat.DB.upsert('segment_review_issues', data.issue );
+                MateCat.DB.upsert('segment_translation_issues', data.issue );
                 modal.close();
                 //
             });
@@ -242,7 +248,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
                 $.each( data.issues, function() {
                     this.formattedDate = moment(this.created_at).format('lll');
 
-                    MateCat.DB.upsert('segment_review_issues', this);
+                    MateCat.DB.upsert('segment_translation_issues', this);
                 });
             }
         })
@@ -255,8 +261,9 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     var currentHiglight;
 
     function highlightIssue(e) {
+
         var container = $(e.target).closest('.issue-container');
-        var issue = db.getCollection('segment_review_issues').findObject({
+        var issue = db.getCollection('segment_translation_issues').findObject({
             id : container.data('issue-id') + ''
         });
         var segment = db.getCollection('segments').findObject({sid : issue.id_segment});
@@ -266,20 +273,24 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         }
 
         currentHiglight = issue.id ;
+        var selection = document.getSelection();
+        selection.removeAllRanges();
 
         var area = container.closest('section').find('.errorTaggingArea') ;
 
-        var tt    = segment.translation ;
-        var first = tt.substring(0, issue.start_position);
-        var mid   = tt.substring(issue.start_position, issue.stop_position);
-        var end   = tt.substring(issue.stop_position);
+        // TODO: fix this to take into account cases when monads are in plac
+        // var tt    = UI.decodePlaceholdersToText( segment.translation );
+        var tt             = area.html() ;
+        var contents       = area.contents() ;
+        var range = document.createRange();
 
-        var span1 = '<span class="highlight">';
-        var span2 = '</span>';
+        range.setStart( contents[ issue.start_node ], issue.start_offset );
+        range.setEnd( contents[ issue.end_node ], issue.end_offset );
 
-        console.debug( first, mid, end );
+        selection.addRange( range );
 
-        area.html( first + span1 + mid + span2 + end );
+        console.debug( issue.start_node, issue.start_offset, issue.end_node, issue.end_offset );
+
 
     }
 
@@ -287,15 +298,18 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         // if ( !$(e.target).hasClass('issue-container') ) {
         //     return ;
         // };
+        var selection = document.getSelection();
+        selection.removeAllRanges();
+
         currentHiglight = null;
         var container = $(e.target).closest('.issue-container');
         var area = container.closest('section').find('.errorTaggingArea') ;
         console.debug('resetHighlight');
-        var issue = db.getCollection('segment_review_issues').findObject({
+        var issue = db.getCollection('segment_translation_issues').findObject({
             id : container.data('issue-id') + ''
         });
         var segment = db.getCollection('segments').findObject({sid : issue.id_segment});
-        area.html( segment.translation );
+        area.html( UI.decodePlaceholdersToText( segment.translation ) );
     }
 
     function updateIssueViews() {

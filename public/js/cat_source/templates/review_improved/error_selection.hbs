@@ -28,11 +28,12 @@
     <div class="error-message-container">
       <h3>Type an optional comment here</h3>
 
-      <textarea name="comment"></textarea>
+      <textarea name="comment" placeholder="Type a comment..."></textarea>
+      <input type="hidden" name="start_node" value="{{start_node}}" />
       <input type="hidden" name="start_offset" value="{{start_offset}}" />
+      <input type="hidden" name="end_node" value="{{end_node}}" />
       <input type="hidden" name="end_offset" value="{{end_offset}}" />
       <input type="submit" id="error-selection-button" />
-
 
     </div>
   </form>

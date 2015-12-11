@@ -99,8 +99,10 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'severity'            => $this->request->severity,
             'translation_version' => $this->translation->version_number,
             'target_text'         => $this->request->target_text,
-            'start_position'      => $this->request->start_position,
-            'stop_position'       => $this->request->stop_position,
+            'start_node'          => $this->request->start_node,
+            'start_offset'        => $this->request->start_offset,
+            'end_node'            => $this->request->end_node,
+            'end_offset'          => $this->request->end_offset,
             'is_full_segment'     => false,
             'penalty_points'      => $this->getPenaltyPoints(),
             'comment'             => $this->request->comment

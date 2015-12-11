@@ -123,6 +123,10 @@ section.reviewImproved.opened {
             background-color: #7EB30C;
         }
     }
+
+    .errorTaggingArea::selection {
+        background-color: #f1c40f;
+    }
 }
 
 section.reviewImproved .textarea-container .tab-content.errorTaggingArea {
