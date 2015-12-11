@@ -1,5 +1,7 @@
 <?php
 
+namespace Analysis\Queue;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -7,11 +9,17 @@
  * Time: 16.59
  *
  */
-class Analysis_Queue_Info {
+class Info {
 
     public $redis_key;
     public $queue_name;
+    public $pid_list;
 
+    /**
+     * Analysis_Queue_Info constructor.
+     *
+     * @param array $queueElement
+     */
     protected function __construct( Array $queueElement ) {
 
         foreach( $queueElement as $key => $values ){
@@ -22,6 +30,11 @@ class Analysis_Queue_Info {
 
     }
 
+    /**
+     * @param array $queueInfo
+     *
+     * @return Info
+     */
     public static function build( Array $queueInfo ) {
         return new self( $queueInfo );
     }

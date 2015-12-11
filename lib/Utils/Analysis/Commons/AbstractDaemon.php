@@ -1,12 +1,8 @@
 <?php
 
-if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
-    die ( "This script can be run only in CLI Mode.\n\n" );
-}
+namespace Analysis\Commons;
 
-declare( ticks = 1 );
-
-set_time_limit( 0 );
+use \Log;
 
 /**
  * Created by PhpStorm.
@@ -14,10 +10,14 @@ set_time_limit( 0 );
  * Date: 17/09/15
  * Time: 15.29
  */
-abstract class Analysis_Abstract_AbstractDaemon {
+abstract class AbstractDaemon {
 
-    public static    $RUNNING    = true;
-    public static    $tHandlerPID;
+    public static $RUNNING = true;
+    public static $tHandlerPID;
+
+    /**
+     * @var AbstractDaemon
+     */
     protected static $__INSTANCE = null;
 
     /**
@@ -33,16 +33,22 @@ abstract class Analysis_Abstract_AbstractDaemon {
      * Singleton Pattern, Unique Instance of This
      */
     public static function getInstance() {
+
+        if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
+            die ( "This script can be run only in CLI Mode.\n\n" );
+        }
+
+        declare( ticks = 1 );
+        set_time_limit( 0 );
+
         if ( static::$__INSTANCE === null ) {
             if ( !extension_loaded( "pcntl" ) && (bool)ini_get( "enable_dl" ) ) {
                 dl( "pcntl.so" );
             }
             if ( !function_exists( 'pcntl_signal' ) ) {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-                Log::doLog( $msg );
                 static::_TimeStampMsg( $msg );
             } else {
-                Log::doLog( 'registering signal handlers' );
                 static::_TimeStampMsg( 'registering signal handlers\n' );
 
                 pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
@@ -50,7 +56,6 @@ abstract class Analysis_Abstract_AbstractDaemon {
                 pcntl_signal( SIGHUP, array( get_called_class(), 'sigSwitch' ) );
                 $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
 
-                Log::doLog( $msg );
                 static::_TimeStampMsg( "$msg\n" );
             }
             static::$__INSTANCE = new static();
@@ -61,7 +66,6 @@ abstract class Analysis_Abstract_AbstractDaemon {
 
     public static function sigSwitch( $sig_no ) {
 
-        Log::doLog( "Signo : $sig_no" );
         static::_TimeStampMsg( "Signo : $sig_no" );
 
         switch ( $sig_no ) {

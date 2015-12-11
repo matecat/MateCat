@@ -1,4 +1,22 @@
 <?php
+namespace Analysis;
+
+use \Analysis\Commons\AbstractDaemon,
+    \Analysis\Commons\RedisKeys;
+
+use \Bootstrap,
+    \Constants_ProjectStatus as ProjectStatus,
+    \Exception,
+    \Analysis_PayableRates as PayableRates,
+    \WordCount_Counter,
+    \Engine,
+    \Database,
+    \CatUtils,
+    \Utils,
+    \PDOException,
+    \Log,
+    \INIT;
+
 
 ini_set("memory_limit","4096M");
 set_time_limit(0);
@@ -9,6 +27,7 @@ include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 include_once INIT::$MODEL_ROOT . '/queries.php';
 
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -16,7 +35,7 @@ include_once INIT::$MODEL_ROOT . '/queries.php';
  * Time: 13.05
  *
  */
-class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
+class FastAnalysis extends AbstractDaemon {
 
     protected static $queueHandler;
 
@@ -28,8 +47,8 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
         parent::__construct();
 
         try {
-            self::$queueHandler = new Analysis_QueueHandler();
-            self::$queueHandler->getRedisClient()->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, self::$tHandlerPID );
+            self::$queueHandler = new QueueHandler();
+            self::$queueHandler->getRedisClient()->rpush( RedisKeys::FAST_PID_LIST, self::$tHandlerPID );
         } catch ( Exception $ex ) {
 
             $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
@@ -64,7 +83,7 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
                 self::_TimeStampMsg( "Memory: " . ( memory_get_usage( true ) / ( 1024 * 1024 ) ) . "MB" );
 
                 $perform_Tms_Analysis = true;
-                $status               = Constants_ProjectStatus::STATUS_FAST_OK;
+                $status               = ProjectStatus::STATUS_FAST_OK;
                 if ( $project_row[ 'id_tms' ] == 0 && $project_row[ 'id_mt_engine' ] == 0 ) {
 
                     /**
@@ -72,7 +91,7 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
                      * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
                      */
                     $perform_Tms_Analysis = false;
-                    $status               = Constants_ProjectStatus::STATUS_DONE;
+                    $status               = ProjectStatus::STATUS_DONE;
                     self::_TimeStampMsg( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
                 }
 
@@ -80,7 +99,7 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
                     $fastReport = self::_fetchMyMemoryFast( $pid );
                     self::_TimeStampMsg( "fast $pid result: " . count( $fastReport->responseData ) . " segments" );
                 } catch ( Exception $e ) {
-                    $status = Constants_ProjectStatus::STATUS_DONE;
+                    $status = ProjectStatus::STATUS_DONE;
                 }
 
                 self::_TimeStampMsg( "Clean old memory cycle" );
@@ -129,7 +148,7 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
                 self::_TimeStampMsg( "inserting segments..." );
 
                 try {
-                    $insertReportRes = $this->_insertFastAnalysis( $pid, $fastResultData, Analysis_PayableRates::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
+                    $insertReportRes = $this->_insertFastAnalysis( $pid, $fastResultData, PayableRates::$DEFAULT_PAYABLE_RATES, $perform_Tms_Analysis );
                 } catch ( Exception $e ) {
                     //Logging done and email sent
                     //set to error
@@ -161,13 +180,13 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
     /**
      * @param $pid
      *
-     * @return Engines_Results_MyMemory_AnalyzeResponse
+     * @return \Engines_Results_MyMemory_AnalyzeResponse
      * @throws Exception
      */
     protected function _fetchMyMemoryFast( $pid ) {
 
         /**
-         * @var $myMemory Engines_MyMemory
+         * @var $myMemory \Engines_MyMemory
          */
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
@@ -244,7 +263,7 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
         self::$tHandlerPID = null;
 
         //SHUTDOWN
-        self::$queueHandler->getRedisClient()->lrem( Constants_AnalysisRedisKeys::FAST_PID_LIST, 0, self::$tHandlerPID );
+        self::$queueHandler->getRedisClient()->lrem( RedisKeys::FAST_PID_LIST, 0, self::$tHandlerPID );
 
         $msg = str_pad( " FAST ANALYSIS " . self::$tHandlerPID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
@@ -428,14 +447,19 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
 
 
         $totalSegmentsToAnalyze = count( $fastResultData );
-        $queueInfo              = self::$queueHandler->getQueueAddressesByPriority( $totalSegmentsToAnalyze );
+
+        /*
+         *  $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use,
+         *  i take the value from the first element of the list ( the last one is the same for the project )
+         *  because surely this value are equal for all the record of the project
+         */
+        $first_element = reset( $fastResultData );
+        $queueInfo     = self::$queueHandler->getQueueAddressesByPriority( $totalSegmentsToAnalyze, $first_element[ 'id_mt_engine' ] );
 
         if ( $totalSegmentsToAnalyze ) {
 
-//        $chunks_st_queue = array_chunk( $fastReport, 10 );
-
-            self::_TimeStampMsg( 'Insert Segment Translations Queue: ' . count( $fastResultData ) );
-            self::_TimeStampMsg( 'Queries: ' . count( $fastResultData ) );
+            self::_TimeStampMsg( "Publish Segment Translations to the queue --> {$queueInfo->queue_name}: " . count( $fastResultData ) );
+            self::_TimeStampMsg( 'Elements: ' . count( $fastResultData ) );
 
             try {
                 self::$queueHandler->setTotal( array( 'pid' => $pid, 'queueInfo' => $queueInfo ) );
@@ -525,4 +549,4 @@ class Analysis_FastAnalysis extends Analysis_Abstract_AbstractDaemon {
 }
 
 
-Analysis_FastAnalysis::getInstance()->main();
+FastAnalysis::getInstance()->main();

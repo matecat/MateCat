@@ -7,12 +7,30 @@
  * 
  */
 
-class Analysis_QueueHandler extends Stomp {
+namespace Analysis;
+
+use \Analysis\Queue\QueuesList,
+    \Analysis\Queue\Info,
+    \Analysis\Commons\RedisKeys;
+
+use \Stomp,
+    \RedisHandler,
+    \INIT,
+    \Exception,
+    \MultiCurlHandler,
+    \Utils,
+    \Engine,
+    \Engines_MyMemory,
+    \Constants_ProjectStatus,
+    \Log,
+    \WordCount_Counter;
+
+class QueueHandler extends Stomp {
 
     protected $amqHandler;
 
     /**
-     * @var Predis\Client
+     * @var \Predis\Client
      */
     protected $redisHandler;
     protected $clientType = null;
@@ -24,26 +42,11 @@ class Analysis_QueueHandler extends Stomp {
 
     public $persistent = 'true';
 
-    protected static $QUEUE_INFO = array(
-            'high'   => array(
-                    "redis_key"  => Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
-                    "queue_name" => Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME
-            ),
-            'medium' => array(
-                    "redis_key"  => Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_P2,
-                    "queue_name" => Constants_AnalysisRedisKeys::QUEUE_NAME_P2
-            ),
-            'low'    => array(
-                    "redis_key"  => Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_P3,
-                    "queue_name" => Constants_AnalysisRedisKeys::QUEUE_NAME_P3
-            ),
-    );
-
     /**
      * Handle a string for the queue name
      * @var string
      *
-     * @throws StompException
+     * @throws \StompException
      */
     protected $queueName = null;
 
@@ -76,12 +79,12 @@ class Analysis_QueueHandler extends Stomp {
      *
      * @return bool
      * @throws Exception
-     * @throws StompException
+     * @throws \StompException
      */
     public function subscribe( $queueName = null ){
 
         if ( empty($queueName) ){
-            $queueName = Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME;
+            $queueName = RedisKeys::DEFAULT_QUEUE_NAME;
         }
 
         if( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_SUBSCRIBER ){
@@ -89,7 +92,7 @@ class Analysis_QueueHandler extends Stomp {
         } elseif( $this->clientType == self::CLIENT_TYPE_SUBSCRIBER ) {
             //already connected, we want to change the queue
             $this->queueName = $queueName;
-            return parent::subscribe( '/queue/' . Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME );
+            return parent::subscribe( '/queue/' . RedisKeys::DEFAULT_QUEUE_NAME );
         }
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
@@ -102,7 +105,7 @@ class Analysis_QueueHandler extends Stomp {
 
     /**
      * @param string            $destination
-     * @param StompFrame|string $msg
+     * @param \StompFrame|string $msg
      * @param array             $properties
      * @param null              $sync
      *
@@ -137,7 +140,7 @@ class Analysis_QueueHandler extends Stomp {
         } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            $queue = Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME;
+            $queue = RedisKeys::DEFAULT_QUEUE_NAME;
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/QueueSize";
@@ -180,7 +183,7 @@ class Analysis_QueueHandler extends Stomp {
         } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            $queue = Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME;
+            $queue = RedisKeys::DEFAULT_QUEUE_NAME;
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/ConsumerCount";
@@ -215,7 +218,7 @@ class Analysis_QueueHandler extends Stomp {
      *  $config = array(
      *    'total' => null,
      *    'qid' => null,
-     *    'queueInfo' => @var Analysis_Queue_Info
+     *    'queueInfo' => @var Info
      *  )
      * </pre>
      *
@@ -252,7 +255,7 @@ class Analysis_QueueHandler extends Stomp {
             $_pid = $this->queueTotalID;
         }
 
-        $this->getRedisClient()->setex( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_pid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
+        $this->getRedisClient()->setex( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_pid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
         $this->getRedisClient()->rpush( $config[ 'queueInfo' ]->redis_key, $_pid );
 
     }
@@ -268,7 +271,7 @@ class Analysis_QueueHandler extends Stomp {
     public function getActualForQID( $qid = null ){
 
         if( empty( $this->queueTotalID ) && empty( $qid ) ){
-            throw new Exception( 'Can Not get values without a Queue ID. Analysis_QueueHandler::setQueueID ' );
+            throw new Exception( 'Can Not get values without a Queue ID. \Analysis\QueueHandler::setQueueID ' );
         }
 
         if( !empty( $qid ) ){
@@ -277,7 +280,7 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        return $this->getRedisClient()->get( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid );
+        return $this->getRedisClient()->get( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid );
 
     }
 
@@ -285,26 +288,31 @@ class Analysis_QueueHandler extends Stomp {
      * Select the right Queue ( and the associated redis Key ) by it's length ( simplest implementation simple )
      *
      * @param $queueLen int
+     * @param $id_mt_engine int
      *
-     * @return Analysis_Queue_Info
+     * @return Info
      */
-    public static function getQueueAddressesByPriority( $queueLen ){
+    public static function getQueueAddressesByPriority( $queueLen, $id_mt_engine ){
 
-        $queueInfo = Analysis_Queue_Levels::build( self::$QUEUE_INFO );
+        $queueInfo = QueuesList::build();
+        $mtEngine  = Engine::getInstance( $id_mt_engine );
 
         //anyway take the defaults
-        $queueAddresses = $queueInfo->high;
+        $queueAddresses = $queueInfo->list[ 0 ];
 
-        //use this kind of construct to easy add/remove queues and to disable feature by: comment rows/change switch flag to false
+        //use this kind of construct to easy add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
+            case ( ! $mtEngine instanceof Engines_MyMemory ):
+                $queueAddresses = $queueInfo->list[ 2 ];
+                break;
             case ( $queueLen >= 100000 ):
-                $queueAddresses = $queueInfo->low;
+                $queueAddresses = $queueInfo->list[ 2 ];
                 break;
             case ( $queueLen >= 10000 ):
-                $queueAddresses = $queueInfo->medium;
+                $queueAddresses = $queueInfo->list[ 1 ];
                 break;
             default:
-                $queueAddresses = $queueInfo->high;
+                $queueAddresses = $queueInfo->list[ 0 ];
                 break;
 
         }
@@ -313,8 +321,13 @@ class Analysis_QueueHandler extends Stomp {
 
     }
 
-    public function setQueue(){
-
+    /**
+     * Get all queues
+     *
+     * @return QueuesList
+     */
+    public function getQueues(){
+        return QueuesList::build();
     }
 
     /**
@@ -325,7 +338,7 @@ class Analysis_QueueHandler extends Stomp {
     public function decrementTotalForWaitingProjects( $qid = null ){
 
         if( empty( $this->queueTotalID ) && empty( $qid ) ){
-            throw new Exception( 'Can Not send without a Queue ID. Analysis_QueueHandler::setQueueID ' );
+            throw new Exception( 'Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ' );
         }
 
         if( !empty( $qid ) ){
@@ -334,7 +347,7 @@ class Analysis_QueueHandler extends Stomp {
             $_qid = $this->queueTotalID;
         }
 
-        $working_jobs = $this->getRedisClient()->lrange( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, -1 );
+        $working_jobs = $this->getRedisClient()->lrange( RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, -1 );
 
         /**
          * We have an unordered list of numeric keys [1,3,2,5,4]
@@ -350,7 +363,7 @@ class Analysis_QueueHandler extends Stomp {
                 $found = true;
             }
             if( $found ){
-                $this->getRedisClient()->decr( Constants_AnalysisRedisKeys::TOTAL_SEGMENTS_TO_WAIT . $value );
+                $this->getRedisClient()->decr( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $value );
             }
         }
 
@@ -365,10 +378,10 @@ class Analysis_QueueHandler extends Stomp {
         }
 
         $project_totals                       = array();
-        $project_totals[ 'project_segments' ] = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-        $project_totals[ 'num_analyzed' ]     = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-        $project_totals[ 'eq_wc' ]            = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 1000;
-        $project_totals[ 'st_wc' ]            = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 1000;
+        $project_totals[ 'project_segments' ] = $this->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
+        $project_totals[ 'num_analyzed' ]     = $this->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
+        $project_totals[ 'eq_wc' ]            = $this->getRedisClient()->get( RedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 1000;
+        $project_totals[ 'st_wc' ]            = $this->getRedisClient()->get( RedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 1000;
 
         Log::doLog ( "--- (child $child_process_id) : count segments in project $pid = " . $project_totals[ 'project_segments' ] . "" );
         Log::doLog ( "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals[ 'num_analyzed' ] . "" );
@@ -379,9 +392,9 @@ class Analysis_QueueHandler extends Stomp {
             return;
         }
 
-        if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->getRedisClient()->setnx( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1 ) ) {
+        if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->getRedisClient()->setnx( RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1 ) ) {
 
-            $this->getRedisClient()->expire( Constants_AnalysisRedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
             $_analyzed_report = getProjectSegmentsTranslationSummary( $pid );
 
@@ -395,7 +408,7 @@ class Analysis_QueueHandler extends Stomp {
             /*
              * Remove this job from the project list
              */
-            $this->getRedisClient()->lrem( Constants_AnalysisRedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, $_pid );
+            $this->getRedisClient()->lrem( RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, $_pid );
 
             Log::doLog ( "--- (child $child_process_id) : trying to initialize job total word count." );
             foreach ( $_analyzed_report as $job_info ) {
@@ -428,24 +441,24 @@ class Analysis_QueueHandler extends Stomp {
         $pid = $objQueue[ 'pid' ];
 
         //get the number of segments in job
-        $_acquiredLock = $this->getRedisClient()->setnx( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 24 hours
+        $_acquiredLock = $this->getRedisClient()->setnx( RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 24 hours
         if ( !empty( $_acquiredLock ) ) {
 
-            $this->getRedisClient()->expire( Constants_AnalysisRedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->expire( RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
             $total_segs = getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
             Log::doLog( $total_segs );
 
-            $this->getRedisClient()->setex( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
-            $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
-            $this->getRedisClient()->expire( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->setex( RedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
+            $this->getRedisClient()->incrby( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
+            $this->getRedisClient()->expire( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
             Log::doLog ( "--- (child $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
 
         } else {
-            $_existingPid = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-            $_analyzed    = $this->getRedisClient()->get( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
+            $_existingPid = $this->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
+            $_analyzed    = $this->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
             Log::doLog ( "--- (child $process_pid) : found $_existingPid segments for PID $pid in Redis" );
             Log::doLog ( "--- (child $process_pid) : analyzed $_analyzed segments for PID $pid in Redis" );
         }
@@ -460,9 +473,9 @@ class Analysis_QueueHandler extends Stomp {
      * @param $standard_words
      */
     public function incrementAnalyzedCount( $pid, $eq_words, $standard_words ) {
-        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
-        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)( $standard_words * 1000 ) );
-        $this->getRedisClient()->incrby( Constants_AnalysisRedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
+        $this->getRedisClient()->incrby( RedisKeys::PROJ_EQ_WORD_COUNT . $pid, (int)( $eq_words * 1000 ) );
+        $this->getRedisClient()->incrby( RedisKeys::PROJ_ST_WORD_COUNT . $pid, (int)( $standard_words * 1000 ) );
+        $this->getRedisClient()->incrby( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 1 );
     }
 
 
@@ -470,7 +483,7 @@ class Analysis_QueueHandler extends Stomp {
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->send( Constants_AnalysisRedisKeys::DEFAULT_QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
+            $this->send( RedisKeys::DEFAULT_QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
         }
 
     }

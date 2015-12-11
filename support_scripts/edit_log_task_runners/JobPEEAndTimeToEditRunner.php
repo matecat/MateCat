@@ -6,13 +6,15 @@ Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
+use Analysis\Commons\AbstractDaemon;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 18/09/15
  * Time: 19.13
  */
-class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
+class JobPEEAndTimeToEditRunner extends AbstractDaemon {
     const NR_OF_JOBS = 1000;
     const NR_OF_SEGS = 10000;
 
@@ -25,7 +27,7 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
         Log::$fileName            = "evaluatePEE.log";
     }
 
-    function main( $args ) {
+    function main( $args = null ) {
         $db               = Database::obtain();
         $lastProcessedJob = (int)file_get_contents( self::$last_job_file_name );
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace Analysis\Commons;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -7,7 +9,7 @@
  * Time: 13.37
  *
  */
-class Constants_AnalysisRedisKeys {
+class RedisKeys {
 
     /**
      * Key that holds the number of segments to wait before this job executed
@@ -41,11 +43,6 @@ class Constants_AnalysisRedisKeys {
     const VOLUME_ANALYSIS_PID = 'tm_pid';
 
     /**
-     * Key that holds the child list of the processes of TM Analysis
-     */
-    const VA_CHILD_PID_LIST = 'ch_pid_list';
-
-    /**
      * Key that holds the process ids of all fast analyses
      */
     const FAST_PID_LIST = 'fast_pid_list';
@@ -66,6 +63,15 @@ class Constants_AnalysisRedisKeys {
     ##################################################
     ######          Queues Definition          #######
     ##################################################
+
+    ##############################
+    ###### Queue priority P1 #####
+    ##############################
+    /**
+     * Key that holds the child list of the processes of TM Analysis in priority 1
+     */
+    const VA_CHILD_PID_LIST_DEFAULT = 'ch_pid_list_p1';
+
     /**
      * Key that holds the projects list in the default queue
      */
@@ -75,6 +81,15 @@ class Constants_AnalysisRedisKeys {
      * Default queue name
      */
     const DEFAULT_QUEUE_NAME = 'analysis_queue_P1';
+
+    ##############################
+    ###### Queue priority P2 #####
+    ##############################
+
+    /**
+     * Key that holds the child list of the processes of TM Analysis in priority 2
+     */
+    const VA_CHILD_PID_LIST_P2 = 'ch_pid_list_p2';
 
     /**
      * Key that holds the projects list in the Priority 2 queue
@@ -86,6 +101,14 @@ class Constants_AnalysisRedisKeys {
      */
     const QUEUE_NAME_P2 = 'analysis_queue_P2';
 
+    ##############################
+    ###### Queue priority P3 #####
+    ##############################
+
+    /**
+     * Key that holds the child list of the processes of TM Analysis in priority 2
+     */
+    const VA_CHILD_PID_LIST_P3 = 'ch_pid_list_p3';
 
     /**
      * Key that holds the projects list in the Priority 2 queue

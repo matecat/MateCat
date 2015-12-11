@@ -7,4 +7,6 @@
  * 
  */
 
-return 20;
+namespace Analysis\Commons;
+
+return 15;

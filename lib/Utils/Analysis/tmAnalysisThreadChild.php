@@ -13,7 +13,7 @@ try {
     $amqHandlerSubscriber = new Analysis_QueueHandler();
     $amqHandlerSubscriber->subscribe();
 
-    $amqHandlerSubscriber->getRedisClient()->rpush( Constants_AnalysisRedisKeys::FAST_PID_LIST, $my_pid );
+    $amqHandlerSubscriber->getRedisClient()->rpush( RedisKeys::FAST_PID_LIST, $my_pid );
 
 } catch ( Exception $ex ){
 
@@ -68,7 +68,7 @@ function isParentRunning( $parent_pid ) {
      */
     global $amqHandlerSubscriber;
 
-    $redis_parent = $amqHandlerSubscriber->getRedisClient()->get( Constants_AnalysisRedisKeys::VOLUME_ANALYSIS_PID );
+    $redis_parent = $amqHandlerSubscriber->getRedisClient()->get( RedisKeys::VOLUME_ANALYSIS_PID );
     if( !(bool)$redis_parent || $redis_parent != $parent_pid ) return false;
     return true;
 
@@ -81,7 +81,7 @@ function myProcessExists( $pid ) {
      */
     global $amqHandlerSubscriber;
 
-    $pidList = $amqHandlerSubscriber->getRedisClient()->lrange( Constants_AnalysisRedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
+    $pidList = $amqHandlerSubscriber->getRedisClient()->lrange( RedisKeys::VA_CHILD_PID_LIST, 0 , -1 );
 
     if( array_search( $pid, $pidList ) !== false ){
         return true;

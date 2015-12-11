@@ -4,13 +4,15 @@ include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 
+use Analysis\Commons\AbstractDaemon;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 21/09/15
  * Time: 16.06
  */
-class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon {
+class LanguageStatsRunner extends AbstractDaemon {
 
 
     public function __construct() {

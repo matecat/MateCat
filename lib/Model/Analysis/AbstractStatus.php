@@ -1,5 +1,7 @@
 <?php
 
+use \Analysis\QueueHandler;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -63,7 +65,7 @@ abstract class Analysis_AbstractStatus {
         $this->_resultSet = getProjectStatsVolumeAnalysis( $this->id_project );
 
         try {
-            $amqHandler         = new Analysis_QueueHandler();
+            $amqHandler         = new QueueHandler();
             $segmentsBeforeMine = $amqHandler->getActualForQID( $this->id_project );
         } catch ( Exception $e ) {
             $segmentsBeforeMine = null;
