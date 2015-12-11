@@ -97,6 +97,28 @@
     margin-top: 2px;
 }
 
+section.reviewImproved.reverted {
+
+    .tab {
+        background-color: #eee;
+    }
+
+}
+
+section.reviewImproved.opened {
+    .buttons {
+        width: 100%;
+
+        .left {
+            float: left;
+        }
+
+        .right {
+            float: right;
+        }
+    }
+}
+
 section.reviewImproved.opened .outersource .copy {
     display: none;
 }
@@ -127,7 +149,13 @@ section.reviewImproved.opened {
     }
 
     .errorTaggingArea::selection {
-        background-color: #f1c40f;
+        background-color: #FFFF00;
+    }
+}
+
+section.reviewImproved.opened.reverted {
+    .errorTaggingArea::selection {
+        background-color: auto;
     }
 }
 

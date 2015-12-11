@@ -1,10 +1,15 @@
 if ( Review.enabled() && Review.type == 'improved' ) {
 
+ReviewImproved = window.ReviewImproved || {};
+
 (function($, root, undefined) {
 
-    var db = window.MateCat.DB;
-
     $.extend(UI, {
+        createButtons: function() {
+            root.ReviewImproved.renderButtons();
+
+            UI.currentSegment.trigger('buttonsCreation');
+        },
         copySuggestionInEditarea : function() {
             return ;
         },
@@ -16,7 +21,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             // database instead
             var segment = db.getCollection('segments').findOne({sid : sid});
             var translation =  segment.translation ;
-            console.log('getSegmentTranslation', translation);
 
             return translation ;
         },
@@ -32,7 +36,10 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
             var section            = $( UI.getSegmentTemplate()( data ) );
             var segment_body       = $( MateCat.Templates[ 'review_improved/segment_body' ](data) );
-            var textarea_container = $( MateCat.Templates[ 'review_improved/text_area_container' ](data) );
+            var textarea_container = MateCat.Templates[ 'review_improved/text_area_container' ](
+                {
+                    decoded_translation : data.decoded_translation
+                });
 
             segment_body
                 .find('[data-mount="segment_text_area_container"]')

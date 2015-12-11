@@ -93,7 +93,7 @@ class EntryDao extends \DataAccess_AbstractDao {
 
         if ( $data['start_node'] == $data['end_node'] ) {
             // if start node and stop node are the same, just order the offsets if needed
-            if ( intval( $data['start_offset'] ) < intval( $data['end_offset'] )) {
+            if ( intval( $data['start_offset'] ) > intval( $data['end_offset'] )) {
                 $tmp = $data['start_offset'] ;
                 $data['start_offset'] = $data['end_offset'];
                 $data['end_offset'] = $tmp ;

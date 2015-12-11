@@ -1,0 +1,13 @@
+{{#if versions}}
+
+<li>
+  <label>Select a version: </label>
+  <select class="version-picker" name="version">
+    <option value="">current</option>
+    {{#each versions as |version|}}
+      <option value="{{version.version_number}}" >{{ version.version_number }}</option>
+    {{/each}}
+  </select>
+</li>
+
+{{/if}}

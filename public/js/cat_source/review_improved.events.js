@@ -4,58 +4,19 @@
 // in memory database for MateCat
 //
 
-(function($, root, undefined) {
-
-    window.rangy_backup = window.rangy ;
-    window.rangy = {
-        init: function() { },
-        saveSelection: function() {}
-    };
-
-    var db = new loki('loki.json');
-    var segments = db.addCollection('segments', { indices: ['sid']} ) ;
-    segments.ensureUniqueIndex('sid');
-
-    $(document).on('segments:load', function(e, data) {
-        $.each(data.files, function() {
-            $.each( this.segments, function() {
-                var seg = segments.findOne( {sid : this.sid} );
-                if ( seg ) {
-                    var update = segments.update( this );
-                }
-                else {
-                    var insert = segments.insert( this );
-                }
-            });
-        });
-    });
-
-    root.MateCat = root.MateCat || {};
-    root.MateCat.DB = db ;
-    root.MateCat.DB.upsert = function(collection, record) {
-        var c = this.getCollection(collection);
-        console.debug('upsert', collection, record);
-        if ( !c.insert( record ) ) {
-            console.debug('upsert, updating');
-            c.update( record );
-        }
-    }
-    root.MateCat.Segments = segments ;
-
-})(jQuery, window);
 
 //
+window.ReviewImproved = window.ReviewImproved || {};
+
 if ( Review.enabled() && Review.type == 'improved' ) {
-(function($, UI, undefined) {
-    var db = window.MateCat.DB;
+(function($, root, ReviewImproved, UI, undefined) {
 
-    var versions = db.addCollection('segment_versions', {indices: [ 'id_segment']});
-    versions.ensureUniqueIndex('id_segment');
+    var db = window.MateCat.db;
 
-    var issues = db.addCollection('segment_translation_issues', {indices: ['id', 'id_segment']});
-    issues.ensureUniqueIndex('id');
-
+    var issues = db.addCollection('segment_translation_issues');
+    var versions = db.getCollection('segment_versions');
     var segments = db.getCollection('segments');
+
     var modal ;
     var currentHiglight;
     var lastSelection;
@@ -111,6 +72,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     });
 
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
+        if ( revertingVersion ) return ;
+
         var selection = document.getSelection();
         var leftMouseButton = 3 ;
         var container = $(e.target);
@@ -200,10 +163,9 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         $.post( path, modelToSave )
             .success(function( data ) {
                 // push the new data to the store
-                console.log('success creation of entry', data.issue );
                 // TODO make an helper for this date conversion
                 data.issue.formattedDate = moment(data.issue.created_at).format('lll');
-                MateCat.DB.upsert('segment_translation_issues', data.issue );
+                MateCat.db.upsert('segment_translation_issues', data.issue );
                 modal.close();
                 //
             });
@@ -236,7 +198,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         .done(function( data ) {
             if ( data.versions.length ) {
                 $.each( data.versions, function() {
-                    MateCat.DB.upsert('segment_versions', this);
+                    MateCat.db.upsert('segment_versions', this);
                 });
             }
         })
@@ -250,7 +212,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
                 $.each( data.issues, function() {
                     this.formattedDate = moment(this.created_at).format('lll');
 
-                    MateCat.DB.upsert('segment_translation_issues', this);
+                    MateCat.db.upsert('segment_translation_issues', this);
                 });
             }
         })
@@ -261,7 +223,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     });
 
     function highlightIssue(e) {
-
         var container = $(e.target).closest('.issue-container');
         var issue = db.getCollection('segment_translation_issues').findObject({
             id : container.data('issue-id') + ''
@@ -288,10 +249,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         range.setEnd( contents[ issue.end_node ], issue.end_offset );
 
         selection.addRange( range );
-
-        console.debug( issue.start_node, issue.start_offset, issue.end_node, issue.end_offset );
-
-
     }
 
     function resetHighlight(e) {
@@ -301,7 +258,6 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         currentHiglight = null;
         var container = $(e.target).closest('.issue-container');
         var area = container.closest('section').find('.errorTaggingArea') ;
-        console.debug('resetHighlight');
         var issue = db.getCollection('segment_translation_issues').findObject({
             id : container.data('issue-id') + ''
         });
@@ -326,36 +282,66 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.Segment.findEl( sid ).find('[data-mount=translation-issues]').html( template );
     }
 
-    function updateTrackChangesView( segment ) {
-        var previous_number = parseInt( segment.version_number ) > 0 ?
-             parseInt( segment.version_number -1)  : 0;
+    function getCurrentSegmentRecord() {
+        return db.getCollection('segments')
+            .findObject({sid : UI.currentSegmentId });
+    }
 
-        var previous_version = db.getCollection('segment_versions').findObject({
-            id_segment : segment.sid, version_number : ( '' + previous_number )
-        });
+    function getCurrentTranslationText() {
+        var record = getCurrentSegmentRecord();
+        var version;
 
-        var target = UI.clenaupTextFromPleaceholders( segment.translation );
-        var el = UI.getSegmentById( segment.sid );
-
-        if ( previous_version ) {
-            el.find('.trackChanges').html(
-              trackChangesHTML( previous_version.translation, target )
-            );
+        if ( revertingVersion ) {
+            // find version and find text
+            version = db.getCollection('segment_versions').findObject({
+                id_segment : record.sid,
+                version_number : revertingVersion + ''
+            });
+            return version.translation ;
         }
-        else
-            el.find('.trackChanges').html( target );
+        else {
+            return record.translation ;
         }
     }
 
-    function updateVersionViews( ) {
+    function getPreviousTranslationText() {
+        var record = getCurrentSegmentRecord();
+        var version ;
+        var prevBase = revertingVersion ? revertingVersion : record.version_number ;
+        version = db.getCollection('segment_versions').findObject({
+            id_segment : record.sid,
+            version_number : (prevBase -1) + ''
+        });
+        if ( version ) {
+            return version.translation;
+        } else {
+            return false;
+        }
+    }
+
+    function updateTrackChangesView() {
+        var current = UI.clenaupTextFromPleaceholders( getCurrentTranslationText() );
+        var prev_text =  getPreviousTranslationText();
+        var el = UI.getSegmentById( UI.currentSegmentId );
+
+        if ( prev_text ) {
+            el.find('.trackChanges').html(
+              trackChangesHTML( UI.clenaupTextFromPleaceholders( prev_text ), current )
+            );
+        }
+        else {
+            el.find('.trackChanges').html( current );
+        }
+    }
+
+    function updateOriginalTargetView() {
+        var segment = segments.findOne({sid : UI.currentSegmentId });
         var original_target ;
-        var sid     = UI.currentSegmentId ;
-        var segment = segments.findOne({sid : sid});
         var data    = { segment : segment };
 
         if ( parseInt(segment.original_target_provied) ) {
             var first_version = db.getCollection('segment_versions').findObject( {
-                id_segment : sid,
+                id_segment : segment.sid,
                 version_number : '0'
             });
 
@@ -368,10 +354,28 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             data.original_target = UI.decodePlaceholdersToText(original_target) ;
         }
 
-        updateTrackChangesView( segment )  ;
-
         var template = $(MateCat.Templates['review_improved/original_target']( data ));
         UI.Segment.findEl( segment.sid ).find('[data-mount=original-target]').html( template );
+    }
+
+    function updateForRevertedVersion() {
+        updateTextAreaContainer();
+        updateTrackChangesView();
+    }
+
+    function updateTextAreaContainer() {
+        var text = getCurrentTranslationText();
+        var textarea_container = MateCat.Templates[ 'review_improved/text_area_container' ](
+            { decoded_translation : UI.decodePlaceholdersToText( text ) });
+
+        $(UI.currentSegment).find('[data-mount=segment_text_area_container]')
+            .html( textarea_container );
+    }
+
+    function updateVersionViews() {
+        updateOriginalTargetView() ;
+        updateTrackChangesView()  ;
+        renderButtons();
     }
 
     issues.on('update', updateIssueViews);
@@ -383,6 +387,24 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     // Event to trigger on approval
     // TODO: this is to be redone, this should only set the state on the
     // segment.
+
+    var revertingVersion;
+
+    $(document).on('change', '.version-picker', function(e) {
+        var segment = new UI.Segment( $( UI.currentSegment ) );
+        var target = $(e.target);
+        var value = target.val();
+        if ( value == '' ) {
+            segment.el.removeClass('reverted');
+            revertingVersion = null;
+        }
+        else {
+            segment.el.addClass('reverted');
+            revertingVersion = value;
+        }
+        updateForRevertedVersion();
+    });
+
     $(document).on('click', 'a.approved', function(e) {
         e.preventDefault();
 
@@ -424,5 +446,31 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     });
 
-})($, UI);
+    function renderButtons() {
+        var segment = UI.Segment.find( UI.currentSegmentId );
+        var container = segment.el.find('.buttons') ;
+
+        var buttonData = {
+            disabled : !container.hasClass('loaded'),
+            id_segment : segment.id,
+            ctrl : ( (UI.isMac) ? 'CMD' : 'CTRL')
+        };
+
+        var buttonHTML = MateCat.Templates['review_improved/approve_button']( buttonData ) ;
+
+        var data = {
+            versions : versions.findObjects({ id_segment : segment.id })
+        };
+
+        var versionSelectHTML = MateCat.Templates['review_improved/version_selection']( data );
+
+        container.html(versionSelectHTML);
+        container.append(buttonHTML);
+    }
+
+    $.extend( ReviewImproved, {
+        renderButtons : renderButtons
+    });
+
+})($, window, ReviewImproved, UI);
 }
