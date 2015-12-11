@@ -148,8 +148,7 @@ class NewController extends ajaxController {
             Log::doLog( "Email is not valid" );
 
             return -5;
-        }
-        else if ( !is_null( $this->owner ) && !empty($this->owner) ) {
+        } else if ( !is_null( $this->owner ) && !empty( $this->owner ) ) {
             $domain = explode( "@", $this->owner );
             $domain = $domain[ 1 ];
             if ( !checkdnsrr( $domain ) ) {
@@ -306,13 +305,12 @@ class NewController extends ajaxController {
     }
 
 
-
-
     public function doAction() {
-        if ( ! $this->validateAuthHeader() ) {
-            header('HTTP/1.0 401 Unauthorized');
+        if ( !$this->validateAuthHeader() ) {
+            header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Authentication failed';
-            return -1 ;
+
+            return -1;
         }
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
@@ -584,7 +582,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->owner;
 
         if ( $this->current_user != null ) {
-            $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
+            $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
         }
 
         $projectManager = new ProjectManager( $projectStructure );
@@ -605,27 +603,28 @@ class NewController extends ajaxController {
             $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
             $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
 
-            $this->api_output[ 'new_keys' ]     = $this->new_keys;
+            $this->api_output[ 'new_keys' ] = $this->new_keys;
 
             $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
-                $projectStructure[ 'project_name' ] . "/" .
-                $projectStructure[ 'result' ][ 'id_project' ] . "-" .
-                $projectStructure[ 'result' ][ 'ppassword' ];
+                    $projectStructure[ 'project_name' ] . "/" .
+                    $projectStructure[ 'result' ][ 'id_project' ] . "-" .
+                    $projectStructure[ 'result' ][ 'ppassword' ];
         }
 
     }
 
     private function validateAuthHeader() {
-        if ($_SERVER['HTTP_X_MATECAT_KEY'] == null) {
-            return true ;
+        if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
+            return true;
         }
 
-        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER['HTTP_X_MATECAT_KEY'] );
-        if ( $key && $key->validSecret( $_SERVER['HTTP_X_MATECAT_SECRET'] ) ) {
-            Log::doLog( $key ) ;
+        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
+        if ( $key && $key->validSecret( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ) {
+            Log::doLog( $key );
 
             $this->current_user = $key->getUser();
-            return true ;
+
+            return true;
         } else {
             return false;
         }
