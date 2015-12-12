@@ -73,14 +73,29 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         });
     });
 
+    $(document).on('changeData', 'section', function(e, key) {
+        var section = $(e.target);
+        switch( key ) {
+            case 'revertingVersion':
+                break;
+        }
+
+    });
+
     $(document).on('segment:deactivate', function(e, lastOpenedSegment, currentSegment) {
         if ( lastOpenedSegment ) {
             restoreFirstTab( lastOpenedSegment );
         }
+        $(lastOpenedSegment)
+            .data('revertingVersion', null)
+            .trigger('changeData', 'revertingVersion');
+        // TODO: restore segment here
     });
 
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
-        if ( revertingVersion ) return ;
+        var segment = new UI.Segment( $(e.target).closest('section'));
+
+        if ( segment.el.data('revertingVersion') ) return ;
 
         var selection = document.getSelection();
         var leftMouseButton = 3 ;
@@ -278,20 +293,24 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     }
 
     function updateIssueViews() {
-        var sid = UI.currentSegmentId ;
-        // get all issues for the current segment
-        var current_issues = issues.findObjects({ id_segment : sid });
+        var revertingVersion = UI.currentSegment.data('revertingVersion');
+        var segment = db.getCollection('segments').findObject({sid : UI.currentSegmentId});
+        var current_issues ;
+        var version = (revertingVersion == null ? segment.version_number : revertingVersion) ;
+        var current_issues = issues.findObjects({
+            id_segment : segment.sid, translation_version : version
+        });
 
         var data = {
             issues : current_issues
         };
 
-        var template = $(MateCat.Templates['review_improved/translation_issues']( data ));
+        var tpl = template('review_improved/translation_issues', data );
 
-        template.find('.issue-container').on('mouseover', highlightIssue);
-        template.find('.issue-container').on('mouseout', resetHighlight);
+        tpl.find('.issue-container').on('mouseover', highlightIssue);
+        tpl.find('.issue-container').on('mouseout', resetHighlight);
 
-        UI.Segment.findEl( sid ).find('[data-mount=translation-issues]').html( template );
+        UI.Segment.findEl( segment.sid ).find('[data-mount=translation-issues]').html( tpl );
     }
 
     function getCurrentSegmentRecord() {
@@ -299,15 +318,18 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             .findObject({sid : UI.currentSegmentId });
     }
 
+    function revertingVersion() {
+        return UI.currentSegment.data('revertingVersion');
+    }
+
     function getCurrentTranslationText() {
         var record = getCurrentSegmentRecord();
         var version;
 
-        if ( revertingVersion ) {
-            // find version and find text
+        if ( revertingVersion() ) {
             version = db.getCollection('segment_versions').findObject({
                 id_segment : record.sid,
-                version_number : revertingVersion + ''
+                version_number : revertingVersion() + ''
             });
             return version.translation ;
         }
@@ -319,7 +341,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     function getPreviousTranslationText() {
         var record = getCurrentSegmentRecord();
         var version ;
-        var prevBase = revertingVersion ? revertingVersion : record.version_number ;
+        var prevBase = revertingVersion() ? revertingVersion() : record.version_number ;
         version = db.getCollection('segment_versions').findObject({
             id_segment : record.sid,
             version_number : (prevBase -1) + ''
@@ -370,14 +392,15 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.Segment.findEl( segment.sid ).find('[data-mount=original-target]').html( template );
     }
 
-    function updateForRevertedVersion() {
-        updateTextAreaContainer();
-        updateTrackChangesView();
+    function updateForRevertedVersion( ) {
+        updateTextAreaContainer( );
+        updateTrackChangesView( );
+        updateIssueViews( );
     }
 
     function updateTextAreaContainer() {
         var text = getCurrentTranslationText();
-        var textarea_container = MateCat.Templates[ 'review_improved/text_area_container' ](
+        var textarea_container = template('review_improved/text_area_container',
             { decoded_translation : UI.decodePlaceholdersToText( text ) });
 
         $(UI.currentSegment).find('[data-mount=segment_text_area_container]')
@@ -400,22 +423,37 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     // TODO: this is to be redone, this should only set the state on the
     // segment.
 
-    var revertingVersion;
-
     $(document).on('change', '.version-picker', function(e) {
         var segment = new UI.Segment( $( UI.currentSegment ) );
         var target = $(e.target);
         var value = target.val();
         if ( value == '' ) {
             segment.el.removeClass('reverted');
-            revertingVersion = null;
+            segment.el.data('revertingVersion', null);
         }
         else {
             segment.el.addClass('reverted');
-            revertingVersion = value;
+            segment.el.data('revertingVersion', value);
+            loadIssuesForVersion( segment );
         }
         updateForRevertedVersion();
     });
+
+    function loadIssuesForVersion( segment ) {
+        var issues_path = sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/issues?version_number=%s',
+            config.id_job, config.password, segment.id, segment.el.data('revertingVersion')
+        );
+        $.getJSON( issues_path )
+        .done(function( data ) {
+            if ( data.issues.length ) {
+                $.each( data.issues, function() {
+                    this.formattedDate = moment(this.created_at).format('lll');
+                    MateCat.db.upsert('segment_translation_issues', this);
+                });
+            }
+        });
+    }
 
     $(document).on('click', 'a.approved', function(e) {
         e.preventDefault();

@@ -9,12 +9,13 @@ if ( Review.enabled() && Review.type == 'improved' )
     var versions = db.addCollection('segment_versions', { indices: ['id','id_segment'] });
     versions.ensureUniqueIndex('id');
 
-    var issues = db.addCollection('segment_translation_issues', {indices: ['id', 'id_segment']});
+    var issues = db.addCollection('segment_translation_issues', {
+        indices: ['id', 'id_segment']
+    });
     issues.ensureUniqueIndex('id');
 
     db.upsert = function(collection, record) {
         var c = this.getCollection(collection);
-        console.debug('upsert', record);
         if ( !c.insert( record ) ) {
             c.update( record );
             console.debug('upsert updated', record);
