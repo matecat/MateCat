@@ -13,9 +13,9 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     var db = window.MateCat.db;
 
-    var issues = db.addcollection('segment_translation_issues');
-    var versions = db.getcollection('segment_versions');
-    var segments = db.getcollection('segments');
+    var issues = db.getCollection('segment_translation_issues');
+    var versions = db.getCollection('segment_versions');
+    var segments = db.getCollection('segments');
 
     var modal ;
     var currentHiglight;
@@ -64,6 +64,14 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         $( segment ).find('.tab-content:not(:first)').css("display", "none");
         $( segment ).find('.tab-content:first').show();
     }
+
+    $(document).on('segments:load', function(e, data) {
+        $.each(data.files, function() {
+            $.each( this.segments, function() {
+                MateCat.db.upsert('segments', this);
+            });
+        });
+    });
 
     $(document).on('segment:deactivate', function(e, lastOpenedSegment, currentSegment) {
         if ( lastOpenedSegment ) {
