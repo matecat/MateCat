@@ -948,3 +948,7 @@ function isTranslated(section) {
         section.hasClass('status-draft')
     );
 }
+
+function template( name, data ) {
+    return $( MateCat.Templates[ name ]( data ) );
+}

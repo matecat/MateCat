@@ -13,9 +13,9 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     var db = window.MateCat.db;
 
-    var issues = db.addCollection('segment_translation_issues');
-    var versions = db.getCollection('segment_versions');
-    var segments = db.getCollection('segments');
+    var issues = db.addcollection('segment_translation_issues');
+    var versions = db.getcollection('segment_versions');
+    var segments = db.getcollection('segments');
 
     var modal ;
     var currentHiglight;
@@ -36,10 +36,10 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         lastSelection       = data.selected_string ;
         data.lqa_model       = JSON.parse( config.lqa_model ) ;
 
-        var template = $( MateCat.Templates['review_improved/error_selection']( data ) );
-        modal = template.remodal({});
+        var tpl = root.template('review_improved/error_selection', data);
+        modal = tpl.remodal({});
 
-        template.on('keydown', function(e)  {
+        tpl.on('keydown', function(e)  {
             var esc = 27 ;
             e.stopPropagation();
             if ( e.which == esc ) {
@@ -188,11 +188,15 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     $( window ).on( 'segmentOpened', function ( e ) {
         var segment = new UI.Segment( $( e.segment ) );
-        var versions_path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/versions',
-                  config.id_job, config.password, segment.id);
+        var versions_path  = sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/versions',
+            config.id_job, config.password, segment.id
+        );
 
-        var issues_path = sprintf('/api/v2/jobs/%s/%s/segments/%s/issues',
-                   config.id_job, config.password, segment.id);
+        var issues_path = sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/issues',
+            config.id_job, config.password, segment.id
+        );
 
         $.getJSON( versions_path )
         .done(function( data ) {
