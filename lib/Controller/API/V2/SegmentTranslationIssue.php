@@ -78,10 +78,11 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     }
 
     public function index() {
+        \Log::doLog("version number: ". $this->getVersionNumber());
         $result = \LQA\EntryDao::findAllByTranslationVersion(
             $this->translation->id_segment,
             $this->translation->id_job,
-            $this->translation->version_number
+            $this->getVersionNumber()
         );
 
         $json = new JsonFormatter( );
@@ -97,7 +98,7 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'id_job'              => $this->request->id_job,
             'id_category'         => $this->request->id_category,
             'severity'            => $this->request->severity,
-            'translation_version' => $this->getVersionNumber(),
+            'translation_version' => $this->translation->version_number,
             'target_text'         => $this->request->target_text,
             'start_node'          => $this->request->start_node,
             'start_offset'        => $this->request->start_offset,
@@ -116,8 +117,10 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     }
 
     private function getVersionNumber() {
-        if ( $this->request->version_number ) {
-            return $this->request->version_number ;
+        \Log::doLog($this->request->params());
+
+        if ( null !== $this->request->param('version_number') ) {
+            return $this->request->param('version_number') ;
         }
         else {
             return $this->translation->version_number ;
