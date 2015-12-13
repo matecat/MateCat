@@ -119,10 +119,15 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         var section = $(e.target).closest('section') ;
         var segment = new UI.Segment( section );
 
-        if ( UI.currentSegmentId != segment.id ) {
+        if ( ! segment.el.hasClass('opened') ) {
             UI.openSegment( segment );
             UI.scrollSegment( segment.el );
         }
+
+        // if ( UI.currentSegmentId != segment.id ) {
+        //     UI.openSegment( segment );
+        //     UI.scrollSegment( segment.el );
+        // }
     });
 
     $('html').on('footerCreation', 'section', function() {
