@@ -204,14 +204,18 @@ if ( Review.enabled() && Review.type == 'improved' ) {
     $(document).on('click', '.reviewImproved .tabs-menu a', function(event) {
         event.preventDefault();
 
+        var section = $(event.target).closest('section');
+
+        // update styles
         $(this).parent().addClass("current");
         $(this).parent().siblings().removeClass("current");
-
-        var section = $(event.target).closest('section');
         var tab = $(this).data("ref");
-
         section.find('.tab-content').not(tab).css("display", "none");
         section.find(tab).show();
+
+        // save current status
+        var id = $(this).data('id');
+        section.data('activeTab', id);
     });
 
     $( window ).on( 'segmentOpened', function ( e ) {
@@ -235,7 +239,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             }
         })
         .complete(function() {
-            updateVersionViews();
+            // updateVersionViews();
         });
 
         $.getJSON( issues_path )
@@ -249,7 +253,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             }
         })
         .complete(function() {
-            updateIssueViews();
+            // updateIssueViews(); // SHOULD NOT BE REQUIRED HERE
         });
 
     });
@@ -318,17 +322,17 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.Segment.findEl( segment.sid ).find('[data-mount=translation-issues]').html( tpl );
     }
 
-    function getCurrentSegmentRecord() {
+    function getSegmentRecord( segment ) {
         return db.getCollection('segments')
-            .findObject({sid : UI.currentSegmentId });
+            .findObject({sid : segment.id });
     }
 
     function revertingVersion() {
         return UI.currentSegment.data('revertingVersion');
     }
 
-    function getCurrentTranslationText() {
-        var record = getCurrentSegmentRecord();
+    function getTranslationText( segment ) {
+        var record = getSegmentRecord( segment );
         var version;
 
         if ( revertingVersion() ) {
@@ -343,8 +347,8 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         }
     }
 
-    function getPreviousTranslationText() {
-        var record = getCurrentSegmentRecord();
+    function getPreviousTranslationText( segment ) {
+        var record = getSegmentRecord(segment);
         var version ;
         var prevBase = revertingVersion() ? revertingVersion() : record.version_number ;
         version = db.getCollection('segment_versions').findObject({
@@ -358,10 +362,10 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         }
     }
 
-    function updateTrackChangesView() {
-        var current = UI.clenaupTextFromPleaceholders( getCurrentTranslationText() );
-        var prev_text =  getPreviousTranslationText();
-        var el = UI.getSegmentById( UI.currentSegmentId );
+    function updateTrackChangesView( segment ) {
+        var current = UI.clenaupTextFromPleaceholders( getTranslationText(segment) );
+        var prev_text =  getPreviousTranslationText( segment );
+        var el = segment.el ;
 
         if ( prev_text ) {
             el.find('.trackChanges').html(
@@ -397,25 +401,29 @@ if ( Review.enabled() && Review.type == 'improved' ) {
         UI.Segment.findEl( segment.sid ).find('[data-mount=original-target]').html( template );
     }
 
-    function updateForRevertedVersion( ) {
-        updateTextAreaContainer( );
-        updateTrackChangesView( );
-        updateIssueViews( );
+    function updateForRevertedVersion( segment ) {
+        updateTextAreaContainer( segment );
+        updateTrackChangesView( segment );
+        updateIssueViews( segment );
     }
 
-    function updateTextAreaContainer() {
-        var text = getCurrentTranslationText();
+    function updateTextAreaContainer( segment ) {
+        var text = getTranslationText( segment );
         var textarea_container = template('review_improved/text_area_container',
-            { decoded_translation : UI.decodePlaceholdersToText( text ) });
+            {
+                decoded_translation : UI.decodePlaceholdersToText( text ),
+            });
 
         $(UI.currentSegment).find('[data-mount=segment_text_area_container]')
             .html( textarea_container );
     }
 
-    function updateVersionViews() {
-        updateOriginalTargetView() ;
-        updateTrackChangesView()  ;
-        renderButtons();
+    function updateVersionViews( version_record ) {
+        var segment = UI.Segment.find( version_record.id_segment );
+
+        updateOriginalTargetView( segment ) ;
+        updateTrackChangesView( segment )  ;
+        renderButtons( segment );
     }
 
     issues.on('update', updateIssueViews);
@@ -441,7 +449,7 @@ if ( Review.enabled() && Review.type == 'improved' ) {
             segment.el.data('revertingVersion', value);
             loadIssuesForVersion( segment );
         }
-        updateForRevertedVersion();
+        updateForRevertedVersion( segment );
     });
 
     function loadIssuesForVersion( segment ) {
@@ -501,8 +509,11 @@ if ( Review.enabled() && Review.type == 'improved' ) {
 
     });
 
-    function renderButtons() {
-        var segment = UI.Segment.find( UI.currentSegmentId );
+    function renderButtons(segment) {
+        if (segment === undefined) {
+            segment = UI.Segment.find( UI.currentSegmentId );
+        }
+
         var container = segment.el.find('.buttons') ;
 
         var buttonData = {
