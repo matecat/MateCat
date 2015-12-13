@@ -3,9 +3,16 @@
 <li>
   <label>Select a version: </label>
   <select class="version-picker" name="version">
-    <option value="">current</option>
+    <option {{#unless revertingVersion}}
+      selected="selected"
+      {{/unless}}
+      value="">current</option>
     {{#each versions as |version|}}
-      <option value="{{version.version_number}}" >{{ version.version_number }}</option>
+      <option
+      {{#ifCond ../revertingVersion version.version_number }}
+        selected="selected"
+      {{/ifCond}}
+        value="{{version.version_number}}" >{{ version.version_number }}</option>
     {{/each}}
   </select>
 </li>

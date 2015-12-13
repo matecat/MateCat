@@ -3,21 +3,20 @@
       <ul>
         {{#each issues as |issue| }}
           <li>
-            <div class="issue-container" data-issue-id="{{issue.id}}" >
-              <span class="">{{issue.category}}: {{issue.severity}}</span>
-              <span class="small">{{issue.formattedDate}}</span>
+            <div class="small issue-container" data-issue-id="{{issue.id}}" >
+              <span class="left">{{issue.severity}} - {{issue.category}}</span>
+              <span class="small right">{{issue.formattedDate}}</span>
+              <span class="clear" />
 
               <div class="issue-comment-container"> {{issue.comment}} </div>
               <div class="issue-target-text-container"> {{issue.target_text}} </div>
               <div class="issue-footer">
-                <span data-mount="number-of-replies"> 6 replies </span>
+                <span data-mount="number-of-replies"> </span>
 
                 <div class="issue-footer-controls">
-                  <a href="javascript:;">View</a>
                   <a href="javascript:;" class="danger">Delete</a>
                 </div>
               </div>
-
 
             </div>
           </li>
