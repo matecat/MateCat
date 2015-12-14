@@ -88,6 +88,7 @@ module.exports = function(grunt) {
 
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
+                    basePath + 'cat_source/review_improved.js',
                     basePath + 'cat_source/review_improved.*.js',
                     basePath + 'cat_source/handlebars-helpers.js',
 

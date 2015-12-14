@@ -1,7 +1,4 @@
-if ( Review.enabled() && Review.type == 'improved' ) {
-
-ReviewImproved = window.ReviewImproved || {};
-
+if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, undefined) {
 
     $.extend(UI, {
@@ -57,5 +54,6 @@ ReviewImproved = window.ReviewImproved || {};
         }
     });
 
-  })(jQuery, window) ;
+
+  })(jQuery, window, ReviewImproved) ;
 }

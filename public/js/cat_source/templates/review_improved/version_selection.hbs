@@ -2,7 +2,8 @@
 
 <li>
   <label>Select a version: </label>
-  <select class="version-picker" name="version">
+
+  <select class="version-picker">
     <option {{#unless revertingVersion}}
       selected="selected"
       {{/unless}}
@@ -12,7 +13,7 @@
       {{#ifCond ../revertingVersion version.version_number }}
         selected="selected"
       {{/ifCond}}
-        value="{{version.version_number}}" >{{ version.version_number }}</option>
+        value="{{version.version_number}}" >{{ formatDate version.created_at 'lll' }}</option>
     {{/each}}
   </select>
 </li>

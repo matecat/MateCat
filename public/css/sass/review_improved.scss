@@ -8,6 +8,7 @@
         padding-bottom: 4px;
         text-align: left;
     }
+
 }
 
 .translation-issues-area {
@@ -30,9 +31,6 @@
     .issue-comment-container {
         padding: 4px 0;
     }
-    .issue-footer-controls {
-        float: right;
-    }
 }
 
 .trackChanges {
@@ -47,21 +45,31 @@
     }
 }
 
-.original-target-area {
-    padding: 4px;
-    width: 100%;
-    background: #efefef;
-    border-bottom: 1px solid #ccc;
-    outline: 0;
-    text-align: left;
-    font-size: 18px;
-    color: #000;
-    border: 1px solid #727272;
-    box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal;
-    word-break: normal !important;
+section {
+    .issuesHighlightArea, .reviewImproved .original-target-area {
+        padding: 4px;
+        width: 100%;
+        background: #efefef;
+        border-bottom: 1px solid #ccc;
+        outline: 0;
+        text-align: left;
+        font-size: 18px;
+        color: #000;
+        border: 1px solid #727272;
+        box-shadow: 0 1px 2px #ccc;
+        -webkit-box-shadow: 0 1px 2px #ccc;
+        word-break: normal;
+        word-break: normal !important;
+    }
+
+
 }
+
+section .version-picker-container {
+    text-align: left;
+    margin: 10px 0;
+}
+
 
 .error-selection-modal {
 
@@ -155,6 +163,12 @@ section.reviewImproved.opened {
 
 section.reviewImproved.opened.reverted {
     .errorTaggingArea::selection {
+        background-color: #FFFF00;
+    }
+}
+
+section.opened {
+    .issuesHighlightArea::selection {
         background-color: #FFFF00;
     }
 }

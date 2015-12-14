@@ -1,12 +1,16 @@
 
-if ( Review.enabled() && Review.type == 'improved' )
+if ( ReviewImproved.enabled() )
 (function($, root, undefined) {
-    var db = new loki('loki.json');
+    var db = new loki('matecat.json');
 
-    var segments = db.addCollection('segments', { indices: ['sid']} ) ;
+    var segments = db.addCollection('segments', {
+        indices: ['sid']
+    }) ;
     segments.ensureUniqueIndex('sid');
 
-    var versions = db.addCollection('segment_versions', { indices: ['id','id_segment'] });
+    var versions = db.addCollection('segment_versions', {
+        indices: ['id','id_segment']
+    });
     versions.ensureUniqueIndex('id');
 
     var issues = db.addCollection('segment_translation_issues', {
@@ -25,6 +29,7 @@ if ( Review.enabled() && Review.type == 'improved' )
     root.MateCat = root.MateCat || {};
     root.MateCat.db = db ;
 
+    // TODO: Just for debugging purposes
     root.colls = {};
     root.colls.issues   = issues ;
     root.colls.segments = segments ;

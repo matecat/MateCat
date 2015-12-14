@@ -8,13 +8,15 @@
               <span class="small right">{{issue.formattedDate}}</span>
               <span class="clear" />
 
-              <div class="issue-comment-container"> {{issue.comment}} </div>
+                {{#if issue.comment }}
+                  <div class="issue-comment-container"><strong>Comment:</strong> {{issue.comment}} </div>
+                {{/if}}
               <div class="issue-target-text-container"> {{issue.target_text}} </div>
               <div class="issue-footer">
                 <span data-mount="number-of-replies"> </span>
 
                 <div class="issue-footer-controls">
-                  <a href="javascript:;" class="danger">Delete</a>
+                  <a href="javascript:;" class="action-delete-issue danger">Delete</a>
                 </div>
               </div>
 
