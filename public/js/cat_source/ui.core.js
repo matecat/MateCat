@@ -831,6 +831,7 @@ console.log('changeStatus');
 		$('.footer-message', segment).fadeOut(6000);
 	},
 	getMoreSegments: function(where) {
+        console.log('get more segments');
 		if ((where == 'after') && (this.noMoreSegmentsAfter))
 			return;
 		if ((where == 'before') && (this.noMoreSegmentsBefore))
@@ -984,6 +985,8 @@ console.log('changeStatus');
 		return percentageClass;
 	},
 	getSegments: function(options) {
+        console.log('get segments');
+
 //        console.log('options: ', options);
 		where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;

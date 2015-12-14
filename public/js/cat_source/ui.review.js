@@ -366,6 +366,13 @@ if ( Review.enabled() ) {
             return false;
         },
 */
+        renderAfterConfirm: function (nextId) {
+            this.render({
+                firstLoad: false,
+                segmentToOpen: nextId
+            });
+        },
+
         openNextTranslated: function (sid) {
             console.log('openNextTranslated');
             sid = sid || UI.currentSegmentId;
@@ -374,8 +381,9 @@ if ( Review.enabled() ) {
 
             var translatedList = [];
             var approvedList = [];
-
+// console.log('QUANTI? ', el.nextAll('.status-translated, .status-approved').length);
             // find in current UI
+
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
@@ -409,7 +417,7 @@ if ( Review.enabled() ) {
                 });
                 // else
                 if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
-
+console.log('AAA');
                     translatedList = $('section.status-translated');
                     approvedList   = $('section.status-approved');
 
@@ -428,6 +436,7 @@ if ( Review.enabled() ) {
                     }
 
                 } else { // find in not loaded segments
+                    console.log('ask for getNextReviseSegment');
 //                    console.log('got to ask to server next translated segment id, and then reload to that segment');
                     APP.doRequest({
                         data: {
@@ -440,10 +449,14 @@ if ( Review.enabled() ) {
                         },
                         success: function(d) {
                             if( d.nextId == null ) return false;
-                            UI.render({
-                                firstLoad: false,
-                                segmentToOpen: d.nextId
-                            });
+                            if($(".modal[data-type='confirm']").length) {
+                                $(window).on('statusChanged', function(e) {
+                                    UI.renderAfterConfirm(d.nextId);
+                                });
+                            } else {
+                                UI.renderAfterConfirm(d.nextId);
+                            }
+
                         }
                     });
                 }
