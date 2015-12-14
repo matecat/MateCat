@@ -127,6 +127,11 @@ class ConversionHandler {
         //get storage object
         $fs = new FilesStorage();
 
+        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+        if ( INIT::$LEGACY_CONVERSION !== false ) {
+            INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
+        }
+
         //if already present in database cache get the converted without convert it again
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
@@ -143,41 +148,19 @@ class ConversionHandler {
             //we have to convert it
 
             // By default, use always the new converters...
-            $useLegacyConverters = false;
+            $converterVersion = Constants_ConvertersVersions::LATEST;
             if ( $this->segmentation_rule !== null ) {
                 // ...but new converters don't support custom segmentation rules.
                 // if $this->segmentation_rule is set use the old ones.
-                $useLegacyConverters = true;
-            }
-
-            //TODO: Remove after filters upgrade in new converters ( or Alfred introduction )
-            $info = FilesStorage::pathinfo_fix( $file_path );
-            if ( $info[ 'extension' ] == 'sxml' ) {
-                // ...but new converters don't support some xml customizations
-                if( !rename( $file_path, $file_path . ".xml" ) ){
-
-                    //custom error message passed directly to javascript client and displayed as is
-                    $convertResult[ 'errorMessage' ] = "Error: there is a problem with this file, it cannot be converted.";
-                    $this->result[ 'code' ]          = -110;
-                    $this->result[ 'errors' ][]      = array(
-                            "code"  => -110, "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => FilesStorage::basename_fix( $this->file_name )
-                    );
-
-                    return false;
-
-                }
-                $file_path = $file_path . ".xml";
-                $this->setFileName( $info[ 'filename' ] . ".xml" );
-                $useLegacyConverters = true;
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
             //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
             if( INIT::$LEGACY_CONVERSION !== false ){
-                $useLegacyConverters = true;
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
-            $converter = new FileFormatConverter($useLegacyConverters);
+            $converter = new FileFormatConverter($converterVersion);
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );
@@ -222,7 +205,6 @@ class ConversionHandler {
                    put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
                    (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
                  */
-
                 //save in cache
                 $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
 

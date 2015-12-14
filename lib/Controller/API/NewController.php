@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/array_column.php";
 
 set_time_limit( 180 );
 
@@ -68,6 +67,7 @@ class NewController extends ajaxController {
             'message' => 'Untraceable error (sorry, not mapped)'
     );
 
+
     public function __construct() {
 
         //limit execution time to 300 seconds
@@ -96,6 +96,9 @@ class NewController extends ajaxController {
                 ),
                 'segmentation_rule' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'owner_email'       => array(
+                        'filter' => FILTER_VALIDATE_EMAIL
                 )
         );
 
@@ -112,6 +115,7 @@ class NewController extends ajaxController {
             $__postInput[ $key ] = urldecode( $val );
         }
 
+
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
@@ -127,14 +131,30 @@ class NewController extends ajaxController {
         );
         $this->seg_rule       = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
         $this->subject        = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner          = $__postInput[ 'owner_email' ];
+
+
+        if ( $this->owner === false ) {
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = "Email is not valid";
+            Log::doLog( "Email is not valid" );
+
+            return -5;
+        }
+        else if ( !is_null( $this->owner ) && !empty($this->owner) ) {
+            $domain = explode( "@", $this->owner );
+            $domain = $domain[ 1 ];
+            if ( !checkdnsrr( $domain ) ) {
+                $this->api_output[ 'message' ] = "Project Creation Failure";
+                $this->api_output[ 'debug' ]   = "Email is not valid";
+                Log::doLog( "Email is not valid" );
+
+                return -5;
+            }
+        }
 
         try {
-            if ( $this->tms_engine != 0 ) {
-                $test_valid_TMS = Engine::getInstance( $this->tms_engine );
-            }
-            if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-                $test_valid_MT = Engine::getInstance( $this->mt_engine );
-            }
+            $this->validateEngines();
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = $ex->getMessage();
             Log::doLog( $ex->getMessage() );
@@ -168,8 +188,6 @@ class NewController extends ajaxController {
             $subjectList = array_column( $subjectList, 'key' );
         }
 
-
-
         if ( !in_array( $this->subject, $subjectList ) ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Subject not allowed: " . $this->subject;
@@ -200,10 +218,10 @@ class NewController extends ajaxController {
         $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
 
         //If a TMX file has been uploaded and no key was provided, create a new key.
-        if( empty($this->private_tm_key) ){
+        if ( empty( $this->private_tm_key ) ) {
             foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = FilesStorage::pathinfo_fix($_fileinfo['name']);
-                if($pathinfo['extension'] == 'tmx'){
+                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $this->private_tm_key[] = 'new';
                     break;
                 }
@@ -262,15 +280,34 @@ class NewController extends ajaxController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
+    private function validateEngines() {
+        if ( $this->tms_engine != 0 ) {
+            Engine::getInstance( $this->tms_engine );
+        }
+        if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
+            Engine::getInstance( $this->mt_engine );
+        }
+    }
+
     public function finalize() {
         $toJson = json_encode( $this->api_output );
         echo $toJson;
     }
 
 
-    public function doAction() {
 
-        if ( count( $this->api_output[ 'debug' ] ) > 0 ) {
+
+    public function doAction() {
+        if ( ! $this->validateAuthHeader() ) {
+            header('HTTP/1.0 401 Unauthorized');
+            $this->api_output[ 'message' ] = 'Authentication failed';
+            return -1 ;
+        }
+
+        if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
             return;
         }
 
@@ -330,7 +367,6 @@ class NewController extends ajaxController {
 
         foreach ( $arFiles as $file_name ) {
             $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
-
 
             $conversionHandler = new ConversionHandler();
             $conversionHandler->setFileName( $file_name );
@@ -480,7 +516,7 @@ class NewController extends ajaxController {
                 $zipFiles = json_decode( $zipFiles, true );
 
 
-                $fileNames = array_column( $zipFiles, 'name' );
+                $fileNames = Utils::array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }
@@ -537,6 +573,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'tms_engine' ]           = $this->tms_engine;
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
+        $projectStructure[ 'owner' ]                = $this->owner;
+
+        if ( $this->current_user != null ) {
+            $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
+        }
 
         $projectManager = new ProjectManager( $projectStructure );
         $projectManager->createProject();
@@ -555,9 +596,31 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ]      = 'Success';
             $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
             $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
+
             $this->api_output[ 'new_keys' ]     = $this->new_keys;
+
+            $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
+                $projectStructure[ 'project_name' ] . "/" .
+                $projectStructure[ 'result' ][ 'id_project' ] . "-" .
+                $projectStructure[ 'result' ][ 'ppassword' ];
         }
 
+    }
+
+    private function validateAuthHeader() {
+        if ($_SERVER['HTTP_X_MATECAT_KEY'] == null) {
+            return true ;
+        }
+
+        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER['HTTP_X_MATECAT_KEY'] );
+        if ( $key && $key->validSecret( $_SERVER['HTTP_X_MATECAT_SECRET'] ) ) {
+            Log::doLog( $key ) ;
+
+            $this->current_user = $key->getUser();
+            return true ;
+        } else {
+            return false;
+        }
     }
 
     /**

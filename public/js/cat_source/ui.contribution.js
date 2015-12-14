@@ -5,6 +5,11 @@ $('html').on('copySourceToTarget', 'section', function() {
     UI.setChosenSuggestion(0);
 });
 
+$(document).on('afterFooterCreation', function(e, segment) {
+    console.debug('afterFooterCreation', segment);
+    UI.appendAddTMXButton( segment );
+});
+
 $.extend(UI, {
 	chooseSuggestion: function(w) {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
@@ -137,36 +142,24 @@ $.extend(UI, {
 	getContribution_complete: function(n) {
 		$(".loader", n).removeClass('loader_on');
 	},
-	getContribution_success: function(d, segment) {
-//		console.log(d.data.matches);
-        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
-/*
-        try {
-            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
-        } catch (e) {
-            UI.clearStorage('contribution');
-            localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
-        }
-*/
-//        localStorage.setItem('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d));
-
-//		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
-//		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
-//		console.log(localStorage.getItem('4679214'));
-//		console.log(!localStorage.getItem('4679214'));
-//		console.log(localStorage.getItem('4679215'));
-		this.processContributions(d, segment);
-        this.currentSegmentQA();
+    appendAddTMXButton : function( segment ) {
+        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
     },
-	processContributions: function(d, segment) {
-        if(!d) return true;
-		this.renderContributions(d, segment);
-//		if (this.getSegmentId(segment) == UI.currentSegmentId) {
-//            console.log('è glossary-loaded?', $(segment).hasClass('glossary-loaded'));
-//            this.currentSegmentQA();
-//        }
-		this.lockTags(this.editarea);
-		this.spellCheck();
+    getContribution_success: function(d, segment) {
+        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
+
+        this.appendAddTMXButton( segment );
+
+        this.processContributions(d, segment);
+        this.currentSegmentQA();
+        console.log('getContribution:complete');
+        $(document).trigger('getContribution:complete', segment);
+    },
+  processContributions: function(d, segment) {
+    if(!d) return true;
+    this.renderContributions(d, segment);
+    this.lockTags(this.editarea);
+    this.spellCheck();
 
 		this.saveInUndoStack();
 
@@ -201,22 +194,7 @@ $.extend(UI, {
 
 			var copySuggestionDone = false;
 			var segment_id = segment.attr('id');
-/*
-			if (editareaLength === 0) {
-				console.log('translation AA: ', translation);
-//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
-				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-				console.log($('#' + segment_id + ' .matches .graysmall'));
-				console.log('translation BB: ', translation);
-				UI.copySuggestionInEditarea(segment, translation, editarea, match, true, true, 0);
-				if (UI.body.hasClass('searchActive'))
-					UI.addWarningToSearchDisplay();
-				UI.setChosenSuggestion(1);
-				copySuggestionDone = true;
-			} else {
-			}
-*/
-            $(segment).addClass('loaded');
+      $(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
 
 			$.each(d.data.matches, function(index) {
@@ -265,7 +243,7 @@ $.extend(UI, {
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
+//            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
@@ -296,14 +274,16 @@ $.extend(UI, {
 		} else {
 			if (UI.debug)
 				console.log('no matches');
-//            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
+
 			$(segment).addClass('loaded');
+
 			if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
 		}
+    $(window).trigger('renderContribution:complete', segment);
 	},
         renderContributionErrors: function(errors, segment) {
             $('.tab.sub-editor.matches .engine-errors', segment).empty();

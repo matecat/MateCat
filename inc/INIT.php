@@ -3,22 +3,32 @@
 
 class INIT {
 
+    public static $ENV ;
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
-    public static $DEBUG = true;
-    public static $EXCEPTION_DEBUG = false;
+    public static $DEBUG               = true;
+    public static $EXCEPTION_DEBUG     = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $MEMCACHE_SERVERS = array();
-    public static $REDIS_SERVERS = array();
+    public static $MEMCACHE_SERVERS    = array();
+    public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $USE_COMPILED_ASSETS = false;
+
+    /**
+     * Use or not the js tracking codes macro import ( Ex: google analytics code injection )
+     *
+     * PHPTAL macro located in lib/View/external_sources.html
+     *
+     * @var string Customized path for the tracking codes ( empty default: lib/View )
+     */
+    public static $TRACKING_CODES_VIEW_PATH = "";
 
     public static $QUEUE_NAME = "matecat_analysis_queue";
     //This queue will be used for dqf project creation
@@ -63,9 +73,6 @@ class INIT {
     public static $REFERENCE_REPOSITORY;
     public static $DQF_ENABLED = false;
 
-    public static $CONVERTER_SERVER_ADDRESS;
-    public static $CONVERTER_SERVER_PORT;
-
     public static $FORCE_XLIFF_CONVERSION    = false;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
@@ -88,6 +95,7 @@ class INIT {
      * @var int Interval in seconds
      */
     public static $COPY_SOURCE_INTERVAL = 300;
+    public static $MAX_NUM_SEGMENTS = 500;
 
     /**
      * Default Matecat user agent string
@@ -122,6 +130,7 @@ class INIT {
      *
      */
     public static $CONVERSION_ENABLED = false;
+    public static $USE_ONLY_STABLE_CONVERTERS = true;
 
     /**
      * The MateCat Version
@@ -182,6 +191,7 @@ class INIT {
     public static $OAUTH_SCOPES;
 
     public static $LEGACY_CONVERSION = false;
+    public static $UNLOCKABLE_TAGS = false;
 
     public function __construct(){
 
@@ -198,6 +208,10 @@ class INIT {
         //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
         if( getenv( 'LEGACY_CONVERSION' ) !== false ){
             self::$LEGACY_CONVERSION = true;
+        }
+
+        if ( getenv( 'UNLOCKABLE_TAGS' ) !== false ) {
+            self::$UNLOCKABLE_TAGS = true;
         }
 
     }
@@ -247,7 +261,7 @@ class INIT {
                     'xhtml' => array( '', '', 'exthtm' ),
                     'xml'   => array( '', '', 'extxml' ),
                     'dtd'   => array( '', '', 'extxml' ),
-                    'php'   => array( '', '', 'extxml' ),
+//                    'php'   => array( '', '', 'extxml' ),
                     'json'  => array( '', '', 'extxml'),
                     'yaml'   => array( '', '', 'extxml' )
             ),

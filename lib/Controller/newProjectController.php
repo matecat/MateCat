@@ -61,6 +61,7 @@ class newProjectController extends viewController {
                             $ar[ 'name' ]     = $this->lang_handler->getLocalizedName( $lang );
                             $ar[ 'code' ]     = $lang;
                             $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
+                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
                             array_push( $tmpSourceArAs, $ar );
                         }
                     }
@@ -105,6 +106,7 @@ class newProjectController extends viewController {
 
                             $ar               = array();
                             $ar[ 'name' ]     = $cl;
+                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
                             $ar[ 'code' ]     = $lang;
                             $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
                             array_push( $tmpTargetArAs, $ar );
@@ -269,7 +271,7 @@ class newProjectController extends viewController {
 
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
 //        foreach ( $target_languages as $k => $v ) {
-//            //if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
+//            if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
 //            if ( in_array( $v[ 'code' ], array( 'ja-JP' ) ) ) {
 //                unset ( $target_languages[ $k ] );
 //            }
@@ -302,8 +304,8 @@ class newProjectController extends viewController {
         $this->template->targetLangHistory          = $this->targetLangArray;
         $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
         $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->extended_user              = trim( $this->logged_user['first_name'] . " " . $this->logged_user['last_name'] );
-        $this->template->logged_user                = $this->logged_user['short'];
+        $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+        $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;

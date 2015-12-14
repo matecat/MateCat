@@ -162,26 +162,27 @@ APP = {
         var setup = {
             url: builtURL,
 //			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
-            data: req.data,
-            type: 'POST',
-            dataType: 'json'
-            //TODO set timeout longer than server curl for TM/MT
-        };
+			data: req.data,
+			type: 'POST',
+			dataType: 'json'
+			//TODO set timeout longer than server curl for TM/MT
+		};
 
-        // Callbacks
-        if ( typeof req.success === 'function' )
-            setup.success = req.success;
-        if ( typeof req.complete === 'function' )
-            setup.complete = req.complete;
-        if ( typeof req.context != 'undefined' )
-            setup.context = req.context;
-        if ( typeof req.error === 'function' )
-            setup.error = req.error;
-        if ( typeof req.beforeSend === 'function' )
-            setup.beforeSend = req.beforeSend;
-        $.ajax( setup );
-    },
-    appendTime: function () {
+		// Callbacks
+		if (typeof req.success === 'function')
+			setup.success = req.success;
+		if (typeof req.complete === 'function')
+			setup.complete = req.complete;
+		if (typeof req.context != 'undefined')
+			setup.context = req.context;
+		if (typeof req.error === 'function')
+			setup.error = req.error;
+		if (typeof req.beforeSend === 'function')
+			setup.beforeSend = req.beforeSend;
+
+		return $.ajax(setup);
+	}, 
+    appendTime: function() {
         var t = new Date();
         return '&time=' + t.getTime();
     },

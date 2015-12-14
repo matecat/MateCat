@@ -49,13 +49,15 @@ $(document).ready(function(){
         if ($('.popup-languages li.on').length) {
             var str = '';
             var vals = '';
+            var direction ="ltr";
             $('.popup-languages li.on input').each(function(){
                 str += $(this).parent().find('label').text() + ',';
                 vals += $(this).val() + ',';
             })
+            direction = UI.checkMultilangRTL();
             str = str.substring(0, str.length - 1);
             vals = vals.substring(0, vals.length - 1);
-            var op = '<option id="extraTarget" selected="selected" value="' + vals + '">' + str + '</option>';
+            var op = '<option id="extraTarget" selected="selected" data-direction="' + direction + '" value="' + vals + '">' + str + '</option>';
             $('#extraTarget').remove();
             if ($('#target-lang .separator').length) {
                 ob = $('#target-lang .separator').next();
@@ -66,6 +68,7 @@ $(document).ready(function(){
 
             $('.translate-box.target h2 .extra').remove();
             $('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
+            UI.checkRTL();
         }
     });
     $("#cancelMultilang").click(function(e){

@@ -48,7 +48,6 @@ class downloadFileController extends downloadController {
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
-
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
 
         if ( empty( $this->id_job ) ) {
@@ -57,8 +56,6 @@ class downloadFileController extends downloadController {
     }
 
     public function doAction() {
-        $debug              = array();
-        $debug[ 'total' ][] = time();
 
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
@@ -76,16 +73,12 @@ class downloadFileController extends downloadController {
             return null;
         }
 
-        $debug[ 'get_file' ][] = time();
-
         //get storage object
         $fs        = new FilesStorage();
         $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
 
-        $debug[ 'get_file' ][] = time();
         $nonew                 = 0;
         $output_content        = array();
-        $thereIsAZipFile       = false;
         /*
            the procedure:
            1)original xliff file is read directly from disk; a file handler is obtained
@@ -95,45 +88,25 @@ class downloadFileController extends downloadController {
            5)the temporary file is deleted
          */
 
-        // This array will contain all the files of $files_job split by the
-        // proper converter to use for each one.
-        // At index 0 there will be all the files that need new converters.
-        // At index 1 all the files that need legacy converters
-        $files_job_by_converter_type = array(array(), array());
+        // This array will contain all the files of $files_job split by
+        // converter version.
+        $files_job_by_converter_version = array();
 
-        // Detect the type of converter to use for each file, then store
-        // file infos accordingly.
+        // Detect the converter's version to use for each file, then store
+        // file info accordingly.
         foreach ( $files_job as $file ) {
             $fileType = DetectProprietaryXliff::getInfo($file['xliffFilePath']);
-            if ($fileType[ 'proprietary_short_name' ] == 'matecat_converter') {
-                // Use new converters
-                $converter_type = 0;
-            } else {
-                // Use legacy converters in case of SDLXLIFF and GlobalSight
-                $converter_type = 1;
-            }
-            $files_job_by_converter_type[$converter_type][] = $file;
+            $files_job_by_converter_version[$fileType[ 'converter_version' ]][] = $file;
         }
 
-        // Process files according to the converters needed, one converter
+        // Process files according to the converters' versions, one version
         // at a time
-        foreach ($files_job_by_converter_type as $converter_type => $files_job) {
-            switch ($converter_type) {
-                case 0:
-                    $useLegacyConverters = false;
-                    break;
-                case 1:
-                    $useLegacyConverters = true;
-                    break;
-                default:
-                    throw new Exception("Unexpected converter type: " . $converter_type);
-            }
-
+        foreach ($files_job_by_converter_version as $converter_version => $files_job) {
             //file array is chuncked. Each chunk will be used for a parallel conversion request.
             $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
             foreach ( $files_job as $chunk ) {
 
-                $converter = new FileFormatConverter($useLegacyConverters);
+                $converter = new FileFormatConverter($converter_version);
 
                 $files_to_be_converted = array();
 
@@ -155,9 +128,7 @@ class downloadFileController extends downloadController {
 
                     }
 
-                    $debug[ 'get_segments' ][] = time();
-                    $data                      = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
-                    $debug[ 'get_segments' ][] = time();
+                    $data = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
 
                     //prepare regexp for nest step
                     $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
@@ -188,8 +159,6 @@ class downloadFileController extends downloadController {
 
                     }
 
-                    $debug[ 'replace' ][] = time();
-
                     //instatiate parser
                     $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
 
@@ -205,14 +174,10 @@ class downloadFileController extends downloadController {
                     unset( $xsp );
                     unset( $data );
 
-                    $debug[ 'replace' ][] = time();
-
                     $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
                     $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
 
                     if ( $this->forceXliff ) {
-                        $file_info_details                              = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ] );
-
                         //clean the output filename by removing
                         // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
                         $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
@@ -222,30 +187,23 @@ class downloadFileController extends downloadController {
                      * Conversion Enforce
                      */
                     $convertBackToOriginal = true;
-                    try {
 
+                    //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
+                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-                        //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-                        $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+                    $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
+                    // When the 'proprietary' flag is set to false, the xliff
+                    // is not passed to any converter, because is handled
+                    // directly inside MateCAT.
+                    $xliffWasNotConverted = ( $fileType[ 'proprietary' ] === false );
 
-                        $fileType = DetectProprietaryXliff::getInfo($file[ 'xliffFilePath' ]);
-                        // When the 'proprietary' flag is set to false, the xliff
-                        // is not passed to any converter, because is handled
-                        // directly inside MateCAT.
-                        $xliffWasNotConverted = ($fileType['proprietary'] === false);
-
-                        if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
-                            $convertBackToOriginal = false;
-                            Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                        } else {
-                            //TODO: dos2unix ??? why??
-                            //force unix type files
-                            Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
-                        }
-
-
-                    } catch ( Exception $e ) {
-                        Log::doLog( $e->getMessage() );
+                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
+                        $convertBackToOriginal = false;
+                        Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                    } else {
+                        //TODO: dos2unix ??? why??
+                        //force unix type files
+                        Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
                     }
 
                     if ( $convertBackToOriginal ) {
@@ -264,7 +222,6 @@ class downloadFileController extends downloadController {
 
                 }
 
-                $debug[ 'do_conversion' ][] = time();
                 $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
 
                 foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
@@ -291,16 +248,15 @@ class downloadFileController extends downloadController {
 
 
                 }
-                //            $output_content[ $fileID ][ 'document_content' ] = $convertResult[ 'document_content' ];
+
                 unset( $convertResult );
-                $debug[ 'do_conversion' ][] = time();
+                
             }
         }
 
         foreach ( $output_content as $idFile => $fileInformations ) {
             $zipPathInfo = ZipArchiveExtended::zipPathInfo( $output_content[ $idFile ][ 'output_filename' ] );
             if ( is_array( $zipPathInfo ) ) {
-                $thereIsAZipFile                                = true;
                 $output_content[ $idFile ][ 'zipfilename' ]     = $zipPathInfo[ 'zipfilename' ];
                 $output_content[ $idFile ][ 'zipinternalPath' ] = $zipPathInfo[ 'dirname' ];
                 $output_content[ $idFile ][ 'output_filename' ] = $zipPathInfo[ 'basename' ];
@@ -402,13 +358,11 @@ class downloadFileController extends downloadController {
 
         }
 
-        $debug[ 'total' ][] = time();
-
         try {
             Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
         }
         catch(Exception $e){
-            Log::doLog('Failed to delete dir:'.$e->getMessage());
+            Log::doLog( 'Failed to delete dir:'.$e->getMessage() );
         }
     }
 
@@ -687,7 +641,14 @@ class downloadFileController extends downloadController {
         foreach ( $zipFiles as $zipFileName => $internalFile ) {
 
             foreach ( $internalFile as $__idx => $fileInformations ) {
-                $zipFiles[ $zipFileName ][ $__idx ][ 'output_filename' ] = $fileInformations[ 'zipinternalPath' ] . DIRECTORY_SEPARATOR . $fileInformations[ 'output_filename' ];
+
+                if( $fileInformations[ 'zipinternalPath' ] != "" ){
+                    $internalDirName = $fileInformations[ 'zipinternalPath' ] . DIRECTORY_SEPARATOR;
+                } else {
+                    $internalDirName = null;
+                }
+
+                $zipFiles[ $zipFileName ][ $__idx ][ 'output_filename' ] = $internalDirName . $fileInformations[ 'output_filename' ];
 
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'zipinternalPath' ] );
                 unset( $zipFiles[ $zipFileName ][ $__idx ][ 'zipfilename' ] );
@@ -774,10 +735,11 @@ class downloadFileController extends downloadController {
 
                 //fix the file names inside the zip file, so we compare with our files
                 // and if matches we can substitute them with the converted ones
-                $fileName_fixed = array_pop( explode( DIRECTORY_SEPARATOR, str_replace( " ", "_", $realPath ) ) );
+//                $fileName_fixed = array_pop( explode( DIRECTORY_SEPARATOR, str_replace( " ", "_", $realPath ) ) );
                 foreach ( $internalFiles as $index => $internalFile ) {
-                    $__ourFileName = array_pop( explode( DIRECTORY_SEPARATOR, $internalFile->output_filename ) );
-                    if( $__ourFileName == $fileName_fixed ) {
+//                    $__ourFileName = array_pop( explode( DIRECTORY_SEPARATOR, $internalFile->output_filename ) );
+                    $_tmpRealPath = str_replace( array( " ", " " ), "_", $realPath );
+                    if( $internalFile->output_filename == $_tmpRealPath ) {
                         $zip->deleteName( $realPath );
                         if( FilesStorage::pathinfo_fix( $realPath, PATHINFO_EXTENSION ) == 'pdf' ) $realPath .= '.docx';
                         $zip->addFromString( $realPath, $internalFile->getContent() );

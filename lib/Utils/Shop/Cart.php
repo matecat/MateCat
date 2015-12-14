@@ -36,6 +36,11 @@ class Shop_Cart {
     protected $cartName;
 
     /**
+     * @var $redisHandler \Predis\Client
+     */
+    protected $redisHandler;
+
+    /**
      * Retrieve an instance of Cart identified by $cartName in a pool with singleton pattern
      *
      * @param String $cartName
@@ -57,6 +62,7 @@ class Shop_Cart {
      * @param $cartName
      */
     protected function __construct( $cartName ) {
+        $this->redisHandler = new \Predis\Client();
         $this->cartName = $cartName;
         if ( !isset ( $_SESSION[ $this->cartName ] ) ) {
             $_SESSION[ $this->cartName ] = array();

@@ -66,13 +66,26 @@ UI = {
 		 $("body").removeClass("popup-opened");
 		 });
 		 */
+
+        function wordCountTotalOrPayable( job ) {
+            var total = 0;
+            if ( $('.stat-payable').length > 0 ) {
+                total = Number( $('.stat-payable', job).first().text().replace(",", "") );
+            }
+
+            if (total == 0) {
+                total = Number( $('.stat-total', job).first().text().replace(",", "") );
+            }
+            return total;
+        }
+
 		$("body").on('click', '.dosplit:not(.disabled)', function(e) {
 
 			e.preventDefault();
 			var jobContainer = $(this).parents('.jobcontainer');
 			var job = jobContainer.find('tbody.tablestats');
 			jid = job.attr('data-jid');
-			total = $('.stat-payable', job).first().text().replace(",", "");
+			total = wordCountTotalOrPayable( job ) ;
 			numsplit = $('.splitselect', jobContainer).first().val();
 			wordsXjob = total / numsplit;
 			wordsXjob = Math.floor(wordsXjob);
@@ -275,6 +288,7 @@ UI = {
 				split_values: ar
 			},
 			success: function(d) {
+                var pretranslated = ( null == d.data.eq_word_count );
 				var total = $('.popup-split .wordsum .total-w').attr('data-val');
 				var prog = 0;
 				if (!$.isEmptyObject(d.data)) {
@@ -291,7 +305,14 @@ UI = {
                             $( editAreaList[key] ).addClass( 'empty' );
 
                         } else {
+
+                          if ( pretranslated ) {
+                            val = parseInt( d.data.chunks[key].raw_word_count );
+                          }
+                          else {
                             val = parseInt( d.data.chunks[key].eq_word_count ); //this is d.data.chunks[ index ]
+                          }
+
                         }
 
                         $( editAreaList[key] ).attr( 'value', val );
@@ -785,67 +806,13 @@ UI = {
 
 	},
     downloadAnalysisReport: function () {
-        console.log('eccolo');
-
         var pid = $("#pid").attr("data-pid");
 
         if( typeof $("#pid").attr("data-pwd") === 'undefined' ){
             var jpassword =  $('tbody.tablestats' ).attr('data-pwd');
         }
 
-
         var ppassword = $("#pid").attr("data-pwd");
-
-
-/*
-        //create an iFrame element
-        var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
-            id:'iframeDownload',
-            src: ''
-        });
-
-        //append iFrame to the DOM
-        $("body").append( iFrameDownload );
-
-        //generate a token download
-        var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
-
-        //set event listner, on ready, attach an interval that check for finished download
-        iFrameDownload.ready(function () {
-
-            //create a GLOBAL setInterval so in anonymous function it can be disabled
-            downloadTimer = window.setInterval(function () {
-
-                //check for cookie
-                var token = $.cookie( downloadToken );
-
-                //if the cookie is found, download is completed
-                //remove iframe an re-enable download button
-                if ( token == downloadToken ) {
-                    console.log('scaricato');
-//                    $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
-                    window.clearInterval( downloadTimer );
-                    $.cookie( downloadToken, null, { path: '/', expires: -1 });
-                    iFrameDownload.remove();
-                }
-
-            }, 2000);
-
-        });
-
-        //clone the html form and append a token for download
-        var iFrameForm = $("#fileDownload").clone().append(
-            $( document.createElement( 'input' ) ).prop({
-                type:'hidden',
-                name:'downloadToken',
-                value: downloadToken
-            })
-        );
-
-        //append from to newly created iFrame and submit form post
-        iFrameDownload.contents().find('body').append( iFrameForm );
-        iFrameDownload.contents().find("#fileDownload").submit();
-*/
 
         var form =  '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
                     '				<input type=hidden name="action" value="downloadAnalysisReport">' +
@@ -856,29 +823,7 @@ UI = {
         $('body').append(form);
         $('#downloadAnalysisReportForm').submit();
 
-/*
-        APP.doRequest({
-            data: {
-                action: 'downloadAnalysisReport',
-                id_project: pid,
-                password: jpassword,
-                download_type: 'XTRF'
-            },
-            success: function(d) {
-                console.log('d: ', d);
-            }
-        });
-*/
     }
-
-    /*
-            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
-                id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
-                src: $( e.currentTarget ).attr( 'href' )
-            } );
-            $( "body" ).appendmeDownload );
-        }
-    */
 }
 
 function fit_text_to_container(container, child) {

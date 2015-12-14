@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width"/>
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/editlog.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
         
         <script type="text/javascript">
@@ -15,6 +16,7 @@
             };
         </script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
@@ -36,14 +38,23 @@
 
                 <!--tal:block metal:fill-slot="actions"-->
 
-                    <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
+                    <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
                 <!--/tal:block -->
 
 
             </div>
         </header>
 
-        <div class="wrapper">
+        <div class="wrapper" tal:condition="emptyJob">
+                <div id="projects">
+                    <p class="article msg">
+                        <i>There are no edited segments in this job.</i>
+                    </p>
+                </div>
+
+        </div>
+
+        <div class="wrapper" tal:condition="not: emptyJob">
 
             <!--	<h1>Field test - 1</h1> -->
 
@@ -63,28 +74,22 @@
             <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <th>Words</th>
-                    <th>Total Time To Edit</th>
-                    <th>Avg secs/word <br/>
-                        <b><span tal:replace="source_code">---</span></b> &gt;
-                        <b><span tal:replace="target_code">---</span></b>
-                    </th>
-                    <th>MateCat users' avg secs/word<br/>
-                        <b><span tal:replace="source_code">---</span></b> &gt;
-                        <b><span tal:replace="target_code">---</span></b>
-                    </th>
-                    <th>Avg PEE <br/>
-                        <b><span tal:replace="source_code">---</span></b> &gt;
-                        <b><span tal:replace="target_code">---</span></b>
-                    </th>
-                    <th>MateCat users' <br/> avg PEE <br/><b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></th>
+                    <th>Total Time-to-edit <a class="tooltip">?<span>Sum of the time to edit of all segments, including translators' pauses.</span></a></th>
+                    <th>Your avg secs/word</th>
+                    <th>Your avg PEE</th>
                 </tr>
                 <tr>
-                    <td tal:content="stats/edited-word-count | default">N/A</td>
+                    <td tal:content="stats/valid-word-count | default">N/A</td>
                     <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
-                    <td tal:attributes="class php:tte_fast ? 'color_green' : NULL" ><span tal:replace="stats/avg-secs-per-word | string:--"></span>s <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span></td>
-                    <td><span tal:replace="overall_tte | string:--"></span>s</td>
-                    <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL"><span tal:replace="stats/avg-pee | string:--"></span></td>
-                    <td><span tal:replace="overall_pee | string:--"></span>%</td>
+                    <td tal:attributes="class php:tte_fast ? 'color_green' : NULL">
+                        <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span>
+                        <span tal:replace="stats/avg-secs-per-word | string:--"></span>s
+                        <small style="color:#000">(avg <span tal:replace="overall_tte | string:--"></span>s)</small>
+                    </td>
+                    <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL" >
+                        <span tal:replace="stats/avg-pee | string:--"></span>
+                        <small>(avg <span tal:replace="overall_pee | string:--"></span>%)</small>
+                    </td>
                 </tr>
             </table>
             <form action="${basepath}" method="post">
@@ -92,50 +97,64 @@
                 <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
                 <input type="hidden" name="password" tal:attributes="value password" value=""/>
 
-                <span class="pull-right" id="export_edit_log_csv_link">(<a  name="submit" value="Export All Data in CSV" href="javascript:;" onclick="parentNode.submit();">Export detailed log as CSV</a>)</span>
+                <span class="pull-right" id="export_edit_log_csv_link">(<a  name="submit" value="Export All Data in CSV" href="javascript:;" onclick="parentNode.parentNode.submit();">Export detailed log as CSV</a>)</span>
                 <span class="clearfix"></span>
             </form>
 
             <h2 style="margin-top:20px;margin-bottom:10px">Editing Details</h2>
 
+            <!-- to be completed
+            <div id="sort_box" class="translate-box">
+                <label for="sort_select">Sort by:</label>
+                <select id="sort_select">
+                    <option value="seg_id">Segment ID </option>
+                    <option value="secsWord_asc">Secs/Word (asc)</option>
+                    <option value="secsWord_desc">Secs/Word (desc)</option>
+                    <option value="pee_asc">Post-editing effort (asc)</option>
+                    <option value="pee_desc">Post-editing effort (desc)</option>
+                    <option value="issues">Segments with issues first</option>
+                </select>
+            </div>
+            -->
+
             <div tal:define="file_data php:array()" tal:repeat="file_data data">
-                <span tal:attributes="class string:error-symbol" tal:condition="php:file_data['stats-valid-style'] NE '' "></span>
-                <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats-valid-style}">
+                <span tal:attributes="class string:error-symbol" tal:condition="php:file_data['stats_valid_style'] NE '' "></span>
+                <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats_valid_style}">
 
                     <tr>
-                        <th width="100">Secs/Word</th>
-                        <th>Job ID</th>
                         <th>Segment ID</th>
                         <th>Words</th>
-                        <th>Suggestion source</th>
-                        <th>Match percentage</th>
-                        <th>Time-to-edit</th>
-                        <th>PE Effort</th>
-                        <!-- th>HTER <span style="font-size: 80%">(Beta)</span></th -->
+                        <th>Time-to-edit (TTE)</th>
+                        <th width="100">Secs/Word</th>
+                        <th>Post-editing effort (PEE)</th>
                     </tr>
 
                     <tr>
-                        <td title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics." tal:attributes="style string:background:${file_data/stats-valid-color}" tal:content="file_data/secs-per-word | default">N/A</td>
-                        <td tal:content="file_data/jid | default">N/A</td>
-                        <td><a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}#${file_data/sid}"><span tal:replace="file_data/sid | default" /></a></td>
-                        <td tal:content="file_data/rwc | default">N/A</td>
-                        <td tal:content="file_data/ss | default">N/A</td>
-                        <td tal:content="file_data/sm | default">%</td>
-                        <td tal:content="file_data/time_to_edit"></td>
+                        <td><a
+                                tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}#${file_data/id}"><span
+                                tal:replace="file_data/id | default" /></a></td>
+                        <td tal:content="file_data/raw_word_count | default">N/A</td>
+                        <td tal:content="file_data/display_time_to_edit"></td>
+                        <td tal:content="file_data/secs_per_word | default"
+                            title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics."> N/A </td>
                         <td tal:content="file_data/pe_effort_perc | default">%</td>
-                        <!-- td tal:content="file_data/ter | default">%</td -->
+                        <!--<td tal:content="file_data/suggestion_source | default">N/A</td>-->
+                        <!--<td tal:content="file_data/suggestion_match | default">%</td>-->
                     </tr>
                 </table>
 
-                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats-valid-style}">
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats_valid_style}">
 
                     <tr>
                         <th style="width: 100px">Segment</th>
                         <td style="text-align:left;font-size:16px;" tal:content="structure file_data/source | default">N/A</td>
                     </tr>		
                     <tr>
-                        <th style="width: 100px">Suggestion</th>
-                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/sug_view | default">N/A</td>
+                        <th style="width: 100px">Suggestion<br/>
+                            (<span tal:content="file_data/suggestion_source | default"></span> -
+                             <span tal:content="file_data/suggestion_match | default"></span>)
+                        </th>
+                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/suggestion_view | default">N/A</td>
                     </tr>		
                     <tr>
                         <th style="width: 100px">Translation</th>
@@ -145,6 +164,10 @@
                     <tr>
                         <th style="width: 100px">Diff View</th>
                         <td style="text-align:left;font-size:16px;" tal:content="structure file_data/diff | default">N/A</td>
+                    </tr>
+                    <tr>
+                        <th style="width: 100px">QA Issues</th>
+                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/warnings"></td>
                     </tr>
                 </table>
 
@@ -183,6 +206,50 @@
                     
                 </nav>
 
+                <div id="pagination_box" tal:condition="not: emptyJob">
+                    <nav>
+                        <ul>
+                            <li id="prev_page" tal:condition="exists: pagination/prev">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/prev}">&lt;&lt;</a>
+                            </li>
+
+                            <li id="first_page" tal:condition="exists: pagination/first">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/first}">
+                                    1
+                                </a>
+                            </li>
+                            <li tal:condition="php: pagination['current_page'] > 3">
+                                <span>...</span>
+                            </li>
+                            <li tal:condition="exists: pagination/prev">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/prev}"
+                                   tal:content="php: pagination['current_page']-1">
+                                </a>
+                            </li>
+                            <li id="current_page" tal:condition="exists: pagination/current">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/current}">${pagination/current_page}</a>
+                            </li>
+                            <li tal:condition="exists: pagination/next">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/next}"
+                                   tal:content="php: pagination['current_page'] +1 ">
+                                </a>
+                            </li>
+                            <li tal:condition="php: pagination['last_page'] > pagination['current_page'] + 2">
+                                <span>...</span>
+                            </li>
+                            <li id="last_page" tal:condition="exists: pagination/last">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/last}">
+                                    ${pagination/last_page}
+                                </a>
+                            </li>
+                            <li id="next_page" tal:condition="exists: pagination/next">
+                                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/next}">
+                                    &gt;&gt;
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
                     <!-- <p class="progress">Progress:</p> -->

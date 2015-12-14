@@ -148,7 +148,7 @@ class CatUtils {
         return $segment;
     }
 
-    private static function restore_xliff_tags_for_wiew($segment) {
+    public static function restore_xliff_tags_for_view($segment) {
         $segment = self::__decode_tag_attributes( $segment );
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
@@ -326,7 +326,7 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
 
         //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace('/\s{2}/', " &nbsp;", $segment);
+        $segment = preg_replace('/[[:blank:]]{2}/', " &nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
@@ -336,7 +336,7 @@ class CatUtils {
         $segment = str_replace(">", "&gt;", $segment);
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
 
-        $segment = self::restore_xliff_tags_for_wiew($segment);
+        $segment = self::restore_xliff_tags_for_view($segment);
 
         $segment = str_replace("\r\n", self::crlfPlaceholder, $segment );
         $segment = str_replace("\n", self::lfPlaceholder, $segment );
@@ -358,10 +358,11 @@ class CatUtils {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
         $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
-        $segment = self::restore_xliff_tags_for_wiew($segment);
+        $segment = self::restore_xliff_tags_for_view($segment);
         return $segment;
     }
 
+    //TODO: used only by editLogDownloadController. Move it to editLogModel
     public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
 
         $data = getEditLog($jid, $password);
@@ -479,8 +480,8 @@ class CatUtils {
                 //$seg[ 'diff_ter' ] = '';
             }
 
-            $seg['diff']     = self::restore_xliff_tags_for_wiew($seg['diff']);
-            //$seg['diff_ter'] = self::restore_xliff_tags_for_wiew($seg['diff_ter']);
+            $seg['diff']     = self::restore_xliff_tags_for_view($seg['diff']);
+            //$seg['diff_ter'] = self::restore_xliff_tags_for_view($seg['diff_ter']);
 
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
@@ -649,9 +650,9 @@ class CatUtils {
 
     /**
      * Make an estimation on performance
+     * @param array $job_stats
      *
-     * @param mixed $job_stats
-     * @return mixed
+     * @return array
      */
     protected static function _performanceEstimationTime( array $job_stats ){
 
@@ -804,6 +805,11 @@ class CatUtils {
 
     }
 
+    /**
+     * @param WordCount_Struct $wCount
+     *
+     * @return array
+     */
     public static function getFastStatsForJob( WordCount_Struct $wCount ){
 
         $job_stats = array();

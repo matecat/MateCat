@@ -19,7 +19,6 @@ RewriteRule $ / [R=307,L]
 RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 
-
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
@@ -46,12 +45,13 @@ RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QS
 RewriteRule ^(manage)[/]?$ /manage/1 [R]
 RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
 
-RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [L]
+RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [QSA,L]
 RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
 RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
 
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
+RewriteRule ^api/(.*)$ router.php [QSA,L]
 
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
 RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]

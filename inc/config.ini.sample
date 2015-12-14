@@ -15,7 +15,7 @@ CHECK_FS = no
 ; Check in new config.ini.sample:
 ; There could be new params to configure.
 ;----------------------------------------
-BUILD_NUMBER = "0.6.0e"
+BUILD_NUMBER = "0.6.3b"
 
 ;----------------------------------------
 [development]
@@ -29,12 +29,11 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-STORAGE_DIR = "/home/matecat/local_storage"         ;provide an absolute path
 SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
-SMTP_SENDER = 'no-reply@matecat.com'
+SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
 ;----------------------------------------
@@ -49,12 +48,11 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-STORAGE_DIR = "/home/matecat/local_storage"         ;provide an absolute path
 SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
-SMTP_SENDER = 'no-reply@matecat.com'
+SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
 ; Converter Server Configuration
@@ -74,12 +72,11 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-STORAGE_DIR = "/home/matecat/storage"               ;provide an absolute path
 SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
-SMTP_SENDER = 'no-reply@matecat.com'
+SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
 ; Converter Server Configuration

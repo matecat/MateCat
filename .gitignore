@@ -9,6 +9,8 @@ inc/login_secret.dat
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
+inc/config.test.ini
+inc/config.development.ini
 lib/Utils/Analysis/.num_processes
 
 # Ignore artifacts
@@ -29,3 +31,16 @@ unitTest/xhGui/
 unitTest/coverage/*
 internal_scripts
 local_storage
+lib/Utils/fileupload/thumbnails/*
+
+# advised local folder for test files
+test-storage
+
+# composer files
+composer.phar
+vendor
+
+.env
+
+phinx.yml
+

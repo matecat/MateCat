@@ -1,12 +1,8 @@
 <?php
-$root = realpath(dirname(__FILE__) . '/../../');
+$root = realpath( dirname( __FILE__ ) . '/../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
-
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-$db->debug = false;
-$db->connect();
 
 /**
  * Created by PhpStorm.
@@ -14,31 +10,27 @@ $db->connect();
  * Date: 21/09/15
  * Time: 16.06
  */
-class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
-{
+class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon {
 
 
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
-        Log::$fileName = "languageStats.log";
+        Log::$fileName   = "languageStats.log";
         self::$sleeptime = 10; //60 * 60 * 24 * 30 * 1;
     }
 
-    function main($args)
-    {
+    function main( $args ) {
         $db = Database::obtain();
 
         do {
             //TODO: create DAO for this
-
-            $today = date("Y-m-d");
+            $today     = date( "Y-m-d" );
             $queryJobs = "SELECT
                         source,
                         target,
                         sum( total_time_to_edit ) as total_time_to_edit,
-                        sum(translated_words) + sum(approved_words) + sum(rejected_words) as total_words,
-                        sum( COALESCE (avg_post_editing_effort, 0) ) as total_post_editing_effort,
+                        sum( total_raw_wc ) as total_words,
+                        sum( COALESCE (avg_post_editing_effort, 0) / coalesce(total_raw_wc, 1) ) as total_post_editing_effort,
                         count(*) as job_count
                       FROM
                         jobs j
@@ -53,7 +45,8 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
                         ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
-                          job_count = values( job_count )";
+                          job_count = values( job_count ),
+                          total_word_count = values(total_word_count)";
 
             $updateTuplesTemplate = "( '%s', '%s', '%s', %f, %f, %f, %u )";
 
@@ -61,50 +54,50 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
 
             //getlanguage list
             $languages = $langsObj->getEnabledLanguages();
-            $languages = array_column($languages, 'code');
+            $languages = Utils::array_column( $languages, 'code' );
 
-            foreach ($languages as $source_language) {
-                Log::doLog("Current source_language: $source_language");
+            foreach ( $languages as $source_language ) {
+                Log::doLog( "Current source_language: $source_language" );
                 echo "Current source_language: $source_language\n";
 
                 $languageStats = $db->fetch_array(
-                    sprintf(
-                        $queryJobs,
-                        $source_language
-                    )
+                        sprintf(
+                                $queryJobs,
+                                $source_language
+                        )
                 );
 
                 $languageTuples = array();
 
-                foreach ($languageStats as $languageCoupleStat) {
-                    Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat['target']);
-                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat['target'] . "\n";
+                foreach ( $languageStats as $languageCoupleStat ) {
+                    Log::doLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat[ 'target' ] );
+                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat[ 'target' ] . "\n";
 
                     $languageTuples[] = sprintf(
-                        $updateTuplesTemplate,
-                        $today,
-                        $languageCoupleStat['source'],
-                        $languageCoupleStat['target'],
-                        round($languageCoupleStat['total_words'], 4),
-                        round($languageCoupleStat['total_post_editing_effort'], 4),
-                        round($languageCoupleStat['total_time_to_edit'], 4),
-                        $languageCoupleStat['job_count']
+                            $updateTuplesTemplate,
+                            $today,
+                            $languageCoupleStat[ 'source' ],
+                            $languageCoupleStat[ 'target' ],
+                            round( $languageCoupleStat[ 'total_words' ], 4 ),
+                            round( $languageCoupleStat[ 'total_post_editing_effort' ], 4 ),
+                            round( $languageCoupleStat[ 'total_time_to_edit' ], 4 ),
+                            $languageCoupleStat[ 'job_count' ]
                     );
                 }
 
-                if (count($languageTuples) > 0) {
+                if ( count( $languageTuples ) > 0 ) {
 
-                    Log::doLog("Found some stats. Saving in DB..");
+                    Log::doLog( "Found some stats. Saving in DB.." );
                     echo "Found some stats. Saving in DB..\n";
                     $db->query(
-                        sprintf(
-                            $queryInsert,
-                            implode(", ", $languageTuples)
-                        )
+                            sprintf(
+                                    $queryInsert,
+                                    implode( ", ", $languageTuples )
+                            )
                     );
                 }
 
-                usleep(100);
+                usleep( 100 );
             }
 
             //for the moment, this daemon is single-loop-execution
@@ -113,8 +106,8 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon
             if ( self::$RUNNING ) {
                 sleep( self::$sleeptime );
             }
-            
-        } while (self::$RUNNING);
+
+        } while ( self::$RUNNING );
     }
 
 }
@@ -124,4 +117,4 @@ $lsr = LanguageStatsRunner::getInstance();
 /**
  * @var $lsr LanguageStatsRunner
  */
-$lsr->main(null);
+$lsr->main( null );

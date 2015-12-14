@@ -1,0 +1,1 @@
+alter table jobs add column total_raw_wc bigint(20) DEFAULT '1';

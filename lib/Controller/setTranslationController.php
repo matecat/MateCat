@@ -20,18 +20,6 @@ class setTranslationController extends ajaxController {
 
     protected $client_target_version;
 
-    /**
-     * This constant represent the job progress percentage over
-     * which the wordcount could be updated by a massive query.
-     */
-//    const UPDATE_QUERY_JOB_PROGRESS_THRESHOLD = 90;
-
-    /**
-     * The probability over which the wordcount massive query
-     * will be triggered
-     */
-//    const UPDATE_QUERY_PROBABILITY_THRESHOLD = 90;
-
     public function __construct() {
 
         parent::__construct();
@@ -94,11 +82,8 @@ class setTranslationController extends ajaxController {
 
         $this->parseIDSegment();
         if ( empty( $this->id_segment ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing id_segment" );
+            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
         }
-
-//        $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "prova" );
-//        throw new Exception( "prova", -1 );
 
         //strtoupper transforms null to "" so check for the first element to be an empty string
         if ( !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num ) ) {
@@ -121,11 +106,8 @@ class setTranslationController extends ajaxController {
         }
 
         if ( empty( $this->id_job ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing id_job" );
+            $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
         } else {
-
-//            $this->result[ 'error' ][ ] = array( "code" => -1000, "message" => "test 1" );
-//            throw new Exception( 'prova', -1 );
 
             //get Job Info, we need only a row of jobs ( split )
             $this->jobData = $job_data = getJobData( (int)$this->id_job, $this->password );
@@ -137,13 +119,13 @@ class setTranslationController extends ajaxController {
 
             //add check for job status archived.
             if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "job archived" );
+                $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
             }
 
             //check for Password correctness ( remove segment split )
             $pCheck = new AjaxPasswordCheck();
             if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
+                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
 
         }
@@ -210,7 +192,9 @@ class setTranslationController extends ajaxController {
         $check = new QA( $segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
 
+
         if ( $check->thereAreWarnings() ) {
+
             $err_json    = $check->getWarningsJSON();
             $translation = $this->translation;
         } else {
@@ -231,13 +215,9 @@ class setTranslationController extends ajaxController {
         $db->begin();
 
         $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
-
-//        $old_version = ( empty( $old_translation['translation_date'] ) ? '0' : date_create( $old_translation['translation_date'] )->getTimestamp() );
-//        if( $this->client_target_version != $old_version ){
-//            $this->result[ 'errors' ][ ] = array( "code" => -102, "message" => "Translation version mismatch" );
-//            $db->rollback();
-//            return false;
-//        }
+        if ( false === $old_translation ) {
+            $old_translation = array();
+        } // $old_translation if `false` sometimes
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
@@ -257,7 +237,7 @@ class setTranslationController extends ajaxController {
             $res                                      = addTranslation( $_Translation );
 
             if ( $res < 0 ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
+                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
                 $db->rollback();
 
                 return $res;
@@ -281,6 +261,22 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();
         $_Translation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
+
+        /**
+         * Evaluate new Avg post-editing effort for the job:
+         * - get old translation
+         * - get suggestion
+         * - evaluate $_seg_oldPEE and normalize it on the number of words for this segment
+         *
+         * - get new translation
+         * - evaluate $_seg_newPEE and normalize it on the number of words for this segment
+         *
+         * - get $_jobTotalPEE
+         * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
+         */
+        $this->updateJobPEE( $old_translation, $_Translation );
+        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
+        $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -349,21 +345,25 @@ class setTranslationController extends ajaxController {
         //but to exclude current segment from auto-propagation
         $_idSegment = $this->id_segment;
 
-        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] =  $this->status : null /* NO OP */;
+        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] = $this->status : null /* NO OP */
+        ;
 
         $TPropagation[ 'id_job' ]                 = $this->id_job;
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
-        $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
+
+
+        $TPropagation[ 'warning' ] = $check->thereAreWarnings();
 //        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
         $propagationTotal = array();
         if ( $propagateToTranslated && in_array( $this->status, array(
-                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
-                Constants_TranslationStatus::STATUS_REJECTED
-        ) ) ) {
+                        Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED,
+                        Constants_TranslationStatus::STATUS_REJECTED
+                ) )
+        ) {
 
             try {
 
@@ -374,27 +374,14 @@ class setTranslationController extends ajaxController {
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );
                 $db->rollback();
+
                 return $e->getCode();
 
             }
 
         }
 
-        //Recount Job Totals
-        $old_wStruct = new WordCount_Struct();
-        $old_wStruct->setIdJob( $this->id_job );
-        $old_wStruct->setJobPassword( $this->password );
-        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
-        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
-        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
-        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
-        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
-
-        $old_wStruct->setIdSegment( $this->id_segment );
-
-        //redundant, this is made into WordCount_Counter::updateDB
-        $old_wStruct->setOldStatus( $old_translation[ 'status' ] );
-        $old_wStruct->setNewStatus( $this->status );
+        $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
 
         //redundant because the update is made only where status = old status
         if ( $this->status != $old_translation[ 'status' ] ) {
@@ -420,41 +407,10 @@ class setTranslationController extends ajaxController {
             }
 
             try {
-                
-                //THIS IS THE WORST SOLUTION
-//                $updateJobCountersWithQuery = false;
-//                $progressWords              = $this->jobData[ 'approved_words' ] + $this->jobData[ 'translated_words' ];
-//                $totalWords                 = array_sum( array(
-//                        $this->jobData[ 'new_words' ],
-//                        $this->jobData[ 'draft_words' ],
-//                        $this->jobData[ 'translated_words' ],
-//                        $this->jobData[ 'approved_words' ],
-//                        $this->jobData[ 'rejected_words' ]
-//                ) );
-//
-//                // if job progress is above 90%, then toss a d100.
-//                // If the result is above 90, then manually update counters
-//                // with a query (super slow, but executed few times)
-//                if ( 100 * ( $progressWords / $totalWords ) >= self::UPDATE_QUERY_JOB_PROGRESS_THRESHOLD ) {
-//                    $d100Result = rand( 1, 100 );
-//                    if ( $d100Result >= self::UPDATE_QUERY_PROBABILITY_THRESHOLD ) {
-//                        $updateJobCountersWithQuery = true;
-//                    }
-//                }
-//
-//                if ( $updateJobCountersWithQuery ) {
-//                    $newTotals = $counter->updateDB_countAll( $newValues );
-//                } else {
-//                    $newTotals = $counter->updateDB( $newValues );
-//                }
-
                 $newTotals = $counter->updateDB( $newValues );
-
             } catch ( Exception $e ) {
-                $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
-                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
-//                $x1 = explode( "\n" , var_export( $old_translation, true) );
-//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
+                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
+                Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 return $e->getCode();
@@ -465,12 +421,11 @@ class setTranslationController extends ajaxController {
         }
 
         //update total time to edit
-        try{
-            updateTotalTimeToEdit($this->id_job, $this->password, $this->time_to_edit);
-        }
-        catch ( Exception $e ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "database errors" );
-            Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+        try {
+            updateTotalTimeToEdit( $this->id_job, $this->password, $this->time_to_edit );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
+            Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
 //                $x1 = explode( "\n" , var_export( $old_translation, true) );
 //                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
             $db->rollback();
@@ -482,7 +437,8 @@ class setTranslationController extends ajaxController {
         $project   = getProject( $this->jobData[ 'id_project' ] );
         $project   = array_pop( $project );
 
-        $job_stats[ 'ANALYSIS_COMPLETE' ] = ( $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+        $job_stats[ 'ANALYSIS_COMPLETE' ] = (
+        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
         $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
@@ -524,16 +480,113 @@ class setTranslationController extends ajaxController {
 
         $db->commit();
 
-        if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' ) {
+        //EVERY time an user changes a row in his job when the job is completed,
+        // a query to do the update is executed...
+        // Avoid this by setting a key on redis with an reasonable TTL
+        $redisHandler = new RedisHandler();
+        $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
+        if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' && empty( $job_status ) ) {
+            $redisHandler->getConnection()->setex( 'job_completeness:' . $this->id_job, 60 * 60 * 24 * 15, true ); //15 days
             $update_completed = setJobCompleteness( $this->id_job, 1 );
-        }
-
-        if ( @$update_completed < 0 ) {
-            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
+            if ( $update_completed < 0 ) {
+                $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
+                $redisHandler->getConnection()->del( 'job_completeness:' . $this->id_job );
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
         }
 
     }
+
+    private function recountJobTotals( $old_status ) {
+        $old_wStruct = new WordCount_Struct();
+        $old_wStruct->setIdJob( $this->id_job );
+        $old_wStruct->setJobPassword( $this->password );
+        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
+        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
+        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
+        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
+        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
+
+        $old_wStruct->setIdSegment( $this->id_segment );
+
+        //redundant, this is made into WordCount_Counter::updateDB
+        $old_wStruct->setOldStatus( $old_status );
+        $old_wStruct->setNewStatus( $this->status );
+
+        return $old_wStruct;
+    }
+
+    //TODO: put this method into Job model and use Segnent object
+    private function updateJobPEE( Array $old_translation, Array $new_translation ) {
+        $segmentDao       = new Segments_SegmentDao( Database::obtain() );
+        $segment_original = $segmentDao->getById( $this->id_segment );
+
+        $segmentRawWordCount = $segment_original->raw_word_count;
+        $segment             = new EditLog_EditLogSegmentClientStruct(
+                array(
+                        'suggestion'     => $old_translation[ 'suggestion' ],
+                        'translation'    => $old_translation[ 'translation' ],
+                        'raw_word_count' => $segmentRawWordCount,
+                        'time_to_edit'   => $old_translation[ 'time_to_edit' ] + $new_translation[ 'time_to_edit' ]
+                )
+        );
+
+        $oldSegment               = clone $segment;
+        $oldSegment->time_to_edit = $old_translation[ 'time_to_edit' ];
+
+        $oldPEE          = $segment->getPeePerc();
+        $oldPee_weighted = $oldPEE * $segmentRawWordCount;
+
+        $segment->translation    = $new_translation[ 'translation' ];
+        $segment->pe_effort_perc = null;
+
+        $newPEE          = $segment->getPeePerc();
+        $newPee_weighted = $newPEE * $segmentRawWordCount;
+
+        if ( $segment->isValidForEditLog() ) {
+            //if the segment was not valid for editlog and now it is, then just add the weighted pee
+            if ( !$oldSegment->isValidForEditLog() ) {
+                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] + $newPee_weighted );
+            } //otherwise, evaluate it normally
+            else {
+                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
+
+            }
+            $queryUpdateJob = "update jobs
+                                set avg_post_editing_effort = %f
+                                where id = %d and password = '%s'";
+
+            $db = Database::obtain();
+            $db->query(
+                    sprintf(
+                            $queryUpdateJob,
+                            $newTotalJobPee,
+                            $this->id_job,
+                            $this->password
+                    )
+            );
+        } //segment was valid but now it is no more
+        else if ( $oldSegment->isValidForEditLog() ) {
+            $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted );
+
+            $queryUpdateJob = "update jobs
+                                set avg_post_editing_effort = %f
+                                where id = %d and password = '%s'";
+
+            $db = Database::obtain();
+            $db->query(
+                    sprintf(
+                            $queryUpdateJob,
+                            $newTotalJobPee,
+                            $this->id_job,
+                            $this->password
+                    )
+            );
+        }
+
+
+    }
+
 
 }

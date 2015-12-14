@@ -221,7 +221,7 @@ function doReplaceAll( Array $queryParams ) {
 
         //we get the spaces before needed string and re-apply before substitution because we can't know if there are
         //and how much they are
-        $trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '$1' . $replacement, $tRow[ 'translation' ] );
+        $trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '${1}' . $replacement, $tRow[ 'translation' ] );
 
         /**
          * Escape for database
@@ -429,40 +429,39 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
     return $results[ 'suggestions_array' ];
 }
 
-/**
- * Get job data structure,
- * this can return a list of jobs if the job is split into chunks and
- * no password is provided for search
- *
- * <pre>
- * $jobData = array(
- *      'source'            => 'it-IT',
- *      'target'            => 'en-US',
- *      'id_mt_engine'      => 1,
- *      'id_tms'            => 1,
- *      'id_translator'     => '',
- *      'status'            => 'active',
- *      'password'          => 'UnDvBUXMiSBGNjSV',
- *      'job_first_segment' => '1234',
- *      'job_last_segment'  => '1456',
- * );
- * </pre>
- *
- * @param int         $id_job
- * @param null|string $password
- *
- * @return array $jobData
- */
 function getJobData( $id_job, $password = null ) {
 
-    $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
-		job_first_segment, job_last_segment, create_date, owner,
-		new_words, draft_words, translated_words, approved_words, rejected_words, id_project, subject, dqf_key, payable_rates
-			FROM jobs
-			WHERE id = %u";
+    $fields = array(
+        'id',
+        'id_project',
+        'source',
+        'target',
+        'id_mt_engine',
+        'id_tms',
+        'id_translator',
+        'tm_keys',
+        'status_owner AS status',
+        'password',
+        'job_first_segment',
+        'job_last_segment',
+        'create_date',
+        'owner',
+        'new_words',
+        'draft_words',
+        'translated_words',
+        'approved_words',
+        'rejected_words',
+        'subject',
+        'dqf_key', 
+        'payable_rates', 
+        'total_time_to_edit', 
+        'avg_post_editing_effort'
+    );
+
+    $query = "SELECT " . implode(', ', $fields) . " FROM jobs WHERE id = %u";
 
     if ( !empty( $password ) ) {
-        $query .= " and password = '%s' ";
+        $query .= " AND password = '%s' ";
     }
 
     $query   = sprintf( $query, $id_job, $password );
@@ -2414,7 +2413,7 @@ function updateTotalTimeToEdit( $job_id, $jobPass, $segmentTimeToEdit ){
         return $e->getCode() * -1;
     }
     $affectedRows = $db->affected_rows;
-    Log::doLog( "Affected: " . $affectedRows . "\n" );
+    Log::doLog( "Affected: " . $affectedRows );
     return $affectedRows;
 }
 
@@ -2900,6 +2899,7 @@ function setJobCompleteness( $jid, $is_completed ) {
     try {
         $result = $db->query_first($query);
     } catch( PDOException $e ) {
+        Log::doLog( $query );
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
