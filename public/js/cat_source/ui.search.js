@@ -257,10 +257,14 @@ $.extend(UI, {
 	},
 	updateSearchDisplayCount: function(segment) {
 		numRes = $('.search-display .numbers .results');
-		numRes.text(parseInt(numRes.text()) - 1);
+		currRes = parseInt(numRes.text());
+		newRes = (currRes == 0)? 0 : currRes - 1;
+		numRes.text(newRes);
 		if (($('.targetarea mark.searchMarker', segment).length - 1) === 0) {
 			numSeg = $('.search-display .numbers .segments');
-			numSeg.text(parseInt(numSeg.text()) - 1);
+			currSeg = parseInt(numSeg.text());
+			newSeg = (currSeg == 0)? 0 : currSeg - 1;
+			numSeg.text(newSeg);
 		}
 		this.updateSearchItemsCount();
 	},
