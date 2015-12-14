@@ -8,18 +8,27 @@ class INIT {
     public static $BASEURL;
     public static $HTTPHOST;
     public static $PROTOCOL;
-    public static $DEBUG = true;
-    public static $EXCEPTION_DEBUG = false;
+    public static $DEBUG               = true;
+    public static $EXCEPTION_DEBUG     = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $MEMCACHE_SERVERS = array();
-    public static $REDIS_SERVERS = array();
+    public static $MEMCACHE_SERVERS    = array();
+    public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $USE_COMPILED_ASSETS = false;
+
+    /**
+     * Use or not the js tracking codes macro import ( Ex: google analytics code injection )
+     *
+     * PHPTAL macro located in lib/View/external_sources.html
+     *
+     * @var string Customized path for the tracking codes ( empty default: lib/View )
+     */
+    public static $TRACKING_CODES_VIEW_PATH = "";
 
     public static $QUEUE_NAME = "matecat_analysis_queue";
     //This queue will be used for dqf project creation

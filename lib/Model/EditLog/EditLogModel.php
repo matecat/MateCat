@@ -179,7 +179,7 @@ class EditLog_EditLogModel {
             if ( $seg->raw_word_count < 1 ) {
                 $displaySeg->raw_word_count = 1;
             }
-
+            $displaySeg->raw_word_count = round($displaySeg->raw_word_count);
             //todo: remove this
             $displaySeg->secs_per_word = $seg->getSecsPerWord();
 
@@ -204,7 +204,7 @@ class EditLog_EditLogModel {
 
             $displaySeg->secs_per_word .= "s";
 
-            $displaySeg->pe_effort_perc = $displaySeg->getPeePerc();
+            $displaySeg->pe_effort_perc = $displaySeg->getPEE();
 
             if ( $displaySeg->pe_effort_perc < 0 ) {
                 $displaySeg->pe_effort_perc = 0;
@@ -314,7 +314,7 @@ class EditLog_EditLogModel {
         $pagination  = $this->evaluatePagination( $__pagination_prev, $__pagination_next + 1 );
         $globalStats = $this->evaluateGlobalStats();
 
-        $stats[ 'valid-word-count' ] = $globalStats[ 'raw_words' ];
+        $stats[ 'valid-word-count' ] = round($globalStats[ 'raw_words' ]);
 
         //TODO: this will not work anymore
         $stats[ 'edited-word-count' ] = array_sum( $stat_rwc );
@@ -402,6 +402,10 @@ class EditLog_EditLogModel {
             unset( $pagination[ 'prev' ] );
         }
 
+        //there is only one page: pagination is useless
+        if( $pagination['current_page'] == $pagination['last_page']){
+            $pagination = array();
+        }
 
         return $pagination;
     }
@@ -476,7 +480,7 @@ class EditLog_EditLogModel {
      * @return bool
      */
     public function isPEEslow() {
-        return ( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) - self::PEE_THRESHOLD < $this->evaluateOverallPEE();
+        return ( str_replace( "%", "", $this->stats[ 'avg-pee' ] ) ) + self::PEE_THRESHOLD < $this->evaluateOverallPEE();
     }
 
     /**

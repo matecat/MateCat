@@ -124,13 +124,13 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $job_id int
+     * @param $job_id   int
      * @param $password string
      *
      * @return bool
      */
     public function isEditLogEmpty( $job_id, $password ) {
-        $query  = "SELECT count(segments.id) as num_segs
+        $query = "SELECT count(segments.id) as num_segs
                     FROM segments
                     JOIN segment_translations st ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
@@ -148,7 +148,8 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         Constants_TranslationStatus::STATUS_DRAFT
                 )
         );
-        return (int)$result['num_segs'] == 0;
+
+        return (int)$result[ 'num_segs' ] == 0;
     }
 
 
@@ -334,12 +335,12 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         if ( empty( $password ) ) {
             throw new Exception( "Job password required" );
         }
-        $query = "
+        $queryValidSegments = "
         select
             sum(time_to_edit) as tot_tte,
             sum(raw_word_count) as raw_words,
             sum(time_to_edit)/sum(raw_word_count) as secs_per_word,
-            avg_post_editing_effort / translated_words as avg_pee
+            avg_post_editing_effort / sum(raw_word_count) as avg_pee
         from segment_translations st
         join segments s on s.id = st.id_segment
         join jobs j on j.id = st.id_job
@@ -348,9 +349,9 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             and st.status not in( '%s', '%s' )
             and time_to_edit/raw_word_count between %d and %d";
 
-        $result = $this->_fetch_array(
+        $resultValidSegs = $this->_fetch_array(
                 sprintf(
-                        $query,
+                        $queryValidSegments,
                         $job_id,
                         $password,
                         Constants_TranslationStatus::STATUS_NEW,
@@ -360,7 +361,33 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 )
         );
 
-        return $result[ 0 ];
+        $queryAllSegments = "
+          select
+            sum(time_to_edit) as tot_tte,
+            sum(raw_word_count) as raw_words,
+            sum(time_to_edit)/sum(raw_word_count) as secs_per_word
+          from segment_translations st
+            join segments s on s.id = st.id_segment
+            join jobs j on j.id = st.id_job
+          where id_job = %d
+            and  password = '%s'";
+
+        $resultAllSegs = $this->_fetch_array(
+                sprintf(
+                        $queryAllSegments,
+                        $job_id,
+                        $password
+                )
+        );
+
+        $result = array(
+                'tot_tte'       => $resultAllSegs[0][ 'tot_tte' ],
+                'raw_words'     => $resultAllSegs[0][ 'raw_words' ],
+                'secs_per_word' => $resultAllSegs[0][ 'secs_per_word' ],
+                'avg_pee'       => $resultValidSegs[0][ 'avg_pee' ]
+        );
+
+        return $result;
     }
 
     /**

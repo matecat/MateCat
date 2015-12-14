@@ -40,10 +40,10 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
 
     protected function _buildResult( $array_result ) {
         // TODO
-        // $result = array();
-        // foreach($array_result as $record) {
-        //     $result[] = new Chunks_ChunkStruct( $record );
-        // }
+         $result = array();
+         foreach($array_result as $record) {
+             $result[] = new Chunks_ChunkStruct( $record );
+         }
 
         // return $result;
     }

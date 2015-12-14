@@ -9,6 +9,7 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
     public $job_first_segment;
     public $job_last_segment ;
     public $last_opened_segment ;
+    public $owner ;
     public $last_update ;
     public $source ;
     public $target ;
