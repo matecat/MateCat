@@ -84,6 +84,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery.hotkeys.min.js',
                     basePath + 'lib/jquery.cookie.js',
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
+                    basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js'
