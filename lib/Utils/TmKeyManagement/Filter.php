@@ -63,12 +63,6 @@ class TmKeyManagement_Filter {
     );
 
     /**
-     * White list of the accepted grants constants
-     * @var array
-     */
-    protected $_accepted_grants = array( "r", "w", "rw" );
-
-    /**
      * White list of the accepted types constants
      * @var array
      */
@@ -79,6 +73,7 @@ class TmKeyManagement_Filter {
      */
     public function __construct( $uid = null ) {
         $this->__uid = (int)$uid;
+
     }
 
     /**
@@ -183,7 +178,7 @@ class TmKeyManagement_Filter {
      */
     public function setGrants( $grant_level = 'rw' ){
 
-        if ( !in_array( $grant_level, $this->_accepted_grants ) ) {
+        if ( !in_array( $grant_level, Constants_TmKeyPermissions::$_accepted_grants ) ) {
             throw new Exception ( __METHOD__ . " -> Invalid grant string." );
         }
 

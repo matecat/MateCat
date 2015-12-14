@@ -232,7 +232,6 @@ class ProjectManager {
 
         }
 
-
         //sort files in order to process TMX first
         $sortedFiles = array();
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
@@ -242,10 +241,14 @@ class ProjectManager {
             if ( DetectProprietaryXliff::getMemoryFileType() ) {
 
                 //found TMX, enable language checking routines
-                if( DetectProprietaryXliff::isTMXFile() ) $this->checkTMX = 1;
+                if( DetectProprietaryXliff::isTMXFile() ) {
+                    $this->checkTMX = 1;
+                }
 
                 //not used at moment but needed if we want to do a poll for status
-                if( DetectProprietaryXliff::isGlossaryFile() ) $this->checkGlossary = 1;
+                if( DetectProprietaryXliff::isGlossaryFile() ) {
+                    $this->checkGlossary = 1;
+                }
 
                 //prepend in front of the list
                 array_unshift( $sortedFiles, $fileName );
