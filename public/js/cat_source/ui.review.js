@@ -239,8 +239,8 @@ if ( Review.enabled() ) {
         d.original = UI.editarea.text();
         */
         // end temp
-        xEditarea = $('#segment-' + id_segment + '.editarea');
-        xSegment = $('section#segment-' + id_segment);
+        xEditarea = $('#segment-' + id_segment + '-editarea');
+        xSegment = $('#segment-' + id_segment);
         if(d.original == '') d.original = xEditarea.text();
         if(!xSegment.find('.original-translation').length) xEditarea.after('<div class="original-translation" style="display: none">' + d.original + '</div>');
         UI.setReviewErrorData(d.error_data);
@@ -386,15 +386,16 @@ if ( Review.enabled() ) {
 // console.log('QUANTI? ', el.nextAll('.status-translated, .status-approved').length);
             // find in current UI
 
-            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
+            if(el.nextAll('.status-translated').length) { // find in next segments in the current file
                 translatedList = el.nextAll('.status-translated');
-                approvedList   = el.nextAll('.status-approved');
+//                approvedList   = el.nextAll('.status-approved');
                 console.log('translatedList: ', translatedList);
-                console.log('approvedList: ', approvedList);
+//                console.log('approvedList: ', approvedList);
                 if( translatedList.length ) {
                     translatedList.first().find('.editarea').click();
                 } else {
-                    approvedList.first().find('.editarea').click();
+//                    approvedList.first().find('.editarea').click();
+                    // chiudi segmento: BELLA, HO FINITO!
 
 //                    UI.reloadWarning();
 //                    approvedList.first().find('.editarea').click();
@@ -402,10 +403,10 @@ if ( Review.enabled() ) {
 
             } else {
                 file = el.parents('article');
-                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+                file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
 
                     var translatedList = $(this).find('.status-translated');
-                    var approvedList   = $(this).find('.status-approved');
+//                    var approvedList   = $(this).find('.status-approved');
 
                     if( translatedList.length ) {
                         translatedList.first().find('.editarea').click();
@@ -418,10 +419,10 @@ if ( Review.enabled() ) {
 
                 });
                 // else
-                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+                if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
 console.log('AAA');
                     translatedList = $('section.status-translated');
-                    approvedList   = $('section.status-approved');
+//                    approvedList   = $('section.status-approved');
 
                     if( translatedList.length ) {
                         if((translatedList.first().is(UI.currentSegment))) {
@@ -429,12 +430,14 @@ console.log('AAA');
                         } else {
                             translatedList.first().find('.editarea').click();
                         }
+/*
                     } else {
                         if((approvedList.first().is(UI.currentSegment))) {
                             UI.scrollSegment(approvedList.first());
                         } else {
                             approvedList.first().find('.editarea').click();
                         }
+*/
                     }
 
                 } else { // find in not loaded segments
