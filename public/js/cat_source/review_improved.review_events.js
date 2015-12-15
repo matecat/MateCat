@@ -82,7 +82,8 @@ if ( ReviewImproved.enabled() ) {
             });
 
             var data = {
-                issues : current_issues
+                issues : current_issues,
+                isReview : config.isReview
             };
 
             var tpl = template('review_improved/translation_issues', data );

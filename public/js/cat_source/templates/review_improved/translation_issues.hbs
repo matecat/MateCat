@@ -16,7 +16,13 @@
                 <span data-mount="number-of-replies"> </span>
 
                 <div class="issue-footer-controls">
-                  <a href="javascript:;" class="action-delete-issue danger">Delete</a>
+                  {{#if ../isReview }}
+                    <a href="javascript:;" class="action-delete-issue danger">Delete</a>
+                    |
+                    <a href="javascript:;" class="action-view-issue danger">View</a>
+                  {{else}}
+                    <a href="javascript:;" class="action-view-issue danger">Reply</a>
+                  {{/if}}
                 </div>
               </div>
 
