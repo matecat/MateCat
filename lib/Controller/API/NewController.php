@@ -120,19 +120,27 @@ class NewController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->project_name   = $__postInput[ 'project_name' ];
-        $this->source_lang    = $__postInput[ 'source_lang' ];
-        $this->target_lang    = $__postInput[ 'target_lang' ];
-        $this->tms_engine     = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
-        $this->mt_engine      = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->private_tm_key = array_map(
-                'trim',
-                explode( ",", $__postInput[ 'private_tm_key' ] )
-        );
-        $this->seg_rule       = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
-        $this->subject        = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
-        $this->owner          = $__postInput[ 'owner_email' ];
+        $this->project_name = $__postInput[ 'project_name' ];
+        $this->source_lang  = $__postInput[ 'source_lang' ];
+        $this->target_lang  = $__postInput[ 'target_lang' ];
+        $this->tms_engine   = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
+        $this->mt_engine    = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
+        $this->seg_rule     = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
+        $this->subject      = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner        = $__postInput[ 'owner_email' ];
 
+        try {
+            $this->private_tm_key = array_map(
+                    'self::parseTmKeyInput',
+                    explode( ",", $__postInput[ 'private_tm_key' ] )
+            );
+        } catch ( Exception $e ) {
+            $this->api_output[ 'message' ] = $e->getMessage();
+            $this->api_output[ 'debug' ]   = $e->getMessage();
+            Log::doLog( $e->getMessage() );
+
+            return -6;
+        }
 
         if ( $this->owner === false ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
@@ -140,8 +148,7 @@ class NewController extends ajaxController {
             Log::doLog( "Email is not valid" );
 
             return -5;
-        }
-        else if ( !is_null( $this->owner ) && !empty($this->owner) ) {
+        } else if ( !is_null( $this->owner ) && !empty( $this->owner ) ) {
             $domain = explode( "@", $this->owner );
             $domain = $domain[ 1 ];
             if ( !checkdnsrr( $domain ) ) {
@@ -231,7 +238,7 @@ class NewController extends ajaxController {
         //remove all empty entries
         foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
             //from api a key is sent and the value is 'new'
-            if ( $tm_key == 'new' ) {
+            if ( $tm_key[ 'key' ] == 'new' ) {
 
                 try {
 
@@ -247,8 +254,8 @@ class NewController extends ajaxController {
                             array(
                                     'key'  => $newUser->key,
                                     'name' => null,
-                                    'r'    => true,
-                                    'w'    => true
+                                    'r'    => $tm_key[ 'r' ],
+                                    'w'    => $tm_key[ 'w' ]
 
                             );
                     $this->new_keys[]                   = $newUser->key;
@@ -265,10 +272,10 @@ class NewController extends ajaxController {
             else if ( !empty( $tm_key ) ) {
                 $this->private_tm_key[ $__key_idx ] =
                         array(
-                                'key'  => $tm_key,
+                                'key'  => $tm_key[ 'key' ],
                                 'name' => null,
-                                'r'    => true,
-                                'w'    => true
+                                'r'    => $tm_key['r'],
+                                'w'    => $tm_key['w']
 
                         );
             }
@@ -298,13 +305,12 @@ class NewController extends ajaxController {
     }
 
 
-
-
     public function doAction() {
-        if ( ! $this->validateAuthHeader() ) {
-            header('HTTP/1.0 401 Unauthorized');
+        if ( !$this->validateAuthHeader() ) {
+            header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Authentication failed';
-            return -1 ;
+
+            return -1;
         }
 
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
@@ -576,7 +582,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'owner' ]                = $this->owner;
 
         if ( $this->current_user != null ) {
-            $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
+            $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
         }
 
         $projectManager = new ProjectManager( $projectStructure );
@@ -597,27 +603,28 @@ class NewController extends ajaxController {
             $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
             $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
 
-            $this->api_output[ 'new_keys' ]     = $this->new_keys;
+            $this->api_output[ 'new_keys' ] = $this->new_keys;
 
             $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
-                $projectStructure[ 'project_name' ] . "/" .
-                $projectStructure[ 'result' ][ 'id_project' ] . "-" .
-                $projectStructure[ 'result' ][ 'ppassword' ];
+                    $projectStructure[ 'project_name' ] . "/" .
+                    $projectStructure[ 'result' ][ 'id_project' ] . "-" .
+                    $projectStructure[ 'result' ][ 'ppassword' ];
         }
 
     }
 
     private function validateAuthHeader() {
-        if ($_SERVER['HTTP_X_MATECAT_KEY'] == null) {
-            return true ;
+        if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
+            return true;
         }
 
-        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER['HTTP_X_MATECAT_KEY'] );
-        if ( $key && $key->validSecret( $_SERVER['HTTP_X_MATECAT_SECRET'] ) ) {
-            Log::doLog( $key ) ;
+        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
+        if ( $key && $key->validSecret( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ) {
+            Log::doLog( $key );
 
             $this->current_user = $key->getUser();
-            return true ;
+
+            return true;
         } else {
             return false;
         }
@@ -636,4 +643,46 @@ class NewController extends ajaxController {
 
     }
 
+    private static function parseTmKeyInput( $tmKeyString ) {
+        $tmKeyInfo = explode( ":", $tmKeyString );
+        $read      = true;
+        $write     = true;
+
+        $permissionString = $tmKeyInfo[ 1 ];
+        //if the key is not set, return null. It will be filtered in the next lines.
+        if ( empty( $tmKeyInfo[ 0 ] ) ) {
+            return null;
+        } //if permissions are set, check if they are allowed or not and eventually set permissions
+        elseif ( isset( $tmKeyInfo[ 1 ] ) ) {
+            //permission string not allowed
+            if ( !empty( $permissionString ) &&
+                    !in_array( $permissionString, Constants_TmKeyPermissions::$_accepted_grants ) ) {
+                $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
+                throw new Exception( "Permission modifier string not allowed. Allowed: <empty>, $allowed_permissions" );
+            } else {
+                switch ( $permissionString ) {
+                    case 'r':
+                        $write = false;
+                        break;
+                    case 'w':
+                        $read = false;
+                        break;
+                    case 'rw':
+                    case ''  :
+                        break;
+                    //this should never be triggered
+                    default:
+                        $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
+                        throw new Exception( "Permission modifier string not allowed. Allowed: <empty>, $allowed_permissions" );
+                        break;
+                }
+            }
+        }
+
+        return array(
+                'key' => $tmKeyInfo[ 0 ],
+                'r'   => $read,
+                'w'   => $write,
+        );
+    }
 }
