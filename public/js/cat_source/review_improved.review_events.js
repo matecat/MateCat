@@ -26,6 +26,14 @@ if ( ReviewImproved.enabled() ) {
         $(document).trigger('segmentVersionChanged', segment);
     });
 
+    $(document).on('click', '.action-view-issue', function(e) {
+        var container =  $(e.target).closest('.issue-container') ;
+        var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
+            id : container.data('issue-id') + ''
+        });
+        ReviewImproved.showIssueDetailModalWindow( issue );
+    });
+
     // Globally reusable functions
     $.extend(ReviewImproved, {
 
@@ -70,6 +78,21 @@ if ( ReviewImproved.enabled() ) {
             else {
                 return record.translation ;
             }
+        },
+
+        showIssueDetailModalWindow : function( issue ) {
+            var data = { issue: issue };
+            var tpl = template('review_improved/issue_detail_modal', data);
+            ReviewImproved.modal = tpl.remodal({});
+
+            tpl.on('keydown', function(e)  {
+                var esc = 27 ;
+                e.stopPropagation();
+                if ( e.which == esc ) {
+                    ReviewImproved.modal.close();
+                }
+            });
+            ReviewImproved.modal.open();
         },
 
         updateIssueViews : function( segment ) {
@@ -254,7 +277,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         if ( segment.el.data('revertingVersion') ) return ;
 
         var selection = document.getSelection();
-        var leftMouseButton = 3 ;
+        // var leftMouseButton = 3 ;
         var container = $(e.target);
 
         if (

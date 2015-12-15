@@ -1,0 +1,42 @@
+<div class="issue-detail-modal" >
+  <button data-remodal-action="close" class="remodal-close"></button>
+  <h2>Issue detail</h2>
+
+  <ul>
+    <li>
+      <strong>Target text:</strong>
+      {{ issue.target_text }}
+    </li>
+    <li>
+      <strong>Category:</strong>
+      {{ issue.category }}
+    </li>
+    <li>
+      <strong>Severity:</strong>
+      {{ issue.severity }}
+    </li>
+
+    <li>
+      <strong>Target text:</strong>
+      {{ issue.target_text }}
+    </li>
+    {{#if issue.comment}}
+    <li>
+      <strong>Reviewer comment:</strong>
+      {{issue.comment}}
+    </li>
+    {{/if}}
+
+  </ul>
+
+    <hr />
+
+    <div class="message-form-container">
+      <textarea name="comment" placeholder="Leave a reply.."></textarea>
+
+      <input type="submit" id="error-selection-button" />
+    </div>
+
+  </form>
+
+</div>

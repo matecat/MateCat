@@ -67,7 +67,7 @@ section .version-picker-container {
 }
 
 
-.error-selection-modal {
+.issue-detail-modal, .error-selection-modal {
 
     #error-selection-form table {
         margin-bottom: 20px;
@@ -77,6 +77,7 @@ section .version-picker-container {
         }
     }
 
+    .message-form-container textarea,
     .error-message-container textarea {
        width: 100%;
     }
