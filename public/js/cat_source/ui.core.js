@@ -1767,8 +1767,8 @@ console.log('changeStatus');
         if (config.alternativesEnabled) {
             this.getTranslationMismatches(id_segment);
         }
-
-        $('html').trigger('setCurrentSegment_success', d);
+console.log('VEDIAMO: ', id_segment);
+        $('html').trigger('setCurrentSegment_success', [d, id_segment]);
     },
     getTranslationMismatches: function (id_segment) {
         APP.doRequest({
