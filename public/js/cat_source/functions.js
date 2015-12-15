@@ -557,6 +557,10 @@ function insertHtmlAfterSelection(html) {
     };
 })();
 
+// This activation function is only valid if the editarea is present
+// in ReviewImproved the editara class is not present so we need to
+// register a different activation function.
+// The function is defined in review_improved module.
 SegmentActivator.registry.push(function( sid ) {
     var el = $("#segment-" + sid + "-target").find(".editarea");
     $(el).click();

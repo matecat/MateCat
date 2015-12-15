@@ -4,6 +4,16 @@ ReviewImproved.enabled = function() {
     return Review.type == 'improved';
 }
 
+
+if ( ReviewImproved.enabled() && config.isReview ) {
+    SegmentActivator.registry.push(function( sid ) {
+        var segment = UI.Segment.find( sid );
+        // TODO: refactor this, the click to activate a
+        // segment is not a good way to handle.
+        segment.el.find('.errorTaggingArea').click();
+    });
+}
+
 if ( ReviewImproved.enabled() && !config.isReview ) {
 (function($, root, undefined) {
 

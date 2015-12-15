@@ -45,24 +45,20 @@
     }
 }
 
-section {
-    .issuesHighlightArea, .reviewImproved .original-target-area {
-        padding: 4px;
-        width: 100%;
-        background: #efefef;
-        border-bottom: 1px solid #ccc;
-        outline: 0;
-        text-align: left;
-        font-size: 18px;
-        color: #000;
-        border: 1px solid #727272;
-        box-shadow: 0 1px 2px #ccc;
-        -webkit-box-shadow: 0 1px 2px #ccc;
-        word-break: normal;
-        word-break: normal !important;
-    }
-
-
+section .muted-text-box {
+    padding: 4px;
+    width: 100%;
+    background: #efefef;
+    border-bottom: 1px solid #ccc;
+    outline: 0;
+    text-align: left;
+    font-size: 18px;
+    color: #000;
+    border: 1px solid #727272;
+    box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    word-break: normal;
+    word-break: normal !important;
 }
 
 section .version-picker-container {
