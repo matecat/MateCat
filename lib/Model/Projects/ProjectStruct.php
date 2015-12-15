@@ -20,9 +20,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     // protected static $cachables = array('getJobs') ;
 
     public function getOwnerFeature( $feature_code ) {
-      return OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
-        $feature_code, $this->id_customer
-      );
+        return OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
+            $feature_code, $this->id_customer
+        );
     }
 
     public function getJobs() {
@@ -36,7 +36,8 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     public function isFeatureEnabled( $feature_code ) {
-      return $this->getOwnerFeature( $feature_code ) !== false ;
+        $feature = $this->getOwnerFeature( $feature_code );
+        return \Features::enabled($feature, $this);
     }
 
     public function getChunks() {
