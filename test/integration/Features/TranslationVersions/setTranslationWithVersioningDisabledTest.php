@@ -97,7 +97,6 @@ class setTranslationWithVerioningDisabledTest extends IntegrationTest {
           'propagate'   => true
         ) ) ;
 
-
         $translations = $chunk->getTranslations();
 
         $versions = Translations_TranslationVersionDao::getVersionsForJob(

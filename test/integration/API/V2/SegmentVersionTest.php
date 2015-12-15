@@ -86,12 +86,12 @@ class SegmentVersionTest extends IntegrationTest {
             'versions' => array(
                 array(
                     'id'              => $version->id,
-                    'segmentId'       => $version->id_segment,
-                    'jobId'           => $version->id_job,
+                    'id_segment'       => $version->id_segment,
+                    'id_job'           => $version->id_job,
                     'translation'     => $version->translation,
                     'version_number'  => $version->version_number,
                     'propagated_from' => $version->propagated_from,
-                    'createdAt'       => $version->creation_date,
+                    'created_at'       => $version->creation_date,
                 )
             )
         );

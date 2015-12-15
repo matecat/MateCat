@@ -1,5 +1,8 @@
 <?php
 
+include 'Features/ReviewImproved.php';
+include 'Features/TranslationVersions.php';
+
 class Features {
     const PROJECT_COMPLETION = 'project_completion' ;
     const TRANSLATION_VERSIONS = 'translation_versions'  ;
@@ -20,7 +23,24 @@ class Features {
             return self::reviewImprovedEnabled( $project );
         }
         else {
-            return true;
+            return $feature != null ;
+        }
+    }
+
+    // TODO: to be improved. This should be the entry point to apply
+    // feature specific updated to the project due to owner features.
+    //
+    public static function processProjectCreated( $id_project ) {
+        // find owner features
+        $project = Projects_ProjectDao::findById( $id_project );
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $project->id_customer );
+
+        foreach( $features as $feature ) {
+            \Log::doLog( 'feature code', $feature->feature_code );
+            $name = "Features\\" . $feature->toClassName() ;
+
+            $cls = new $name( $project, $feature );
+            $cls->postCreate();
         }
     }
 

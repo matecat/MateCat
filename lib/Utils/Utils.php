@@ -2,6 +2,10 @@
 
 class Utils {
 
+    public static function underscoreToCamelCase($string) {
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
+    }
+
     public static function ensure_keys($params, $required_keys) {
         $missing = array();
 

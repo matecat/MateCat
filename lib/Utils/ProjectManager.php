@@ -667,6 +667,9 @@ class ProjectManager {
                 Utils::sendErrMailReport( $output, $exn->getMessage() );
             }
         }
+
+
+        Features::processProjectCreated( $this->projectStructure[ 'id_project' ]);
     }
 
     /**

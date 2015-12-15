@@ -19,6 +19,19 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         return $this->getById( $conn->lastInsertId() );
     }
 
+    public static function getByIdCustomer( $id_customer ) {
+        $conn = Database::obtain()->getConnection();
+
+        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
+            " INNER JOIN users ON users.uid = owner_features.uid " .
+            " WHERE users.email = :id_customer " .
+            " AND owner_features.enabled "
+        );
+        $stmt->execute( array( 'id_customer' => $id_customer) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
+        return $stmt->fetchAll();
+    }
+
     public static function getById( $id ) {
         $conn = Database::obtain()->getConnection();
 
