@@ -797,15 +797,23 @@ span.zone2 {
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice, .pricebox delivery {line-height:30px;}
 
+.viewvendors h3 {
+    float: left;
+    margin: 2% 2.5% 2% 2%!important;
+}
+
+.showpricesloading {
+    float: right;
+    width: 160px;
+    height: 23px;
+    margin: 2% 2.5% 2% 2%!important;
+    padding: 5px 10px !Important;
+}
+
 .uploadbtn.showprices  
 {
-	display: none!important;
-	width: auto; 
-	margin-top: 15px! important;
-}
-.showprices  
-{
-    display: none;
+    margin: 2% 2.5% 2% 2%!important;
+    width: 160px;
 }
 /*.pricebox .paybox {
 border-radius: 4px;
