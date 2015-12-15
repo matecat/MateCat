@@ -216,7 +216,8 @@ module.exports = function(grunt) {
 
     grunt.registerTask('deploy', [
         'concat:libraries', 'handlebars', 'concat:components', 'replace:version',
-        'concat:app', 'concat:styles',
+        'concat:app',
+        'development:css',  // <-- TODO rename this
         'strip'
     ]);
 };
