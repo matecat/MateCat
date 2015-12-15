@@ -76,6 +76,7 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
     protected function formatFile( $values, $vector ){
 
         $_TOTAL_RAW_SUM = (
+                $values[ 'NEW' ][0] +
                 $values[ 'ICE' ][0] +
                 $values[ 'REPETITIONS' ][0] +
                 $values[ 'NUMBERS_ONLY' ][0] +
@@ -99,6 +100,12 @@ class Analysis_XTRFStatus extends Analysis_APIStatus {
                 str_pad( "Match Types", 16, " ", STR_PAD_RIGHT ) .
                 str_pad( "Words", 12, " ", STR_PAD_LEFT ) .
                 str_pad( "Percent", 14, " ", STR_PAD_LEFT ) .
+                PHP_EOL;
+
+        $fileContent .=
+                str_pad( "New words", 16, " ", STR_PAD_RIGHT ) .
+                str_pad( $values[ 'NEW' ][0], 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values[ 'NEW' ][0] / $values[ 'TOTAL_PAYABLE' ][0] * 100, 2, '.', '' ) , 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
