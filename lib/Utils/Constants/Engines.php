@@ -14,13 +14,11 @@ class Constants_Engines {
 
     const MY_MEMORY     = 'MyMemory';
     const MOSES         = 'Moses';
+    const TAUYOU	    = 'Tauyou';
     const MICROSOFT_HUB = 'MicrosoftHub';
     const IP_TRANSLATOR = 'IPTranslator';
     const DEEPLINGO     = 'DeepLingo';
     const APERTIUM      = 'Apertium';
     const ALTLANG	    = 'Altlang';
     const LETSMT        = 'LetsMT';
-    const APERTIUM      = 'Apertium';
-    const ALTLANG	    = 'Altlang';
-
 } 

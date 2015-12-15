@@ -126,6 +126,7 @@ class engineController extends ajaxController {
 
                 break;
             case strtolower( Constants_Engines::MOSES ):
+            case strtolower( Constants_Engines::TAUYOU ):
 
                 /**
                  * Create a record of type Moses
