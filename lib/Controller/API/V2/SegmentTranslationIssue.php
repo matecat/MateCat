@@ -12,90 +12,11 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     private $translation ;
     private $issue ;
 
-    protected function afterConstruct() {
-        $this->validator = new JobPasswordValidator(
-            $this->request->id_job,
-            $this->request->password
-        );
-    }
-
-    private function prepareData() {
-        // Ensure chunk is in project
-        $dao = new \Segments_SegmentDao( \Database::obtain() );
-
-        $this->segment = $dao->getByChunkIdAndSegmentId(
-            $this->request->id_job,
-            $this->request->password,
-            $this->request->id_segment
-        );
-
-        $this->chunk = \Chunks_ChunkDao::getByIdAndPassword(
-            $this->request->id_job,
-            $this->request->password
-        );
-
-        $this->project = \Projects_ProjectDao::findById(
-            $this->chunk->id_project
-        );
-
-    }
-
-    private function validateCategoryId() {
-        $this->qa_model = \LQA\ModelDao::findById( $this->project->id_qa_model );
-        $this->category = \LQA\CategoryDao::findById( $this->request->id_category );
-        if ( $this->category->id_model != $this->qa_model->id ) {
-            throw new ValidationError('QA model id mismatch');
-        }
-    }
-
-    private function validate() {
-        $this->prepareData() ;
-
-        if ( $this->request->id_category ) {
-            $this->validateCategoryId();
-        }
-
-        // TODO: extend validations here, for instance check the
-        // project has a QA model.
-
-        if ( !$this->segment ) {
-            throw new NotFoundError();
-        }
-
-        $this->translation = $this->segment->findTranslation( $this->request->id_job ) ;
-
-        if ( !$this->translation ) {
-            throw new NotFoundError();
-        }
-
-        // IF an issue_id is provided check it's in the segment scope
-        if ( $this->request->id_issue ) {
-            $this->issue = \LQA\EntryDao::findById( $this->request->id_issue );
-
-            if ( !$this->issue ) {
-                throw new ValidationError('issue not found');
-            }
-
-            if ( $this->issue->id_segment != $this->segment->id ) {
-                throw new ValidationError('issue not in segment scope');
-            }
-        }
-
-        return true;
-    }
-
-    protected function validateRequest() {
-        if ( !($this->validate() ) ) {
-            $this->response->code(404);
-            $this->response->json( array('error' => 'Not found') );
-        }
-    }
-
     public function index() {
         \Log::doLog("version number: ". $this->getVersionNumber());
         $result = \LQA\EntryDao::findAllByTranslationVersion(
-            $this->translation->id_segment,
-            $this->translation->id_job,
+            $this->validator->translation->id_segment,
+            $this->validator->translation->id_job,
             $this->getVersionNumber()
         );
 
@@ -132,8 +53,16 @@ class SegmentTranslationIssue extends ProtectedKleinController {
 
     public function delete() {
         $this->validateAdditionalPassword();
-        EntryDao::deleteEntry( $this->issue );
+        EntryDao::deleteEntry( $this->validator->issue );
         $this->response->code(200);
+    }
+
+    protected function afterConstruct() {
+        $this->validator = new Validators\SegmentTranslationIssue( $this->request );
+    }
+
+    protected function validateRequest() {
+        $this->validator->validate();
     }
 
     private function getVersionNumber() {
@@ -143,7 +72,7 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             return $this->request->param('version_number') ;
         }
         else {
-            return $this->translation->version_number ;
+            return $this->validator->translation->version_number ;
         }
     }
 
@@ -152,13 +81,13 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     }
 
     private function getPenaltyPoints() {
-        $severities = $this->category->getJsonSeverities() ;
+        $severities = $this->validator->category->getJsonSeverities() ;
         foreach($severities as $severity) {
             if ( $severity['label'] == $this->request->severity ) {
                 return $severity['penalty'];
             }
         }
-        throw new \Exception('Provided severity was not found in model');
+        throw new ValidationError('Provided severity was not found in model');
     }
 
 }

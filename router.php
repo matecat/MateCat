@@ -22,8 +22,11 @@ $klein = new \Klein\Klein();
 
 $klein->onError(function ($klein, $err_msg, $err_type) {
     switch( $err_type ) {
-        case 'API\V2\AuthorizationError':
+        case 'API\V2\AuthenticationError':
             $klein->response()->code(401);
+            break;
+        case 'API\V2\AuthorizationError':
+            $klein->response()->code(403);
             break;
         case 'API\V2\ValidationError':
             $klein->response()->code(400);
@@ -94,6 +97,12 @@ $klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segm
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssue');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('delete');
+});
+
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues/[:id_issue]/comments', function() {
+    $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('create');
 });
 
 $klein->dispatch();

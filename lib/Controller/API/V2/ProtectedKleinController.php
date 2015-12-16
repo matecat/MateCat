@@ -13,15 +13,14 @@ class ProtectedKleinController extends KleinController {
         $this->api_secret = $headers['x-matecat-secret'];
 
         if ( ! $this->validKeys() ) {
-            $this->response->code(403);
-            $this->response->json(array('error' => 'Authentication failed'));
+            throw new AuthenticationError();
         }
 
         $this->validateRequest();
     }
 
     private function validKeys() {
-        if ($this->api_key && $this->api_secret) {
+        if ( $this->api_key && $this->api_secret ) {
             $this->api_record = \ApiKeys_ApiKeyDao::findByKey( $this->api_key ) ;
 
             return $this->api_record &&
