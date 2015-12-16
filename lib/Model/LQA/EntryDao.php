@@ -7,6 +7,14 @@ class EntryDao extends \DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
     }
 
+    public static function deleteEntry( EntryStruct $record ) {
+        $sql = "DELETE FROM qa_entries WHERE id = :id ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        return $stmt->execute( array( 'id' => $record->id ));
+    }
+
     public static function findById( $id ) {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
             " FROM qa_entries " .

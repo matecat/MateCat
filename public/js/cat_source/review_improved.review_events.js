@@ -212,9 +212,11 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     issues.on('update', issueRecordChanged);
     issues.on('insert', issueRecordChanged);
+    issues.on('delete', issueRecordChanged);
 
     versions.on('update', versionRecordChanged);
     versions.on('insert', versionRecordChanged);
+    versions.on('delete', versionRecordChanged);
 
     function showIssueSelectionModalWindow(selection, container) {
         var data             = {};
@@ -511,36 +513,28 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         updateVersionDependentViews( segment );
     });
 
-    function deleteIssue() {
-        console.debug('delete issue');
-        var issue_path = sprintf(
-            '/api/v2/jobs/%s/%s/segments/%s/issues/%s',
-            config.id_job, config.password, segment.id, issue.id
-        );
-
-        $.ajax({
-            url: issue_path,
-            type: 'DELETE'
-        }).done( function( data ) {
-
-            console.log('data', data );
-        })
-    }
-
     $(document).on('click', '.action-delete-issue', function(e) {
         id = $(e.target).closest('.issue-container').data('issue-id');
         var issue = db.getCollection('segment_translation_issues').findObject({
             id : id + ''
         });
 
-        var message = sprintf("You are about to delete the issue on string '%s' posted on %s." ,
-                         issue.target_text,
-                         moment( issue.created_at ).format('lll')
-                        );
+        var message = sprintf(
+            "You are about to delete the issue on string '%s' posted on %s." ,
+            issue.target_text,
+            moment( issue.created_at ).format('lll')
+        );
 
-        if ( confirm( message ) ) {
-            deleteIssue( issue );
-        }
+        APP.confirm({
+            name : 'Confirm issue deletion',
+            callback : 'deleteTranslationIssue',
+            msg: message,
+            okTxt: 'Yes delete this issue',
+            context: JSON.stringify({
+                id_segment : issue.id_segment,
+                id_issue : issue.id
+            })
+        });
 
     });
 

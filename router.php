@@ -20,6 +20,25 @@ Log::$uniqID = uniqid() ;
 
 $klein = new \Klein\Klein();
 
+$klein->onError(function ($klein, $err_msg, $err_type) {
+    switch( $err_type ) {
+        case 'API\V2\AuthorizationError':
+            $klein->response()->code(401);
+            break;
+        case 'API\V2\ValidationError':
+            $klein->response()->code(400);
+            $klein->response()->json( array('error' => $err_msg ));
+            break;
+        case 'API\V2\NotFoundError':
+            $klein->response()->code(404);
+            break;
+        default:
+            $klein->response()->code(500);
+            break;
+    }
+
+});
+
 // This is unreleased APIs. I'm no longer fond of the [i:id_job] in the path,
 // so before releasing change it use a querystring.
 //
@@ -69,6 +88,12 @@ $klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segmen
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssue');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
+});
+
+$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues/[:id_issue]', function() {
+    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssue');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('delete');
 });
 
 $klein->dispatch();

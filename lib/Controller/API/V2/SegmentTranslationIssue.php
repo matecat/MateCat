@@ -1,6 +1,7 @@
 <?php
 namespace API\V2  ;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
+use LQA\EntryDao as EntryDao ;
 
 class SegmentTranslationIssue extends ProtectedKleinController {
 
@@ -9,6 +10,7 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     private $validator ;
     private $segment ;
     private $translation ;
+    private $issue ;
 
     protected function afterConstruct() {
         $this->validator = new JobPasswordValidator(
@@ -42,14 +44,13 @@ class SegmentTranslationIssue extends ProtectedKleinController {
         $this->qa_model = \LQA\ModelDao::findById( $this->project->id_qa_model );
         $this->category = \LQA\CategoryDao::findById( $this->request->id_category );
         if ( $this->category->id_model != $this->qa_model->id ) {
-            throw new \Exception('QA model id mismatch');
+            throw new ValidationError('QA model id mismatch');
         }
     }
 
     private function validate() {
         $this->prepareData() ;
 
-        // TODO: decide how to handle failed validation
         if ( $this->request->id_category ) {
             $this->validateCategoryId();
         }
@@ -58,13 +59,26 @@ class SegmentTranslationIssue extends ProtectedKleinController {
         // project has a QA model.
 
         if ( !$this->segment ) {
-            return false; // TODO: handle error
+            throw new NotFoundError();
         }
 
         $this->translation = $this->segment->findTranslation( $this->request->id_job ) ;
 
         if ( !$this->translation ) {
-            return false;  // TODO handle error
+            throw new NotFoundError();
+        }
+
+        // IF an issue_id is provided check it's in the segment scope
+        if ( $this->request->id_issue ) {
+            $this->issue = \LQA\EntryDao::findById( $this->request->id_issue );
+
+            if ( !$this->issue ) {
+                throw new ValidationError('issue not found');
+            }
+
+            if ( $this->issue->id_segment != $this->segment->id ) {
+                throw new ValidationError('issue not in segment scope');
+            }
         }
 
         return true;
@@ -116,6 +130,12 @@ class SegmentTranslationIssue extends ProtectedKleinController {
         $this->response->json( array('issue' => $rendered) );
     }
 
+    public function delete() {
+        $this->validateAdditionalPassword();
+        EntryDao::deleteEntry( $this->issue );
+        $this->response->code(200);
+    }
+
     private function getVersionNumber() {
         \Log::doLog($this->request->params());
 
@@ -125,6 +145,10 @@ class SegmentTranslationIssue extends ProtectedKleinController {
         else {
             return $this->translation->version_number ;
         }
+    }
+
+    private function validateAdditionalPassword() {
+        // TODO: check password is good for deletion
     }
 
     private function getPenaltyPoints() {

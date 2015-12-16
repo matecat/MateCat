@@ -29,10 +29,9 @@ if ( ReviewImproved.enabled() )
     root.MateCat = root.MateCat || {};
     root.MateCat.db = db ;
 
-    // TODO: Just for debugging purposes
-    root.colls = {};
-    root.colls.issues   = issues ;
-    root.colls.segments = segments ;
-    root.colls.versions = versions ;
+    root.MateCat.colls = {};
+    root.MateCat.colls.issues   = issues ;
+    root.MateCat.colls.segments = segments ;
+    root.MateCat.colls.versions = versions ;
 
 })(jQuery, window);

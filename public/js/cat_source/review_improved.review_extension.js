@@ -2,6 +2,25 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, undefined) {
 
     $.extend(UI, {
+        deleteTranslationIssue : function( context ) {
+            console.debug('delete issue', context);
+
+            var parsed = JSON.parse( context );
+            var issue_path = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/issues/%s',
+                config.id_job, config.password,
+                parsed.id_segment,
+                parsed.id_issue
+            );
+
+            $.ajax({
+                url: issue_path,
+                type: 'DELETE'
+            }).done( function( data ) {
+                var record = MateCat.colls.issues.findOne({id : parsed.id_issue}) ;
+                MateCat.colls.issues.remove( record );
+            })
+        },
         createButtons: function() {
             root.ReviewImproved.renderButtons();
 

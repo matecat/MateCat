@@ -19,7 +19,9 @@ class ProjectCompletionStatus extends ProtectedKleinController {
 
         if (! ($this->validator->validate() )) {
             $this->response->code(404);
-            $this->response->json( array('error' => 'This project does not exist') );
+            $this->response->json(
+                array('error' => 'This project does not exist')
+            );
         }
     }
 
