@@ -48,10 +48,10 @@ class TMManagerTest extends AbstractTest {
 
 
         //remove 3 elements from queue 1
-        $x = QueuesList::build();
-        $old_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list );
+        $x = QueuesList::get();
+        $old_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list_name );
         $reflectedMethod->invokeArgs( $this->_TMInstance, array( $x->list[0], 0, 3 ) );
-        $new_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list );
+        $new_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list_name );
         $this->assertEquals( 3, $old_len - $new_len );
         //put a known pid into the list
         $this->_redisClient->getConnection()->rpush( RedisKeys::VA_CHILD_PID_LIST_P3, 99999 );
@@ -63,28 +63,28 @@ class TMManagerTest extends AbstractTest {
 
 
         //remove 5 pids by balancing
-        $old_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list );
-        $old_len += $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list );
-        $old_len += $this->_redisClient->getConnection()->llen( $x->list[2]->pid_list );
+        $old_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list_name );
+        $old_len += $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list_name );
+        $old_len += $this->_redisClient->getConnection()->llen( $x->list[2]->pid_list_name );
         $reflectedMethod->invokeArgs( $this->_TMInstance, array( null, 0, 5 ) );
-        $new_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list );
-        $new_len += $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list );
-        $new_len += $this->_redisClient->getConnection()->llen( $x->list[2]->pid_list );
+        $new_len = $this->_redisClient->getConnection()->llen( $x->list[0]->pid_list_name );
+        $new_len += $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list_name );
+        $new_len += $this->_redisClient->getConnection()->llen( $x->list[2]->pid_list_name );
         $this->assertEquals( 5, $old_len - $new_len );
 
 
         //delete all pid in a list
         $reflectedMethod->invokeArgs( $this->_TMInstance, array( $x->list[2] ) );
-        $new_len = $this->_redisClient->getConnection()->llen( $x->list[2]->pid_list );
+        $new_len = $this->_redisClient->getConnection()->llen( $x->list[2]->pid_list_name );
         $this->assertEquals( 0, $new_len );
 
         //bad and stranges
 
         //remove a non existent pid from a list
         //there is not. expected: do nothing
-        $old_len = $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list );
+        $old_len = $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list_name );
         $reflectedMethod->invokeArgs( $this->_TMInstance, array( $x->list[1], 99999 ) );
-        $new_len = $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list );
+        $new_len = $this->_redisClient->getConnection()->llen( $x->list[1]->pid_list_name );
         $this->assertEquals( 0, $old_len - $new_len );
         $this->assertNotEquals( 0, $new_len );
 

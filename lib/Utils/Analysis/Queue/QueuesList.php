@@ -17,17 +17,17 @@ class QueuesList {
      * <code>
      * array(
      *      0 => array(
-     *          "pid_list"   => RedisKeys::VA_CHILD_PID_LIST_DEFAULT,
+     *          "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_DEFAULT,
      *          "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
      *          "queue_name" => RedisKeys::DEFAULT_QUEUE_NAME
      *      ),
      *      1 => array(
-     *          "pid_list"   => RedisKeys::VA_CHILD_PID_LIST_P2,
+     *          "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P2,
      *          "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P2,
      *          "queue_name" => RedisKeys::QUEUE_NAME_P2
      *      ),
      *      2 => array(
-     *          "pid_list"   => RedisKeys::VA_CHILD_PID_LIST_P3,
+     *          "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P3,
      *          "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P3,
      *          "queue_name" => RedisKeys::QUEUE_NAME_P3
      *      ),
@@ -38,22 +38,25 @@ class QueuesList {
      */
     protected static $_QUEUE_INFO = array(
             0 => array(
-                    "pid_list"   => RedisKeys::VA_CHILD_PID_LIST_DEFAULT,
+                    "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_DEFAULT,
                     "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
                     "queue_name" => RedisKeys::DEFAULT_QUEUE_NAME
             ),
             1 => array(
-                    "pid_list"   => RedisKeys::VA_CHILD_PID_LIST_P2,
+                    "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P2,
                     "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P2,
                     "queue_name" => RedisKeys::QUEUE_NAME_P2
             ),
             2 => array(
-                    "pid_list"   => RedisKeys::VA_CHILD_PID_LIST_P3,
+                    "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P3,
                     "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P3,
                     "queue_name" => RedisKeys::QUEUE_NAME_P3
             ),
     );
 
+    /**
+     * @var Info[]
+     */
     public $list = array();
 
     /**
@@ -80,7 +83,7 @@ class QueuesList {
      *
      * @return static
      */
-    public static function build( Array $queue_info = array() ) {
+    public static function get( Array $queue_info = array() ) {
         return new static( $queue_info );
     }
 

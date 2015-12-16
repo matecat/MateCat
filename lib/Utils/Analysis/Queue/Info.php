@@ -13,7 +13,8 @@ class Info {
 
     public $redis_key;
     public $queue_name;
-    public $pid_list;
+    public $pid_list_name;
+    public $pid_list = array();
 
     /**
      * Analysis_Queue_Info constructor.

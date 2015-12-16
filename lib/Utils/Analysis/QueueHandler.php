@@ -294,7 +294,7 @@ class QueueHandler extends Stomp {
      */
     public static function getQueueAddressesByPriority( $queueLen, $id_mt_engine ){
 
-        $queueInfo = QueuesList::build();
+        $queueInfo = QueuesList::get();
         $mtEngine  = Engine::getInstance( $id_mt_engine );
 
         //anyway take the defaults
@@ -327,7 +327,7 @@ class QueueHandler extends Stomp {
      * @return QueuesList
      */
     public function getQueues(){
-        return QueuesList::build();
+        return QueuesList::get();
     }
 
     /**
