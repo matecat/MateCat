@@ -68,7 +68,7 @@ class TMManager extends AbstractDaemon {
          */
         if ( self::$_queueHandler->getRedisClient()->get( RedisKeys::VOLUME_ANALYSIS_PID ) ){
             //kill all it's children
-            self::_managePids();
+            self::_killPids();
         }
 
         //register My Pid ( and also overwrite the old one )
@@ -96,7 +96,7 @@ class TMManager extends AbstractDaemon {
             $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
             if ( $dead > 0 ) {
                 self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : child $dead exited: deleting file ...." );
-                self::_managePids( $dead );
+                self::_killPids( $dead );
                 self::_TimeStampMsg( "DONE" );
             }
             $numProcesses = $this->_getNumProcesses();
@@ -128,7 +128,7 @@ class TMManager extends AbstractDaemon {
                     break;
                 case $numProcessesDiff > 0:
                     self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : need to delete $numProcessesToLaunchOrDelete processes" );
-                    self::_managePids( "", $numProcessesToLaunchOrDelete );
+                    self::_killPids( "", $numProcessesToLaunchOrDelete );
                     sleep(1);
                     break;
                 default:
@@ -199,7 +199,7 @@ class TMManager extends AbstractDaemon {
     public static function cleanShutDown() {
 
         //SHUTDOWN
-        self::_managePids();
+        self::_killPids();
         self::$_queueHandler->getRedisClient()->del( RedisKeys::VOLUME_ANALYSIS_PID );
         $msg = str_pad( " TM ANALYSIS " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
@@ -224,7 +224,7 @@ class TMManager extends AbstractDaemon {
      * @param int  $pid
      * @param int  $num
      */
-    protected static function _managePids( Info $queueInfo = null, $pid = 0, $num = 0 ) {
+    protected static function _killPids( Info $queueInfo = null, $pid = 0, $num = 0 ) {
 
         self::_TimeStampMsg( "Request to kill some processes." );
         self::_TimeStampMsg( "Pid List: " . @var_export( $queueInfo->pid_list, true ) );
@@ -335,7 +335,7 @@ class TMManager extends AbstractDaemon {
 
 $_TMInstance = TMManager::getInstance(); //->main();
 
-$reflectedMethod = new \ReflectionMethod($_TMInstance, '_managePids' );
+$reflectedMethod = new \ReflectionMethod($_TMInstance, '_killPids' );
 $reflectedMethod->setAccessible( true );
 
 //remove pid 2 ( seek and destroy )

@@ -34,7 +34,7 @@ class TMManagerTest extends AbstractTest {
 
     public function testDeletePid(){
 
-        $reflectedMethod = new ReflectionMethod( $this->_TMInstance, '_managePids' );
+        $reflectedMethod = new ReflectionMethod( $this->_TMInstance, '_killPids' );
         $reflectedMethod->setAccessible( true );
 
         //TEST remove pid 2 ( seek and destroy )
