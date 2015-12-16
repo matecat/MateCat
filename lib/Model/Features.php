@@ -23,7 +23,7 @@ class Features {
             return self::reviewImprovedEnabled( $project );
         }
         else {
-            return $feature != null ;
+            return !!$feature ;
         }
     }
 

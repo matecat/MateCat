@@ -17,7 +17,7 @@ class SegmentVersion {
                 'id'              => $version->id,
                 'id_segment'      => $version->id_segment,
                 'id_job'          => $version->id_job,
-                'translation'     => $version->translation,
+                'translation'     => \CatUtils::rawxliff2view( $version->translation ),
                 'version_number'  => $version->version_number,
                 'propagated_from' => $version->propagated_from,
                 'created_at'      => $version->creation_date,

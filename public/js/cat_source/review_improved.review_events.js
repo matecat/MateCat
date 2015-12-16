@@ -136,9 +136,7 @@ if ( ReviewImproved.enabled() ) {
 
             var area = container.closest('section').find('.issuesHighlightArea') ;
 
-            // TODO: fix this to take into account cases when monads are in plac
-            // var tt    = UI.decodePlaceholdersToText( segment.translation );
-            var tt             = area.html() ;
+            // TODO: fix this to take into account cases when monads are in place
             var contents       = area.contents() ;
             var range = document.createRange();
 
@@ -160,7 +158,8 @@ if ( ReviewImproved.enabled() ) {
                 id : container.data('issue-id') + ''
             });
             var segment = MateCat.db.getCollection('segments').findObject({sid : issue.id_segment});
-            area.html( UI.decodePlaceholdersToText( segment.translation ) );
+            area.html( UI.decodePlaceholdersToText( ReviewImproved.getTranslationText(segment) ));
+
         },
 
         versionsAndIssuesPromise : function( segment ) {
@@ -471,6 +470,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     function updateTextAreaContainer( segment ) {
         var text = RI.getTranslationText( segment );
+
         var textarea_container = template('review_improved/text_area_container',
             {
                 decoded_translation : UI.decodePlaceholdersToText( text ),
