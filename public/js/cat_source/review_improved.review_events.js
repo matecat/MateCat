@@ -111,8 +111,8 @@ if ( ReviewImproved.enabled() ) {
 
             var tpl = template('review_improved/translation_issues', data );
 
-            tpl.find('.issue-container').on('mouseover', ReviewImproved.highlightIssue);
-            tpl.find('.issue-container').on('mouseout', ReviewImproved.resetHighlight);
+            tpl.find('.issue-container').on('mouseenter', ReviewImproved.highlightIssue);
+            tpl.find('.issue-container').on('mouseleave', ReviewImproved.resetHighlight);
 
             UI.Segment.findEl( record.sid ).find('[data-mount=translation-issues]').html( tpl );
         },
@@ -147,18 +147,21 @@ if ( ReviewImproved.enabled() ) {
         },
 
         resetHighlight : function(e) {
-            var container = $(e.target).closest('.issue-container');
             var selection = document.getSelection();
             selection.removeAllRanges();
 
-            container.data('current-issue-id', null) ; // TODO: check for this to be really needed
+            var segment = new UI.Segment( $(e.target).closest('section'));
             var container = $(e.target).closest('.issue-container');
-            var area = container.closest('section').find('.issuesHighlightArea') ;
+
+            container.data('current-issue-id', null) ; // TODO: check for this to be really needed
+
+            var section = container.closest('section');
+
+            var area = section.find('.issuesHighlightArea') ;
             var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
                 id : container.data('issue-id') + ''
             });
-            var segment = MateCat.db.getCollection('segments').findObject({sid : issue.id_segment});
-            area.html( UI.decodePlaceholdersToText( ReviewImproved.getTranslationText(segment) ));
+            area.html( UI.decodePlaceholdersToText( ReviewImproved.getTranslationText( segment ) ));
 
         },
 
@@ -206,6 +209,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     var issues = db.getCollection('segment_translation_issues');
     var versions = db.getCollection('segment_versions');
     var segments = db.getCollection('segments');
+
+    issues.on('update', issueRecordChanged);
+    issues.on('insert', issueRecordChanged);
+
+    versions.on('update', versionRecordChanged);
+    versions.on('insert', versionRecordChanged);
 
     function showIssueSelectionModalWindow(selection, container) {
         var data             = {};
@@ -486,16 +495,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     }
 
     function issueRecordChanged( record ) {
+        console.log('issueRecordChanged', record);
+
         var segment = UI.Segment.find( record.id_segment );
         RI.updateIssueViews( segment );
     }
 
-
-    issues.on('update', issueRecordChanged);
-    issues.on('insert', issueRecordChanged);
-
-    versions.on('update', versionRecordChanged);
-    versions.on('insert', versionRecordChanged);
 
     // Event to trigger on approval
     // TODO: this is to be redone, this should only set the state on the

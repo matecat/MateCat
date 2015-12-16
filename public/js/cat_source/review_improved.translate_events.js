@@ -5,6 +5,23 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
     var versions = db.getCollection('segment_versions');
     var segments = db.getCollection('segments');
 
+    issues.on('update', issueRecordChanged);
+    issues.on('insert', issueRecordChanged);
+
+    versions.on('update', versionRecordChanged);
+    versions.on('insert', versionRecordChanged);
+
+    function issueRecordChanged( record ) {
+        var segment = UI.Segment.find( record.id_segment );
+        updateVersionDependentViews( segment );
+
+    }
+
+    function versionRecordChanged( record ) {
+        var segment = UI.Segment.find( record.id_segment );
+        updateVersionDependentViews( segment )
+    }
+
     function updateHighlightArea( segment ) {
         var text = RI.getTranslationText( segment );
         var versions = MateCat.db.getCollection('segment_versions');
