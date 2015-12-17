@@ -1,4 +1,5 @@
-
+// common events
+//
 if ( ReviewImproved.enabled() ) {
 
     $(document).on('segments:load', function(e, data) {
@@ -32,6 +33,33 @@ if ( ReviewImproved.enabled() ) {
             id : container.data('issue-id') + ''
         });
         ReviewImproved.showIssueDetailModalWindow( issue );
+    });
+
+    $(document).on('click', 'input[data-action=submit-issue-reply]', function(e) {
+        var container = $(e.target).closest('.issue-detail-modal');
+        var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
+            id : container.data('issue-id') + ''
+        });
+
+        var data = {
+          message : $('[data-ui=issue-reply-message]').val(),
+          source_page : config.isReview
+        };
+
+        var replies_path = sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/issues/%s/comments',
+            config.id_job, config.password,
+            issue.id_segment,
+            issue.id
+        );
+
+        $.ajax({
+            url: replies_path,
+            type: 'POST'
+        }).done( function( data ) {
+            console.log('New comment posted');
+        })
+
     });
 
     // Globally reusable functions

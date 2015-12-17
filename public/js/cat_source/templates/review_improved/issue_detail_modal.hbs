@@ -1,4 +1,4 @@
-<div class="issue-detail-modal" >
+<div data-issue-id="{{issue.id}}" class="issue-detail-modal" >
   <button data-remodal-action="close" class="remodal-close"></button>
   <h2>Issue detail</h2>
 
@@ -21,22 +21,19 @@
       {{ issue.target_text }}
     </li>
     {{#if issue.comment}}
-    <li>
-      <strong>Reviewer comment:</strong>
-      {{issue.comment}}
-    </li>
+      <li>
+        <strong>Reviewer comment:</strong>
+        {{issue.comment}}
+      </li>
     {{/if}}
 
   </ul>
+  <hr />
 
-    <hr />
+  <div class="message-form-container">
+    <textarea data-ui="issue-reply-message" name="comment" placeholder="Leave a reply..."></textarea>
 
-    <div class="message-form-container">
-      <textarea name="comment" placeholder="Leave a reply.."></textarea>
-
-      <input type="submit" id="error-selection-button" />
-    </div>
-
-  </form>
+    <input data-action="submit-issue-reply" type="submit" />
+  </div>
 
 </div>
