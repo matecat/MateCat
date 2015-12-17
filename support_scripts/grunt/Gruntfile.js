@@ -56,10 +56,13 @@ module.exports = function(grunt) {
             }
         },
         concat: {
-            components: {
+            app: {
+                options: {
+                    sourceMap: true
+                },
                 src: [
+                    basePath + 'common.js',
                     basePath + 'build/templates.js',
-
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.scrollsegment.js',
@@ -92,9 +95,10 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/review_improved.*.js',
                     basePath + 'cat_source/handlebars-helpers.js',
 
-                    basePath + 'tm.js'
+                    basePath + 'tm.js',
+                    basePath + 'logout.js'
                 ],
-                dest: buildPath + 'cat.js'
+                dest: buildPath + 'app.js'
             },
             libraries: {
                 src: [
@@ -116,14 +120,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/sprintf.min.js',
                 ],
                 dest: buildPath + 'libs.js'
-            },
-            app: {
-                src: [
-                    basePath + 'common.js',
-                    buildPath + 'cat.js',
-                    basePath + 'logout.js'
-                ],
-                dest: buildPath + 'app.js'
             },
             styles: {
                 src: cssFiles,
@@ -181,10 +177,12 @@ module.exports = function(grunt) {
         },
         replace: {
           version: {
-            src: [buildPath + 'cat.js'],             // source files array (supports minimatch)
-            dest: buildPath + 'cat.js',             // destination directory or file
+            src: [
+                buildPath + 'app.js'
+            ],
+            dest: buildPath + 'app.js',
             replacements: [{
-              from: /this\.version \= \"(.*?)\"/gi,      // regex replacement ('Fooo' to 'Mooo')
+              from: /this\.version \= \"(.*?)\"/gi,
               to: 'this.version = "' + version + '"'
             }]
           }
@@ -198,14 +196,16 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-strip');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
 
     grunt.registerTask('development:js', [
+        'handlebars',
         'concat:libraries',
-        'handlebars', 'concat:components', 'replace:version',
-        'concat:app'
+        'concat:app',
+        'replace:version',
     ]);
 
     grunt.registerTask('development:css', ['sass', 'concat:styles'] );
@@ -215,10 +215,12 @@ module.exports = function(grunt) {
     ]);
 
     grunt.registerTask('deploy', [
-        'concat:libraries', 'handlebars', 'concat:components', 'replace:version',
+        'handlebars',
+        'concat:libraries',
         'concat:app',
+        'replace:version',
+        'strip',
         'development:css',  // <-- TODO rename this
-        'strip'
     ]);
 };
 
