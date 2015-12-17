@@ -16,6 +16,7 @@ inc/.globalmessage.ini
 
 # Ignore artifacts
 public/css/app.css
+public/css/app.css.map
 public/js/build
 
 # NodeJs stuff
@@ -47,6 +48,3 @@ vendor
 
 phinx.yml
 
-.sass-cache
-public/css/sass/*.css
-public/css/sass/*.css.map

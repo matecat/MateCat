@@ -4,27 +4,22 @@ module.exports = function(grunt) {
     var incPath = '../../inc/';
     var cssBase = '../../public/css/';
 
-    var cssFiles = [
+    var conf = grunt.file.read( incPath + 'version.ini' );
+    var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
+    grunt.log.ok( 'Matecat Version: ' + version );
+
+    var cssWatchFiles = [
         cssBase + 'common.css',
         cssBase + 'style.css',
         cssBase + 'mbc-style.css',
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
-
-        cssBase + 'sass/review_improved.css',
-
-        cssBase + 'libs/remodal.css',
-        cssBase + 'libs/remodal-default-theme.css',
+        cssBase + 'review_improved.css' ,
+        cssBase + 'lib/remodal.css',
+        cssBase + 'lib/remodal-default-theme.css',
+        cssBase + 'sass/review_improved.scss',
     ];
-
-    var sassFiles = [
-        cssBase + 'sass/review_improved.scss'
-    ];
-
-    var conf = grunt.file.read( incPath + 'version.ini' );
-    var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
-    grunt.log.ok( 'Matecat Version: ' + version );
 
     function stripPrefixForTempaltes(filePath) {
         /**
@@ -121,10 +116,6 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'libs.js'
             },
-            styles: {
-                src: cssFiles,
-                dest: basePath + '../css/app.css'
-            }
         },
         watch: {
             js: {
@@ -140,7 +131,7 @@ module.exports = function(grunt) {
                 }
             },
             css: {
-                files: cssFiles.concat( sassFiles ),
+                files: cssWatchFiles ,
                 tasks: ['development:css'],
                 options: {
                     interrupt: true,
@@ -150,13 +141,14 @@ module.exports = function(grunt) {
         },
         sass: {
             dist: {
-                files: [{
-                    expand: true,
-                    // cwd: cssBase :'',
-                    src: cssBase + 'sass/*.scss',
-                    dest: cssBase ,
-                    ext: '.css'
-                }]
+                options : {
+                    sourceMap : true,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                files: {
+                    '../../public/css/app.css' :
+                        '../../public/css/sass/main.scss'
+                }
             }
         },
         jshint: {
@@ -195,8 +187,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-strip');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
-    grunt.loadNpmTasks('grunt-contrib-sass');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-sass');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
@@ -208,10 +199,8 @@ module.exports = function(grunt) {
         'replace:version',
     ]);
 
-    grunt.registerTask('development:css', ['sass', 'concat:styles'] );
-
     grunt.registerTask('development', [
-        'development:js', 'development:css'
+        'development:js', 'sass'
     ]);
 
     grunt.registerTask('deploy', [
@@ -220,7 +209,7 @@ module.exports = function(grunt) {
         'concat:app',
         'replace:version',
         'strip',
-        'development:css',  // <-- TODO rename this
+        'sass',  // <-- TODO rename this
     ]);
 };
 
