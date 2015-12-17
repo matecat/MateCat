@@ -308,7 +308,8 @@ class QueueHandler extends Stomp {
             case ( $queueLen >= 100000 ):
                 $queueAddresses = $queueInfo->list[ 2 ];
                 break;
-            case ( $queueLen >= 10000 ):
+            case ( $queueLen >= 20000 ): // at rate of 100 segments/s  ~ 3m 20s
+//            case ( $queueLen >= 20 ): // TEST
                 $queueAddresses = $queueInfo->list[ 1 ];
                 break;
             default:
@@ -331,23 +332,18 @@ class QueueHandler extends Stomp {
     }
 
     /**
-     * @param null $qid
+     * @param int $project_id
+     * @param Info $queueInfo
      *
      * @throws Exception
      */
-    public function decrementTotalForWaitingProjects( $qid = null ){
+    public function decSegmentsToAnalyzeOfWaitingProjects( $project_id, Info $queueInfo ){
 
-        if( empty( $this->queueTotalID ) && empty( $qid ) ){
+        if(  empty( $project_id ) ){
             throw new Exception( 'Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ' );
         }
 
-        if( !empty( $qid ) ){
-            $_qid = $qid;
-        } else {
-            $_qid = $this->queueTotalID;
-        }
-
-        $working_jobs = $this->getRedisClient()->lrange( RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, -1 );
+        $working_jobs = $this->getRedisClient()->lrange( $queueInfo->redis_key, 0, -1 );
 
         /**
          * We have an unordered list of numeric keys [1,3,2,5,4]
@@ -359,7 +355,7 @@ class QueueHandler extends Stomp {
          */
         $found = false;
         foreach( $working_jobs as $k => $value ){
-            if( $value == $_qid ) {
+            if( $value == $project_id ) {
                 $found = true;
             }
             if( $found ){
@@ -369,46 +365,40 @@ class QueueHandler extends Stomp {
 
     }
 
-    public function tryToCloseProject( $pid, $child_process_id ) {
-
-        if( !empty( $pid ) ){
-            $_pid = $pid;
-        } else {
-            $_pid = $this->queueTotalID;
-        }
+    public function tryToCloseProject( $_project_id, $child_process_id, Info $queueInfo ) {
 
         $project_totals                       = array();
-        $project_totals[ 'project_segments' ] = $this->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-        $project_totals[ 'num_analyzed' ]     = $this->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-        $project_totals[ 'eq_wc' ]            = $this->getRedisClient()->get( RedisKeys::PROJ_EQ_WORD_COUNT . $pid ) / 1000;
-        $project_totals[ 'st_wc' ]            = $this->getRedisClient()->get( RedisKeys::PROJ_ST_WORD_COUNT . $pid ) / 1000;
+        $project_totals[ 'project_segments' ] = $this->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $_project_id );
+        $project_totals[ 'num_analyzed' ]     = $this->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $_project_id );
+        $project_totals[ 'eq_wc' ]            = $this->getRedisClient()->get( RedisKeys::PROJ_EQ_WORD_COUNT . $_project_id ) / 1000;
+        $project_totals[ 'st_wc' ]            = $this->getRedisClient()->get( RedisKeys::PROJ_ST_WORD_COUNT . $_project_id ) / 1000;
 
-        Log::doLog ( "--- (child $child_process_id) : count segments in project $pid = " . $project_totals[ 'project_segments' ] . "" );
-        Log::doLog ( "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals[ 'num_analyzed' ] . "" );
+        Log::doLog ( "--- (child $child_process_id) : count segments in project $_project_id = " . $project_totals[ 'project_segments' ] . "" );
+        Log::doLog ( "--- (child $child_process_id) : Analyzed segments in project $_project_id = " . $project_totals[ 'num_analyzed' ] . "" );
 
         if ( empty( $project_totals[ 'project_segments' ] ) ) {
-            Log::doLog ( "--- (child $child_process_id) : WARNING !!! error while counting segments in projects $pid skipping and continue " );
+            Log::doLog ( "--- (child $child_process_id) : WARNING !!! error while counting segments in projects $_project_id skipping and continue " );
 
             return;
         }
 
-        if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->getRedisClient()->setnx( RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1 ) ) {
+        if ( $project_totals[ 'project_segments' ] - $project_totals[ 'num_analyzed' ] == 0 && $this->getRedisClient()->setnx( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 1 ) ) {
 
-            $this->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
+            $this->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */ );
 
-            $_analyzed_report = getProjectSegmentsTranslationSummary( $pid );
+            $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup
 
-            Log::doLog ( "--- (child $child_process_id) : analysis project $pid finished : change status to DONE" );
+            Log::doLog ( "--- (child $child_process_id) : analysis project $_project_id finished : change status to DONE" );
 
-            changeProjectStatus( $pid, Constants_ProjectStatus::STATUS_DONE );
-            changeTmWc( $pid, $project_totals[ 'eq_wc' ], $project_totals[ 'st_wc' ] );
+            changeProjectStatus( $_project_id, Constants_ProjectStatus::STATUS_DONE );
+            changeTmWc( $_project_id, $project_totals[ 'eq_wc' ], $project_totals[ 'st_wc' ] );
 
             /*
              * Remove this job from the project list
              */
-            $this->getRedisClient()->lrem( RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT, 0, $_pid );
+            $this->getRedisClient()->lrem( $queueInfo->redis_key, 0, $_project_id );
 
             Log::doLog ( "--- (child $child_process_id) : trying to initialize job total word count." );
             foreach ( $_analyzed_report as $job_info ) {
@@ -457,13 +447,30 @@ class QueueHandler extends Stomp {
             Log::doLog ( "--- (child $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
 
         } else {
-            $_existingPid = $this->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-            $_analyzed    = $this->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-            Log::doLog ( "--- (child $process_pid) : found $_existingPid segments for PID $pid in Redis" );
-            Log::doLog ( "--- (child $process_pid) : analyzed $_analyzed segments for PID $pid in Redis" );
+            $_projectTotSegs = $this->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
+            $_analyzed       = $this->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
+            Log::doLog ( "--- (child $process_pid) : found $_projectTotSegs, analyzed $_analyzed segments for PID $pid in Redis" );
         }
 
         Log::doLog ( "--- (child $process_pid) : fetched data for segment $sid-$jid. Project ID is $pid" );
+
+    }
+
+    public function forceSetSegmentAnalyzed( $elementQueue, Info $subscribedQueue ){
+
+        $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
+        $where                        = " id_segment = {$elementQueue[ 'id_segment' ]} and id_job = {$elementQueue[ 'id_job' ]} ";
+
+        $db = \Database::obtain();
+        try {
+            $affectedRows = $db->update('segment_translations', $data, $where);
+        } catch( \PDOException $e ) {
+            \Log::doLog( $e->getMessage() );
+        }
+
+        $this->incrementAnalyzedCount( $elementQueue[ 'pid' ], 0, 0 );
+        $this->decSegmentsToAnalyzeOfWaitingProjects( $elementQueue[ 'pid' ], $subscribedQueue );
+        $this->tryToCloseProject(  $elementQueue[ 'pid' ], getmypid()  , $subscribedQueue );
 
     }
 
@@ -479,11 +486,11 @@ class QueueHandler extends Stomp {
     }
 
 
-    public function reQueue( $failed_segment ){
+    public function reQueue( $failed_segment, Info $queueInfo ){
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . var_export( $failed_segment, true ) );
-            $this->send( RedisKeys::DEFAULT_QUEUE_NAME, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
+            $this->send( $queueInfo->queue_name, json_encode( $failed_segment ), array( 'persistent' => $this->persistent ) );
         }
 
     }

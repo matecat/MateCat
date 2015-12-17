@@ -16,21 +16,24 @@ class QueuesList {
      *
      * <code>
      * array(
-     *      0 => array(
-     *          "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_DEFAULT,
-     *          "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
-     *          "queue_name" => RedisKeys::DEFAULT_QUEUE_NAME
-     *      ),
+     *    0 => array(
+     *          "pid_list_name"       => RedisKeys::VA_CHILD_PID_SET_DEFAULT,
+     *          "redis_key"           => RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
+     *          "queue_name"          => RedisKeys::DEFAULT_QUEUE_NAME,
+     *          "pid_list_perc_break" => 70
+     *    ),
      *      1 => array(
-     *          "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P2,
-     *          "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P2,
-     *          "queue_name" => RedisKeys::QUEUE_NAME_P2
-     *      ),
+     *          "pid_list_name"       => RedisKeys::VA_CHILD_PID_SET_P2,
+     *          "redis_key"           => RedisKeys::PROJECTS_QUEUE_LIST_P2,
+     *          "queue_name"          => RedisKeys::QUEUE_NAME_P2,
+     *          "pid_list_perc_break" => 20
+     *    ),
      *      2 => array(
-     *          "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P3,
-     *          "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P3,
-     *          "queue_name" => RedisKeys::QUEUE_NAME_P3
-     *      ),
+     *          "pid_list_name"       => RedisKeys::VA_CHILD_PID_SET_P3,
+     *          "redis_key"           => RedisKeys::PROJECTS_QUEUE_LIST_P3,
+     *          "queue_name"          => RedisKeys::QUEUE_NAME_P3,
+     *          "pid_list_perc_break" => 10
+     *    ),
      * )
      * </code>
      *
@@ -38,19 +41,22 @@ class QueuesList {
      */
     protected static $_QUEUE_INFO = array(
             0 => array(
-                    "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_DEFAULT,
-                    "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
-                    "queue_name" => RedisKeys::DEFAULT_QUEUE_NAME
+                    "pid_set_name"       => RedisKeys::VA_CHILD_PID_SET_DEFAULT,
+                    "redis_key"          => RedisKeys::PROJECTS_QUEUE_LIST_DEFAULT,
+                    "queue_name"         => RedisKeys::DEFAULT_QUEUE_NAME,
+                    "pid_set_perc_break" => 70
             ),
             1 => array(
-                    "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P2,
-                    "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P2,
-                    "queue_name" => RedisKeys::QUEUE_NAME_P2
+                    "pid_set_name"       => RedisKeys::VA_CHILD_PID_SET_P2,
+                    "redis_key"          => RedisKeys::PROJECTS_QUEUE_LIST_P2,
+                    "queue_name"         => RedisKeys::QUEUE_NAME_P2,
+                    "pid_set_perc_break" => 20
             ),
             2 => array(
-                    "pid_list_name"   => RedisKeys::VA_CHILD_PID_LIST_P3,
-                    "redis_key"  => RedisKeys::PROJECTS_QUEUE_LIST_P3,
-                    "queue_name" => RedisKeys::QUEUE_NAME_P3
+                    "pid_set_name"       => RedisKeys::VA_CHILD_PID_SET_P3,
+                    "redis_key"          => RedisKeys::PROJECTS_QUEUE_LIST_P3,
+                    "queue_name"         => RedisKeys::QUEUE_NAME_P3,
+                    "pid_set_perc_break" => 10
             ),
     );
 

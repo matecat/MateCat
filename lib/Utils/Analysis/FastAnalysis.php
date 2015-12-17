@@ -171,7 +171,7 @@ class FastAnalysis extends AbstractDaemon {
 
             }
 
-        } while ( self::$RUNNING );
+        } while ( $this->RUNNING );
 
         self::cleanShutDown();
 
@@ -239,12 +239,10 @@ class FastAnalysis extends AbstractDaemon {
 
         switch ( $sig_no ) {
             case SIGTERM :
-            case SIGINT :
-                self::$RUNNING = false;
-                break;
             case SIGHUP :
-                self::$RUNNING = false;
-                self::cleanShutDown();
+            case SIGINT :
+                $run = static::getInstance();
+                $run->RUNNING = false;
                 break;
             default :
                 $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Received Signal $sig_no ", 50, "-", STR_PAD_BOTH );
@@ -259,7 +257,8 @@ class FastAnalysis extends AbstractDaemon {
 
     public static function cleanShutDown() {
 
-        self::$RUNNING     = false;
+        $run = static::getInstance();
+        $run->RUNNING = false;
         self::$tHandlerPID = null;
 
         //SHUTDOWN

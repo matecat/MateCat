@@ -73,7 +73,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
             $start = time();
 
             //get a chunk of self::NR_OF_JOBS each time.
-            for ( $firstJob = $minJob; self::$RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
+            for ( $firstJob = $minJob; $this->RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
 
                 $jobs = $db->fetch_array(
                         sprintf(
@@ -86,7 +86,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                 //iterate over completed jobs, evaluate incremental PEE and save it in the job row
                 //Incremental PEE = sum( segment_pee * segment_raw_wordcount)
                 //It will be normalized when necessary
-                for ( $j = 0; self::$RUNNING && ( $j < count( $jobs ) ); $j++ ) {
+                for ( $j = 0; $this->RUNNING && ( $j < count( $jobs ) ); $j++ ) {
                     $job = $jobs[ $j ];
 
                     //BEGIN TRANSACTION
@@ -162,7 +162,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                                 "",
                                 "[JobPostEditingEffortRunner] Failed to process job $_jid"
                         );
-                        self::$RUNNING = false;
+                        $this->RUNNING = false;
 
                         continue;
                         //exit;
@@ -178,11 +178,11 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
             Log::doLog( "sleeping for 1 month" );
             echo "sleeping for 1 month\n";
 
-            if ( self::$RUNNING ) {
+            if ( $this->RUNNING ) {
                 sleep( self::$sleeptime );
             }
 
-        } while ( self::$RUNNING );
+        } while ( $this->RUNNING );
     }
 
     public static function cleanShutDown() {

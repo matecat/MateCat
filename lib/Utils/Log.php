@@ -90,7 +90,7 @@ class Log {
     }
 
     protected static function _getHeader() {
-        $trace = debug_backtrace();
+        $trace = debug_backtrace(2);
 
         $now = date( 'Y-m-d H:i:s' );
         //$ip = gethostname(); // only for PHP 5.3

@@ -9,4 +9,4 @@
 
 namespace Analysis\Commons;
 
-return 15;
+return 10;

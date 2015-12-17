@@ -12,11 +12,11 @@ use \Log;
  */
 abstract class AbstractDaemon {
 
-    public static $RUNNING = true;
+    public $RUNNING = true;
     public static $tHandlerPID;
 
     /**
-     * @var AbstractDaemon
+     * @var static
      */
     protected static $__INSTANCE = null;
 
@@ -31,6 +31,7 @@ abstract class AbstractDaemon {
 
     /**
      * Singleton Pattern, Unique Instance of This
+     * @return static
      */
     public static function getInstance() {
 
@@ -49,7 +50,7 @@ abstract class AbstractDaemon {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
                 static::_TimeStampMsg( $msg );
             } else {
-                static::_TimeStampMsg( 'registering signal handlers\n' );
+                static::_TimeStampMsg( 'registering signal handlers' );
 
                 pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
                 pcntl_signal( SIGINT, array( get_called_class(), 'sigSwitch' ) );
@@ -72,7 +73,7 @@ abstract class AbstractDaemon {
             case SIGTERM :
             case SIGINT :
             case SIGHUP :
-                static::$RUNNING = false;
+                static::$__INSTANCE->RUNNING = false;
                 break;
             default :
                 break;
@@ -80,7 +81,7 @@ abstract class AbstractDaemon {
     }
 
     protected static function _TimeStampMsg( $msg ) {
-        echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+        if ( \INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
         Log::doLog( $msg );
     }
 

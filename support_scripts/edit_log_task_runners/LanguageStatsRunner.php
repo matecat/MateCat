@@ -103,13 +103,13 @@ class LanguageStatsRunner extends AbstractDaemon {
             }
 
             //for the moment, this daemon is single-loop-execution
-            self::$RUNNING = false;
+            $this->RUNNING = false;
 
-            if ( self::$RUNNING ) {
+            if ( $this->RUNNING ) {
                 sleep( self::$sleeptime );
             }
 
-        } while ( self::$RUNNING );
+        } while ( $this->RUNNING );
     }
 
     public static function cleanShutDown() {

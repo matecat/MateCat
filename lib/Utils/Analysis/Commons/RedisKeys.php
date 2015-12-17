@@ -68,9 +68,9 @@ class RedisKeys {
     ###### Queue priority P1 #####
     ##############################
     /**
-     * Key that holds the child list of the processes of TM Analysis in priority 1
+     * Key that holds the child set of the processes of TM Analysis in priority 1
      */
-    const VA_CHILD_PID_LIST_DEFAULT = 'ch_pid_list_p1';
+    const VA_CHILD_PID_SET_DEFAULT = 'ch_pid_set_p1';
 
     /**
      * Key that holds the projects list in the default queue
@@ -87,9 +87,9 @@ class RedisKeys {
     ##############################
 
     /**
-     * Key that holds the child list of the processes of TM Analysis in priority 2
+     * Key that holds the child set of the processes of TM Analysis in priority 2
      */
-    const VA_CHILD_PID_LIST_P2 = 'ch_pid_list_p2';
+    const VA_CHILD_PID_SET_P2 = 'ch_pid_set_p2';
 
     /**
      * Key that holds the projects list in the Priority 2 queue
@@ -106,9 +106,9 @@ class RedisKeys {
     ##############################
 
     /**
-     * Key that holds the child list of the processes of TM Analysis in priority 2
+     * Key that holds the child set of the processes of TM Analysis in priority 2
      */
-    const VA_CHILD_PID_LIST_P3 = 'ch_pid_list_p3';
+    const VA_CHILD_PID_SET_P3 = 'ch_pid_set_p3';
 
     /**
      * Key that holds the projects list in the Priority 2 queue

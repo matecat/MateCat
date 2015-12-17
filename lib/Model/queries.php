@@ -1319,7 +1319,7 @@ function setSuggestionUpdate( $data ) {
     $id_segment = (int)$data[ 'id_segment' ];
     $id_job     = (int)$data[ 'id_job' ];
 
-    $where = " id_segment=$id_segment and id_job=$id_job";
+    $where = " id_segment = $id_segment and id_job = $id_job";
 
     $db = Database::obtain();
     try {
@@ -2557,21 +2557,6 @@ function getCurrentJobsStatus( $pid ) {
     $results = $db->fetch_array( $query );
 
     return $results;
-}
-
-function setSegmentTranslationError( $sid, $jid ) {
-
-    $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an incostistent state
-    $where                        = " id_segment=$sid and id_job=$jid ";
-
-    $db = Database::obtain();
-    try {
-        $affectedRows = $db->update('segment_translations', $data, $where);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $affectedRows;
 }
 
 // tm analysis threaded
