@@ -542,7 +542,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .projectbar li{width:33.1%;float:left;margin:0;padding:0;border-left:1px solid #000;display: block}
 
 .projectbar a{color:#333;margin:12px 0px 0 0}
-.projectbar .top, .projectbar .down{float:right !Important;margin-right:11px;background: url(../img/updown.gif) 3px 2px no-repeat;display:block;width:12px;height:12px;position:absolute;right:0;border:1px solid #ccc;margin-top:-6px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;-moz-border-radius: 2px;border-radius: 2px;}
+.projectbar .top, .projectbar .down{float:right !important;margin-right:11px;background: url(../img/updown.gif) 3px 2px no-repeat;display:block;width:12px;height:12px;position:absolute;right:0;border:1px solid #ccc;margin-top:-6px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;-moz-border-radius: 2px;border-radius: 2px;}
 .projectbar .top:hover, .projectbar .down:hover{border:1px solid #666}
 .projectbar .disabled{border:1px solid #ccc !important}
 .projectbar .down{background: url(../img/updown.gif) 3px -18px no-repeat;margin-top:12px}
@@ -606,7 +606,7 @@ article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 
 .buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin: 0;position:absolute;right:0;}
-.buttons li{float:left;text-align:center;margin:0px 0 20px 0px;height:35px;width:auto !important;padding:0 !Important}
+.buttons li{float:left;text-align:center;margin:0px 0 20px 0px;height:35px;width:auto !important;padding:0 !important}
 .buttons p {margin:2px 0 0 5px;font-size:11px;font-weight:normal;color:#666;display:none;text-align:center;}
 
 .buttons a+p {padding-top: 10px; margin-left: 0px;}
@@ -765,7 +765,7 @@ box-shadow: 0 1px 2px #ccc;
 	margin: 3px 0!important;
 	box-shadow: none;
 	width: 13px;
-	padding: 6px 10px !Important;
+	padding: 6px 10px !important;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
@@ -1026,7 +1026,7 @@ body.cattool:not(.editing) article {
 
 
 .graysmall{width:100%;background:#fbfbfb;float:left;position:relative;border-bottom:1px solid #ccc;color:#666;-webkit-transition: all  100ms ease-in;transition: all  100ms ease-in;}
-.graysmall:last-child{border-bottom:none !Important}
+.graysmall:last-child{border-bottom:none !important}
 .tab.concordances .graysmall:not(.prime)
 {
 	display: none;
@@ -1697,7 +1697,7 @@ section .header .context
 	{
 		color: #000;
 	}
-.percentuage.visible{display:block !Important}
+.percentuage.visible{display:block !important}
 
 
 .greenborder{border-top:2px solid #00a651; background:url(../img/pointgreen.gif) 0 0px no-repeat;}
@@ -2102,7 +2102,7 @@ textarea, input, .editarea, .search-editarea, select  {
 }
 .graysmall .b{padding-left:25px!important;position:relative}
 
-.message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !Important;background-size:12px 12px}
+.message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !important;background-size:12px 12px}
 .graysmall:hover .trash{height:20px;}
 
 .trash:hover {margin-top:-2px;color:#000;}
@@ -2233,7 +2233,7 @@ textarea, input, .editarea, .search-editarea, select  {
 
 
 /*status*/
-.status-container .status{width:11px;display:block;position:absolute;height:100%;padding:0;background:#dddedf;right:0;border-left:1px solid #ccc;	margin:0px 0px 0px 0 !Important;z-index:99;border-bottom:1px solid #ccc	}
+.status-container .status{width:11px;display:block;position:absolute;height:100%;padding:0;background:#dddedf;right:0;border-left:1px solid #ccc;	margin:0px 0px 0px 0 !important;z-index:99;border-bottom:1px solid #ccc	}
 section.readonly .status-container a.status:hover,
 body.archived section .status-container a.status:hover
 {
@@ -2257,7 +2257,7 @@ body.archived section .status-container a.status:hover
 
 
 .status img{display:none}
-.editor .status img{display:block;margin:-6px 0px 0 0 !Important;position:absolute;top:0;right:0px}
+.editor .status img{display:block;margin:-6px 0px 0 0 !important;position:absolute;top:0;right:0px}
 .status-container{width:10px !important;float:right;margin:0 0px 0 0 !important;}
 
 
@@ -2486,7 +2486,7 @@ section.modified.editor .status
 
 /*
 
-.justdone .end-message-box{display:none !Important}
+.justdone .end-message-box{display:none !important}
 
 .justdone .editarea{z-index:9 !important}
 
@@ -2503,7 +2503,7 @@ section.modified.editor .status
 .downloadtr-button span{font-size:14px}
 
 
-.end-message-box .downloadtr-button {width:380px;margin:10px 0 0px 0;font-size:18px;padding:10px 0px !important;float:left !Important;border:1px solid #848689 !important;color:#fff;text-align:center}
+.end-message-box .downloadtr-button {width:380px;margin:10px 0 0px 0;font-size:18px;padding:10px 0px !important;float:left !important;border:1px solid #848689 !important;color:#fff;text-align:center}
 .end-message-col1{float:left;margin:0;width:150px;}
 .end-message-col1 img{float:left;margin:0px 0 0 0;}
 .end-message-col1 p{position:absolute;bottom:20px;width:300px;left:20px;text-align:left;color:#fff}
@@ -2694,7 +2694,7 @@ section.modified.editor .status
 
 @media screen and (min-width: 1181px){
 	.languages{text-indent:-85px; }
-	.graysmall .b{ padding-left:55px !Important;width:42% !important}
+	.graysmall .b{ padding-left:55px !important;width:42% !important}
 	.graysmall-message{left:55px !important}
 	
 
@@ -2720,7 +2720,7 @@ section.modified.editor .status
 	.loader{left:-40px;}
 	    #notifbox,#filterSwitch {width: 45px;}
 
-	.search-editarea {width:200px !Important}
+	.search-editarea {width:200px !important}
 	.text .item,.white li, .track-changes {width: 44% !important}
     article {margin-left: 6%;}
     .sid {left: -7%;width: 7%;}
@@ -3489,7 +3489,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 @-ms-keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6; }
-}​
+}
 
 /* Opera */
 @-o-keyframes fadein {
@@ -3535,7 +3535,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 @-ms-keyframes fadeout {
     from { opacity: 0.6 }
     to   { opacity: 0 }
-}​
+}
 
 /* Opera */
 @-o-keyframes fadeout {

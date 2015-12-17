@@ -433,7 +433,7 @@ float: left;
  
  
   .name  {
-    width: 50% !Important;
+    width: 50% !important;
     overflow: hidden;
 	text-overflow: ellipsis;
   }
@@ -570,7 +570,7 @@ h2.payoff
 
 /*button*/
 
-.uploadbtn{background: #09beec;width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !Important;min-width:250px; margin:20px 0px 8px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
+.uploadbtn{background: #09beec;width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !important;min-width:250px; margin:20px 0px 8px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
 .uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
 .disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#d6d6d6;}
@@ -586,7 +586,7 @@ h2.payoff
 .upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
 
-.btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !Important;font-size:14px !Important;margin:0px 0 0 10px !important;}
+.btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !important;font-size:14px !important;margin:0px 0 0 10px !important;}
 
 
 
@@ -599,7 +599,7 @@ h2.payoff
 }
 
 
-.preview {border-right:none !Important; width:30px;}
+.preview {border-right:none !important; width:30px;}
 .preview img{margin:5px 0 0 10px}
 
 .delete, .cancel{border-right:none !important;}
@@ -626,7 +626,7 @@ h2.payoff
 /*.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}*/
 
 .cancel button:hover,.delete button:hover {background:#ca2a2e;color:#fff;}
-.cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !Important;display:block;float:left;}
+.cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !important;display:block;float:left;}
 
 
 a{text-decoration:underline}
@@ -661,7 +661,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 /* upload footer */
 .upload-footer{width:100%;background:#ebebec;padding:10px 0;border-top:1px dashed #ccc;margin-top:-1px}
 .upload-footer .btn{float:left;padding:5px 10px 0 30px;width:auto;margin-bottom:0px !important}
-.upload-footer p{text-align:left !Important;float:left;margin:5px 10px 0px 20px !Important;font-size:18px !Important;line-height:20px !Important;}
+.upload-footer p{text-align:left !important;float:left;margin:5px 10px 0px 20px !important;font-size:18px !important;line-height:20px !important;}
 
 .ui-progressbar-value{display:none !important}
 table .ui-progressbar-value{display:block !important}
@@ -717,7 +717,7 @@ a{color:#39699a}
 .uploaded.dragging .file-drop{display:none !important}
 .uploaded .upload-footer{display:block !important}
 .file-drop{margin:40px 0 50px 0!important}
-#fileupload{margin:0 !important; /* padding:0 !Important */ }
+#fileupload{margin:0 !important; /* padding:0 !important */ }
 .upload-files
 	{
 	
