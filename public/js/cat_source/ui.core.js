@@ -543,7 +543,7 @@ console.log('changeStatus');
                     UI.footerHTML = UI.footerHTML + '</ul>'  ;
 
                     UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor matches open" ' + ((config.isReview)? ' style="display: none"' : '') + ' id="segment-' + sid + '-matches">' +
+					'<div class="tab sub-editor matches open" ' + ' id="segment-' + sid + '-matches">' +
 					'	<div class="overflow"></div>' +
                     '   <div class="engine-errors"></div>' +
                     '</div>' ;
