@@ -12,6 +12,7 @@ inc/config.ini
 inc/config.test.ini
 inc/config.development.ini
 lib/Utils/Analysis/.num_processes
+inc/.globalmessage.ini
 
 # Ignore artifacts
 public/css/app.css
