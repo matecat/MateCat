@@ -14,8 +14,3 @@ Options -Indexes
     Order Allow,Deny
     Allow from all
 </Files>
-
-<Files xliffToTarget.php>
-    Order Allow,Deny
-    Allow from all
-</Files>
