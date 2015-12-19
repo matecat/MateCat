@@ -1,0 +1,14 @@
+
+<ul class="submenu">
+  <li class="footerSwitcher"></li>
+
+  {{#each labels}}
+    <li class="{{hidden_class}} {{active_class}} tab-switcher tab-switcher-{{code}}"
+        id="segment-{{id_segment}}-{{code}}"
+        data-tab-class="{{tab_class}}"
+        data-code="{{code}}" >
+    <a tabindex="-1" href="#">{{tab_markup}}<span class="number"></span></a>
+  </li>
+  {{/each}}
+
+</ul>
