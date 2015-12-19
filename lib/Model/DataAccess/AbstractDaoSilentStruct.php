@@ -8,8 +8,21 @@
  */
 
 abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDaoObjectStruct {
+    protected $validator;
+    protected $cached_results = array();
 
     /**
+     * This method returns the same object so to be chainable
+     * and be sure to clear the cache when calling cachable
+     * methods.
+     *
+     * @example assuming the model has a cachable
+     * method called foo();
+     *
+     * $model->foo(); // makes computation the first time and caches
+     * $model->foo(); // returns the cached result
+     * $model->clear()->foo(); // clears the cache and returns fresh data
+     *
      * @return $this
      */
     public function clear() {
@@ -17,6 +30,10 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         return $this;
     }
 
+    /**
+     * This method makes it possible to define methods on child classes
+     * whose result is cached on the instance.
+     */
     protected function cachable($method_name, $params, $function) {
       if ( !key_exists($method_name,  $this->cached_results) ) {
         $this->cached_results[$method_name] =
@@ -37,6 +54,21 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
             // distinct log levels. Should go in DEBUG level.
             // Log::doLog("DEBUG: Unknown property $name");
         }
+    }
+
+    public function toArray(){
+        Log::doLog('DEPRECATED, use `attributes()` method instead');
+        return $this->attributes();
+    }
+
+    public function attributes() {
+        $refclass = new ReflectionClass( $this );
+        $attrs = array();
+        $publicProperties = $refclass->getProperties(ReflectionProperty::IS_PUBLIC) ;
+        foreach( $publicProperties as $property ) {
+            $attrs[$property->getName()] = $property->getValue($this);
+        }
+        return $attrs;
     }
 
 }

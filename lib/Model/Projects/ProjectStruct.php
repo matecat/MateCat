@@ -16,9 +16,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $pretranslate_100 ;
     public $id_qa_model ;
 
-    protected $cached_results = array();
-    // protected static $cachables = array('getJobs') ;
-
     public function getOwnerFeature( $feature_code ) {
         return OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
             $feature_code, $this->id_customer
@@ -26,13 +23,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     public function getJobs() {
-      return $this->cachable(__function__, $this->id, function($id) {
-        return Jobs_JobDao::getByProjectId( $id );
-      });
+        return $this->cachable(__function__, $this->id, function($id) {
+            return Jobs_JobDao::getByProjectId( $id );
+        });
     }
 
     public function getMetadata() {
-      return Projects_MetadataDao::getByProjectId( $this->id );
+        return Projects_MetadataDao::getByProjectId( $this->id );
     }
 
     public function isFeatureEnabled( $feature_code ) {
