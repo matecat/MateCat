@@ -313,10 +313,6 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
-<<<<<<< 830d406cda38ca60e337c0c126c6b7b7aef329bf
-
-=======
->>>>>>> adds revision_type param to project creation API
     public function doAction() {
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
