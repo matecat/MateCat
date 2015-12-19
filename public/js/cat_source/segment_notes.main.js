@@ -7,7 +7,30 @@ SegmentNotes = {
 
 if ( SegmentNotes.enabled() ) 
 (function($,SegmentNotes,undefined) {
+
     window.segmentNotes = {};
+
+    window.UI.SegmentFooter.registerTab({
+        code : 'notes',
+        label : 'Messages',
+        tab_class : 'segment-notes',
+        activation_priority : 60,
+        tab_position : 50,
+        is_enabled : function( footer ) {
+            var notes = window.segmentNotes[ footer.segment.absoluteId ] ;
+            return notes != null;
+        },
+        tab_markup : function( footer ) {
+            return this.label ;
+        },
+        content_markup : function( footer ) {
+            return SegmentNotes.panelHTML( footer.segment );
+        },
+        is_hidden : function( footer ) {
+            return false;
+        }
+    });
+
 
     var registerSegments = function( data ) {
         $.each(data.files, function() {
@@ -17,31 +40,15 @@ if ( SegmentNotes.enabled() )
         });
     };
 
-    var tabHTML = function( sid ) {
-        var segment = UI.Segment.find( sid );
-        var notes = segmentNotes[ segment.absoluteId ] ;
-        var output = '';
-
-        if ( notes != null ) {
-            output = '' +
-            '<li class="tab-switcher tab-switcher-notes" id="segment-' + sid + '-notes">' +
-            '   <a tabindex="-1" href="#">Messages<span class="number"></span></a>' +
-            '</li>';
-        }
-
-        return output ;
-    }
-
     var buildNotesForm = function(sid, notes) {
-        var panel = $('<div class="tab sub-editor segment-notes" id="" >' +
+        var panel = $('' +
             '	<div class="overflow">' +
             '       <div class="segment-notes-container">  ' +
             '           <div class="segment-notes-panel-body">' +
             '             <ul class="graysmall"></ul> ' +
             '           </div>' +
             '       </div> ' +
-            '	</div>' +
-            '</div>') ;
+            '   </div>');
 
         panel.find('.tab').attr('id', 'segment-' + sid + '-segment-notes');
 
@@ -59,13 +66,12 @@ if ( SegmentNotes.enabled() )
         return $('<div>').append( panel ).html();
     }
 
-    var panelHTML = function( sid ) {
-        var segment = UI.Segment.find( sid );
+    var panelHTML = function( segment ) {
         var notes = segmentNotes[ segment.absoluteId ] ;
         var output = '' ;
 
         if ( notes != null ) {
-            output = buildNotesForm(sid, notes) ;
+            output = buildNotesForm(segment.absoluteId, notes) ;
         }
         return output;
     }
@@ -123,7 +129,6 @@ if ( SegmentNotes.enabled() )
     // exports
     $.extend(SegmentNotes, {
         registerSegments : registerSegments,
-        tabHTML : tabHTML,
         panelHTML : panelHTML
     }); 
 
