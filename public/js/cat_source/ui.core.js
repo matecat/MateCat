@@ -501,13 +501,22 @@ console.log('changeStatus');
         UI.segmentButtons = null;
 	},
 
+    /**
+     * createFooter is invoked each time the footer is to be rendered for a
+     * given segment. During the activation of a segment, footer for the next
+     * segment is also rendered, so to be cached and ready when the user moves
+     * to the next segment.
+     *
+     * @param segment DOMElement the <section> tag of the segment
+     * @param forceEmptyContribution boolean default true. not sure what it
+     * does.
+     */
 	createFooter: function(segment, forceEmptyContribution) {
         var sid = UI.getSegmentId( segment );
 
-
 		forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
 
-		if ( $('.matches .overflow', segment).text() !== '' ) {
+		if ( $('.matches .overflow', segment).text() !== '' ) { // <-- XXX unnamed intention
 			if (!forceEmptyContribution) {
 				$('.matches .overflow', segment).empty();
                 $(document).trigger('createFooter:skipped', segment);
@@ -515,83 +524,15 @@ console.log('changeStatus');
 			}
 		}
 
-		if ( $('.footer ul.submenu', segment).length ) {
+		if ( $('.footer ul.submenu', segment).length ) {  // <--- XXX unnamed intention
             $(document).trigger('createFooter:skipped:cached', segment);
             return false;
         }
 
-		UI.footerHTML =	'<ul class="submenu">' +
-                    '	<li class="footerSwitcher">' +
-                    '	</li>' +
-					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher tab-switcher-tm" id="segment-' + sid + '-tm">' +
-					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
-					'	</li>' +
-					'	<li class="tab-switcher tab-switcher-cc" id="segment-' + sid + '-cc">' +
-					'		<a tabindex="-1" href="#">Concordance</a>' +
-					'	</li>' +
-					'	<li class="tab-switcher tab-switcher-gl" id="segment-' + sid + '-gl">' +
-					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
-					'	</li>' +
-					'	<li class="tab-switcher tab-switcher-al" id="segment-' + sid + '-al">' +
-					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
-                    '	</li>' ;
-
-                    if ( SegmentNotes.enabled() ) {
-                        UI.footerHTML = UI.footerHTML + SegmentNotes.tabHTML( sid ) ;
-                    }
-
-                    UI.footerHTML = UI.footerHTML + '</ul>'  ;
-
-                    UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor matches open" ' + ' id="segment-' + sid + '-matches">' +
-					'	<div class="overflow"></div>' +
-                    '   <div class="engine-errors"></div>' +
-                    '</div>' ;
-
-                    if ( SegmentNotes.enabled() ) {
-                        UI.footerHTML = UI.footerHTML + SegmentNotes.panelHTML( sid ) ;
-                    }
-
-                    UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor concordances" id="segment-' + sid + '-concordances">' +
-					'	<div class="overflow">' +
-						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
-					'		<div class="results"></div>' +
-					'	</div>' +
-					'</div>' +
-					'<div class="tab sub-editor glossary" id="segment-' + sid + '-glossary">' +
-					'	<div class="overflow">' +
-
-					((config.tms_enabled)?
-					'		<div class="gl-search">' +
-					'			<div class="input search-source" contenteditable="true" />' +
-					'				<div class="input search-target" contenteditable="true" />' +
-					'					<!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a>' +
-					'					<div class="comment">' +
-					'						<a href="#">(+) Comment</a>' +
-					'						<div class="input gl-comment" contenteditable="true" /></div>' +
-					'					</div>' +
-					'					<div class="results"></div>' +
-					'				</div>' +
-					'			</div>' +
-					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
-					'	</div>' +
-					'</div>';
-
-        UI.currentSegment.trigger('footerCreation');
-
-        $('.footer', segment).html( UI.footerHTML );
-
-        alternativesTabHtml =  '' +
-            '<div class="tab sub-editor alternatives" id="segment-' + sid + '-alternatives">' +
-            '	<div class="overflow"></div>' +
-            '</div>';
-
-        $('.footer .tab.glossary', segment).after( alternativesTabHtml );
+        var segmentFooter = new UI.SegmentFooter( segment );
+        $('.footer', segment).append( segmentFooter.html() );
 
         UI.currentSegment.trigger('afterFooterCreation', segment);
-
-        UI.footerHTML = null;
 
         // FIXME: arcane. Whatever it does, it should go in the contribution module.
 		if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
@@ -628,11 +569,6 @@ console.log('changeStatus');
 				'    </ul>' +
 				'</nav>';
 		this.body.append(menu);
-/*
-		$('#jobMenu li').each(function() {
-			APP.fitText($(this), $('a', $(this)), 20);
-		});
-*/
 	},
 	displaySurvey: function(s) {
         if(this.surveyDisplayed) return;

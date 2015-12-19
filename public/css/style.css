@@ -1086,10 +1086,6 @@ section.loaded .submenu {display: block; }
     z-index: 9999999999999;
 }
 
-.tab-switcher-al
-{
-	display: none;
-}
 body.noGlossary .tab-switcher-gl
 {
 	display: none;
@@ -1125,8 +1121,7 @@ body.noGlossary .tab-switcher-gl
     color: red;
 }
 
-.tab-switcher-al a
-{
+.tab-switcher-al a {
 	color: #D65959 !important;
 }
 
