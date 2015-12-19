@@ -37,6 +37,12 @@ class Info {
     public $pid_list     = array();
 
     /**
+     * Length of the pid list in that queue
+     * @var int
+     */
+    public $pid_list_len = 0;
+
+    /**
      * Number of elements in the queue on AMQ
      * @var int
      */

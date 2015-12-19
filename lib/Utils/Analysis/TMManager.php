@@ -104,13 +104,7 @@ class TMManager extends AbstractDaemon {
                 continue;
             }
 
-            //avoid zombies : the parent is aware of the death of one of the children
-            $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
-            if ( $dead > 0 ) {
-                self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : child $dead exited: deleting file ...." );
-                $this->_killPids( null, $dead );
-                self::_TimeStampMsg( "DONE" );
-            }
+            $this->_waitPid();
 
             $this->_numProcessesMax = $this->_getNumProcessesMax();
 
@@ -138,18 +132,16 @@ class TMManager extends AbstractDaemon {
                 case $numProcessesDiff > 0:
 
                     self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : need to delete $numProcessesToLaunchOrDelete processes" );
-                    $this->_killPids( "", $numProcessesToLaunchOrDelete );
+                    $this->_killPids( null, 0, $numProcessesToLaunchOrDelete );
                     sleep(1);
 
                     break;
 
                 default:
-
-                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : no pid to delete everithing  works well" );
-                    self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID .  ") sleeping ...." );
+                    if( ! ( time() % 11 ) ) self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID .  ") sleeping ...." );
+//                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : no pid to delete everithing  works well" );
                     self::_balanceQueues( $this->_queueObjectList );
-                    sleep( 5 );
-
+                    sleep( 1 );
                     break;
             }
 
@@ -159,31 +151,54 @@ class TMManager extends AbstractDaemon {
 
     }
 
+    protected function _waitPid(){
 
-    protected function _routeThisChildProcess( $myPid, QueuesList $queueList ){
+        //avoid zombies : parent process knows the death of one of the children
+        $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
+        while ( $dead > 0 ) {
 
-//        $totalElements = 0;
-        $numProcessesActual = 0;
-        $queueObject = $queueList->list[ 0 ]; //DEFAULT
+            self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : child $dead exited: deleting file ...." );
+            foreach ( $this->_queueObjectList->list as $queue ) {
+                $_was_active = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead );
+                if ( $_was_active ) {
+                    $this->_killPids( null, $dead );
+                }
+            }
+
+            //avoid zombies : parent process knows the death of one of the children
+            $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
+
+            self::_TimeStampMsg( "DONE" );
+
+        }
+
+    }
+
+    /**
+     * Run by forked child
+     *
+     * @return Info
+     * @throws Exception
+     */
+    protected function _routeThisChildProcess(){
+
+        $queueObject = $this->_queueObjectList->list[ 0 ]; //DEFAULT
         try {
-            foreach ( $queueList->list as $queueObject ) {
+            foreach ( $this->_queueObjectList->list as $queueObject ) {
 
-                $queueObject->pid_list = $this->_queueHandler->getRedisClient()->smembers( $queueObject->pid_set_name );
+                $maxConsumersPerQueue = $this->_numProcessesMax / 100 * $queueObject->pid_set_perc_break;
 
-                //TODO Use this!
-                $numProcessesActual += count( $queueObject->pid_list );
-
-//                $totalElements += $queueObject->queue_length =
-//                        $this->_queueHandler->getQueueLength( $queueObject->queue_name );
-
-                $maxElementsPerQueue = $this->_numProcessesMax / 100 * $queueObject->pid_set_perc_break;
-                if ( count( $queueObject->pid_list ) <= $maxElementsPerQueue ) {
+                if ( $queueObject->pid_list_len < $maxConsumersPerQueue ) {
+//                    self::_TimeStampMsg( "queue " . $queueObject->queue_name . " has max $maxConsumersPerQueue elements and $queueObject->pid_list_len actuals"  );
+                    $queueObject->pid_list_len = $this->_queueHandler->getRedisClient()->incr( $queueObject->queue_name );
                     return $queueObject; //use this queue
+                } else {
+//                    self::_TimeStampMsg( "queue " . $queueObject->queue_name . " has max $maxConsumersPerQueue elements and $queueObject->pid_list_len actuals -- SKIPPED "  );
                 }
 
             }
         } catch ( Exception $e ) {
-            throw new \Exception( "(child " . getmypid() . ") : FATAL !! " . $e->getMessage(), static::ERR_SET_NOT_AVAILABLE );
+            throw new \Exception( "(parent " . self::$tHandlerPID . ") : FATAL !! " . $e->getMessage(), static::ERR_SET_NOT_AVAILABLE );
         }
 
         return $queueObject;
@@ -212,12 +227,12 @@ class TMManager extends AbstractDaemon {
         while ( $processLaunched < $numProcesses ) {
 
             try {
-                $queueObject = $this->_routeThisChildProcess( getmypid(), $this->_queueObjectList );
+                $queueObject = $this->_routeThisChildProcess();
             } catch ( \Exception $e ){
-                throw new \Exception( "(parent " . getmypid() . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_ROUTE );
+                throw new \Exception( "(parent " . self::$tHandlerPID . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_ROUTE );
             }
 
-            self::_TimeStampMsg( "Spawn process ....." );
+//            self::_TimeStampMsg( "Spawn process ....." );
             $pid = pcntl_fork();
 
             if ( $pid == -1 ) {
@@ -229,7 +244,6 @@ class TMManager extends AbstractDaemon {
                 // parent process continue running
                 $processLaunched += 1;
                 $this->_runningPids += 1;
-                usleep( 200000 );
 
             } else {
 
@@ -282,26 +296,31 @@ class TMManager extends AbstractDaemon {
         self::_TimeStampMsg( "Pid:      " . @var_export( $pid, true ) );
         self::_TimeStampMsg( "Num:      " . @var_export( $num, true ) );
 
-        $x = debug_backtrace();
-
-        self::_TimeStampMsg( $x );
-
         $numDeleted = 0;
 
         if ( !empty( $pid ) && !empty( $queueInfo ) ) {
 
             self::_TimeStampMsg( "Killing pid $pid from " . $queueInfo->pid_set_name );
             $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid );
+            posix_kill( $pid, SIGINT );
+            $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queueInfo->queue_name );
 
         } elseif ( !empty( $pid ) && empty( $queueInfo ) ) {
 
             self::_TimeStampMsg( "Killing pid $pid from a not defined queue. Seek and destroy." );
-            $queuesInfo = QueuesList::get();
             /**
              * @var $queue Info
              */
-            foreach ( $queuesInfo->list as $queue ) {
-                $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid );
+            foreach ( $this->_queueObjectList->list as $queue ) {
+
+                $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid );
+                if( $deleted ){
+                    posix_kill( $pid, SIGINT );
+                    $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queue->queue_name );
+                    self::_TimeStampMsg( "Found. Killed pid $pid from queue $queue->queue_name." );
+                }
+                $numDeleted += $deleted;
+
             }
 
         } elseif ( !empty( $num ) && !empty( $queueInfo ) ) {
@@ -309,7 +328,9 @@ class TMManager extends AbstractDaemon {
             self::_TimeStampMsg( "Killing $num pid from " . $queueInfo->pid_set_name );
             $queueBefore = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
             for( $i = 0; $i < $num; $i++ ){
-                $this->_queueHandler->getRedisClient()->spop( $queueInfo->pid_set_name );
+                $pid = $this->_queueHandler->getRedisClient()->spop( $queueInfo->pid_set_name );
+                posix_kill( $pid, SIGINT );
+                $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queueInfo->queue_name );
             }
             $queueAfter = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
             $numDeleted = $queueBefore - $queueAfter;
@@ -318,12 +339,17 @@ class TMManager extends AbstractDaemon {
 
             self::_TimeStampMsg( "Killing all processes from " . $queueInfo->pid_set_name );
             $numDeleted = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $pid_list = $this->_queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
+            foreach( $pid_list as $pid ){
+                posix_kill( $pid, SIGINT );
+            }
             $this->_queueHandler->getRedisClient()->del( $queueInfo->pid_set_name );
+            $this->_queueHandler->getRedisClient()->set( $queueInfo->queue_name, 0 );
+            $queueInfo->pid_list_len = 0;
 
         } elseif ( !empty( $num ) ) {
 
             self::_TimeStampMsg( "Killing $num processes balancing all queues." );
-            $queuesInfo = QueuesList::get();
 
             while ( true ) {
 
@@ -331,14 +357,23 @@ class TMManager extends AbstractDaemon {
                 //we do not want an infinite loop
                 //so, at least one deletion per cycle
                 $deleted = false;
-                foreach ( $queuesInfo->list as $queue ) {
+                foreach ( $this->_queueObjectList->list as $queue ) {
 
                     //Exit, we reached the right number, exit the while loop
                     if( $numDeleted >= $num ){
                         break 2; //exit the while loop
                     }
 
-                    $_deleted = $this->_queueHandler->getRedisClient()->spop( $queue->pid_set_name );
+                    $_deleted = false;
+                    $maxConsumersPerQueue = $this->_numProcessesMax / 100 * $queue->pid_set_perc_break;
+                    if( $maxConsumersPerQueue < $queue->pid_list_len ){
+                        //ok, queue can be reduced because it's upper limit exceed the max queue consumers
+                        $_deleted = $this->_queueHandler->getRedisClient()->spop( $queue->pid_set_name );
+                        if ( $_deleted ) {
+                            $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queue->queue_name );
+                            posix_kill( $_deleted, SIGINT );
+                        }
+                    }
 
                     //we do not want an infinite loop
                     //so, at least one deletion per cycle
@@ -360,7 +395,13 @@ class TMManager extends AbstractDaemon {
             self::_TimeStampMsg( "Killing ALL processes." );
             foreach ( $this->_queueObjectList->list as $queue ) {
                 $numDeleted += $this->_queueHandler->getRedisClient()->scard( $queue->pid_set_name );
+                $pid_list = $this->_queueHandler->getRedisClient()->smembers( $queue->pid_set_name );
+                foreach ( $pid_list as $pid ){
+                    posix_kill( $pid, SIGINT );
+                }
                 $this->_queueHandler->getRedisClient()->del( $queue->pid_set_name );
+                $this->_queueHandler->getRedisClient()->set( $queue->queue_name, 0 );
+                $queue->pid_list_len = 0;
             }
 
         } else {

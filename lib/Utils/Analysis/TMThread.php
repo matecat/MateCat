@@ -8,7 +8,7 @@ use \Exception, \Bootstrap;
 $root = realpath( dirname( __FILE__ ) . '/../../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
-
+include \INIT::$MODEL_ROOT . "/queries.php";
 
 class TMThread {
 
@@ -48,15 +48,16 @@ class TMThread {
      */
     public static $__INSTANCE;
     public $RUNNING = true;
-    public $tHandlerPID;
+    public $_tHandlerPID;
     protected static function _TimeStampMsg( $msg ) {
+//        \INIT::$DEBUG = false;
         if ( \INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
         \Log::doLog( $msg );
     }
 
     protected function __construct( Info $queueInfo ) {
 
-        $this->tHandlerPID = posix_getpid();
+        $this->_tHandlerPID = posix_getpid();
         \Log::$fileName = 'tm_analysis.log';
 
         $this->_mySubscribedQueue = $queueInfo;
@@ -66,13 +67,13 @@ class TMThread {
             $this->_parentPid = posix_getppid();
             $this->_queueHandler = new QueueHandler();
 
-            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_mySubscribedQueue->pid_set_name, $this->tHandlerPID ) ) {
-                throw new \Exception( "(child {$this->tHandlerPID}) : FATAL !! cannot create my resource ID. Exiting!" );
+            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_mySubscribedQueue->pid_set_name, $this->_tHandlerPID ) ) {
+                throw new \Exception( "(child {$this->_tHandlerPID}) : FATAL !! cannot create my resource ID. Exiting!" );
             } else {
-                self::_TimeStampMsg( "(child {$this->tHandlerPID}) : spawned !!!" );
+                self::_TimeStampMsg( "(child {$this->_tHandlerPID}) : spawned !!!" );
             }
 
-            $this->_queueHandler->subscribe();
+            $this->_queueHandler->subscribe( $this->_mySubscribedQueue->queue_name );
 
         } catch ( \Exception $ex ){
 
@@ -92,9 +93,48 @@ class TMThread {
      */
     public static function getInstance( Info $queueInfo ) {
 
+        if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
+            die ( "This script can be run only in CLI Mode.\n\n" );
+        }
+
+        declare( ticks = 10 );
+        set_time_limit( 0 );
+
+        if ( !extension_loaded( "pcntl" ) && (bool)ini_get( "enable_dl" ) ) {
+            dl( "pcntl.so" );
+        }
+        if ( !function_exists( 'pcntl_signal' ) ) {
+            $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
+            static::_TimeStampMsg( $msg );
+        } else {
+//            static::_TimeStampMsg( 'registering signal handlers' );
+
+            pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
+            pcntl_signal( SIGINT,  array( get_called_class(), 'sigSwitch' ) );
+            pcntl_signal( SIGHUP,  array( get_called_class(), 'sigSwitch' ) );
+
+//            $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
+//            static::_TimeStampMsg( "$msg\n" );
+        }
+
         static::$__INSTANCE = new static( $queueInfo );
         return static::$__INSTANCE;
 
+    }
+
+    public static function sigSwitch( $sig_no ) {
+
+        static::_TimeStampMsg( "Trapped Signal : $sig_no" );
+
+        switch ( $sig_no ) {
+            case SIGTERM :
+            case SIGINT :
+            case SIGHUP :
+                static::$__INSTANCE->RUNNING = false;
+                break;
+            default :
+                break;
+        }
     }
 
     public function main( $args = null ) {
@@ -108,18 +148,18 @@ class TMThread {
             try {
 
                 // PROCESS CONTROL FUNCTIONS
-                if ( !self::_myProcessExists( $this->tHandlerPID ) ) {
-                    self::_TimeStampMsg( "(child " . $this->tHandlerPID . ") :  EXITING! my pid does not exists anymore, my parent told me to die." );
+                if ( !self::_myProcessExists( $this->_tHandlerPID ) ) {
+                    self::_TimeStampMsg( "(child " . $this->_tHandlerPID . ") :  EXITING! my pid does not exists anymore, my parent told me to die." );
                     $this->RUNNING = false;
                     break;
                 }
 
                 // control if parent is still running
-                if ( !self::_isMyParentRunning( $this->_parentPid ) ) {
-                    self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : EXITING : my parent seems to be died." );
-                    $this->RUNNING = false;
-                    break;
-                }
+//                if ( !self::_isMyParentRunning( $this->_parentPid ) ) {
+//                    self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : EXITING : my parent seems to be died." );
+//                    $this->RUNNING = false;
+//                    break;
+//                }
                 // PROCESS CONTROL FUNCTIONS
 
                 //read Message frame from the queue
@@ -128,14 +168,14 @@ class TMThread {
             } catch ( \Exception $e ) {
 
                 $secs = 3;
-//                self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : Failed to read frame from AMQ. Doing nothing, wait $secs seconds and re-try in next cycle." );
+//                self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : Failed to read frame from AMQ. Doing nothing, wait $secs seconds and re-try in next cycle." );
 //                self::_TimeStampMsg( $e->getMessage() );
                 sleep( $secs );
                 continue;
 
             }
 
-            self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} found " );
+            self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} found " );
 
             try {
                 $this->_checkForReQueueEnd( $elementQueue );
@@ -149,7 +189,7 @@ class TMThread {
             //START
 
             try {
-                $this->_queueHandler->initializeTMAnalysis( $elementQueue, $this->tHandlerPID );
+                $this->_queueHandler->initializeTMAnalysis( $elementQueue, $this->_tHandlerPID );
                 $this->_checkWordCount( $elementQueue );
             } catch ( \Exception $e ){
                 self::_TimeStampMsg( $e->getMessage() );
@@ -159,11 +199,12 @@ class TMThread {
 
             try {
                 $this->_matches = $this->_getMatches( $elementQueue );
-                self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} matches retrieved." );
+                self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} matches retrieved." );
                 $this->_tryRealignTagID( $elementQueue );
             } catch ( \Exception  $e ) {
 
-                self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : error retrieving Matches. Continue and try again in the next cycle." ); // ERROR FROM MYMEMORY
+//                self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : error retrieving Matches. Continue and try again in the next cycle." ); // ERROR FROM MYMEMORY
+                self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : error retrieving Matches. Try again in the next cycle. - " . $e->getMessage() ); // ERROR FROM MYMEMORY
                 $this->_queueHandler->ack( $msgFrame ); //ack the message try again next time. Re-queue
 
                 //set/increment the reQueue number
@@ -177,7 +218,7 @@ class TMThread {
 
             try {
                 $this->_updateRecord( $elementQueue );
-                self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} updated." );
+                self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} updated." );
             } catch ( \Exception $e ){
 
                 //Failed to update DB record
@@ -195,7 +236,7 @@ class TMThread {
 
             //unlock segment
             $this->_queueHandler->ack( $msgFrame );
-            self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} acknowledged." );
+            self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : Segment {$elementQueue[ 'id_segment' ]} - Job {$elementQueue[ 'id_job' ]} acknowledged." );
 
         } while( $this->RUNNING );
 
@@ -319,7 +360,7 @@ class TMThread {
         //set memcache
         $this->_queueHandler->incrementAnalyzedCount( $elementQueue[ 'pid' ], $eq_words, $standard_words );
         $this->_queueHandler->decSegmentsToAnalyzeOfWaitingProjects( $elementQueue[ 'pid' ], $this->_mySubscribedQueue );
-        $this->_queueHandler->tryToCloseProject( $elementQueue[ 'pid' ], $this->tHandlerPID, $this->_mySubscribedQueue );
+        $this->_queueHandler->tryToCloseProject( $elementQueue[ 'pid' ], $this->_tHandlerPID, $this->_mySubscribedQueue );
 
     }
 
@@ -491,7 +532,7 @@ class TMThread {
              * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
              */
             if ( $tms_match === null ) {
-                throw new \Exception( "--- (child " . $this->tHandlerPID . ") : Error from MyMemory. NULL received." );
+                throw new \Exception( "--- (child " . $this->_tHandlerPID . ") : Error from MyMemory. NULL received." );
             }
 
             $tms_match = $tms_match->get_matches_as_array();
@@ -533,7 +574,7 @@ class TMThread {
          * If No results found. Re-Queue
          */
         if ( empty( $matches ) || !is_array( $matches ) ) {
-            throw new \Exception( "--- (child " . $this->tHandlerPID . ") : No contribution found : Try again later." );
+            throw new \Exception( "--- (child " . $this->_tHandlerPID . ") : No contribution found : Try again later." );
         }
 
         return $matches;
@@ -616,10 +657,10 @@ class TMThread {
     protected function _checkWordCount( Array $objQueue ){
 
         if ( $objQueue[ 'raw_word_count' ] == 0 ) {
-//            self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : empty segment. acknowledge and continue" );
+//            self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : empty segment. acknowledge and continue" );
 //            SET as DONE and "decrement counter/close project"
             $this->_queueHandler->forceSetSegmentAnalyzed( $objQueue, $this->_mySubscribedQueue );
-            throw new Exception( "--- (child " . $this->tHandlerPID . ") : empty segment. acknowledge and continue" );
+            throw new Exception( "--- (child " . $this->_tHandlerPID . ") : empty segment. acknowledge and continue" );
         }
 
     }
@@ -640,7 +681,7 @@ class TMThread {
             if ( $msg instanceof \StompFrame && ( $msg->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msg->headers /* Stomp Client bug... hack */ ) ) ) {
 
                 $this->_frameID++;
-                self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") : processing frame {$this->_frameID}" );
+                self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") : processing frame {$this->_frameID}" );
 
                 $elementQueue = json_decode( $msg->body, true );
                 //empty message what to do?? it should not be there, acknowledge and process the next one
@@ -649,17 +690,16 @@ class TMThread {
                     \Utils::raiseJsonExceptionError();
                     $this->_queueHandler->ack( $msg );
                     sleep( 2 );
-                    throw new \Exception( "--- (child " . $this->tHandlerPID . ") : found frame but no valid segment found for tm volume analysis: wait 2 seconds" );
+                    throw new \Exception( "--- (child " . $this->_tHandlerPID . ") : found frame but no valid segment found for tm volume analysis: wait 2 seconds" );
 
                 }
 
             } else {
-                sleep( 5 );
-                throw new \Exception( "--- (child " . $this->tHandlerPID . ") : no frame found. wait 5 second" );
+                throw new \Exception( "--- (child " . $this->_tHandlerPID . ") : no frame found. Starting next cycle." );
             }
 
         } catch ( \Exception $e ) {
-            self::_TimeStampMsg( $e->getMessage() );
+//            self::_TimeStampMsg( $e->getMessage() );
 //            self::_TimeStampMsg( $e->getTraceAsString() );
             throw new \Exception( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
             /* jump the ack */
@@ -677,9 +717,9 @@ class TMThread {
          */
         if ( isset( $enqueuedMsg[ 'reQueueNum' ] ) && $enqueuedMsg[ 'reQueueNum' ] >= 100 ) {
             $this->_queueHandler->forceSetSegmentAnalyzed( $enqueuedMsg, $this->_mySubscribedQueue );
-            throw new \Exception( "--- (child " . $this->tHandlerPID . ") :  Frame Re-queue max value reached, acknowledge and skip." );
+            throw new \Exception( "--- (child " . $this->_tHandlerPID . ") :  Frame Re-queue max value reached, acknowledge and skip." );
         } elseif ( isset( $enqueuedMsg[ 'reQueueNum' ] ) ) {
-            self::_TimeStampMsg( "--- (child " . $this->tHandlerPID . ") :  Frame re-queued {$enqueuedMsg[ 'reQueueNum' ]} times." );
+            self::_TimeStampMsg( "--- (child " . $this->_tHandlerPID . ") :  Frame re-queued {$enqueuedMsg[ 'reQueueNum' ]} times." );
         }
 
     }
@@ -724,5 +764,8 @@ class TMThread {
 
 }
 
-TMThread::getInstance( QueuesList::get()->list[0] )->main();
-//TMThread::getInstance( Info::build( json_decode( $argv[ 1 ], true ) ) )->main();
+//$argv = array();
+//$argv[ 1 ] = '{"redis_key":"p3_list","queue_name":"analysis_queue_P3","pid_set_name":"ch_pid_set_p3","pid_list":[],"pid_list_len":1,"queue_length":0,"pid_set_perc_break":10}';
+
+//TMThread::getInstance( QueuesList::get()->list[0] )->main();
+TMThread::getInstance( Info::build( json_decode( $argv[ 1 ], true ) ) )->main();
