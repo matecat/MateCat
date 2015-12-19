@@ -6,7 +6,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
     function setup() {
         $this->test_data = new StdClass();
-        parent::setup();
+        // parent::setup();
     }
 
     private function prepareUserAndApiKey() {
@@ -38,7 +38,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $this->submitProjectWithApiKeys();
 
         $this->test_data->chunks = integrationSetSegmentsTranslated(
-                $this->test_data->project->id_project
+            $this->test_data->project->id_project
         );
     }
 

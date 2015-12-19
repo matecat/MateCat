@@ -1,7 +1,6 @@
 <?php
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
-
     public $id ;
     public $password ;
     public $id_customer ;

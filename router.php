@@ -37,6 +37,12 @@ $klein->onError(function ($klein, $err_msg, $err_type) {
             break;
         default:
             $klein->response()->code(500);
+            $error = error_get_last();
+            Log::doLog(
+                "Error: ${error['message']} " .
+                " \n" .
+                " ${error['line']} ${error['file']}"
+            );
             break;
     }
 

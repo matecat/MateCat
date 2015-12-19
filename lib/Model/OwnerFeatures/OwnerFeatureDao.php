@@ -13,7 +13,9 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
             " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled );"
         );
 
-        $values = array_diff_key( $obj->toArray(), array('id' => null) );
+        Log::doLog( $obj->attributes() );
+
+        $values = array_diff_key( $obj->attributes(), array('id' => null) );
 
         $stmt->execute( $values );
         return $this->getById( $conn->lastInsertId() );
