@@ -18,6 +18,11 @@ if ( ReviewImproved.enabled() )
     });
     issues.ensureUniqueIndex('id');
 
+    var issue_comments = db.addCollection('issue_comments', {
+        indices: ['id', 'id_issue']
+    });
+    issues.ensureUniqueIndex('id');
+
     db.upsert = function(collection, record) {
         var c = this.getCollection(collection);
         if ( !c.insert( record ) ) {
@@ -30,8 +35,9 @@ if ( ReviewImproved.enabled() )
     root.MateCat.db = db ;
 
     root.MateCat.colls = {};
-    root.MateCat.colls.issues   = issues ;
-    root.MateCat.colls.segments = segments ;
-    root.MateCat.colls.versions = versions ;
+    root.MateCat.colls.issues         = issues ;
+    root.MateCat.colls.segments       = segments ;
+    root.MateCat.colls.versions       = versions ;
+    root.MateCat.colls.issue_comments = issue_comments ;
 
 })(jQuery, window);

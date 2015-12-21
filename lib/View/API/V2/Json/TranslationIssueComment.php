@@ -19,5 +19,15 @@ class TranslationIssueComment {
         );
     }
 
+    /**
+     * @return array
+     */
+    public function renderArray( $array ) {
+        $out = array();
+        foreach($array as $record) {
+            $out[] = $this->renderItem( $record );
+        }
+        return $out;
+    }
 
 }

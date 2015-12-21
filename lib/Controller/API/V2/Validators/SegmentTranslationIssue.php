@@ -26,6 +26,11 @@ class SegmentTranslationIssue {
         }
     }
 
+    /**
+     *
+     * @throws NotFoundError
+     */
+
     private function ensureTranslationExists() {
         $this->translation = \Translations_SegmentTranslationDao::
             findBySegmentAndJob( $this->request->id_segment, $this->request->id_job  );
@@ -33,6 +38,7 @@ class SegmentTranslationIssue {
             throw new NotFoundError('translation not found');
         }
     }
+
     private function ensureSegmentExists() {
         $dao = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getByChunkIdAndSegmentId(

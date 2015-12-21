@@ -1,0 +1,20 @@
+<div class="messages-area-wrapper">
+  {{#if messages_ready}}
+    <div class="messages-list-container">
+      {{#each comments as |comment|}}
+        <div class="message-item">
+          {{comment.comment}}
+        </div>
+      {{/each}}
+    </div>
+    <div class="message-form-container">
+      <textarea data-ui="issue-reply-message" name="comment"
+          placeholder="Leave a reply..."></textarea>
+
+      <input data-action="submit-issue-reply" type="submit" />
+    </div>
+  {{else}}
+
+    <div class="loading">Loading...</div>
+  {{/if}}
+</div>

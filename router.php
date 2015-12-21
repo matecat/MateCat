@@ -117,4 +117,10 @@ $klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segmen
     $instance->respond('create');
 });
 
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues/[:id_issue]/comments', function() {
+    $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('index');
+});
+
 $klein->dispatch();

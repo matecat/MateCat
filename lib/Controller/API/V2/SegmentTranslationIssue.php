@@ -1,4 +1,5 @@
 <?php
+
 namespace API\V2  ;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use LQA\EntryDao as EntryDao ;
@@ -26,7 +27,6 @@ class SegmentTranslationIssue extends ProtectedKleinController {
 
     public function create() {
         $data = array(
-            // 'uid'                 => null,
             'id_segment'          => $this->request->id_segment,
             'id_job'              => $this->request->id_job,
             'id_category'         => $this->request->id_category,
@@ -38,19 +38,19 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'end_node'            => $this->request->end_node,
             'end_offset'          => $this->request->end_offset,
             'is_full_segment'     => false,
-            // 'penalty_points'      => $this->getPenaltyPoints(),
             'comment'             => $this->request->comment
         );
 
-        $result = \LQA\EntryDao::createEntry( $data );
-        $json = new JsonFormatter( );
-        $rendered = $json->renderItem( $result );
+        $model = EntryDao::createEntry( $data );
+        $json = new JsonFormatter();
+        $rendered = $json->renderItem( $model );
 
         $this->response->json( array('issue' => $rendered) );
     }
 
     public function delete() {
         $this->validateAdditionalPassword();
+
         EntryDao::deleteEntry( $this->validator->issue );
         $this->response->code(200);
     }
@@ -64,8 +64,6 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     }
 
     private function getVersionNumber() {
-        \Log::doLog($this->request->params());
-
         if ( null !== $this->request->param('version_number') ) {
             return $this->request->param('version_number') ;
         }

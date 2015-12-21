@@ -58,7 +58,15 @@ if ( ReviewImproved.enabled() ) {
             type: 'POST',
             data : data
         }).done( function( data ) {
-            console.log('New comment posted');
+            // Append the record to the issue_comments database
+            //
+            // close modal window
+            // rerender issue
+            var issue = MateCat.db.getCollection('segment_translation_issues')
+                .by('id', data.id_issue);
+            ReviewImproved.modal.close();
+            ReviewImproved.updateIssueViews( segment );
+
         })
 
     });
@@ -87,6 +95,27 @@ if ( ReviewImproved.enabled() ) {
             });
         },
 
+        // TODO: rerender issue detail instead
+        renderCommentList : function( issue ) {
+            var selector = sprintf(
+                '[data-issue-id=%s] [data-mount=issue-comment]:visible',
+                issue.id
+            );
+            var mount_point = $( selector );
+            if ( mount_point.length == 0 ) return;
+
+            var comments = MateCat.db.getCollection('issue_comments').
+                findObjects({ 'id_issue' : issue.id });
+
+            var data = {
+                loading : false,
+                comments : comments
+            };
+            var tpl = root.template('review_improved/issue_comments', data);
+
+            mount_point.html(tpl);
+        },
+
         getSegmentRecord : function( segment ) {
             return MateCat.db.getCollection('segments')
                 .findObject({sid : segment.id });
@@ -112,7 +141,22 @@ if ( ReviewImproved.enabled() ) {
         showIssueDetailModalWindow : function( issue ) {
             var data = { issue: issue };
             var tpl = template('review_improved/issue_detail_modal', data);
+
+            var issue_comments = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/issues/%s/comments',
+                config.id_job, config.password,
+                issue.id_segment,
+                issue.id
+            );
+
+            $.getJSON(issue_comments).done(function(data) {
+                $.each( data.comments, function( comment ) {
+                    MateCat.db.upsert('issue_comments', _.clone(this) );
+                });
+            });
+
             ReviewImproved.modal = tpl.remodal({});
+            ReviewImproved.renderCommentList( issue );
 
             tpl.on('keydown', function(e)  {
                 var esc = 27 ;
@@ -122,6 +166,7 @@ if ( ReviewImproved.enabled() ) {
                 }
             });
             ReviewImproved.modal.open();
+
         },
 
         updateIssueViews : function( segment ) {
@@ -191,7 +236,6 @@ if ( ReviewImproved.enabled() ) {
                 id : container.data('issue-id') + ''
             });
             area.html( UI.decodePlaceholdersToText( ReviewImproved.getTranslationText( segment ) ));
-
         },
 
         versionsAndIssuesPromise : function( segment ) {
@@ -238,6 +282,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     var issues = db.getCollection('segment_translation_issues');
     var versions = db.getCollection('segment_versions');
     var segments = db.getCollection('segments');
+    var comments = db.getCollection('issue_comments');
 
     issues.on('update', issueRecordChanged);
     issues.on('insert', issueRecordChanged);
@@ -246,6 +291,11 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     versions.on('update', versionRecordChanged);
     versions.on('insert', versionRecordChanged);
     versions.on('delete', versionRecordChanged);
+
+    comments.on('update', commentRecordChanged);
+    comments.on('insert', commentRecordChanged);
+    comments.on('delete', commentRecordChanged);
+
 
     function showIssueSelectionModalWindow(selection, container) {
         var data             = {};
@@ -520,14 +570,20 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             .html( textarea_container );
     }
 
+    function commentRecordChanged( record ) {
+        var issue = MateCat.db.getCollection('segment_translation_issues').
+                by('id', record.id_issue);
+        console.log('issue', issue);
+        // rerender comments list
+        ReviewImproved.renderCommentList( issue );
+    }
+
     function versionRecordChanged( record ) {
         var segment = UI.Segment.find( record.id_segment );
         updateVersionDependentViews( segment );
     }
 
     function issueRecordChanged( record ) {
-        console.log('issueRecordChanged', record);
-
         var segment = UI.Segment.find( record.id_segment );
         RI.updateIssueViews( segment );
     }

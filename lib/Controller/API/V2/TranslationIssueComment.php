@@ -1,10 +1,20 @@
 <?php
 namespace API\V2  ;
 use API\V2\Json\TranslationIssueComment as JsonFormatter;
-use LQA\EntryDao as EntryDao ;
+use LQA\EntryCommentDao ;
 
 class TranslationIssueComment extends ProtectedKleinController {
     private $validator ;
+
+    public function index() {
+        $comments = EntryCommentDao::findByIssueId(
+            $this->validator->issue->id
+        );
+
+        $json = new JsonFormatter( );
+        $rendered = $json->renderArray( $comments );
+        $this->response->json( array('comments' => $rendered ));
+    }
 
     public function create() {
         $data = array(
@@ -12,7 +22,7 @@ class TranslationIssueComment extends ProtectedKleinController {
             'id_qa_entry' => $this->validator->issue->id,
         );
 
-        $result = \LQA\EntryCommentDao::createComment( $data );
+        $result = EntryCommentDao::createComment( $data );
 
         $json = new JsonFormatter( );
         $rendered = $json->renderItem( $result );

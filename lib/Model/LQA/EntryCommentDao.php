@@ -4,6 +4,16 @@ namespace LQA;
 
 class EntryCommentDao extends \DataAccess_AbstractDao {
 
+    public function findByIssueId( $id_issue ) {
+        $sql = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
+            " ORDER BY create_date DESC ";
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->execute( array( $id_issue ) );
+        return $stmt->fetchAll();
+    }
+
     public function createComment( $data ) {
         $struct = new EntryCommentStruct( $data );
         $struct->ensureValid();

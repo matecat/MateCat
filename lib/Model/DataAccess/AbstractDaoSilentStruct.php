@@ -107,8 +107,10 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         if ( $this->validator != null ) {
             $this->validator->flushErrors();
             $this->validator->validate();
-            $string = $this->validator->getErrorsAsString();
+            // TODO: change this
+            $string = $this->validator->getErrors();
             $isEmpty = empty( $string );
+
             return  $isEmpty ;
         }
         return true;

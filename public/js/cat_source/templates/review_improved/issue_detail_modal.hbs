@@ -30,10 +30,9 @@
   </ul>
   <hr />
 
-  <div class="message-form-container">
-    <textarea data-ui="issue-reply-message" name="comment" placeholder="Leave a reply..."></textarea>
-
-    <input data-action="submit-issue-reply" type="submit" />
+  <div data-mount="issue-comments">
+    {{> 'review_improved/_issue_comments' }}
   </div>
+
 
 </div>
