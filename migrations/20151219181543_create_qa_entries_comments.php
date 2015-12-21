@@ -9,7 +9,7 @@ CREATE TABLE `qa_entry_comments` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `uid` bigint(20) ,
     `id_qa_entry` bigint(20) NOT NULL,
-    `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `comment` TEXT,
     PRIMARY KEY (`id`),
     KEY `id_qa_entry` (`id_qa_entry`),

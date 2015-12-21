@@ -55,7 +55,8 @@ if ( ReviewImproved.enabled() ) {
 
         $.ajax({
             url: replies_path,
-            type: 'POST'
+            type: 'POST',
+            data : data
         }).done( function( data ) {
             console.log('New comment posted');
         })

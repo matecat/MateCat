@@ -61,15 +61,26 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         }
     }
 
+    /**
+     *
+     * @deprecation use `attributes` method instead
+     */
     public function toArray(){
         Log::doLog('DEPRECATED, use `attributes()` method instead');
         return $this->attributes();
     }
 
+    /**
+     * Returns an array of the public attributes of the struct.
+     * If $keys_to_return is provided, the resulting array will include
+     * only the specified keys.
+     *
+     * This method is useful in conjunction with PDO execute, where only
+     * a subset of the attributes may be required to be bound to the query.
+     *
+     * @return Array
+     */
     public function attributes( $keys_to_return=null ) {
-
-        \Log::doLog( $keys_to_return );
-
         $refclass = new ReflectionClass( $this );
         $attrs = array();
         $publicProperties = $refclass->getProperties(ReflectionProperty::IS_PUBLIC) ;
