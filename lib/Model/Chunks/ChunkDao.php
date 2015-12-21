@@ -2,6 +2,13 @@
 
 class Chunks_ChunkDao extends DataAccess_AbstractDao {
 
+    /**
+     * @param $id
+     * @param $password
+     *
+     * @return Chunks_ChunkStruct
+     * @throws Exceptions_RecordNotFound
+     */
     public static function getByIdAndPassword( $id, $password ) {
         $conn = Database::obtain()->getConnection();
 

@@ -297,11 +297,18 @@ abstract class viewController extends controller {
      */
     protected function makeTemplate( $skeleton_file ) {
         try {
-            $this->template                   = new PHPTAL( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
-            $this->template->basepath         = INIT::$BASEURL;
-            $this->template->hostpath         = INIT::$HTTPHOST;
-            $this->template->supportedBrowser = $this->supportedBrowser;
-            $this->template->enabledBrowsers  = INIT::$ENABLED_BROWSERS;
+            $this->template                       = new PHPTAL( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+            $this->template->basepath             = INIT::$BASEURL;
+            $this->template->hostpath             = INIT::$HTTPHOST;
+            $this->template->supportedBrowser     = $this->supportedBrowser;
+            $this->template->enabledBrowsers      = INIT::$ENABLED_BROWSERS;
+            $this->template->build_number         = INIT::$BUILD_NUMBER;
+            $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
+
+            $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
+            $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+
+            ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
         } catch ( Exception $e ) {
             echo "<pre>";

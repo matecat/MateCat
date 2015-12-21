@@ -1,0 +1,34 @@
+<!doctype html>
+<html dir="ltr" lang="it-IT">
+<head>
+    <title>Job Archived</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="icon" href="${basepath}public/img/favicon.ico"/>
+    <link href="${basepath}public/css/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+
+<div class="iepopup job_archived">
+    <script>
+        $( "body" ).on( 'click', '#reactivate-job', function ( e ) {
+            e.preventDefault();
+            UI.reactivateJob();
+        } );
+    </script>
+    <a href="${basepath}" class="logoblack"></a><br/>
+
+
+    <strong style="font-size:160%">This job has been archived.</strong><br/><br/>
+    <img src="/public/img/jobarchived.png"/><br/>
+    <p>MateCAT archives automatically jobs after ${job_archived} days of inactivity.</p>
+    <p tal:condition="true:jobOwnerIsMe">
+        <a id="reactivate-job" href="#" class="translated">Reactivate it</a>
+
+    </p>
+    <p tal:condition="not:jobOwnerIsMe">If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a>
+        to reactivate it<br/>
+        If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
+</div>
+
+</body>
+</html>

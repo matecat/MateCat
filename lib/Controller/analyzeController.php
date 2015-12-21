@@ -89,6 +89,7 @@ class analyzeController extends viewController {
 
         if ( empty( $project_by_jobs_data ) ) {
             $this->project_not_found = true;
+            return;
         }
 
         //pick the project subject from the first job
@@ -301,6 +302,10 @@ class analyzeController extends viewController {
 
     public function setTemplateVars() {
 
+        if( $this->project_not_found ){
+            parent::makeTemplate( 'project_not_found.html' );
+            return;
+        }
 
         $this->template->jobs                       = $this->jobs;
         $this->template->fast_analysis_wc           = $this->fast_analysis_wc;

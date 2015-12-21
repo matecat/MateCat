@@ -70,65 +70,6 @@
 
 
 
-<div class="iepopup" metal:define-macro="job_not_found">
-	<a href="${basepath}" class="logoblack"></a><br />
-
-
-	<strong style="font-size:160%">Sorry, we can't find the project you're looking for.</strong>
-    <br /><br />
-     <img src="/public/img/jobnotfound.png" />
-    <br />
-	<p>Double check the URL or contact your PM.<br />
- If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
-</div>
-
-<div class="iepopup" metal:define-macro="project_not_found">
-    <a href="${basepath}" class="logoblack"></a><br />
-
-
-    <strong style="font-size:160%">Sorry, we can't find the project you're looking for.</strong><br /><br />
- <img src="/public/img/jobcancelled.png" />
-    <br />
-    <p>Double check the URL or contact your PM.<br />
- If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
-</div>
-
-<div class="iepopup job_cancelled" metal:define-macro="job_cancelled">
-    <a href="${basepath}" class="logoblack"></a><br />
-
-
-    <strong style="font-size:160%">This job has been cancelled.</strong><br /><br />
-<img src="/public/img/jobcancelled.png" />
-    <br />
-    <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br />
-        If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
-</div>
-
-<div class="iepopup job_archived" metal:define-macro="job_archived">
-    <script>
-        $("body").on('click', '#reactivate-job', function(e) {
-            e.preventDefault();
-            UI.reactivateJob();
-        });
-    </script>
-    <a href="${basepath}" class="logoblack"></a><br />
-
-
-    <strong style="font-size:160%">This job has been archived.</strong><br /><br />
-<img src="/public/img/jobarchived.png" /><br />
-    <p>MateCAT archives automatically jobs after ${job_archived} days of inactivity.</p>
-    <p tal:condition="true:jobOwnerIsMe">
-        <a id="reactivate-job" href="#" class="translated">Reactivate it</a>
-
-    </p>
-    <p tal:condition="not:jobOwnerIsMe">If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br />
-        If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
-</div>
-
-
-
-
-
 
 
 
