@@ -73,7 +73,6 @@ class catController extends viewController {
         $this->password   = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
-        $this->job        = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
 
         if ( isset( $_GET[ 'step' ] ) ) {
             $this->step = $_GET[ 'step' ];
@@ -116,13 +115,14 @@ class catController extends viewController {
         $files_found  = array();
         $lang_handler = Langs_Languages::getInstance();
 
-        $data = getSegmentsInfo( $this->jid, $this->password );
-        if ( empty( $data ) or $data < 0 ) {
+        try {
+            $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        } catch( \Exception $e ){
             $this->job_not_found = true;
-
-            //stop execution
             return;
         }
+
+        $data = getSegmentsInfo( $this->jid, $this->password );
 
         //retrieve job owner. It will be useful also if the job is archived or cancelled
         $this->job_owner = ( $data[ 0 ][ 'job_owner' ] != "" ) ? $data[ 0 ][ 'job_owner' ] : "support@matecat.com";
@@ -472,16 +472,34 @@ class catController extends viewController {
 
     public function setTemplateVars() {
 
-        $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS;
-        $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
+        if ( $this->job_not_found ) {
+            parent::makeTemplate( 'job_not_found.html' );
+            return;
+        }
 
-        if ( $this->job_not_found || $this->job_cancelled ) {
+        if( $this->job_cancelled ) parent::makeTemplate( 'job_cancelled.html' );
+        if( $this->job_archived ) parent::makeTemplate( 'job_archived.html' );
+
+        if( $this->job_cancelled || $this->job_archived ) {
+
             $this->template->pid                 = null;
             $this->template->target              = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = 0;
             $this->template->fileCounter         = 0;
+
+            $this->template->owner_email   = $this->job_owner;
+            $this->template->jobOwnerIsMe  = ( $this->logged_user->email == $this->job_owner );
+            $this->template->job_not_found = $this->job_not_found;
+            $this->template->job_archived  = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+            $this->template->job_cancelled = $this->job_cancelled;
+            $this->template->logged_user            = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
+            $this->template->extended_user          = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+            $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
+
+            return;
+
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->target              = $this->target;
@@ -490,6 +508,15 @@ class catController extends viewController {
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
         }
+
+        $this->template->owner_email   = $this->job_owner;
+        $this->template->jobOwnerIsMe  = ( $this->logged_user->email == $this->job_owner );
+        $this->template->job_not_found = $this->job_not_found;
+        $this->template->job_archived  = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_cancelled = $this->job_cancelled;
+        $this->template->logged_user   = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
+        $this->template->extended_user = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
+        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
 
         $this->template->page        = 'cattool';
         $this->template->jid         = $this->jid;
@@ -511,7 +538,6 @@ class catController extends viewController {
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
         $this->template->owner_email         = $this->job_owner;
-        $this->template->jobOwnerIsMe        = ( $this->logged_user->email == $this->job_owner );
 
         $this->template->isLogged        = $this->isLoggedIn(); // used in template
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );  // used by the client
@@ -525,39 +551,28 @@ class catController extends viewController {
         $this->template->overall_quality       = $this->qa_overall;
         $this->template->overall_quality_class = strtolower( str_replace( ' ', '', $this->qa_overall ) );
 
-        $end_time                               = microtime( true ) * 1000;
-        $load_time                              = $end_time - $this->start_time;
-        $this->template->load_time              = $load_time;
-        $this->template->tms_enabled            = var_export( (bool)$this->project_status[ 'id_tms' ], true );
-        $this->template->mt_enabled             = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
-        $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
-        $this->template->build_number           = INIT::$BUILD_NUMBER;
+        $end_time                    = microtime( true ) * 1000;
+        $load_time                   = $end_time - $this->start_time;
+        $this->template->load_time   = $load_time;
+        $this->template->tms_enabled = var_export( (bool)$this->project_status[ 'id_tms' ], true );
+        $this->template->mt_enabled  = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
+
         $this->template->downloadFileName       = urlencode( $this->downloadFileName );
-        $this->template->job_not_found          = $this->job_not_found;
-        $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
-        $this->template->job_cancelled          = $this->job_cancelled;
-        $this->template->logged_user            = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->extended_user          = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
+
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
-        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-
-        $this->template->isReview    = var_export( self::isRevision(), true );
-        $this->template->reviewClass = ( self::isRevision() ? ' review' : '' );
+        $this->template->isReview         = var_export( self::isRevision(), true );
+        $this->template->reviewClass      = ( self::isRevision() ? ' review' : '' );
         $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
-        $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-
-        $this->template->editLogClass = $this->getEditLogClass();
-        $this->template->maxNumSegments = INIT::$MAX_NUM_SEGMENTS;
-
-
-        ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
+        $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
+        $this->template->editLogClass         = $this->getEditLogClass();
+        $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
+        $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
+        $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
 
         //check if it is a composite language, for cjk check that accepts only ISO 639 code
         if ( strpos( $this->target_code, '-' ) !== false ) {
@@ -608,12 +623,16 @@ class catController extends viewController {
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
+
     }
 
     public function getJobStats() {
       return $this->job_stats ;
     }
 
+    /**
+     * @return Jobs_JobStruct
+     */
     public function getJob() {
       return $this->job ;
     }

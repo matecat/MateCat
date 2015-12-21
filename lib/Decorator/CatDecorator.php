@@ -7,7 +7,8 @@ class CatDecorator {
   private $job ;
   private $project_completion_feature_enabled ;
 
-  public function  __construct( $controller, $template ) {
+  public function  __construct( catController $controller, PHPTAL $template ) {
+
     $this->controller = $controller ;
     $this->template = $template ;
     $this->job = $this->controller->getJob() ;
