@@ -1274,6 +1274,7 @@ $.extend(UI, {
                 setCursorPosition(this);
                 selectText(this);
                 $(this).toggleClass('selected');
+				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }
 
 //		}).on('contextmenu', '.source', function(e) {
