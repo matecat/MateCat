@@ -308,8 +308,7 @@ class QueueHandler extends Stomp {
             case ( $queueLen >= 100000 ):
                 $queueAddresses = $queueInfo->list[ 2 ];
                 break;
-            case ( $queueLen >= 20000 ): // at rate of 100 segments/s  ~ 3m 20s
-//            case ( $queueLen >= 20 ): // TEST
+            case ( $queueLen >= 15000 ): // at rate of 40 segments/s  ~ 6m 15s
                 $queueAddresses = $queueInfo->list[ 1 ];
                 break;
             default:
