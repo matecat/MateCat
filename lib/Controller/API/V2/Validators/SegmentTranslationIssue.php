@@ -10,11 +10,7 @@ class SegmentTranslationIssue {
     private $request;
 
     public $segment;
-    public $project;
-    public $chunk ;
     public $translation ;
-    public $qa_model ;
-    public $category ;
     public $issue ;
 
     public function __construct( $request ) {
@@ -22,11 +18,22 @@ class SegmentTranslationIssue {
     }
 
     public function validate() {
-        $this->validateResourcePresence();
-        $this->validateRequestParams();
+        $this->ensureSegmentExists();
+        $this->ensureTranslationExists();
+
+        if ( $this->request->id_issue ) {
+            $this->ensureSegmentIsInScope();
+        }
     }
 
-    private function validateResourcePresence() {
+    private function ensureTranslationExists() {
+        $this->translation = \Translations_SegmentTranslationDao::
+            findBySegmentAndJob( $this->request->id_segment, $this->request->id_job  );
+        if ( !$this->translation ) {
+            throw new NotFoundError('translation not found');
+        }
+    }
+    private function ensureSegmentExists() {
         $dao = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getByChunkIdAndSegmentId(
             $this->request->id_job,
@@ -35,44 +42,17 @@ class SegmentTranslationIssue {
         );
 
         if (!$this->segment) throw new NotFoundError('segment not found');
-
-        $this->chunk = \Chunks_ChunkDao::getByIdAndPassword(
-            $this->request->id_job,
-            $this->request->password
-        );
-
-        $this->project = \Projects_ProjectDao::findById(
-            $this->chunk->id_project
-        );
     }
 
-    private function validateRequestParams() {
-        $this->validateCategoryId();
+    private function ensureSegmentIsInScope() {
+        $this->issue = \LQA\EntryDao::findById( $this->request->id_issue );
 
-        $this->translation = $this->segment->findTranslation( $this->request->id_job ) ;
-
-        // IF an issue_id is provided check it's in the segment scope
-        if ( $this->request->id_issue ) {
-            $this->issue = \LQA\EntryDao::findById( $this->request->id_issue );
-
-            if ( !$this->issue ) {
-                throw new ValidationError('issue not found');
-            }
-
-            if ( $this->issue->id_segment != $this->segment->id ) {
-                throw new ValidationError('issue not found');
-            }
+        if ( !$this->issue ) {
+            throw new ValidationError('issue not found');
         }
-    }
 
-    private function validateCategoryId() {
-        if ( $this->request->id_category ) {
-            $this->qa_model = \LQA\ModelDao::findById( $this->project->id_qa_model );
-            $this->category = \LQA\CategoryDao::findById( $this->request->id_category );
-
-            if ( $this->category->id_model != $this->qa_model->id ) {
-                throw new ValidationError('QA model id mismatch');
-            }
+        if ( $this->issue->id_segment != $this->segment->id ) {
+            throw new ValidationError('issue not found');
         }
     }
 }

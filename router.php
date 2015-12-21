@@ -20,7 +20,13 @@ Log::$uniqID = uniqid() ;
 
 $klein = new \Klein\Klein();
 
-$klein->onError(function ($klein, $err_msg, $err_type) {
+
+
+
+$klein->onError(function ($klein, $err_msg, $err_type, $exception) {
+    // TODO still need to catch fatal errors here with 500 code
+    //
+
     switch( $err_type ) {
         case 'API\V2\AuthenticationError':
             $klein->response()->code(401);
@@ -36,13 +42,13 @@ $klein->onError(function ($klein, $err_msg, $err_type) {
             $klein->response()->code(404);
             break;
         default:
+            \Log::doLog("$err_msg" );
             $klein->response()->code(500);
-            $error = error_get_last();
+            // TODO: log exceptions to default loader
             Log::doLog(
-                "Error: ${error['message']} " .
-                " \n" .
-                " ${error['line']} ${error['file']}"
+                "Error: {$exception->getMessage()} "
             );
+            \Log::doLog( $exception->getTraceAsString() );
             break;
     }
 

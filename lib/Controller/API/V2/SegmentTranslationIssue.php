@@ -9,11 +9,9 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     private $project ;
     private $validator ;
     private $segment ;
-    private $translation ;
     private $issue ;
 
     public function index() {
-        \Log::doLog("version number: ". $this->getVersionNumber());
         $result = \LQA\EntryDao::findAllByTranslationVersion(
             $this->validator->translation->id_segment,
             $this->validator->translation->id_job,
@@ -33,14 +31,14 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'id_job'              => $this->request->id_job,
             'id_category'         => $this->request->id_category,
             'severity'            => $this->request->severity,
-            'translation_version' => $this->translation->version_number,
+            'translation_version' => $this->validator->translation->version_number,
             'target_text'         => $this->request->target_text,
             'start_node'          => $this->request->start_node,
             'start_offset'        => $this->request->start_offset,
             'end_node'            => $this->request->end_node,
             'end_offset'          => $this->request->end_offset,
             'is_full_segment'     => false,
-            'penalty_points'      => $this->getPenaltyPoints(),
+            // 'penalty_points'      => $this->getPenaltyPoints(),
             'comment'             => $this->request->comment
         );
 
@@ -78,16 +76,6 @@ class SegmentTranslationIssue extends ProtectedKleinController {
 
     private function validateAdditionalPassword() {
         // TODO: check password is good for deletion
-    }
-
-    private function getPenaltyPoints() {
-        $severities = $this->validator->category->getJsonSeverities() ;
-        foreach($severities as $severity) {
-            if ( $severity['label'] == $this->request->severity ) {
-                return $severity['penalty'];
-            }
-        }
-        throw new ValidationError('Provided severity was not found in model');
     }
 
 }

@@ -11,6 +11,11 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
     protected $validator;
     protected $cached_results = array();
 
+    public function __construct( Array $array_params = array() ) {
+        parent::__construct( $array_params );
+        $this->tryValidator();
+    }
+
     /**
      * This method returns the same object so to be chainable
      * and be sure to clear the cache when calling cachable
@@ -61,14 +66,64 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         return $this->attributes();
     }
 
-    public function attributes() {
+    public function attributes( $keys_to_return=null ) {
+
+        \Log::doLog( $keys_to_return );
+
         $refclass = new ReflectionClass( $this );
         $attrs = array();
         $publicProperties = $refclass->getProperties(ReflectionProperty::IS_PUBLIC) ;
         foreach( $publicProperties as $property ) {
+            if ( !empty($keys_to_return) ) {
+                if (! in_array( $property->getName(), $keys_to_return)) {
+                    continue;
+                }
+            }
             $attrs[$property->getName()] = $property->getValue($this);
         }
         return $attrs;
+    }
+
+    public function ensureValid() {
+        if ( !$this->isValid() ) {
+            throw new DataAccess_ValidationError(
+                $this->validator->getMessages()
+            );
+        }
+    }
+
+    public function isValid() {
+        if ( $this->validator != null ) {
+            $this->validator->flushErrors();
+            $this->validator->validate();
+            $string = $this->validator->getErrorsAsString();
+            $isEmpty = empty( $string );
+            return  $isEmpty ;
+        }
+        return true;
+    }
+
+    /**
+     * Try to set the validator for this struct automatically.
+     */
+    private function tryValidator() {
+        // try to set a validator for this struct it one exists
+        $current_class = get_class( $this );
+
+        // This regular expressions changes `FooStruct` in `FooValidator`
+        $validator_name = preg_replace('/(.+)(Struct)$/', '\1Validator', $current_class );
+        $validator_name = "\\$validator_name" ;
+
+        \Log::doLog('validator_name', $validator_name);
+
+        try {
+            $load = class_exists($validator_name, true) ;
+            if ( $load  ) {
+                $this->validator = new $validator_name($this);
+            }
+        } catch ( \Exception $e ) {
+            \Log::doLog("Exception class not found $validator_name");
+        }
     }
 
 }

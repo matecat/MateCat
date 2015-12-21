@@ -53,6 +53,10 @@ class EntryDao extends \DataAccess_AbstractDao {
     public static function createEntry( $data ) {
         $data = self::ensureStartAndStopPositionAreOrdered( $data ) ;
 
+        $struct = new EntryStruct( $data );
+        $struct->ensureValid();
+        $struct->setDefaults();
+
         $sql = "INSERT INTO qa_entries " .
             " ( " .
             " id_segment, id_job, id_category, severity, " .
@@ -71,14 +75,14 @@ class EntryDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        try {
-            $stmt->execute( $data );
-        } catch ( \Exception $e ) {
-            // FIXME: this was required because Klein does not handle SQL
-            // exceptions correctly.
-            Log::doLog( $e->getMessage() );
-            throw new \Exception( $e->getMessage() );
-        }
+        $values = $struct->attributes(
+             array_merge( array_keys($data), array('penalty_points') )
+        );
+        \Log::doLog( $values );
+
+        $stmt->execute( $values );
+
+        Log::doLog('record saved');
 
         $lastId = $conn->lastInsertId();
         return self::findById( $lastId );

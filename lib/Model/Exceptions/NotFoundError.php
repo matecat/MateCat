@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V2  ;
+namespace Exceptions  ;
 class NotFoundError extends \Exception {
 
 }
