@@ -94,6 +94,7 @@ class reviseSummaryController extends viewController {
 
         $this->template->jid          = $this->jid;
         $this->template->password     = $this->password;
+        $this->template->pid          = $this->data['id_project'];
 
         $this->template->pname        = $this->project_status[ 'name' ];
         $this->template->source_code  = $this->data[ 'source' ];
