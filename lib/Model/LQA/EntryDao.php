@@ -7,6 +7,19 @@ class EntryDao extends \DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
     }
 
+    public static function updateRepliesCount( $id ) {
+        $sql = "UPDATE qa_entries SET replies_count = " .
+            " ( SELECT count(*) FROM " .
+            " qa_entry_comments WHERE id_qa_entry = :id " .
+            " ) WHERE id = :id ";
+
+        \Log::doLog( $sql );
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        return $stmt->execute( array( 'id' => $id ) );
+    }
+
     public static function deleteEntry( EntryStruct $record ) {
         $sql = "DELETE FROM qa_entries WHERE id = :id ";
 

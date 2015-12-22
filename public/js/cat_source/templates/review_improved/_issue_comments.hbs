@@ -1,20 +1,17 @@
 <div class="messages-area-wrapper">
-  {{ log 'loading' loading }}
-  {{ log 'comments' comments }}
-
   {{#unless loading}}
+    {{#if comments}}
     <div class="messages-list-container">
       {{#each comments as |comment|}}
         <div class="message-item">
           <span class="date">{{ formatDate comment.created_at 'lll' }}</span>
           {{comment.message}}
         </div>
-
-
         <hr />
 
       {{/each}}
     </div>
+    {{/if}}
     <div class="message-form-container">
       <textarea data-ui="issue-reply-message" name="comment"
           placeholder="Leave a reply..."></textarea>

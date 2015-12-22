@@ -26,11 +26,15 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
-        $stmt->execute( $struct->attributes(
+        $result = $stmt->execute( $struct->attributes(
             array('uid', 'id_qa_entry', 'create_date', 'comment')
         ));
-
         $lastId = $conn->lastInsertId();
+
+        if ( $result ) {
+            \LQA\EntryDao::updateRepliesCount( $struct->id_qa_entry );
+        }
+
         return self::findById( $lastId );
     }
 

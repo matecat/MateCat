@@ -11,6 +11,19 @@
 
 }
 
+.messages-area-wrapper {
+    margin-top: 10px;
+
+    .messages-list-container {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        padding: 8px 8px 0 0;
+    }
+}
+
 .translation-issues-area {
     max-height: 200px;
     overflow-y: auto;

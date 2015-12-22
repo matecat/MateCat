@@ -17,8 +17,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     versions.on('insert', versionRecordChanged);
     versions.on('delete', versionRecordChanged);
 
-    $(document).on('db:issue_comments:change', commentRecordChanged);
-
     function showIssueSelectionModalWindow(selection, container) {
         var data             = {};
 
@@ -295,14 +293,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         segment.el.find('[data-mount=segment_text_area_container]')
             .html( textarea_container );
-    }
-
-    function commentRecordChanged( record ) {
-        var issue = MateCat.db.getCollection('segment_translation_issues').
-                by('id', record.id_issue);
-        console.log('issue', issue);
-        // rerender comments list
-        ReviewImproved.renderCommentList( issue );
     }
 
     function versionRecordChanged( record ) {
