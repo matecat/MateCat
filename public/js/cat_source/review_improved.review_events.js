@@ -58,16 +58,11 @@ if ( ReviewImproved.enabled() ) {
             type: 'POST',
             data : data
         }).done( function( data ) {
-            // Append the record to the issue_comments database
-            //
-            // close modal window
-            // rerender issue
-            var issue = MateCat.db.getCollection('segment_translation_issues')
-                .by('id', data.id_issue);
-            ReviewImproved.modal.close();
-            ReviewImproved.updateIssueViews( segment );
+            MateCat.db.upsert('issue_comments', _.clone( data.comment ) );
+            $(document).trigger('db:issue_comments:change', data.comments);
 
-        })
+            ReviewImproved.renderCommentList( issue );
+        });
 
     });
 
@@ -98,21 +93,20 @@ if ( ReviewImproved.enabled() ) {
         // TODO: rerender issue detail instead
         renderCommentList : function( issue ) {
             var selector = sprintf(
-                '[data-issue-id=%s] [data-mount=issue-comment]:visible',
+                '[data-issue-id=%s] [data-mount=issue-comments]:visible',
                 issue.id
             );
             var mount_point = $( selector );
             if ( mount_point.length == 0 ) return;
 
             var comments = MateCat.db.getCollection('issue_comments').
-                findObjects({ 'id_issue' : issue.id });
+                findObjects({ 'id_issue': issue.id });
 
             var data = {
                 loading : false,
                 comments : comments
             };
-            var tpl = root.template('review_improved/issue_comments', data);
-
+            var tpl = template('review_improved/issue_comments', data);
             mount_point.html(tpl);
         },
 
@@ -154,9 +148,9 @@ if ( ReviewImproved.enabled() ) {
                     MateCat.db.upsert('issue_comments', _.clone(this) );
                 });
             });
+            $(document).trigger('db:issue_comments:change', _.last(data.comments));
 
             ReviewImproved.modal = tpl.remodal({});
-            ReviewImproved.renderCommentList( issue );
 
             tpl.on('keydown', function(e)  {
                 var esc = 27 ;
@@ -165,8 +159,15 @@ if ( ReviewImproved.enabled() ) {
                     ReviewImproved.modal.close();
                 }
             });
-            ReviewImproved.modal.open();
 
+            $(document).one('closed', '.remodal', function() {
+                ReviewImproved.modal.destroy();
+            });
+            $(document).one('opened', '.remodal', function() {
+                ReviewImproved.renderCommentList( issue );
+            });
+
+            ReviewImproved.modal.open();
         },
 
         updateIssueViews : function( segment ) {
@@ -292,10 +293,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     versions.on('insert', versionRecordChanged);
     versions.on('delete', versionRecordChanged);
 
-    comments.on('update', commentRecordChanged);
-    comments.on('insert', commentRecordChanged);
-    comments.on('delete', commentRecordChanged);
-
+    $(document).on('db:issue_comments:change', commentRecordChanged);
 
     function showIssueSelectionModalWindow(selection, container) {
         var data             = {};
@@ -313,6 +311,11 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         data.lqa_model       = JSON.parse( config.lqa_model ) ;
 
         var tpl = root.template('review_improved/error_selection', data);
+
+        if ( RI.modal ) {
+            RI.modal.destroy();
+        }
+
         RI.modal = tpl.remodal({});
 
         tpl.on('keydown', function(e)  {

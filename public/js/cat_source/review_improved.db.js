@@ -21,7 +21,7 @@ if ( ReviewImproved.enabled() )
     var issue_comments = db.addCollection('issue_comments', {
         indices: ['id', 'id_issue']
     });
-    issues.ensureUniqueIndex('id');
+    issue_comments.ensureUniqueIndex('id');
 
     db.upsert = function(collection, record) {
         var c = this.getCollection(collection);
