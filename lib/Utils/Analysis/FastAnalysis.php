@@ -2,7 +2,10 @@
 namespace Analysis;
 
 use \Analysis\Commons\AbstractDaemon,
-    \Analysis\Commons\RedisKeys;
+    \Analysis\Queue\RedisKeys,
+    \Analysis\Commons\QueueElement,
+    \Analysis\Queue\QueueInfo,
+    \Analysis\Queue\QueuesList;
 
 use \Bootstrap,
     \Constants_ProjectStatus as ProjectStatus,
@@ -47,7 +50,7 @@ class FastAnalysis extends AbstractDaemon {
         parent::__construct();
 
         try {
-            self::$queueHandler = new QueueHandler();
+            self::$queueHandler = new AMQHandler();
             self::$queueHandler->getRedisClient()->rpush( RedisKeys::FAST_PID_LIST, self::$tHandlerPID );
         } catch ( Exception $ex ) {
 
@@ -453,7 +456,7 @@ class FastAnalysis extends AbstractDaemon {
          *  because surely this value are equal for all the record of the project
          */
         $first_element = reset( $fastResultData );
-        $queueInfo     = self::$queueHandler->getQueueAddressesByPriority( $totalSegmentsToAnalyze, $first_element[ 'id_mt_engine' ] );
+        $queueInfo     = $this->_getQueueAddressesByPriority( $totalSegmentsToAnalyze, $first_element[ 'id_mt_engine' ] );
 
         if ( $totalSegmentsToAnalyze ) {
 
@@ -461,7 +464,7 @@ class FastAnalysis extends AbstractDaemon {
             self::_TimeStampMsg( 'Elements: ' . count( $fastResultData ) );
 
             try {
-                self::$queueHandler->setTotal( array( 'pid' => $pid, 'queueInfo' => $queueInfo ) );
+                $this->_setTotal( array( 'pid' => $pid, 'queueInfo' => $queueInfo ) );
             } catch ( Exception $e ) {
                 Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString(), "Fast Analysis set Total values failed." );
                 self::_TimeStampMsg( $e->getMessage() . "" . $e->getTraceAsString() );
@@ -483,9 +486,12 @@ class FastAnalysis extends AbstractDaemon {
                         $queue_element[ 'target' ] = $language;
                         $queue_element[ 'id_job' ] = $id_job;
 
-                        $jsonObj = json_encode( $queue_element );
+                        $element = new QueueElement();
+                        $element->params = $queue_element;
+                        $element->classLoad = '\Analysis\Workers\TMAnalysisWorker';
+
                         Utils::raiseJsonExceptionError();
-                        self::$queueHandler->send( $queueInfo->queue_name, $jsonObj, array( 'persistent' => self::$queueHandler->persistent ) );
+                        self::$queueHandler->send( $queueInfo->queue_name, $element, array( 'persistent' => self::$queueHandler->persistent ) );
                         self::_TimeStampMsg( "AMQ Set Executed " . ( $k + 1 ) );
 
                     }
@@ -543,6 +549,92 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         return $results;
+    }
+
+    /**
+     * How much segments are in queue before this?
+     *
+     * <pre>
+     *  $config = array(
+     *    'total' => null,
+     *    'qid' => null,
+     *    'queueInfo' => @var QueueInfo
+     *  )
+     * </pre>
+     *
+     * @param array $config
+     *
+     * @throws Exception
+     */
+    protected function _setTotal( $config = array(
+            'total'            => null,
+            'pid'              => null,
+            'queueInfo'        => null
+    ) ) {
+
+        if( empty( $this->queueTotalID ) && empty( $config[ 'pid' ] ) ){
+            throw new Exception( 'Can Not set a Total without a Queue ID.' );
+        }
+
+        if( !empty( $config[ 'total' ] ) ){
+            $_total = $config[ 'total' ];
+        } else {
+
+            if( empty( $config[ 'queueInfo' ] ) && empty( $this->queueName ) ){
+                throw new Exception( 'Need a queue name to get it\'s total or you must provide one' );
+            }
+
+            $queueName = ( !empty( $config[ 'queueInfo' ] ) ? $config[ 'queueInfo' ]->queue_name : $this->queueName );
+            $_total = self::$queueHandler->getQueueLength( $queueName );
+
+        }
+
+        if( !empty( $config[ 'pid' ] ) ){
+            $_pid = $config[ 'pid' ];
+        } else {
+            $_pid = $this->queueTotalID;
+        }
+
+        self::$queueHandler->getRedisClient()->setex( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_pid, 60 * 60 * 24 /* 24 hours TTL */, $_total );
+        self::$queueHandler->getRedisClient()->rpush( $config[ 'queueInfo' ]->redis_key, $_pid );
+
+    }
+
+    /**
+     * Select the right Queue ( and the associated redis Key ) by it's length ( simplest implementation simple )
+     *
+     * @param $queueLen int
+     * @param $id_mt_engine int
+     *
+     * @return QueueInfo
+     */
+    protected function _getQueueAddressesByPriority( $queueLen, $id_mt_engine ){
+
+        $queueInfo = QueuesList::get();
+        $mtEngine  = Engine::getInstance( $id_mt_engine );
+
+        //anyway take the defaults
+        $queueAddresses = $queueInfo->list[ 0 ];
+
+        //use this kind of construct to easy add/remove queues and to disable feature by: comment rows or change the switch flag to false
+        switch ( true ) {
+            case ( ! $mtEngine instanceof \Engines_MyMemory ):
+                $queueAddresses = $queueInfo->list[ 2 ];
+                break;
+            case ( $queueLen >= 100000 ):
+                $queueAddresses = $queueInfo->list[ 2 ];
+                break;
+            case ( $queueLen >= 15000 ): // at rate of 40 segments/s  ~ 6m 15s
+                $queueAddresses = $queueInfo->list[ 1 ];
+                break;
+            default:
+                $queueAddresses = $queueInfo->list[ 0 ];
+                break;
+
+        }
+
+        return $queueAddresses;
+
     }
 
 }

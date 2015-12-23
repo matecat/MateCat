@@ -9,8 +9,8 @@
 
 namespace Analysis;
 use Analysis\Commons\AbstractDaemon, 
-    Analysis\Commons\RedisKeys,
-    Analysis\Queue\Info,
+    Analysis\Queue\RedisKeys,
+    Analysis\Queue\QueueInfo,
     Analysis\Queue\QueuesList;
 
 use \INIT, \Log, \Exception, \Bootstrap;
@@ -25,10 +25,10 @@ Bootstrap::start();
  * Should be the final class when daemons will refactored
  *
  */
-class TMManager extends AbstractDaemon {
+class TaskManager extends AbstractDaemon {
 
     /**
-     * @var \Analysis\QueueHandler
+     * @var \Analysis\AMQHandler
      */
     protected $_queueHandler;
 
@@ -54,12 +54,12 @@ class TMManager extends AbstractDaemon {
         try {
 
             $this->NUM_WORKERS_FILE = INIT::$ROOT . "/lib/Utils/Analysis/.num_processes";
-            $this->DEFAULT_NUM_WORKERS = require( 'Commons/DefaultNumTMWorkers.php' );
+            $this->DEFAULT_NUM_WORKERS = require( 'DefaultNumTMWorkers.php' );
 
             set_time_limit(0);
 
-            $this->_queueHandler = new QueueHandler();
-            $this->_queueObjectList = $this->_queueHandler->getQueues();
+            $this->_queueHandler = new AMQHandler();
+            $this->_queueObjectList = QueuesList::get();
 
 
         } catch ( Exception $ex ){
@@ -138,9 +138,9 @@ class TMManager extends AbstractDaemon {
                     break;
 
                 default:
-                    if( ! ( time() % 11 ) ) self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID .  ") sleeping ...." );
+                    if( ! ( time() % 10 ) ) self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID .  ") sleeping ...." );
 //                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : no pid to delete everithing  works well" );
-                    self::_balanceQueues( $this->_queueObjectList );
+                    self::_balanceQueues();
                     sleep( 1 );
                     break;
             }
@@ -177,7 +177,7 @@ class TMManager extends AbstractDaemon {
     /**
      * Run by forked child
      *
-     * @return Info
+     * @return QueueInfo
      * @throws Exception
      */
     protected function _routeThisChildProcess(){
@@ -205,7 +205,7 @@ class TMManager extends AbstractDaemon {
 
     }
 
-    protected function _balanceQueues( QueuesList $queueList ){
+    protected function _balanceQueues(){
 //        self::_TimeStampMsg( "TODO. Now i do nothing." );
 //        $this->RUNNING = false;
     }
@@ -248,7 +248,7 @@ class TMManager extends AbstractDaemon {
             } else {
 
                 // child process runs from here
-                pcntl_exec( "/usr/bin/php", array( "TMThread.php" , json_encode( $queueObject ) ) );
+                pcntl_exec( "/usr/bin/php", array( "Executor.php" , json_encode( $queueObject ) ) );
                 posix_kill( posix_getpid(), SIGINT );
                 exit;
 
@@ -285,11 +285,11 @@ class TMManager extends AbstractDaemon {
      *     <li>Kill ALL processes when no parameters are sent</li>
      * </ul>
      *
-     * @param Info $queueInfo
-     * @param int  $pid
-     * @param int  $num
+     * @param QueueInfo $queueInfo
+     * @param int       $pid
+     * @param int       $num
      */
-    protected function _killPids( Info $queueInfo = null, $pid = 0, $num = 0 ) {
+    protected function _killPids( QueueInfo $queueInfo = null, $pid = 0, $num = 0 ) {
 
         self::_TimeStampMsg( "Request to kill some processes." );
         self::_TimeStampMsg( "Pid List: " . @var_export( $queueInfo->pid_set_name, true ) );
@@ -309,7 +309,7 @@ class TMManager extends AbstractDaemon {
 
             self::_TimeStampMsg( "Killing pid $pid from a not defined queue. Seek and destroy." );
             /**
-             * @var $queue Info
+             * @var $queue QueueInfo
              */
             foreach ( $this->_queueObjectList->list as $queue ) {
 
@@ -416,7 +416,7 @@ class TMManager extends AbstractDaemon {
 
     protected function _getNumProcessesMax() {
 
-        // legge quanti processi lanciare
+        // how many process to run
         $num_processes = $this->DEFAULT_NUM_WORKERS;
         if ( file_exists( $this->NUM_WORKERS_FILE ) ) {
             $num_processes = intval( file_get_contents( $this->NUM_WORKERS_FILE ) );
@@ -432,4 +432,4 @@ class TMManager extends AbstractDaemon {
 
 }
 
-TMManager::getInstance()->main();
+TaskManager::getInstance()->main();

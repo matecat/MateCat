@@ -1,6 +1,6 @@
 <?php 
 
-use Analysis\TMManager, Analysis\Commons\RedisKeys, Analysis\Queue\QueuesList;
+use Analysis\TaskManager, Analysis\Commons\RedisKeys, Analysis\Queue\QueuesList;
 
 class TMManagerTest extends AbstractTest {
 
@@ -14,7 +14,7 @@ class TMManagerTest extends AbstractTest {
     public function setUp() {
 
         \INIT::$DEBUG = false;
-        $this->_TMInstance = TMManager::getInstance();
+        $this->_TMInstance = TaskManager::getInstance();
 
         $this->_redisClient = new \RedisHandler();
         $this->_redisClient->getConnection()->set( RedisKeys::VOLUME_ANALYSIS_PID, 1224 );

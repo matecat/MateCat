@@ -8,7 +8,7 @@
  */
 
 namespace Analysis;
-use Analysis\Commons\RedisKeys,
+use Analysis\Queue\RedisKeys,
         \RedisHandler,
         \Predis\Client,
         \INIT,

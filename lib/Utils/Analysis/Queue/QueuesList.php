@@ -1,6 +1,6 @@
 <?php
 namespace Analysis\Queue;
-use \Analysis\Commons\RedisKeys;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -61,7 +61,7 @@ class QueuesList {
     );
 
     /**
-     * @var Info[]
+     * @var QueueInfo[]
      */
     public $list = array();
 
@@ -79,7 +79,7 @@ class QueuesList {
         }
 
         foreach ( $queue_info as $level => $values ) {
-            $this->list[ $level ] = Info::build( $values );
+            $this->list[ $level ] = QueueInfo::buildFromArray( $values );
         }
 
     }

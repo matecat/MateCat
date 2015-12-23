@@ -6,9 +6,10 @@ use \Log;
 
 /**
  * Created by PhpStorm.
- * User: roberto
- * Date: 17/09/15
- * Time: 15.29
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 23/12/15
+ * Time: 20.55
+ *
  */
 abstract class AbstractDaemon {
 
@@ -87,6 +88,10 @@ abstract class AbstractDaemon {
 
     abstract public function main( $args = null );
 
+    /**
+     * Needed to be abstract and static despite the strict standards because it will be called from signal handler
+     * @return mixed
+     */
     abstract public static function cleanShutDown();
 
 }

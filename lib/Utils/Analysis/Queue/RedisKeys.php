@@ -1,6 +1,6 @@
 <?php
 
-namespace Analysis\Commons;
+namespace Analysis\Queue;
 
 /**
  * Created by PhpStorm.

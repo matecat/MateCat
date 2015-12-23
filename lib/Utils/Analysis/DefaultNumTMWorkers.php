@@ -7,6 +7,6 @@
  * 
  */
 
-namespace Analysis\Commons;
+namespace Analysis;
 
 return 100;

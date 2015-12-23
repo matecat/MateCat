@@ -1,6 +1,6 @@
 <?php
 
-use \Analysis\QueueHandler;
+use \Analysis\AMQHandler;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +8,7 @@ use \Analysis\QueueHandler;
  * Date: 18/05/15
  * Time: 13.15
  */
-class Analysis_DqfQueueHandler extends QueueHandler {
+class Analysis_DqfQueueHandler extends AMQHandler {
 
     public function __construct( $brokerUri = null ) {
 
