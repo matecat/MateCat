@@ -89,7 +89,6 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         segment_id = this.getSegmentId(segment);
-//        this.consecutiveCopySourceNum = [];
         var options = {
             segment_id: segment_id,
             status: status,
@@ -109,12 +108,6 @@ UI = {
                     callback: 'preExecChangeStatus',
                     okTxt: 'Only this segment',
                     context: optionsStr,
-/*
-                    context: {
-                        options: options,
-                        noPropagation: false
-                    },
-*/
                     msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
                 });
             } else {
