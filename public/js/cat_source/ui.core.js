@@ -587,8 +587,7 @@ console.log('changeStatus');
             '	<div class="overflow"></div>' +
             '</div>';
 
-        // FIXME: this is global search for element
-        $('.footer .tab.glossary').after( alternativesTabHtml );
+        $('.footer .tab.glossary', segment).after( alternativesTabHtml );
 
         UI.currentSegment.trigger('afterFooterCreation', segment);
 
