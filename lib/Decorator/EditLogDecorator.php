@@ -32,6 +32,7 @@ class EditLogDecorator extends AbstractDecorator {
         $project_status = $model->getProjectStatus();
         $jobData        = $model->getJobData();
 
+        $this->template->pid         = $model->getProjectId();
         $this->template->jid         = $model->getJid();
         $this->template->password    = $model->getPassword();
         $this->template->data        = $data;

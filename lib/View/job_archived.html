@@ -5,6 +5,27 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="icon" href="${basepath}public/img/favicon.ico"/>
     <link href="${basepath}public/css/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+
+    <script src="${basepath}public/js/lib/jquery.js"></script>
+    <script type="text/javascript">
+        /*<![CDATA[*/
+        var config = {
+            basepath: '${basepath | string:/}',
+            job_id: '${jid}',
+            password: '${password}'
+        };
+        /*]]>*/
+    </script>
+
+    <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+    <tal:block tal:condition="true:use_compiled_assets" >
+        <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
+    </tal:block>
+
+    <tal:block tal:condition="not:use_compiled_assets" >
+        <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
+    </tal:block>
+
 </head>
 <body>
 
