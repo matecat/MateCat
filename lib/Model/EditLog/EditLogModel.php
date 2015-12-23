@@ -614,5 +614,8 @@ class EditLog_EditLogModel {
         return $this->jobEmpty;
     }
 
+    public function getProjectId(){
+        return $this->data[ 'id_project' ];
+    }
 
 }
