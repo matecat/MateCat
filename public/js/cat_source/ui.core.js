@@ -86,20 +86,34 @@ UI = {
         $(window).trigger('cachedSegmentObjects');
     },
 
+    /**
+     * Changes the segment status.
+     *
+     * @param ob element is the button that was clicked
+     * @param status string 'approved' or whatever else status string
+     * @param byStatus int indicates if the click comes form the status bar or
+     * from the button.
+     *
+     */
 	changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-        segment_id = this.getSegmentId(segment);
+        var segment_id = this.getSegmentId(segment);
+
         var options = {
             segment_id: segment_id,
             status: status,
             byStatus: byStatus,
             noPropagation: false
         };
-        if(byStatus) { // if this comes from a click on the status bar
+
+        if (byStatus) {
             options.noPropagation = true;
             this.execChangeStatus(JSON.stringify(options)); // no propagation
         } else {
-            if(this.autopropagateConfirmNeeded()) { // ask if the user wants propagation or this is valid only for this segment
+
+            // ask if the user wants propagation or this is valid only
+            // for this segment
+            if (this.autopropagateConfirmNeeded()) {
                 optionsStr = JSON.stringify(options)
                 APP.confirm({
                     name: 'confirmAutopropagation',
@@ -108,7 +122,9 @@ UI = {
                     callback: 'preExecChangeStatus',
                     okTxt: 'Only this segment',
                     context: optionsStr,
-                    msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
+                    msg: "There are other identical segments. <br><br>Would you " +
+                         "like to propagate the translation to all of them, " +
+                         "or keep this translation only for this segment?"
                 });
             } else {
                 this.execChangeStatus(JSON.stringify(options)); // autopropagate
