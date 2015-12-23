@@ -123,8 +123,6 @@ if ( Review.enabled() )
             if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
-                console.log('translatedList: ', translatedList);
-                console.log('approvedList: ', approvedList);
                 if( translatedList.length ) {
                     translatedList.first().find('.editarea').click();
                 } else {
@@ -290,10 +288,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         } else {
             $('.editor .sub-editor.review').addClass('open');
         }
-/*
-        $('.editor .sub-editor').hide();
-        $('.editor .sub-editor.review').show();
-*/
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('afterFormatSelection', '.editor .editarea', function() {
@@ -352,27 +346,14 @@ if ( Review.enabled() && Review.type == 'simple' ) {
     });
 
     $.extend(UI, {
-
         setRevision: function( data ){
-
             APP.doRequest({
-//                data: reqData,
-
                 data: data,
-
-//                context: [reqArguments, segment, status],
                 error: function() {
-                    //UI.failedConnection( this[0], 'setRevision' );
                     UI.failedConnection( data, 'setRevision' );
                 },
                 success: function(d) {
-//                    console.log('d: ', d);
                     $('#quality-report').attr('data-vote', d.data.overall_quality_class);
-                    // temp
-//                    d.stat_quality = config.stat_quality;
-//                    d.stat_quality[0].found = 2;
-                    //end temp
-//                    UI.populateStatQualityPanel(d.stat_quality);
                 }
             });
         },
@@ -483,26 +464,14 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             console.log('openNextTranslated');
             sid = sid || UI.currentSegmentId;
             el = $('#segment-' + sid);
-//            console.log(el.nextAll('.status-translated, .status-approved'));
 
             var translatedList = [];
             var approvedList = [];
-// console.log('QUANTI? ', el.nextAll('.status-translated, .status-approved').length);
-            // find in current UI
 
             if(el.nextAll('.status-translated').length) { // find in next segments in the current file
                 translatedList = el.nextAll('.status-translated');
-//                approvedList   = el.nextAll('.status-approved');
-                console.log('translatedList: ', translatedList);
-//                console.log('approvedList: ', approvedList);
                 if( translatedList.length ) {
                     translatedList.first().find('.editarea').click();
-                } else {
-//                    approvedList.first().find('.editarea').click();
-                    // chiudi segmento: BELLA, HO FINITO!
-
-//                    UI.reloadWarning();
-//                    approvedList.first().find('.editarea').click();
                 }
 
             } else {
@@ -510,13 +479,11 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
 
                     var translatedList = $(this).find('.status-translated');
-//                    var approvedList   = $(this).find('.status-approved');
 
                     if( translatedList.length ) {
                         translatedList.first().find('.editarea').click();
                     } else {
                         UI.reloadWarning();
-//                        approvedList.first().find('.editarea').click();
                     }
 
                     return false;
@@ -526,7 +493,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
 console.log('AAA');
                     translatedList = $('section.status-translated');
-//                    approvedList   = $('section.status-approved');
 
                     if( translatedList.length ) {
                         if((translatedList.first().is(UI.currentSegment))) {
@@ -534,14 +500,6 @@ console.log('AAA');
                         } else {
                             translatedList.first().find('.editarea').click();
                         }
-/*
-                    } else {
-                        if((approvedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(approvedList.first());
-                        } else {
-                            approvedList.first().find('.editarea').click();
-                        }
-*/
                     }
 
                 } else { // find in not loaded segments

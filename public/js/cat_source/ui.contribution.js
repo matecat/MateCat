@@ -342,8 +342,6 @@ $.extend(UI, {
         this.setContributionTail.push(item);
     },
     execSetContributionTail: function () {
-//        console.log('execSetContributionTail');
-
         if ( UI.setContributionTail.length ) {
             item = UI.setContributionTail[0];
             UI.setContributionTail.shift();
