@@ -10,11 +10,7 @@ if ( ReviewImproved.enabled() ) {
         modal : null,
         lastSelection : null,
 
-        commentRecordChanged : function(event, record) {
-            var issue = MateCat.db.getCollection('segment_translation_issues').
-                findObject({ id: record.id_issue });
-
-            // rerender comments list
+        commentsLoaded : function(event, issue) {
             ReviewImproved.renderCommentList( issue );
         },
 
@@ -95,16 +91,13 @@ if ( ReviewImproved.enabled() ) {
                     $.each( data.comments, function( comment ) {
                         MateCat.db.upsert('issue_comments', _.clone(this) );
                     });
-                    if ( data.comments.length ) {
-                        $(document).trigger('db:issue_comments:change', _.last( data.comments ));
-                    }
+                    $(document).trigger('issue_comments:load', issue);
                 });
             });
             $(document).trigger('db:issue_comments:change', _.last(data.comments));
 
             var tpl_data = { loading: true, issue: issue };
             var tpl = template('review_improved/issue_detail_modal', tpl_data);
-
 
             ReviewImproved.modal = tpl.remodal({});
 
@@ -226,7 +219,7 @@ if ( ReviewImproved.enabled() ) {
         }
     });
 
-    $(document).on('db:issue_comments:change', ReviewImproved.commentRecordChanged);
+    $(document).on('issue_comments:load', ReviewImproved.commentsLoaded);
 
     $(document).on('segments:load', function(e, data) {
         $.each(data.files, function() {
@@ -285,7 +278,7 @@ if ( ReviewImproved.enabled() ) {
             data : data
         }).done( function( data ) {
             MateCat.db.upsert('issue_comments', _.clone( data.comment ) );
-            $(document).trigger('db:issue_comments:change', data.comment );
+            $(document).trigger('issue_comments:load', issue );
             ReviewImproved.renderCommentList( issue );
         });
 
