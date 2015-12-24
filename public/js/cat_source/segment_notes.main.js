@@ -80,52 +80,6 @@ if ( SegmentNotes.enabled() )
         return $('.tab-switcher-notes:visible', segment).length > 0;
     }
 
-    var activateTab = function() {
-        $('.editor .submenu .active').removeClass('active');
-        $('.tab-switcher-notes').addClass('active');
-
-        $('.editor .sub-editor.open').removeClass('open');
-        $('.editor .sub-editor.segment-notes').addClass('open');
-    }
-
-    $(window).on('segmentOpened', function(e) {
-        if ( tabVisible( e.segment ) ) {
-            activateTab();
-        }
-    });
-
-    $(document).on('createFooter:skipped', function(e, segment) {
-    });
-
-    $(document).on('createFooter:skipped:cached', function(e, segment) {
-        if ( tabVisible( segment ) ) {
-            activateTab();
-        }
-    });
-
-    $(window).on('segmentOpened', function(e) {
-        var segment = new UI.Segment( e.segment );
-
-        if ( tabVisible( segment ) && segment.isFooterCreated() ) {
-            activateTab();
-        }
-
-    });
-
-    $(window).on('getContribution:complete', function(e, segment) {
-        // IF this event triggers for the current segment it
-        // means that the footer was not cached and the loading
-        // completed while we were on the active segment.
-        if ( tabVisible( segment ) ) {
-            activateTab();
-        }
-    });
-
-    $(document).on('click', '.tab-switcher-notes', function(e) {
-        e.preventDefault();
-        activateTab();
-    });
-
     // exports
     $.extend(SegmentNotes, {
         registerSegments : registerSegments,
