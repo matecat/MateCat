@@ -94,7 +94,6 @@ if ( ReviewImproved.enabled() ) {
                     $(document).trigger('issue_comments:load', issue);
                 });
             });
-            $(document).trigger('db:issue_comments:change', _.last(data.comments));
 
             var tpl_data = { loading: true, issue: issue };
             var tpl = template('review_improved/issue_detail_modal', tpl_data);

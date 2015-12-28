@@ -6,42 +6,66 @@ ReviewImproved.enabled = function() {
 
 
 if ( ReviewImproved.enabled() && config.isReview ) {
+    // Review page
+
     SegmentActivator.registry.push(function( sid ) {
         var segment = UI.Segment.find( sid );
         // TODO: refactor this, the click to activate a
         // segment is not a good way to handle.
         segment.el.find('.errorTaggingArea').click();
     });
+
+    // Register footer
+    UI.SegmentFooter.registerTab({
+        code                : 'review',
+        tab_class           : 'review',
+        label               : 'Revise',
+        activation_priority : 60,
+        tab_position        : 50,
+        is_enabled    : function( footer ) {
+            return true;
+        },
+        tab_markup          : function( footer ) {
+            return this.label ;
+        },
+        content_markup      : function( footer ) {
+            var data = { id : footer.segment.id };
+            return MateCat.Templates['review_improved/review_tab_content'](data);
+        },
+        is_hidden    : function( footer ) {
+            return false;
+        },
+    });
+
+
 }
 
 if ( ReviewImproved.enabled() && !config.isReview ) {
 (function($, root, undefined) {
 
-    function activateTab( segment ) {
-        $('.editor .submenu .active').removeClass('active');
-        $('.tab-switcher-issues').addClass('active');
-
-        $('.editor .sub-editor.open').removeClass('open');
-        $('.editor .sub-editor.segment-issues').addClass('open');
-    }
-
-    $(document).on('click', '.tab-switcher-issues', function(e) {
-        var segment = new UI.Segment( $( e.target ).closest( 'section' ) );
-        e.preventDefault();
-        activateTab( segment );
-    });
-
-    $.extend(ReviewImproved, {
-        translateFooterTabHTML : function( sid ) {
-            return template('review_improved/issues_tab', {
-                id_segment : sid
-            })[0].outerHTML ;
+    // Translate page
+    UI.SegmentFooter.registerTab({
+        code                : 'review',
+        tab_class           : 'review',
+        label               : 'Revise',
+        activation_priority : 60,
+        tab_position        : 50,
+        is_enabled    : function( footer ) {
+            return true;
         },
-        translateFooterTabContentHTML : function( sid ) {
-            return template('review_improved/issues_tab_content', {
-                id_segment: sid
-            })[0].outerHTML ;
-        }
+        tab_markup          : function( footer ) {
+            return this.label ;
+        },
+        content_markup      : function( footer ) {
+            var data = { id : footer.segment.id };
+            return MateCat.Templates['review_improved/issues_tab_content'](data);
+        },
+        is_hidden    : function( footer ) {
+            return false;
+        },
     });
+
+
+
 })(jQuery, window) ;
 }

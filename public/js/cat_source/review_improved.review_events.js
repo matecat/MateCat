@@ -123,22 +123,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         // }
     });
 
-    $('html').on('footerCreation', 'section', function() {
-        var div = $('<div>' + UI.footerHTML + '</div>');
-
-        var data = { id: $(this).attr('id') };
-
-        div.find('.submenu').append(
-            $(MateCat.Templates['review_improved/review_tab']( data ))
-        );
-
-        div.append(
-            $(MateCat.Templates['review_improved/review_tab_content'](data))
-        );
-
-        UI.footerHTML = div.html();
-    });
-
     $(document).on('click', '.reviewImproved .tab-switcher-review', function(e) {
         e.preventDefault();
 
@@ -304,11 +288,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var segment = UI.Segment.find( record.id_segment );
         RI.updateIssueViews( segment );
     }
-
-
-    // Event to trigger on approval
-    // TODO: this is to be redone, this should only set the state on the
-    // segment.
 
 
     $(document).on('segmentVersionChanged', function(e, segment) {
