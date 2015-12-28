@@ -115,9 +115,6 @@ class ProjectManager {
             return ;
         }
 
-
-        // TODO:
-
         $dao = new Projects_MetadataDao( Database::obtain() );
         $dao->set(
             $this->projectStructure['id_project'],
@@ -138,6 +135,16 @@ class ProjectManager {
                     "code"    => -5,
                     "message" => "Invalid Project Name " . $oldName . ": it should only contain numbers and letters!"
             );
+        }
+
+        /**
+         * This is the last chance to perform the validation before the project is created in the database.
+         * Validations should populate the projectStructure with errors and codes.
+         */
+        Features::validateProjectCreation( $this->projectStructure );
+
+
+        if (! empty( $this->projectStructure['result']['errors'] )) {
 
             return false;
         }

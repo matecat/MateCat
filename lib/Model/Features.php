@@ -27,6 +27,30 @@ class Features {
         }
     }
 
+    /**
+     * Populates the projectStructure with error messages coming from
+     * all the features enabled for the current request.
+     *
+     * @param $projectStructure is the project structure right before it's persisted.
+     */
+
+    public static function validateProjectCreation( ArrayObject &$projectStructure ) {
+        // find the features to work on. We must rely on the project owner
+        //
+        \Log::doLog( 'id_customer', $projectStructure['id_customer'] );
+
+        // find the features enabled for the customer
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $projectStructure['id_customer'] );
+
+        foreach( $features as $feature ) {
+            \Log::doLog( 'feature', $feature);
+            $name = "Features\\" . $feature->toClassName() ;
+            $name::validateProjectCreation( $projectStructure );
+
+        }
+
+    }
+
     // TODO: to be improved. This should be the entry point to apply
     // feature specific updated to the project due to owner features.
     //
@@ -36,11 +60,10 @@ class Features {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $project->id_customer );
 
         foreach( $features as $feature ) {
-            \Log::doLog( 'feature code', $feature->feature_code );
             $name = "Features\\" . $feature->toClassName() ;
 
             $cls = new $name( $project, $feature );
-            $cls->postCreate();
+            $cls->postProjectCreate();
         }
     }
 

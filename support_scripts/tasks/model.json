@@ -1,5 +1,7 @@
 {
 	"model": {
+        "version" : 1,
+
 		"label": "Ebay 1",
 		"categories": [{
 			"label": "Accuracy",
@@ -122,6 +124,13 @@
 				"label": "Critical",
 				"penalty": 8
 			}
-        ]
+        ],
+
+        "passfail" : {
+            "type" : "points_per_mille",
+            "limit" : 20
+        }
+
 	}
+
 }

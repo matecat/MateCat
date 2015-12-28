@@ -2,8 +2,6 @@
 
 class NewWithOwnershipTest extends IntegrationTest {
 
-    private $test_data ;
-
     function setup() {
         $this->path = '/api/new' ;
         $this->method = 'POST';

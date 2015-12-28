@@ -340,6 +340,7 @@ class NewController extends ajaxController {
         }
 
         $arFiles = array();
+
         foreach ( $stdResult as $input_name => $input_value ) {
             $arFiles[] = $input_value->name;
         }
@@ -398,6 +399,9 @@ class NewController extends ajaxController {
                 $conversionHandler->setStopOnFileException( false );
 
                 $fileObjects = $conversionHandler->extractZipFile();
+
+                \Log::doLog( 'fileObjets', $fileObjects );
+
                 //call convertFileWrapper and start conversions for each file
 
                 if ( $conversionHandler->uploadError ) {
