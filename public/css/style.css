@@ -3972,3 +3972,10 @@ body.hideMatches .submenu {
     margin-bottom: 5px;
 }
 
+
+/**
+ * Ensure all tabbed content in the footer is only visible when
+ * the segment completed loading.
+ */
+section .footer .tab.open { display: none; }
+section.loaded .footer .tab.open { display: block ; }
