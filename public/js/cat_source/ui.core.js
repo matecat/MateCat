@@ -1149,17 +1149,22 @@ UI = {
 		getNormally = isNotSimilar || isEqual;
 
 		this.activateSegment(getNormally);
+
         segment.trigger('open');
+
         $('section').first().nextAll('.undoCursorPlaceholder').remove();
+
         this.getNextSegment(this.currentSegment, 'untranslated');
+
 
 		if ((!this.readonly)&&(!getNormally)) {
 			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
 		}
+
 		this.setCurrentSegment();
 
 		if (!this.readonly) {
-
+            // XXX Arcane, what's this code for?
 			if(getNormally) {
 				this.getContribution(segment, 0);
 			} else {

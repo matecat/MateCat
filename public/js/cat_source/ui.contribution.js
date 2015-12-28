@@ -61,11 +61,9 @@ $.extend(UI, {
 			translation: translation
 		});
 	},
-	getContribution: function(segment, next) {//console.log('getContribution');
+	getContribution: function(segment, next) {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
-//			console.log('hasclass loaded');
-//			console.log('qualcosa nella tab matches? ', segment.find('.footer .matches .overflow').text().length);
             if(segment.find('.footer .matches .overflow').text().length) {
                 this.spellCheck();
                 if (next) {
@@ -95,20 +93,18 @@ $.extend(UI, {
             txt = $('.source', n).text();
         }
 
-//		var txt = $('.source', n).text();
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
-		//txt = txt.replace(/&quot;/g,'"');
+
 		if (!next) {
-//				console.log('spinner by getcontribution');
 			$(".loader", n).addClass('loader_on');
 		}
+
+        // `next` and `untranslated next` are the same
 		if((next == 2)&&(this.nextSegmentId == this.nextUntranslatedSegmentId)) {
-//			console.log('il successivo e il successivo non tradotto sono lo stesso');
 			return false;
 		}
-//		console.log('this.nextSegmentId: ', this.nextSegmentId);
-//		console.log('this.nextUntranslatedSegmentId: ', this.nextUntranslatedSegmentId);
+
 		APP.doRequest({
 			data: {
 				action: 'getContribution',
