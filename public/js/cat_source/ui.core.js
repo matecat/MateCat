@@ -103,79 +103,13 @@ UI = {
                 this.execChangeStatus(JSON.stringify(options)); // autopropagate
             }
         }
-/*
-        if((this.autopropagateConfirmNeeded())&&(!byStatus)) {
-            console.log('autopropagateConfirmNeeded');
-            APP.confirm({
-                name: 'confirmAutopropagation',
-                cancelTxt: 'Propagate to All',
-                onCancel: 'execChangeStatus',
-                callback: 'preExecChangeStatus',
-                okTxt: 'Only this segment',
-                context: options,
-                msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
-            });
-        } else {
-            console.log('not autopropagateConfirmNeeded');
-            this.execChangeStatus(options, false);
-        }
- */
-/*
-        $('.percentuage', segment).removeClass('visible');
-//		if (!segment.hasClass('saved'))
-        this.setTranslation(this.getSegmentId(segment), status, false);
-        segment.removeClass('saved');
-        this.setContribution(segment_id, status, byStatus);
-        this.setContributionMT(segment_id, status, byStatus);
-        this.getNextSegment(this.currentSegment, 'untranslated');
-        if(!this.nextUntranslatedSegmentId) {
-            $(window).trigger({
-                type: "allTranslated"
-            });
-        }
-        $(window).trigger({
-            type: "statusChanged",
-            segment: segment,
-            status: status
-        });
-*/
 
-/*
-//        console.log('byStatus: ', byStatus);
-		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-//        console.log('segment: ', segment);
-        segment_id = this.getSegmentId(segment);
-//        console.log('segment_id: ', segment_id);
-console.log('changeStatus');
-        var options = {
-            segment_id: segment_id,
-            status: status,
-            byStatus: byStatus
-        };
-        optionsStr = JSON.stringify(options);
-        if(this.autopropagateConfirmNeeded()) {
-            console.log('aa');
-            APP.confirm({
-                name: 'confirmAutopropagation',
-                cancelTxt: 'Propagate to All',
-                onCancel: 'execChangeStatus',
-                callback: 'preExecChangeStatus',
-                okTxt: 'Only this segment',
-                context: optionsStr,
-                msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
-            });
-        } else {
-            console.log('bb');
-            this.execChangeStatus(optionsStr);
-        }
-*/
 	},
     autopropagateConfirmNeeded: function () {
         segment = UI.currentSegment;
         if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
             return false;
         }
-//        console.log('propagable: ', segment.attr('data-propagable'));
         if(segment.attr('data-propagable') == 'true') {
             if(config.isReview) {
                 return true;
@@ -189,13 +123,6 @@ console.log('changeStatus');
         } else {
             return false;
         }
-/*
-        if( (segment.attr('data-propagable') == 'true') && (segment.is('.status-translated, .status-approved, .status-rejected')) ) {
-            return true;
-        } else {
-            return false;
-        }
-*/
     },
     preExecChangeStatus: function (optStr) {
         opt = $.parseJSON(optStr);
