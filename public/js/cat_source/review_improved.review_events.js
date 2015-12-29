@@ -320,45 +320,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     $(document).on('click', 'a.approved', function(e) {
+        var segment = new UI.Segment( $(e.target).closest('section') );
         e.preventDefault();
 
-        UI.tempDisablingReadonlyAlert = true;
-        UI.hideEditToolbar();
-
-        UI.currentSegment.removeClass('modified');
-
-        original = UI.currentSegment.find('.original-translation').text();
-
-        $('.sub-editor.review .error-type').removeClass('error');
-
-        UI.changeStatus(this, 'approved', 0);
-
-        // TODO: remove references to currentSegmentId
-
-        err = $('.sub-editor.review .error-type');
-        err_typing = $(err).find('input[name=t1]:checked').val();
-        err_translation = $(err).find('input[name=t2]:checked').val();
-        err_terminology = $(err).find('input[name=t3]:checked').val();
-        err_language = $(err).find('input[name=t4]:checked').val();
-        err_style = $(err).find('input[name=t5]:checked').val();
-
-
-        var data = {
-            action: 'setRevision',
-            job: config.id_job,
-            jpassword: config.password,
-            segment: UI.currentSegmentId,
-            original: original,
-            err_typing: err_typing,
-            err_translation: err_translation,
-            err_terminology: err_terminology,
-            err_language: err_language,
-            err_style: err_style
-        };
-
-        UI.openNextTranslated();
-
-        UI.setRevision( data );
+        UI.openNextTranslated( segment.id );
 
     });
 

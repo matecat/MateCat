@@ -89,61 +89,47 @@ if ( Review.enabled() )
             });
 
         },
-/*
-        gotoNextUntranslated: function () {
-            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            //console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
-//                console.log('b: ', UI.currentSegmentId);
-                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
-//                console.log('c: ', UI.currentSegmentId);
 
-            } else {
-                UI.reloadWarning();
-            }
-
-        },
-*/
-/*
-        closeNotYetTranslated: function () {
-            return false;
-        },
-*/
+        /**
+         * Search for the next translated segment to propose for revision.
+         * This function searches in the current UI first, then falls back
+         * to invoke the server and eventually reload the page to the new
+         * URL.
+         */
         openNextTranslated: function (sid) {
-            console.log('openNextTranslated');
             sid = sid || UI.currentSegmentId;
-            el = $('#segment-' + sid);
-//            console.log(el.nextAll('.status-translated, .status-approved'));
+            var el = $('#segment-' + sid);
 
             var translatedList = [];
             var approvedList = [];
 
-            // find in current UI
-            if(el.nextAll('.status-translated, .status-approved').length) { // find in next segments in the current file
+            var clickableSelector = UI.targetContainerSelector();
+
+            if ( el.nextAll('.status-translated, .status-approved').length ) {
+
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
-                if( translatedList.length ) {
-                    translatedList.first().find('.editarea').click();
-                } else {
-                    approvedList.first().find('.editarea').click();
 
-//                    UI.reloadWarning();
-//                    approvedList.first().find('.editarea').click();
+
+                if ( translatedList.length ) {
+                    translatedList.first().find( clickableSelector ).click();
+                } else {
+                    approvedList.first().find( clickableSelector ).click();
+
                 }
 
             } else {
+
                 file = el.parents('article');
-                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () { // find in next segments in the next files
+                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () {
 
                     var translatedList = $(this).find('.status-translated');
                     var approvedList   = $(this).find('.status-approved');
 
                     if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
+                        translatedList.first().find( clickableSelector ).click();
                     } else {
                         UI.reloadWarning();
-//                        approvedList.first().find('.editarea').click();
                     }
 
                     return false;
@@ -159,18 +145,18 @@ if ( Review.enabled() )
                         if((translatedList.first().is(UI.currentSegment))) {
                             UI.scrollSegment(translatedList.first());
                         } else {
-                            translatedList.first().find('.editarea').click();
+                            translatedList.first().find( clickableSelector ).click();
                         }
                     } else {
                         if((approvedList.first().is(UI.currentSegment))) {
                             UI.scrollSegment(approvedList.first());
                         } else {
-                            approvedList.first().find('.editarea').click();
+                            approvedList.first().find( clickableSelector ).click();
                         }
                     }
 
                 } else { // find in not loaded segments
-//                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+
                     APP.doRequest({
                         data: {
                             action: 'getNextReviseSegment',
@@ -188,6 +174,7 @@ if ( Review.enabled() )
                             });
                         }
                     });
+
                 }
             }
         }
@@ -358,15 +345,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             });
         },
         trackChanges: function (editarea) {
-/*
-            console.log('11111: ', $(editarea).text());
-            console.log('22222: ', htmlEncode($(editarea).text()));
-            console.log('a: ', UI.currentSegment.find('.original-translation').text());
-            console.log('b: ', $(editarea).html());
-            console.log('c: ', $(editarea).text());
-            var c = $(editarea).text();
-            console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
-*/
             var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
                     .replace( config.lfPlaceholderRegex, "\n" )
                     .replace( config.crPlaceholderRegex, "\r" )
@@ -399,30 +377,9 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
         },
-/*
-        createStatQualityPanel: function () {
-            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
-        },
-        populateStatQualityPanel: function (d) { // no more used
-            tbody = $('#popup-stat-quality .slide-panel-body tbody');
-            tbody.empty();
-            $.each(d, function (index) {
-                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
-            });
-//            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
-        },
-        openStatQualityPanel: function() { // no more used
-            $('body').addClass('side-popup');
-            $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
-//            $("#SnapABug_Button").hide();
-            $(".outer-stat-quality").show();
-//            $.cookie('tmpanel-open', 1, { path: '/' });
-        },
-*/
+
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
-//                console.log(this.type + ' - ' + this.value);
-//                console.log('.editor .error-type input[name=t1][value=' + this.value + ']');
                 if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
                 if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
                 if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
@@ -432,27 +389,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             });
 
         },
-/*
-        gotoNextUntranslated: function () {
-            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            //console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
-//                console.log('b: ', UI.currentSegmentId);
-                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
-//                console.log('c: ', UI.currentSegmentId);
 
-            } else {
-                UI.reloadWarning();
-            }
-
-        },
-*/
-/*
-        closeNotYetTranslated: function () {
-            return false;
-        },
-*/
         renderAfterConfirm: function (nextId) {
             this.render({
                 firstLoad: false,
