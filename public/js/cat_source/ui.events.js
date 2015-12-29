@@ -1420,15 +1420,6 @@ $.extend(UI, {
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
 //            console.log('l');
 
-        }).on('click', 'a.approved', function() {
-/*
-			UI.setStatusButtons(this);
-			$(".editarea", UI.nextUntranslatedSegment).click();
-
-			UI.changeStatus(this, 'approved', 0);
-			UI.changeStatusStop = new Date();
-			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-*/
 		}).on('click', 'a.d, a.a, a.r, a.f', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
