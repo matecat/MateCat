@@ -24,7 +24,14 @@ class NewWithQAModelTest extends IntegrationTest {
         ));
     }
 
-    function tests_api_key_is_recognized() {
+    /**
+     * In this test the qa_model.json file is contained in the zip
+     * file and we are testing that the project creation evaluates
+     * the source file correctly and that the record is created in
+     * the database.
+     */
+
+    function tests_qa_model_is_created_from_json_file() {
         $this->prepareUserAndKey();
 
         $this->headers = array(
@@ -47,5 +54,11 @@ class NewWithQAModelTest extends IntegrationTest {
 
         $this->assertEquals( $project->id_customer, $this->test_data->user->email );
         $this->assertEquals( $response['code'], 200 );
+
+        $model = $project->getLqaModel();
+        $this->assertInstanceOf('LQA\ModelStruct', $model );
+
+        $categories = json_decode ( $model->getSerializedCategories(), true );
+        $this->assertEquals( 'Accuracy', $categories['categories'][0]['label']);
     }
 }

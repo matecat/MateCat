@@ -127,8 +127,6 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         $validator_name = preg_replace('/(.+)(Struct)$/', '\1Validator', $current_class );
         $validator_name = "\\$validator_name" ;
 
-        \Log::doLog('validator_name', $validator_name);
-
         try {
             $load = class_exists($validator_name, true) ;
             if ( $load  ) {

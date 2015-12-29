@@ -43,9 +43,10 @@ class Features {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $projectStructure['id_customer'] );
 
         foreach( $features as $feature ) {
-            \Log::doLog( 'feature', $feature);
             $name = "Features\\" . $feature->toClassName() ;
-            $name::validateProjectCreation( $projectStructure );
+
+            $cls = new $name( $projectStructure, $feature );
+            $cls->validateProjectCreation( );
 
         }
 
@@ -54,15 +55,13 @@ class Features {
     // TODO: to be improved. This should be the entry point to apply
     // feature specific updated to the project due to owner features.
     //
-    public static function processProjectCreated( $id_project ) {
-        // find owner features
-        $project = Projects_ProjectDao::findById( $id_project );
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $project->id_customer );
+    public static function processProjectCreated( ArrayObject &$projectStructure ) {
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $projectStructure['id_customer'] );
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
 
-            $cls = new $name( $project, $feature );
+            $cls = new $name( $projectStructure, $feature );
             $cls->postProjectCreate();
         }
     }

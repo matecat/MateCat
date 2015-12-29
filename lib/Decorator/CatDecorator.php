@@ -57,7 +57,7 @@ class CatDecorator {
           $project = $this->job->getProject();
           $model = $project->getLqaModel() ;
 
-          $this->template->lqa_model = $model->getSerialized();
+          $this->template->lqa_categories = $model->getSerializedCategories();
       }
   }
 

@@ -23,53 +23,14 @@ if (empty($options))                               usage() ;
 if (!array_key_exists('file', $options))           usage() ;
 if (!array_key_exists('id_project', $options))     usage() ;
 
-
 $project = Projects_ProjectDao::findById( $options['id_project']);
 
 $content = file_get_contents( $options['file']);
 $json = json_decode( $content, true );
 
-$model_root = $json['model'];
+$model_record = LQA\ModelDao::createModelFromJsonDefinition( $json );
 
-// var_dump($model_root);
-$model = LQA\ModelDao::createRecord( $model_root );
+$dao = new \Projects_ProjectDao( \Database::obtain() );
+$dao->updateField( $this->project, 'id_qa_model', $model_record->id );
 
-$default_severities = $model_root['severities'];
-$categories = $model_root['categories'];
-
-function insertRecord($record, $model_id, $parent_id) {
-    global $default_severities ;
-
-    if ( !array_key_exists('severities', $record) ) {
-       $record['severities'] = $default_severities ;
-    }
-
-    $category = LQA\CategoryDao::createRecord(array(
-        'id_model'   => $model_id,
-        'label'      => $record['label'],
-        'id_parent'  => $parent_id,
-        'severities' => json_encode( $record['severities'] )
-    ));
-
-    if ( array_key_exists('subcategories', $record)) {
-        foreach($record['subcategories'] as $sub) {
-            insertRecord($sub, $model_id, $category->id);
-        }
-    }
-}
-
-foreach($categories as $record) {
-    insertRecord($record, $model->id, null);
-}
-
-$project->id_qa_model = $model->id ;
-$conn = Database::obtain()->getConnection();
-
-$stmt = $conn->prepare(
-    "UPDATE projects SET id_qa_model = :id_qa_model WHERE id = :id "
-);
-
-$stmt->execute( array(
-    'id' => $project->id,
-    'id_qa_model' => $model->id
-));
+echo "done \n";

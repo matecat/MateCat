@@ -147,6 +147,7 @@ class ProjectManager {
         if (! empty( $this->projectStructure['result']['errors'] )) {
 
             return false;
+
         }
 
         // create project?
@@ -676,7 +677,7 @@ class ProjectManager {
         }
 
 
-        Features::processProjectCreated( $this->projectStructure[ 'id_project' ]);
+        Features::processProjectCreated( $this->projectStructure );
     }
 
     /**

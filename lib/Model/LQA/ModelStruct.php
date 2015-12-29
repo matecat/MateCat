@@ -6,7 +6,12 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $id;
     public $label ;
 
-    public function getSerialized() {
+    /**
+     * Returns the serialized representation of categires and subcategories.
+     *
+     * @return string
+     */
+    public function getSerializedCategories() {
         return CategoryDao::getSerializedModel( $this->id );
     }
 }

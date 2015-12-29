@@ -7,7 +7,7 @@
   <form id="error-selection-form" action="#" method="POST">
     <table>
 
-      {{#each lqa_model.categories as |category| }}
+      {{#each lqa_categories.categories as |category| }}
         {{#if category.subcategories }}
           {{!-
           if it has subcategories then represent as heading, non selectable issue.

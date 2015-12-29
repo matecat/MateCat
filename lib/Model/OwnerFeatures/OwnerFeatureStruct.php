@@ -14,6 +14,4 @@ class OwnerFeatures_OwnerFeatureStruct extends DataAccess_AbstractDaoSilentStruc
         return Utils::underscoreToCamelCase( $this->feature_code );
     }
 
-
-
 }

@@ -36,6 +36,12 @@ class CategoryDao extends \DataAccess_AbstractDao {
         return self::findById( $lastId );
     }
 
+    /**
+     * Returns a json encoded representation of categories and subcategories
+     *
+     * @return string
+     */
+
     public static function getSerializedModel( $id_model ) {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model " .
             " ORDER BY COALESCE(id_parent, 0) ";

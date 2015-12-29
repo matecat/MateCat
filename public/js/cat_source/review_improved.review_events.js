@@ -29,8 +29,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         data.end_offset = selection.focusOffset;
 
         data.selected_string = selection.toString() ;
-        RI.lastSelection       = data.selected_string ;
-        data.lqa_model       = JSON.parse( config.lqa_model ) ;
+        RI.lastSelection     = data.selected_string ;
+        data.lqa_categories  = JSON.parse( config.lqa_categories ) ;
 
         var tpl = root.template('review_improved/error_selection', data);
 

@@ -9,18 +9,71 @@ use ZipArchive ;
 
 class ReviewImproved extends BaseFeature {
 
+    private $feature_options ;
+
     /**
      * Performs post project creation tasks for the current project.
-     *
+     * Evaluates if a qa model is present in the feature options.
+     * If so, then try to assign the defined qa_model.
+     * If not, then try to find the qa_model from the project structure.
      */
     public function postProjectCreate() {
+        $this->feature_options = json_decode( $this->feature->options );
 
-        $options = json_decode($this->feature->options);
+        \Log::doLog( 'feature_options', $this->feature_options );
 
-        if ( $options->id_qa_model != null ) {
-            $dao = new \Projects_ProjectDao( \Database::obtain() );
-            // TODO: continue from here. Reopen the zip file and create the QA model from here.
-            $dao->updateField( $this->project, 'id_qa_model', $options->id_qa_model);
+        if ( $this->feature_options->id_qa_model ) {
+            $this->setQaModelFromFeatureOptions();
+        }
+        else {
+            $this->setQaModelFromJsonFile();
+        }
+    }
+
+    /**
+     * Sets the QA model fom the uploaded file which was previously validated
+     * and added to the project structure.
+     */
+    private function setQaModelFromJsonFile() {
+        $model_json = $this->project_structure['features']
+            ['review_improved']['__meta']['qa_model'];
+
+        $model_record = \LQA\ModelDao::createModelFromJsonDefinition( $model_json );
+
+        $project = \Projects_ProjectDao::findById(
+            $this->project_structure['id_project']
+        );
+
+        $dao = new \Projects_ProjectDao( \Database::obtain() );
+        $dao->updateField( $project, 'id_qa_model', $model_record->id );
+    }
+
+    /**
+     * This method  is used to  assign the  qa_model to the project based on the
+     * option specified in the feature record itself.
+     *
+     * This was originally developed to avoid the need to pass the qa_model.json
+     * inside the zip file each time. This could be used to perform a conditonal
+     * check on the need for the qa_model.json file to be passed at each project
+     * creation.
+     */
+    private function setQaModelFromFeatureOptions() {
+        $project = \Projects_ProjectDao::findById(
+            $this->project_structure['id_project']
+        );
+
+        $dao = new \Projects_ProjectDao( \Database::obtain() );
+        $dao->updateField( $project, 'id_qa_model', $this->feature_options->id_qa_model );
+
+    }
+
+    public function validateProjectCreation()  {
+        $this->feature_options = json_decode( $this->feature->options );
+
+        if ( $this->feature_options->id_qa_model ) {
+            // pass
+        } else {
+            $this->validateModeFromJsonFile();
         }
     }
 
@@ -30,13 +83,10 @@ class ReviewImproved extends BaseFeature {
      * a __meta folder. The qa_model.json file must be valid too.
      *
      * If validation fails, adds errors to the projectStructure.
-     *
-     * @param projectStructure the project structure before it's persisted to database.
-     *
      */
 
-    public static function validateProjectCreation( & $projectStructure )  {
-        \Log::doLog( 'projectStructure', $projectStructure );
+    private function validateModeFromJsonFile() {
+        $projectStructure = $this->project_structure ;
 
         $fs = new FilesStorage();
         $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
@@ -50,7 +100,33 @@ class ReviewImproved extends BaseFeature {
             );
         }
 
+        $decoded_model = json_decode( $qa_model, TRUE ) ;
+
+        if ( $decoded_model === null ) {
+            $projectStructure['result']['errors'][ ] = array(
+                'code' => '-900',  // TODO: decide how to assign such errors
+                'message' => 'QA model failed to decode'
+            );
+        }
+
         // TODO: implement other validations
+
+
+        /**
+         * Append the qa model to the project structure for later use.
+         */
+        if ( ! array_key_exists('features', $projectStructure ) ) {
+            $projectStructure['features'] = array();
+        }
+
+        $projectStructure['features'] = array(
+            'review_improved' => array(
+                '__meta' => array(
+                    'qa_model' => $decoded_model
+                )
+            )
+        );
+
     }
 
 }
