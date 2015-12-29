@@ -6,6 +6,9 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $id;
     public $label ;
 
+    public $pass_type ;
+    public $pass_options ;
+
     /**
      * Returns the serialized representation of categires and subcategories.
      *

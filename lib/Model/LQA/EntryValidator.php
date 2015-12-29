@@ -3,6 +3,7 @@
 namespace LQA;
 
 use \Exceptions\NotFoundError ;
+
 class EntryValidator extends \DataAccess_AbstractValidator {
 
     public $segment;
@@ -12,6 +13,10 @@ class EntryValidator extends \DataAccess_AbstractValidator {
     public $qa_model ;
     public $category ;
     public $issue ;
+
+    /**
+     * @throws \Exceptions\NotFoundError
+     */
 
     public function validate() {
         $dao = new \Segments_SegmentDao( \Database::obtain() );

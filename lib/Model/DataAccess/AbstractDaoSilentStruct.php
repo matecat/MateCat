@@ -95,10 +95,17 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         return $attrs;
     }
 
+    /**
+     * Checks if any error is present and if so throws an exception
+     * with imploded error messages.
+     *
+     * @throws \Exceptions\ValidationError
+     */
+
     public function ensureValid() {
         if ( !$this->isValid() ) {
-            throw new DataAccess_ValidationError(
-                $this->validator->getMessages()
+            throw new \Exceptions\ValidationError (
+                $this->validator->getErrorsAsString()
             );
         }
     }

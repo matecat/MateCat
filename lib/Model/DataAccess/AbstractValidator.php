@@ -27,7 +27,7 @@ abstract class DataAccess_AbstractValidator {
 
     public function getErrorMessages() {
         return array_map( function( $item ) {
-            return last($item); // the message itself
+            return implode(' ', $item);
         }, $this->errors );
     }
 

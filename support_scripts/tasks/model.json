@@ -127,8 +127,10 @@
         ],
 
         "passfail" : {
-            "type" : "points_per_mille",
-            "limit" : 20
+            "type" : "points_per_thousand",
+            "options" : {
+                "limit" : 20
+            }
         }
 
 	}

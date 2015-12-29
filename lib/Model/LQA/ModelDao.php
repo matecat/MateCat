@@ -15,12 +15,21 @@ class ModelDao extends \DataAccess_AbstractDao {
     }
 
     public static function createRecord( $data ) {
-        $sql = "INSERT INTO qa_models ( label ) " .
-            " VALUES ( :label ) ";
+        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options ) " .
+            " VALUES ( :label, :pass_type, :pass_options ) ";
+
+        $struct = new ModelStruct( array(
+            'label' => $data['label'] ,
+            'pass_type' => $data['passfail']['type'],
+            'pass_options' => json_encode( $data['passfail']['options'] )
+        ) );
+        $struct->ensureValid();
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array( 'label' => $data['label'] ) );
+        $stmt->execute( $struct->attributes(
+            array('label', 'pass_type', 'pass_options')
+        ));
         $lastId = $conn->lastInsertId();
 
         return self::findById( $lastId );
