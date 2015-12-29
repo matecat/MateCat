@@ -2287,16 +2287,18 @@ console.log('eccolo: ', typeof token);
 
 	checkWarnings: function(openingSegment) {
 		var dd = new Date();
-		ts = dd.getTime();
+		var ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-        dataMix = {
+        var dataMix = {
             action: 'getWarning',
             id_job: config.job_id,
             password: config.password,
             token: token
         };
-        if(UI.logEnabled) dataMix.logs = this.extractLogs();
+
+        if (UI.logEnabled) dataMix.logs = this.extractLogs();
+
 		APP.doRequest({
 			data: dataMix,
 			error: function() {
@@ -2329,7 +2331,7 @@ console.log('eccolo: ', typeof token);
 				}
 
 				// check for messages
-				if(typeof data.messages != 'undefined') {
+				if ( data.messages ) {
 					var msgArray = $.parseJSON(data.messages);
 					if (msgArray.length > 0) {
 						UI.displayMessage(msgArray);
