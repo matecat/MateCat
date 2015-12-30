@@ -356,6 +356,8 @@ abstract class DataAccess_AbstractDao {
      */
 
     public static function updateStruct( $struct, $options=array() ) {
+        $struct->ensureValid();
+
         $attrs = $struct->attributes();
 
         $sql = " UPDATE " . static::TABLE ;
@@ -369,6 +371,9 @@ abstract class DataAccess_AbstractDao {
             $struct->attributes( $options['fields'] ),
             self::structKeys( $struct )
         );
+
+        \Log::doLog("SQL", $sql);
+        \Log::doLog("data", $data);
 
         return $stmt->execute( $data );
     }

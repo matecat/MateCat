@@ -15,4 +15,5 @@ class Constants_TranslationStatus {
     const STATUS_APPROVED   = 'APPROVED';
     const STATUS_REJECTED   = 'REJECTED';
 
-} 
+
+}
