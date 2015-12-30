@@ -38,7 +38,7 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
             $klein->response()->code(400);
             $klein->response()->json( array('error' => $err_msg ));
             break;
-        case 'API\V2\NotFoundError':
+        case 'Exceptions\NotFoundError':
             $klein->response()->code(404);
             break;
         default:
@@ -81,46 +81,69 @@ $klein->respond('GET', '/api/v2/project-translation/[i:id_project]', function() 
     $instance->respond('status');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/versions', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/versions', function() {
     $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/versions/[:version_number]', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/versions/[:version_number]', function() {
     $reflect  = new ReflectionClass('API_V2_SegmentVersion');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('detail');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssue');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues', function() {
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssue');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
 });
 
-$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues/[:id_issue]', function() {
+$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssue');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('delete');
 });
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues/[:id_issue]/comments', function() {
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/issues/[:id_issue]/comments', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });
+
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', function() {
+    $reflect  = new ReflectionClass('API\V2\TranslationController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('index');
+});
+
+function route($path, $method, $controller, $action) {
+    global $klein;
+    $klein->respond($method, $path, function() use ($controller, $action) {
+        $reflect = new ReflectionClass($controller);
+        $instance = $reflect->newInstanceArgs(func_get_args());
+        $instance->respond( $action );
+    });
+}
+
+/**
+ * Define additional routes here
+ */
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'PATCH',
+    'API\V2\TranslationController', 'update'
+);
 
 $klein->dispatch();

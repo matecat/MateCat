@@ -16,7 +16,7 @@ if ( ReviewImproved.enabled() ) {
 
         loadIssuesForVersion : function( segment ) {
             var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/issues?version_number=%s',
+                '/api/v2/jobs/%s/%s/segments/%s/translation/issues?version_number=%s',
                 config.id_job, config.password,
                 segment.id, segment.el.data('revertingVersion')
             );
@@ -80,7 +80,7 @@ if ( ReviewImproved.enabled() ) {
 
             $(document).one('opened', '.remodal', function() {
                 var issue_comments = sprintf(
-                    '/api/v2/jobs/%s/%s/segments/%s/issues/%s/comments',
+                    '/api/v2/jobs/%s/%s/segments/%s/translation/issues/%s/comments',
                     config.id_job, config.password,
                     issue.id_segment,
                     issue.id
@@ -186,12 +186,12 @@ if ( ReviewImproved.enabled() ) {
 
         versionsAndIssuesPromise : function( segment ) {
             var versions_path  = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/versions',
+                '/api/v2/jobs/%s/%s/segments/%s/translation/versions',
                 config.id_job, config.password, segment.id
             );
 
             var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/issues',
+                '/api/v2/jobs/%s/%s/segments/%s/translation/issues',
                 config.id_job, config.password, segment.id
             );
 
@@ -265,7 +265,7 @@ if ( ReviewImproved.enabled() ) {
         };
 
         var replies_path = sprintf(
-            '/api/v2/jobs/%s/%s/segments/%s/issues/%s/comments',
+            '/api/v2/jobs/%s/%s/segments/%s/translation/issues/%s/comments',
             config.id_job, config.password,
             issue.id_segment,
             issue.id

@@ -7,7 +7,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             var parsed = JSON.parse( context );
             var issue_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/issues/%s',
+                '/api/v2/jobs/%s/%s/segments/%s/translation/issues/%s',
                 config.id_job, config.password,
                 parsed.id_segment,
                 parsed.id_issue

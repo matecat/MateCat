@@ -144,7 +144,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         var form    = $( e.target );
         var segment = new UI.Segment( UI.currentSegment );
-        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/issues',
+        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation/issues',
                   config.id_job, config.password, segment.id);
 
         var checked = form.find('input[type=radio]:checked').val() ;
@@ -322,6 +322,24 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     $(document).on('click', 'a.approved', function(e) {
         var segment = new UI.Segment( $(e.target).closest('section') );
         e.preventDefault();
+
+        var translation_path = sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/translation',
+            config.id_job,
+            config.password,
+            segment.id
+        );
+
+        $.ajax({
+            method : 'POST',
+            url : translation_path,
+            data : {
+                "translation" : {
+                    "status" : "approved"
+                },
+                '_method' : 'PATCH'
+            }
+        });
 
         UI.openNextTranslated( segment.id );
 

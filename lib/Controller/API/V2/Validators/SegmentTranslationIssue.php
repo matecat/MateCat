@@ -1,56 +1,23 @@
 <?php
 
-namespace API\V2\Validators  ;
+namespace API\V2\Validators;
 
 use API\V2\ValidationError ;
-use API\V2\NotFoundError ;
 
-class SegmentTranslationIssue {
+class SegmentTranslationIssue extends Base {
 
-    private $request;
-
-    public $segment;
-    public $translation ;
     public $issue ;
 
-    public function __construct( $request ) {
-        $this->request = $request;
-    }
-
     public function validate() {
-        $this->ensureSegmentExists();
-        $this->ensureTranslationExists();
+        $segment_translation = new SegmentTranslation( $this->request );
+        $segment_translation->validate();
 
         if ( $this->request->id_issue ) {
-            $this->ensureSegmentIsInScope();
+            $this->ensureIssueIsInScope();
         }
     }
 
-    /**
-     *
-     * @throws NotFoundError
-     */
-
-    private function ensureTranslationExists() {
-        $this->translation = \Translations_SegmentTranslationDao::
-            findBySegmentAndJob( $this->request->id_segment, $this->request->id_job  );
-        if ( !$this->translation ) {
-            throw new NotFoundError('translation not found');
-        }
-    }
-
-    private function ensureSegmentExists() {
-        $dao = new \Segments_SegmentDao( \Database::obtain() );
-        $this->segment = $dao->getByChunkIdAndSegmentId(
-            $this->request->id_job,
-            $this->request->password,
-            $this->request->id_segment
-        );
-
-        if (!$this->segment) throw new NotFoundError('segment not found');
-    }
-
-    private function ensureSegmentIsInScope() {
+    private function ensureIssueIsInScope() {
         $this->issue = \LQA\EntryDao::findById( $this->request->id_issue );
 
         if ( !$this->issue ) {

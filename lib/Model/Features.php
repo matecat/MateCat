@@ -44,9 +44,11 @@ class Features {
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-
             $cls = new $name( $projectStructure, $feature );
-            $cls->validateProjectCreation( );
+
+            if ( method_exists( $cls, 'validateProjectCreation') ) {
+                $cls->validateProjectCreation( );
+            }
 
         }
 
@@ -60,9 +62,11 @@ class Features {
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-
             $cls = new $name( $projectStructure, $feature );
-            $cls->postProjectCreate();
+
+            if ( method_exists( $cls, 'postProjectCreate') ) {
+                $cls->postProjectCreate();
+            }
         }
     }
 

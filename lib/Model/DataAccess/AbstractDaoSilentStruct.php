@@ -72,21 +72,22 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
 
     /**
      * Returns an array of the public attributes of the struct.
-     * If $keys_to_return is provided, the resulting array will include
+     * If $mask is provided, the resulting array will include
      * only the specified keys.
      *
      * This method is useful in conjunction with PDO execute, where only
      * a subset of the attributes may be required to be bound to the query.
      *
+     * @param $mask a mask for the keys to return
      * @return Array
      */
-    public function attributes( $keys_to_return=null ) {
+    public function attributes( $mask=null ) {
         $refclass = new ReflectionClass( $this );
         $attrs = array();
         $publicProperties = $refclass->getProperties(ReflectionProperty::IS_PUBLIC) ;
         foreach( $publicProperties as $property ) {
-            if ( !empty($keys_to_return) ) {
-                if (! in_array( $property->getName(), $keys_to_return)) {
+            if ( !empty($mask) ) {
+                if (! in_array( $property->getName(), $mask)) {
                     continue;
                 }
             }

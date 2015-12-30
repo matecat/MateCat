@@ -2,6 +2,9 @@
 
 class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
+    const PRIMARY_KEY = 'id_job,id_segment';
+    const TABLE = "segment_translations";
+
     public static function findBySegmentAndJob( $id_segment, $id_job ) {
         Log::doLog( $id_segment, $id_job );
 
