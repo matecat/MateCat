@@ -335,7 +335,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             url : translation_path,
             data : {
                 "translation" : {
-                    "status" : "approved"
+                    "status" : "APPROVED"
                 },
                 '_method' : 'PATCH'
             }
