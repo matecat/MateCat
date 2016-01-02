@@ -6,6 +6,9 @@
  * Time: 17.25
  *
  */
+
+use Analysis\DqfQueueHandler;
+
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 class ProjectManager {
@@ -590,7 +593,7 @@ class ProjectManager {
             $dqfProjectStruct->name            = $this->projectStructure[ 'project_name' ];
             $dqfProjectStruct->source_language = $this->projectStructure[ 'source_language' ];
 
-            $dqfQueue = new Analysis_DqfQueueHandler();
+            $dqfQueue = new DqfQueueHandler();
 
             try {
 

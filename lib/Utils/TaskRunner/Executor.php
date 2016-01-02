@@ -1,27 +1,24 @@
 <?php
-namespace Analysis;
-use Analysis\Commons\AbstractContext;
-use Analysis\Commons\AbstractWorker;
-use Analysis\Commons\QueueElement;
-use Analysis\Exceptions\EmptyElementException;
-use Analysis\Exceptions\EndQueueException;
-use Analysis\Exceptions\FrameException;
-use Analysis\Exceptions\ReQueueException;
-use Analysis\Exceptions\WorkerClassException;
+namespace TaskRunner;
+use TaskRunner\Commons\Context;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EmptyElementException;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\FrameException;
+use TaskRunner\Exceptions\ReQueueException;
+use TaskRunner\Exceptions\WorkerClassException;
 use Analysis\Queue\QueueInfo;
 
-use Analysis\Workers\TMAnalysisWorker;
-use \Exception, \Bootstrap;
+use \Exception, \Bootstrap, \SplObserver, \SplSubject, \AMQHandler;;
 
-$root = realpath( dirname( __FILE__ ) . '/../../../' );
-include_once $root . "/inc/Bootstrap.php";
+include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
 Bootstrap::start();
-include \INIT::$MODEL_ROOT . "/queries.php";
 
-class Executor {
+class Executor implements \SplObserver {
 
     /**
-     * @var \Analysis\AMQHandler
+     * @var \AMQHandler
      */
     protected $_queueHandler;
 
@@ -38,19 +35,17 @@ class Executor {
     protected $_frameID = 0;
 
     /**
-     * Matches vector
-     *
-     * @var array|null
-     */
-    protected $_matches = null;
-
-    /**
      * @var static
      */
     public static $__INSTANCE;
+
     public $RUNNING = true;
-    public $_tHandlerPID;
-    protected static function _TimeStampMsg( $msg ) {
+    public $_executorPID;
+
+    /**
+     * @param $msg
+     */
+    protected function _logMsg( $msg ) {
 //        \INIT::$DEBUG = false;
         if ( \INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
         \Log::doLog( $msg );
@@ -64,12 +59,12 @@ class Executor {
     /**
      * Executor constructor.
      *
-     * @param AbstractContext $_context
+     * @param Context $_context
      */
-    protected function __construct( AbstractContext $_context ) {
+    protected function __construct( Context $_context ) {
 
-        $this->_tHandlerPID = posix_getpid();
-        \Log::$fileName = 'Executor.log';
+        $this->_executorPID = posix_getpid();
+        \Log::$fileName     = $_context->loggerName;
 
         $this->_executionContext = $_context;
 
@@ -77,10 +72,10 @@ class Executor {
 
             $this->_queueHandler = new AMQHandler();
 
-            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_tHandlerPID ) ) {
-                throw new \Exception( "(Executor {$this->_tHandlerPID}) : FATAL !! cannot create my resource ID. Exiting!" );
+            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_executorPID ) ) {
+                throw new \Exception( "(Executor {$this->_executorPID}) : FATAL !! cannot create my resource ID. Exiting!" );
             } else {
-                self::_TimeStampMsg( "(Executor {$this->_tHandlerPID}) : spawned !!!" );
+                $this->_logMsg( "(Executor {$this->_executorPID}) : spawned !!!" );
             }
 
             $this->_queueHandler->subscribe( $this->_executionContext->queue_name );
@@ -88,8 +83,8 @@ class Executor {
         } catch ( \Exception $ex ){
 
             $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
-            static::_TimeStampMsg( $msg );
-            static::_TimeStampMsg( $ex->getMessage() );
+            $this->_logMsg( $msg );
+            $this->_logMsg( $ex->getMessage() );
             die();
 
         }
@@ -97,11 +92,11 @@ class Executor {
     }
 
     /**
-     * @param AbstractContext $queueContext
+     * @param Context $queueContext
      *
      * @return static
      */
-    public static function getInstance( AbstractContext $queueContext ) {
+    public static function getInstance( Context $queueContext ) {
 
         if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
             die ( "This script can be run only in CLI Mode.\n\n" );
@@ -115,27 +110,25 @@ class Executor {
         }
         if ( !function_exists( 'pcntl_signal' ) ) {
             $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-            static::_TimeStampMsg( $msg );
-            sleep( 3 );
         } else {
-//            static::_TimeStampMsg( 'registering signal handlers' );
 
             pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
             pcntl_signal( SIGINT,  array( get_called_class(), 'sigSwitch' ) );
             pcntl_signal( SIGHUP,  array( get_called_class(), 'sigSwitch' ) );
 
-//            $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
-//            static::_TimeStampMsg( "$msg\n" );
+            $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
+
         }
 
         static::$__INSTANCE = new static( $queueContext );
+        static::$__INSTANCE->_logMsg( $msg );
         return static::$__INSTANCE;
 
     }
 
     public static function sigSwitch( $sig_no ) {
 
-        static::_TimeStampMsg( "Trapped Signal : $sig_no" );
+//        static::$__INSTANCE->_logMsg( "Trapped Signal : $sig_no" );
 
         switch ( $sig_no ) {
             case SIGTERM :
@@ -153,14 +146,11 @@ class Executor {
         $this->_frameID = 1;
         do {
 
-            //reset matches vector
-            $this->_matches = null;
-
             try {
 
                 // PROCESS CONTROL FUNCTIONS
-                if ( !self::_myProcessExists( $this->_tHandlerPID ) ) {
-                    self::_TimeStampMsg( "(Executor " . $this->_tHandlerPID . ") :  EXITING! my pid does not exists anymore, my parent told me to die." );
+                if ( !self::_myProcessExists( $this->_executorPID ) ) {
+                    $this->_logMsg( "(Executor " . $this->_executorPID . ") :  EXITING! my pid does not exists anymore, my parent told me to die." );
                     $this->RUNNING = false;
                     break;
                 }
@@ -174,46 +164,59 @@ class Executor {
                 list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
 
             } catch ( \Exception $e ) {
-//                self::_TimeStampMsg( "--- (Executor " . $this->_tHandlerPID . ") : Failed to read frame from AMQ. Doing nothing, wait $secs seconds and re-try in next cycle." );
-//                self::_TimeStampMsg( $e->getMessage() );
+
+//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
+//                $this->_logMsg( $e->getMessage() );
                 usleep( 500000 );
                 continue;
 
             }
 
-            self::_TimeStampMsg( "--- (Executor " . $this->_tHandlerPID . ") - QueueElement found: " . var_export( $queueElement, true ) );
+            $this->_logMsg( "--- (Executor " . $this->_executorPID . ") - QueueElement found: " . var_export( $queueElement, true ) );
 
             try {
+
                 /**
                  * Do not re-instantiate an already existent object
                  */
                 if( ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ){
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
+                    $this->_worker->attach( $this );
+                    $this->_worker->setPid( $this->_executorPID );
                 }
+
                 $this->_worker->process( $queueElement, $this->_executionContext );
+
             } catch ( EndQueueException $e ){
+
+                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR Re-queue
                 $this->_queueHandler->ack( $msgFrame );
                 continue;
+
             } catch ( ReQueueException $e ){
-//                self::_TimeStampMsg( "--- (Executor " . $this->_tHandlerPID . ") : error retrieving Matches. Try again in the next cycle. - " . $e->getMessage() ); // ERROR FROM Memory Server
+
+                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Error retrieving Matches. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
                 $this->_queueHandler->ack( $msgFrame ); //ack the message try again next time. Re-queue
-//
+
                 //set/increment the reQueue number
-                $queueElement->reQueueNum = ++$queueElement->reQueueNum;
+                $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher          = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
                 $amqHandlerPublisher->disconnect();
                 continue;
+
             } catch( EmptyElementException $e ){
-                self::_TimeStampMsg( $e->getMessage() );
+
+                $this->_logMsg( $e->getMessage() );
                 $this->_queueHandler->ack( $msgFrame );
                 continue;
+
             }
 
             //unlock segment
             $this->_queueHandler->ack( $msgFrame );
 
-            self::_TimeStampMsg( "--- (Executor " . $this->_tHandlerPID . ") - QueueElement acknowledged." );
+            $this->_logMsg( "--- (Executor " . $this->_executorPID . ") - QueueElement acknowledged." );
 
         } while( $this->RUNNING );
 
@@ -241,7 +244,7 @@ class Executor {
             if ( $msgFrame instanceof \StompFrame && ( $msgFrame->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->headers /* Stomp Client bug... hack */ ) ) ) {
 
                 $this->_frameID++;
-                self::_TimeStampMsg( "--- (Executor " . $this->_tHandlerPID . ") : processing frame {$this->_frameID}" );
+                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : processing frame {$this->_frameID}" );
 
                 $queueElement = json_decode( $msgFrame->body, true );
                 $queueElement = new QueueElement( $queueElement );
@@ -251,12 +254,12 @@ class Executor {
                     \Utils::raiseJsonExceptionError();
                     $this->_queueHandler->ack( $msgFrame );
                     sleep( 2 );
-                    throw new WorkerClassException( "--- (Executor " . $this->_tHandlerPID . ") : found frame but no valid Worker Class found: wait 2 seconds" );
+                    throw new WorkerClassException( "--- (Executor " . $this->_executorPID . ") : found frame but no valid Worker Class found: wait 2 seconds" );
 
                 }
 
             } else {
-                throw new FrameException( "--- (Executor " . $this->_tHandlerPID . ") : no frame found. Starting next cycle." );
+                throw new FrameException( "--- (Executor " . $this->_executorPID . ") : no frame found. Starting next cycle." );
             }
 
         } catch ( \Exception $e ) {
@@ -282,7 +285,7 @@ class Executor {
 
         //SHUTDOWN
         $msg = str_pad( " Executor " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
-        self::_TimeStampMsg( $msg );
+        static::$__INSTANCE->_logMsg( $msg );
 
         die();
 
@@ -299,9 +302,19 @@ class Executor {
 
     }
 
+    /**
+     * @param SplSubject $subject
+     */
+    public function update( SplSubject $subject ) {
+        /**
+         * @var $subject AbstractWorker
+         */
+        $this->_logMsg( $subject->getLogMsg() );
+    }
+
 }
 
 //$argv = array();
-//$argv[ 1 ] = '{"redis_key":"p1_list","queue_name":"analysis_queue_P1","pid_set_name":"ch_pid_set_p1","pid_list":[],"pid_list_len":1,"queue_length":0,"pid_set_perc_break":10}';
+//$argv[ 1 ] = '{"redis_key":"p1_list","queue_length":0,"queue_name":"analysis_queue_P1","pid_set_name":"ch_pid_set_p1","pid_list":[],"pid_list_len":0,"max_executors":"15","loggerName":"tm_analysis.log"}';
 
 Executor::getInstance( QueueInfo::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

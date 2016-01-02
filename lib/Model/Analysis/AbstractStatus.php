@@ -1,7 +1,5 @@
 <?php
 
-use \Analysis\AMQHandler;
-
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -65,7 +63,7 @@ abstract class Analysis_AbstractStatus {
         $this->_resultSet = getProjectStatsVolumeAnalysis( $this->id_project );
 
         try {
-            $amqHandler         = new AMQHandler();
+            $amqHandler         = new \AMQHandler();
             $segmentsBeforeMine = $amqHandler->getActualForQID( $this->id_project );
         } catch ( Exception $e ) {
             $segmentsBeforeMine = null;

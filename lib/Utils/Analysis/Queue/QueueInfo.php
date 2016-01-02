@@ -1,7 +1,7 @@
 <?php
 
 namespace Analysis\Queue;
-use Analysis\Commons\AbstractContext;
+use TaskRunner\Commons\Context;
 
 /**
  * Created by PhpStorm.
@@ -10,7 +10,7 @@ use Analysis\Commons\AbstractContext;
  * Time: 16.59
  *
  */
-class QueueInfo extends AbstractContext {
+class QueueInfo extends Context {
 
     /**
      * The key of the project list
@@ -24,11 +24,5 @@ class QueueInfo extends AbstractContext {
      * @var int
      */
     public $queue_length = 0;
-
-    /**
-     * The breakdown percentage on which balance processes over the queues
-     * @var int
-     */
-    public $pid_set_perc_break = 0;
 
 }

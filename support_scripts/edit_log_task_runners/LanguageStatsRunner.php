@@ -4,7 +4,7 @@ include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 
-use Analysis\Commons\AbstractDaemon;
+use TaskRunner\Commons\AbstractDaemon;
 
 /**
  * Created by PhpStorm.
@@ -18,10 +18,10 @@ class LanguageStatsRunner extends AbstractDaemon {
     public function __construct() {
         parent::__construct();
         Log::$fileName   = "languageStats.log";
-        self::$sleeptime = 10; //60 * 60 * 24 * 30 * 1;
+        self::$sleepTime = 10; //60 * 60 * 24 * 30 * 1;
     }
 
-    function main( $args ) {
+    function main( $args = null ) {
         $db = Database::obtain();
 
         do {

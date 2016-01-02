@@ -7,17 +7,16 @@
  * 
  */
 
-namespace Analysis;
-use Analysis\Commons\AbstractDaemon, 
-    Analysis\Queue\RedisKeys,
-    Analysis\Queue\QueueInfo,
-    Analysis\Queue\QueuesList;
+namespace TaskRunner;
 
-use \INIT, \Log, \Exception, \Bootstrap;
+use Analysis\Queue\QueuesList;
+use TaskRunner\Commons\AbstractDaemon,
+    TaskRunner\Commons\Context;
 
-$root = realpath( dirname( __FILE__ ) . '/../../../' );
-include_once $root . "/inc/Bootstrap.php";
-Bootstrap::start();
+use Analysis\Queue\RedisKeys,
+    Analysis\Queue\QueueInfo;
+
+use \Log, \Exception, \AMQHandler;
 
 /**
  * Class Analysis_Manager
@@ -28,39 +27,45 @@ Bootstrap::start();
 class TaskManager extends AbstractDaemon {
 
     /**
-     * @var \Analysis\AMQHandler
+     * @var \AMQHandler
      */
     protected $_queueHandler;
 
-    protected $NUM_WORKERS_FILE;
-    protected $DEFAULT_NUM_WORKERS;
-
-    protected $_numProcessesMax = 0;
     protected $_runningPids     = 0;
-    protected $_queueObjectList = array();
 
-    const LOG_FILENAME = 'tm_analysis.log';
+    protected $_context_definitions = array();
+    protected $_contextIndex;
+
+    protected $_configFile;
+
+    /**
+     * @var QueuesList
+     */
+    protected $_queueContextList = array();
+
+    /**
+     * Deleted context ( removed from config file at runtime ) will be putted here to be removed
+     * @var Context[]
+     */
+    protected $_destroyContext = array();
 
     const ERR_NOT_FORK          = 1;
-    const ERR_SET_NOT_AVAILABLE = 2;
+    const ERR_NOT_INCREMENT     = 2;
     const ERR_PID_NOT_PUBLISHED = 3;
-    const ERR_NOT_ROUTE         = 4;
 
-    protected function __construct( $logger = null ) {
+    protected function __construct( $configFile = null, $contextIndex = null ) {
 
-        Log::$fileName = self::LOG_FILENAME;
+        $this->_configFile   = $configFile;
+        $this->_contextIndex = $contextIndex;
+
         parent::__construct();
 
         try {
 
-            $this->NUM_WORKERS_FILE = INIT::$ROOT . "/lib/Utils/Analysis/.num_processes";
-            $this->DEFAULT_NUM_WORKERS = require( 'DefaultNumTMWorkers.php' );
-
             set_time_limit(0);
 
             $this->_queueHandler = new AMQHandler();
-            $this->_queueObjectList = QueuesList::get();
-
+            $this->_updateConfiguration();
 
         } catch ( Exception $ex ){
 
@@ -72,26 +77,26 @@ class TaskManager extends AbstractDaemon {
 
     }
 
+    /**
+     * @param null $args
+     */
     public function main( $args = null ) {
 
         /*
-         * TODO improve, put on redis not only the pid, but the ip also to make unique
-         * Kill all other managers. "There can be only one."
+         * Kill all managers. "There can be only one."
+         * Register My Host address ( and also overwrite the old one )
          */
-        if ( $this->_queueHandler->getRedisClient()->get( RedisKeys::VOLUME_ANALYSIS_PID ) ){
+        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::VOLUME_ANALYSIS_PID, gethostbyname( gethostname() ) ) ){
             //kill all it's children
             $this->_killPids();
         }
-
-        //register My Pid ( and also overwrite the old one )
-        $this->_queueHandler->getRedisClient()->set( RedisKeys::VOLUME_ANALYSIS_PID, getmypid() );
 
         // BEGIN
         do {
 
             try {
 
-                if( !$this->_queueHandler->getRedisClient()->get( RedisKeys::VOLUME_ANALYSIS_PID ) ) {
+                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::VOLUME_ANALYSIS_PID, gethostbyname( gethostname() ) ) ) {
                     self::_TimeStampMsg( "(parent " . self::$tHandlerPID . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
                     self::cleanShutDown();
                     die();
@@ -106,50 +111,59 @@ class TaskManager extends AbstractDaemon {
 
             $this->_waitPid();
 
-            $this->_numProcessesMax = $this->_getNumProcessesMax();
+            $this->_updateConfiguration();
 
-            $numProcessesDiff = $this->_runningPids - $this->_numProcessesMax;
+            foreach ( $this->_queueContextList->list as $context_index => $context ) {
 
-            $numProcessesToLaunchOrDelete = abs( $numProcessesDiff );
+                $numProcessesDiff = $context->pid_list_len - $context->max_executors;
 
-            switch ( true ) {
+                $numProcessesToLaunchOrDelete = abs( $numProcessesDiff );
 
-                case $numProcessesDiff < 0:
+                switch ( true ) {
 
-                    try {
+                    case $numProcessesDiff < 0:
 
-                        $this->_forkProcesses( $numProcessesToLaunchOrDelete );
+                        try {
 
-                    } catch ( \Exception $e ){
-                        self::_TimeStampMsg( "Exception {$e->getCode()}: " . $e->getMessage() );
-                        if( $e->getCode() != self::ERR_NOT_ROUTE ) {
+                            $this->_forkProcesses( $numProcessesToLaunchOrDelete, $context );
+
+                        } catch ( Exception $e ) {
+                            self::_TimeStampMsg( "Exception {$e->getCode()}: " . $e->getMessage() );
                             $this->RUNNING = false;
                         }
-                    }
 
-                    break;
+                        break;
 
-                case $numProcessesDiff > 0:
+                    case $numProcessesDiff > 0:
 
-                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : need to delete $numProcessesToLaunchOrDelete processes" );
-                    $this->_killPids( null, 0, $numProcessesToLaunchOrDelete );
-                    sleep(1);
+                        self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : need to delete $numProcessesToLaunchOrDelete processes" );
+                        $this->_killPids( $context, 0, $numProcessesToLaunchOrDelete );
+                        sleep( 1 );
 
-                    break;
+                        break;
 
-                default:
-                    if( ! ( time() % 10 ) ) self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID .  ") sleeping ...." );
-//                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID .  ") : no pid to delete everithing  works well" );
-                    self::_balanceQueues();
-                    sleep( 1 );
-                    break;
+                    default:
+                        if ( !( ( round( microtime(true), 3 ) * 1000 ) % 10 ) ) {
+                            self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID . ") sleeping ...." );
+                        }
+
+                        self::_balanceQueues();
+                        break;
+                }
             }
+
+            // clean deleted contexts from configuration file
+            $this->_cleanContexts();
+
+            //wait to free cpu
+            sleep( self::$sleepTime );
 
         } while( $this->RUNNING );
 
         self::cleanShutDown();
 
     }
+
 
     protected function _waitPid(){
 
@@ -158,7 +172,7 @@ class TaskManager extends AbstractDaemon {
         while ( $dead > 0 ) {
 
             self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : child $dead exited: deleting file ...." );
-            foreach ( $this->_queueObjectList->list as $queue ) {
+            foreach ( $this->_queueContextList->list as $queue ) {
                 $_was_active = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead );
                 if ( $_was_active ) {
                     $this->_killPids( null, $dead );
@@ -174,37 +188,6 @@ class TaskManager extends AbstractDaemon {
 
     }
 
-    /**
-     * Run by forked child
-     *
-     * @return QueueInfo
-     * @throws Exception
-     */
-    protected function _routeThisChildProcess(){
-
-        $queueObject = $this->_queueObjectList->list[ 0 ]; //DEFAULT
-        try {
-            foreach ( $this->_queueObjectList->list as $queueObject ) {
-
-                $maxConsumersPerQueue = $this->_numProcessesMax / 100 * $queueObject->pid_set_perc_break;
-
-                if ( $queueObject->pid_list_len < $maxConsumersPerQueue ) {
-//                    self::_TimeStampMsg( "queue " . $queueObject->queue_name . " has max $maxConsumersPerQueue elements and $queueObject->pid_list_len actuals"  );
-                    $queueObject->pid_list_len = $this->_queueHandler->getRedisClient()->incr( $queueObject->queue_name );
-                    return $queueObject; //use this queue
-                } else {
-//                    self::_TimeStampMsg( "queue " . $queueObject->queue_name . " has max $maxConsumersPerQueue elements and $queueObject->pid_list_len actuals -- SKIPPED "  );
-                }
-
-            }
-        } catch ( Exception $e ) {
-            throw new \Exception( "(parent " . self::$tHandlerPID . ") : FATAL !! " . $e->getMessage(), static::ERR_SET_NOT_AVAILABLE );
-        }
-
-        return $queueObject;
-
-    }
-
     protected function _balanceQueues(){
 //        self::_TimeStampMsg( "TODO. Now i do nothing." );
 //        $this->RUNNING = false;
@@ -213,31 +196,30 @@ class TaskManager extends AbstractDaemon {
     /**
      * Launch a single process over a queue and register it's pid in the right processes queue
      *
-     * @param int $numProcesses
+     * @param int     $numProcesses
+     *
+     * @param Context $context
      *
      * @return int|null
-     *
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function _forkProcesses( $numProcesses ) {
+    protected function _forkProcesses( $numProcesses, Context $context ) {
 
-        $numProcesses    = ( empty( $numProcesses ) ? 1 : $numProcesses );
         $processLaunched = 0;
 
         while ( $processLaunched < $numProcesses ) {
 
             try {
-                $queueObject = $this->_routeThisChildProcess();
-            } catch ( \Exception $e ){
-                throw new \Exception( "(parent " . self::$tHandlerPID . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_ROUTE );
+                $context->pid_list_len = $this->_queueHandler->getRedisClient()->incr( $context->queue_name );
+            } catch ( Exception $e ){
+                throw new Exception( "(parent " . self::$tHandlerPID . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_INCREMENT );
             }
 
-//            self::_TimeStampMsg( "Spawn process ....." );
             $pid = pcntl_fork();
 
             if ( $pid == -1 ) {
 
-                throw new \Exception( "(parent " . self::$tHandlerPID . ") : ERROR OCCURRED : cannot fork. PARENT EXITING !!", static::ERR_NOT_FORK );
+                throw new Exception( "(parent " . self::$tHandlerPID . ") : ERROR OCCURRED : cannot fork. PARENT EXITING !!", static::ERR_NOT_FORK );
 
             } elseif ( $pid ) {
 
@@ -248,8 +230,8 @@ class TaskManager extends AbstractDaemon {
             } else {
 
                 // child process runs from here
-                pcntl_exec( "/usr/bin/php", array( "Executor.php" , json_encode( $queueObject ) ) );
-                posix_kill( posix_getpid(), SIGINT );
+                pcntl_exec( "/usr/bin/php", array( __DIR__ . DIRECTORY_SEPARATOR . "Executor.php" , json_encode( $context ) ) );
+                posix_kill( posix_getpid(), SIGINT ); //this line of code will never be executed
                 exit;
 
             }
@@ -311,7 +293,7 @@ class TaskManager extends AbstractDaemon {
             /**
              * @var $queue QueueInfo
              */
-            foreach ( $this->_queueObjectList->list as $queue ) {
+            foreach ( $this->_queueContextList->list as $queue ) {
 
                 $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid );
                 if( $deleted ){
@@ -344,7 +326,7 @@ class TaskManager extends AbstractDaemon {
                 posix_kill( $pid, SIGINT );
             }
             $this->_queueHandler->getRedisClient()->del( $queueInfo->pid_set_name );
-            $this->_queueHandler->getRedisClient()->set( $queueInfo->queue_name, 0 );
+            $this->_queueHandler->getRedisClient()->del( $queueInfo->queue_name );
             $queueInfo->pid_list_len = 0;
 
         } elseif ( !empty( $num ) ) {
@@ -357,7 +339,7 @@ class TaskManager extends AbstractDaemon {
                 //we do not want an infinite loop
                 //so, at least one deletion per cycle
                 $deleted = false;
-                foreach ( $this->_queueObjectList->list as $queue ) {
+                foreach ( $this->_queueContextList->list as $queue ) {
 
                     //Exit, we reached the right number, exit the while loop
                     if( $numDeleted >= $num ){
@@ -365,8 +347,7 @@ class TaskManager extends AbstractDaemon {
                     }
 
                     $_deleted = false;
-                    $maxConsumersPerQueue = $this->_numProcessesMax / 100 * $queue->pid_set_perc_break;
-                    if( $maxConsumersPerQueue < $queue->pid_list_len ){
+                    if( $queue->max_executors < $queue->pid_list_len ){
                         //ok, queue can be reduced because it's upper limit exceed the max queue consumers
                         $_deleted = $this->_queueHandler->getRedisClient()->spop( $queue->pid_set_name );
                         if ( $_deleted ) {
@@ -393,7 +374,7 @@ class TaskManager extends AbstractDaemon {
         } elseif ( empty( $queueInfo ) && empty( $pid ) && empty( $num ) ) {
 
             self::_TimeStampMsg( "Killing ALL processes." );
-            foreach ( $this->_queueObjectList->list as $queue ) {
+            foreach ( $this->_queueContextList->list as $queue ) {
                 $numDeleted += $this->_queueHandler->getRedisClient()->scard( $queue->pid_set_name );
                 $pid_list = $this->_queueHandler->getRedisClient()->smembers( $queue->pid_set_name );
                 foreach ( $pid_list as $pid ){
@@ -414,22 +395,87 @@ class TaskManager extends AbstractDaemon {
 
     }
 
-    protected function _getNumProcessesMax() {
+    /**
+     * Reload Configuration every cycle
+     *
+     */
+    protected function _updateConfiguration() {
 
-        // how many process to run
-        $num_processes = $this->DEFAULT_NUM_WORKERS;
-        if ( file_exists( $this->NUM_WORKERS_FILE ) ) {
-            $num_processes = intval( file_get_contents( $this->NUM_WORKERS_FILE ) );
+        $config = parse_ini_file( $this->_configFile, true );
+
+        Log::$fileName              = $config[ 'loggerName' ];
+        $this->_context_definitions = $config[ 'context_definitions' ];
+
+        if ( empty( $this->_contextIndex ) ) {
+            $contextList = $this->_context_definitions;
+        } else {
+            $contextList = array( $this->_context_definitions[ $this->_contextIndex ] );
         }
 
-        if ( !is_int( $num_processes ) ) {
-            self::_TimeStampMsg( "WARNING : num processes from file is not numeric. Back to default value NUM_PROCESSES = 1" );
-            $num_processes = 1;
+        if( empty( $this->_queueContextList->list ) ){
+
+            //First Execution, load build object
+            $this->_queueContextList = QueuesList::get( $contextList );
+
+            //exit method
+            return;
+
         }
 
-        return $num_processes;
+        /**
+         * Compares the keys from array1 against the keys from array2 and returns the difference.
+         * This function is like array_diff() except the comparison is done on the keys instead of the values.
+         *
+         * <pre>
+         *     array_diff:
+         *     Compares array1 against one or more other arrays
+         *     and returns the values in array1 that are not present in any of the other arrays.
+         *</pre>
+         *
+         */
+        if( $diff = array_diff_key( $this->_queueContextList->list, QueuesList::get( $contextList )->list ) ){
+
+            //remove no more present contexts
+            foreach( $diff as $_key => $_cont ){
+                unset( $this->_queueContextList->list[ $_key ] );
+                $this->_destroyContext[] = $_cont;
+            }
+
+        }
+
+        foreach( $this->_context_definitions as $contextName => $context ){
+
+            if( isset( $this->_queueContextList->list[ $contextName ] ) ){
+
+                //update the max executor number for this element
+                $this->_queueContextList->list[ $contextName ]->max_executors = $context[ 'max_executors' ];
+
+            } else {
+
+                //create a new Object executo context
+                $this->_queueContextList->list[ $contextName ] = QueueInfo::buildFromArray( $context );
+
+            }
+
+        }
+
+    }
+
+    /**
+     *
+     * Remove no more present contexts
+     */
+    protected function _cleanContexts(){
+
+        //remove no more present contexts
+        foreach( $this->_destroyContext as $_context ){
+
+            self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : need to delete a context" );
+            $this->_killPids( $_context );
+
+        }
+        $this->_destroyContext = array();
+
     }
 
 }
-
-TaskManager::getInstance()->main();

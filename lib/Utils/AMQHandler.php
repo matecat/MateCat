@@ -7,8 +7,6 @@
  * 
  */
 
-namespace Analysis;
-
 use \Analysis\Queue\QueueInfo,
     \Analysis\Queue\RedisKeys;
 
@@ -136,7 +134,7 @@ class AMQHandler extends Stomp {
         } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            $queue = RedisKeys::DEFAULT_QUEUE_NAME;
+            throw new \Exception( 'No queue name provided.' );
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/QueueSize";
@@ -179,7 +177,7 @@ class AMQHandler extends Stomp {
         } elseif( !empty( $this->queueName ) ) {
             $queue = $this->queueName;
         } else {
-            $queue = RedisKeys::DEFAULT_QUEUE_NAME;
+            throw new \Exception( 'No queue name provided.' );
         }
 
         $queue_inteface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=$queue/ConsumerCount";

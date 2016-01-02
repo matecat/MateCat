@@ -6,7 +6,7 @@ Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
-use Analysis\Commons\AbstractDaemon;
+use TaskRunner\Commons\AbstractDaemon;
 
 /**
  * Created by PhpStorm.
@@ -23,7 +23,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
     public function __construct() {
         parent::__construct();
         self::$last_job_file_name = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '.lastjobprocessed_jpeer';
-        self::$sleeptime          = 60 * 60 * 24 * 30 * 1;
+        self::$sleepTime          = 60 * 60 * 24 * 30 * 1;
         Log::$fileName            = "evaluatePEE.log";
     }
 

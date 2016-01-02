@@ -11,8 +11,8 @@ if ( !defined( 'LOG_FILENAME' ) ) {
 }
 
 // Be sure Monolog is installed via composer
-if( @include 'vendor/autoload.php' ) {
-    Log::$useMonolog = true ;
+if ( @include 'vendor/autoload.php' ) {
+    Log::$useMonolog = true;
 }
 
 use Monolog\Logger;
@@ -45,17 +45,17 @@ class Log {
             mkdir( INIT::$LOG_REPOSITORY );
         }
 
-        if( !empty( self::$fileName ) ){
+        if ( !empty( self::$fileName ) ) {
             self::$fileNamePath = LOG_REPOSITORY . "/" . self::$fileName;
         } else {
             self::$fileNamePath = LOG_REPOSITORY . "/" . LOG_FILENAME;
         }
 
-        if( self::$useMonolog ) {
+        if ( self::$useMonolog ) {
 
             try {
 
-                if( empty( self::$logger ) ) {
+                if ( empty( self::$logger ) ) {
 
                     $matecatRedisHandler = new \RedisHandler();
 
@@ -90,11 +90,10 @@ class Log {
     }
 
     protected static function _getHeader() {
-        $trace = debug_backtrace(2);
+
+        $trace = debug_backtrace( 2 );
 
         $now = date( 'Y-m-d H:i:s' );
-        //$ip = gethostname(); // only for PHP 5.3
-        $ip = php_uname( 'n' );
 
         $ip = Utils::getRealIpAddr();
 
@@ -103,9 +102,11 @@ class Log {
         if ( isset( $trace[ 2 ][ 'class' ] ) ) {
             $stringDataInfo .= " " . $trace[ 2 ][ 'class' ] . "-> ";
         }
+
         if ( isset( $trace[ 2 ][ 'function' ] ) ) {
             $stringDataInfo .= $trace[ 2 ][ 'function' ] . " ";
         }
+
         $stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ") : ";
 
         return $stringDataInfo;
@@ -114,7 +115,9 @@ class Log {
 
     public static function doLog() {
 
-        if ( !INIT::$DEBUG ) return;
+        if ( !INIT::$DEBUG ) {
+            return;
+        }
 
         $head = self::_getHeader();
 
@@ -123,20 +126,11 @@ class Log {
         for ( $i = 0; $i < $ct; $i++ ) {
             $curr_arg = func_get_arg( $i ); // get each argument passed
 
-//            $tmp = explode( "\n", var_export( $curr_arg, true ) );
             $tmp = explode( "\n", print_r( $curr_arg, true ) );
-            foreach( $tmp as $row ){
+            foreach ( $tmp as $row ) {
                 $string .= $head . $row . "\n";
             }
 
-//            if ( is_string( $curr_arg ) ) {
-//                $string .= $head . $curr_arg . "\n";
-//            } else {
-//                $tmp = explode( "\n", var_export( $curr_arg, true ) );
-//                foreach( $tmp as $row ){
-//                    $string .= $head . $row . "\n";
-//                }
-//            }
         }
 
         self::_writeTo( $string );
@@ -156,11 +150,10 @@ class Log {
      *
      */
     public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ) {
-        //$ip = gethostname(); // only for PHP 5.3
+
         if ( is_array( $data ) ) {
             $data = print_r( $data, true );
         }
-
 
         $hexi   = '';
         $ascii  = '';
@@ -168,9 +161,7 @@ class Log {
         $offset = 0;
         $len    = strlen( $data );
 
-
         $x = ( $uppercase === false ) ? 'x' : 'X';
-
 
         for ( $i = $j = 0; $i < $len; $i++ ) {
 
@@ -179,11 +170,12 @@ class Log {
             // Replace non-viewable bytes with '.'
             if ( ord( $data[ $i ] ) >= 32 ) {
                 $ascii .= ( $htmloutput === true ) ?
-                    htmlentities( $data[ $i ] ) :
-                    $data[ $i ];
+                        htmlentities( $data[ $i ] ) :
+                        $data[ $i ];
             } else {
                 $ascii .= '.';
             }
+
             if ( $j === 7 ) {
                 $hexi .= ' ';
                 $ascii .= ' ';
@@ -203,13 +195,12 @@ class Log {
                 if ( $i !== $len - 1 ) {
                     $dump .= "\n";
                 }
+
             }
+
         }
 
-
-        $dump .= $htmloutput === true ?
-            '</pre>' :
-            '';
+        $dump .= $htmloutput === true ? '</pre>' : '';
         $dump .= "\n";
 
         // Output method
@@ -218,6 +209,7 @@ class Log {
         } else {
             return $dump;
         }
+
     }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+use Analysis\DqfQueueHandler;
+
 /**
  * Class checkTausPMKeyController
  */
@@ -30,7 +32,7 @@ class checkTausPMKeyController extends ajaxController {
      */
     public function doAction() {
 
-        $dqfQueue = new Analysis_DqfQueueHandler();
+        $dqfQueue = new DqfQueueHandler();
 
         try {
 

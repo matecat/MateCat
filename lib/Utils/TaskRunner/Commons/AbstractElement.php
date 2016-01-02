@@ -7,7 +7,7 @@
  *
  */
 
-namespace Analysis\Commons;
+namespace TaskRunner\Commons;
 use \ArrayAccess;
 use \DomainException;
 use \stdClass;

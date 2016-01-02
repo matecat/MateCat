@@ -1,17 +1,18 @@
 <?php
 namespace Analysis\Workers;
-use Analysis\Commons\AbstractElement;
-use Analysis\Commons\AbstractContext;
-use Analysis\Commons\AbstractWorker;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\Context;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EmptyElementException;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
-use Analysis\Exceptions\EmptyElementException;
-use Analysis\Exceptions\EndQueueException;
-use Analysis\Exceptions\ReQueueException;
 use Analysis\Queue\QueueInfo;
-use Analysis\Commons\QueueElement;
 use Analysis\Queue\RedisKeys;
-use Analysis\AMQHandler;
-use \Exception, \Log;
+use \Exception, \AMQHandler;
+
+include \INIT::$MODEL_ROOT . "/queries.php";
 
 class TMAnalysisWorker extends AbstractWorker {
 
@@ -23,15 +24,9 @@ class TMAnalysisWorker extends AbstractWorker {
     protected $_matches = null;
 
     /**
-     * @var \Analysis\AMQHandler
+     * @var \AMQHandler
      */
     protected $_queueHandler;
-
-    /**
-     * Process ID
-     * @var int
-     */
-    protected $_myPid = 0;
 
     /**
      * @var QueueInfo
@@ -41,14 +36,14 @@ class TMAnalysisWorker extends AbstractWorker {
     const ERR_EMPTY_WORD_COUNT = 3;
     const ERR_WRONG_PROJECT    = 4;
 
-    public function __construct( AMQHandler $queueHandler, $logName = 'tm_analysis.log' ) {
-        Log::$fileName       = $logName;
+    public function __construct( AMQHandler $queueHandler ) {
+        \Log::$fileName = 'tm_analysis.log';
         $this->_queueHandler = $queueHandler;
     }
 
     /**
      * @param AbstractElement $queueElement
-     * @param AbstractContext $queueContext
+     * @param Context         $queueContext
      *
      * @return void
      *
@@ -56,7 +51,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    public function process( AbstractElement $queueElement, AbstractContext $queueContext ) {
+    public function process( AbstractElement $queueElement, Context $queueContext ) {
 
         /**
          * @var $queueContext QueueInfo
@@ -69,7 +64,7 @@ class TMAnalysisWorker extends AbstractWorker {
         /**
          * @var $queueElement QueueElement
          */
-        Log::doLog( "--- (Worker " . $this->_myPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} found " );
+        $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} found " );
 
         /**
          * @throws EndQueueException
@@ -78,7 +73,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //START
 
-        $this->_initializeTMAnalysis( $queueElement, $this->_myPid );
+        $this->_initializeTMAnalysis( $queueElement, $this->_workerPid );
 
         /**
          * @throws EmptyElementException
@@ -90,17 +85,17 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         $this->_matches = $this->_getMatches( $queueElement );
 
-        Log::doLog( "--- (Worker " . $this->_myPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
+        $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
         $this->_tryRealignTagID( $queueElement );
 
         /**
          * @throws ReQueueException
          */
         $this->_updateRecord( $queueElement );
-        Log::doLog( "--- (Worker " . $this->_myPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} updated." );
+        $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} updated." );
 
         //ack segment
-        Log::doLog( "--- (Worker " . $this->_myPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} acknowledged." );
+        $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} acknowledged." );
 
     }
 
@@ -215,11 +210,11 @@ class TMAnalysisWorker extends AbstractWorker {
         } elseif( $updateRes == 0 ) {
 
             //There was not a fast Analysis??? Impossible.
-            Log::doLog( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
+            $this->_doLog( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
 
         } else {
 
-            Log::doLog( "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.");
+            $this->_doLog( "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.");
 
         }
 
@@ -398,7 +393,7 @@ class TMAnalysisWorker extends AbstractWorker {
              * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
              */
             if ( $tms_match === null ) {
-                throw new ReQueueException( "--- (Worker " . $this->_myPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
+                throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
             }
 
             $tms_match = $tms_match->get_matches_as_array();
@@ -421,7 +416,7 @@ class TMAnalysisWorker extends AbstractWorker {
                     $mt_result = false;
                 }
             } catch ( \Exception $e ){
-                Log::doLog( $e->getMessage() );
+                $this->_doLog( $e->getMessage() );
             }
 
         }
@@ -440,7 +435,7 @@ class TMAnalysisWorker extends AbstractWorker {
          * If No results found. Re-Queue
          */
         if ( empty( $matches ) || !is_array( $matches ) ) {
-            throw new ReQueueException( "--- (Worker " . $this->_myPid . ") : No contribution found : Try again later.", self::ERR_REQUEUE );
+            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : No contribution found : Try again later.", self::ERR_REQUEUE );
         }
 
         return $matches;
@@ -478,17 +473,17 @@ class TMAnalysisWorker extends AbstractWorker {
                 if ( !$qaRealign->thereAreErrors() ) {
 
                     /*
-                        Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $queueElement, true ) );
-                        Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
-                        Log::doLog( $log_prepend . "TMS RAW RESULT:" );
-                        Log::doLog( $log_prepend . var_export( $this->_matches[ 0 ]e, true ) );
-                        Log::doLog( $log_prepend . "Realignment Success:" );
+                        $this->_doLog( $log_prepend . " - Requested Segment: " . var_export( $queueElement, true ) );
+                        $this->_doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
+                        $this->_doLog( $log_prepend . "TMS RAW RESULT:" );
+                        $this->_doLog( $log_prepend . var_export( $this->_matches[ 0 ]e, true ) );
+                        $this->_doLog( $log_prepend . "Realignment Success:" );
                     */
                     $this->_matches[ 0 ][ 'raw_translation' ] = $qaRealign->getTrgNormalized();
                     $this->_matches[ 0 ][ 'match' ]           = ( $fuzzy == 0 ? '100%' : '99%' );
 
                 } else {
-                    Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $queueElement->params->id_segment );
+                    $this->_doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $queueElement->params->id_segment );
                 }
 
             }
@@ -523,10 +518,10 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _checkWordCount( QueueElement $queueElement ){
 
         if ( $queueElement->params->raw_word_count == 0 ) {
-//            Log::doLog( "--- (Worker " . $this->_myPid . ") : empty segment. acknowledge and continue" );
+//            $this->_doLog( "--- (Worker " . $this->_myPid . ") : empty segment. acknowledge and continue" );
 //            SET as DONE and "decrement counter/close project"
             $this->_forceSetSegmentAnalyzed( $queueElement );
-            throw new EmptyElementException( "--- (Worker " . $this->_myPid . ") : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT );
+            throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT );
         }
 
     }
@@ -544,9 +539,9 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
             $this->_forceSetSegmentAnalyzed( $queueElement );
-            throw new EndQueueException( "--- (Worker " . $this->_myPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
+            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
         } elseif ( isset( $queueElement->reQueueNum ) ) {
-            Log::doLog( "--- (Worker " . $this->_myPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
 
     }
@@ -570,20 +565,20 @@ class TMAnalysisWorker extends AbstractWorker {
             $total_segs = getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
-            Log::doLog( $total_segs );
+            $this->_doLog( $total_segs );
 
             $this->_queueHandler->getRedisClient()->setex( RedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
             $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
-            Log::doLog ( "--- (child $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
+            $this->_doLog ( "--- (Worker $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
 
         } else {
             $_projectTotSegs = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
             $_analyzed       = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-            Log::doLog ( "--- (child $process_pid) : found $_projectTotSegs, analyzed $_analyzed segments for PID $pid in Redis" );
+            $this->_doLog ( "--- (Worker $process_pid) : found $_projectTotSegs, analyzed $_analyzed segments for PID $pid in Redis" );
         }
 
-        Log::doLog ( "--- (child $process_pid) : fetched data for segment $sid-$jid. Project ID is $pid" );
+        $this->_doLog ( "--- (Worker $process_pid) : fetched data for segment $sid-$jid. Project ID is $pid" );
 
     }
 
@@ -642,11 +637,11 @@ class TMAnalysisWorker extends AbstractWorker {
         $project_totals[ 'eq_wc' ]            = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJ_EQ_WORD_COUNT . $_project_id ) / 1000;
         $project_totals[ 'st_wc' ]            = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJ_ST_WORD_COUNT . $_project_id ) / 1000;
 
-        Log::doLog ( "--- (Worker $this->_myPid) : count segments in project $_project_id = " . $project_totals[ 'project_segments' ] . "" );
-        Log::doLog ( "--- (Worker $this->_myPid) : Analyzed segments in project $_project_id = " . $project_totals[ 'num_analyzed' ] . "" );
+        $this->_doLog ( "--- (Worker $this->_workerPid) : count segments in project $_project_id = " . $project_totals[ 'project_segments' ] . "" );
+        $this->_doLog ( "--- (Worker $this->_workerPid) : Analyzed segments in project $_project_id = " . $project_totals[ 'num_analyzed' ] . "" );
 
         if ( empty( $project_totals[ 'project_segments' ] ) ) {
-            Log::doLog ( "--- (Worker $this->_myPid) : WARNING !!! error while counting segments in projects $_project_id skipping and continue " );
+            $this->_doLog ( "--- (Worker $this->_workerPid) : WARNING !!! error while counting segments in projects $_project_id skipping and continue " );
 
             return;
         }
@@ -659,7 +654,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup
 
-            Log::doLog ( "--- (Worker $this->_myPid) : analysis project $_project_id finished : change status to DONE" );
+            $this->_doLog ( "--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE" );
 
             changeProjectStatus( $_project_id, \Constants_ProjectStatus::STATUS_DONE );
             changeTmWc( $_project_id, $project_totals[ 'eq_wc' ], $project_totals[ 'st_wc' ] );
@@ -669,7 +664,7 @@ class TMAnalysisWorker extends AbstractWorker {
              */
             $this->_queueHandler->getRedisClient()->lrem( $this->_mySubscribedQueue->redis_key, 0, $_project_id );
 
-            Log::doLog ( "--- (Worker $this->_myPid) : trying to initialize job total word count." );
+            $this->_doLog ( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
             foreach ( $_analyzed_report as $job_info ) {
                 $counter = new \WordCount_Counter();
                 $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
@@ -691,7 +686,7 @@ class TMAnalysisWorker extends AbstractWorker {
         try {
             $affectedRows = $db->update('segment_translations', $data, $where);
         } catch( \PDOException $e ) {
-            \Log::doLog( $e->getMessage() );
+            $this->_doLog( $e->getMessage() );
         }
 
         $this->_incrementAnalyzedCount( $elementQueue->params->pid, 0, 0 );

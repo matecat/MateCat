@@ -8,11 +8,13 @@
  */
 
 namespace Analysis;
-use Analysis\Queue\RedisKeys,
-        \RedisHandler,
-        \Predis\Client,
-        \INIT,
-        \Log;
+
+use \Analysis\Queue\RedisKeys,
+    \RedisHandler,
+    \Predis\Client,
+    \INIT,
+    \Log;
+
 /**
  * Class Analysis_Manager
  *

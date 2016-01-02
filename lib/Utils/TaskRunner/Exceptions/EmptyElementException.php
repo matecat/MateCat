@@ -3,13 +3,13 @@
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 24/12/15
- * Time: 11.05
+ * Time: 10.59
  *
  */
 
-namespace Analysis\Exceptions;
+namespace TaskRunner\Exceptions;
 
 
-class FrameException extends \Exception {
+class EmptyElementException extends \Exception {
 
 }

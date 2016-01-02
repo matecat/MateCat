@@ -7,10 +7,10 @@
  *
  */
 
-namespace Analysis\Commons;
+namespace TaskRunner\Commons;
 
 
-abstract class AbstractContext {
+class Context {
 
     /**
      * The name for the queue on AMQ
@@ -19,7 +19,7 @@ abstract class AbstractContext {
     public $queue_name;
 
     /**
-     * Name of the set of processes in which this pid will be put by TaskManager
+     * Name of the set of processes in which every pid will be put by TaskManager
      * @var string
      */
     public $pid_set_name;
@@ -31,10 +31,22 @@ abstract class AbstractContext {
     public $pid_list     = array();
 
     /**
-     * Number of the processes tied to that queue
+     * Number of the processes actually tied to that queue
      * @var int
      */
     public $pid_list_len = 0;
+
+    /**
+     * Max processes that must to be tied the queue
+     * @var int
+     */
+    public $max_executors = 0;
+
+    /**
+     * Default Logger name
+     * @var string
+     */
+    public $loggerName = 'Executor.log';
 
     /**
      * AbstractContext constructor.
@@ -58,6 +70,14 @@ abstract class AbstractContext {
      */
     public static function buildFromArray( Array $context ) {
         return new static( $context );
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function __toString() {
+        return json_encode( $this );
     }
 
 }

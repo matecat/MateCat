@@ -7,7 +7,7 @@
  *
  */
 
-namespace Analysis\Commons;
+namespace TaskRunner\Commons;
 
 class QueueElement extends AbstractElement {
 

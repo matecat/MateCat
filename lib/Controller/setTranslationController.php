@@ -1,5 +1,7 @@
 <?php
 
+use Analysis\DqfQueueHandler;
+
 class setTranslationController extends ajaxController {
 
     protected $__postInput = array();
@@ -322,7 +324,7 @@ class setTranslationController extends ajaxController {
             $dqfSegmentStruct->mt_engine_version = 1;
 
             try {
-                $dqfQueueHandler = new Analysis_DqfQueueHandler();
+                $dqfQueueHandler = new DqfQueueHandler();
                 $dqfQueueHandler->createSegment( $dqfSegmentStruct );
             } catch ( Exception $exn ) {
                 $msg = $exn->getMessage() . "\n\n" . $exn->getTraceAsString();

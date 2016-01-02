@@ -3,13 +3,13 @@
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 24/12/15
- * Time: 10.18
+ * Time: 11.04
  *
  */
 
-namespace Analysis\Exceptions;
+namespace TaskRunner\Exceptions;
 
 
-class EndQueueException extends \Exception {
+class WorkerClassException extends \Exception {
 
 }

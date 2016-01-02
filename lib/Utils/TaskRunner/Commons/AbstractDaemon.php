@@ -1,6 +1,6 @@
 <?php
 
-namespace Analysis\Commons;
+namespace TaskRunner\Commons;
 
 use \Log;
 
@@ -24,23 +24,27 @@ abstract class AbstractDaemon {
     /**
      * @var int sleep time in seconds. To be used as a parameter of sleep()
      */
-    protected static $sleeptime = 1;
+    protected static $sleepTime = 2;
 
-    protected function __construct() {
+    protected function __construct( $configFile = null, $contextIndex = null ) {
         static::$tHandlerPID = posix_getpid();
     }
 
     /**
      * Singleton Pattern, Unique Instance of This
+     *
+     * @param $config_file mixed
+     * @param $queueIndex
+     *
      * @return static
      */
-    public static function getInstance() {
+    public static function getInstance( $config_file = null, $queueIndex = null ) {
 
         if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
             die ( "This script can be run only in CLI Mode.\n\n" );
         }
 
-        declare( ticks = 1 );
+        declare( ticks = 10 );
         set_time_limit( 0 );
 
         if ( static::$__INSTANCE === null ) {
@@ -51,7 +55,7 @@ abstract class AbstractDaemon {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
                 static::_TimeStampMsg( $msg );
             } else {
-                static::_TimeStampMsg( 'registering signal handlers' );
+                static::_TimeStampMsg( 'Registering signal handlers' );
 
                 pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
                 pcntl_signal( SIGINT, array( get_called_class(), 'sigSwitch' ) );
@@ -60,7 +64,7 @@ abstract class AbstractDaemon {
 
                 static::_TimeStampMsg( "$msg\n" );
             }
-            static::$__INSTANCE = new static();
+            static::$__INSTANCE = new static(  $config_file, $queueIndex );
         }
 
         return static::$__INSTANCE;
