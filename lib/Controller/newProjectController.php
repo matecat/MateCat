@@ -11,6 +11,9 @@ class newProjectController extends viewController {
     private $targetLangArray = array();
     private $subjectArray = array();
 
+    private $project_name='';
+    private $private_tm_key='';
+
     /**
      * @var string The actual URL
      */
@@ -22,6 +25,16 @@ class newProjectController extends viewController {
 
         parent::__construct( false );
         parent::makeTemplate( "upload.html" );
+
+
+        $filterArgs = array(
+                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'private_tm_key' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+        );
+
+        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
+        $this->project_name      = $__postInput[ "project_name" ];
+        $this->private_tm_key = $__postInput[ "private_tm_key" ];
 
         $this->guid            = Utils::create_guid();
         $this->lang_handler    = Langs_Languages::getInstance();
@@ -276,6 +289,9 @@ class newProjectController extends viewController {
 //                unset ( $target_languages[ $k ] );
 //            }
 //        }
+
+        $this->template->project_name=$this->project_name;
+        $this->template->private_tm_key=$this->private_tm_key;
 
         $this->template->page = 'home';
         $this->template->source_languages = $source_languages;
