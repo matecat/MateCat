@@ -1,100 +1,980 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Force latest IE rendering engine or ChromeFrame if installed -->
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+    <meta charset="utf-8"/>
+    <title>MateCat XLIFF-to-target utility</title>
 
-<meta charset="UTF-8" />
-<title>MateCat XLIFF-to-target utility</title>
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
-<link rel="stylesheet" href="/public/js/lib/dropzone/dropzone.css" />
-<style>
-    html, body {
-        position: relative;
-        margin: 0;
-        padding: 40px;
-        width: 100%;
-        height: 100%;
-        background: #f0f0f0;
-    }
-    .dropzone {
-        background: #d8d8d8;
-        border: none;
-        color: #828282;
-        border-radius: 30px;
-        transition: all .25s;
-    }
-    body.dropzone.dz-clickable .dz-message {
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-        margin: 0;
-        height: 70px;
-        font: 23px/1.7 sans-serif;
-        transition: all .25s;
-        opacity: 1 !important;
-    }
-    body.dropzone.dz-clickable.dz-drag-hover {
-        color: #828282 !important;
-        border: none;
-        padding: 30px;
-        background: #c0c0c0;
-        transform: scale(1.04, 1.04);
-    }
-    .frame {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
-        border: dashed 5px #828282;
-        border-radius: 30px;
-        transition: all .25s;
-    }
-    .click {
-        cursor: pointer !important;
-    }
-</style>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <meta property="og:title" content="Translate a file with MateCat"/>
+    <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!"/>
+    <meta property="og:url" content="https://www.matecat.com"/>
+    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg"/>
 
+    <!--
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/public/js/lib/dropzone/dropzone.css"/>
+-->
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
+
+    <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+    <script src="${basepath}public/js/lib/jquery.js"></script>
+    <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/upload.js"></script>
+
+    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+
+    <script type="text/javascript">
+        var config = {
+            basepath: '${basepath | string:/}',
+            hostpath: '${hostpath | string:/}',
+            unsupportedFileTypes: '${unsupported_file_types}',
+            allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
+            conversionEnabled: ${conversion_enabled},
+            analysisEnabled: ${volume_analysis_enabled},
+            maxFileSize: ${maxFileSize},
+            maxTMXFileSize: ${maxTMXFileSize},
+            maxNumberFiles: ${maxNumberFiles},
+            ownerIsMe: true,
+            isAnonymousUser: ${isAnonymousUser},
+            blueimp_dataType: 'text'
+        };
+    </script>
+
+    <style>
+        #dropzone_wrapper {
+            padding: 30px;
+        }
+
+        .file_upload_ok {
+            color: #0c0;
+            font-size: 14px;
+        }
+    </style>
 </head>
-<body class="dropzone click" id="myDropzone">
+<body tal:condition="not:supportedBrowser">
+<div metal:use-macro="unsupported_browser.html/unsupported"/>
+</body>
 
-<div class="frame click"></div>
+<body tal:condition="php:supportedBrowser EQ -2">
+<div metal:use-macro="unsupported_browser.html/indexie"/>
+</body>
+
+<body tal:condition="php:supportedBrowser EQ 1" class="started ">
+
+<header>
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+        <ul class="pull-right" id="menu-site">
+            <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
+            <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+            <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
+            <li><a href="https://www.matecat.com/about/">About</a></li>
+            <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
+            <li><a href="https://www.matecat.com/support/">Support</a></li>
+            <li><a class="bigred" href="https://www.matecat.com/contacts">LSP? Request a demo</a></li>
+        </ul>
+    </div>
+    <div class="cl"></div>
+</header>
+<div id="dropzone_wrapper">
+    <div class="upload-files drag">
+
+        <form id="fileupload" action="/index.php?action=xliffToTarget" method="POST" enctype="multipart/form-data">
+
+            <div id="overlay"></div>
+            <div id="droptest">
+
+                <p class="file-drag">
+                    <strong>Drag and drop</strong> your XLIFF here<br/>
+                    <span class="min">to obtain the translated documents</span>
+                </p>
+
+                <p class="file-drop">
+                    <strong>Drop it</strong> here.
+                </p>
+
+                <div class="container">
+                    <div class="row fileupload-buttonbar">
+                        <div class="span7">
+                        <span class="btn btn-success fileinput-button">
+                            <span>Add files...</span>
+                            <input type="file" name="xliff" multiple="multiple" class="multiple-button"/>
+                        </span>
+                        </div>
+
+                        <!-- The global progress information -->
+                        <div class="span5 fileupload-progress fade">
+                            <!-- The global progress bar -->
+                            <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                                <div class="bar" style="width:0%;"></div>
+                            </div>
+                            <!-- The extended global progress information -->
+                            <div class="progress-extended">&nbsp;</div>
+                        </div>
+                    </div>
+                    <!-- The loading indicator is shown during file processing -->
+                    <div class="fileupload-loading"></div>
+                    <!-- The table listing the files available for upload/download -->
+                    <table cellpadding="0" cellspacing="0" class="upload-table table-striped" role="presentation">
+                        <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody>
+                    </table>
+                    <div class="cl"></div>
+
+                </div>
+
+
+            </div>
+            <div class="cl"></div>
+        </form>
+    </div>
+</div>
+
+
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+        <td class="preview">
+             {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
+
+             {% if (o.files[i].type == "application/zip") { %}
+             <span class="extzip"></span>
+             {% mimeok=1 } %}
+
+
+            {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
+			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+			) { %}
+            <span class="extdoc"></span>
+
+            {% mimeok=1 } %}
+
+			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
+            <span class="extppt"></span>
+            {% mimeok=1} %}
+
+
+			{% if (o.files[i].type == "text/plain" || o.files[i].type == "application/txt" || o.files[i].type == "browser/internal" || o.files[i].type == "text/anytext" || o.files[i].type == "widetext/plain" || o.files[i].type == "widetext/paragraph" ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
+
+
+			{% if (o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/msexcel" || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/x-ms-excel" || o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-excel" || o.files[i].type == "application/x-dos_ms_excel"  || o.files[i].type == "application/xls" || o.files[i].type == "application/excel"  || o.files[i].type == "application/xlt" || o.files[i].type == "application/msexcel"  || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || o.files[i].type == "application/vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/x-vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/vnd.sun.xml.calc" || o.files[i].type == "text/comma-separated-values" || o.files[i].type == "text/csv" || o.files[i].type == "application/csv" || o.files[i].type == "application/vnd.msexcel"
+
+
+			) { %}
+
+            <span class="extxls"></span>
+            {% mimeok=1} %}
+
+		    {% if ( (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type =="application/x-xml" ) ) { %}
+                {% if (/resx/.test( o.files[i].name.split('.').pop() ) == false) { %}
+                <span class="extxml"></span>
+                {% } %}
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
+
+            <span class="exthtm"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "application/vnd.mif" || o.files[i].type == "application/x-framemaker" || o.files[i].type == "application/x-maker"|| o.files[i].type == "application/x-mif"  ) { %}
+
+            <span class="extmif"></span>
+            {% mimeok=1} %}
+
+			 {% if (/idml/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extidd"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "application/quarkxpress" || o.files[i].type == "application/x-quark-express" ||  /xtg/.test( o.files[i].name.split('.').pop() )) { %}
+
+            <span class="extqxp"></span>
+            {% mimeok=1} %}
+
+			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
+
+			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extttx"></span>
+            {% mimeok=1} %}
+
+			 {% if (/xliff/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extxif"></span>
+            {% mimeok=1} %}
+
+			 {% if (/xlf/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extxlf"></span>
+            {% mimeok=1} %}
+
+			 {% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extrcc"></span>
+            {% mimeok=1} %}
+
+			{% if (/resx/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extres"></span>
+            {% mimeok=1} %}
+
+			{% if (/sgml/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extsgl"></span>
+            {% mimeok=1} %}
+
+			{% if (/sgm/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extsgm"></span>
+            {% mimeok=1} %}
+
+			{% if (/properties/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="extpro"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
+
+            <span class="extpdf"></span>
+            {% mimeok=1} %}
+
+			{% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
+			 <span class="extxif"></span>
+            {% } %}
+
+        </td>
+        <td class="name"><span>{%=file.name%}</span></td>
+        <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+        {% if (file.error) { %}
+        <td class="file_upload_error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
+            {%=locale.fileupload.errors[file.error] || file.error%}
+        </td>
+        {% } else if (!i) { %}
+        <td colspan="2">
+            <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="bar" style="width:0%;"></div>
+            </div>
+        </td>
+        <td class="start hide">{% if (!o.options.autoUpload) { %}
+            <button class="btn btn-primary">
+                <i class="icon-upload icon-white"></i>
+                <span>{%=locale.fileupload.start%}</span>
+            </button>
+            {% } %}
+        </td>
+        {% } else { %}
+        <td colspan="2"></td>
+        {% } %}
+        <td class="cancel">{% if (!i) { %}
+            <button class="btn btn-warning">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>{%=locale.fileupload.cancel%}</span>
+            </button>
+            {% } %}
+        </td>
+    </tr>
+
+    {% } %}
+
+
+
+
+
+
+</script>
+
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade">
+        {% if (file.error) { %}
+        <td></td>
+        <td class="name"><span></span></td>
+        <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+        <td class="file_upload_error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
+            {%=locale.fileupload.errors[file.error] || file.error%}
+        </td>
+        {% } else { %}
+        <td class="preview">
+		     {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
+            {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
+			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+			) { %}
+            <span class="extdoc"></span>
+
+            {% mimeok=1 } %}
+
+            {% if (o.files[i].type == "application/zip") { %}
+             <span class="extzip"></span>
+             {% mimeok=1 } %}
+
+			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
+            <span class="extppt"></span>
+            {% mimeok=1} %}
+
+
+			{% if (o.files[i].type == "text/plain" || o.files[i].type == "application/txt" || o.files[i].type == "browser/internal" || o.files[i].type == "text/anytext" || o.files[i].type == "widetext/plain" || o.files[i].type == "widetext/paragraph" ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
+
+
+			{% if (o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/msexcel" || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/x-ms-excel" || o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-excel" || o.files[i].type == "application/x-dos_ms_excel"  || o.files[i].type == "application/xls" || o.files[i].type == "application/excel"  || o.files[i].type == "application/xlt" || o.files[i].type == "application/msexcel"  || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || o.files[i].type == "application/vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/x-vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/vnd.sun.xml.calc" || o.files[i].type == "text/comma-separated-values" || o.files[i].type == "text/csv" || o.files[i].type == "application/csv" || o.files[i].type == "application/vnd.msexcel"
+
+
+			) { %}
+
+            <span class="extxls"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
+                {% if (/resx/.test( o.files[i].fileName.split('.').pop() ) == false) { %}
+                <span class="extxml"></span>
+                {% } %}
+            {% mimeok=1} %}
+
+
+			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
+
+            <span class="exthtm"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "application/vnd.mif" || o.files[i].type == "application/x-framemaker" || o.files[i].type == "application/x-maker"|| o.files[i].type == "application/x-mif"  ) { %}
+
+            <span class="extmif"></span>
+            {% mimeok=1} %}
+
+			 {% if (/idml/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extidd"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "application/quarkxpress" || o.files[i].type == "application/x-quark-express" ||  /xtg/.test( o.files[i].fileName.split('.').pop() )) { %}
+
+            <span class="extqxp"></span>
+            {% mimeok=1} %}
+
+
+			 {% if (/g/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="exttxt"></span>
+            {% mimeok=1} %}
+
+
+			 {% if (/ttx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extttx"></span>
+            {% mimeok=1} %}
+
+			 {% if (/xliff/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extxif"></span>
+            {% mimeok=1} %}
+
+			 {% if (/xlf/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extxlf"></span>
+            {% mimeok=1} %}
+
+			 {% if (/rc/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extrcc"></span>
+            {% mimeok=1} %}
+
+			{% if (/resx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extres"></span>
+            {% mimeok=1} %}
+
+            {% if (/sgml/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extsgl"></span>
+            {% mimeok=1} %}
+
+			{% if (/sgm/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extsgm"></span>
+            {% mimeok=1} %}
+
+			{% if (/properties/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="extpro"></span>
+            {% mimeok=1} %}
+
+			 {% if (/tmx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            <span class="exttmx"></span>
+            {% mimeok=1} %}
+
+			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
+
+            <span class="extpdf"></span>
+            {% mimeok=1} %}
+
+			{% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
+			 <span class="extxif"></span>
+            {% } %}
+
+
+        </td>
+        <td class="name">{%=file.fileName%}</td>
+        <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+        <td colspan="2" class="file_upload_ok">File downloaded! Check your download folder</td>
+        {% } %}
+        <td class="delete">
+            <button class="btn btn-dange ui-button" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>{%=locale.fileupload.destroy%}</span>
+            </button>
+        </td>
+
+    </tr>
+
+
+    {% } %}
+
+
+
+
+
+</script>
+
+<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
+
+<footer>
+
+    <div class="wrapper">
+
+        <ul class="external-links">
+            <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
+
+            <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
+            <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
+        </ul>
+
+        <nav>
+
+            <ul>
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                </tal:block>
+
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <li><a href="${authURL}" class="authLink">Manage</a></li>
+                </tal:block>
+
+            </ul>
+
+            <tal:block tal:condition="php: empty(logged_user)">
+                <div id='welcomebox'>
+                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
+                </div>
+            </tal:block>
+
+            <tal:block tal:condition="php: !empty(logged_user)">
+                <div id='welcomebox' tal:attributes="title extended_user">
+                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                </div>
+            </tal:block>
+
+        </nav>
+
+    </div>
+</footer>
+
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="/public/js/lib/dropzone/dropzone.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
 
 <script>
-    Dropzone.options.myDropzone = {
-        url: "/index.php?action=xliffToTarget", // Set the url
-        paramName: "xliff", // The name that will be used to transfer the file
-        dictDefaultMessage: "Drop your XLIFF files here<br />to obtain the translated documents",
-        clickable: '.click',
-        //maxFilesize: 2, // MB
-        accept: function(file, done) {
-            var ext = file.name.split('.').pop().toLowerCase();
-            switch (ext) {
-                case "xlf":
-                case "xliff":
-                case "sdlxliff":
-                    // Allowed!
-                    done();
-                    break;
-                default:
-                    done("This tool supports only XLIFF files!");
+    <!--
+
+    // Generate blob from base 64
+    function b64toBlob( b64Data, contentType, sliceSize ) {
+        contentType = contentType || '';
+        sliceSize = sliceSize || 512;
+        var byteCharacters = atob( b64Data );
+        var byteArrays = [];
+        for ( var offset = 0; offset < byteCharacters.length; offset += sliceSize ) {
+            var slice = byteCharacters.slice( offset, offset + sliceSize );
+            var byteNumbers = new Array( slice.length );
+            for ( var i = 0; i < slice.length; i++ ) {
+                byteNumbers[i] = slice.charCodeAt( i );
             }
-        },
-        sending: function(file, xhr, formData) {
-            xhr.responseType = "blob";
-        },
-        success: function(file, data) {
-            var downloadUrl = URL.createObjectURL(data);
-            var a = document.createElement("a");
-            a.href = downloadUrl;
-            a.download = file.name.substring(0, file.name.lastIndexOf("."));
-            document.body.appendChild(a);
-            a.click();
+            var byteArray = new Uint8Array( byteNumbers );
+            byteArrays.push( byteArray );
         }
-    };
+        var blob = new Blob( byteArrays, {
+            type: contentType
+        } );
+        return blob;
+    }
+
+    $( function () {
+        //remove init method. It's useless
+        UI.init = function () {};
+    } );
+
+
+    //-->
 </script>
+
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
+<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
+
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
+
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>
+
+<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+<!--<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>-->
+
+<!-- jQuery Image Gallery -->
+<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
+
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>
+<!-- The File Upload file processing plugin -->
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
+<!-- The File Upload user interface plugin -->
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
+<!-- The File Upload jQuery UI plugin -->
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
+<!-- The localization script -->
+<script src="${basepath}public/js/lib/fileupload/locale.js"></script>
+<!-- The main application script -->
+<script src="${basepath}public/js/lib/fileupload/main.js"></script>
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
+<!--[if gte IE 8]>
+<script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
+
+<script src="${basepath}public/js/lib/jquery.cookie.js"></script>
+<script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
+
+<script>
+    <!--//
+    //remove old eventListener. The only way is searching it from its guid ( == 50 )
+    $( function () {
+        $( '#fileupload' ).fileupload( 'destroy' );
+        $( '#fileupload' ).fileupload( {
+            autoUpload: true,
+            acceptFileTypes: config.allowedFileTypes,
+            dataType: config.dataType,
+            maxFileSize: config.maxFileSize,
+
+            add: function ( e, data ) {
+                var that = $( this ).data( 'fileupload' ),
+                        options = that.options,
+                        files = data.files;
+                $( this ).fileupload( 'process', data ).done( function () {
+                    that._adjustMaxNumberOfFiles( -files.length );
+                    data.isAdjusted = true;
+                    data.files.valid = data.isValidated = that._validate( files );
+                    data.context = that._renderUpload( files ).data( 'data', data );
+                    options.filesContainer[
+                            options.prependFiles ? 'prepend' : 'append'
+                            ]( data.context );
+                    that._renderPreviews( files, data.context );
+                    that._forceReflow( data.context );
+
+                    that._transition( data.context ).done(
+                            function () {
+                                if ( (that._trigger( 'added', e, data ) !== false) &&
+                                        (options.autoUpload || data.autoUpload) &&
+                                        data.autoUpload !== false && data.isValidated ) {
+                                    data.submit();
+                                }
+                            }
+                    );
+                } );
+            },
+
+            // Callback for the start of each file upload request:
+            send: function ( e, data ) {
+                var that = $( this ).data( 'fileupload' );
+                if ( !data.isValidated ) {
+                    if ( !data.isAdjusted ) {
+                        that._adjustMaxNumberOfFiles( -data.files.length );
+                    }
+                    if ( !that._validate( data.files ) ) {
+                        return false;
+                    }
+                }
+                if ( data.context && data.dataType &&
+                        data.dataType.substr( 0, 6 ) === 'iframe' ) {
+                    // Iframe Transport does not support progress events.
+                    // In lack of an indeterminate progress bar, we set
+                    // the progress to 100%, showing the full animated bar:
+                    data.context
+                            .find( '.progress' ).addClass(
+                            !$.support.transition && 'progress-animated'
+                    )
+                            .attr( 'aria-valuenow', 100 )
+                            .find( '.bar' ).css(
+                            'width',
+                            '100%'
+                    );
+                }
+                return that._trigger( 'sent', e, data );
+            },
+            // Callback for successful uploads:
+            done: function ( e, data ) {
+                var that = $( this ).data( 'fileupload' ),
+                        template;
+                if ( data.context ) {
+
+                    data.context.each( function ( index ) {
+                        if ( (data instanceof Object) && (typeof data.result.fileContent == 'string') ) {
+                            var file = data.result;
+                        }
+                        else {
+                            var file = {error: 'emptyResult'};
+                        }
+
+                        if ( file.error ) {
+                            that._adjustMaxNumberOfFiles( 1 );
+                        }
+                        that._transition( $( this ) ).done(
+                                function () {
+                                    var node = $( this );
+                                    template = that._renderDownload( [file] )
+                                            .replaceAll( node );
+                                    that._forceReflow( template );
+                                    that._transition( template ).done(
+                                            function () {
+                                                data.context = $( this );
+                                                that._trigger( 'completed', e, data );
+                                            }
+                                    );
+                                    $( '.size span' ).css( 'visibility', 'visible' );
+                                    $( data.context ).find( '.size + td' ).addClass( 'file_upload_ok' ).html( "<span>" + file.message + "</span>" );
+                                }
+                        );
+
+                    } );
+                } else {
+                    template = that._renderDownload( data.result )
+                            .appendTo( that.options.filesContainer );
+                    that._forceReflow( template );
+                    that._transition( template ).done(
+                            function () {
+                                data.context = $( this );
+                                that._trigger( 'completed', e, data );
+                            }
+                    );
+                }
+            },
+            // Callback for failed (abort or error) uploads:
+            fail: function ( e, data ) {
+                var that = $( this ).data( 'fileupload' ),
+                        template;
+                that._adjustMaxNumberOfFiles( data.files.length );
+                if ( data.context ) {
+                    data.context.each( function ( index ) {
+                        if ( data.errorThrown !== 'abort' ) {
+                            var file = data.files[index];
+                            file.error = file.error || data.errorThrown ||
+                                    true;
+                            that._transition( $( this ) ).done(
+                                    function () {
+                                        var node = $( this );
+                                        template = that._renderDownload( [file] )
+                                                .replaceAll( node );
+                                        that._forceReflow( template );
+                                        that._transition( template ).done(
+                                                function () {
+                                                    data.context = $( this );
+                                                    that._trigger( 'failed', e, data );
+                                                }
+                                        );
+                                    }
+                            );
+                        } else {
+                            that._transition( $( this ) ).done(
+                                    function () {
+                                        $( this ).remove();
+                                        that._trigger( 'failed', e, data );
+                                    }
+                            );
+                        }
+                    } );
+                } else if ( data.errorThrown !== 'abort' ) {
+                    that._adjustMaxNumberOfFiles( -data.files.length );
+                    data.context = that._renderUpload( data.files )
+                            .appendTo( that.options.filesContainer )
+                            .data( 'data', data );
+                    that._forceReflow( data.context );
+                    that._transition( data.context ).done(
+                            function () {
+                                data.context = $( this );
+                                that._trigger( 'failed', e, data );
+                            }
+                    );
+                } else {
+                    that._trigger( 'failed', e, data );
+                }
+            },
+            // Callback for upload progress events:
+            progress: function ( e, data ) {
+                if ( data.context ) {
+                    var progress = parseInt( data.loaded / data.total * 100, 10 );
+                    data.context.find( '.progress' )
+                            .attr( 'aria-valuenow', progress )
+                            .find( '.bar' ).css(
+                            'width',
+                            progress + '%'
+                    );
+                }
+            },
+            // Callback for global upload progress events:
+            progressall: function ( e, data ) {
+                var $this = $( this ),
+                        progress = parseInt( data.loaded / data.total * 100, 10 ),
+                        globalProgressNode = $this.find( '.fileupload-progress' ),
+                        extendedProgressNode = globalProgressNode
+                                .find( '.progress-extended' );
+                if ( extendedProgressNode.length ) {
+                    extendedProgressNode.html(
+                            $this.data( 'fileupload' )._renderExtendedProgress( data )
+                    );
+                }
+                globalProgressNode
+                        .find( '.progress' )
+                        .attr( 'aria-valuenow', progress )
+                        .find( '.bar' ).css(
+                        'width',
+                        progress + '%'
+                );
+            },
+            // Callback for uploads start, equivalent to the global ajaxStart event:
+            start: function ( e ) {
+                var that = $( this ).data( 'fileupload' );
+                that._transition( $( this ).find( '.fileupload-progress' ) ).done(
+                        function () {
+                            that._trigger( 'started', e );
+                        }
+                );
+            },
+            // Callback for uploads stop, equivalent to the global ajaxStop event:
+            stop: function ( e ) {
+                var that = $( this ).data( 'fileupload' );
+                that._transition( $( this ).find( '.fileupload-progress' ) ).done(
+                        function () {
+                            $( this ).find( '.progress' )
+                                    .attr( 'aria-valuenow', '0' )
+                                    .find( '.bar' ).css( 'width', '0%' );
+                            $( this ).find( '.progress-extended' ).html( '&nbsp;' );
+                            that._trigger( 'stopped', e );
+                        }
+                );
+            },
+            // Callback for file deletion:
+            destroy: function ( e, data ) {
+
+                var that = $( this ).data( 'fileupload' );
+                if ( data.url ) {
+                    $.ajax( data );
+                    that._adjustMaxNumberOfFiles( 1 );
+                }
+
+                var _deleteRow = function ( rowToBeDeleted ) {
+
+                    that._transition( $( rowToBeDeleted ) ).done(
+                            function () {
+                                $( this ).remove();
+                                that._trigger( 'destroyed', e, data );
+                            }
+                    );
+
+                };
+
+                _deleteRow( data.context );
+
+                /* END Editing */
+            },
+            complete: function ( e, data ) {
+                console.log( 'completed!!!' );
+                var result = e.responseJSON; //JSON.parse( data.result );
+                saveAs( b64toBlob( result.fileContent ), result.fileName );
+            }
+        } );
+
+//        $( '#fileupload' ).bind( 'fileuploadcompleted', function ( e, data ) {
+//
+//        } );
+
+
+        $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'] = [];
+//        var guid1 = $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'][1].guid;
+
+//        if ( guid0 == 50 ) {
+//            $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'].splice( 0, 1 );
+//        }
+//        else if ( guid1 == 50 ) {
+//            $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'].pop();
+//        }
+//-->
+    } );
+</script>
+
+<div class="modal supported-formats" data-type="view">
+    <div class="popup-outer closeClickingOutside"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>Supported file formats</h1>
+
+        <div class="popup-box fileformat">
+            <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
+                <h3 tal:content="repeat/supported/key"></h3>
+                <ul tal:repeat="ext supported">
+                    <li tal:repeat="item ext">
+                        <span tal:content="item/ext" tal:attributes="class item/class"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="popup-outer lang-slide hide"></div>
+<div class="modal popup-languages slide" data-type="view">
+
+    <div class="">
+        <h1>
+            Choose Multiple Languages (<span class="number">1</span>)
+            <a href="#" id="deselectMultilang">Deselect all</a>
+            <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
+            <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
+        </h1>
+
+        <div class="popup-box">
+            <ul class="listlang">
+
+                <tal:block tal:repeat="language target_languages">
+                    <li tal:attributes="class language/top">
+                        <input type="checkbox" tal:attributes="value language/code; id language/code"/>
+                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
+                    </li>
+                </tal:block>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="modal popup-languages" data-type="view">
+    <div class="popup-outer"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>
+            <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
+            <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
+            Choose Multiple Languages (<span class="number">1</span>)
+            <a href="#" id="deselectMultilang">Deselect all</a>
+        </h1>
+
+        <div class="popup-box">
+            <ul class="listlang">
+
+                <tal:block tal:repeat="language target_languages">
+                    <li tal:attributes="class language/top">
+                        <input type="checkbox" tal:attributes="value language/code; id language/code"/>
+                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
+                    </li>
+                </tal:block>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
+
+<footer>
+
+    <div class="wrapper">
+
+        <ul class="external-links">
+            <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
+
+            <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
+            <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
+        </ul>
+<!--
+        <nav>
+
+            <ul>
+
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                </tal:block>
+
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <li><a href="${authURL}" class="authLink">Manage</a></li>
+                </tal:block>
+
+            </ul>
+
+            <tal:block tal:condition="php: empty(logged_user)">
+                <div id='welcomebox'>
+                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
+                </div>
+            </tal:block>
+
+            <tal:block tal:condition="php: !empty(logged_user)">
+                <div id='welcomebox' tal:attributes="title extended_user">
+                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                </div>
+            </tal:block>
+
+        </nav>
+-->
+    </div>
+</footer>
+
+<div class="iepopup nobrowser">
+
+    <a href="${basepath}" class="logoblack"></a>
+
+    <div class="titleie">
+        <h1>Welcome to MateCat!</h1>
+
+        <h2>There are 2 options for you</h2>
+    </div>
+    <div class="col-2 pull-left col-a">
+        <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
+
+        <p>MateCat works great with the following browsers</p>
+        <ul>
+            <li>
+                <a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="${basepath}public/img/chrome.jpg" width="140"/><br/>
+                    Chrome</a></li>
+
+            <li>
+                <a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="${basepath}public/img/safari.jpg" width="140"/><br/>
+                    Safari</a></li>
+        </ul>
+    </div>
+    <div class="col-2 pull-left col-b">
+        <h3>2 - Learn more about MateCat</h3>
+
+        <p><a class="button-learn" href="https://www.matecat.com/benefits/">Visit the website</a></p>
+    </div>
+</div>
+
+<div metal:use-macro="tm.html/tm_panel"></div>
+
+<div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
+
+<div id="uploadCallback"></div>
+
+<div metal:use-macro="cookiebanner.html/cookieBanner"/>
+<!-- SnapEngage -->
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+<!-- // SnapEngage -->
+
+<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
 </body>
 </html>

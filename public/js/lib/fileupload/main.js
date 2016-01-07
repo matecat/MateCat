@@ -305,7 +305,8 @@ $( function () {
 //	        multipart: false,
                 fileInput: $( '#fileupload .multiple-button, .btncontinue .multiple-button' ),
 //	        acceptFileTypes: /(\.|\/)(xliff|sdlxliff|xlf)$/i
-                acceptFileTypes: config.allowedFileTypes
+                acceptFileTypes: config.allowedFileTypes,
+                dataType: config.dataType
             }
     );
     $( '#fileupload' ).bind( 'fileuploaddragover', function ( e ) {

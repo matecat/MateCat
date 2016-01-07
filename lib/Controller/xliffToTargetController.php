@@ -24,11 +24,16 @@ class xliffToTargetController extends downloadController {
         ));
 
         if ($conversion[1]['isSuccess'] !== true) {
-            $this->error =  true;
+            $this->error = true;
             $this->errorMessage =  $conversion[1]['errorMessage'];
         } else {
-            $this->_filename = $conversion[1]['xliff'];
-            $this->content   = $conversion[1]['document_content'];
+            $this->content = json_encode(array(
+              "fileName" => $conversion[1]['filename'],
+              "fileContent" => base64_encode($conversion[1]['document_content']),
+              "size" => filesize($file_path),
+              "type" => mime_content_type($file_path),
+              "message" => "File downloaded! Check your download folder"
+            ));
         }
     }
 

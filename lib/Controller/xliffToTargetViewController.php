@@ -1,15 +1,20 @@
 <?php
 
-class xliffToTargetViewController extends viewController {
+class xliffToTargetViewController extends newProjectController {
 
-	public function __construct()
-	{
-		parent::__construct(false);
-		parent::makeTemplate("xliffToTarget.html");
-	}
+    private $incomingUrl;
 
-	function doAction() {}
+    public function __construct() {
+        parent::__construct( );
+        parent::makeTemplate( "xliffToTarget.html" );
+    }
 
-	function setTemplateVars() {}
+    public function setTemplateVars(){
+        INIT::$CONVERSION_ENABLED = false;
+        $this->template->basepath = "/";
+        parent::setTemplateVars();
+    }
+
+
 
 }
