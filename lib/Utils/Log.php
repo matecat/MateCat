@@ -133,7 +133,7 @@ class Log {
 
         }
 
-        self::_writeTo( $string );
+        self::_writeTo( rtrim( $string ) );
 
     }
 

@@ -215,7 +215,11 @@ class FastAnalysis extends AbstractDaemon {
          */
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
-        $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
+        try {
+            $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
+        } catch( PDOException $e ) {
+            throw new Exception( "Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE );
+        }
 
         if ( count( $this->segments ) == 0 ) {
             //there is no analysis on that file, it is ALL Pre-Translated
@@ -224,7 +228,8 @@ class FastAnalysis extends AbstractDaemon {
             throw new Exception( $exceptionMsg, self::ERR_NO_SEGMENTS );
         }
 
-        if( count( $this->segments ) > 200000 ){
+        //TODO Remove when MyMemory FastAnalysis will be rewritten
+        if( count( $this->segments ) > 120000 ){
             throw new Exception( "Project too large. Skip.", self::ERR_TOO_LARGE );
         }
 
@@ -260,7 +265,15 @@ class FastAnalysis extends AbstractDaemon {
         self::_TimeStampMsg( "Sending query to MyMemory analysis..." );
 
         $myMemory->doLog = true; //tell to the engine to not log the output
-        return $myMemory->fastAnalysis( $this->segments );
+
+        /**
+         * @var $result \Engines_Results_MyMemory_AnalyzeResponse
+         */
+        $result = $myMemory->fastAnalysis( $this->segments );
+        if( isset( $result->error->code ) && $result->error->code == -28 ){ //curl timed out
+            throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
+        }
+        return $result;
 
     }
 
@@ -534,6 +547,12 @@ class FastAnalysis extends AbstractDaemon {
         return $db->affected_rows;
     }
 
+    /**
+     * @param $pid
+     *
+     * @return array
+     * @throws PDOException
+     */
     protected static function _getSegmentsForFastVolumeAnalysis( $pid ) {
 
         //with this query we decide what segments
@@ -562,8 +581,7 @@ class FastAnalysis extends AbstractDaemon {
             $results = $db->fetch_array( $query );
         } catch ( PDOException $e ) {
             Log::doLog( $e->getMessage() );
-
-            return $e->getCode() * -1;
+            throw $e;
         }
 
         return $results;
@@ -631,27 +649,27 @@ class FastAnalysis extends AbstractDaemon {
         $mtEngine  = Engine::getInstance( $id_mt_engine );
 
         //anyway take the defaults
-        $queueList = $this->_queueContextList->list;
-        $queueName = $queueList[ 'P1' ];
+        $contextList = $this->_queueContextList->list;
+        $context = $contextList[ 'P1' ];
 
         //use this kind of construct to easy add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
             case ( ! $mtEngine instanceof \Engines_MyMemory ):
-                $queueName = $queueList[ 'P3' ];
+                $context = $contextList[ 'P3' ];
                 break;
-            case ( $queueLen >= 50000 ):
-                $queueName = $queueList[ 'P3' ];
+            case ( $queueLen >= 30000 ):
+                $context = $contextList[ 'P3' ];
                 break;
-            case ( $queueLen >= 10000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s
-                $queueName = $queueList[ 'P2' ];
+            case ( $queueLen >= 5000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s
+                $context = $contextList[ 'P2' ];
                 break;
             default:
-                $queueName = $queueList[ 'P1' ];
+                $context = $contextList[ 'P1' ];
                 break;
 
         }
 
-        return $queueName;
+        return $context;
 
     }
 

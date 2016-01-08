@@ -48,7 +48,7 @@ abstract class AbstractWorker implements SplSubject {
      * @param $queueElement AbstractElement
      * @param $queueContext Context
      *
-*@return mixed
+     * @return mixed
      */
     abstract public function process( AbstractElement $queueElement, Context $queueContext );
 
@@ -106,7 +106,7 @@ abstract class AbstractWorker implements SplSubject {
      * @param $msg string
      */
     protected function _doLog( $msg ){
-        $this->_logMsg = get_class( $this ) . " - " . $msg;
+        $this->_logMsg = get_class( $this ) . " - " . print_r( $msg, true );
         $this->notify();
     }
 
