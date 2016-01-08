@@ -28,6 +28,44 @@ class ReviewImproved extends BaseFeature {
         else {
             $this->setQaModelFromJsonFile();
         }
+
+        $this->createQaJobReviewRecord();
+    }
+
+    /**
+     * Entry point for project data validation for this feature.
+     */
+    public function validateProjectCreation()  {
+        $this->feature_options = json_decode( $this->feature->options );
+
+        if ( $this->feature_options->id_qa_model ) {
+            // pass
+        } else {
+            $this->validateModeFromJsonFile();
+        }
+    }
+
+    /**
+     * createQaJobReviewRecord
+     *
+     */
+    private function createQaJobReviewRecord() {
+        \Log::doLog( $this->project_structure['array_jobs']['job_list'] );
+        foreach( $this->project_structure['array_jobs']['job_list'] as $k => $v ) {
+
+            $id_job = $v ;
+            $password = $this->project_structure['array_jobs']['job_pass'][$k];
+            \Log::doLog( $id, $pass );
+
+            $data = array(
+                'id_project' => $this->project_structure['id_project'],
+                'id_job' => $id_job,
+                'password' => $password
+            );
+
+            \LQA\JobReviewDao::createRecord( $data );
+        }
+
     }
 
     /**
@@ -65,16 +103,6 @@ class ReviewImproved extends BaseFeature {
         $dao = new \Projects_ProjectDao( \Database::obtain() );
         $dao->updateField( $project, 'id_qa_model', $this->feature_options->id_qa_model );
 
-    }
-
-    public function validateProjectCreation()  {
-        $this->feature_options = json_decode( $this->feature->options );
-
-        if ( $this->feature_options->id_qa_model ) {
-            // pass
-        } else {
-            $this->validateModeFromJsonFile();
-        }
     }
 
     /**

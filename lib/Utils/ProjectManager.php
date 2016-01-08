@@ -105,11 +105,18 @@ class ProjectManager {
 
         $this->dbHandler = Database::obtain();
 
+
     }
 
     public function getProjectStructure() {
         return $this->projectStructure;
     }
+
+    /**
+     * Evaluates the presence of metadata assocaited with project.
+     * At present, only `revision_type` is evaluated.
+     *
+     */
     private function evalMetadata () {
         if ($this->projectStructure['revision_type'] == null) {
             return ;
@@ -145,9 +152,7 @@ class ProjectManager {
 
 
         if (! empty( $this->projectStructure['result']['errors'] )) {
-
             return false;
-
         }
 
         // create project?
@@ -984,6 +989,8 @@ class ProjectManager {
                 insertFilesJob( $jid, $fid );
             }
         }
+
+        Features::processJobsCreated( $projectStructure );
     }
 
     private function insertSegmentNotesForFile() {

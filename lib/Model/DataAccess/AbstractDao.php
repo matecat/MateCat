@@ -263,28 +263,18 @@ abstract class DataAccess_AbstractDao {
      */
     protected abstract function _buildResult( $array_result );
 
-
-    /**
-     * Returns the primary keys defined in the child DAO, as array.
-     *
-     * @return array
-     */
-
-    protected static function primaryKeys() {
-        return explode(',', static::PRIMARY_KEY);
-    }
-
     /**
      * Returns a string suitable for updates of the fields
      * provided by the attributes array.
      *
-     * @param $attrs array of attributes to update.
+     * @param $attrs array of full attributes to update
+     * @param $mask array of attributes to include in the update
      * @return string
      */
 
     protected static function buildUpdateSet( $attrs, $mask ) {
         $map = array();
-        $pks = self::primaryKeys();
+        $pks = static::$primary_keys;
 
         if ( empty($mask) ) {
             $mask = array_keys( $attrs );
@@ -308,9 +298,10 @@ abstract class DataAccess_AbstractDao {
      */
 
     protected static function buildPkeyCondition( $attrs ) {
-        foreach( $attrs as $key => $value ) {
+        $map = array();
 
-            if ( in_array( $key, self::primaryKeys() )) {
+        foreach( $attrs as $key => $value ) {
+            if ( in_array( $key, static::$primary_keys )) {
                 $map[] =  " $key = :$key " ;
             }
 
@@ -343,7 +334,7 @@ abstract class DataAccess_AbstractDao {
      */
 
     protected static function structKeys( $struct ) {
-        $keys = self::primaryKeys()  ;
+        $keys = static::$primary_keys  ;
         return $struct->attributes( $keys );
     }
 
@@ -377,6 +368,5 @@ abstract class DataAccess_AbstractDao {
 
         return $stmt->execute( $data );
     }
-
 
 }

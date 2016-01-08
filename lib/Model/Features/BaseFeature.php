@@ -23,7 +23,4 @@ class BaseFeature {
 
     }
 
-    public function postCreate() {
-
-    }
 }

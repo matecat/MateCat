@@ -14,4 +14,9 @@ class OwnerFeatures_OwnerFeatureStruct extends DataAccess_AbstractDaoSilentStruc
         return Utils::underscoreToCamelCase( $this->feature_code );
     }
 
+    public function classExists() {
+        $name =  "Features\\" . $feature->toClassName() ;
+        return class_exists( $name );
+    }
+
 }
