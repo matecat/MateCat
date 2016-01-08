@@ -97,6 +97,9 @@ function integrationSetChunkAsComplete( $options ) {
     return json_decode( $response['body'] )  ;
 }
 
+/**
+ * Creates a project via API call
+ */
 function integrationCreateTestProject( $options=array() ) {
   $test = new CurlTest();
 
@@ -123,6 +126,34 @@ function integrationCreateTestProject( $options=array() ) {
   return json_decode( $response['body'] ) ;
 }
 
+function splitJob( $params, $options=array() ) {
+    $test = new CurlTest();
+
+    if ( key_exists( 'headers' , $options ) ) {
+        $test->headers = $options['headers'];
+    }
+
+    $test->path = '?action=splitJob';
+    $test->method = 'POST';
+    $test->params = array(
+        'job_id'       => $params['id_job'],
+        'project_id'   => $params['id_project'],
+        'exec'         => $params['exec'],
+        'project_pass' => $params['project_pass'],
+        'job_pass'     => $params['job_pass'],
+        'num_split'    => $params['num_split'],
+        'split_values' => $params['split_values']
+    );
+
+    $response = $test->getResponse();
+
+    if ( !in_array( (int) $response['code'], array(200, 201) )) {
+        throw new Exception( "invalid response code " . $response['code'] );
+    }
+
+    return json_decode( $response['body'] )  ;
+}
+
 function integrationSetSegmentsTranslated( $project_id ) {
     $chunksDao = new Chunks_ChunkDao( Database::obtain() ) ;
     $chunks = $chunksDao->getByProjectID( $project_id );
@@ -140,7 +171,6 @@ function integrationSetSegmentsTranslated( $project_id ) {
     }
 
     return $chunks ;
-
 }
 
 function integrationSetTranslation($options) {
