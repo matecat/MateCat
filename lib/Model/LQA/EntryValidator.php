@@ -50,7 +50,7 @@ class EntryValidator extends \DataAccess_AbstractValidator {
         $this->category = \LQA\CategoryDao::findById( $this->struct->id_category );
 
         if ( $this->category->id_model != $this->qa_model->id ) {
-            $this->errors[] = 'QA model id mismatch';
+            $this->errors[] = array(null, 'QA model id mismatch');
         }
     }
 }
