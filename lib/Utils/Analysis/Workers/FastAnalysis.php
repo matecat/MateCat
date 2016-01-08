@@ -53,7 +53,11 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected function _updateConfiguration() {
 
-        $config = parse_ini_file( $this->_configFile, true );
+        $config = @parse_ini_file( $this->_configFile, true );
+        Utils::raiseJsonExceptionError();
+        if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
+            throw new Exception( 'Wrong configuration file provided.' );
+        }
 
         //First Execution, load build object
         $this->_queueContextList = QueuesList::get( $config[ 'context_definitions' ] );
@@ -74,9 +78,8 @@ class FastAnalysis extends AbstractDaemon {
 
         } catch ( Exception $ex ) {
 
-            $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
-            self::_TimeStampMsg( $msg );
-            self::_TimeStampMsg( $ex->getMessage() );
+            self::_TimeStampMsg( str_pad( " " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH ) );
+            self::_TimeStampMsg( str_pad( "EXIT", 60, " ", STR_PAD_BOTH ) );
             die();
         }
 

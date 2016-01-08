@@ -55,14 +55,14 @@ abstract class AbstractDaemon {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
                 static::_TimeStampMsg( $msg );
             } else {
-                static::_TimeStampMsg( 'Registering signal handlers' );
+                static::_TimeStampMsg( str_pad( " Registering signal handlers ", 60, "*", STR_PAD_BOTH ) );
 
                 pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
                 pcntl_signal( SIGINT, array( get_called_class(), 'sigSwitch' ) );
                 pcntl_signal( SIGHUP, array( get_called_class(), 'sigSwitch' ) );
-                $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
+                $msg = str_pad( " Signal Handler Installed ", 60, "-", STR_PAD_BOTH );
 
-                static::_TimeStampMsg( "$msg\n" );
+                static::_TimeStampMsg( "$msg" );
             }
             static::$__INSTANCE = new static(  $config_file, $queueIndex );
         }
@@ -97,5 +97,11 @@ abstract class AbstractDaemon {
      * @return mixed
      */
     abstract public static function cleanShutDown();
+
+    /**
+     * Every cycle reload and update Daemon configuration.
+     * @return void
+     */
+    abstract protected function _updateConfiguration();
 
 }

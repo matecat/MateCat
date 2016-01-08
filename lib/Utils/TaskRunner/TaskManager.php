@@ -16,7 +16,7 @@ use TaskRunner\Commons\AbstractDaemon,
 use Analysis\Queue\RedisKeys,
     Analysis\Queue\QueueInfo;
 
-use \Log, \Exception, \AMQHandler;
+use \Log, \Exception, \AMQHandler, \Utils;
 
 /**
  * Class Analysis_Manager
@@ -69,9 +69,8 @@ class TaskManager extends AbstractDaemon {
 
         } catch ( Exception $ex ){
 
-            $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
-            self::_TimeStampMsg( $msg );
-            self::_TimeStampMsg( $ex->getMessage() );
+            self::_TimeStampMsg( str_pad( " " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH ) );
+            self::_TimeStampMsg( str_pad( "EXIT", 60, " ", STR_PAD_BOTH ) );
             die();
         }
 
@@ -401,7 +400,11 @@ class TaskManager extends AbstractDaemon {
      */
     protected function _updateConfiguration() {
 
-        $config = parse_ini_file( $this->_configFile, true );
+        $config = @parse_ini_file( $this->_configFile, true );
+        Utils::raiseJsonExceptionError();
+        if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
+            throw new Exception( 'Wrong configuration file provided.' );
+        }
 
         Log::$fileName              = $config[ 'loggerName' ];
         $this->_context_definitions = $config[ 'context_definitions' ];

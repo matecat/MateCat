@@ -8,4 +8,4 @@ Bootstrap::start();
 
 use Analysis\Workers\FastAnalysis;
 
-FastAnalysis::getInstance( $argv[1] )->main();
+FastAnalysis::getInstance( @$argv[1] )->main();
