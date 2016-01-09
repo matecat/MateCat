@@ -15,54 +15,13 @@ class Features {
     );
 
     /**
-     * Some features require additional checks in order to define
-     * if they are 'enabled' or not.
-     */
-    public static function enabled($feature, $project) {
-        if ( $feature->feature_code == Features::REVIEW_IMPROVED ) {
-            return self::reviewImprovedEnabled( $project );
-        }
-        else {
-            return !!$feature ;
-        }
-    }
-
-    /**
-     * Populates the projectStructure with error messages coming from
-     * all the features enabled for the current request.
-     *
-     * @param $projectStructure is the project structure right before it's persisted.
+     * Invoke the given method on feature-specific classes, if available. Pass the
+     * projectStructure as input.
+     * @param $method string the method to invoke
+     * @param $projectStructure ArrayObject
      */
 
-    public static function validateProjectCreation( ArrayObject &$projectStructure ) {
-        // find the features to work on. We must rely on the project owner
-        //
-        \Log::doLog( 'id_customer', $projectStructure['id_customer'] );
-        self::evalMethodOnFeatures('validateProjectCreation', $projectStructure);
-    }
-
-
-    /**
-     * processProjectCreated
-     *
-     * TODO: to be improved. This should be the entry point to apply
-     * feature specific updated to the project due to owner features.
-     */
-
-    public static function processProjectCreated( ArrayObject $projectStructure ) {
-        self::evalMethodOnFeatures('postProjectCreate', $projectStructure);
-    }
-
-    /**
-     * processJobsCreated
-     *
-     */
-
-    public static function processJobsCreated( ArrayObject $projectStructure ) {
-        self::evalMethodOnFeatures('postJobsCreated', $projectStructure);
-    }
-
-    private static function evalMethodOnFeatures( $method, ArrayObject $projectStructure ) {
+    public static function run( $method, ArrayObject $projectStructure ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $projectStructure['id_customer'] );
 
         foreach( $features as $feature ) {
@@ -72,6 +31,19 @@ class Features {
             if ( method_exists( $cls, $method ) ) {
                 $cls->$method();
             }
+        }
+    }
+
+    /**
+     * Some features require additional checks in order to define
+     * if they are 'enabled' or not.
+     */
+    public static function enabled($feature, $project) {
+        if ( $feature->feature_code == Features::REVIEW_IMPROVED ) {
+            return self::reviewImprovedEnabled( $project );
+        }
+        else {
+            return !!$feature ;
         }
     }
 

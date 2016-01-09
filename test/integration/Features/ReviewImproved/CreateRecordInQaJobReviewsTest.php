@@ -1,6 +1,6 @@
 <?php
 
-use \LQA\JobReviewDao ;
+use \LQA\ChunkReviewDao ;
 
 class CreateRecordInQaJobReviewsTest extends IntegrationTest {
 
@@ -28,11 +28,11 @@ class CreateRecordInQaJobReviewsTest extends IntegrationTest {
         $project = Projects_ProjectDao::findById( $project->id_project );
 
         $this->assertNotNull( $project->id );
-        $reviews = JobReviewDao::findByProjectId( $project->id ) ;
+        $reviews = ChunkReviewDao::findByProjectId( $project->id ) ;
         $this->assertNotEmpty( $reviews );
     }
 
-    function tests_edit_records_when_job_is_splitted() {
+    function tests_update_chunk_review_records_on_split() {
         $project = $this->createProject();
         $project = Projects_ProjectDao::findById( $project->id_project );
 
@@ -41,7 +41,6 @@ class CreateRecordInQaJobReviewsTest extends IntegrationTest {
         splitJob(array(
             'id_job'       => $chunks[0]->id,
             'id_project'   => $project->id,
-            'exec'         => 'apply',
             'project_pass' => $project->password,
             'job_pass'     => $chunks[0]->password,
             'num_split'    => 2,
@@ -50,6 +49,44 @@ class CreateRecordInQaJobReviewsTest extends IntegrationTest {
 
         $chunks = $project->getChunks();
         $this->assertEquals(2, count( $chunks ) );
+
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $this->assertEquals(2, count( $review_chunks ) );
+    }
+
+    function tests_update_chunk_review_records_on_merge() {
+        $project = $this->createProject();
+        $project = Projects_ProjectDao::findById( $project->id_project );
+
+        $chunks = $project->getChunks();
+
+        splitJob(array(
+            'id_job'       => $chunks[0]->id,
+            'id_project'   => $project->id,
+            'project_pass' => $project->password,
+            'job_pass'     => $chunks[0]->password,
+            'num_split'    => 2,
+            'split_values' => array(10, 11)
+        ));
+
+        $chunks = $project->getChunks();
+        $this->assertEquals(2, count( $chunks ) );
+
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $this->assertEquals(2, count( $review_chunks ) );
+
+        // Now merge the job again
+        mergeJob(array(
+            'id_job'       => $chunks[0]->id,
+            'id_project'   => $project->id,
+            'project_pass' => $project->password,
+        ));
+
+        $chunks = $project->getChunks();
+        $this->assertEquals(1, count( $chunks ) );
+
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $this->assertEquals(1, count( $review_chunks ) );
     }
 
     private function createProject() {

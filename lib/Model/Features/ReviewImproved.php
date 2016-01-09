@@ -6,6 +6,7 @@ use INIT;
 use Log ;
 use FilesStorage ;
 use ZipArchive ;
+use Chunks_ChunkDao  ;
 
 class ReviewImproved extends BaseFeature {
 
@@ -20,8 +21,6 @@ class ReviewImproved extends BaseFeature {
     public function postProjectCreate() {
         $this->feature_options = json_decode( $this->feature->options );
 
-        \Log::doLog( 'feature_options', $this->feature_options );
-
         if ( $this->feature_options->id_qa_model ) {
             $this->setQaModelFromFeatureOptions();
         }
@@ -29,7 +28,31 @@ class ReviewImproved extends BaseFeature {
             $this->setQaModelFromJsonFile();
         }
 
-        $this->createQaJobReviewRecord();
+        $id_job = $this->project_structure['array_jobs']['job_list'][0];
+        $this->createQaChunkReviewRecord( $id_job  );
+    }
+
+    /**
+     * postJobSplitted
+     *
+     * Deletes the previously created record and creates the new records matching the new chunks.
+     */
+    public function postJobSplitted() {
+        $id_job = $this->project_structure['array_jobs']['job_list'][0] ;
+        \LQA\ChunkReviewDao::deleteByJobId( $id_job );
+        $this->createQaChunkReviewRecord( $id_job );
+    }
+
+    /**
+     * postJobMerged
+     *
+     * Deletes the previously created record and creates the new records matching the new chunks.
+     * TODO: this action should merge revision data as well.
+     */
+    public function postJobMerged() {
+        $id_job = $this->project_structure['job_to_merge'] ;
+        \LQA\ChunkReviewDao::deleteByJobId( $id_job );
+        $this->createQaChunkReviewRecord( $id_job );
     }
 
     /**
@@ -46,26 +69,24 @@ class ReviewImproved extends BaseFeature {
     }
 
     /**
-     * createQaJobReviewRecord
+     * @param $array_jobs The jobs array coming from the project_structure
      *
      */
-    private function createQaJobReviewRecord() {
-        \Log::doLog( $this->project_structure['array_jobs']['job_list'] );
-        foreach( $this->project_structure['array_jobs']['job_list'] as $k => $v ) {
+    private function createQaChunkReviewRecord( $id_job ) {
+        $id_project = $this->project_structure['id_project'];
 
-            $id_job = $v ;
-            $password = $this->project_structure['array_jobs']['job_pass'][$k];
-            \Log::doLog( $id, $pass );
+        $chunks = Chunks_ChunkDao::getByJobIdProjectAndIdJob( $id_project, $id_job ) ;
+
+        foreach( $chunks as $chunk ) {
 
             $data = array(
-                'id_project' => $this->project_structure['id_project'],
-                'id_job' => $id_job,
-                'password' => $password
+                'id_project' => $id_project,
+                'id_job'     => $chunk->id,
+                'password'   => $chunk->password
             );
 
-            \LQA\JobReviewDao::createRecord( $data );
+            \LQA\ChunkReviewDao::createRecord( $data );
         }
-
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace LQA ;
 
-class JobReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
 
     public $id;
     public $id_project ;

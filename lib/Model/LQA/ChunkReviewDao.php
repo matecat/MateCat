@@ -4,9 +4,9 @@ namespace LQA ;
 
 use \CatUtils ;
 
-class JobReviewDao extends \DataAccess_AbstractDao {
+class ChunkReviewDao extends \DataAccess_AbstractDao {
 
-    const TABLE = "qa_job_reviews";
+    const TABLE = "qa_chunk_reviews";
 
     public static $primary_keys = array(
         'id'
@@ -17,33 +17,33 @@ class JobReviewDao extends \DataAccess_AbstractDao {
     }
 
     public static function findById( $id ) {
-        $sql = "SELECT * FROM qa_job_reviews " .
+        $sql = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id = :id ";
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\JobReviewStruct' );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute(array('id' => $id ));
         return $stmt->fetch();
 
     }
 
     public static function findByProjectId( $id_project ) {
-        $sql = "SELECT * FROM qa_job_reviews " .
+        $sql = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id_project = :id_project ";
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\JobReviewStruct' );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute(array('id_project' => $id_project));
-        return $stmt->fetch();
+        return $stmt->fetchAll() ;
     }
 
     /**
-     * Creates a JobReviewStruct
+     * Creates a ChunkReviewStruct
      *
      * @param $data array of data to use
      */
     public static function createRecord( $data ) {
-        $struct = new \LQA\JobReviewStruct( $data );
+        $struct = new \LQA\ChunkReviewStruct( $data );
 
         $struct->ensureValid();
         $struct->review_password = CatUtils::generate_password( 12 );
@@ -63,7 +63,14 @@ class JobReviewDao extends \DataAccess_AbstractDao {
 
         $lastId = $conn->lastInsertId();
         return self::findById( $lastId );
+    }
 
+    public static function deleteByJobId($id_job) {
+        $sql = "DELETE FROM qa_chunk_reviews " .
+            " WHERE id_job = :id_job " ;
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        return $stmt->execute( array('id_job' => $id_job ) ) ;
     }
 
 }

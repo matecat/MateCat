@@ -45,6 +45,16 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll( ) ;
     }
 
+    public static function getByJobIdProjectAndIdJob( $id_project, $id_job ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM " .
+            "jobs WHERE id_project = :id_project AND id = :id_job");
+
+        $stmt->execute(array( 'id_project' => $id_project, 'id_job' => $id_job ));
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
+        return $stmt->fetchAll( ) ;
+    }
+
     protected function _buildResult( $array_result ) {
         // TODO
          $result = array();

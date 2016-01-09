@@ -2,10 +2,10 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class CreateQaJobReviews extends AbstractMigration {
+class CreateQaChunkReviews extends AbstractMigration {
 
     public $sql_up = <<<EOF
-CREATE TABLE `qa_job_reviews` (
+CREATE TABLE `qa_chunk_reviews` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `id_project` int(11) NOT NULL,
     `id_job` bigint(20) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE `qa_job_reviews` (
 EOF;
 
     public $sql_down = <<<EOF
-DROP TABLE `qa_job_reviews`;
+DROP TABLE `qa_chunk_reviews`;
 EOF;
 
     public function up() {

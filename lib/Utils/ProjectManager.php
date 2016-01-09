@@ -148,8 +148,7 @@ class ProjectManager {
          * This is the last chance to perform the validation before the project is created in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        Features::validateProjectCreation( $this->projectStructure );
-
+        Features::run( 'validateProjectCreation', $this->projectStructure );
 
         if (! empty( $this->projectStructure['result']['errors'] )) {
             return false;
@@ -682,7 +681,7 @@ class ProjectManager {
         }
 
 
-        Features::processProjectCreated( $this->projectStructure );
+        Features::run( 'postProjectCreate', $this->projectStructure );
     }
 
     /**
@@ -990,7 +989,7 @@ class ProjectManager {
             }
         }
 
-        Features::processJobsCreated( $projectStructure );
+        Features::run('processJobsCreated', $projectStructure );
     }
 
     private function insertSegmentNotesForFile() {
@@ -1333,6 +1332,8 @@ class ProjectManager {
     public function applySplit( ArrayObject $projectStructure ) {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
         $this->_splitJob( $projectStructure );
+
+        Features::run( 'postJobSplitted', $projectStructure );
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
@@ -1418,6 +1419,7 @@ class ProjectManager {
 
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
+        Features::run('postJobMerged',  $projectStructure );
     }
 
     /**
