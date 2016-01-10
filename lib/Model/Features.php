@@ -29,10 +29,33 @@ class Features {
             $name = "Features\\" . $feature->toClassName() . "\\CatDecorator" ;
 
             if ( class_exists( $name ) ) {
-                $cls = new $name( $controller, $template) ;
-                $cls->decorate();
+                $obj = new $name( $controller, $template) ;
+                $obj->decorate();
             }
         }
+    }
+
+    public static function filter() {
+        list( $method, $id_customer) = array_slice( func_get_args(), 0, 2);
+
+        $args = array_slice( func_get_args(), 2);
+
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+
+        foreach( $features as $feature ) {
+            $name = "Features\\" . $feature->toClassName() ;
+            // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
+            // here, so the feature initializer should not need the project strucutre at all.
+            // The `id_customer` should be enough. XXX
+            $obj = new $name( null, $feature );
+
+            if ( method_exists( $obj, $method ) ) {
+                $returnable = call_user_func_array( array( $obj, $method), $args );
+            }
+        }
+
+        return $returnable ;
+
     }
 
     /**
@@ -47,10 +70,10 @@ class Features {
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-            $cls = new $name( $projectStructure, $feature );
+            $obj = new $name( $projectStructure, $feature );
 
-            if ( method_exists( $cls, $method ) ) {
-                $cls->$method();
+            if ( method_exists( $obj, $method ) ) {
+                $obj->$method();
             }
         }
     }

@@ -100,10 +100,13 @@ UI = {
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'cancelled');
         }).on('mousedown','td.actions .revise',function(e) {
             e.preventDefault();
-			var win = window.open(
-				$(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/"), '_blank'
-			);
-			win.focus();
+
+            var url = $(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/") ;
+            console.log( url );
+            console.log( $(e.target).closest('.url').attr('href') );
+			// var win = window.open( url , '_blank' );
+			// win.focus();
+            //
         }).on('mousedown','td.actions .download-manage, td.actions .sdlxliff',function(e) {
             e.preventDefault();
             var win = window.open(
@@ -680,7 +683,7 @@ UI = {
 		        '	    <div class="project-details">';
 
             if(config.v_analysis){
-                newProject += '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+this.tm_analysis+' Payable words</a>';
+                newProject += '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-' + this.password + '" title="Volume Analysis">'+this.tm_analysis+' Payable words</a>';
             }
 
             newProject += '			<a href="#" title="Cancel project" class="cancel-project"></a>'+
@@ -726,6 +729,9 @@ UI = {
             $.each(this, function() {
                 ind++;
                 var private_tm_keys = '';
+
+                console.log( this );
+                // var password = ( typeof this.review_password == 'undefined' ? this.password : this.review_password );
                 this.private_tm_key = $.parseJSON(this.private_tm_key);
                 $.each(this.private_tm_key, function(i, tm_key){
 
@@ -749,6 +755,9 @@ UI = {
                     newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';
                 }
 
+                var password = ( typeof this.review_password == 'undefined' ? this.password : this.review_password );
+                console.log( password  );
+
                 newJob += '        <td class="progress">'+
 				    '            <div class="meter">'+
 				    '                <a href="#" class="approved-bar" title="Approved '+this.stats.APPROVED_PERC_FORMATTED+'%" style="width:'+this.stats.APPROVED_PERC+'%"></a>'+
@@ -763,7 +772,7 @@ UI = {
     				'				<ul class="dropdown">'+
     				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change Password</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
-        			'					<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
+				'					<li><a class="revise" data-review-password="' + password + '" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
         			'					<li><a class="archive" href="#" title="Archive Job"><span class="icon-drawer"></span>Archive</a></li>'+
         			'					<li><a class="resume" href="#" title="Resume Job"><span class="icon-trash-o noticon"></span>Resume</a></li>'+
         			'					<li><a class="unarchive" href="#" title="Unarchive Job"><span class="noticon icon-drawer"></span>Unarchive</a></li>'+
