@@ -54,7 +54,7 @@
                 alternativesEnabled: true,
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 survey: false,
-                isReview: ${isReview | false},
+                isReview: ${isReview | string: false},
                 reviewType: '${review_type}',
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
@@ -121,7 +121,8 @@
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
 
-    <body class="cattool${review_class}${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived" define="catpage string:true">
+    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
+      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -437,37 +438,6 @@ $(window).resize(function() {
     </template>
     <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
     </template>
-    <!--
-    <template id="tpl-review-stat-quality">
-
-        <div class="popup-outer outer-stat-quality hide"></div>
-        <div class="popup-stat-quality slide-panel hide" data-type="view">
-
-            <h1>
-                <a href="#" class="btn-ok right">Close</a>
-                Overall Quality
-            </h1>
-            
-            <div class="popup-box">
-                <div class="slide-panel-body">
-                    <table>
-                        <thead>
-                        <th>Error Type</th>
-                        <th>Max Num. of Errors</th>
-                        <th>Found</th>
-                        <th>Vote</th>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <p>Job's overall rate is calculated as the average of the ratings for each type of error.</p>
-        </div>
-
-    </template>
--->
 <div class="offline_stuffs" ></div>
 <!-- Snapengage -->
 <script src="${basepath}public/js/lib/snapengage.js"></script>
