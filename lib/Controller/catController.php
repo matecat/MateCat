@@ -42,6 +42,9 @@ class catController extends viewController {
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
     private $job ;
 
     /**
@@ -60,7 +63,7 @@ class catController extends viewController {
         parent::makeTemplate( "index.html" );
 
         $filterArgs = array(
-                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
@@ -634,7 +637,7 @@ class catController extends viewController {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return Chunks_ChunkStruct
      */
     public function getJob() {
       return $this->job ;

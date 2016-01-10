@@ -55,7 +55,7 @@
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 survey: false,
                 isReview: ${isReview | false},
-                reviewType: '${reviewType}',
+                reviewType: '${review_type}',
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
                 overall_quality: '${overall_quality}',
@@ -121,7 +121,7 @@
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
 
-    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived" define="catpage string:true">
+    <body class="cattool${review_class}${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -221,11 +221,7 @@
 
 
         <footer>
-			<a href="#" id="settingsSwitcher" title="Settings"></a>
-
-			<!--
-						<a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
-			-->
+            <a href="#" id="settingsSwitcher" title="Settings"></a>
             <div class="wrapper">
 
                 <nav>
@@ -238,12 +234,12 @@
                             <li><a href="${authURL}" class="authLink">Manage</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: !catController::isRevision()">
+                        <tal:block tal:condition="footer_show_revise_link">
                             <li><a
                                     href="${basepath}revise/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: catController::isRevision()">
+                        <tal:block tal:condition="footer_show_translate_link">
                             <li><a
                                     href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>
@@ -263,7 +259,7 @@
                             <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
                         </div>
                     </tal:block>
-					
+
                 </nav>
 
 
@@ -297,8 +293,8 @@
                             <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
                         </li>
                     </ul>
-			
-		</div>
+
+        </div>
 
                 <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
                     <p class="progress">Calculating word count...</p>

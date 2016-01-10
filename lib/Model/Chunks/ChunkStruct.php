@@ -34,8 +34,19 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         return $dao->lastTranslationByJobOrChunk( $this );
     }
 
+    /**
+     * getProject
+     *
+     * Returns the project struct, caching the result on the instance to avoid
+     * unnecessary queries.
+     *
+     * @return \Projects_ProjectStruct
+     */
+
     public function getProject() {
-        return $this->getJob()->getProject();
+        return $this->cachable(__function__, $this->getJob(),  function( $job ) {
+            return $job->getProject();
+        });
     }
 
     public function isFeatureEnabled( $feature_code ) {
