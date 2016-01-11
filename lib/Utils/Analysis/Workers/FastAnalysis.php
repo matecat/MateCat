@@ -646,7 +646,12 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected function _getQueueAddressesByPriority( $queueLen, $id_mt_engine ){
 
-        $mtEngine  = Engine::getInstance( $id_mt_engine );
+        $mtEngine = null;
+        try {
+            $mtEngine  = Engine::getInstance( $id_mt_engine );
+        } catch ( Exception $e ){
+            self::_TimeStampMsg( "Caught Exception: " . $e->getMessage() );
+        }
 
         //anyway take the defaults
         $contextList = $this->_queueContextList->list;
