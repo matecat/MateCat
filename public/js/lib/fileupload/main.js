@@ -306,7 +306,7 @@ $( function () {
                 fileInput: $( '#fileupload .multiple-button, .btncontinue .multiple-button' ),
 //	        acceptFileTypes: /(\.|\/)(xliff|sdlxliff|xlf)$/i
                 acceptFileTypes: config.allowedFileTypes,
-                dataType: config.dataType
+                dataType: config.blueimp_dataType
             }
     );
     $( '#fileupload' ).bind( 'fileuploaddragover', function ( e ) {
