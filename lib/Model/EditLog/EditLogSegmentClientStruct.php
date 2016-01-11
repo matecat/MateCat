@@ -86,6 +86,12 @@ class EditLog_EditLogSegmentClientStruct extends EditLog_EditLogSegmentStruct {
             $this->pe_effort_perc = $this->getPEE();
         }
 
+        if ( $this->pe_effort_perc < 0 ) {
+            $this->pe_effort_perc = 0;
+        } else if ( $this->pe_effort_perc > 100 ) {
+            $this->pe_effort_perc = 100;
+        }
+
         return $this->pe_effort_perc;
     }
 

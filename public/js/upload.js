@@ -80,9 +80,6 @@ $(document).ready(function(){
             $(this).removeClass('on').find('input').removeAttr('checked');
         });
     });
-    if ($.browser.mozilla) {
-//        $('.popup-languages .popup-box').empty().append('<ul class="test"><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li></ul>');
-    };
 
     $( 'a.authLink' ).click(function(e){
         e.preventDefault();
