@@ -1,0 +1,6 @@
+expire ="1999-01-01 00:00:00"
+
+#Put your message here.
+#It will be shown in the translation page as long as it doesn't expire.
+#This message has to be single-line and can contain html
+message="Matecat is great!"

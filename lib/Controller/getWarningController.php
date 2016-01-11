@@ -40,7 +40,7 @@ class getWarningController extends ajaxController {
          *   because the suggestion has not been loaded yet.
          *   This happens only if segment is in status NEW
          */
-        if( empty($this->__postInput->segment_status ) ){
+        if ( empty( $this->__postInput->segment_status ) ) {
             $this->__postInput->segment_status = 'draft';
         }
 
@@ -82,8 +82,11 @@ class getWarningController extends ajaxController {
              *   because the suggestion has not been loaded yet.
              *   This happens only if segment is in status NEW
              */
-            if($this->__postInput->segment_status == 'new' &&
-                    empty($this->__postInput->trg_content)) return;
+            if ( $this->__postInput->segment_status == 'new' &&
+                    empty( $this->__postInput->trg_content )
+            ) {
+                return;
+            }
 
             $this->__postInput->src_content = CatUtils::view2rawxliff( $this->__postInput->src_content );
             $this->__postInput->trg_content = CatUtils::view2rawxliff( $this->__postInput->trg_content );
@@ -112,13 +115,14 @@ class getWarningController extends ajaxController {
      */
     private function __globalWarningsCall() {
 
-        $this->result[ 'token' ]   = $this->__postInput->token;
+        $this->result[ 'token' ] = $this->__postInput->token;
 
         try {
             $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
-        } catch ( Exception $e ){
+        } catch ( Exception $e ) {
             $this->result[ 'details' ]                = array();
             $this->result[ 'translation_mismatches' ] = array( 'total' => 0, 'mine' => 0, 'list_in_my_job' => array() );
+
             return;
         }
 
@@ -126,13 +130,10 @@ class getWarningController extends ajaxController {
             $item = $item[ 'id_segment' ];
         }
 
-
-//        $msg = 'MateCat will be undergoing scheduled maintenance starting on Saturday, December 13 at 11:50 PM CEST. MateCat will be unavailable for approximately 4 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
-//        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-12-14 04:00:00"}]';
-
+        $this->result[ 'messages' ] = $this->getGlobalMessage();
 
         $this->result[ 'details' ] = array_values( $result );
-        $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
+        $tMismatch                 = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
 //        Log::doLog( $tMismatch );
 
@@ -208,7 +209,18 @@ class getWarningController extends ajaxController {
         return empty( $glossaryWord ) ? '' : $glossaryWord;
     }
 
-
+    private function getGlobalMessage(){
+        if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
+            $globalMessage              = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
+            return sprintf(
+                            '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
+                            $globalMessage[ 'message' ],
+                            md5( $globalMessage[ 'message' ] ),
+                            $globalMessage[ 'expiry' ]
+                    );
+        }
+        return null;
+    }
 }
 
 ?>
