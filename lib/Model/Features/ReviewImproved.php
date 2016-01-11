@@ -13,10 +13,20 @@ class ReviewImproved extends BaseFeature {
     private $feature_options ;
 
     /**
+     * TODO:
+     */
+    public function filter_cat_job_password( &$path_password ) {
+        $filterArgs = array(
+            'jid' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
+        );
+        $getInput = (object)filter_input_array( INPUT_GET, $filterArgs );
+    }
+
+    /**
      * This filter is to store the review_password in the data strucutre
      * to be passed back to the javascript.
      */
-    public function filter_manage_projects_loaded( $projects ) {
+    public function x_filter_manage_projects_loaded( $projects ) {
         $chunks = array();
         foreach( $projects as $project ) {
             foreach( $project['jobs'] as $job ) {
@@ -43,7 +53,6 @@ class ReviewImproved extends BaseFeature {
                             $projects[$k]['jobs'][$kk][$kkk]['review_password'] = $chunk_review->review_password ;
                         }
                     }
-
                 }
             }
         }

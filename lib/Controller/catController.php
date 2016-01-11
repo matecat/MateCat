@@ -13,6 +13,14 @@ class catController extends viewController {
     private $jid = "";
     private $tid = "";
     private $password = "";
+    /**
+     * @var string
+     * Path password is to be used for request authorization purposes only.
+     * Path password  generally corresponds with the Job's password. Some
+     * plugins may override that to ensure the revision is not accessed by
+     * unauthorized users.
+     */
+    private $path_password = "";
     private $source = "";
     private $pname = "";
     private $create_date = "";
@@ -74,6 +82,7 @@ class catController extends viewController {
 
         $this->jid        = $getInput->jid;
         $this->password   = $getInput->password;
+        $this->path_password = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
 
@@ -105,13 +114,19 @@ class catController extends viewController {
     }
 
     private function doAuth() {
-
-        //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
             $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
         }
+    }
 
+    /**
+     * This method finds the current chunk, invoking a callback to allow
+     * plugin features to interact with the process.
+     */
+    private function findJobByIdAndPassword() {
+        Features::filter('filter_cat_job_password', $this->cid, $this->password );
+        $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
     }
 
     public function doAction() {
@@ -119,8 +134,8 @@ class catController extends viewController {
         $lang_handler = Langs_Languages::getInstance();
 
         try {
-            $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-        } catch( \Exception $e ){
+            $this->findJobByIdAndPassword();
+        } catch( \Exceptions_RecordNotFound $e ){
             $this->job_not_found = true;
             return;
         }

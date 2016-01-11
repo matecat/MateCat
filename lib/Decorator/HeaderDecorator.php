@@ -24,9 +24,12 @@ class HeaderDecorator {
     const PREVIEW = 'PREVIEW';
 
     public function __construct( $controller ) {
+
       $this->controller = $controller;
       $this->job_stats = $controller->getJobStats();
       $this->job = $controller->getJob();
+
+      \Log::doLog( $this->job );
 
       $this->evalProperties();
     }

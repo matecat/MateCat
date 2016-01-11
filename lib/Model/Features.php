@@ -35,10 +35,20 @@ class Features {
         }
     }
 
+    /**
+     * Returns the filtered subject variable passed to all enabled features.
+     *
+     * @param $method, the filter method to invoke.
+     * @param $id_customer the customer id to decide if the feature is anabled or not
+     * @param $subject the subject variable to be filtered.
+     *
+     */
+
     public static function filter() {
         list( $method, $id_customer) = array_slice( func_get_args(), 0, 2);
 
         $args = array_slice( func_get_args(), 2);
+        $returnable = $args ;
 
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
@@ -50,11 +60,11 @@ class Features {
             $obj = new $name( null, $feature );
 
             if ( method_exists( $obj, $method ) ) {
-                $returnable = call_user_func_array( array( $obj, $method), $args );
+                $returnable = call_user_func_array( array( $obj, $method ), $args );
             }
         }
 
-        return $returnable ;
+        return $returnable[0] ;
 
     }
 

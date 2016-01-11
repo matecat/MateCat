@@ -79,18 +79,6 @@ UI = {
 	        $('body').addClass('filterOpen');
 	        $('#search-projectname').focus();
         });
-/*
-		$("#contentBox" ).prepend('<a href="#" style="position:relative;top:300px;" class="test">cliccami</a>');
-		$("#contentBox" ).on('click','a.test',function(e) {
-			e.preventDefault();
-			alert('ciccio');
-		});
-
-        $("#contentBox").on('mousedown','a.cancel', function(e) {
-            e.preventDefault();
-            alert('sss');
-        });
-*/
 
 		$("#contentBox").on('mousedown','td.actions .change',function(e) {
             e.preventDefault();
@@ -100,13 +88,9 @@ UI = {
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'cancelled');
         }).on('mousedown','td.actions .revise',function(e) {
             e.preventDefault();
-
-            var url = $(this).parents('tr').find('.urls .url').attr('href').replace(/\/translate\//g, "/revise/") ;
-            console.log( url );
-            console.log( $(e.target).closest('.url').attr('href') );
-			// var win = window.open( url , '_blank' );
-			// win.focus();
-            //
+            var url = $(e.target).closest('.actions').data('revise-url');
+			var win = window.open( url , '_blank' );
+			win.focus();
         }).on('mousedown','td.actions .download-manage, td.actions .sdlxliff',function(e) {
             e.preventDefault();
             var win = window.open(
@@ -219,7 +203,7 @@ UI = {
 	DropDown: function(el){
 		this.initEvents = function () {
 			var obj = this;
-			obj.dd.on( 'click', function ( event ) {console.log('this: ', this);
+            obj.dd.on( 'click', function ( event ) {
 				$( this ).toggleClass( 'active' );
                 event.preventDefault();
 				event.stopPropagation();
@@ -724,28 +708,32 @@ UI = {
 				'		<tbody>';
 
     		$.each(this.jobs, function() {
-            var prefix = (APP.objectSize(this) > 1)? true : false;
-            var ind = 0;
-            $.each(this, function() {
-                ind++;
-                var private_tm_keys = '';
+            var use_prefix = (APP.objectSize(this) > 1)? true : false;
+            var index = 0;
 
-                console.log( this );
-                // var password = ( typeof this.review_password == 'undefined' ? this.password : this.review_password );
+            $.each(this, function() {
+                index++;
+
+                var private_tm_keys = '';
+                var possibly_different_review_password = ( typeof this.review_password == 'undefined' ? this.password : this.review_password );
+
                 this.private_tm_key = $.parseJSON(this.private_tm_key);
                 $.each(this.private_tm_key, function(i, tm_key){
-
                     private_tm_keys +=  "<span class='key'>"    + tm_key.key  + "</span>"+
                                         "<span class='rgrant'>" + tm_key.r    + "</span>"+
                                         "<span class='wgrant'>" + tm_key.w    + "</span><br class='clear'/>";
                 });
 
+                var chunk_id = this.id+( ( use_prefix ) ? '-' + index : '' ) ;
+                var translate_url = '/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+ chunk_id +'-'+this.password  ;
+                var revise_url = '/revise/'+project.name+'/'+this.source+'-'+this.target+'/'+ chunk_id +'-'+ possibly_different_review_password  ;
+
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
-		            '        		<div class="jobdata">'+this.id+((prefix)? '-'+ind : '') + '<span class="langs">' + this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt +'</span></div>'+
-		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'</a>'+
+		            '        		<div class="jobdata">'+ chunk_id + '<span class="langs">' + this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt +'</span></div>'+
+		            '        		<a class="url" target="_blank" href="' + translate_url +'">'+config.hostpath+'/translate/.../'+ chunk_id +'-'+this.password+'</a>'+
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="tm-key">'+
@@ -755,8 +743,6 @@ UI = {
                     newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';
                 }
 
-                var password = ( typeof this.review_password == 'undefined' ? this.password : this.review_password );
-                console.log( password  );
 
                 newJob += '        <td class="progress">'+
 				    '            <div class="meter">'+
@@ -766,13 +752,12 @@ UI = {
 				    '                <a href="#" class="draft-bar" title="Draft '+this.stats.DRAFT_PERC_FORMATTED+'%" style="width:'+this.stats.DRAFT_PERC+'%"></a>'+
 				    '            </div>'+
 		            '        </td>'+
-					'		<!--td class="missing-outsource-data"></td-->'+
-		            '        <td class="actions">'+
-		            '			<div id="dd' + ind + '" class="wrapper-dropdown-5" tabindex="1">&nbsp;'+
+		            '        <td class="actions" data-revise-url="' + revise_url + '">'+
+		            '			<div id="dd' + index + '" class="wrapper-dropdown-5" tabindex="1">&nbsp;'+
     				'				<ul class="dropdown">'+
     				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change Password</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
-				'					<li><a class="revise" data-review-password="' + password + '" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
+				'					<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
         			'					<li><a class="archive" href="#" title="Archive Job"><span class="icon-drawer"></span>Archive</a></li>'+
         			'					<li><a class="resume" href="#" title="Resume Job"><span class="icon-trash-o noticon"></span>Resume</a></li>'+
         			'					<li><a class="unarchive" href="#" title="Unarchive Job"><span class="noticon icon-drawer"></span>Unarchive</a></li>'+
@@ -783,6 +768,7 @@ UI = {
         			'			</div><input type="button" class="btn pull-right revise" value="Revise">'+
 		            '        </td>'+
 		            '    </tr>';
+
 
 				newProject += newJob;
             })

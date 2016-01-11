@@ -60,7 +60,7 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         // I'm doing this to keep the concepts of Chunk and Job as
         // separated as possible even though they share the same
         // database table.
-        return new Jobs_JobStruct( $this->toArray() );
+        return new Jobs_JobStruct( $this->attributes() );
     }
 
 }
