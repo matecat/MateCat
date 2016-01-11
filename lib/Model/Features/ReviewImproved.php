@@ -26,7 +26,7 @@ class ReviewImproved extends BaseFeature {
      * This filter is to store the review_password in the data strucutre
      * to be passed back to the javascript.
      */
-    public function x_filter_manage_projects_loaded( $projects ) {
+    public function filter_manage_projects_loaded( $projects ) {
         $chunks = array();
         foreach( $projects as $project ) {
             foreach( $project['jobs'] as $job ) {

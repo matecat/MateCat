@@ -17,6 +17,8 @@ CREATE TABLE `qa_chunk_reviews` (
     `force_pass_at` timestamp NULL DEFAULT NULL ,
     PRIMARY KEY (`id`),
     KEY `id_project` (`id_project`),
+    KEY `review_password` (`review_password`),
+    KEY `id_job` (`id_job`),
     UNIQUE KEY `id_job_password` (`id_job`, `password`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 EOF;

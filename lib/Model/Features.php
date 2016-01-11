@@ -64,7 +64,7 @@ class Features {
             }
         }
 
-        return $returnable[0] ;
+        return $returnable ;
 
     }
 
