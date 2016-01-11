@@ -174,7 +174,7 @@ class DetectProprietaryXliff {
 
     public static function isGlossaryFile( $pathInfo = array() ) {
 
-        if ( self::getMemoryFileType( $pathInfo ) == 'g' ) {
+        if ( self::getMemoryFileType( $pathInfo ) == 'glossary' ) {
             return true;
         }
 
