@@ -270,6 +270,10 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 if ( $line_num == 0 ) {
                     list( $source_lang, $target_lang, ) = $line;
 
+                    //eventually, remove BOM from source language
+                    $bom = pack('H*','EFBBBF');
+                    $source_lang = preg_replace("/^$bom/","",$source_lang);
+
                     if ( !Langs_Languages::isEnabled( $source_lang ) ) {
                         throw new RuntimeException( "Source language not supported: " . $source_lang );
                     }
