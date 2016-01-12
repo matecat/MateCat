@@ -210,7 +210,8 @@ class INIT {
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
         self::$OAUTH_SCOPES       = array(
                 'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile'
+                'https://www.googleapis.com/auth/userinfo.profile',
+                'https://www.googleapis.com/auth/drive.file',
         );
 
     }
