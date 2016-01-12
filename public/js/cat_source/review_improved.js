@@ -1,9 +1,21 @@
+/**
+ * Main file of review_improved feature.
+ *
+ * This file is divided in two parts: the first is for the
+ * initialization of the review interface, the second for
+ * initialization of translate page.
+ *
+ * For translate and review pages two different tabs are configured
+ * for the segment footer.
+ *
+ * For translate page, review specific statuses are not offered.
+ *
+ */
 ReviewImproved = window.ReviewImproved || {};
 
 ReviewImproved.enabled = function() {
     return Review.type == 'improved';
 }
-
 
 if ( ReviewImproved.enabled() && config.isReview ) {
     // Review page
@@ -47,7 +59,7 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
     UI.SegmentFooter.registerTab({
         code                : 'review',
         tab_class           : 'review',
-        label               : 'Revise',
+        label               : 'Review issues',
         activation_priority : 60,
         tab_position        : 50,
         is_enabled    : function( footer ) {
@@ -65,7 +77,11 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
         },
     });
 
-
+    $.extend(UI, {
+        showRevisionStatuses : function() {
+            return false;
+        }
+    });
 
 })(jQuery, window) ;
 }

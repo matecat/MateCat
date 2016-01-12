@@ -527,9 +527,6 @@ $.extend(UI, {
 			$(".stats").toggle();
 		});
 
-//		$(window).on('sourceCopied', function(event) {
-//		});
-
 		$("#outer").on('click', 'a.sid', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -538,12 +535,13 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 		}).on('click', 'section:not(.readonly) a.status', function() {
-//			console.log('status');
-			var segment = $(this).parents("section");
-			var statusMenu = $("ul.statusmenu", segment);
+			var section = $(this).closest("section");
+			var statusMenu = $("ul.statusmenu", section);
 
-			UI.createStatusMenu(statusMenu);
+			UI.createStatusMenu(statusMenu, section );
+
 			statusMenu.show();
+
 			$('html').bind("click.outOfStatusMenu", function() {
 				$("ul.statusmenu").hide();
 				$('html').unbind('click.outOfStatusMenu');

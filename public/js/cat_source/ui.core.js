@@ -638,9 +638,21 @@ UI = {
 								'extxif';
 		return c;
 	},
-	createStatusMenu: function(statusMenu) {
-		$("ul.statusmenu").empty().hide();
-		var menu = '<li class="arrow"><span class="arrow-mcolor"></span></li><li><a href="#" class="f" data-sid="segment-' + this.currentSegmentId + '" title="set draft as status">DRAFT</a></li><li><a href="#" class="d" data-sid="segment-' + this.currentSegmentId + '" title="set translated as status">TRANSLATED</a></li><li><a href="#" class="a" data-sid="segment-' + this.currentSegmentId + '" title="set approved as status">APPROVED</a></li><li><a href="#" class="r" data-sid="segment-' + this.currentSegmentId + '" title="set rejected as status">REJECTED</a></li>';
+    showRevisionStatuses : function() {
+        return true;
+    },
+	createStatusMenu: function(statusMenu, section) {
+        $("ul.statusmenu").empty().hide();
+
+        var segment = new UI.Segment( section );
+
+        var data = {
+            id_segment : segment.id,
+            show_revision_statuses : UI.showRevisionStatuses()
+        };
+
+        var menu = MateCat.Templates['segment_status_menu'](data);
+
 		statusMenu.html(menu).show();
 	},
 	deActivateSegment: function(byButton) {
