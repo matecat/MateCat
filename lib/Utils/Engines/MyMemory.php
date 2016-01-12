@@ -269,7 +269,20 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
                 if ( $line_num == 0 ){
                     list( $source_lang, $target_lang, ) = $line;
-                    if ( empty( $source_lang ) || empty( $target_lang ) ){
+
+                    //eventually, remove BOM from source language
+                    $bom = pack('H*','EFBBBF');
+                    $source_lang = preg_replace("/^$bom/","",$source_lang);
+
+                    if ( !Langs_Languages::isEnabled( $source_lang ) ) {
+                        throw new RuntimeException( "Source language not supported: " . $source_lang );
+                    }
+
+                    if ( !Langs_Languages::isEnabled( $target_lang ) ) {
+                        throw new RuntimeException( "Target language not supported: " . $target_lang );
+                    }
+
+                    if ( empty( $source_lang ) || empty( $target_lang ) ) {
                         throw new RuntimeException( "No language definition found in glossary file." );
                     }
                     continue;
