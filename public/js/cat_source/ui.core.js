@@ -157,18 +157,18 @@ UI = {
         this.execChangeStatus(JSON.stringify(opt));
     },
     execChangeStatus: function (optStr) {
-        opt = $.parseJSON(optStr);
-        options = opt;
-        noPropagation = opt.noPropagation;
+        var options = $.parseJSON(optStr);
 
-        segment_id = options.segment_id;
-        segment = $('#segment-' + segment_id);
-        status = options.status;
-        byStatus = options.byStatus;
+        var noPropagation = options.noPropagation;
+        var segment_id    = options.segment_id;
+        var segment       = $('#segment-' + segment_id);
+        var status        = options.status;
+        var byStatus      = options.byStatus;
+
         noPropagation = noPropagation || false;
 
         $('.percentuage', segment).removeClass('visible');
-//		if (!segment.hasClass('saved'))
+
         this.setTranslation({
             id_segment: segment_id,
             status: status,
@@ -176,16 +176,19 @@ UI = {
             byStatus: byStatus,
             propagate: !noPropagation
         });
-//        this.setTranslation(segment_id, status, false);
+
         segment.removeClass('saved');
-        this.setContribution(segment_id, status, byStatus);
-        this.setContributionMT(segment_id, status, byStatus);
-        this.getNextSegment(this.currentSegment, 'untranslated');
-        if(!this.nextUntranslatedSegmentId) {
+
+        this.setContribution( segment_id, status, byStatus );
+        this.setContributionMT( segment_id, status, byStatus );
+        this.getNextSegment( this.currentSegment, 'untranslated' );
+
+        if ( !this.nextUntranslatedSegmentId ) {
             $(window).trigger({
                 type: "allTranslated"
             });
         }
+
         $(window).trigger({
             type: "statusChanged",
             segment: segment,
