@@ -13,14 +13,6 @@ class catController extends viewController {
     private $jid = "";
     private $tid = "";
     private $password = "";
-    /**
-     * @var string
-     * Path password is to be used for request authorization purposes only.
-     * Path password  generally corresponds with the Job's password. Some
-     * plugins may override that to ensure the revision is not accessed by
-     * unauthorized users.
-     */
-    private $path_password = "";
     private $source = "";
     private $pname = "";
     private $create_date = "";
@@ -56,12 +48,27 @@ class catController extends viewController {
     private $job ;
 
     /**
+     * @var Projects_ProjectStruct
+     */
+    private $project ;
+
+    /**
      * @var string
      */
     private $thisUrl;
     private $translation_engines;
 
     private $mt_id;
+
+    /**
+     * @var string
+     * Review password generally corresponds to job password.
+     * Translate and revise pages share the same password, exception
+     * made for scenarios in which the review page must be protected
+     * by second layer of authorization. In such cases, this variable
+     * holds a different password than the job's password.
+     */
+    private $review_password = "";
 
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
@@ -82,9 +89,10 @@ class catController extends viewController {
 
         $this->jid        = $getInput->jid;
         $this->password   = $getInput->password;
-        $this->path_password = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
+
+        $this->review_password = $getInput->password;
 
         if ( isset( $_GET[ 'step' ] ) ) {
             $this->step = $_GET[ 'step' ];
@@ -121,11 +129,28 @@ class catController extends viewController {
     }
 
     /**
-     * This method finds the current chunk, invoking a callback to allow
-     * plugin features to interact with the process.
+     * findJobByIdAndPassword
+     *
+     * Finds the current chunk by job id and password. if in revision then
+     * pass the control to a filter, to allow plugin to interact with the
+     * authorization process.
+     *
+     * Filters may restore the password to the actual password contained in
+     * `jobs` table, while the request may have come with a different password
+     * for the purpose of access control.
+     *
+     * This is done to avoid the rewrite of preexisting implementations.
      */
     private function findJobByIdAndPassword() {
-        Features::filter('filter_cat_job_password', $this->cid, $this->password );
+        if ( self::isRevision() ) {
+            $this->project = Projects_ProjectDao::findByJobId( $this->jid );
+
+            $this->password = Features::filter('filter_review_password',
+                $this->project->id_customer,
+                $this->password
+            );
+        }
+
         $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
     }
 
@@ -656,6 +681,14 @@ class catController extends viewController {
      */
     public function getJob() {
       return $this->job ;
+    }
+
+    /**
+     * @return string
+     */
+
+    public function getReviewPassword() {
+        return $this->review_password ;
     }
 
     /**

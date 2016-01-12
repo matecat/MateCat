@@ -39,14 +39,16 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " jobs.password = qa_chunk_reviews.password " .
             " WHERE  " . implode( ' OR ', $conditions ) ;
 
-        \Log::doLog( $sql );
-
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    /**
+     * @return ChunkReviewStruct
+     */
 
     public static function findByProjectId( $id_project ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
@@ -59,8 +61,29 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * Creates a ChunkReviewStruct
-     *
+     * @return ChunkReviewStruct
+     */
+
+    public static function findByReviewPasswordAndJobId( $review_password, $id_job ) {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+            " WHERE review_password = :review_password " .
+            " AND id_job = :id_job " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
+        $stmt->execute(
+            array(
+                'review_password' => $review_password,
+                'id_job'          => $id_job
+            )
+        );
+        return $stmt->fetch() ;
+
+    }
+
+    /**
+     * @return ChunkReviewStruct
      * @param $data array of data to use
      */
     public static function createRecord( $data ) {

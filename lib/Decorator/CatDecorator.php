@@ -19,12 +19,13 @@ class CatDecorator {
       $this->template->isReview = $this->controller->isRevision();
       $this->template->header_quality_report_item_class = '' ;
       $this->template->header_output_quality_report = false;
+      $this->template->review_password = $this->controller->getReviewPassword() ;
 
       if ( $this->controller->isRevision() ) {
           $this->decorateForRevision();
       }
       else {
-          $this->decorateForTranslated();
+          $this->decorateForTranslate();
       }
 
       $this->decorateHeader();
@@ -51,7 +52,7 @@ class CatDecorator {
 
   }
 
-  private function decorateForTranslated() {
+  private function decorateForTranslate() {
       $this->template->footer_show_revise_link = true;
       $this->template->footer_show_translate_link = false;
       $this->template->review_class = '';

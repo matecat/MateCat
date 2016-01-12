@@ -13,13 +13,31 @@ class ReviewImproved extends BaseFeature {
     private $feature_options ;
 
     /**
-     * TODO:
+     * filter_review_password
+     *
+     * If this method is reached it means that the project we are
+     * working on has ReviewImproved feature enabled, and that we
+     * are in reivew mode.
+     *
+     * Assuming the provided password is a "review_password".
+     * This review password is checked against the `qa_chunk_reviews`.
+     * If not found, raise an exception.
+     * If found, override the input password with job password.
+     *
      */
-    public function filter_cat_job_password( &$path_password ) {
+    public function filter_review_password( $review_password ) {
         $filterArgs = array(
             'jid' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
         );
-        $getInput = (object)filter_input_array( INPUT_GET, $filterArgs );
+        $getInput = (object) filter_input_array( INPUT_GET, $filterArgs );
+
+        $chunk_review = \LQA\ChunkReviewDao::findByReviewPasswordAndJobId(
+            $review_password, $getInput->jid );
+
+        if ( ! $chunk_review ) {
+            throw new \Exceptions_RecordNotFound('Review password was not found');
+        }
+        return $chunk_review->password ;
     }
 
     /**
@@ -123,7 +141,7 @@ class ReviewImproved extends BaseFeature {
     private function createQaChunkReviewRecord( $id_job ) {
         $id_project = $this->project_structure['id_project'];
 
-        $chunks = Chunks_ChunkDao::getByJobIdProjectAndIdJob( $id_project, $id_job ) ;
+        $chunks = Chunks_ChunkDao::getByJobIdProeectAndIdJob( $id_project, $id_job ) ;
 
         foreach( $chunks as $chunk ) {
 

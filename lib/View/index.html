@@ -3,8 +3,8 @@
     <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title tal:condition="php: !catController::isRevision()">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
-        <title tal:condition="php: catController::isRevision()">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:condition="not:isReview">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:condition="true:isReview">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
@@ -66,6 +66,10 @@
             };
             var renderStart = new Date();
             /*]]>*/
+        </script>
+
+        <script tal:condition="true:isReview" type="text/javascript">
+            config.review_password = '${review_password}';
         </script>
 
         <script tal:condition="true:review_improved" type="text/javascript">

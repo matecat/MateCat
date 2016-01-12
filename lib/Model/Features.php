@@ -45,7 +45,7 @@ class Features {
      */
 
     public static function filter() {
-        list( $method, $id_customer) = array_slice( func_get_args(), 0, 2);
+        list( $method, $id_customer ) = array_slice( func_get_args(), 0, 2);
 
         $args = array_slice( func_get_args(), 2);
         $returnable = $args ;
