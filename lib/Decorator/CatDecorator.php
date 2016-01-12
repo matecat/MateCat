@@ -18,7 +18,6 @@ class CatDecorator {
   public function decorate() {
       $this->template->isReview = $this->controller->isRevision();
       $this->template->header_quality_report_item_class = '' ;
-      $this->template->header_output_quality_report = false;
       $this->template->review_password = $this->controller->getReviewPassword() ;
 
       if ( $this->controller->isRevision() ) {
@@ -44,7 +43,6 @@ class CatDecorator {
       $this->template->review_class = 'review' ;
       $this->template->review_type = 'simple';
 
-      $this->template->header_output_quality_report = true;
       if ( $this->template->overall_quality_class == 'fail' ||
           $this->template->overall_quality_class == 'poor' ) {
           $this->template->header_quality_report_item_class = 'hide' ;
