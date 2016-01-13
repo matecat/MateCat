@@ -141,7 +141,7 @@ class ReviewImproved extends BaseFeature {
     private function createQaChunkReviewRecord( $id_job ) {
         $id_project = $this->project_structure['id_project'];
 
-        $chunks = Chunks_ChunkDao::getByJobIdProeectAndIdJob( $id_project, $id_job ) ;
+        $chunks = Chunks_ChunkDao::getByJobIdProjectAndIdJob( $id_project, $id_job ) ;
 
         foreach( $chunks as $chunk ) {
 
