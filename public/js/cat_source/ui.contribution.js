@@ -502,7 +502,7 @@ $.extend(UI, {
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
 				if (d.errors.length)
-					UI.processErrors(d.error, 'setContributionMT');
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},

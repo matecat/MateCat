@@ -319,35 +319,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     });
 
-    $(document).on('click', 'a.approved', function(e) {
-        var segment = new UI.Segment( $(e.target).closest('section') );
-        e.preventDefault();
-
-        var status = 'APPROVED';
-        var translation_path = sprintf(
-            '/api/v2/jobs/%s/%s/segments/%s/translation',
-            config.id_job,
-            config.password,
-            segment.id
-        );
-
-        $.ajax({
-            method : 'POST',
-            url : translation_path,
-            data : {
-                "translation" : {
-                    "status" : status
-                },
-                '_method' : 'PATCH'
-            }
-        }).done(function() {
-
-            UI.postStatusChanged( segment.el, status);
-
-        });
-
+    $(document).on('segment:status:change', function(e, segment, options) {
         UI.openNextTranslated( segment.id );
+    });
 
+    $(document).on('click', 'a.approved', function(e) {
+        UI.changeStatus( this , 'approved', 0);
     });
 
     function renderButtons(segment) {

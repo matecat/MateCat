@@ -71,6 +71,30 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
+
+        $(document).on('segment:status:change', function(e, segment, options) {
+            var staus = options.status ;
+            var byStatus = options.byStatus ;
+
+            UI.setContribution( segment.id, status, byStatus );
+            UI.setContributionMT( segment.id, status, byStatus );
+
+            var next = UI.getNextSegment( segment.el, 'untranslated' );
+
+            if ( ! next ) {
+                $(window).trigger({
+                    type: "allTranslated"
+                });
+            }
+
+            // TODO: not sure this is still useful
+            $(window).trigger({
+                type: "statusChanged",
+                segment: segment.el,
+                status: status
+            });
+        });
+
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');

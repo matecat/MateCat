@@ -2,12 +2,15 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, undefined) {
 
     $.extend(UI, {
-        execChangeStatus : function( optStr ) {
-            var options = $.parseJSON(optStr);
-
-            console.log( options );
+        /**
+         * translationIsToSave
+         *
+         * only check if translation is queued
+         */
+        translationIsToSave : function( segment ) {
+            var alreadySet = UI.alreadyInSetTranslationTail( segment.id );
+            return !alreadySet ;
         },
-
         deleteTranslationIssue : function( context ) {
             console.debug('delete issue', context);
 

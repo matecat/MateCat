@@ -1,4 +1,6 @@
 module.exports = function(grunt) {
+    var mapFilePath;
+
     var basePath = '../../public/js/';
     var buildPath = '../../public/js/build/';
     var incPath = '../../inc/';
@@ -21,7 +23,12 @@ module.exports = function(grunt) {
         cssBase + 'sass/review_improved.scss',
     ];
 
-    function stripPrefixForTempaltes(filePath) {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16).substring(1);
+    }
+
+    function stripPrefixForTemplates(filePath) {
         /**
          * Strip '../../public/js/cat_source/templates/'
          * from template identifiers.
@@ -39,8 +46,8 @@ module.exports = function(grunt) {
         handlebars : {
             options : {
                 namespace : 'MateCat.Templates',
-                processPartialName: stripPrefixForTempaltes ,
-                processName: stripPrefixForTempaltes
+                processPartialName: stripPrefixForTemplates ,
+                processName: stripPrefixForTemplates
             },
             all : {
                 files : {
@@ -53,7 +60,18 @@ module.exports = function(grunt) {
         concat: {
             app: {
                 options: {
-                    sourceMap: true
+                    sourceMap: true,
+                    sourceMapName: function() {
+                        var path = buildPath + '/app.*.source-map.js';
+                        var expanded = grunt.file.expand( path );
+
+                        expanded.forEach( function( item ) {
+                            grunt.log.ok( 'deleting previous source map: ' + item );
+                            grunt.file.delete( item, { force : true }  );
+                        });
+
+                        return buildPath + '/app.' + s4() + '.source-map.js' ;
+                    }
                 },
                 src: [
                     basePath + 'common.js',

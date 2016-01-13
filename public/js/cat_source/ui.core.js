@@ -159,46 +159,27 @@ UI = {
     execChangeStatus: function (optStr) {
         var options = $.parseJSON(optStr);
 
+        var segment = UI.Segment.find( options.segment_id );
+
         var noPropagation = options.noPropagation;
-        var segment_id    = options.segment_id;
-        var segment       = $('#segment-' + segment_id);
         var status        = options.status;
         var byStatus      = options.byStatus;
 
         noPropagation = noPropagation || false;
 
-        $('.percentuage', segment).removeClass('visible');
+        $('.percentuage', segment.el).removeClass('visible');
 
         this.setTranslation({
-            id_segment: segment_id,
+            id_segment: segment.id,
             status: status,
             caller: false,
             byStatus: byStatus,
             propagate: !noPropagation
         });
 
-        segment.removeClass('saved');
+        segment.el.removeClass('saved');
 
-        this.setContribution( segment_id, status, byStatus );
-        this.setContributionMT( segment_id, status, byStatus );
-        this.getNextSegment( this.currentSegment, 'untranslated' );
-
-        this.postStatusChanged(segment, status);
-    },
-
-    postStatusChanged : function(section, status) {
-        if ( !this.nextUntranslatedSegmentId ) {
-            $(window).trigger({
-                type: "allTranslated"
-            });
-        }
-
-        $(window).trigger({
-            type: "statusChanged",
-            segment: section,
-            status: status
-        });
-
+        $(document).trigger('segment:status:change', [segment, options]);
     },
 
     getSegmentId: function (segment) {
@@ -221,8 +202,6 @@ UI = {
         } catch( e ){
             return false;
         }
-
-//        return $(segment).attr('id').split('-')[1];
 
     },
 
@@ -842,13 +821,30 @@ UI = {
 		this.setWaypoints();
         $(window).trigger('segmentsAdded');
 	},
-	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
-		var seg = this.currentSegment;
+
+    /**
+     * getNextSegment
+     *
+     * Returns the next segment.
+     *
+     */
+	getNextSegment: function(segment, status) {
+        UI.evalNextSegment( segment, status) ;
+        return this.nextSegmentId ;
+	},
+
+    /**
+     * evalNextSegment
+     *
+     * Evaluates the next segment and populates this.nextSegmentId ;
+     *
+     */
+    evalNextSegment: function( section, status ) {
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
-		var n = $(seg).nextAll(rules).first();
+		var n = $(section).nextAll(rules).first();
+
 		if (!n.length) {
-			n = $(seg).parents('article').next().find(rules).first();
-            n = $(seg).parents('article').next().find(rules).first();
+			n = $(section).parents('article').next().find(rules).first();
 		}
 
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
@@ -856,17 +852,17 @@ UI = {
 		} else {
 			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
 		}
-        var i = $(seg).next();
+        var i = $(section).next();
 
         if (!i.length) {
-			i = $(seg).parents('article').next().find('section').first();
+			i = $(section).parents('article').next().find('section').first();
 		}
 		if (i.length) {
 			this.nextSegmentId = this.getSegmentId($(i));
 		} else {
 			this.nextSegmentId = 0;
 		}
-	},
+    },
 	getPercentuageClass: function(match) {
 		var percentageClass = "";
 		var m_parse = parseInt(match);
@@ -1367,7 +1363,6 @@ UI = {
                     //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
                     //end temp
                     status = segment.target_chunk_lengths.statuses[i];
-//                    console.log('vediamo status: ', status);
                     segData = {
                         autopropagated_from: "0",
                         has_reference: "false",
@@ -1567,7 +1562,6 @@ UI = {
         if (config.alternativesEnabled) {
             this.getTranslationMismatches(id_segment);
         }
-console.log('VEDIAMO: ', id_segment);
         $('html').trigger('setCurrentSegment_success', [d, id_segment]);
     },
     getTranslationMismatches: function (id_segment) {
@@ -2250,25 +2244,28 @@ console.log('eccolo: ', typeof token);
 		}, 'local');
 	},
 
-    setTranslation: function(options) {
-        id_segment = options.id_segment;
-        status = options.status;
-        caller = options.caller || false;
-        callback = options.callback || false;
-        byStatus = options.byStatus || false;
-        propagate = options.propagate || false;
-
+    translationIsToSave : function( segment ) {
         // add to setTranslation tail
-        alreadySet = this.alreadyInSetTranslationTail(id_segment);
-//        console.log('prova: ', '"' + $('#segment-' + id_segment + ' .editarea').text().trim().length + '"');
-        emptyTranslation = ($('#segment-' + id_segment + ' .editarea').text().trim().length)? false : true;
-        toSave = ((!alreadySet)&&(!emptyTranslation));
-//        console.log('alreadySet: ', alreadySet);
-//        console.log('emptyTranslation: ', emptyTranslation);
+        var alreadySet = this.alreadyInSetTranslationTail( segment.id );
+        var emptyTranslation = ( segment.el.find('.editarea').text().trim().length )? false : true;
 
+        return ((!alreadySet)&&(!emptyTranslation));
+    },
+
+    setTranslation: function(options) {
+        var id_segment = options.id_segment;
+        var status = options.status;
+        var caller = options.caller || false;
+        var callback = options.callback || false;
+        var byStatus = options.byStatus || false;
+        var propagate = options.propagate || false;
+
+        var segment = UI.Segment.find( id_segment );
+
+        //
         //REMOVED Check for to save
         //Send ALL to the queue
-        item = {
+        var item = {
             id_segment: id_segment,
             status: status,
             caller: caller,
@@ -2276,18 +2273,13 @@ console.log('eccolo: ', typeof token);
             byStatus: byStatus,
             propagate: propagate
         };
-        if( toSave ) {
-            this.addToSetTranslationTail(item);
-//            this.addToSetTranslationTail( id_segment, status, caller, callback = callback || {} );
+
+        if( this.translationIsToSave( segment ) ) {
+            this.addToSetTranslationTail( item );
         } else {
-            this.updateToSetTranslationTail(item)
+            this.updateToSetTranslationTail( item )
         }
 
-//        console.log('this.alreadyInSetTranslationTail(id_segment): ', this.alreadyInSetTranslationTail(id_segment));
-//        this.addToSetTranslationTail(id_segment, status, caller);
-//        if(UI.setTranslationTail.length) console.log('UI.setTranslationTail 3: ', UI.setTranslationTail.length);
-//        console.log('UI.offline: ', UI.offline);
-//        console.log('config.offlineModeEnabled: ', config.offlineModeEnabled);
         if ( this.offline && config.offlineModeEnabled ) {
 
             if ( toSave ) {
@@ -2299,13 +2291,10 @@ console.log('eccolo: ', typeof token);
             this.checkConnection( 'Set Translation check Authorized' );
 
         } else {
-//            console.log('this.executingSetTranslation: ', this.executingSetTranslation);
             if ( !this.executingSetTranslation ) this.execSetTranslationTail();
         }
     },
     alreadyInSetTranslationTail: function (sid) {
-//        console.log('qqqq');
-//        console.log('UI.setTranslationTail.length: ', UI.setTranslationTail.length);
         alreadySet = false;
         $.each(UI.setTranslationTail, function (index) {
             if(this.id_segment == sid) alreadySet = true;
@@ -2319,31 +2308,12 @@ console.log('eccolo: ', typeof token);
         }
     },
     addToSetTranslationTail: function (item) {
-//        console.log('addToSetTranslationTail ' + id_segment);
-        $('#segment-' + id_segment).addClass('setTranslationPending');
-/*
-        var item = {
-            id_segment: options.id_segment,
-            status: options.status,
-            caller: options.caller,
-            callback: options.callback,
-            byStatus: options.false,
-            propagate: options.false
-        }
-*/
+        $('#segment-' + item.id_segment).addClass('setTranslationPending');
         this.setTranslationTail.push(item);
     },
     updateToSetTranslationTail: function (item) {
-//        console.log('addToSetTranslationTail ' + id_segment);
         $('#segment-' + id_segment).addClass('setTranslationPending');
-/*
-        var item = {
-            id_segment: id_segment,
-            status: status,
-            caller: caller,
-            callback: callback
-        }
-*/
+
         $.each( UI.setTranslationTail, function (index) {
             if( this.id_segment == item.id_segment ) {
                 this.status   = item.status;
@@ -2355,12 +2325,10 @@ console.log('eccolo: ', typeof token);
         });
     },
     execSetTranslationTail: function ( callback_to_execute ) {
-//        console.log('execSetTranslationTail');
-        if(UI.setTranslationTail.length) {
+        if ( UI.setTranslationTail.length ) {
             item = UI.setTranslationTail[0];
             UI.setTranslationTail.shift(); // to move on ajax callback
             UI.execSetTranslation(item);
-//            UI.execSetTranslation( item.id_segment, item.status, item.caller, item.callback );
         }
     },
 
@@ -2395,26 +2363,11 @@ console.log('eccolo: ', typeof token);
 		var errors = '';
 		errors = this.collectSegmentErrors(segment);
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
-//		if(caller != 'replace') {
-//			if(this.body.hasClass('searchActive')) {
-//				console.log('aaa');
-//				console.log(segment);
-//				this.applySearch(segment);
-//				oldNum = parseInt($(segment).attr('data-searchitems'));
-//				newNum = parseInt($('mark.searchMarker', segment).length);
-//				numRes = $('.search-display .numbers .results');
-//				numRes.text(parseInt(numRes.text()) - oldNum + newNum);
-//			}
-//		}
 		autosave = (caller == 'autosave') ? true : false;
         isSplitted = (id_segment.split('-').length > 1) ? true : false;
         if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
-//        console.log('isSplitted: ', isSplitted);
-//        sidToSend = (isSplitted)? id_segment.split('-')[0] : id_segment;
         this.tempReqArguments = {
-//            id_segment: sidToSend,
             id_segment: id_segment,
-//            id_segment: id_segment.split('-')[0],
             id_job: config.id_job,
             id_first_file: file.attr('id').split('-')[1],
             password: config.password,
@@ -2758,40 +2711,6 @@ console.log('eccolo: ', typeof token);
 		}
 		return newStr;
 	},
-/*
-	prova: function(str, root) {
-		var newStr = '';
-		$.each($.parseHTML(str), function(index) {
-			if(this.nodeName == '#text') {
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
-			} else {
-				match = this.outerHTML.match(/<.*?>/gi);
-				console.log('match: ', match);
-				if(match.length == 1) { // se è 1 solo, è un tag inline
-
-				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
-//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
-				} else {
-					console.log('vediamo: ', $.parseHTML(this.outerHTML));
-
-					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML) + htmlEncode(match[1], false);
-
-//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
-
-//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
-				}
-
-
-				// se sono più di due, ci sono tag innestati
-			}
-		});
-		if(root) {
-			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
-		}
-		return newStr;
-	},
-*/
 
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
@@ -3106,7 +3025,6 @@ console.log('eccolo: ', typeof token);
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
 
 		this.editarea.html(this.undoStack[ind]);
-        console.log('vediamo: ', document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		$('.undoCursorPlaceholder').remove();
 

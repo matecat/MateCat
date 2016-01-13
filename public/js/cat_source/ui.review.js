@@ -289,22 +289,31 @@ if ( Review.enabled() && Review.type == 'simple' ) {
         UI.hideEditToolbar();
         UI.currentSegment.removeClass('modified');
 
-        noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
-        if((noneSelected)&&($('.editor .track-changes p span').length)) {
+        var noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
+
+        //
+        if ( ( noneSelected ) && ( $('.editor .track-changes p span').length) ) {
+
             $('.editor .tab-switcher-review').click();
             $('.sub-editor.review .error-type').addClass('error');
+
         } else {
-            original = UI.currentSegment.find('.original-translation').text();
+
             $('.sub-editor.review .error-type').removeClass('error');
-            UI.changeStatus(this, 'approved', 0);
-            sid = UI.currentSegmentId;
-            err = $('.sub-editor.review .error-type');
-            err_typing = $(err).find('input[name=t1]:checked').val();
-            err_translation = $(err).find('input[name=t2]:checked').val();
-            err_terminology = $(err).find('input[name=t3]:checked').val();
-            err_language = $(err).find('input[name=t4]:checked').val();
-            err_style = $(err).find('input[name=t5]:checked').val();
+
+            UI.changeStatus(this, 'approved', 0);  // this does < setTranslation
+
+            var original = UI.currentSegment.find('.original-translation').text();
+            var sid = UI.currentSegmentId;
+            var err = $('.sub-editor.review .error-type');
+            var err_typing = $(err).find('input[name=t1]:checked').val();
+            var err_translation = $(err).find('input[name=t2]:checked').val();
+            var err_terminology = $(err).find('input[name=t3]:checked').val();
+            var err_language = $(err).find('input[name=t4]:checked').val();
+            var err_style = $(err).find('input[name=t5]:checked').val();
+
             UI.openNextTranslated();
+
             var data = {
                 action: 'setRevision',
                     job: config.job_id,
@@ -428,7 +437,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 });
                 // else
                 if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
-console.log('AAA');
                     translatedList = $('section.status-translated');
 
                     if( translatedList.length ) {
@@ -440,8 +448,7 @@ console.log('AAA');
                     }
 
                 } else { // find in not loaded segments
-                    console.log('ask for getNextReviseSegment');
-//                    console.log('got to ask to server next translated segment id, and then reload to that segment');
+
                     APP.doRequest({
                         data: {
                             action: 'getNextReviseSegment',
