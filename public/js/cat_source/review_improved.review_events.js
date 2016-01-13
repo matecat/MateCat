@@ -323,6 +323,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var segment = new UI.Segment( $(e.target).closest('section') );
         e.preventDefault();
 
+        var status = 'APPROVED';
         var translation_path = sprintf(
             '/api/v2/jobs/%s/%s/segments/%s/translation',
             config.id_job,
@@ -335,10 +336,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             url : translation_path,
             data : {
                 "translation" : {
-                    "status" : "APPROVED"
+                    "status" : status
                 },
                 '_method' : 'PATCH'
             }
+        }).done(function() {
+
+            UI.postStatusChanged( segment.el, status);
+
         });
 
         UI.openNextTranslated( segment.id );

@@ -17,9 +17,11 @@ ReviewImproved.enabled = function() {
     return Review.type == 'improved';
 }
 
-if ( ReviewImproved.enabled() && config.isReview ) {
-    // Review page
+/**
+ * Review page
+ */
 
+if ( ReviewImproved.enabled() && config.isReview ) {
     SegmentActivator.registry.push(function( sid ) {
         var segment = UI.Segment.find( sid );
         // TODO: refactor this, the click to activate a
@@ -52,10 +54,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
 }
 
+/**
+ * Translate page
+ */
+
 if ( ReviewImproved.enabled() && !config.isReview ) {
 (function($, root, undefined) {
-
-    // Translate page
     UI.SegmentFooter.registerTab({
         code                : 'review',
         tab_class           : 'review',

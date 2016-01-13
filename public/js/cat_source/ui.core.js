@@ -183,6 +183,10 @@ UI = {
         this.setContributionMT( segment_id, status, byStatus );
         this.getNextSegment( this.currentSegment, 'untranslated' );
 
+        this.postStatusChanged(segment, status);
+    },
+
+    postStatusChanged : function(section, status) {
         if ( !this.nextUntranslatedSegmentId ) {
             $(window).trigger({
                 type: "allTranslated"
@@ -191,9 +195,10 @@ UI = {
 
         $(window).trigger({
             type: "statusChanged",
-            segment: segment,
+            segment: section,
             status: status
         });
+
     },
 
     getSegmentId: function (segment) {

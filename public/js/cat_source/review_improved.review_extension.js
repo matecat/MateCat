@@ -2,6 +2,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, undefined) {
 
     $.extend(UI, {
+        execChangeStatus : function( optStr ) {
+            var options = $.parseJSON(optStr);
+
+            console.log( options );
+        },
+
         deleteTranslationIssue : function( context ) {
             console.debug('delete issue', context);
 

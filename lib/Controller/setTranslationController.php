@@ -192,6 +192,7 @@ class setTranslationController extends ajaxController {
         $segment = getSegment( $this->id_segment );
 
         //compare segment-translation and get results
+        // QA here stands for Quality Assurance
         $check = new QA( $segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
 
