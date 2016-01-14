@@ -1,4 +1,4 @@
-<?
+<?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";

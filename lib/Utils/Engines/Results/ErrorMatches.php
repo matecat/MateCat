@@ -1,4 +1,4 @@
-<?
+<?php
 
 class Engines_Results_ErrorMatches {
 
