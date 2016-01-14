@@ -1,4 +1,4 @@
-<?
+<?php
 require_once '../../inc/Bootstrap.php';
 Bootstrap::start();
 
