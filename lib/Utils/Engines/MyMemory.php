@@ -275,11 +275,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                     $source_lang = preg_replace("/^$bom/","",$source_lang);
 
                     if ( !Langs_Languages::isEnabled( $source_lang ) ) {
-                        throw new RuntimeException( "Source language not supported: " . $source_lang );
+                        throw new RuntimeException( "The source language specified in the glossary is not supported: " . $source_lang );
                     }
 
                     if ( !Langs_Languages::isEnabled( $target_lang ) ) {
-                        throw new RuntimeException( "Target language not supported: " . $target_lang );
+                        throw new RuntimeException( "The target language specified in the glossary is not supported: " . $target_lang );
                     }
 
                     if ( empty( $source_lang ) || empty( $target_lang ) ) {
