@@ -155,6 +155,10 @@ class ConversionHandler {
                 $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
+            //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
+            if( INIT::$LEGACY_CONVERSION !== false ){
+                $converterVersion = Constants_ConvertersVersions::LEGACY;
+            }
             $converter = new FileFormatConverter($converterVersion);
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
