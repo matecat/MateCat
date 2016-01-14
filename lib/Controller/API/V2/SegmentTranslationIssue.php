@@ -31,7 +31,7 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'id_job'              => $this->request->id_job,
             'id_category'         => $this->request->id_category,
             'severity'            => $this->request->severity,
-            'translation_version' => $this->validator->translation->version_number,
+            'translation_version' => $this->validator->segment_translation->version_number,
             'target_text'         => $this->request->target_text,
             'start_node'          => $this->request->start_node,
             'start_offset'        => $this->request->start_offset,
@@ -41,9 +41,10 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'comment'             => $this->request->comment
         );
 
-        $model = EntryDao::createEntry( $data );
+        $model = new \LQA\TranslationIssueModel( $data ) ;
+        $struct = $model->save();
         $json = new JsonFormatter();
-        $rendered = $json->renderItem( $model );
+        $rendered = $json->renderItem( $struct );
 
         $this->response->json( array('issue' => $rendered) );
     }

@@ -149,6 +149,7 @@ class catController extends viewController {
                 $this->project->id_customer,
                 $this->password
             );
+
         }
 
         $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );

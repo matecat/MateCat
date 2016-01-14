@@ -26,10 +26,10 @@ class Features {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
         foreach( $features as $feature ) {
-            $name = "Features\\" . $feature->toClassName() . "\\CatDecorator" ;
+            $cls = "Features\\" . $feature->toClassName() . "\\$name" ;
 
-            if ( class_exists( $name ) ) {
-                $obj = new $name( $controller, $template) ;
+            if ( class_exists( $cls ) ) {
+                $obj = new $cls( $controller, $template) ;
                 $obj->decorate();
             }
         }

@@ -21,6 +21,7 @@ class SegmentTranslation extends Base {
     private function ensureTranslationExists() {
         $this->translation = \Translations_SegmentTranslationDao::
             findBySegmentAndJob( $this->request->id_segment, $this->request->id_job  );
+
         if ( !$this->translation ) {
             throw new NotFoundError('translation not found');
         }

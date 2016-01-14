@@ -91,13 +91,10 @@ class EntryDao extends \DataAccess_AbstractDao {
         $values = $struct->attributes(
              array_merge( array_keys($data), array('penalty_points') )
         );
-        \Log::doLog( $values );
 
         $stmt->execute( $values );
-
-        Log::doLog('record saved');
-
         $lastId = $conn->lastInsertId();
+
         return self::findById( $lastId );
     }
 
