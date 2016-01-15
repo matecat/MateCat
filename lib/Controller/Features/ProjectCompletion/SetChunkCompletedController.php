@@ -39,7 +39,8 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
         $params = array(
             'uid' => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),
-            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER
+            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review' => $this->isRevision()
         );
 
         $event = Chunks_ChunkCompletionEventDao::createFromChunk(

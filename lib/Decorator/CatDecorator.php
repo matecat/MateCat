@@ -5,7 +5,6 @@ class CatDecorator {
   private $controller ;
   private $template ;
   private $job ;
-  private $project_completion_feature_enabled ;
   private $review_type ;
 
   public function  __construct( catController $controller, PHPTAL $template ) {
@@ -13,12 +12,18 @@ class CatDecorator {
     $this->controller = $controller ;
     $this->template = $template ;
     $this->job = $this->controller->getJob() ;
+    $this->job_stats = $this->controller->getJobStats();
   }
 
   public function decorate() {
       $this->template->isReview = $this->controller->isRevision();
       $this->template->header_quality_report_item_class = '' ;
       $this->template->review_password = $this->controller->getReviewPassword() ;
+
+      $this->template->header_main_button_enabled = true ;
+      $this->template->header_main_button_class = 'downloadtr-button ';
+      $this->template->header_main_button_label = $this->getHeaderMainButtonLabel();
+      $this->template->header_main_button_id = 'downloadProject';
 
       if ( $this->controller->isRevision() ) {
           $this->decorateForRevision();
@@ -27,13 +32,31 @@ class CatDecorator {
           $this->decorateForTranslate();
       }
 
-      $this->decorateHeader();
-
       Features::appendDecorators(
           $this->job->getProject()->id_customer,
           'CatDecorator',
           $this->controller,
-          $this->template
+          $this->template,
+          array('project' => $this->job->getProject())
+      );
+  }
+
+  private function getHeaderMainButtonLabel() {
+      if ( $this->isDownloadable() ) {
+          return 'DOWNLOAD TRANSLATION';
+      } else {
+          return 'PREVIEW';
+      }
+  }
+
+  private function downloadStatus() {
+        return $this->job_stats['DOWNLOAD_STATUS'] ;
+  }
+
+  private function isDownloadable() {
+      return (
+        $this->job_stats['TODO_FORMATTED'] == 0 &&
+        $this->job_stats['ANALYSIS_COMPLETE']
       );
   }
 
@@ -57,14 +80,4 @@ class CatDecorator {
       $this->template->review_type = 'simple';
 
   }
-
-  /**
-   * @deprecated doesn't sound like a good idea to work this way, because of the possible
-   * issues with plugins trying to override template properties.
-   */
-
-  private function decorateHeader() {
-      $this->template->header = new HeaderDecorator( $this->controller ) ;
-  }
-
 }

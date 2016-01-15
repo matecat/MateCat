@@ -20,8 +20,10 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         return $dao->getByChunkId( $this->id, $this->password );
     }
 
-    public function isMarkedComplete() {
-        return Chunks_ChunkCompletionEventDao::isCompleted( $this ) ;
+    public function isMarkedComplete( $params ) {
+        $params = \Utils::ensure_keys( $params,  array('is_review') );
+
+        return Chunks_ChunkCompletionEventDao::isCompleted( $this, array('is_review' => $params['is_review'] ) ) ;
     }
 
     public function getTranslations() {

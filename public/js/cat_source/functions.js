@@ -479,18 +479,21 @@ function runDownload() {
     }
 }
 
+/**
+ * Returns the translation status evaluating the job stats
+ */
+
 function translationStatus(stats) {
     var t = 'approved';
     var app = parseFloat(stats.APPROVED);
     var tra = parseFloat(stats.TRANSLATED);
     var dra = parseFloat(stats.DRAFT);
     var rej = parseFloat(stats.REJECTED);
-    if (tra)
-    t = 'translated';
-    if (dra)
-    t = 'draft';
-    if (rej)
-    t = 'draft';
+
+    if (tra) t = 'translated';
+    if (dra) t = 'draft';
+    if (rej) t = 'draft';
+
     if( !tra && !dra && !rej && !app ){
         t = 'draft';
     }

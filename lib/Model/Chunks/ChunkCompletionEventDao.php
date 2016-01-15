@@ -15,10 +15,10 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare("INSERT INTO chunk_completion_events " .
             " ( " .
             " id_project, id_job, password, job_first_segment, job_last_segment, " .
-            " source, create_date, remote_ip_address, uid " .
+            " source, create_date, remote_ip_address, uid, is_review " .
             " ) VALUES ( " .
             " :id_project, :id_job, :password, :job_first_segment, :job_last_segment, " .
-            " :source, :create_date, :remote_ip_address, :uid " .
+            " :source, :create_date, :remote_ip_address, :uid, :is_review " .
             " ); ");
 
         $validSources = self::validSources() ;
@@ -31,11 +31,14 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             'source'            => $validSources[ $params['source'] ],
             'create_date'       => date('Y-m-d H:i:s'),
             'remote_ip_address' => $params['remote_ip_address'],
-            'uid'               => $params['uid']
+            'uid'               => $params['uid'],
+            'is_review'         => $params['is_review']
         ));
     }
 
-    public static function isChunkCompleted( Chunks_ChunkStruct $chunk ) {
+    public static function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
+        $is_review = $params['is_review'] || false;
+
         // find the latest translation date for this chunk
         // if no date is returned then the chunk cannot be completed.
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
@@ -48,6 +51,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             " WHERE id_job = :id_job AND password = :password " .
             " AND job_first_segment = :job_first_segment " .
             " AND job_last_segment = :job_last_segment " .
+            " AND is_review = :is_review " .
             " AND create_date >= :latest_translation_at " );
 
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkCompletionEventStruct');
@@ -57,7 +61,8 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             'password' => $chunk->password,
             'job_first_segment' => $chunk->job_first_segment,
             'job_last_segment' => $chunk->job_last_segment,
-            'latest_translation_at' => $latestTranslation->translation_date
+            'latest_translation_at' => $latestTranslation->translation_date,
+            'is_review' => $is_review
         ));
 
         $fetched = $stmt->fetch();
@@ -69,9 +74,9 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         return $uncompletedChunksByProjectId == false;
     }
 
-    public static function isCompleted( $obj ) {
+    public static function isCompleted( $obj, array $params = array() ) {
         if ( $obj instanceof Chunks_ChunkStruct ) {
-            return self::isChunkCompleted( $obj );
+            return self::isChunkCompleted( $obj, $params );
         } elseif ($obj instanceof Projects_ProjectStruct) {
             return self::isProjectCompleted( $obj ) ;
         } else {
