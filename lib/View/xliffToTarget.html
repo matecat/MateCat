@@ -39,7 +39,7 @@
             hostpath: '${hostpath | string:/}',
             unsupportedFileTypes: '${unsupported_file_types}',
             allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
-            conversionEnabled: ${conversion_enabled},
+            conversionEnabled: true,
             analysisEnabled: ${volume_analysis_enabled},
             maxFileSize: ${maxFileSize},
             maxTMXFileSize: ${maxTMXFileSize},
@@ -553,7 +553,6 @@
 
 <script>
     <!--//
-    //remove old eventListener. The only way is searching it from its guid ( == 50 )
     $( function () {
         $( '#fileupload' ).fileupload( 'destroy' );
         $( '#fileupload' ).fileupload( {
@@ -805,14 +804,28 @@
 
 
         $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'] = [];
-//        var guid1 = $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'][1].guid;
+//
+        UI.errorsBeforeUpload = function ( file ){
+            console.log( 'TUMADRE! errorsBeforeUpload' );
 
-//        if ( guid0 == 50 ) {
-//            $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'].splice( 0, 1 );
-//        }
-//        else if ( guid1 == 50 ) {
-//            $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'].pop();
-//        }
+            var ext = file.name.split( '.' ).pop();
+
+            console.log( file );
+
+            var msg = '';
+
+            if ( file.type.match( /^image/ ) ) {
+                msg = 'Images not allowed in MateCat';
+            } else {
+                msg = 'Filetype not allowed in this page. Please upload an xliff file';
+            }
+
+            UI.checkFailedConversionsNumber();
+
+            console.log( 'msg: ', msg );
+
+            return msg;
+        };
 //-->
     } );
 </script>
