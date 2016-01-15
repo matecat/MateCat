@@ -105,7 +105,7 @@ class INIT {
     /**
      * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
      */
-    const JOB_ARCHIVABILITY_THRESHOLD = 30;
+    const JOB_ARCHIVABILITY_THRESHOLD = 90;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
