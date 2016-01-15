@@ -11,6 +11,7 @@ use TaskRunner\Exceptions\ReQueueException;
 use Analysis\Queue\QueueInfo;
 use Analysis\Queue\RedisKeys;
 use \Exception, \AMQHandler;
+use \Database, \PDOException;
 
 include \INIT::$MODEL_ROOT . "/queries.php";
 
@@ -33,8 +34,8 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected $_mySubscribedQueue;
 
-    const ERR_EMPTY_WORD_COUNT = 3;
-    const ERR_WRONG_PROJECT    = 4;
+    const ERR_EMPTY_WORD_COUNT = 4;
+    const ERR_WRONG_PROJECT    = 5;
 
     public function __construct( AMQHandler $queueHandler ) {
         \Log::$fileName = 'tm_analysis.log';
@@ -52,6 +53,8 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ReQueueException
      */
     public function process( AbstractElement $queueElement, Context $queueContext ) {
+
+        $this->_checkDatabaseConnection();
 
         /**
          * @var $queueContext QueueInfo
@@ -82,6 +85,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         /**
          * @throws ReQueueException
+         * @throws EmptyElementException
          */
         $this->_matches = $this->_getMatches( $queueElement );
 
@@ -96,6 +100,32 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //ack segment
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} acknowledged." );
+
+    }
+
+    /**
+     * Check the connection.
+     * MySql timeout close the socket and throws Exception in the nex read/write access
+     *
+     * <code>
+     * By default, the server closes the connection after eight hours if nothing has happened.
+     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
+     * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
+     * </code>
+     *
+     */
+    protected function _checkDatabaseConnection(){
+
+        $db = Database::obtain();
+        try {
+            $db->ping();
+        } catch ( PDOException $e ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
+            $db->close();
+            //reconnect
+            $db->getConnection();
+        }
 
     }
 
@@ -205,6 +235,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $updateRes = setSuggestionUpdate( $tm_data );
         if ( $updateRes < 0 ) {
 
+            $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
             throw new ReQueueException( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}", self::ERR_REQUEUE );
 
         } elseif( $updateRes == 0 ) {
@@ -218,7 +249,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         }
 
-        //set memcache
+        //set redis cache
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
         $this->_tryToCloseProject( $queueElement->params->pid );
@@ -393,7 +424,10 @@ class TMAnalysisWorker extends AbstractWorker {
              * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
              */
             if ( $tms_match === null ) {
+
+                $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received." );
                 throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
+
             }
 
             $tms_match = $tms_match->get_matches_as_array();
@@ -435,7 +469,9 @@ class TMAnalysisWorker extends AbstractWorker {
          * If No results found. Re-Queue
          */
         if ( empty( $matches ) || !is_array( $matches ) ) {
-            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : No contribution found : Try again later.", self::ERR_REQUEUE );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment." );
+            $this->_forceSetSegmentAnalyzed( $queueElement );
+            throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
         }
 
         return $matches;
@@ -518,9 +554,9 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _checkWordCount( QueueElement $queueElement ){
 
         if ( $queueElement->params->raw_word_count == 0 ) {
-//            $this->_doLog( "--- (Worker " . $this->_myPid . ") : empty segment. acknowledge and continue" );
 //            SET as DONE and "decrement counter/close project"
             $this->_forceSetSegmentAnalyzed( $queueElement );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : empty word count segment. acknowledge and continue." );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT );
         }
 
@@ -538,8 +574,11 @@ class TMAnalysisWorker extends AbstractWorker {
          * check for loop re-queuing
          */
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
+
             $this->_forceSetSegmentAnalyzed( $queueElement );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
+
         } elseif ( isset( $queueElement->reQueueNum ) ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }

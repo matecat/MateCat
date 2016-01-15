@@ -15,6 +15,7 @@ abstract class AbstractWorker implements SplSubject {
 
     const ERR_REQUEUE_END      = 1;
     const ERR_REQUEUE          = 2;
+    const ERR_EMPTY_ELEMENT    = 3;
 
     /**
      * @var SplObserver[]

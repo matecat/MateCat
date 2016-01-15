@@ -16,7 +16,7 @@ use TaskRunner\Commons\AbstractDaemon,
 use Analysis\Queue\RedisKeys,
     Analysis\Queue\QueueInfo;
 
-use \Log, \Exception, \AMQHandler, \Utils;
+use \Log, \Exception, \AMQHandler;
 
 /**
  * Class Analysis_Manager
@@ -401,7 +401,7 @@ class TaskManager extends AbstractDaemon {
     protected function _updateConfiguration() {
 
         $config = @parse_ini_file( $this->_configFile, true );
-        Utils::raiseJsonExceptionError();
+
         if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
             throw new Exception( 'Wrong configuration file provided.' );
         }

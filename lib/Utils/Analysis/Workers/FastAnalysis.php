@@ -54,7 +54,7 @@ class FastAnalysis extends AbstractDaemon {
     protected function _updateConfiguration() {
 
         $config = @parse_ini_file( $this->_configFile, true );
-        Utils::raiseJsonExceptionError();
+
         if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
             throw new Exception( 'Wrong configuration file provided.' );
         }
@@ -525,7 +525,6 @@ class FastAnalysis extends AbstractDaemon {
                         $element->params = $queue_element;
                         $element->classLoad = '\Analysis\Workers\TMAnalysisWorker';
 
-                        Utils::raiseJsonExceptionError();
                         self::$queueHandler->send( $queueInfo->queue_name, $element, array( 'persistent' => self::$queueHandler->persistent ) );
                         self::_TimeStampMsg( "AMQ Set Executed " . ( $k + 1 ) );
 
@@ -662,10 +661,10 @@ class FastAnalysis extends AbstractDaemon {
             case ( ! $mtEngine instanceof \Engines_MyMemory ):
                 $context = $contextList[ 'P3' ];
                 break;
-            case ( $queueLen >= 30000 ):
-                $context = $contextList[ 'P3' ];
-                break;
-            case ( $queueLen >= 5000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s
+//            case ( $queueLen >= 30000 ):
+//                $context = $contextList[ 'P3' ];
+//                break;
+            case ( $queueLen >= 10000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s
                 $context = $contextList[ 'P2' ];
                 break;
             default:

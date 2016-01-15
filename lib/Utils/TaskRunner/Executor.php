@@ -189,31 +189,29 @@ class Executor implements \SplObserver {
 
             } catch ( EndQueueException $e ){
 
-                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR Re-queue
-                $this->_queueHandler->ack( $msgFrame );
-                continue;
+//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR Re-queue
 
             } catch ( ReQueueException $e ){
 
-                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Error retrieving Matches. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
-                $this->_queueHandler->ack( $msgFrame ); //ack the message try again next time. Re-queue
+//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Error retrieving Matches. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
 
                 //set/increment the reQueue number
                 $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher          = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
                 $amqHandlerPublisher->disconnect();
-                continue;
 
             } catch( EmptyElementException $e ){
 
-                $this->_logMsg( $e->getMessage() );
-                $this->_queueHandler->ack( $msgFrame );
-                continue;
+//                $this->_logMsg( $e->getMessage() );
+
+            } catch( Exception $e ){
+
+                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a generic exception. SKIP Frame *************" . $e->getMessage() );
 
             }
 
-            //unlock segment
+            //unlock frame
             $this->_queueHandler->ack( $msgFrame );
 
             $this->_logMsg( "--- (Executor " . $this->_executorPID . ") - QueueElement acknowledged." );
@@ -315,6 +313,6 @@ class Executor implements \SplObserver {
 }
 
 //$argv = array();
-//$argv[ 1 ] = '{"redis_key":"p1_list","queue_length":0,"queue_name":"analysis_queue_P1","pid_set_name":"ch_pid_set_p1","pid_list":[],"pid_list_len":0,"max_executors":"15","loggerName":"tm_analysis.log"}';
+//$argv[ 1 ] = '{"redis_key":"p3_list","queue_length":0,"queue_name":"analysis_queue_P3","pid_set_name":"ch_pid_set_p3","pid_list":[],"pid_list_len":0,"max_executors":"15","loggerName":"tm_analysis_P3.log"}';
 
 Executor::getInstance( QueueInfo::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();
