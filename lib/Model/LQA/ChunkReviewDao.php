@@ -27,7 +27,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
-    public static function findReviewPasswordByChunkIds( $chunk_ids ) {
+    public static function findChunkReviewsByChunkIds( $chunk_ids ) {
         $conditions = array_map( function($ids) {
             return " ( jobs.id = " . $ids[0] .
                 " AND jobs.password = '" . $ids[1] . "' ) ";

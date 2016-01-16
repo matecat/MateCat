@@ -46,7 +46,6 @@ class CatDecorator extends AbstractDecorator {
 
     private function completable() {
         if ($this->controller->isRevision()) {
-            \Log::doLog( $this->stats );
 
             return $this->stats['DRAFT'] <= 0 &&
                 $this->stats['TRANSLATED'] <= 0 &&

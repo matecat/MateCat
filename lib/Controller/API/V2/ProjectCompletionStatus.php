@@ -2,9 +2,10 @@
 
 namespace API\V2 ;
 
+use Features ;
+
 class ProjectCompletionStatus extends ProtectedKleinController {
 
-    private $project ;
     private $validator ;
 
     protected function afterConstruct() {
@@ -19,8 +20,6 @@ class ProjectCompletionStatus extends ProtectedKleinController {
 
         $valid = $this->validator->validate();
 
-        \Log::doLog( var_export( $valid, true ));
-
         if (! $valid ) {
             $this->response->code(404);
             $this->response->json(
@@ -31,11 +30,19 @@ class ProjectCompletionStatus extends ProtectedKleinController {
 
     public function status() {
         // TODO: move this in to a json presenter class
-        $uncompleted = \Projects_ProjectDao::uncompletedChunksByProjectId(
-            $this->request->id_project
+        $uncompleted_reviews = \Projects_ProjectDao::uncompletedChunksByProjectId(
+            $this->request->id_project,
+            array('is_review' => true )
         );
 
-        $is_completed = count($uncompleted) == 0 ;
+        $uncompleted_translations = \Projects_ProjectDao::uncompletedChunksByProjectId(
+            $this->request->id_project,
+            array('is_review' => false )
+        );
+
+        $is_completed =
+            count($uncompleted_translations) +
+            count($uncompleted_reviews) == 0  ;
 
         $id_project = $this->request->id_project ;
         $response = array();
@@ -59,13 +66,33 @@ class ProjectCompletionStatus extends ProtectedKleinController {
                 $response['completed'] = true;
             } else  {
                 $response['completed'] = false;
-                $response['chunks'] = array();
 
-                foreach($uncompleted as $chunk) {
-                    $response['chunks'][] = array(
-                        'id' => $chunk->id,
-                        'password' => $chunk->password
-                    );
+                if ( count($uncompleted_reviews) > 0 ) {
+                    $response['revise'] = array();
+                    foreach($uncompleted_reviews as $chunk) {
+
+                        $password = Features::filter(
+                            'filter_job_password_to_review_password',
+                            $this->validator->getProject()->id_customer,
+                            $chunk->password,
+                            $chunk->id
+                        );
+
+                        $response['revise'][] = array(
+                            'id' => $chunk->id,
+                            'password' => $password
+                        );
+                    }
+                }
+
+                if ( count($uncompleted_translations) > 0 ) {
+                    $response['translate'] = array();
+                    foreach($uncompleted_translations as $chunk) {
+                        $response['translate'][] = array(
+                            'id' => $chunk->id,
+                            'password' => $chunk->password
+                        );
+                    }
                 }
             }
 

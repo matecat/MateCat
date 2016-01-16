@@ -145,9 +145,11 @@ class catController extends viewController {
         if ( self::isRevision() ) {
             $this->project = Projects_ProjectDao::findByJobId( $this->jid );
 
-            $this->password = Features::filter('filter_review_password',
+            $this->password = Features::filter(
+                'filter_review_password_to_job_password',
                 $this->project->id_customer,
-                $this->password
+                $this->password,
+                $this->jid
             );
 
         }

@@ -37,11 +37,19 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
     }
 
     /**
+     *
+     * Returns true or false if the chunk is completed. Requires 'is_review' to be passed
+     * as a param.
+     *
+     * @param $chunk chunk to examinate
+     * @param $params list of params for query
+     *
      * @return true|false
      *
      */
 
     public static function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
+        $params = Utils::ensure_keys($params, array('is_review'));
         $is_review = $params['is_review'] || false;
 
         $sql = "SELECT c.is_review, c.id_job, cc.password " .

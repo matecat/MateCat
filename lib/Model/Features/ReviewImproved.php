@@ -25,20 +25,31 @@ class ReviewImproved extends BaseFeature {
      * If found, override the input password with job password.
      *
      */
-    public function filter_review_password( $review_password ) {
-        $filterArgs = array(
-            'jid' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
-        );
-        $getInput = (object) filter_input_array( INPUT_GET, $filterArgs );
-
+    public function filter_review_password_to_job_password( $review_password, $id_job ) {
         $chunk_review = \LQA\ChunkReviewDao::findByReviewPasswordAndJobId(
-            $review_password, $getInput->jid );
+            $review_password, $id_job );
 
         if ( ! $chunk_review ) {
-            throw new \Exceptions_RecordNotFound('Review password was not found');
+            throw new \Exceptions_RecordNotFound('Review record was not found');
         }
+
         return $chunk_review->password ;
     }
+
+    public function filter_job_password_to_review_password( $password, $id_job ) {
+        $chunk_reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds(
+            array( array($id_job, $password ) )
+        );
+
+        $chunk_review = $chunk_reviews[0];
+
+        if ( ! $chunk_review ) {
+            throw new \Exceptions_RecordNotFound('Review record was not found');
+        }
+
+        return $chunk_review->review_password ;
+    }
+
 
     /**
      * This filter is to store the review_password in the data strucutre
@@ -54,7 +65,7 @@ class ReviewImproved extends BaseFeature {
             }
         }
 
-        $chunk_reviews = \LQA\ChunkReviewDao::findReviewPasswordByChunkIds( $chunks );
+        $chunk_reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds( $chunks );
 
         foreach( $projects as $k => $project ) {
             foreach( $project['jobs'] as $kk => $job ) {
