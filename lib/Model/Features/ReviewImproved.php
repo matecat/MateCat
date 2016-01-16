@@ -84,18 +84,20 @@ class ReviewImproved extends BaseFeature {
      * If so, then try to assign the defined qa_model.
      * If not, then try to find the qa_model from the project structure.
      */
-    public function postProjectCreate() {
+    public function postProjectCreate($projectStructure) {
+        \Log::doLog( $this->feature );
+
         $this->feature_options = json_decode( $this->feature->options );
 
         if ( $this->feature_options->id_qa_model ) {
-            $this->setQaModelFromFeatureOptions();
+            $this->setQaModelFromFeatureOptions($projectStructure);
         }
         else {
-            $this->setQaModelFromJsonFile();
+            $this->setQaModelFromJsonFile( $projectStructure );
         }
 
-        $id_job = $this->project_structure['array_jobs']['job_list'][0];
-        $this->createQaChunkReviewRecord( $id_job  );
+        $id_job = $projectStructure['array_jobs']['job_list'][0];
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure );
     }
 
     /**
@@ -103,10 +105,10 @@ class ReviewImproved extends BaseFeature {
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      */
-    public function postJobSplitted() {
-        $id_job = $this->project_structure['array_jobs']['job_list'][0] ;
+    public function postJobSplitted($projectStructure) {
+        $id_job = $projectStructure['array_jobs']['job_list'][0] ;
         \LQA\ChunkReviewDao::deleteByJobId( $id_job );
-        $this->createQaChunkReviewRecord( $id_job );
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure );
     }
 
     /**
@@ -115,22 +117,22 @@ class ReviewImproved extends BaseFeature {
      * Deletes the previously created record and creates the new records matching the new chunks.
      * TODO: this action should merge revision data as well.
      */
-    public function postJobMerged() {
-        $id_job = $this->project_structure['job_to_merge'] ;
+    public function postJobMerged( $projectStructure ) {
+        $id_job = $projectStructure['job_to_merge'] ;
         \LQA\ChunkReviewDao::deleteByJobId( $id_job );
-        $this->createQaChunkReviewRecord( $id_job );
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure );
     }
 
     /**
      * Entry point for project data validation for this feature.
      */
-    public function validateProjectCreation()  {
+    public function validateProjectCreation($projectStructure)  {
         $this->feature_options = json_decode( $this->feature->options );
 
         if ( $this->feature_options->id_qa_model ) {
             // pass
         } else {
-            $this->validateModeFromJsonFile();
+            $this->validateModeFromJsonFile($projectStructure);
         }
     }
 
@@ -138,8 +140,8 @@ class ReviewImproved extends BaseFeature {
      * @param $array_jobs The jobs array coming from the project_structure
      *
      */
-    private function createQaChunkReviewRecord( $id_job ) {
-        $id_project = $this->project_structure['id_project'];
+    private function createQaChunkReviewRecord( $id_job, $projectStructure ) {
+        $id_project = $projectStructure['id_project'];
 
         $chunks = Chunks_ChunkDao::getByJobIdProjectAndIdJob( $id_project, $id_job ) ;
 
@@ -159,14 +161,15 @@ class ReviewImproved extends BaseFeature {
      * Sets the QA model fom the uploaded file which was previously validated
      * and added to the project structure.
      */
-    private function setQaModelFromJsonFile() {
-        $model_json = $this->project_structure['features']
+    private function setQaModelFromJsonFile( $projectStructure ) {
+
+        $model_json = $projectStructure['features']
             ['review_improved']['__meta']['qa_model'];
 
         $model_record = \LQA\ModelDao::createModelFromJsonDefinition( $model_json );
 
         $project = \Projects_ProjectDao::findById(
-            $this->project_structure['id_project']
+            $projectStructure['id_project']
         );
 
         $dao = new \Projects_ProjectDao( \Database::obtain() );
@@ -182,10 +185,8 @@ class ReviewImproved extends BaseFeature {
      * check on the need for the qa_model.json file to be passed at each project
      * creation.
      */
-    private function setQaModelFromFeatureOptions() {
-        $project = \Projects_ProjectDao::findById(
-            $this->project_structure['id_project']
-        );
+    private function setQaModelFromFeatureOptions($projectStructure) {
+        $project = \Projects_ProjectDao::findById( $projectStructure['id_project'] );
 
         $dao = new \Projects_ProjectDao( \Database::obtain() );
         $dao->updateField( $project, 'id_qa_model', $this->feature_options->id_qa_model );
@@ -200,9 +201,7 @@ class ReviewImproved extends BaseFeature {
      * If validation fails, adds errors to the projectStructure.
      */
 
-    private function validateModeFromJsonFile() {
-        $projectStructure = $this->project_structure ;
-
+    private function validateModeFromJsonFile( $projectStructure ) {
         $fs = new FilesStorage();
         $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
         $model_file_path = 'zip://' . $zip_file . '#__meta/qa_model.json' ;

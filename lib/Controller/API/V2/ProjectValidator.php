@@ -25,6 +25,8 @@ class ProjectValidator {
   public function validate() {
     $this->project = \Projects_ProjectDao::findById( $this->id_project );
 
+    \Log::doLog( $this->project );
+
     if ($this->project == false) {
       return false;
     }
@@ -37,11 +39,17 @@ class ProjectValidator {
   }
 
   private function validateFeatureEnabled() {
+      \Log::doLog( var_export( $this->feature, true ));
+
     return $this->feature == null ||
       $this->project->getOwnerFeature( $this->feature )  ;
   }
 
   private function inProjectScope() {
-    return $this->api_record->getUser()->email == $this->project->id_customer ;
+
+      \Log::doLog ( $this->api_record->getUser()->email );
+      \Log::doLog ( $this->project->id_customer );
+
+       return $this->api_record->getUser()->email == $this->project->id_customer ;
   }
 }

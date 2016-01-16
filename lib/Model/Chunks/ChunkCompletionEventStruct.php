@@ -11,8 +11,9 @@ class Chunks_ChunkCompletionEventStruct extends DataAccess_AbstractDaoSilentStru
   public $password ;
   public $uid ;
   public $source ;
-  public $first_job_segment ;
-  public $last_job_segment ;
+  public $job_first_segment ;
+  public $job_last_segment ;
   public $create_date ;
+  public $is_review ;
 
 }

@@ -9,7 +9,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         );
     }
 
-    public static function createFromChunk( $chunk, $params ) {
+    public static function createFromChunk( $chunk, array $params ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare("INSERT INTO chunk_completion_events " .
@@ -36,34 +36,25 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         ));
     }
 
+    /**
+     * @return true|false
+     *
+     */
+
     public static function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
         $is_review = $params['is_review'] || false;
 
-        // find the latest translation date for this chunk
-        // if no date is returned then the chunk cannot be completed.
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-        $latestTranslation =  $dao->lastTranslationByJobOrChunk( $chunk );
-
-        if ( $latestTranslation === false ) return false;
+        $sql = "SELECT c.is_review, c.id_job, cc.password " .
+            " FROM chunk_completion_events c " .
+            " LEFT JOIN chunk_completion_updates cc on c.id_job = cc.id_job " .
+            " AND  c.password = cc.password and cc.is_review = c.is_review " .
+            " WHERE ( c.create_date > cc.last_translation_at OR cc.last_translation_at IS NULL ) " .
+            " AND c.is_review = :is_review " .
+            " GROUP BY id_job, password, is_review " ;
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM chunk_completion_events " .
-            " WHERE id_job = :id_job AND password = :password " .
-            " AND job_first_segment = :job_first_segment " .
-            " AND job_last_segment = :job_last_segment " .
-            " AND is_review = :is_review " .
-            " AND create_date >= :latest_translation_at " );
-
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkCompletionEventStruct');
-
-        $stmt->execute( array(
-            'id_job' => $chunk->id,
-            'password' => $chunk->password,
-            'job_first_segment' => $chunk->job_first_segment,
-            'job_last_segment' => $chunk->job_last_segment,
-            'latest_translation_at' => $latestTranslation->translation_date,
-            'is_review' => $is_review
-        ));
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( array( 'is_review' => $is_review ) );
 
         $fetched = $stmt->fetch();
         return $fetched != false ;
@@ -84,6 +75,5 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         }
     }
 
-    protected function _buildResult( $array_result ) {
-    }
+    protected function _buildResult( $array_result ) { }
 }

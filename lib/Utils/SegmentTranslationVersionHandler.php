@@ -72,10 +72,10 @@ class SegmentTranslationVersionHandler {
     }
 
     private function prepareDao() {
-        $dao = new Translations_TranslationVersionDao( $db );
+        $this->db         = Database::obtain();
+        $dao = new Translations_TranslationVersionDao( $this->db );
         $dao->uid         = $this->uid ;
         $dao->source_page = $this->source_page ;
-        $this->db         = Database::obtain();
         // TODO: ^^^ this is safe for now because we have
         // one connection for request, so the object returned
         // by the obtain is the same we started the transaction

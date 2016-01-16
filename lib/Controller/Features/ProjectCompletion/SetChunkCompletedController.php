@@ -20,7 +20,6 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     public function doAction() {
-        // ensure the record exists
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
             $this->__postInput['id_job'],
             $this->__postInput['password']

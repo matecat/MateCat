@@ -20,7 +20,17 @@ class setTranslationController extends ajaxController {
 
     protected $jobData = array();
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    protected $chunk ;
+
     protected $client_target_version;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project ;
 
     public function __construct() {
 
@@ -111,23 +121,31 @@ class setTranslationController extends ajaxController {
         } else {
 
             //get Job Info, we need only a row of jobs ( split )
-            $this->jobData = $job_data = getJobData( (int)$this->id_job, $this->password );
-            if ( empty( $job_data ) ) {
+            $this->jobData = getJobData( (int)$this->id_job, $this->password );
+
+            if ( empty( $this->jobData ) ) {
                 $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );
             }
 
             //add check for job status archived.
-            if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            if ( strtolower( $this->jobData[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
                 $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
             }
 
             //check for Password correctness ( remove segment split )
             $pCheck = new AjaxPasswordCheck();
-            if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
+            if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->password, $this->id_segment ) ) {
                 $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
+
+            /**
+             * Here we instantiate new objects in order to migrate towards
+             * a more object oriented approach.
+             */
+            $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
 
         }
 
@@ -316,6 +334,11 @@ class setTranslationController extends ajaxController {
             return -1;
         }
 
+        Features::run( 'postAddSegmentTranslation', $this->project->id_customer, array(
+            'chunk' => $this->chunk,
+            'is_review' => $this->isRevision()
+        ));
+
         if ( INIT::$DQF_ENABLED && !empty( $this->jobData[ 'dqf_key' ] ) &&
                 $_Translation[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED
         ) {
@@ -365,10 +388,7 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
-
-
         $TPropagation[ 'warning' ] = $check->thereAreWarnings();
-//        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
         $propagationTotal = array();

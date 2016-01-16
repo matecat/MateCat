@@ -42,6 +42,8 @@ class Features {
      * @param $id_customer the customer id to decide if the feature is anabled or not
      * @param $subject the subject variable to be filtered.
      *
+     * FIXME: this is not a real filter since the input params are not passed
+     * modified to the next function in the queue.
      */
 
     public static function filter() {
@@ -57,7 +59,7 @@ class Features {
             // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
             // here, so the feature initializer should not need the project strucutre at all.
             // The `id_customer` should be enough. XXX
-            $obj = new $name( null, $feature );
+            $obj = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
                 $returnable = call_user_func_array( array( $obj, $method ), $args );
@@ -71,19 +73,28 @@ class Features {
     /**
      * Invoke the given method on feature-specific classes, if available. Pass the
      * projectStructure as input.
+     *
+     * This method is similar to filter, but it's not expected to return an updated
+     * input value.
+     *
      * @param $method string the method to invoke
      * @param $projectStructure ArrayObject
+     *
      */
 
-    public static function run( $method, ArrayObject $projectStructure ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $projectStructure['id_customer'] );
+    public static function run() {
+        list( $method, $id_customer ) = array_slice( func_get_args(), 0, 2);
+        $args = array_slice( func_get_args(), 2);
+
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-            $obj = new $name( $projectStructure, $feature );
+            $obj = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
-                $obj->$method();
+                \Log::doLog( " calling $name, $method, with args " . var_export( $args, true) );
+                call_user_func_array( array( $obj, $method ), $args );
             }
         }
     }

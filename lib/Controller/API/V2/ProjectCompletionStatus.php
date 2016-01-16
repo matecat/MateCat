@@ -17,7 +17,11 @@ class ProjectCompletionStatus extends ProtectedKleinController {
         );
         $this->validator->setFeature( 'project_completion' );
 
-        if (! ($this->validator->validate() )) {
+        $valid = $this->validator->validate();
+
+        \Log::doLog( var_export( $valid, true ));
+
+        if (! $valid ) {
             $this->response->code(404);
             $this->response->json(
                 array('error' => 'This project does not exist')

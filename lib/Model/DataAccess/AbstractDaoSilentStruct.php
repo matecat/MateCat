@@ -70,6 +70,10 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         return $this->attributes();
     }
 
+    public function setTimestamp($attribute, $timestamp) {
+        $this->$attribute = date('c', $timestamp);
+    }
+
     /**
      * Returns an array of the public attributes of the struct.
      * If $mask is provided, the resulting array will include
@@ -82,6 +86,7 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
      * @return Array
      */
     public function attributes( $mask=null ) {
+
         $refclass = new ReflectionClass( $this );
         $attrs = array();
         $publicProperties = $refclass->getProperties(ReflectionProperty::IS_PUBLIC) ;
