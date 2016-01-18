@@ -56,7 +56,8 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             " FROM chunk_completion_events c " .
             " LEFT JOIN chunk_completion_updates cc on c.id_job = cc.id_job " .
             " AND  c.password = cc.password and cc.is_review = c.is_review " .
-            " WHERE ( c.create_date > cc.last_translation_at OR cc.last_translation_at IS NULL ) " .
+            " WHERE c.create_date IS NOT NULL  " .
+            " AND ( c.create_date > cc.last_translation_at OR cc.last_translation_at IS NULL ) " .
             " AND c.is_review = :is_review " .
             " GROUP BY id_job, password, is_review " ;
 
