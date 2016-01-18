@@ -76,6 +76,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 AND
                 ( j.id_project = :id_project AND events.id IS NULL )
                 OR events.create_date < updates.last_translation_at
+                GROUP BY j.id, j.password
             ) uncomplete ON jobs.id = uncomplete.id
                 AND jobs.password = uncomplete.password ";
 
