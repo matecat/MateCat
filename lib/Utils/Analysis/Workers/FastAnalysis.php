@@ -69,6 +69,7 @@ class FastAnalysis extends AbstractDaemon {
         parent::__construct();
 
         $this->_configFile = $configFile;
+        Log::$fileName = 'fastAnalysis.log';
 
         try {
             self::$queueHandler = new AMQHandler();

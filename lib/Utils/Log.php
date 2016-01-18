@@ -77,7 +77,7 @@ class Log {
 
                 }
 
-                self::$logger->debug( $stringData );
+                self::$logger->debug( rtrim( $stringData ) );
 
             } catch ( Exception $e ) {
                 file_put_contents( self::$fileNamePath, $stringData, FILE_APPEND );
@@ -133,7 +133,7 @@ class Log {
 
         }
 
-        self::_writeTo( rtrim( $string ) );
+        self::_writeTo( $string );
 
     }
 
