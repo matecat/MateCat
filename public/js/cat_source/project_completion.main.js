@@ -75,7 +75,6 @@ if ( ProjectCompletion.enabled() ) {
              */
 
             return stats.DRAFT <= 0 &&
-                stats.TRANSLATED <= 0 &&
                 ( stats.APPROVED + stats.REJECTED ) > 0 ;
         }
         else {
