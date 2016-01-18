@@ -7,6 +7,8 @@ class CurlTest {
   public $params = array();
   public $files = array();
 
+  public $referer ;
+
   private $url ;
 
   private $response_header ;
@@ -21,6 +23,7 @@ class CurlTest {
     $this->params  = @$options['params'];
     $this->files   = @$options['files'];
     $this->method  = @$options['method'];
+    $this->referer = @$options['referer'];
 
   }
 
@@ -55,6 +58,12 @@ class CurlTest {
 
     if ($this->method == 'GET' and $this->params) {
       $this->url .= "?" . http_build_query( $this->params );
+    }
+
+
+    if ( $this->referer != null ) {
+        \Log::doLog('referer: ' .  $this->referer );
+        curl_setopt($ch, CURLOPT_REFERER, $this->referer )  ;
     }
 
     $this->setHeaders($ch) ;

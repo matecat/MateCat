@@ -35,6 +35,7 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function processInsert() {
+
         $params = array(
             'uid' => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),

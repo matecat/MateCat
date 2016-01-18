@@ -64,17 +64,22 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $params = Utils::ensure_keys($params, array('is_review'));
         $is_review = $params['is_review'] || false;
 
-        $sql = "SELECT j.* FROM jobs j LEFT JOIN ( " .
-                " SELECT c.is_review, c.id_job, cc.password " .
-                " FROM chunk_completion_events c " .
-                " LEFT JOIN chunk_completion_updates cc on c.id_job = cc.id_job " .
-                    " AND  c.password = cc.password AND cc.is_review = c.is_review " .
-                " WHERE ( c.create_date > cc.last_translation_at OR cc.last_translation_at IS NULL ) " .
-                " AND c.is_review = :is_review " .
-                " AND c.id_project = :id_project " .
-                " GROUP BY id_job, password, is_review " .
-                " ) jj ON jj.id_job = j.id AND jj.password = j.password " .
-            " WHERE j.id_project = :id_project AND jj.id_job IS NULL ";
+        $sql = " SELECT jobs.* FROM jobs INNER join ( " .
+            " SELECT j.id, j.password from jobs j
+                LEFT JOIN chunk_completion_events events
+                ON events.id_job = j.id and events.password = j.password
+                LEFT JOIN chunk_completion_updates updates
+                ON updates.id_job = j.id and updates.password = j.password
+                AND updates.is_review = events.is_review
+                WHERE
+                (events.is_review = :is_review OR events.is_review IS NULL )
+                AND
+                ( j.id_project = :id_project AND events.id IS NULL )
+                OR events.create_date < updates.last_translation_at
+            ) uncomplete ON jobs.id = uncomplete.id
+                AND jobs.password = uncomplete.password ";
+
+        \Log::doLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

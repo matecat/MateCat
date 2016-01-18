@@ -50,7 +50,7 @@ class Features {
         list( $method, $id_customer ) = array_slice( func_get_args(), 0, 2);
 
         $args = array_slice( func_get_args(), 2);
-        $returnable = $args ;
+        $returnable = $args[0];
 
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 

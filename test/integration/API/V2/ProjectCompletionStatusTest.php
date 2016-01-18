@@ -42,12 +42,57 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         );
     }
 
-    function testsCallOnValidProject() {
+    function test_is_not_complete_by_default() {
+        $this->setValidProjectWithAllTranslatedSegments();
+        $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
+
+        $expected_jobs = array();
+        $jobs = $project->getJobs();
+
+        $expected = array(
+                'project_status' => array(
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
+                        'revise'   => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password
+                            )
+                        ),
+                        'translate' => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password
+                            )
+                        ),
+                )
+        );
+
+        $test          = new CurlTest();
+        $test->path    = '/api/v2/project-completion-status/' .
+                $this->test_data->project->id_project;
+        $test->method  = 'GET';
+        $test->headers = $this->test_data->headers;
+        $response      = $test->getResponse();
+
+        $this->assertEquals( json_encode( $expected ), $response[ 'body' ] );
+
+    }
+
+    function test_is_complete_when_review_and_translate_are_complete() {
         $this->setValidProjectWithAllTranslatedSegments();
         $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
 
         foreach ( $this->test_data->chunks as $chunk ) {
             integrationSetChunkAsComplete( array(
+                    'referer' => 'http://example.org/translate/foo/bar',
+                    'params' => array(
+                            'id_job'   => $chunk->id,
+                            'password' => $chunk->password
+                    )
+            ) );
+            integrationSetChunkAsComplete( array(
+                    'referer' => 'http://example.org/revise/foo/bar',
                     'params' => array(
                             'id_job'   => $chunk->id,
                             'password' => $chunk->password
@@ -85,7 +130,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
     }
 
-    function testReturnsNonCompletedProject() {
+    function test_returns_uncomplete_splitted_job_correctly() {
         $this->setValidProjectWithAllTranslatedSegments();
 
         // get project chunks
@@ -121,11 +166,22 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $first_chunk  = $chunks[ 0 ];
         $second_chunk = $chunks[ 1 ];
 
+        // set chunk completed for translate page
         integrationSetChunkAsComplete( array(
-                'params' => array(
-                        'id_job'   => $first_chunk->id,
-                        'password' => $first_chunk->password
-                )
+            'referer' => 'http://example.org/translate/rest-of-path',
+            'params' => array(
+                'id_job'   => $first_chunk->id,
+                'password' => $first_chunk->password
+            )
+        ) );
+
+        // set chunk completed for revise page
+        integrationSetChunkAsComplete( array(
+            'referer' => 'http://example.org/revise/rest-of-path',
+            'params' => array(
+                'id_job'   => $first_chunk->id,
+                'password' => $first_chunk->password
+            )
         ) );
 
         $test          = new CurlTest();
@@ -139,7 +195,13 @@ class ProjectCompletionStatusTest extends IntegrationTest {
                 'project_status' => array(
                         'id'        => $this->test_data->project->id_project,
                         'completed' => false,
-                        'chunks'    => array(
+                        'revise'    => array(
+                                array(
+                                        'id'       => $second_chunk->id,
+                                        'password' => $second_chunk->password
+                                )
+                        ),
+                        'translate'    => array(
                                 array(
                                         'id'       => $second_chunk->id,
                                         'password' => $second_chunk->password

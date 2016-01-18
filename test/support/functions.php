@@ -81,6 +81,10 @@ function integrationSetChunkAsComplete( $options ) {
         $test->headers = $options['headers'];
     }
 
+    if ( array_key_exists( 'referer', $options ) ) {
+        $test->referer = $options['referer'];
+    }
+
     $test->path = '?action=Features_ProjectCompletion_SetChunkCompleted';
     $test->method = 'POST';
     $test->params = array(
