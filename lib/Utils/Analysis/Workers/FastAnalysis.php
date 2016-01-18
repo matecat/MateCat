@@ -658,12 +658,12 @@ class FastAnalysis extends AbstractDaemon {
 
         //use this kind of construct to easy add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
+            case ( $mtEngine === null ): // means NONE as selected Engine
+                $context = $contextList[ 'P1' ];
+                break;
             case ( ! $mtEngine instanceof \Engines_MyMemory ):
                 $context = $contextList[ 'P3' ];
                 break;
-//            case ( $queueLen >= 30000 ):
-//                $context = $contextList[ 'P3' ];
-//                break;
             case ( $queueLen >= 10000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s
                 $context = $contextList[ 'P2' ];
                 break;
