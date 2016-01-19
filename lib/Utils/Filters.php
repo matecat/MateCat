@@ -2,8 +2,6 @@
 
 class Filters {
 
-    const SEND_ERROR_REPORT = true;
-
     const SOURCE_TO_XLIFF_ENDPOINT = "/AutomationService/original2xliff";
     const XLIFF_TO_TARGET_ENDPOINT = "/AutomationService/xliff2original";
 
@@ -166,7 +164,9 @@ class Filters {
             Log::doLog( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
-        Utils::sendErrMailReport("MateCat: conversion failed.\n\n" . print_r($info, true));
+        if (INIT::$FILTERS_EMAIL_FAILURES) {
+            Utils::sendErrMailReport("MateCat: conversion failed.\n\n" . print_r($info, true));
+        }
 
         if ($response['isSuccess'] !== true) {
             $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
