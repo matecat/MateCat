@@ -123,6 +123,7 @@ class INIT {
     public static $FILTERS_ADDRESS = null;
     public static $FILTERS_USER_AGENT = "MateCat Community Instance";
     public static $FILTERS_FORCE_VERSION = null;
+    public static $FILTERS_EMAIL_FAILURES = false;
 
     /**
      * The MateCat Version
