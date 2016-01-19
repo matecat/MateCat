@@ -32,7 +32,7 @@ class FilesStorage {
     private $cacheDir;
     private $zipDir;
 
-    const ORIGINAL_ZIP_PLACEHOLDER = "____originalZip__";
+    const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
 
     public function __construct( $files = null, $cache = null, $zip = null ) {
 

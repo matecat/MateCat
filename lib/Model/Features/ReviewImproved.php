@@ -116,7 +116,7 @@ class ReviewImproved extends BaseFeature {
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      */
-    public function postJobSplitted($projectStructure) {
+    public function postJobSplitted(ArrayObject $projectStructure) {
         $id_job = $projectStructure['array_jobs']['job_list'][0] ;
         \LQA\ChunkReviewDao::deleteByJobId( $id_job );
         $this->createQaChunkReviewRecord( $id_job, $projectStructure );
@@ -215,8 +215,11 @@ class ReviewImproved extends BaseFeature {
     private function validateModeFromJsonFile( $projectStructure ) {
         $fs = new FilesStorage();
         $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
-        $model_file_path = 'zip://' . $zip_file . '#__meta/qa_model.json' ;
-        $qa_model = file_get_contents( $model_file_path ); ;
+
+        $zip = new ZipArchive();
+        $zip->open( $zip_file );
+
+        $qa_model = $zip->getFromName( '__meta/qa_model.json');
 
         if ( $qa_model === FALSE ) {
             $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');
