@@ -78,7 +78,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 break;
             default:
 
-                if ( isset( $decoded[ 'matches' ] ) ) {
+                if( isset( $decoded[ 'matches' ] ) ){
                     foreach ( $decoded[ 'matches' ] as $pos => $match ) {
                         $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
                         $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
@@ -258,16 +258,16 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             $origFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
             $tmpFileName = tempnam( "/tmp", 'GLOS' );
-            $newFile     = new SplFileObject( $tmpFileName, 'r+' );
+            $newFile = new SplFileObject( $tmpFileName, 'r+' );
             $newFile->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::READ_AHEAD );
 
             foreach ( $origFile as $line_num => $line ) {
 
-                if ( count( $line ) < 2 ) {
+                if( count( $line ) < 2 ){
                     throw new RuntimeException( "No valid glossary file provided. Field separator could be not valid." );
                 }
 
-                if ( $line_num == 0 ) {
+                if ( $line_num == 0 ){
                     list( $source_lang, $target_lang, ) = $line;
 
                     //eventually, remove BOM from source language
@@ -275,11 +275,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                     $source_lang = preg_replace("/^$bom/","",$source_lang);
 
                     if ( !Langs_Languages::isEnabled( $source_lang ) ) {
-                        throw new RuntimeException( "Source language not supported: " . $source_lang );
+                        throw new RuntimeException( "The source language specified in the glossary is not supported: " . $source_lang );
                     }
 
                     if ( !Langs_Languages::isEnabled( $target_lang ) ) {
-                        throw new RuntimeException( "Target language not supported: " . $target_lang );
+                        throw new RuntimeException( "The target language specified in the glossary is not supported: " . $target_lang );
                     }
 
                     if ( empty( $source_lang ) || empty( $target_lang ) ) {
@@ -295,17 +295,16 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             $newFile->fflush();
 
             $origFile = null; //close the file handle
-            $newFile  = null; //close the file handle
+            $newFile = null; //close the file handle
             copy( $tmpFileName, $file );
             unlink( $tmpFileName );
 
-        } catch ( RuntimeException $e ) {
+        } catch( RuntimeException $e ){
             $this->result = new Engines_Results_MyMemory_TmxResponse( array(
                     "responseStatus"  => 406,
                     "responseData"    => null,
                     "responseDetails" => $e->getMessage()
             ) );
-
             return $this->result;
         }
 
@@ -549,7 +548,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'segs' ] = $json_segs;
 
         $this->_setAdditionalCurlParams( array(
-                        CURLOPT_TIMEOUT => 300
+                        CURLOPT_TIMEOUT    => 300
                 )
         );
 
@@ -585,7 +584,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
             if ( $lang_detect_files[ $currFileName ] == "skip" ) {
                 //this will force google to answer with "und" language code
-                $segmentsToBeDetected[] = "q[$counter]=1";
+                $segmentsToBeDetected[ ] = "q[$counter]=1";
 
                 next( $lang_detect_files );
                 $arrayIterator->next();
@@ -638,7 +637,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                     break;
                 }
             }
-            $segmentsToBeDetected[] = "q[$counter]=" . urlencode( $textToBeDetected );
+            $segmentsToBeDetected[ ] = "q[$counter]=" . urlencode( $textToBeDetected );
 
             next( $lang_detect_files );
             $arrayIterator->next();

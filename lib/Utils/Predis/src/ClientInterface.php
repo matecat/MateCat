@@ -96,7 +96,7 @@ use Predis\Profile\ProfileInterface;
  * @method string rpoplpush($source, $destination)
  * @method int    rpush($key, array $values)
  * @method int    rpushx($key, $value)
- * @method int    sadd($key, array $members)
+ * @method int    sadd($key, $members)
  * @method int    scard($key)
  * @method array  sdiff(array $keys)
  * @method int    sdiffstore($destination, array $keys)

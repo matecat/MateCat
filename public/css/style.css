@@ -1225,7 +1225,7 @@ background: #09beec;
 {
     float: left;
     width: 45.8%;
-    margin: 20px 1.5% 20px 1.5%;
+    margin: 20px 2% 20px 1.5%;
     border: 1px solid #aaa;
     padding: 2px 0.4%;
     border-radius: 2px;
@@ -1237,10 +1237,17 @@ background: #09beec;
 .sub-editor .gl-search .search-source,
 .sub-editor .gl-search .search-target
 {
-	width: 43%;
 	margin-bottom: 4px;
-	margin-top: 16px;
 }
+
+.sub-editor .gl-search .search-target{
+	width: 41%;
+}
+
+.sub-editor .cc-search .search-target{
+	width: 45.2%;
+}
+
 .sub-editor .gl-search .gl-comment
 {
 	margin-bottom: 4px;

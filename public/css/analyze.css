@@ -111,7 +111,8 @@ a:hover{text-decoration:none}
     text-decoration: underline;
     cursor: pointer;
 }
-.downloadAnalysisReport:hover {
+.analysisNotPerformed {
+	margin-top: -8px !important;
     text-decoration: underline;
 }
 span.complete {
