@@ -400,16 +400,23 @@ class FastAnalysis extends AbstractDaemon {
                     $fastResultData[ $k ][ 'eq_word_count' ]       = (float)$eq_word;
                     $fastResultData[ $k ][ 'standard_word_count' ] = (float)$standard_words;
 
-                } else {
-//                Log::doLog( 'Skipped Fast Segment: ' . var_export( $fastReport[ $k ], true ) );
+                } elseif( $perform_Tms_Analysis ) {
+
+                    Log::doLog( 'Skipped Fast Segment: ' . var_export( $fastResultData[ $k ], true ) );
                     // this segment must not be sent to the TM analysis queue
                     unset( $fastResultData[ $k ] );
+
+                } else {
+                    //In this case the TM analysis is disabled
+                    //ALL segments must not be sent to the TM analysis queue
+                    //do nothing, but $perform_Tms_Analysis is false, so we want delete all elements after the end of the loop
                 }
 
             }
 
             //anyway this key must be removed because he is no more needed and we want not to send it to the queue
             unset( $fastResultData[ $k ][ 'wc' ] );
+            if( !$perform_Tms_Analysis ) unset( $fastResultData[ $k ] );
 
         }
 
