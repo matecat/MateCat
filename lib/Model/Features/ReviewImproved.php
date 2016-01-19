@@ -219,10 +219,7 @@ class ReviewImproved extends BaseFeature {
         $qa_model = file_get_contents( $model_file_path ); ;
 
         if ( $qa_model === FALSE ) {
-            $projectStructure['result']['errors'][ ] = array(
-                'code' => '-900',  // TODO: decide how to assign such errors
-                'message' => 'QA model definition is missing'
-            );
+            $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');
         }
 
         $decoded_model = json_decode( $qa_model, TRUE ) ;
