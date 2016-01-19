@@ -118,19 +118,11 @@ class INIT {
     public static $ENABLE_OUTSOURCE = true;
 
     /**
-     * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
-     * ( xliff produced by SDL Trados )
-     *
-     * We are not including the file converters into the Matecat code because we haven't find any open source
-     * library that satisfy the required quality and licensing.
-     *
-     * Here you have two options
-     *  a) Keep $CONVERSION_ENABLED to false, manually convert your files into xliff using SDL Trados, Okapi or similar
-     *  b) Set $CONVERSION_ENABLED to true and implement your own converter
-     *
+     * MateCat Filters configuration
      */
-    public static $CONVERSION_ENABLED = false;
-    public static $USE_ONLY_STABLE_CONVERTERS = true;
+    public static $FILTERS_ADDRESS = null;
+    public static $FILTERS_USER_AGENT = "MateCat Community Instance";
+    public static $FILTERS_FORCE_VERSION = null;
 
     /**
      * The MateCat Version
