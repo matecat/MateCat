@@ -1,0 +1,18 @@
+<div class="overflow">
+  {{#if tms_enabled}}
+    <div class="gl-search">
+      <div class="input search-source" contenteditable="true" ></div>
+      <div class="input search-target" contenteditable="true" ></div>
+      <a class="set-glossary disabled" href="#"></a>
+      <div class="comment">
+        <a href="#">(+) Comment</a>
+        <div class="input gl-comment" contenteditable="true" ></div>
+      </div>
+      <div class="results"></div>
+    </div>
+  {{else}}
+    <ul class="graysmall message">
+      <li>Glossary is not available when the TM feature is disabled</li>
+    </ul>
+  {{/if}}
+</div>

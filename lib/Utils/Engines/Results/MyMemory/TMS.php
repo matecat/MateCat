@@ -1,4 +1,4 @@
-<?
+<?php
 
 class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     /**

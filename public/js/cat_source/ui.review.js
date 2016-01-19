@@ -33,12 +33,29 @@ if ( Review.enabled() )
 })(Review, window);
 
 if ( Review.enabled() ) {
+
+    UI.SegmentFooter.registerTab({
+        code                : 'review',
+        tab_class           : 'review',
+        label               : 'Revise',
+        activation_priority : 60,
+        tab_position        : 50,
+        is_enabled    : function(segment) {
+            return true;
+        },
+        tab_markup          : function(segment) {
+            return this.label ;
+        },
+        content_markup      : function(segment) {
+            return $('#tpl-review-tab').html();
+        },
+        is_hidden    : function(segment) {
+            return false;
+        },
+    });
+
     $('html').on('open', 'section', function() {
-//        console.log('new? ', $(this).hasClass('status-new'));
-//        console.log('draft? ', $(this).hasClass('status-draft'));
         if($(this).hasClass('opened')) {
-//            console.log('OPEN SEGMENT');
-//            console.log($(this).find('.tab-switcher-review').length);
             $(this).find('.tab-switcher-review').click();
         }
     }).on('start', function() {
@@ -87,28 +104,6 @@ if ( Review.enabled() ) {
         div.find('.next-untranslated').parent().remove();
 
         UI.segmentButtons = div.html();
-    }).on('footerCreation', 'section', function() {
-        var div = $('<div>' + UI.footerHTML + '</div>');
-        div.find('.submenu').append('<li class="active tab-switcher tab-switcher-review" id="' + $(this).attr('id') + '-review"><a tabindex="-1" href="#">Revise</a></li>');
-        div.append('<div class="tab sub-editor review" id="segment-' + UI.currentSegmentId + '-review">' + $('#tpl-review-tab').html() + '</div>');
-
-        /*
-               setTimeout(function() {// fixes a bug in setting defaults in radio buttons
-                   UI.currentSegment.find('.sub-editor.review .error-type input[value=0]').click();
-                   UI.trackChanges(UI.editarea);
-               }, 100);
-        */
-        UI.footerHTML = div.html();
- /*
-        if(UI.body.hasClass('hideMatches')) {
-            UI.currentSegment.find('.tab-switcher.active').removeClass('active');
-            UI.currentSegment.find('.tab-switcher-review').addClass('active');
-        } else {
-            UI.currentSegment.find('.tab-switcher-review').click();
-        }
-*/
-        UI.currentSegment.find('.tab-switcher-review').click();
-
     }).on('click', '.editor .tab-switcher-review', function(e) {
         e.preventDefault();
 

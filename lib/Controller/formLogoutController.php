@@ -1,4 +1,4 @@
-<?
+<?php
 
 class formLogoutController extends ajaxController {
     private $login = '';
