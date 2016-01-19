@@ -213,7 +213,7 @@ class DetectProprietaryXliff {
 
         if ( self::isXliffExtension() ) {
 
-            if ( INIT::$CONVERSION_ENABLED ) {
+            if ( !empty(INIT::$FILTERS_ADDRESS) ) {
 
                 //conversion enforce
                 if ( !INIT::$FORCE_XLIFF_CONVERSION ) {

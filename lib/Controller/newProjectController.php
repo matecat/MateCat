@@ -302,10 +302,10 @@ class newProjectController extends viewController {
 
         $this->template->mt_engines         = $this->mt_engines;
 //        $this->template->tms_engines        = $this->tms_engines;
-        $this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
+        $this->template->conversion_enabled = !empty(INIT::$FILTERS_ADDRESS);
 
         $this->template->isUploadTMXAllowed = false;
-        if ( INIT::$CONVERSION_ENABLED ) {
+        if ( !empty(INIT::$FILTERS_ADDRESS) ) {
             $this->template->allowed_file_types = $this->getExtensions( "" );
             $this->template->isUploadTMXAllowed = $this->isUploadTMXAllowed();
         } else {

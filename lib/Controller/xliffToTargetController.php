@@ -16,7 +16,7 @@ class xliffToTargetController extends downloadController {
         $fileInfo = DetectProprietaryXliff::getInfo($file_path);
         $converterVersion = $fileInfo['converter_version'];
 
-        $converter = new FileFormatConverter($converterVersion);
+        $converter = new Filters($converterVersion);
 
         $conversion = $converter->multiConvertToOriginal(array(
           1 => array(

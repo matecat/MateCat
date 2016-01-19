@@ -56,7 +56,7 @@ class ConversionHandler {
 
             if ( DetectProprietaryXliff::isXliffExtension() || DetectProprietaryXliff::getMemoryFileType() ) {
 
-                if ( INIT::$CONVERSION_ENABLED ) {
+                if ( !empty(INIT::$FILTERS_ADDRESS) ) {
 
                     //conversion enforce
                     if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
@@ -155,12 +155,6 @@ class ConversionHandler {
                 $converterVersion = Constants_ConvertersVersions::LEGACY;
             }
 
-            //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-            if( INIT::$LEGACY_CONVERSION !== false ){
-                $converterVersion = Constants_ConvertersVersions::LEGACY;
-            }
-            $converter = new FileFormatConverter($converterVersion);
-
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );
                 $single_language = $single_language[ 0 ];
@@ -168,31 +162,10 @@ class ConversionHandler {
                 $single_language = $this->target_lang;
             }
 
-            $convertResult = $converter->convertToSdlxliff( $file_path, $this->source_lang, $single_language, false, $this->segmentation_rule );
+            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language);
+            Filters::logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule);
 
             if ( $convertResult[ 'isSuccess' ] == 1 ) {
-
-                /* try to back convert the file */
-                $output_content                     = array();
-                $output_content[ 'out_xliff_name' ] = $file_path . '.out.sdlxliff';
-                $output_content[ 'source' ]         = $this->source_lang;
-                $output_content[ 'target' ]         = $single_language;
-                $output_content[ 'content' ]        = $convertResult[ 'xliffContent' ];
-                $output_content[ 'filename' ]       = $this->file_name;
-                $back_convertResult                 = $converter->convertToOriginal( $output_content );
-                /* try to back convert the file */
-
-                if ( $back_convertResult[ 'isSuccess' ] == false ) {
-                    //custom error message passed directly to javascript client and displayed as is
-                    $convertResult[ 'errorMessage' ] = "Error: there is a problem with this file, it cannot be converted back to the original one.";
-                    $this->result[ 'code' ]          = -110;
-                    $this->result[ 'errors' ][]      = array(
-                            "code"  => -110, "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => FilesStorage::basename_fix( $this->file_name )
-                    );
-
-                    return false;
-                }
 
                 //store converted content on a temporary path on disk (and off RAM)
                 $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
@@ -223,72 +196,10 @@ class ConversionHandler {
 
             } else {
 
-                $file = FilesStorage::pathinfo_fix( $this->file_name );
-
-                switch ( $file[ 'extension' ] ) {
-                    case 'docx':
-                        $defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-                        break;
-                    case 'doc':
-                    case 'rtf':
-                        $defaultError = "Importing error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
-                        break;
-                    case 'inx':
-                        $defaultError = "Importing Error. Try to commit changes in InDesign before importing.";
-                        break;
-                    case 'idml':
-                        $defaultError = "Importing Error. MateCat does not support this version of InDesign, try converting it to a previous one.";
-                        break;
-                    default:
-                        $defaultError = "Importing error. Try opening and saving the document with a new name.";
-                        break;
-                }
-
-                if (
-                        stripos( $convertResult[ 'errorMessage' ], "failed to create SDLXLIFF." ) !== false ||
-                        stripos( $convertResult[ 'errorMessage' ], "COM target does not implement IDispatch" ) !== false
-                ) {
-                    $convertResult[ 'errorMessage' ] = "Error: failed importing file.";
-
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "Unable to open Excel file - it may be password protected" ) !== false ) {
-                    $convertResult[ 'errorMessage' ] = $convertResult[ 'errorMessage' ] . " Try to remove protection using the Unprotect Sheet command on Windows Excel.";
-
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "The document contains unaccepted changes" ) !== false ) {
-                    $convertResult[ 'errorMessage' ] = "The document contains track changes. Accept all changes before uploading it.";
-
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "Error: Could not find file" ) !== false ||
-                        stripos( $convertResult[ 'errorMessage' ], "tw4winMark" ) !== false
-                ) {
-                    $convertResult[ 'errorMessage' ] = $defaultError;
-
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "Attempted to read or write protected memory" ) !== false ) {
-                    $convertResult[ 'errorMessage' ] = $defaultError;
-
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "The document was created in Microsoft Word 97 or earlier" ) ) {
-                    $convertResult[ 'errorMessage' ] = $defaultError;
-
-                } elseif ( $file[ 'extension' ] == 'csv' && empty( $convertResult[ 'errorMessage' ] ) ) {
-                    $convertResult[ 'errorMessage' ] = "This CSV file is not eligible to be imported due internal wrong format. Try to convert in TXT using UTF8 encoding";
-
-                } elseif ( empty( $convertResult[ 'errorMessage' ] ) ) {
-                    $convertResult[ 'errorMessage' ] = "Failed to convert file. Internal error. Please Try again.";
-
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "DocumentFormat.OpenXml.dll" ) !== false ) {
-                    //this error is triggered on DOCX when converter's parser can't decode some regions of the file
-                    $convertResult[ 'errorMessage' ] = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-                } elseif ( $file[ 'extension' ] == 'idml' ) {
-                    $convertResult[ 'errorMessage' ] = $defaultError;
-                } elseif ( stripos( $convertResult[ 'errorMessage' ], "Error: The source language of the file" ) !== false ) {
-                    //Error: The source language of the file (English (United States)) is different from the project source language.
-                    //we take the error, is good
-                } else {
-                    $convertResult[ 'errorMessage' ] = "Import error. Try converting it to a compatible file format (e.g. doc > docx, xlsx > xls)";
-                }
-
                 //custom error message passed directly to javascript client and displayed as is
                 $this->result[ 'code' ]     = -100;
                 $this->result[ 'errors' ][] = array(
-                        "code" => -100, "message" => $convertResult[ 'errorMessage' ], "debug" => $file[ 'basename' ]
+                        "code" => -100, "message" => $convertResult[ 'errorMessage' ], "debug" => FilesStorage::basename_fix( $this->file_name )
                 );
             }
 

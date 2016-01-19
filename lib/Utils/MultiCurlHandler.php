@@ -215,7 +215,7 @@ class MultiCurlHandler {
      */
     public function createResource( $url, $options, $tokenHash = null ) {
 
-        if ( empty( $tokenHash ) ) {
+        if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( "", true ) );
         }
 
@@ -239,7 +239,7 @@ class MultiCurlHandler {
      */
     public function addResource( $curl_resource, $tokenHash = null ) {
 
-        if ( $tokenHash == null ) {
+        if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( '', true ) );
         }
 
