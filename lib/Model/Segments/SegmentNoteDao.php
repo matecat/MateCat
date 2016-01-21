@@ -4,7 +4,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
     public static function getBySegmentId( $id_segment ) {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM segment_notes " . 
+        $stmt = $conn->prepare( "SELECT * FROM segment_notes " .
             " WHERE id_segment = ? " ); 
         $stmt->execute( array( $id_segment ) ); 
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Segments_SegmentNoteStruct');

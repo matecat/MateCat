@@ -100,6 +100,7 @@ class downloadFileController extends downloadController {
                     $mime_type        = $file[ 'mime_type' ];
                     $fileID           = $file[ 'id_file' ];
                     $current_filename = $file[ 'filename' ];
+                    $remote_id        = $file[ 'remote_id' ];
 
                     //get path for the output file converted to know it's right extension
                     $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
@@ -329,8 +330,12 @@ class downloadFileController extends downloadController {
                     $this->content = self::composeZip( $output_content ); //add zip archive content here;
 
                 } else {
-                    //always an array with 1 element, pop it, Ex: array( array() )
+
+                    # TODO: this is a good point to test transmission back
                     $output_content = array_pop( $output_content );
+
+                    $this->updateFileOnGDrive($remote_id, $output_content) ;
+                    //always an array with 1 element, pop it, Ex: array( array() )
                     $this->setContent( $output_content );
                 }
             }
@@ -371,6 +376,38 @@ class downloadFileController extends downloadController {
         $this->_filename = self::sanitizeFileExtension( $output_content->output_filename );
         $this->content   = $output_content->getContent();
 
+    }
+
+    private function updateFileOnGDrive($fileId, ZipContentObject $content) {
+
+
+        parent::sessionStart();
+
+        $dao = new \Users_UserDao( \Database::obtain() );
+        $user = $dao->getByUid( $_SESSION['uid'] );
+        $token = $user->oauth_access_token ;
+
+        $client = OauthClient::getInstance()->getClient();
+        $client->setAccessToken( $token );
+        $service = new Google_Service_Drive( $client );
+
+        $file = $service->files->get($fileId);
+        // $mimeType = 'application/vnd.google-apps.presentation';
+        $mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        $file->setMimeType( $mimeType );
+        $file->setTitle('Test slides');
+
+
+        $additionalParams = array(
+            'mimeType' => $mimeType,
+            'newRevision' => FALSE,
+            'data' => $content->getContent(),
+            'uploadType' => 'media'
+        );
+
+        $upload = $service->files->update( $fileId, $file, $additionalParams );
+
+        // Log::doLog( $upload );
     }
 
     protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {

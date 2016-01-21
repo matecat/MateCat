@@ -37,18 +37,38 @@ class OpenController extends KleinController {
 
         $token = $user->oauth_access_token ; 
 
-        $state = json_decode( $this->request->param('state') ); 
-        $fileId = $state->ids[0]; 
+        $state = json_decode( $this->request->param('state'), TRUE );
+
+        \Log::doLog( $state );
 
         $client = OauthClient::getInstance()->getClient();
         $client->setAccessToken( $token ); 
-
         $service = new Google_Service_Drive( $client );
 
         // TODO: handle token expired HERE 
         // \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-        $file = $service->files->get($fileId); 
-        $downloadUrl = $file->getDownloadUrl();
+        //
+        if ( array_key_exists( 'ids', $state) ) {
+            $fileId = $state['ids'][0];
+            $file = $service->files->get($fileId);
+            $downloadUrl = $file->getDownloadUrl();
+        }
+        else if ( array_key_exists('exportIds', $state) ) {
+            // forge a request to the APIs V3 to get export download URL
+            $fileId = $state['exportIds'][0];
+            $mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+            $file = $service->files->get($fileId);
+            $links = $file->getExportLinks() ;
+            $downloadUrl = $links[ $mime ];
+        }
+        else {
+            throw new Exception( " no ids or export ids found ");
+        }
+
+        // Save in session to allow createProject to insert
+        // the database record representing the file along with its
+        // google drive ids.
+        $_SESSION['google_drive_file_id'] = $fileId ;
 
         if ($downloadUrl) {
             $this->file_name = $file->getTitle(); 

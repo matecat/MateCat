@@ -447,14 +447,30 @@ class ProjectManager {
 
                 //PLEASE NOTE, this can be an array when the same file added more
                 // than once and with different names
+                //
                 foreach ( $_originalFileName as $originalFileName ) {
+
+                    $file_insert_params = array();
+
+                    if ( array_key_exists( 'google_drive_file_id', $_SESSION ) ) {
+                        $file_insert_params = array(
+                            'remote_id' => $_SESSION['google_drive_file_id']
+                        );
+                        unset( $_SESSION['google_drive_file_id'] );
+                        // ensure this session var is set only once
+                        // XXX: DANGER XXX
+                        // if this variable is not unset property and remains in session
+                        // it may be assigned to the wrong files with possibly destructive
+                        // consequences.
+                    }
 
                     \Log::doLog('--------------------------------------------------- 1'); 
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
+                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
+                        $fileDateSha1Path, $file_insert_params  );
 
                     \Log::doLog('--------------------------------------------------- 2');
-                    //move the file in the right directory from the packages to the file dir
+                    //move the file in the right directory from the packages to the file dirstorage/conversion_errors/{E0ECD8B2-7CB8-DCD3-3138-EF076C03F3B3}/test.pptx
                     \Log::doLog($fileDateSha1Path, $this->projectStructure['source_language'], $fid, $originalFileName); 
 
                     $this->fileStorage->moveFromCacheToFileDir(

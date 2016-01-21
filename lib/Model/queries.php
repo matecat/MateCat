@@ -1824,7 +1824,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path, $params=array() ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
@@ -1832,6 +1832,9 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
     $data[ 'mime_type' ]          = $mime_type;
     $data[ 'sha1_original_file' ] = $fileDateSha1Path;
 
+    if ( array_key_exists('remote_id', $params)) {
+        $data[ 'remote_id'] = $params['remote_id'];
+    }
 
     $db = Database::obtain();
 

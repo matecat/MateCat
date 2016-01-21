@@ -525,7 +525,7 @@ class FilesStorage {
             $where_id_file = " and id_file=$id_file";
         }
 
-        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file from files_job fj
+        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file, f.remote_id from files_job fj
 			inner join files f on f.id=fj.id_file
 			join jobs as j on j.id=fj.id_job
 			where fj.id_job = $id_job $where_id_file group by id_file";
