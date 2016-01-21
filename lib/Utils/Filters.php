@@ -53,13 +53,16 @@ class Filters {
             $info = $infos[$id];
 
             // Compute response
-            if ($response === false) {
-                $response = array( "isSuccess" => false, "curlInfo" => $info );
-                if ($info['errno']) {
-                    $response['errorMessage'] = "Curl error $info[errno]: $info[error]";
+            if ($info['http_code'] != 200 || $response === false) {
+                $errResponse = array( "isSuccess" => false, "curlInfo" => $info );
+                if ($response === '{"message":"Invalid Mashape Key"}') {
+                    $errResponse['errorMessage'] = "Failed Mashape authentication. Check FILTERS_MASHAPE_KEY in config.ini";
+                } else if ($info['errno']) {
+                    $errResponse['errorMessage'] = "Curl error $info[errno]: $info[error]";
                 } else {
-                    $response['errorMessage'] = "Received status code $info[http_code]";
+                    $errResponse['errorMessage'] = "Received status code $info[http_code]";
                 }
+                $response = $errResponse;
 
             } else {
                 $response = json_decode($response, true);
