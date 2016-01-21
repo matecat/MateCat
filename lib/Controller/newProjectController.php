@@ -297,8 +297,6 @@ class newProjectController extends viewController {
         $this->template->target_languages = $target_languages;
         $this->template->subjects = $this->subjectArray;
 
-        $this->template->upload_session_id = $this->guid;
-
         $this->template->mt_engines         = $this->mt_engines;
 //        $this->template->tms_engines        = $this->tms_engines;
         $this->template->conversion_enabled = !empty(INIT::$FILTERS_ADDRESS);
@@ -334,6 +332,13 @@ class newProjectController extends viewController {
 
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
         $this->template->DQF_enabled = INIT::$DQF_ENABLED;
+
+
+        $this->template->use_pre_uploaded_files = 
+            $_SESSION['pre_loaded_file'] && 
+            $_GET['preupload'] ; 
+
+        $this->template->pre_uploaded_files =  $_SESSION['pre_loaded_file'];
 
     }
 

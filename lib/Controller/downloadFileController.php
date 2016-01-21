@@ -79,6 +79,7 @@ class downloadFileController extends downloadController {
 
         $nonew                 = 0;
         $output_content        = array();
+
         /*
            the procedure:
            1)original xliff file is read directly from disk; a file handler is obtained

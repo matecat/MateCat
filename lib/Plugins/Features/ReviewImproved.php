@@ -238,13 +238,25 @@ class ReviewImproved extends BaseFeature {
      */
 
     private function validateModeFromJsonFile( $projectStructure ) {
+        // detect if the project created was a zip file, in which case try to detect 
+        // id_qa_model from json file. 
+        // otherwise assign the default model 
+        
+        $qa_model = FALSE; 
         $fs = new FilesStorage();
         $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
 
-        $zip = new ZipArchive();
-        $zip->open( $zip_file );
+        \Log::doLog( $zip_file ); 
 
-        $qa_model = $zip->getFromName( '__meta/qa_model.json');
+        if ( $zip_file !== FALSE ) {
+            $zip = new ZipArchive();
+            $zip->open( $zip_file );
+            $qa_model = $zip->getFromName( '__meta/qa_model.json');
+        }
+
+        // File is not a zip OR model was not found in zip
+
+        \Log::doLog( $qa_model ); 
 
         if ( $qa_model === FALSE ) {
             $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');

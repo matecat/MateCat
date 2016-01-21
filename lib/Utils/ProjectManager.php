@@ -299,6 +299,8 @@ class ProjectManager {
 
         //sort files in order to process TMX first
         $sortedFiles = array();
+        \Log::doLog( '------------------------------'); 
+        \Log::doLog( $this->projectStructure['array_files'] );
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             //check for glossary files and tmx and put them in front of the list
@@ -324,6 +326,9 @@ class ProjectManager {
             }
 
         }
+        \Log::doLog( '------------------------------'); 
+        \Log::doLog( $this->projectStructure['array_files'] ); 
+
         $this->projectStructure[ 'array_files' ] = $sortedFiles;
         unset( $sortedFiles );
 
@@ -354,6 +359,10 @@ class ProjectManager {
 
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
          */
+
+        \Log::doLog( '------------------------------'); 
+        \Log::doLog( $this->projectStructure['array_files'] ); 
+
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             /*
@@ -388,7 +397,7 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][]                                                                    = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
@@ -440,24 +449,35 @@ class ProjectManager {
                 // than once and with different names
                 foreach ( $_originalFileName as $originalFileName ) {
 
+                    \Log::doLog('--------------------------------------------------- 1'); 
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                     $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
+                    \Log::doLog('--------------------------------------------------- 2');
                     //move the file in the right directory from the packages to the file dir
+                    \Log::doLog($fileDateSha1Path, $this->projectStructure['source_language'], $fid, $originalFileName); 
+
                     $this->fileStorage->moveFromCacheToFileDir(
                             $fileDateSha1Path,
                             $this->projectStructure[ 'source_language' ],
                             $fid,
                             $originalFileName
                     );
+                    \Log::doLog('--------------------------------------------------- 3');
 
                     $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
+                    \Log::doLog('--------------------------------------------------- 4');
                     $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid );
+
+                    \Log::doLog('--------------------------------------------------- 5');
 
                 }
 
             } catch ( Exception $e ) {
+
+                \Log::doLog('---------------------------------------------------'); 
+                \Log::doLog( $e->getMessage() ); 
 
                 if ( $e->getCode() == -1 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = array(

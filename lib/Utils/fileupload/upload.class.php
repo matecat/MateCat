@@ -19,7 +19,7 @@ class UploadHandler {
     function __construct( $options = null ) {
         $this->options = array(
                 'script_url'              => $this->getFullUrl() . '/',
-                'upload_dir'              => INIT::$UPLOAD_REPOSITORY . "/" . $_COOKIE[ 'upload_session' ] . '/',
+                'upload_dir'              => Utils::uploadDirFromSessionCookie(),
                 'upload_url'              => $this->getFullUrl() . '/files/',
                 'param_name'              => 'files',
                 // Set the following option to 'POST', if your server does not support
@@ -382,6 +382,8 @@ class UploadHandler {
             $file->size = $file_size;
             $this->set_file_delete_url( $file );
 
+
+            Log::doLog( $file_path ); 
 
             $fileContent    = file_get_contents( $file_path );
             $preg_file_html = '|<file original="(.*?)" source-language="(.*?)" datatype="(.*?)" target-language="(.*?)">|m';

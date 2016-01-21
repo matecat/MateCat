@@ -158,5 +158,9 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
     );
 });
+route(
+    '/webhooks/gdrive/open', 'GET', 
+    'Webhooks\GDrive\OpenController', 'open'
+); 
 
 $klein->dispatch();

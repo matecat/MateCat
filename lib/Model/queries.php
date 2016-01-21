@@ -416,8 +416,14 @@ function tryInsertUserFromOAuth( $data ) {
     } else {
         $cid[ 'email' ] = $data[ 'email' ];
         $cid[ 'uid' ]   = $results[ 'uid' ];
-    }
 
+        // TODO: migrate this to an insert on duplicate key update
+        $sql_update = "UPDATE users set oauth_access_token = ? WHERE uid = ?" ; 
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql_update ); 
+        $stmt->execute( array( $data['oauth_access_token'], $cid['uid'] ) ); 
+    }
+    
     return $cid;
 }
 

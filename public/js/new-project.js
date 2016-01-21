@@ -78,6 +78,7 @@ $(document).ready(function() {
 	});
 
 	$("input.uploadbtn").click(function(e) {
+        
         if(!UI.allTMUploadsCompleted()) {
             return false;
         }
@@ -87,13 +88,19 @@ $(document).ready(function() {
 			files += '@@SEP@@' + $(this).text();
 		});
 
-//        var private_tm_key = ( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" );
         tm_data = UI.extractTMdataFromTable();
+
+        if ( config.pre_uploaded_files ) {
+            var filename = config.pre_uploaded_files ; 
+        }
+        else {
+            var filename = files.substr(7) ; 
+        }
 
 		APP.doRequest({
 			data: {
 				action				: "createProject",
-				file_name			: files.substr(7),
+				file_name			: filename,
 				project_name		: $('#project-name').val(),
 				source_language		: $('#source-lang').val(),
 				target_language		: $('#target-lang').val(),
@@ -119,11 +126,14 @@ $(document).ready(function() {
 					UI.skipLangDetectArr = d.lang_detect;
 				}
 
-				$.each(UI.skipLangDetectArr, function(file, status){
-					if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
-					else UI.skipLangDetectArr[file] = 'detect';
+                if ( UI.skipLangDetectArr != null ) {
+                    $.each(UI.skipLangDetectArr, function(file, status){
+                        if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
+                        else UI.skipLangDetectArr[file] = 'detect';
 
-				});
+                    });
+                }
+
 
 				if( typeof d.errors != 'undefined' && d.errors.length ) {
 
@@ -354,13 +364,10 @@ $(document).ready(function() {
 
 	$("input, select").change(function(e) {
 		$('.error-message').hide();
-		//		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
 	});
 	$("input").keyup(function(e) {
 		$('.error-message').hide();
-		//		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
 	});
-//    		uploadSessionId = $.cookie("upload_session");
 
 });
 

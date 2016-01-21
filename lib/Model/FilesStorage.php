@@ -370,6 +370,9 @@ class FilesStorage {
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
 
+        \Log::doLog( $fileDir ); 
+        \Log::doLog( $cacheDir ); 
+
         $res = true;
         //check if doesn't exist
         if ( !is_dir( $fileDir ) ) {
@@ -385,7 +388,10 @@ class FilesStorage {
         //make links from cache to files
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
-        $origFilePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
+        $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig" ; 
+        \Log::doLog( $origDir ); 
+
+        $origFilePath = $this->getSingleFileInPath( $origDir );
         $tmpOrigFileName = $origFilePath;
         if( is_file( $origFilePath ) ){
 
@@ -403,7 +409,12 @@ class FilesStorage {
         /*
          * Force the new filename if it is provided
          */
-        $convertedFilePath = $this->getSingleFileInPath( $cacheDir . DIRECTORY_SEPARATOR . "work" );
+        $d = $cacheDir . DIRECTORY_SEPARATOR . "work" ; 
+        \Log::doLog( $d ); 
+        $convertedFilePath = $this->getSingleFileInPath( $d );
+
+        \Log::doLog( $convertedFilePath ); 
+
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ){
             if( !DetectProprietaryXliff::isXliffExtension( FilesStorage::pathinfo_fix( $newFileName ) ) ){
@@ -411,7 +422,14 @@ class FilesStorage {
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
-        $res &= $this->link( $convertedFilePath, $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) );
+
+        \Log::doLog( $convertedFilePath );  // <--------- TODO: this is empty! 
+
+        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) ; 
+
+        \Log::doLog( $dest ); 
+
+        $res &= $this->link( $convertedFilePath, $dest );
 
         if( !$res ){
             throw new UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
@@ -663,6 +681,8 @@ class FilesStorage {
 
     public function getTemporaryUploadedZipFile( $uploadToken ) {
         $files  = scandir( INIT::$UPLOAD_REPOSITORY . '/' . $uploadToken );
+        $zip_name = null; 
+        $zip_file = null; 
 
         foreach($files as $file) {
             Log::doLog( $file );
@@ -679,7 +699,11 @@ class FilesStorage {
             }
         }
 
-        return INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file ;
+        if ( $zip_name == null && $zip_file == null ) {
+            return FALSE ; 
+        } else {
+            return INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file ;
+        }
     }
 
     /**

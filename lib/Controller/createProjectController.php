@@ -149,6 +149,7 @@ class createProjectController extends ajaxController {
         }
 
         $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
+
         $default_project_name = $arFiles[ 0 ];
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
@@ -259,6 +260,9 @@ class createProjectController extends ajaxController {
         }
 
         $arFiles = $newArFiles;
+
+        \Log::doLog( '------------------------------'); 
+        \Log::doLog( $arFiles ); 
 
         $projectManager = new ProjectManager();
 
