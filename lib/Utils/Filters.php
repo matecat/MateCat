@@ -1,14 +1,28 @@
 <?php
 
+// TODO: files should remain on disk, and not copied and transformed in memory several times
 class Filters {
 
     const SOURCE_TO_XLIFF_ENDPOINT = "/AutomationService/original2xliff";
     const XLIFF_TO_TARGET_ENDPOINT = "/AutomationService/xliff2original";
 
-    private static function sendToFilters( $dataGroups, $fullUrl ) {
+    /**
+     * @param $dataGroups array each value must be an associative array
+     *                          representing the fields of a POST request
+     * @param $endpoint string use one of the two constants of this class
+     * @return array
+     */
+    private static function sendToFilters($dataGroups, $endpoint ) {
         $multiCurl = new MultiCurlHandler();
 
+        // Each group is a POST request
         foreach ($dataGroups as $id => $data) {
+            // Add to POST fields the version forced using the config file
+            if ( ! empty( INIT::$FILTERS_FORCE_VERSION ) ) {
+                $data['forceVersion'] = INIT::$FILTERS_FORCE_VERSION;
+            }
+
+            // Setup CURL options and add to MultiCURL
             $options = array (
                 CURLOPT_POST => true,
                 CURLOPT_USERAGENT => INIT::$FILTERS_USER_AGENT,
@@ -18,40 +32,58 @@ class Filters {
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             );
-            $multiCurl->createResource( $fullUrl, $options, $id );
+            $url = INIT::$FILTERS_ADDRESS . $endpoint;
+            $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
 
+        // Launch the multiCURL and get all the results
         $multiCurl->multiExec();
         $responses = $multiCurl->getAllContents();
         $infos = $multiCurl->getAllInfo();
         $headers = $multiCurl->getAllHeaders();
 
+        // Compute results
         foreach ($responses as $id => &$response) {
             $info = $infos[$id];
-            if ($response !== false) {
+
+            // Compute response
+            if ($response === false) {
+                $response = array(
+                  "isSuccess" => false,
+                  "errorMessage" => "Curl error $info[errno]: $info[error]",
+                  "curlInfo" => $info);
+
+            } else {
                 $response = json_decode($response, true);
-                //get the binary result from converter and set the right ( EXTERNAL TO THIS CLASS ) key for content
+                // Super ugly, but this is the way the old FileFormatConverter
+                // cooperated with callers; changing this requires changing the
+                // callers, a huge and risky refactoring work I couldn't afford
                 if ( isset( $response[ "documentContent" ] ) ) {
                     $response[ 'document_content' ] = base64_decode( $response[ 'documentContent' ] );
                     unset( $response[ 'documentContent' ] );
                 }
-            } else {
-                $response = array(
-                        "isSuccess" => false,
-                        "errorMessage" => "Curl error $info[errno]: $info[error]",
-                        "curlInfo" => $info);
             }
+
+            // Compute headers
             $instanceInfo = self::extractInstanceInfoFromHeaders($headers[$id]);
             if ($instanceInfo !== false) {
                 $response = array_merge($response, $instanceInfo);
             }
+
+            // Add to response the CURL total time in milliseconds
             $response['time'] = round($info['curlinfo_total_time'] * 1000);
         }
 
         return $responses;
     }
 
+    /**
+     * Looks for the Filters-Instance header and returns the information in it.
+     * @param $headers
+     * @return array|bool an array with the address and version of the
+     *                    respondent instance; false if the header was not found
+     */
     private static function extractInstanceInfoFromHeaders( $headers ) {
         foreach ($headers as $header) {
             if (preg_match("|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches)) {
@@ -77,8 +109,7 @@ class Filters {
             'fileName'      => "$filename.$extension"
         );
 
-        $url = INIT::$FILTERS_ADDRESS . self::SOURCE_TO_XLIFF_ENDPOINT;
-        $filtersResponse = self::sendToFilters(array($data), $url);
+        $filtersResponse = self::sendToFilters(array($data), self::SOURCE_TO_XLIFF_ENDPOINT);
 
         return $filtersResponse[0];
     }
@@ -86,12 +117,10 @@ class Filters {
     public static function xliffToTarget($xliffsData) {
         $dataGroups = array();
         $tmpFiles = array();
-        $url = INIT::$FILTERS_ADDRESS . self::XLIFF_TO_TARGET_ENDPOINT;
 
-        //iterate files.
-        //For each file prepare a curl resource
         foreach ($xliffsData as $id => $xliffData ) {
-            //get random name for temporary location
+            // Filters are expecting an upload of a xliff file, so put the xliff
+            // data in a temp file and configure POST param to upload it
             $tmpXliffFile = tempnam(sys_get_temp_dir(), "matecat-xliff-to-target-");
             $tmpFiles[$id] = $tmpXliffFile;
             file_put_contents($tmpXliffFile, $xliffData[ 'document_content' ]);
@@ -99,9 +128,9 @@ class Filters {
             $dataGroups[$id] = array('xliffContent' => "@$tmpXliffFile");
         }
 
-        $responses = self::sendToFilters($dataGroups, $url);
+        $responses = self::sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
 
-        //remove temporary files
+        // We sent requests and obtained responses, we can delete temp files
         foreach ($tmpFiles as $tmpFile) {
             unlink($tmpFile);
         }
@@ -109,18 +138,24 @@ class Filters {
         return $responses;
     }
 
+    /**
+     * Logs a conversion to xliff, doing also file backup in case of failure.
+     */
     public static function logConversionToXliff($response, $sentFile, $sourceLang, $targetLang, $segmentation ) {
         self::logConversion($response, true, $sentFile, array('source' => $sourceLang, 'target' => $targetLang), array('segmentation_rule' => $segmentation));
     }
 
+    /**
+     * Logs a conversion to target, doing also file backup in case of failure.
+     */
     public static function logConversionToTarget($response, $sentFile, $jobData, $sourceFileData ) {
         self::logConversion($response, false, $sentFile, $jobData, $sourceFileData);
     }
 
     private static function logConversion($response, $toXliff, $sentFile, $jobData, $sourceFileData ) {
         try {
-            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS,
-                array (
+            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER,
+              INIT::$DB_USER, INIT::$DB_PASS, array (
                     PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
                     PDO::ATTR_EMULATE_PREPARES   => false,
                     PDO::ATTR_ORACLE_NULLS       => true,
@@ -169,18 +204,28 @@ class Filters {
         }
 
         if ($response['isSuccess'] !== true) {
-            $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
-              . 'conversion_errors' . DIRECTORY_SEPARATOR
-              . date("Ymd");
-            if ( !is_dir( $backupDir ) ) {
-                mkdir( $backupDir, 0755, true );
-            }
-            $backupFile = $backupDir . DIRECTORY_SEPARATOR . date("His") . '-' . basename($sentFile);
-            if (!rename($sentFile, $backupFile)) {
-                Log::doLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
-            }
+            self::backupFailedConversion($sentFile);
         }
 
+    }
+
+    /**
+     * Moves $sentFile to the backup folder, that is like
+     *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
+     */
+    private static function backupFailedConversion(&$sentFile) {
+        $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
+          . 'conversion_errors' . DIRECTORY_SEPARATOR
+          . date("Ymd");
+        if ( !is_dir( $backupDir ) ) {
+            mkdir( $backupDir, 0755, true );
+        }
+        $backupFile = $backupDir . DIRECTORY_SEPARATOR . date("His") . '-' . basename($sentFile);
+        if (!rename($sentFile, $backupFile)) {
+            Log::doLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+        } else {
+            $sentFile = $backupFile;
+        }
     }
 
 }
