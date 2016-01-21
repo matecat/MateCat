@@ -12,28 +12,23 @@ class xliffToTargetController extends downloadController {
         $file_path       = $_FILES['xliff']['tmp_name'] . '.xlf';
         move_uploaded_file($_FILES['xliff']['tmp_name'], $file_path);
 
-        // Detect XLIFF type
-        $fileInfo = DetectProprietaryXliff::getInfo($file_path);
-        $converterVersion = $fileInfo['converter_version'];
-
-        $converter = new Filters($converterVersion);
-
-        $conversion = $converter->multiConvertToOriginal(array(
-          1 => array(
+        $conversion = Filters::xliffToTarget(array(
+          array(
             'document_content' => file_get_contents($file_path))
         ));
+        $conversion = $conversion[0];
 
-        if ($conversion[1]['isSuccess'] !== true) {
-            $this->error = true;
-            $this->errorMessage =  $conversion[1]['errorMessage'];
-        } else {
+        if ($conversion['isSuccess'] === true) {
             $this->content = json_encode(array(
-              "fileName" => $conversion[1]['filename'],
-              "fileContent" => base64_encode($conversion[1]['document_content']),
+              "fileName" => (isset($conversion['fileName']) ? $conversion['fileName'] : $conversion['filename']),
+              "fileContent" => base64_encode($conversion['document_content']),
               "size" => filesize($file_path),
               "type" => mime_content_type($file_path),
               "message" => "File downloaded! Check your download folder"
             ));
+        } else {
+            $this->error = true;
+            $this->errorMessage =  $conversion[0]['errorMessage'];
         }
     }
 
