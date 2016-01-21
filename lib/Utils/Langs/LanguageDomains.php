@@ -1,4 +1,4 @@
-<?
+<?php
 /*
    this class manages supported languages in the CAT tool
  */

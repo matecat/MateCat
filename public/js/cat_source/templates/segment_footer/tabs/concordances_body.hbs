@@ -1,0 +1,14 @@
+
+<div class="overflow">
+{{#if tms_enabled}}
+  <div class="cc-search">
+    <div class="input search-source" contenteditable="true" ></div>
+    <div class="input search-target" contenteditable="true" ></div>
+  </div>
+{{else}}
+  <ul class="graysmall message">
+    <li>Concordance is not available when the TM feature is disabled</li>
+  </ul>
+{{/if}}
+  <div class="results"></div>
+</div>

@@ -4,22 +4,24 @@ include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 
+use TaskRunner\Commons\AbstractDaemon;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 21/09/15
  * Time: 16.06
  */
-class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon {
+class LanguageStatsRunner extends AbstractDaemon {
 
 
     public function __construct() {
         parent::__construct();
         Log::$fileName   = "languageStats.log";
-        self::$sleeptime = 10; //60 * 60 * 24 * 30 * 1;
+        self::$sleepTime = 10; //60 * 60 * 24 * 30 * 1;
     }
 
-    function main( $args ) {
+    function main( $args = null ) {
         $db = Database::obtain();
 
         do {
@@ -101,13 +103,17 @@ class LanguageStatsRunner extends Analysis_Abstract_AbstractDaemon {
             }
 
             //for the moment, this daemon is single-loop-execution
-            self::$RUNNING = false;
+            $this->RUNNING = false;
 
-            if ( self::$RUNNING ) {
+            if ( $this->RUNNING ) {
                 sleep( self::$sleeptime );
             }
 
-        } while ( self::$RUNNING );
+        } while ( $this->RUNNING );
+    }
+
+    public static function cleanShutDown() {
+        // TODO: Implement cleanShutDown() method.
     }
 
 }

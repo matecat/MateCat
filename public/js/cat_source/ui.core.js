@@ -103,79 +103,13 @@ UI = {
                 this.execChangeStatus(JSON.stringify(options)); // autopropagate
             }
         }
-/*
-        if((this.autopropagateConfirmNeeded())&&(!byStatus)) {
-            console.log('autopropagateConfirmNeeded');
-            APP.confirm({
-                name: 'confirmAutopropagation',
-                cancelTxt: 'Propagate to All',
-                onCancel: 'execChangeStatus',
-                callback: 'preExecChangeStatus',
-                okTxt: 'Only this segment',
-                context: options,
-                msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
-            });
-        } else {
-            console.log('not autopropagateConfirmNeeded');
-            this.execChangeStatus(options, false);
-        }
- */
-/*
-        $('.percentuage', segment).removeClass('visible');
-//		if (!segment.hasClass('saved'))
-        this.setTranslation(this.getSegmentId(segment), status, false);
-        segment.removeClass('saved');
-        this.setContribution(segment_id, status, byStatus);
-        this.setContributionMT(segment_id, status, byStatus);
-        this.getNextSegment(this.currentSegment, 'untranslated');
-        if(!this.nextUntranslatedSegmentId) {
-            $(window).trigger({
-                type: "allTranslated"
-            });
-        }
-        $(window).trigger({
-            type: "statusChanged",
-            segment: segment,
-            status: status
-        });
-*/
 
-/*
-//        console.log('byStatus: ', byStatus);
-		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-//        console.log('segment: ', segment);
-        segment_id = this.getSegmentId(segment);
-//        console.log('segment_id: ', segment_id);
-console.log('changeStatus');
-        var options = {
-            segment_id: segment_id,
-            status: status,
-            byStatus: byStatus
-        };
-        optionsStr = JSON.stringify(options);
-        if(this.autopropagateConfirmNeeded()) {
-            console.log('aa');
-            APP.confirm({
-                name: 'confirmAutopropagation',
-                cancelTxt: 'Propagate to All',
-                onCancel: 'execChangeStatus',
-                callback: 'preExecChangeStatus',
-                okTxt: 'Only this segment',
-                context: optionsStr,
-                msg: "There are other identical segments. <br><br>Would you like to propagate the translation to all of them, or keep this translation only for this segment?"
-            });
-        } else {
-            console.log('bb');
-            this.execChangeStatus(optionsStr);
-        }
-*/
 	},
     autopropagateConfirmNeeded: function () {
         segment = UI.currentSegment;
         if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
             return false;
         }
-//        console.log('propagable: ', segment.attr('data-propagable'));
         if(segment.attr('data-propagable') == 'true') {
             if(config.isReview) {
                 return true;
@@ -189,13 +123,6 @@ console.log('changeStatus');
         } else {
             return false;
         }
-/*
-        if( (segment.attr('data-propagable') == 'true') && (segment.is('.status-translated, .status-approved, .status-rejected')) ) {
-            return true;
-        } else {
-            return false;
-        }
-*/
     },
     preExecChangeStatus: function (optStr) {
         opt = $.parseJSON(optStr);
@@ -501,13 +428,22 @@ console.log('changeStatus');
         UI.segmentButtons = null;
 	},
 
+    /**
+     * createFooter is invoked each time the footer is to be rendered for a
+     * given segment. During the activation of a segment, footer for the next
+     * segment is also rendered, so to be cached and ready when the user moves
+     * to the next segment.
+     *
+     * @param segment DOMElement the <section> tag of the segment
+     * @param forceEmptyContribution boolean default true. not sure what it
+     * does.
+     */
 	createFooter: function(segment, forceEmptyContribution) {
         var sid = UI.getSegmentId( segment );
 
-
 		forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
 
-		if ( $('.matches .overflow', segment).text() !== '' ) {
+		if ( $('.matches .overflow', segment).text() !== '' ) { // <-- XXX unnamed intention
 			if (!forceEmptyContribution) {
 				$('.matches .overflow', segment).empty();
                 $(document).trigger('createFooter:skipped', segment);
@@ -515,83 +451,15 @@ console.log('changeStatus');
 			}
 		}
 
-		if ( $('.footer ul.submenu', segment).length ) {
+		if ( $('.footer ul.submenu', segment).length ) {  // <--- XXX unnamed intention
             $(document).trigger('createFooter:skipped:cached', segment);
             return false;
         }
 
-		UI.footerHTML =	'<ul class="submenu">' +
-                    '	<li class="footerSwitcher">' +
-                    '	</li>' +
-					'	<li class="' + ((config.isReview)? '' : 'active') + ' tab-switcher tab-switcher-tm" id="segment-' + sid + '-tm">' +
-					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
-					'	</li>' +
-					'	<li class="tab-switcher tab-switcher-cc" id="segment-' + sid + '-cc">' +
-					'		<a tabindex="-1" href="#">Concordance</a>' +
-					'	</li>' +
-					'	<li class="tab-switcher tab-switcher-gl" id="segment-' + sid + '-gl">' +
-					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
-					'	</li>' +
-					'	<li class="tab-switcher tab-switcher-al" id="segment-' + sid + '-al">' +
-					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
-                    '	</li>' ;
-
-                    if ( SegmentNotes.enabled() ) {
-                        UI.footerHTML = UI.footerHTML + SegmentNotes.tabHTML( sid ) ;
-                    }
-
-                    UI.footerHTML = UI.footerHTML + '</ul>'  ;
-
-                    UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor matches open" ' + ' id="segment-' + sid + '-matches">' +
-					'	<div class="overflow"></div>' +
-                    '   <div class="engine-errors"></div>' +
-                    '</div>' ;
-
-                    if ( SegmentNotes.enabled() ) {
-                        UI.footerHTML = UI.footerHTML + SegmentNotes.panelHTML( sid ) ;
-                    }
-
-                    UI.footerHTML = UI.footerHTML +
-					'<div class="tab sub-editor concordances" id="segment-' + sid + '-concordances">' +
-					'	<div class="overflow">' +
-						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
-					'		<div class="results"></div>' +
-					'	</div>' +
-					'</div>' +
-					'<div class="tab sub-editor glossary" id="segment-' + sid + '-glossary">' +
-					'	<div class="overflow">' +
-
-					((config.tms_enabled)?
-					'		<div class="gl-search">' +
-					'			<div class="input search-source" contenteditable="true" />' +
-					'				<div class="input search-target" contenteditable="true" />' +
-					'					<!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a>' +
-					'					<div class="comment">' +
-					'						<a href="#">(+) Comment</a>' +
-					'						<div class="input gl-comment" contenteditable="true" /></div>' +
-					'					</div>' +
-					'					<div class="results"></div>' +
-					'				</div>' +
-					'			</div>' +
-					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
-					'	</div>' +
-					'</div>';
-
-        UI.currentSegment.trigger('footerCreation');
-
-        $('.footer', segment).html( UI.footerHTML );
-
-        alternativesTabHtml =  '' +
-            '<div class="tab sub-editor alternatives" id="segment-' + sid + '-alternatives">' +
-            '	<div class="overflow"></div>' +
-            '</div>';
-
-        $('.footer .tab.glossary', segment).after( alternativesTabHtml );
+        var segmentFooter = new UI.SegmentFooter( segment );
+        $('.footer', segment).append( segmentFooter.html() );
 
         UI.currentSegment.trigger('afterFooterCreation', segment);
-
-        UI.footerHTML = null;
 
         // FIXME: arcane. Whatever it does, it should go in the contribution module.
 		if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
@@ -628,11 +496,6 @@ console.log('changeStatus');
 				'    </ul>' +
 				'</nav>';
 		this.body.append(menu);
-/*
-		$('#jobMenu li').each(function() {
-			APP.fitText($(this), $('a', $(this)), 20);
-		});
-*/
 	},
 	displaySurvey: function(s) {
         if(this.surveyDisplayed) return;
@@ -1286,17 +1149,22 @@ console.log('changeStatus');
 		getNormally = isNotSimilar || isEqual;
 
 		this.activateSegment(getNormally);
+
         segment.trigger('open');
+
         $('section').first().nextAll('.undoCursorPlaceholder').remove();
+
         this.getNextSegment(this.currentSegment, 'untranslated');
+
 
 		if ((!this.readonly)&&(!getNormally)) {
 			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
 		}
+
 		this.setCurrentSegment();
 
 		if (!this.readonly) {
-
+            // XXX Arcane, what's this code for?
 			if(getNormally) {
 				this.getContribution(segment, 0);
 			} else {

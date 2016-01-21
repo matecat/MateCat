@@ -58,11 +58,12 @@ abstract class Engines_AbstractEngine {
             $placeholders[ ] = CatUtils::generate_password();
         }
 
-        $this->_patterns_found = array_combine(
+        $this->_patterns_found = @array_combine(
                 $matches,
                 $placeholders
         );
 
+        if( ! is_array( $this->_patterns_found ) ) return $_string;
         foreach ( $this->_patterns_found as $str => $placeholder ) {
             $_string = str_replace( $str, $placeholder, $_string );
         }
@@ -71,6 +72,8 @@ abstract class Engines_AbstractEngine {
     }
 
     protected function _resetSpecialStrings( $_string ) {
+
+        if( ! is_array( $this->_patterns_found ) ) return $_string;
 
         foreach ( $this->_patterns_found as $str => $placeholder ) {
             $_string = str_ireplace( $placeholder, $str, $_string );
