@@ -198,10 +198,6 @@ class downloadFileController extends downloadController {
 
                         $files_to_be_converted [ $fileID ] = $output_content[ $fileID ];
 
-                    } elseif ( $this->forceXliff ) {
-
-                        $this->cleanFilePath( $output_content[ $fileID ][ 'document_content' ] );
-
                     }
 
                 }
@@ -513,24 +509,6 @@ class downloadFileController extends downloadController {
                 array( $source, $target, $sourceTokenizer, $targetTokenizer ),
                 $omegatFile );
 
-
-    }
-
-    public function cleanFilePath( &$documentContent ) {
-
-        if ( !function_exists( '_clean' ) ) {
-            function _clean( $file ) {
-                $file_parts = explode( "\\", $file[ 2 ] );
-                $file[ 0 ]  = str_replace( $file[ 2 ], array_pop( $file_parts ), $file[ 0 ] );
-
-                return $file[ 0 ];
-            }
-        }
-
-        //remove system confidential information
-        $documentContent = preg_replace_callback( '|(<file [^>]*?original="([^>]*?)" [^>]*>)|si', '_clean', $documentContent );
-        $documentContent = preg_replace_callback( '|(o-path="([^>]*?))"|si', '_clean', $documentContent );
-        $documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
 
     }
 
