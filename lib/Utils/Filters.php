@@ -32,6 +32,11 @@ class Filters {
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             );
+            if (! empty( INIT::$FILTERS_MASHAPE_KEY ) ) {
+                $options[CURLOPT_HTTPHEADER] = array(
+                  'X-Mashape-Key: '. INIT::$FILTERS_MASHAPE_KEY,
+                );
+            }
             $url = INIT::$FILTERS_ADDRESS . $endpoint;
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
@@ -49,10 +54,12 @@ class Filters {
 
             // Compute response
             if ($response === false) {
-                $response = array(
-                  "isSuccess" => false,
-                  "errorMessage" => "Curl error $info[errno]: $info[error]",
-                  "curlInfo" => $info);
+                $response = array( "isSuccess" => false, "curlInfo" => $info );
+                if ($info['errno']) {
+                    $response['errorMessage'] = "Curl error $info[errno]: $info[error]";
+                } else {
+                    $response['errorMessage'] = "Received status code $info[http_code]";
+                }
 
             } else {
                 $response = json_decode($response, true);

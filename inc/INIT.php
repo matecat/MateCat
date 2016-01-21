@@ -120,8 +120,9 @@ class INIT {
     /**
      * MateCat Filters configuration
      */
-    public static $FILTERS_ADDRESS = null;
     public static $FILTERS_USER_AGENT = "MateCat Community Instance";
+    public static $FILTERS_ADDRESS = "https://translated-matecat-filters-v1.p.mashape.com";
+    public static $FILTERS_MASHAPE_KEY = null;
     public static $FILTERS_FORCE_VERSION = null;
     public static $FILTERS_EMAIL_FAILURES = false;
 
