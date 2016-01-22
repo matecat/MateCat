@@ -78,7 +78,7 @@ class OpenController extends KleinController {
             if ($httpRequest->getResponseHttpCode() == 200) {
                 $body =  $httpRequest->getResponseBody();
                 $directory = Utils::uploadDirFromSessionCookie( $guid );
-                mkdir($directory, '0755', true); 
+                mkdir($directory, 0755, true);
 
                 $file_path = Utils::uploadDirFromSessionCookie( $guid, $this->file_name ); 
                 $saved = file_put_contents( $file_path, $httpRequest->getResponseBody() ); 
