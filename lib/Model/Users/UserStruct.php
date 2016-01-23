@@ -6,7 +6,7 @@
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $uid;
     public $email;
