@@ -116,7 +116,7 @@ class ReviewImproved extends BaseFeature {
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
      */
-    public function postJobSplitted(ArrayObject $projectStructure) {
+    public function postJobSplitted(\ArrayObject $projectStructure) {
         $id_job = $projectStructure['array_jobs']['job_list'][0] ;
         \LQA\ChunkReviewDao::deleteByJobId( $id_job );
         $this->createQaChunkReviewRecord( $id_job, $projectStructure );
