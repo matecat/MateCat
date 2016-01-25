@@ -18,6 +18,7 @@ class SegmentTranslationObserver implements \SplObserver {
         $model = new ReviewImproved\SegmentTranslationModel( $segment_translation_model );
         $model->addOrSubtractCachedReviewedWordsCount();
 
+
     }
 
 

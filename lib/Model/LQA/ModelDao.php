@@ -5,6 +5,10 @@ namespace LQA;
 class ModelDao extends \DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) { }
 
+    /**
+     * @param $id
+     * @return \LQA\ModelStruct
+     */
     public static function findById( $id ) {
         $sql = "SELECT * FROM qa_models WHERE id = :id LIMIT 1" ;
         $conn = \Database::obtain()->getConnection();
@@ -14,6 +18,11 @@ class ModelDao extends \DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param $data
+     * @return ModelStruct
+     * @throws \Exceptions\ValidationError
+     */
     public static function createRecord( $data ) {
         $sql = "INSERT INTO qa_models ( label, pass_type, pass_options ) " .
             " VALUES ( :label, :pass_type, :pass_options ) ";

@@ -51,8 +51,14 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
       return Chunks_ChunkCompletionEventDao::isProjectCompleted( $this );
     }
 
+    /**
+     * @return \LQA\ModelStruct
+     *
+     */
     public function getLqaModel() {
-        return \LQA\ModelDao::findById( $this->id_qa_model ) ;
+        return $this->cachable(__METHOD__, $this->id_qa_model, function($id_qa_model) {
+            return \LQA\ModelDao::findById( $id_qa_model ) ;
+        });
     }
 
 }

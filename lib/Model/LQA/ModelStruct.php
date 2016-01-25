@@ -17,4 +17,18 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public function getSerializedCategories() {
         return CategoryDao::getSerializedModel( $this->id );
     }
+
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getLimit() {
+        $options = json_decode( $this->pass_options, TRUE);
+        if ( ! array_key_exists('limit', $options) ) {
+            throw new \Exception( 'limit is not defined in JSON options');
+        }
+        return $options['limit'];
+
+    }
 }

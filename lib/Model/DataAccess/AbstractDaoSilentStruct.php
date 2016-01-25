@@ -38,6 +38,10 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
     /**
      * This method makes it possible to define methods on child classes
      * whose result is cached on the instance.
+     *
+     * @param $method_name
+     * @param $params
+     * @param $function
      */
     protected function cachable($method_name, $params, $function) {
       if ( !array_key_exists($method_name,  $this->cached_results) ) {

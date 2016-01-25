@@ -27,6 +27,11 @@ class SegmentTranslationModel
      */
     private $chunk_review;
 
+    /**
+     * @var bool
+     */
+    private $did_change_reviewed_words_count = false;
+
     public function __construct(\SegmentTranslationModel $model ) {
 
         $this->model = $model;
@@ -64,9 +69,17 @@ class SegmentTranslationModel
             $this->checkReviewedStateTransition();
         } else {
             $this->checkTranslationIssuesExist();
-
         }
+
     }
+
+    /**
+     * @return bool
+     */
+    public function didChangeReviewedWordsCount() {
+        return $this->did_change_reviewed_words_count ;
+    }
+
 
     private function checkReviewedStateTransition()
     {
@@ -91,40 +104,27 @@ class SegmentTranslationModel
         if ( count($entries) == 0 ) {
             $this->checkReviewedStateTransition();
         }
-
     }
-
 
     /**
      * @return \LQA\ChunkReviewStruct
      */
     public function getChunkReview() {
-
         return $this->chunk_review ;
 
     }
 
     private function addCount() {
-
         $segment = $this->model->getSegmentStruct();
-
-        $this->chunk_review->reviewed_words_count += $segment->raw_word_count ;
-
-        \LQA\ChunkReviewDao::updateStruct( $this->chunk_review, array(
-            'fields' => array('reviewed_words_count')));
+        $model = new ChunkReviewModel( $this->chunk_review );
+        $model->addWordsCount( $segment->raw_word_count );
 
     }
 
     private function subtractCount() {
         $segment = $this->model->getSegmentStruct();
-
-        $this->chunk_review->reviewed_words_count -= $segment->raw_word_count ;
-
-        \LQA\ChunkReviewDao::updateStruct( $this->chunk_review, array(
-            'fields' => array('reviewed_words_count')));
-
-
+        $model = new ChunkReviewModel($this->chunk_review);
+        $model->subtractWordsCount($segment->raw_word_count);
     }
-
 
 }
