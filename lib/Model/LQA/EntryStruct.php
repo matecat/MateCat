@@ -3,6 +3,7 @@
 namespace LQA;
 
 class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+
     public $id ;
     public $uid ;
     public $id_segment ;

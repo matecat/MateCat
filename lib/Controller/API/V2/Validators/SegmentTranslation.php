@@ -29,6 +29,7 @@ class SegmentTranslation extends Base {
 
     private function ensureSegmentExists() {
         $dao = new \Segments_SegmentDao( \Database::obtain() );
+
         $this->segment = $dao->getByChunkIdAndSegmentId(
             $this->request->id_job,
             $this->request->password,

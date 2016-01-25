@@ -2,12 +2,16 @@
 
 namespace API\V2  ;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
+use Features\ReviewImproved;
 use LQA\EntryDao as EntryDao ;
 
-class SegmentTranslationIssue extends ProtectedKleinController {
+class SegmentTranslationIssueController extends ProtectedKleinController {
 
     private $chunk ;
     private $project ;
+    /**
+     * @var Validators\SegmentTranslationIssue
+     */
     private $validator ;
     private $segment ;
     private $issue ;
@@ -26,6 +30,7 @@ class SegmentTranslationIssue extends ProtectedKleinController {
     }
 
     public function create() {
+
         $data = array(
             'id_segment'          => $this->request->id_segment,
             'id_job'              => $this->request->id_job,
@@ -41,18 +46,35 @@ class SegmentTranslationIssue extends ProtectedKleinController {
             'comment'             => $this->request->comment
         );
 
-        $model = new \LQA\TranslationIssueModel( $data ) ;
+        $struct = new \LQA\EntryStruct( $data );
+
+        $model = new ReviewImproved\TranslationIssueModel(
+            $this->request->id_job,
+            $this->request->password,
+            $struct
+        ) ;
+
         $struct = $model->save();
+
+
         $json = new JsonFormatter();
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( array('issue' => $rendered) );
     }
 
+
     public function delete() {
         $this->validateAdditionalPassword();
 
-        EntryDao::deleteEntry( $this->validator->issue );
+        $model = new ReviewImproved\TranslationIssueModel(
+            $this->request->id_job,
+            $this->request->password,
+            $this->validator->issue
+        );
+
+        $model->delete();
+
         $this->response->code(200);
     }
 

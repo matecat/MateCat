@@ -25,17 +25,53 @@ class ChunkReviewModel
         $this->score = $this->chunk_review->score ;
     }
 
+    /**
+     * Adds reviewed words count and recomputes result
+     *
+     * @param $count
+     */
+
     public function addWordsCount( $count ) {
         $this->chunk_review->reviewed_words_count += $count ;
-        $this->reviewedWordsCountDidChange() ;
+        $this->updatePassFailResult() ;
     }
 
+    /**
+     * Subtracts reviewed_words_count and recomputes result
+     *
+     * @param $count
+     */
     public function subtractWordsCount( $count ) {
         $this->chunk_review->reviewed_words_count -= $count ;
-        $this->reviewedWordsCountDidChange() ;
+        $this->updatePassFailResult() ;
     }
 
-    private function reviewedWordsCountDidChange() {
+    /**
+     * adds score and updates pass fail result
+     *
+     * @param $score
+     */
+    public function addScore( $score ) {
+        $this->chunk_review->score += $score;
+        $this->updatePassFailResult();
+    }
+
+    /**
+     * subtract score and updates pass fail result
+     *
+     * @param $score
+     */
+
+    public function subtractScore( $score ) {
+        $this->chunk_review->score -= $score;
+        $this->updatePassFailResult();
+    }
+
+    /**
+     *
+     * @throws \Exception
+     */
+    private function updatePassFailResult() {
         $score_per_mille =  $this->chunk_review->score /
             $this->chunk_review->reviewed_words_count * 1000 ;
 
@@ -45,7 +81,7 @@ class ChunkReviewModel
         $this->chunk_review->is_pass = ( $score_per_mille <= $lqa_model->getLimit() ) ;
 
         \LQA\ChunkReviewDao::updateStruct( $this->chunk_review, array(
-            'fields' => array('reviewed_words_count', 'is_pass')));
+            'fields' => array('reviewed_words_count', 'is_pass', 'score')));
     }
 
 }

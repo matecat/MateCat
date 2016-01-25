@@ -89,7 +89,11 @@ class EntryDao extends \DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
 
         $values = $struct->attributes(
-             array_merge( array_keys($data), array('penalty_points') )
+            array(
+                'id_segment', 'id_job', 'id_category', 'severity',
+                'translation_version', 'start_node', 'start_offset',
+                'end_node', 'end_offset', 'is_full_segment',
+                'penalty_points', 'comment', 'target_text')
         );
 
         $stmt->execute( $values );
