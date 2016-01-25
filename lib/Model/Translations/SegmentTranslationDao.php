@@ -9,6 +9,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     const TABLE = "segment_translations";
 
+    /**
+     * @param $id_segment
+     * @param $id_job
+     * @return Translations_SegmentTranslationStruct
+     */
+
     public static function findBySegmentAndJob( $id_segment, $id_job ) {
         Log::doLog( $id_segment, $id_job );
 

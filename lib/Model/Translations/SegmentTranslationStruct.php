@@ -26,4 +26,18 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     public $serialized_errors_list ;
     public $version_number ;
 
+
+    public function isReviewedStatus() {
+        return in_array( $this->status, Constants_TranslationStatus::$REVIEWED_STATUSES);
+    }
+
+    /**
+     * @return Jobs_JobStruct
+     */
+    public function getJob() {
+        return $this->cachable(__FUNCTION__, $this->id_job, function($id_job) {
+            return Jobs_JobDao::getById( $id_job );
+        });
+    }
+
 }

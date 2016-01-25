@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Class SegmentTranslationVersionHandler
+ *
+ */
 class SegmentTranslationVersionHandler {
     public $db;
 
@@ -30,6 +34,10 @@ class SegmentTranslationVersionHandler {
         Log::doLog( 'feature_enalbed', var_export( $this->feature_enalbed, true));
     }
 
+    /**
+     * @param $params
+     * @throws Exception
+     */
     public function savePropagation( $params ) {
         $params = Utils::ensure_keys($params, array(
             'propagation', 'job_data', 'propagate_to_translated'
@@ -62,6 +70,12 @@ class SegmentTranslationVersionHandler {
             return;
         }
 
+
+        /**
+         * This is where we decide if a new translation version is to be generated.
+         * This should be moved in a review_improved specific model.
+         * TODO: refactor.
+         */
         if ( $params->old_translation['translation'] ==
             $params->new_translation['translation'] ) {
             return ;

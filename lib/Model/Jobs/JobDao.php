@@ -33,11 +33,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function getById( $id_project) {
+    public static function getById( $id_job ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ?");
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
-        $stmt->execute( array( $id_project ) );
+        $stmt->execute( array( $id_job ) );
 
         return $stmt->fetch();
     }

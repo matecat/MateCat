@@ -13,5 +13,5 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $num_errors ;
     public $is_pass ;
     public $force_pass_at ;
-
+    public $reviewed_words_count ;
 }

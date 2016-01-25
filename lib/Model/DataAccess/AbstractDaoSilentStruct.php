@@ -40,7 +40,7 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
      * whose result is cached on the instance.
      */
     protected function cachable($method_name, $params, $function) {
-      if ( !key_exists($method_name,  $this->cached_results) ) {
+      if ( !array_key_exists($method_name,  $this->cached_results) ) {
         $this->cached_results[$method_name] =
           call_user_func($function, $params);
       }

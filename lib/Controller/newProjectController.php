@@ -26,7 +26,6 @@ class newProjectController extends viewController {
         parent::__construct( false );
         parent::makeTemplate( "upload.html" );
 
-
         $filterArgs = array(
                 'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'private_tm_key' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),

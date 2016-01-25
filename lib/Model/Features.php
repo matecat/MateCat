@@ -78,12 +78,11 @@ class Features {
      * input value.
      *
      * @param $method string the method to invoke
-     * @param $projectStructure ArrayObject
+     * @param $id_customer string of the customer to search active features for
      *
      */
 
-    public static function run() {
-        list( $method, $id_customer ) = array_slice( func_get_args(), 0, 2);
+    public static function run($method, $id_customer) {
         $args = array_slice( func_get_args(), 2);
 
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );

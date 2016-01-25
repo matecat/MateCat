@@ -15,5 +15,9 @@ class Constants_TranslationStatus {
     const STATUS_APPROVED   = 'APPROVED';
     const STATUS_REJECTED   = 'REJECTED';
 
+    public static $REVIEWED_STATUSES = array(
+        self::STATUS_APPROVED, self::STATUS_REJECTED
+    );
+
 
 }

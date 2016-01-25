@@ -20,6 +20,7 @@ use \AMQHandler,
     \PDOException,
     \Log;
 
+
 include_once \INIT::$MODEL_ROOT . '/queries.php';
 
 /**

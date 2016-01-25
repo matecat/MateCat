@@ -303,6 +303,7 @@ class setTranslationController extends ajaxController {
 
         /**
          * Translation version handler: save old translation.
+         * TODO: move this in an model observer for segment translation.
          */
 
         $this->VersionsHandler->saveVersion(array(
@@ -320,6 +321,10 @@ class setTranslationController extends ajaxController {
             $_Translation[ 'autopropagated_from' ] = 'NULL';
         }
 
+        /**
+         * Translation is inserted here.
+         *
+         */
         $res = CatUtils::addSegmentTranslation( $_Translation );
 
         if ( !empty( $res[ 'errors' ] ) ) {
@@ -358,7 +363,6 @@ class setTranslationController extends ajaxController {
             $dqfSegmentStruct->new_target_segment = $_Translation[ 'translation' ];
 
             $dqfSegmentStruct->time = $_Translation[ 'time_to_edit' ];
-//            $dqfSegmentStruct->mtengine = $this->jobData['id_mt_engine'];
             $dqfSegmentStruct->mt_engine_version = 1;
 
             try {
@@ -520,6 +524,7 @@ class setTranslationController extends ajaxController {
 
         }
 
+        Features::run('setTranslationCommitted', $this->project->id_customer, $_Translation, $old_translation);
 
         $db->commit();
 

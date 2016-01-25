@@ -5,8 +5,11 @@ namespace Features ;
 use INIT;
 use Log ;
 use FilesStorage ;
+use Translations_SegmentTranslationStruct;
 use ZipArchive ;
 use Chunks_ChunkDao  ;
+use SegmentTranslationModel;
+use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 
 class ReviewImproved extends BaseFeature {
 
@@ -147,6 +150,28 @@ class ReviewImproved extends BaseFeature {
         }
     }
 
+    /**
+     * @param $new_translation
+     * @param $old_translation
+     */
+    public function setTranslationCommitted($new_translation, $old_translation) {
+
+        $new_translation_struct =  new Translations_SegmentTranslationStruct( $new_translation );
+        $old_translation_struct = new Translations_SegmentTranslationStruct( $old_translation );
+
+        $translation_model = new SegmentTranslationModel( $new_translation_struct );
+        $translation_model->setOldTranslation( $old_translation_struct );
+
+        /**
+         * This implementation may seem overkill since we are already into review improved feature
+         * so we could avoid to delegate to an observer. This is done with aim to the future when
+         * the SegmentTranslationModel will be used directly into setTranslation controller.
+         */
+        $translation_model->attach( new SegmentTranslationObserver());
+        $translation_model->notify();
+
+
+    }
     /**
      * @param $array_jobs The jobs array coming from the project_structure
      *

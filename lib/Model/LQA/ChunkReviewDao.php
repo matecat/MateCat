@@ -16,6 +16,10 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $id
+     * @return \LQA\ChunkReviewStruct
+     */
     public static function findById( $id ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
             " WHERE id = :id ";
@@ -27,7 +31,13 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
-    public static function findChunkReviewsByChunkIds( $chunk_ids ) {
+
+    /**
+     * @param array $chunk_ids Example: array( array($id_job, $password), ... )
+     * @return \LQA\ChunkReviewStruct[]
+     */
+
+    public static function findChunkReviewsByChunkIds( array $chunk_ids ) {
         $conditions = array_map( function($ids) {
             return " ( jobs.id = " . $ids[0] .
                 " AND jobs.password = '" . $ids[1] . "' ) ";
