@@ -53,9 +53,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     function overrideButtons() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
-        div.find('.translated').text('APPROVED')
-            .removeClass('translated').addClass('approved');
+
+        div.find('.translated')
+            .text('APPROVED')
+            .removeClass('translated')
+            .addClass('approved');
+
         div.find('.next-untranslated').parent().remove();
+
         UI.segmentButtons = div.html();
     }
 
@@ -172,10 +177,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 data.issue.formattedDate = moment(data.issue.created_at).format('lll');
                 MateCat.db.upsert('segment_translation_issues', data.issue );
                 RI.modal.close();
-                //
+                RI.reloadQualityReport();
             });
 
         return false;
+    });
+
+    $(document).on('setTranslation:success', function(e, data) {
+        ReviewImproved.reloadQualityReport();
     });
 
     $(document).on('click', '.reviewImproved .tabs-menu a', function(event) {

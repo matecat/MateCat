@@ -8,9 +8,11 @@
 
 namespace Features\ReviewImproved\Controller\API;
 
+use Features\ReviewImproved\View\Json\QualityReportJSONFormatter as JsonFormatter ;
 
 use API\V2\JobPasswordValidator;
 use API\V2\ProtectedKleinController;
+use LQA\ChunkReviewDao;
 
 class QualityReportController extends ProtectedKleinController
 {
@@ -22,12 +24,15 @@ class QualityReportController extends ProtectedKleinController
 
     public function show() {
 
-        // password combination is valid.
-        // Find QA_ChunkReview record for this combination and
-        // return the quality status.
-        //
-        $this->validator->getChunk();
+        $chunk = $this->validator->getChunk();
 
+        $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIds(
+            array( array( $chunk->id, $chunk->password) )
+        );
+        $struct = $chunk_reviews[0];
+
+        $json = new JsonFormatter();
+        $rendered = $json->renderItem( $struct );
 
         $this->response->json( $rendered );
     }

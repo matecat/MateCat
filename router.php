@@ -138,12 +138,22 @@ function route($path, $method, $controller, $action) {
     });
 }
 
+
 /**
  * Define additional routes here
  */
-route(
-    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'PATCH',
+// TODO: remove this from there, it's not being used
+
+route( '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'PATCH',
     'API\V2\TranslationController', 'update'
 );
+
+$klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
+
+    route( '/quality-report', 'GET',
+       'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
+    );
+
+});
 
 $klein->dispatch();

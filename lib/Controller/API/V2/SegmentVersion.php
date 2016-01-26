@@ -2,6 +2,7 @@
 namespace API\V2  ;
 use API\V2\Json\SegmentVersion as JsonFormatter;
 
+
 class SegmentVersion extends ProtectedKleinController {
 
     private $job ;
@@ -11,8 +12,8 @@ class SegmentVersion extends ProtectedKleinController {
 
     protected function afterConstruct() {
         $this->validator = new JobPasswordValidator(
-            $this->request->id_job,
-            $this->request->password
+            $this->request
+
         );
     }
 

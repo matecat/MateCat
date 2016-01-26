@@ -28,7 +28,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             }).done( function( data ) {
                 var record = MateCat.colls.issues.findOne({id : parsed.id_issue}) ;
                 MateCat.colls.issues.remove( record );
-            })
+                root.ReviewImproved.reloadQualityReport();
+            });
         },
         createButtons: function() {
             root.ReviewImproved.renderButtons();

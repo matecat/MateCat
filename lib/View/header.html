@@ -16,8 +16,12 @@
         <ul class="header-menu" tal:condition="php: !job_archived ">
 
               <li tal:condition="true:isReview" tal:attributes="class header_quality_report_item_class">
-                  <a id="quality-report" class="draft" tal:attributes="data-vote overall_quality_class;"
-                    href="${basepath}revise-summary/${jid}-${password}" target="_self">QUALITY REPORT</a>
+                  <a id="quality-report" class="draft"
+                     tal:attributes="data-vote overall_quality_class; href quality_report_href"
+
+
+
+                     target="_self">QUALITY REPORT</a>
               </li>
 
             <li>

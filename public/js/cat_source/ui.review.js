@@ -11,6 +11,7 @@ Review = {
 
 if ( Review.enabled() )
 (function(Review, $, undefined) {
+
     var alertNotTranslatedYet = function( sid ) {
         APP.confirm({
             name: 'confirmNotYetTranslated',
@@ -33,28 +34,6 @@ if ( Review.enabled() )
     });
 
     $.extend(UI, {
-        setRevision: function( data ){
-            APP.doRequest({
-//                data: reqData,
-
-                data: data,
-
-//                context: [reqArguments, segment, status],
-                error: function() {
-                    //UI.failedConnection( this[0], 'setRevision' );
-                    UI.failedConnection( data, 'setRevision' );
-                },
-                success: function(d) {
-//                    console.log('d: ', d);
-                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
-                    // temp
-//                    d.stat_quality = config.stat_quality;
-//                    d.stat_quality[0].found = 2;
-                    //end temp
-//                    UI.populateStatQualityPanel(d.stat_quality);
-                }
-            });
-        },
 
         clenaupTextFromPleaceholders : function(text) {
             text = text
@@ -78,8 +57,7 @@ if ( Review.enabled() )
 
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
-//                console.log(this.type + ' - ' + this.value);
-//                console.log('.editor .error-type input[name=t1][value=' + this.value + ']');
+
                 if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
                 if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
                 if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);

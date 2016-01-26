@@ -5,6 +5,7 @@ namespace API\V2\Json  ;
 class SegmentTranslationIssue {
 
     public function __construct(  ) {
+
     }
 
     public function renderItem( $record ) {

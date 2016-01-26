@@ -66,10 +66,12 @@ class CatDecorator {
       $this->template->review_class = 'review' ;
       $this->template->review_type = 'simple';
 
-      if ( $this->template->overall_quality_class == 'fail' ||
-          $this->template->overall_quality_class == 'poor' ) {
+      if ( $this->controller->getQaOverall() == 'fail' ||
+          $this->controller->getQaOverall() == 'poor' ) {
           $this->template->header_quality_report_item_class = 'hide' ;
       }
+
+      $this->setQualityReportHref();
 
   }
 
@@ -80,4 +82,9 @@ class CatDecorator {
       $this->template->review_type = 'simple';
 
   }
+
+    private function setQualityReportHref() {
+        $this->template->quality_report_href =
+            "{$this->template->basepath}revise-summary/{$this->job->id}-{$this->job->password}";
+    }
 }

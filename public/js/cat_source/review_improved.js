@@ -52,6 +52,24 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
 
+    $.extend(ReviewImproved, {
+        reloadQualityReport : function() {
+            var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
+                config.id_job, config.password);
+
+            $.getJSON( path )
+                .success( function( data ) {
+                    console.debug( data );
+
+                    if ( parseInt(data.is_pass) ) {
+                        $('#quality-report').attr('data-vote', 'excellent') ; }
+                    else {
+                        $('#quality-report').attr('data-vote', 'fail');
+                    }
+                });
+        }
+    })
+
 }
 
 /**

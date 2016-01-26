@@ -114,7 +114,9 @@ UI = {
             // ask if the user wants propagation or this is valid only
             // for this segment
             if (this.autopropagateConfirmNeeded()) {
-                optionsStr = JSON.stringify(options)
+
+                optionsStr = JSON.stringify(options);
+
                 APP.confirm({
                     name: 'confirmAutopropagation',
                     cancelTxt: 'Propagate to All',
@@ -2332,18 +2334,21 @@ console.log('eccolo: ', typeof token);
         }
     },
 
+
     execSetTranslation: function(options) {
-        id_segment = options.id_segment;
-        status = options.status;
-        caller = options.caller;
-        callback = options.callback;
-        byStatus = options.byStatus;
-        propagate = options.propagate;
+        var id_segment = options.id_segment;
+        var status = options.status;
+        var caller = options.caller;
+        var callback = options.callback;
+        var byStatus = options.byStatus;
+        var propagate = options.propagate;
 
         this.executingSetTranslation = true;
-        reqArguments = arguments;
-		segment = $('#segment-' + id_segment);
+        var reqArguments = arguments;
+		var segment = $('#segment-' + id_segment);
+
 		this.lastTranslatedSegmentId = id_segment;
+
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
@@ -2393,7 +2398,7 @@ console.log('eccolo: ', typeof token);
         this.log('setTranslation', reqData);
         segment = $('#segment-' + id_segment);
 
-        APP.doRequest({
+        return APP.doRequest({
             data: reqData,
 			context: [reqArguments, options],
 			error: function() {
@@ -2410,9 +2415,6 @@ console.log('eccolo: ', typeof token);
 			}
 		});
 
-        if( typeof( callback ) === "function" ) {
-            callback.call();
-        }
 
 	},
     collectSplittedStatuses: function (sid) {

@@ -38,6 +38,7 @@ class catController extends viewController {
     private $last_opened_segment;
 
     private $qa_data = '[]';
+
     private $qa_overall = '';
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
@@ -594,8 +595,8 @@ class catController extends viewController {
         $this->template->user_keys             = $this->_keyList;
         $this->template->job_stats             = $this->job_stats;
         $this->template->stat_quality          = $this->qa_data;
-        $this->template->overall_quality       = $this->qa_overall;
-        $this->template->overall_quality_class = strtolower( str_replace( ' ', '', $this->qa_overall ) );
+
+        $this->template->overall_quality_class = strtolower( $this->getQaOverall() );
 
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
@@ -692,6 +693,12 @@ class catController extends viewController {
 
     public function getReviewPassword() {
         return $this->review_password ;
+    }
+
+
+    public function getQaOverall() {
+        // TODO: is this str_replace really required?
+        return str_replace( ' ', '', $this->qa_overall );
     }
 
     /**
