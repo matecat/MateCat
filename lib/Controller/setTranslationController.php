@@ -73,6 +73,8 @@ class setTranslationController extends ajaxController {
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
+
+
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
         $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
 
@@ -86,35 +88,42 @@ class setTranslationController extends ajaxController {
 
     }
 
-    protected function _checkData( $logName = 'log.txt' ) {
+    /**
+     * @return bool
+     */
+    private function isSplittedSegment() {
+        //strtoupper transforms null to "" so check for the first element to be an empty string
+        return !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num );
+    }
 
-        //change Log file
-        Log::$fileName = $logName;
+    /**
+     * setStatusForSplittedSegment
+     *
+     * If splitted segments have different statuses, we reset status
+     * to draft.
+     */
+    private function setStatusForSplittedSegment() {
+        if ( count( array_unique( $this->split_statuses ) ) == 1 ) {
+            // IF ALL translation chunks are in the same status,
+            // we take the status for the entire segment
+            $this->status = $this->split_statuses[ 0 ];
+        } else {
+            $this->status = Constants_TranslationStatus::STATUS_DRAFT;
+        }
+    }
 
+    protected function _checkData() {
         $this->parseIDSegment();
+
         if ( empty( $this->id_segment ) ) {
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
         }
 
-        //strtoupper transforms null to "" so check for the first element to be an empty string
-        if ( !empty( $this->split_statuses[ 0 ] ) && !empty( $this->split_num ) ) {
-
-            if ( count( array_unique( $this->split_statuses ) ) == 1 ) {
-                //IF ALL translation chunks are in the same status, we take the status for the entire segment
-                $this->status = $this->split_statuses[ 0 ];
-            } else {
-                $this->status = Constants_TranslationStatus::STATUS_DRAFT;
-            }
-
-            foreach ( $this->split_statuses as $pos => $value ) {
-                $this->_checkForStatus( $value );
-            }
-
-        } else {
-
-            $this->_checkForStatus( $this->status );
-
+        if ( $this->isSplittedSegment() ) {
+            $this->setStatusForSplittedSegment();
         }
+
+        $this->checkStatus( $this->status );
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
@@ -164,7 +173,13 @@ class setTranslationController extends ajaxController {
 
     }
 
-    protected function _checkForStatus( $status ) {
+    /**
+     * Throws exception if status is not valid.
+     *
+     * @param $status
+     * @throws Exception
+     */
+    protected function checkStatus( $status ) {
 
         switch ( $status ) {
             case Constants_TranslationStatus::STATUS_TRANSLATED:
