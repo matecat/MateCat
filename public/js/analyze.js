@@ -457,113 +457,103 @@ UI = {
                 ppassword: ppassword,
                 jpassword: jpassword
 			},
-			success: function(d) {
-                if ( d.data ) {
-                    var s = d.data.summary;
-                    //temp
-//					config.daemon_warning = false;
-//					s.IN_QUEUE_BEFORE = 10;
-                    //end temp
-                    if ( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
-//                        $( '.loadingbar' ).addClass( 'open' );
-                        $( '.loadingbar' ).removeClass( 'start' );
+			success: function ( d ) {
+				if ( d.data ) {
+					var s = d.data.summary;
 
-                        if ( config.daemon_warning ) {
+					if ( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
 
-                            if ( -1 == config.support_mail.indexOf( '@' ) ) {
-                                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
-                            } else {
-                                analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
-                            }
-                            UI.displayError( analyzerNotRunningErrorString );
+						$( '.loadingbar' ).removeClass( 'start' );
 
-                            $( '#standard-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
-                            $( '#matecat-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
-                            return false;
+						if ( config.daemon_warning ) {
 
-                        } else if ( s.IN_QUEUE_BEFORE > 0 ) {
-                            //increasing number of segments ( fast analysis on another project )
-                            if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
-                                $( '#shortloading' ).show().html( '<p class="label">There are other projects in queue. Please wait...</p>' );
-                                $( '#longloading' ).hide();
-                            } else { //decreasing ( TM analysis on another project )
-                                if ( !$( '#shortloading .queue' ).length ) {
-                                    $( '#shortloading' ).html( '<p class="label">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>' );
-                                } else {
-                                    $( '#shortloading .queue .number' ).text( s.IN_QUEUE_BEFORE_PRINT );
-                                }
-                            }
-                        }
-                        UI.previousQueueSize = s.IN_QUEUE_BEFORE;
-                    }
+							if ( -1 == config.support_mail.indexOf( '@' ) ) {
+								analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+							} else {
+								analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a>.';
+							}
+							UI.displayError( analyzerNotRunningErrorString );
 
-					//                    this is not used, for now we never get an empty status from controller
-					//                    else if(s.STATUS == 'EMPTY') {
-					//                        UI.displayError('This project contains 0 segments. Nothing to analyze and translate. May be scanned file?');
-					//                        return false;
-					//                    }
+							$( '#standard-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
+							$( '#matecat-equivalent-words .word-number' ).removeClass( 'loading' ).text( $( '#raw-words .word-number' ).text() );
+							return false;
 
-					else if (s.STATUS == 'FAST_OK' && s.IN_QUEUE_BEFORE == 0) {
-						//                        UI.progressBar(UI.progressPerc)
-						if (UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
+						} else if ( s.IN_QUEUE_BEFORE > 0 ) {
+							//increasing number of segments ( fast analysis on another project )
+							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
+								$( '#shortloading' ).show().html( '<p class="label">There are other projects in queue. Please wait...</p>' );
+								$( '#longloading' ).hide();
+							} else { //decreasing ( TM analysis on another project )
+								if ( !$( '#shortloading .queue' ).length ) {
+									$( '#shortloading' ).html( '<p class="label">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>' );
+								} else {
+									$( '#shortloading .queue .number' ).text( s.IN_QUEUE_BEFORE_PRINT );
+								}
+							}
+						}
+						UI.previousQueueSize = s.IN_QUEUE_BEFORE;
+					}
+					else if ( s.STATUS == 'FAST_OK' && s.IN_QUEUE_BEFORE == 0 ) {
+
+						if ( UI.lastProgressSegments != s.SEGMENTS_ANALYZED ) {
 
 							UI.lastProgressSegments = s.SEGMENTS_ANALYZED;
 							UI.noProgressTail = 0;
 
 						} else {
 
-                            UI.noProgressTail++;
-                            if ( UI.noProgressTail > 9 ) {
-                                if ( -1 == config.support_mail.indexOf( '@' ) ) {
-                                    analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
-                                } else {
-                                    analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a> or try refreshing the page.';
-                                }
-                                UI.displayError( analyzerNotRunningErrorString );
-                                return false;
-                            }
+							UI.noProgressTail++;
+							if ( UI.noProgressTail > 9 ) {
+								if ( -1 == config.support_mail.indexOf( '@' ) ) {
+									analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact ' + config.support_mail + '.';
+								} else {
+									analyzerNotRunningErrorString = 'The analysis seems not to be running. Contact <a href="mailto:' + config.support_mail + '">' + config.support_mail + '</a> or try refreshing the page.';
+								}
+								UI.displayError( analyzerNotRunningErrorString );
+								return false;
+							}
 
 						}
-						UI.progressBar(s.SEGMENTS_ANALYZED / s.TOTAL_SEGMENTS);
-						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
-						$('#totalSegmentsReport').text(s.TOTAL_SEGMENTS_PRINT);
+						UI.progressBar( s.SEGMENTS_ANALYZED / s.TOTAL_SEGMENTS );
+						$( '#analyzedSegmentsReport' ).text( s.SEGMENTS_ANALYZED_PRINT );
+						$( '#totalSegmentsReport' ).text( s.TOTAL_SEGMENTS_PRINT );
 
 					}
 
-					var standard_words = $('#standard-equivalent-words .word-number');
+					var standard_words = $( '#standard-equivalent-words .word-number' );
 					old_standard_words = standard_words.text();
 
 					newSText = '';
 					if ( s.STATUS == 'DONE' || s.TOTAL_STANDARD_WC > 0 ) {
-						standard_words.removeClass('loading');
-						$('#standard-equivalent-words .days').show();
+						standard_words.removeClass( 'loading' );
+						$( '#standard-equivalent-words .days' ).show();
 						newSText = s.TOTAL_STANDARD_WC_PRINT;
 					}
 					else {
-						$('#standard-equivalent-words .days').hide();
+						$( '#standard-equivalent-words .days' ).hide();
 					}
-					standard_words.text(newSText);
-					if ((old_standard_words != s.TOTAL_STANDARD_WC_PRINT) && (old_standard_words != ''))
-						$('#standard-equivalent-words .box').effect("highlight", {}, 1000);
-					$('#standard-equivalent-words .workDays').text(s.STANDARD_WC_TIME);
-					$('#standard-equivalent-words .unit').text(s.STANDARD_WC_UNIT);
+					standard_words.text( newSText );
+					if ( (old_standard_words != s.TOTAL_STANDARD_WC_PRINT) && (old_standard_words != '') )
+						$( '#standard-equivalent-words .box' ).effect( "highlight", {}, 1000 );
+					$( '#standard-equivalent-words .workDays' ).text( s.STANDARD_WC_TIME );
+					$( '#standard-equivalent-words .unit' ).text( s.STANDARD_WC_UNIT );
 
-					var matecat_words = $('#matecat-equivalent-words .word-number');
+					var matecat_words = $( '#matecat-equivalent-words .word-number' );
 					old_matecat_words = matecat_words.text();
 					newMText = '';
-					if ( s.STATUS == 'DONE' || s.TOTAL_PAYABLE > 0) {
-						matecat_words.removeClass('loading');
-						$('#matecat-equivalent-words .days').show();
+					if ( s.STATUS == 'DONE' || s.TOTAL_PAYABLE > 0 ) {
+						matecat_words.removeClass( 'loading' );
+						$( '#matecat-equivalent-words .days' ).show();
 						newMText = s.TOTAL_PAYABLE_PRINT;
 					} else {
-						$('#matecat-equivalent-words .days').hide();
+						$( '#matecat-equivalent-words .days' ).hide();
 					}
 
-					matecat_words.text(newMText);
-					if ((old_matecat_words != s.TOTAL_PAYABLE_PRINT) && (old_matecat_words != ''))
-						$('#matecat-equivalent-words .box').effect("highlight", {}, 1000);
-					$('#matecat-equivalent-words .workDays').text(s.PAYABLE_WC_TIME);
-					$('#matecat-equivalent-words .unit').text(s.PAYABLE_WC_UNIT);
+					matecat_words.text( newMText );
+					if ( (old_matecat_words != s.TOTAL_PAYABLE_PRINT) && (old_matecat_words != '') )
+						$( '#matecat-equivalent-words .box' ).effect( "highlight", {}, 1000 );
+					$( '#matecat-equivalent-words .workDays' ).text( s.PAYABLE_WC_TIME );
+					$( '#matecat-equivalent-words .unit' ).text( s.PAYABLE_WC_UNIT );
 
 					//					if ( s.DISCOUNT_WC > 0) {
 					//						$('.promo-text span').text(s.DISCOUNT_WC);
@@ -573,236 +563,252 @@ UI = {
 					//						$('.promo-text span').text(s.DISCOUNT_WC);s
 					//					}
 
-					$('#usageFee').text(s.USAGE_FEE);
-					$('#pricePerWord').text(s.PRICE_PER_WORD);
-					$('#discount').text(s.DISCOUNT);
-					$('#totalFastWC').text(s.TOTAL_FAST_WC_PRINT);
-					$('#totalTMWC').text(s.TOTAL_PAYABLE_PRINT);
+					$( '#usageFee' ).text( s.USAGE_FEE );
+					$( '#pricePerWord' ).text( s.PRICE_PER_WORD );
+					$( '#discount' ).text( s.DISCOUNT );
+					$( '#totalFastWC' ).text( s.TOTAL_FAST_WC_PRINT );
+					$( '#totalTMWC' ).text( s.TOTAL_PAYABLE_PRINT );
 
 					try {
 
 						$.each( d.data.jobs, function ( job_id, group ) {
 
-								var files_group = group.chunks;
-								var total_group = group.totals;
+							var files_group = group.chunks;
+							var total_group = group.totals;
 
-								global_context = $( '#job-' + job_id );
+							global_context = $( '#job-' + job_id );
 
-								$.each( total_group, function ( jPassword, tot ) {
+							$.each( total_group, function ( jPassword, tot ) {
 
-									context = $( global_context ).find( ".tablestats[data-pwd='" + jPassword + "']" ).find( '.totaltable' );
+								context = $( global_context ).find( ".tablestats[data-pwd='" + jPassword + "']" ).find( '.totaltable' );
 
-									var s_total = $( '.stat-payable', context );
-									s_total_txt = s_total.text();
-									//                                s_total_txt = "0";
-									if(parseFloat(s_total_txt) < 1) {
-//									    $(context.parents('.jobcontainer').find('.splitbtn')).addClass('disabled').attr('title', 'You cannot split a job with 1 or 0 payable words.');
-									} else {
-//									    $(context.parents('.jobcontainer').find('.splitbtn')).removeClass('disabled').attr('title', '');
-									}
-									s_total.text( tot.TOTAL_PAYABLE[1] );
-									if ( s_total_txt != s.TOTAL_TM_WC_PRINT )
+								var s_total = $( '.stat-payable', context );
+								s_total_txt = s_total.text();
+
+								s_total.text( tot.TOTAL_PAYABLE[1] );
+								if ( s_total_txt != s.TOTAL_TM_WC_PRINT )
 									s_total.effect( "highlight", {}, 1000 );
+
+								var s_new = $( '.stat_new', context );
+								var s_new_txt = s_new.text();
+								s_new.text( tot.NEW[1] );
+								if ( s_new_txt != tot.NEW[1] )
+									s_new.effect( "highlight", {}, 1000 );
+
+								var s_rep = $( '.stat_rep', context );
+								s_rep_txt = s_rep.text();
+								s_rep.text( tot.REPETITIONS[1] );
+								if ( s_rep_txt != tot.REPETITIONS[1] )
+									s_rep.effect( "highlight", {}, 1000 );
+
+								var s_int = $( '.stat_int', context );
+								s_int_txt = s_int.text();
+								s_int.text( tot.INTERNAL_MATCHES[1] );
+								if ( s_int_txt != tot.INTERNAL_MATCHES[1] )
+									s_int.effect( "highlight", {}, 1000 );
+
+								var s_tm50 = $( '.stat_tm50', context );
+								s_tm50_txt = s_tm50.text();
+								s_tm50.text( tot.TM_50_74[1] );
+								if ( s_tm50_txt != tot.TM_50_74[1] )
+									s_tm50.effect( "highlight", {}, 1000 );
+
+								var s_tm75 = $( '.stat_tm75', context );
+								s_tm75_txt = s_tm75.text();
+								s_tm75.text( tot.TM_75_99[1] );
+								if ( s_tm75_txt != tot.TM_75_99[1] )
+									s_tm75.effect( "highlight", {}, 1000 );
+
+								var s_tm75_84 = $( '.stat_tm75_84', context );
+								s_tm75_84_txt = s_tm75_84.text();
+								s_tm75_84.text( tot.TM_75_84[1] );
+								if ( s_tm75_84_txt != tot.TM_75_84[1] )
+									s_tm75_84.effect( "highlight", {}, 1000 );
+
+								var s_tm85_94 = $( '.stat_tm85_94', context );
+								s_tm85_94_txt = s_tm75_84.text();
+								s_tm85_94.text( tot.TM_85_94[1] );
+								if ( s_tm85_94_txt != tot.TM_85_94[1] )
+									s_tm85_94.effect( "highlight", {}, 1000 );
+
+								var s_tm95_99 = $( '.stat_tm95_99', context );
+								s_tm95_99_txt = s_tm75_84.text();
+								s_tm95_99.text( tot.TM_95_99[1] );
+								if ( s_tm95_99_txt != tot.TM_95_99[1] )
+									s_tm95_99.effect( "highlight", {}, 1000 );
+
+								var s_tm100 = $( '.stat_tm100', context );
+								s_tm100_txt = s_tm100.text();
+								s_tm100.text( tot.TM_100[1] );
+								if ( s_tm100_txt != tot.TM_100[1] )
+									s_tm100.effect( "highlight", {}, 1000 );
+
+								var s_tm100_public = $( '.stat_tm100_public', context );
+								s_tm100_public_txt = s_tm100.text();
+								s_tm100_public.text( tot.TM_100_PUBLIC[1] );
+								if ( s_tm100_public_txt != tot.TM_100_PUBLIC[1] )
+									s_tm100_public.effect( "highlight", {}, 1000 );
+
+								var s_tmic = $( '.stat_tmic', context );
+								s_tmic_txt = s_tmic.text();
+								s_tmic.text( tot.ICE[1] );
+								if ( s_tmic_txt != tot.ICE[1] )
+									s_tmic.effect( "highlight", {}, 1000 );
+
+								var s_mt = $( '.stat_mt', context );
+								s_mt_txt = s_mt.text();
+								s_mt.text( tot.MT[1] );
+								if ( s_mt_txt != tot.MT[1] )
+									s_mt.effect( "highlight", {}, 1000 );
+
+
+							} );
+
+							$.each( files_group, function ( jPassword, files_object ) {
+
+								$.each( files_object, function ( id_file, file_details ) {
+
+									context = $( global_context ).find( '#file_' + job_id + '_' + jPassword + '_' + id_file );
+
+									var s_payable = $( '.stat_payable strong', context );
+									var s_payable_txt = s_payable.text();
+									s_payable.text( file_details.TOTAL_PAYABLE[1] );
+									if ( s_payable_txt != file_details.TOTAL_PAYABLE[1] )
+										s_payable.effect( "highlight", {}, 1000 );
 
 									var s_new = $( '.stat_new', context );
 									var s_new_txt = s_new.text();
-									s_new.text( tot.NEW[1] );
-									if ( s_new_txt != tot.NEW[1] )
-									s_new.effect( "highlight", {}, 1000 );
+									s_new.text( file_details.NEW[1] );
+									if ( s_new_txt != file_details.NEW[1] )
+										s_new.effect( "highlight", {}, 1000 );
 
 									var s_rep = $( '.stat_rep', context );
 									s_rep_txt = s_rep.text();
-									s_rep.text( tot.REPETITIONS[1] );
-									if ( s_rep_txt != tot.REPETITIONS[1] )
+									s_rep.text( file_details.REPETITIONS[1] );
+									if ( s_rep_txt != file_details.REPETITIONS[1] )
 										s_rep.effect( "highlight", {}, 1000 );
 
 									var s_int = $( '.stat_int', context );
 									s_int_txt = s_int.text();
-									s_int.text( tot.INTERNAL_MATCHES[1] );
-									if ( s_int_txt != tot.INTERNAL_MATCHES[1] )
+									s_int.text( file_details.INTERNAL_MATCHES[1] );
+									if ( s_int_txt != file_details.INTERNAL_MATCHES[1] )
 										s_int.effect( "highlight", {}, 1000 );
 
 									var s_tm50 = $( '.stat_tm50', context );
 									s_tm50_txt = s_tm50.text();
-									s_tm50.text( tot.TM_50_74[1] );
-									if ( s_tm50_txt != tot.TM_50_74[1] )
+									s_tm50.text( file_details.TM_50_74[1] );
+									if ( s_tm50_txt != file_details.TM_50_74[1] )
 										s_tm50.effect( "highlight", {}, 1000 );
 
 									var s_tm75 = $( '.stat_tm75', context );
 									s_tm75_txt = s_tm75.text();
-									s_tm75.text( tot.TM_75_99[1] );
-									if ( s_tm75_txt != tot.TM_75_99[1] )
+									s_tm75.text( file_details.TM_75_99[1] );
+									if ( s_tm75_txt != file_details.TM_75_99[1] )
 										s_tm75.effect( "highlight", {}, 1000 );
 
-                                    var s_tm75_84 = $( '.stat_tm75_84', context );
-                                    s_tm75_84_txt = s_tm75_84.text();
-                                    s_tm75_84.text( tot.TM_75_84[1] );
-                                    if ( s_tm75_84_txt != tot.TM_75_84[1] )
-                                        s_tm75_84.effect( "highlight", {}, 1000 );
+									var s_tm75_84 = $( '.stat_tm75_84', context );
+									s_tm75_84_txt = s_tm75_84.text();
+									s_tm75_84.text( file_details.TM_75_84[1] );
+									if ( s_tm75_84_txt != file_details.TM_75_84[1] )
+										s_tm75_84.effect( "highlight", {}, 1000 );
 
-                                    var s_tm85_94 = $( '.stat_tm85_94', context );
-                                    s_tm85_94_txt = s_tm75_84.text();
-                                    s_tm85_94.text( tot.TM_85_94[1] );
-                                    if ( s_tm85_94_txt != tot.TM_85_94[1] )
-                                        s_tm85_94.effect( "highlight", {}, 1000 );
+									var s_tm85_94 = $( '.stat_tm85_94', context );
+									s_tm85_94_txt = s_tm75_84.text();
+									s_tm85_94.text( file_details.TM_85_94[1] );
+									if ( s_tm85_94_txt != file_details.TM_85_94[1] )
+										s_tm85_94.effect( "highlight", {}, 1000 );
 
-                                    var s_tm95_99 = $( '.stat_tm95_99', context );
-                                    s_tm95_99_txt = s_tm75_84.text();
-                                    s_tm95_99.text( tot.TM_95_99[1] );
-                                    if ( s_tm95_99_txt != tot.TM_95_99[1] )
-                                        s_tm95_99.effect( "highlight", {}, 1000 );
+									var s_tm95_99 = $( '.stat_tm95_99', context );
+									s_tm95_99_txt = s_tm75_84.text();
+									s_tm95_99.text( file_details.TM_95_99[1] );
+									if ( s_tm95_99_txt != file_details.TM_95_99[1] )
+										s_tm95_99.effect( "highlight", {}, 1000 );
 
 									var s_tm100 = $( '.stat_tm100', context );
 									s_tm100_txt = s_tm100.text();
-									s_tm100.text( tot.TM_100[1] );
-									if ( s_tm100_txt != tot.TM_100[1] )
+									s_tm100.text( file_details.TM_100[1] );
+									if ( s_tm100_txt != file_details.TM_100[1] )
 										s_tm100.effect( "highlight", {}, 1000 );
 
-                                    var s_tm100_public = $( '.stat_tm100_public', context );
-                                    s_tm100_public_txt = s_tm100.text();
-                                    s_tm100_public.text( tot.TM_100_PUBLIC[1] );
-                                    if ( s_tm100_public_txt != tot.TM_100_PUBLIC[1] )
-                                        s_tm100_public.effect( "highlight", {}, 1000 );
+									var s_tm100_public = $( '.stat_tm100_public', context );
+									s_tm100_public_txt = s_tm100_public.text();
+									s_tm100_public.text( file_details.TM_100_PUBLIC[1] );
+									if ( s_tm100_public_txt != file_details.TM_100_PUBLIC[1] )
+										s_tm100_public.effect( "highlight", {}, 1000 );
 
 									var s_tmic = $( '.stat_tmic', context );
 									s_tmic_txt = s_tmic.text();
-									s_tmic.text( tot.ICE[1] );
-									if ( s_tmic_txt != tot.ICE[1] )
+									s_tmic.text( file_details.ICE[1] );
+									if ( s_tmic_txt != file_details.ICE[1] )
 										s_tmic.effect( "highlight", {}, 1000 );
 
 									var s_mt = $( '.stat_mt', context );
 									s_mt_txt = s_mt.text();
-									s_mt.text( tot.MT[1] );
-									if ( s_mt_txt != tot.MT[1] )
+									s_mt.text( file_details.MT[1] );
+									if ( s_mt_txt != file_details.MT[1] )
 										s_mt.effect( "highlight", {}, 1000 );
 
-
 								} );
-								$.each( files_group, function ( jPassword, files_object ) {
 
-										$.each( files_object, function ( id_file, file_details ) {
-
-											context = $( global_context ).find( '#file_' + job_id + '_' + jPassword + '_' + id_file );
-
-											var s_payable = $( '.stat_payable strong', context );
-											var s_payable_txt = s_payable.text();
-											s_payable.text( file_details.TOTAL_PAYABLE[1] );
-											if ( s_payable_txt != file_details.TOTAL_PAYABLE[1] )
-											s_payable.effect( "highlight", {}, 1000 );
-
-											var s_new = $( '.stat_new', context );
-											var s_new_txt = s_new.text();
-											s_new.text( file_details.NEW[1] );
-											if ( s_new_txt != file_details.NEW[1] )
-											s_new.effect( "highlight", {}, 1000 );
-
-											var s_rep = $( '.stat_rep', context );
-											s_rep_txt = s_rep.text();
-											s_rep.text( file_details.REPETITIONS[1] );
-											if ( s_rep_txt != file_details.REPETITIONS[1] )
-											s_rep.effect( "highlight", {}, 1000 );
-
-											var s_int = $( '.stat_int', context );
-											s_int_txt = s_int.text();
-											s_int.text( file_details.INTERNAL_MATCHES[1] );
-											if ( s_int_txt != file_details.INTERNAL_MATCHES[1] )
-												s_int.effect( "highlight", {}, 1000 );
-
-											var s_tm50 = $( '.stat_tm50', context );
-											s_tm50_txt = s_tm50.text();
-											s_tm50.text( file_details.TM_50_74[1] );
-											if ( s_tm50_txt != file_details.TM_50_74[1] )
-												s_tm50.effect( "highlight", {}, 1000 );
-
-											var s_tm75 = $( '.stat_tm75', context );
-											s_tm75_txt = s_tm75.text();
-											s_tm75.text( file_details.TM_75_99[1] );
-											if ( s_tm75_txt != file_details.TM_75_99[1] )
-												s_tm75.effect( "highlight", {}, 1000 );
-
-                                            var s_tm75_84 = $( '.stat_tm75_84', context );
-                                            s_tm75_84_txt = s_tm75_84.text();
-                                            s_tm75_84.text( file_details.TM_75_84[1] );
-                                            if ( s_tm75_84_txt != file_details.TM_75_84[1] )
-                                                s_tm75_84.effect( "highlight", {}, 1000 );
-
-                                            var s_tm85_94 = $( '.stat_tm85_94', context );
-                                            s_tm85_94_txt = s_tm75_84.text();
-                                            s_tm85_94.text( file_details.TM_85_94[1] );
-                                            if ( s_tm85_94_txt != file_details.TM_85_94[1] )
-                                                s_tm85_94.effect( "highlight", {}, 1000 );
-
-                                            var s_tm95_99 = $( '.stat_tm95_99', context );
-                                            s_tm95_99_txt = s_tm75_84.text();
-                                            s_tm95_99.text( file_details.TM_95_99[1] );
-                                            if ( s_tm95_99_txt != file_details.TM_95_99[1] )
-                                                s_tm95_99.effect( "highlight", {}, 1000 );
-
-                                            var s_tm100 = $( '.stat_tm100', context );
-                                            s_tm100_txt = s_tm100.text();
-                                            s_tm100.text( file_details.TM_100[1] );
-                                            if ( s_tm100_txt != file_details.TM_100[1] )
-                                                s_tm100.effect( "highlight", {}, 1000 );
-
-                                            var s_tm100_public = $( '.stat_tm100_public', context );
-                                            s_tm100_public_txt = s_tm100_public.text();
-                                            s_tm100_public.text( file_details.TM_100_PUBLIC[1] );
-                                            if ( s_tm100_public_txt != file_details.TM_100_PUBLIC[1] )
-                                                s_tm100_public.effect( "highlight", {}, 1000 );
-
-											var s_tmic = $( '.stat_tmic', context );
-											s_tmic_txt = s_tmic.text();
-											s_tmic.text( file_details.ICE[1] );
-											if ( s_tmic_txt != file_details.ICE[1] )
-												s_tmic.effect( "highlight", {}, 1000 );
-
-											var s_mt = $( '.stat_mt', context );
-											s_mt_txt = s_mt.text();
-											s_mt.text( file_details.MT[1] );
-											if ( s_mt_txt != file_details.MT[1] )
-												s_mt.effect( "highlight", {}, 1000 );
-
-
-										} );
-
-								} );
+							} );
 
 						} );
 
-					} catch ( e ){
+					} catch ( e ) {
 						//do Nothing and try again in next poll
 					}
-					if (d.data.summary.STATUS != 'DONE') {
-						//						$('.dosplit').addClass('disabled');
-						if( d.data.summary.TOTAL_SEGMENTS > UI.segmentsThreshold  ){
-							UI.pollingTime = parseInt( d.data.summary.TOTAL_SEGMENTS / 20 ) ;
-							console.log( 'Polling time: ' + UI.pollingTime );
-						}
-						setTimeout(function() {
-								UI.pollData();
-								}, UI.pollingTime );
-					} else {
-						//						$('.dosplit').removeClass('disabled');
-						$('#longloading .approved-bar').css('width', '100%');
-						$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
-                        precomputeOutsourceQuotes( $( '.uploadbtn.translate') );
-						setTimeout(function() {
-								$('#shortloading').remove();
-								$('#longloading .meter').remove();
-								$('#longloading').show();
-								$('#longloading p').addClass('loaded').html('<span class="complete">Analysis complete</span>').append('<a class="downloadAnalysisReport">Download Analysis Report</a>');
-                                $('.splitbtn').removeClass('disabled').attr('title', '');
-                        }, 1000);
-						/*
-						   setTimeout(function(){
-						   $('.loadingbar').removeClass('open');
-						   },2000);
-						 */
-					}
+
+                    if( d.data.summary.STATUS == 'DONE' ){
+
+                        $( '#longloading .approved-bar' ).css( 'width', '100%' );
+                        $( '#analyzedSegmentsReport' ).text( s.SEGMENTS_ANALYZED_PRINT );
+                        precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
+                        setTimeout( function () {
+                            $( '#shortloading' ).remove();
+                            $( '#longloading .meter' ).remove();
+                            $( '#longloading' ).show();
+                            $( '#longloading p' ).addClass( 'loaded' ).html( '<span class="complete">Analysis complete</span>' ).append( '<a class="downloadAnalysisReport">Download Analysis Report</a>' );
+                            $( '.splitbtn' ).removeClass( 'disabled' ).attr( 'title', '' );
+                        }, 1000 );
+
+                    } else if( d.data.summary.STATUS == 'NOT_TO_ANALYZE' ){
+
+                        var rwc = $( '#raw-words' );
+
+                        var sew = $( '#standard-equivalent-words' );
+                        sew.find('.word-number').removeClass( 'loading' ).text( rwc.find('.word-number').text() );
+                        sew.find('.days').html( rwc.find('.days' ).html() ).show();
+
+                        var mew = $( '#matecat-equivalent-words' );
+                        mew.find('.word-number').removeClass( 'loading' ).text( rwc.find('.word-number').text() );
+                        mew.find('.days').html( rwc.find('.days' ).html() ).show();
+
+                        precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
+
+                        $( '#shortloading' ).remove();
+                        $( '#longloading .meter' ).remove();
+                        $( '#longloading' ).show();
+                        $( '#longloading p' ).addClass( 'loaded' ).html( '<span class="complete">This job is too big.</span>' ).append( '<span class="analysisNotPerformed">The analysis was not performed.</span>' );
+                        $( '.splitbtn' ).removeClass( 'disabled' ).attr( 'title', '' );
+
+                    } else{
+
+                        if ( d.data.summary.TOTAL_SEGMENTS > UI.segmentsThreshold ) {
+                            UI.pollingTime = parseInt( d.data.summary.TOTAL_SEGMENTS / 20 );
+                            console.log( 'Polling time: ' + UI.pollingTime );
+                        }
+
+                        setTimeout( function () {
+                            UI.pollData();
+                        }, UI.pollingTime );
+
+                    }
 
 				}
-					 }
-		});
+
+			}
+
+		} );
 
 	},
     downloadAnalysisReport: function () {

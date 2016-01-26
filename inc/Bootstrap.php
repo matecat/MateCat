@@ -22,7 +22,7 @@ class Bootstrap {
 
         self::$CONFIG       = parse_ini_file( 'config.ini', true );
         self::$_ROOT        = realpath( dirname( __FILE__ ) . '/../' );
-        $OAUTH_CONFIG       = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
+        $OAUTH_CONFIG       = @parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
         register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
 
         $mv = parse_ini_file( 'version.ini' );
@@ -181,7 +181,7 @@ class Bootstrap {
 
                 header( "HTTP/1.1 200 OK" );
 
-                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
                     if ( INIT::$EXCEPTION_DEBUG ) {

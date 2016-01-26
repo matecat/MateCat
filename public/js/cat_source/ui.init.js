@@ -162,8 +162,8 @@ $.extend(UI, {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "alt+c",
-					"mac": "alt+c",
+					"standard": "alt+k",
+					"mac": "alt+k",
 				}
 			},
 		};
@@ -184,4 +184,100 @@ $.extend(UI, {
 	},
 });
 
+/**
+ * Register tabs in segment footer
+ */
 
+UI.SegmentFooter.registerTab({
+    code                : 'cc',
+    tab_class           : 'concordances',
+    label               : 'Concordance',
+    activation_priority : 10,
+    tab_position        : 20,
+    is_enabled    : function(segment) {
+        return true;
+    },
+    tab_markup          : function(segment) {
+        return this.label ;
+    },
+    content_markup      : function(segment) {
+        var template = MateCat.Templates['segment_footer/tabs/concordances_body'];
+        return template({ tms_enabled : config.tms_enabled });
+    },
+    is_hidden    : function(segment) {
+        return false;
+    },
+    on_activation : function( footer ) {
+        $('.cc-search .search-source', footer.segment.el).focus();
+    }
+});
+
+UI.SegmentFooter.registerTab({
+    code                : 'tm',
+    tab_class           : 'matches',
+    label               : 'Translation Matches',
+    activation_priority : 50,
+    tab_position        : 10,
+    is_enabled          : function(segment) {
+        return true;
+    },
+    tab_markup          : function(segment) {
+        if ( config.mt_enabled ) {
+            return this.label ;
+        }
+        else {
+            return this.label + " (No MT) ";
+        }
+    },
+    content_markup      : function(segment) {
+        return '<div class="overflow"></div>' +
+            '<div class="engine-errors"></div>' ;
+    },
+    is_hidden    : function(segment) {
+        return false;
+    }
+});
+
+UI.SegmentFooter.registerTab({
+    code                : 'gl',
+    tab_class           : 'glossary',
+    label               : 'Glossary',
+    activation_priority : 30,
+    tab_position        : 30,
+    is_enabled          : function(segment) {
+        return true;
+    },
+    tab_markup          : function(segment) {
+        return this.label ;
+    },
+    content_markup      : function(segment) {
+        var template = MateCat.Templates['segment_footer/tabs/glossary_body'];
+        return template({ tms_enabled : config.tms_enabled });
+    },
+    is_hidden    : function(segment) {
+        return false;
+    },
+    on_activation : function( footer ) {
+        $('.gl-search .search-source', footer.segment.el).focus();
+    }
+});
+
+UI.SegmentFooter.registerTab({
+    code                : 'al',
+    tab_class           : 'alternatives',
+    label               : 'Translation conflicts',
+    activation_priority : 30,
+    tab_position        : 40,
+    is_enabled          : function(segment) {
+        return true;
+    },
+    tab_markup          : function(segment) {
+        return this.label ;
+    },
+    content_markup      : function(segment) {
+        return '<div class="overflow"></div>' ;
+    },
+    is_hidden    : function(segment) {
+        return true;
+    }
+});

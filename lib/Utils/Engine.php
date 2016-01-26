@@ -37,6 +37,10 @@ class Engine {
         }
 
         $className = 'Engines_' . $engineRecord->class_load;
+        if( !class_exists( $className, true ) ){
+            throw new \Exception( "Engine Class $className not Found" );
+        }
+
         return new $className( $engineRecord );
 
     }

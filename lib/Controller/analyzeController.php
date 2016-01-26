@@ -1,5 +1,6 @@
 <?php
 
+use \Analysis\Status;
 
 class analyzeController extends viewController {
 
@@ -359,7 +360,7 @@ class analyzeController extends viewController {
         $this->template->incomingUrl = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
         //perform check on running daemons and send a mail randomly
-        $misconfiguration = Analysis_Manager::thereIsAMisconfiguration();
+        $misconfiguration = Status::thereIsAMisconfiguration();
         if ( $misconfiguration && mt_rand( 1, 3 ) == 1 ) {
             $msg = "<strong>The analysis daemons seem not to be running despite server configuration.</strong><br />Change the application configuration or start analysis daemons.";
             Utils::sendErrMailReport( $msg, "Matecat Misconfiguration" );

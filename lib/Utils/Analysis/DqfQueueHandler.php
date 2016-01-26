@@ -1,12 +1,22 @@
 <?php
 
+namespace Analysis;
+
+use \INIT,
+    \Exception,
+    \AMQHandler,
+    \MultiCurlHandler,
+    \DQF_DqfProjectStruct,
+    \DQF_DqfSegmentStruct,
+    \DQF_DqfTaskStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 18/05/15
  * Time: 13.15
  */
-class Analysis_DqfQueueHandler extends Analysis_QueueHandler {
+class DqfQueueHandler extends AMQHandler {
 
     public function __construct( $brokerUri = null ) {
 

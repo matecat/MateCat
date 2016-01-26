@@ -7,7 +7,7 @@
  * 
  */
 
-class DataAccess_AbstractDaoObjectStruct extends stdClass {
+abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
 
     public function __construct( Array $array_params = array() ) {
         if ( $array_params != null ) {

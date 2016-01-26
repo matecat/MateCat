@@ -6,13 +6,15 @@ Bootstrap::start();
 require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
+use TaskRunner\Commons\AbstractDaemon;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 18/09/15
  * Time: 19.13
  */
-class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
+class JobPEEAndTimeToEditRunner extends AbstractDaemon {
     const NR_OF_JOBS = 1000;
     const NR_OF_SEGS = 10000;
 
@@ -21,11 +23,11 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
     public function __construct() {
         parent::__construct();
         self::$last_job_file_name = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '.lastjobprocessed_jpeer';
-        self::$sleeptime          = 60 * 60 * 24 * 30 * 1;
+        self::$sleepTime          = 60 * 60 * 24 * 30 * 1;
         Log::$fileName            = "evaluatePEE.log";
     }
 
-    function main( $args ) {
+    function main( $args = null ) {
         $db               = Database::obtain();
         $lastProcessedJob = (int)file_get_contents( self::$last_job_file_name );
 
@@ -71,7 +73,7 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
             $start = time();
 
             //get a chunk of self::NR_OF_JOBS each time.
-            for ( $firstJob = $minJob; self::$RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
+            for ( $firstJob = $minJob; $this->RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
 
                 $jobs = $db->fetch_array(
                         sprintf(
@@ -84,7 +86,7 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
                 //iterate over completed jobs, evaluate incremental PEE and save it in the job row
                 //Incremental PEE = sum( segment_pee * segment_raw_wordcount)
                 //It will be normalized when necessary
-                for ( $j = 0; self::$RUNNING && ( $j < count( $jobs ) ); $j++ ) {
+                for ( $j = 0; $this->RUNNING && ( $j < count( $jobs ) ); $j++ ) {
                     $job = $jobs[ $j ];
 
                     //BEGIN TRANSACTION
@@ -160,7 +162,7 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
                                 "",
                                 "[JobPostEditingEffortRunner] Failed to process job $_jid"
                         );
-                        self::$RUNNING = false;
+                        $this->RUNNING = false;
 
                         continue;
                         //exit;
@@ -176,12 +178,17 @@ class JobPEEAndTimeToEditRunner extends Analysis_Abstract_AbstractDaemon {
             Log::doLog( "sleeping for 1 month" );
             echo "sleeping for 1 month\n";
 
-            if ( self::$RUNNING ) {
+            if ( $this->RUNNING ) {
                 sleep( self::$sleeptime );
             }
 
-        } while ( self::$RUNNING );
+        } while ( $this->RUNNING );
     }
+
+    public static function cleanShutDown() {
+        // TODO: Implement cleanShutDown() method.
+    }
+
 }
 
 $jpe = JobPEEAndTimeToEditRunner::getInstance();

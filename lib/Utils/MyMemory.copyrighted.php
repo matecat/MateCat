@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
    This code is copyrighted and property of Translated s.r.l.

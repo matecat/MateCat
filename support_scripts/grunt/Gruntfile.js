@@ -53,6 +53,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.scrollsegment.js',
                     basePath + 'cat_source/ui.classes.js',
+                    basePath + 'cat_source/ui.classes.segment_footer.js',
                     basePath + 'cat_source/ui.init.js',
                     basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',
@@ -78,6 +79,7 @@ module.exports = function(grunt) {
             },
             libraries: {
                 src: [
+                    basePath + 'lib/lodash.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/waypoints.min.js',

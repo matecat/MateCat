@@ -11,7 +11,11 @@ abstract class Engines_Results_AbstractResponse {
     public $responseStatus = "";
     public $responseDetails = "";
     public $responseData = "";
-    public $error = "";
+
+    /**
+     * @var \Engines_Results_ErrorMatches
+     */
+    public $error;
 
     protected $_rawResponse = "";
 

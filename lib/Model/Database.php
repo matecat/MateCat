@@ -91,6 +91,15 @@ class Database implements IDatabase {
     }
 
     /**
+     * @return bool
+     * @throws PDOException
+     */
+    public function ping(){
+        $this->getConnection()->query( "SELECT 1 FROM DUAL" );
+        return true;
+    }
+
+    /**
      * @Override
      * {@inheritdoc}
      */
