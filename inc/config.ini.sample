@@ -36,6 +36,11 @@ SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
+; Filters Configuration
+FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
+FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
+
+
 ;----------------------------------------
 [staging]
 DB_SERVER = "localhost"
@@ -55,9 +60,9 @@ SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
-; Converter Server Configuration
-CONVERTER_SERVER_ADDRESS = 'localhost'
-CONVERTER_SERVER_PORT = '8082';
+; Filters Configuration
+FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
+FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
 
 
 ;----------------------------------------
@@ -79,8 +84,6 @@ SMTP_PORT = '25'
 SMTP_SENDER = 'no-reply@matecat.loc'
 SMTP_HOSTNAME = 'localhost'
 
-; Converter Server Configuration
-CONVERTER_SERVER_ADDRESS = 'localhost'
-CONVERTER_SERVER_PORT = '8082';
-
-;----------------------------------------
+; Filters Configuration
+FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
+FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key

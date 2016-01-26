@@ -162,6 +162,11 @@ class Filters {
         self::logConversion($response, false, $sentFile, $jobData, $sourceFileData);
     }
 
+    /**
+     * Logs every conversion made. In order to make this method work, ensure
+     * you have the matecat_conversions_log database properly configured.
+     * See /lib/Model/matecat_conversions_log.sql
+     */
     private static function logConversion($response, $toXliff, $sentFile, $jobData, $sourceFileData ) {
         try {
             $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER,
