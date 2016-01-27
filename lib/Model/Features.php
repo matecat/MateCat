@@ -26,7 +26,7 @@ class Features {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
         foreach( $features as $feature ) {
-            $cls = "Features\\" . $feature->toClassName() . "\\$name" ;
+            $cls = "Features\\" . $feature->toClassName() . "\\Decorator\\$name" ;
 
             if ( class_exists( $cls ) ) {
                 $obj = new $cls( $controller, $template) ;

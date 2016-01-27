@@ -65,11 +65,14 @@ class SegmentTranslationModel
          * added to the cached sum.
          *
          */
-        if ( $version_model->triggersNewVersion() ) {
-            $this->checkReviewedStateTransition();
-        } else {
-            $this->checkTranslationIssuesExist();
-        }
+
+        $this->checkReviewedStateTransition();
+
+        // if ( $version_model->triggersNewVersion() ) {
+        //     $this->checkReviewedStateTransition();
+        // } else {
+        //     $this->checkTranslationIssuesExist();
+        // }
 
     }
 

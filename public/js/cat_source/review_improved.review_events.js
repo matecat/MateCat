@@ -170,15 +170,29 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             'formattedDate'       : moment().format('lll')
         };
 
+        /**
+         * Whenever an error is saved, change status to rejected.
+         */
+
         $.post( path, modelToSave )
-            .success(function( data ) {
+            .done(function( data ) {
+
                 // push the new data to the store
                 // TODO make an helper for this date conversion
                 data.issue.formattedDate = moment(data.issue.created_at).format('lll');
                 MateCat.db.upsert('segment_translation_issues', data.issue );
                 RI.modal.close();
                 RI.reloadQualityReport();
+
+            }).done(function( data ) {
+                UI.changeStatus(segment.el, 'rejected', false, {
+                    noPropagation: true,
+                });
             });
+
+
+
+
 
         return false;
     });

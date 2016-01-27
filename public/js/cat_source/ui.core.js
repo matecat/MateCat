@@ -87,35 +87,35 @@ UI = {
     },
 
     /**
-     * Changes the segment status.
      *
-     * @param ob element is the button that was clicked
-     * @param status string 'approved' or whatever else status string
-     * @param byStatus int indicates if the click comes form the status bar or
-     * from the button.
-     *
+     * @param el
+     * @param status
+     * @param byStatus
+     * @param options
      */
-	changeStatus: function(ob, status, byStatus) {
-        var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
+	changeStatus: function(el, status, byStatus, options) {
+        if ( typeof options == 'undefined') options = {};
+
+        var segment = $(el).closest("section");
         var segment_id = this.getSegmentId(segment);
 
-        var options = {
+        var opts = {
             segment_id: segment_id,
             status: status,
             byStatus: byStatus,
-            noPropagation: false
+            noPropagation: options.noPropagation || false
         };
 
-        if (byStatus) {
-            options.noPropagation = true;
-            this.execChangeStatus(JSON.stringify(options)); // no propagation
+        if ( byStatus || opts.noPropagation ) {
+            opts.noPropagation = true;
+            this.execChangeStatus(JSON.stringify(opts)); // no propagation
         } else {
 
             // ask if the user wants propagation or this is valid only
             // for this segment
             if (this.autopropagateConfirmNeeded()) {
 
-                optionsStr = JSON.stringify(options);
+                var optionsStr = JSON.stringify(opts);
 
                 APP.confirm({
                     name: 'confirmAutopropagation',
@@ -129,16 +129,17 @@ UI = {
                          "or keep this translation only for this segment?"
                 });
             } else {
-                this.execChangeStatus(JSON.stringify(options)); // autopropagate
+                this.execChangeStatus( JSON.stringify(opts) ); // autopropagate
             }
         }
 
 	},
     autopropagateConfirmNeeded: function () {
-        segment = UI.currentSegment;
+        var segment = UI.currentSegment;
         if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
             return false;
         }
+
         if(segment.attr('data-propagable') == 'true') {
             if(config.isReview) {
                 return true;
@@ -154,7 +155,7 @@ UI = {
         }
     },
     preExecChangeStatus: function (optStr) {
-        opt = $.parseJSON(optStr);
+        var opt = $.parseJSON(optStr);
         opt.noPropagation = true;
         this.execChangeStatus(JSON.stringify(opt));
     },
@@ -2297,7 +2298,7 @@ console.log('eccolo: ', typeof token);
         }
     },
     alreadyInSetTranslationTail: function (sid) {
-        alreadySet = false;
+        var alreadySet = false;
         $.each(UI.setTranslationTail, function (index) {
             if(this.id_segment == sid) alreadySet = true;
         });

@@ -1,6 +1,6 @@
 <?php
 
-namespace Features\ProjectCompletion ;
+namespace Features\ProjectCompletion\Decorator ;
 use AbstractDecorator ;
 use Features ;
 
