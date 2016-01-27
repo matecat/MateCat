@@ -1118,7 +1118,7 @@ function addTranslation( array $_Translation ) {
                 translation = {$_Translation['translation']},
                 translation_date = {$_Translation['translation_date']},
                 warning = {$_Translation[ 'warning' ]},
-                version_number = version_number + 1 ;" ;
+                version_number = {$_Translation['version_number']};" ;
 
     if ( isset( $_Translation[ 'autopropagated_from' ] ) ) {
         $query .= " , autopropagated_from = NULL";

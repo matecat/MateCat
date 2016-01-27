@@ -32,6 +32,12 @@ class setTranslationController extends ajaxController {
      */
     protected $project ;
 
+    /**
+     * @var SegmentTranslationVersionHandler
+     */
+    private $VersionsHandler ;
+
+
     public function __construct() {
 
         parent::__construct();
@@ -316,15 +322,9 @@ class setTranslationController extends ajaxController {
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
-        /**
-         * Translation version handler: save old translation.
-         * TODO: move this in an model observer for segment translation.
-         */
 
-        $this->VersionsHandler->saveVersion(array(
-            'old_translation' => $old_translation,
-            'new_translation' => $_Translation
-        ));
+        $this->evaluateVersionSave( $_Translation, $old_translation );
+
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -651,9 +651,29 @@ class setTranslationController extends ajaxController {
 
     private function initVersionHandler() {
         $this->VersionsHandler = new SegmentTranslationVersionHandler(
-            $this->id_job, $this->id_segment, $this->uid,
+            $this->id_job,
+            $this->id_segment,
+            $this->uid,
             $this->jobData['id_project'],
             $this->isRevision()
         );
+    }
+
+    private function evaluateVersionSave( &$_Translation, &$old_translation ) {
+        /**
+         * Translation version handler: save old translation.
+         * TODO: move this in an model observer for segment translation.
+         * TODO: really, this is not good.
+         */
+
+        $version_saved = $this->VersionsHandler->saveVersion( $_Translation, $old_translation );
+        if ( $version_saved ) {
+            $_Translation['version_number'] = $old_translation['version_number'] + 1;
+        } else {
+            $_Translation['version_number'] = $old_translation['version_number'];
+        }
+        if ( $_Translation['version_number'] == null ) {
+            $_Translation['version_number'] = 0 ;
+        }
     }
 }

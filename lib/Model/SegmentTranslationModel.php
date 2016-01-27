@@ -16,7 +16,8 @@ class SegmentTranslationModel extends AbstractModelSubject {
      */
     private $job;
 
-    public function __construct(Translations_SegmentTranslationStruct $translation) {
+    public function __construct(
+        Translations_SegmentTranslationStruct $translation) {
         $this->translation = $translation;
         $this->job = $translation->getJob();
     }
@@ -45,7 +46,6 @@ class SegmentTranslationModel extends AbstractModelSubject {
         return
             ! $this->old_translation->isReviewedStatus() and
             $this->translation->isReviewedStatus();
-
     }
 
     public function exitsReviewedState() {

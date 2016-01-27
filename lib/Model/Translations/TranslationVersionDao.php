@@ -101,7 +101,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql );
-        $stmt->execute( array(
+
+        return $stmt->execute( array(
             'id_job'         => $old_translation['id_job'],
             'id_segment'     => $old_translation['id_segment'] ,
             'translation'    => $old_translation['translation'],

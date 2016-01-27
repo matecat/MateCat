@@ -92,6 +92,7 @@ class SegmentTranslationModel
         elseif ( $this->model->exitsReviewedState() ) {
             $this->subtractCount();
         }
+
     }
 
     private function checkTranslationIssuesExist()

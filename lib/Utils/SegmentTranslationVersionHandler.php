@@ -7,7 +7,11 @@
 class SegmentTranslationVersionHandler {
     public $db;
 
+    /**
+     * @var Translations_TranslationVersionDao
+     */
     private $dao;
+
     private $id_job ;
     private $id_segment ;
     private $project ;
@@ -57,45 +61,52 @@ class SegmentTranslationVersionHandler {
         );
     }
 
-    public function saveVersion( $params ) {
-        $params = (object) Utils::ensure_keys($params, array(
-            'old_translation', 'new_translation'
-        ));
+    /**
+     * Evaluates the need to save a new translation version to database.
+     * If so, sets the new version number on $new_translation.
+     *
+     * @param $old_translation
+     * @param $new_translation
+     */
+
+    public function saveVersion( $new_translation, $old_translation ) {
 
         if ( $this->feature_enalbed !== true ) {
             return ;
         }
 
-        if ( empty($params->old_translation ) ) {
+        if ( empty($old_translation ) ) {
             return;
         }
-
 
         /**
          * This is where we decide if a new translation version is to be generated.
          * This should be moved in a review_improved specific model.
          * TODO: refactor.
          */
-        if ( $params->old_translation['translation'] ==
-            $params->new_translation['translation'] ) {
+        if ( $old_translation['translation'] ==
+            $new_translation['translation'] ) {
             return ;
         }
 
         $this->prepareDao();
-        $this->dao->saveVersion( $params->old_translation );
+
+        $new_translation['version_number'] += 1 ;
+
+        return $this->dao->saveVersion( $old_translation );
     }
 
     private function prepareDao() {
         $this->db         = Database::obtain();
-        $dao = new Translations_TranslationVersionDao( $this->db );
-        $dao->uid         = $this->uid ;
-        $dao->source_page = $this->source_page ;
+        $this->dao = new Translations_TranslationVersionDao( $this->db );
+        $this->dao->uid         = $this->uid ;
+        $this->dao->source_page = $this->source_page ;
+
         // TODO: ^^^ this is safe for now because we have
         // one connection for request, so the object returned
         // by the obtain is the same we started the transaction
         // on in setTranslation.
 
-        $this->dao = $dao ;
     }
 
 }
