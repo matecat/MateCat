@@ -18,8 +18,9 @@ class Filters {
         // Each group is a POST request
         foreach ($dataGroups as $id => $data) {
             // Add to POST fields the version forced using the config file
-            if ( ! empty( INIT::$FILTERS_FORCE_VERSION ) ) {
-                $data['forceVersion'] = INIT::$FILTERS_FORCE_VERSION;
+            if ( $endpoint === self::SOURCE_TO_XLIFF_ENDPOINT
+                    && ! empty( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION ) ) {
+                $data['forceVersion'] = INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
             }
 
             // Setup CURL options and add to MultiCURL
