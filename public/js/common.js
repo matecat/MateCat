@@ -212,10 +212,13 @@ APP = {
         _tpl_checkbox = '' +
                         '<div class="boxed">' +
                         ' <input type="checkbox" id="popup-checkbox" class="confirm_checkbox"><label></label>' +
-                        '</div>'+
-                        '<div class="boxed">' +
-                        ' <input type="checkbox" class="dont_show"><label></label>' +
                         '</div>';
+
+
+        _tpl_checkbox_dontshow = '' +
+                '<div class="boxed">' +
+                ' <input type="checkbox" class="dont_show"><label></label>' +
+                '</div>';
 
         var renderOkButton = function ( options ) {
             var filled_tpl = $(_tpl_button);
@@ -296,7 +299,16 @@ APP = {
 
             if ( typeof options['checkbox_label'] != 'undefined' ) {
                 filled_tpl.find('.confirm_checkbox + label').html(options['checkbox_label']);
-                filled_tpl.find('.dont_show + label' ).html("Don't show this dialog again");
+            }
+            return filled_tpl;
+        };
+
+        var renderDontShowCheckbox = function( options ){
+            var filled_tpl = $( _tpl_checkbox_dontshow );
+
+            if ( typeof options['checkbox_label'] != 'undefined' ) {
+                filled_tpl.find('.dont_show + label' )
+                        .html("Don't show this dialog again for the current job");
             }
             return filled_tpl;
         };
@@ -365,6 +377,9 @@ APP = {
                         break;
                     case 'confirm':
                     case 'confirm_checkbox' :
+                        filled_tpl.find('.popup p' )
+                                .append(renderCheckbox( options ));
+
                         filled_tpl.find( '.popup' )
                                 .addClass('confirm_checkbox')
                                 .addClass('popup-confirm')
@@ -386,7 +401,7 @@ APP = {
 
                         if ( options['type'] == 'confirm_checkbox' ) {
                             filled_tpl.find( '.popup' )
-                                    .append( renderCheckbox( options ) );
+                                    .append( renderDontShowCheckbox( options ) );
 
                             disableOk( filled_tpl );
 
