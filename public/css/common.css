@@ -1164,6 +1164,8 @@ margin-left: 10px;
 .modal .popup-alert p
 {
     padding: 0 20px;
+    margin: 0;
+    margin-top: 20px;
 }
 
 .popup .outer:hover
@@ -1278,12 +1280,15 @@ float: none!important;
 }
 
 
-.popup h1 .btn-ok,
-.popup h1 .btn-cancel
+.popup .btn-ok,
+.popup .btn-cancel
 {
 	padding: 1px 18px;
-	margin-left: 20px;
+    margin: 16px 0 16px 20px;
+    display: inline-block;
+
     }
+
     .popup .btn-cancel, .btn-grey, .slide-panel .btn-cancel, .btn-grey
     {
 	    color: #333;
@@ -1292,6 +1297,9 @@ float: none!important;
 	    background: -moz-linear-gradient(top,  #f6f6f6,  #e2e3e5);
 	    background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
+    .dont_show + label{
+        font-size: 16px;
+    }
 
  .slide-panel h1 .btn-ok,
  .slide-panel h1 .btn-cancel
