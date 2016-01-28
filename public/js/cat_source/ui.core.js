@@ -375,7 +375,9 @@ UI = {
     },
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
-        //$.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
+        $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+                null,
+                { expires: new Date(1) });
     },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
