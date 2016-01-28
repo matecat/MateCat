@@ -401,16 +401,11 @@ APP = {
                             } )
                             .on( 'click', '.dont_show', function () {
                                 if ( $( '.dont_show' ).is( ':checked' ) ) {
-                                    $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
-                                            '0',
-                                            //expiration: 1 day
-                                            { expires: 1 });
+                                    //set global variable because the popup will be destroyed on close event.
+                                    dont_show = 1;
                                 }
                                 else {
-                                    $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
-                                            null,
-                                            //set expiration date before the current date to delete the cookie
-                                            {expires: new Date(1)});
+                                    dont_show = 0;
                                 }
 
                             } );

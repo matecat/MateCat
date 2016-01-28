@@ -375,9 +375,18 @@ UI = {
     },
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
-        $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
-                null,
-                { expires: new Date(1) });
+        if ( typeof dont_show != 'undefined' && dont_show) {
+            $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+                    '0',
+                    //expiration: 1 day
+                    { expires: 1 });
+        }
+        else {
+            $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+                    null,
+                    //set expiration date before the current date to delete the cookie
+                    {expires: new Date(1)});
+        }
     },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
