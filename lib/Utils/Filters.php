@@ -38,7 +38,7 @@ class Filters {
                   'X-Mashape-Key: '. INIT::$FILTERS_MASHAPE_KEY,
                 );
             }
-            $url = INIT::$FILTERS_ADDRESS . $endpoint;
+            $url = rtrim(INIT::$FILTERS_ADDRESS, '/') . $endpoint;
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
