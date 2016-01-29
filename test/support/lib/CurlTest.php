@@ -7,6 +7,8 @@ class CurlTest {
   public $params = array();
   public $files = array();
 
+  public $enable_xdebug = true ;
+
   public $referer ;
 
   private $url ;
@@ -24,7 +26,6 @@ class CurlTest {
     $this->files   = @$options['files'];
     $this->method  = @$options['method'];
     $this->referer = @$options['referer'];
-
   }
 
   function run() {
@@ -64,6 +65,10 @@ class CurlTest {
     if ( $this->referer != null ) {
         \Log::doLog('referer: ' .  $this->referer );
         curl_setopt($ch, CURLOPT_REFERER, $this->referer )  ;
+    }
+
+    if ( $this->enable_xdebug ) {
+      $this->headers[] = "Cookie: XDEBUG_SESSION=MATECAT_TEST" ;
     }
 
     $this->setHeaders($ch) ;
