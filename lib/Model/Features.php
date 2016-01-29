@@ -38,16 +38,15 @@ class Features {
     /**
      * Returns the filtered subject variable passed to all enabled features.
      *
-     * @param $method, the filter method to invoke.
-     * @param $id_customer the customer id to decide if the feature is anabled or not
-     * @param $subject the subject variable to be filtered.
+     * @param $method
+     * @param $id_customer
+     *
+     * @return mixed
      *
      * FIXME: this is not a real filter since the input params are not passed
      * modified to the next function in the queue.
      */
-
-    public static function filter() {
-        list( $method, $id_customer ) = array_slice( func_get_args(), 0, 2);
+    public static function filter($method, $id_customer) {
 
         $args = array_slice( func_get_args(), 2);
         $returnable = $args[0];

@@ -35,6 +35,11 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $id_project
+     *
+     * @return Chunks_ChunkStruct[]
+     */
     public function getByProjectID( $id_project ) {
         $conn = $this->con->getConnection();
         $stmt = $conn->prepare("SELECT * FROM " .

@@ -77,7 +77,7 @@ function prepareTestSchema($testDatabase, $devDatabase) {
 function integrationSetChunkAsComplete( $options ) {
     $test = new CurlTest();
 
-    if ( key_exists( 'headers' , $options ) ) {
+    if ( array_key_exists( 'headers' , $options ) ) {
         $test->headers = $options['headers'];
     }
 
@@ -107,7 +107,7 @@ function integrationSetChunkAsComplete( $options ) {
 function integrationCreateTestProject( $options=array() ) {
   $test = new CurlTest();
 
-  if ( key_exists( 'headers' , $options ) ) {
+  if ( array_key_exists( 'headers' , $options ) ) {
       $test->headers = $options['headers'];
   }
 
@@ -119,7 +119,11 @@ function integrationCreateTestProject( $options=array() ) {
     'source_lang' => 'en'
   );
 
-  if ( key_exists('files', $options) ) {
+    if ( array_key_exists( 'params', $options )) {
+        $test->params = array_merge($test->params, $options['params']);
+    }
+
+  if ( array_key_exists('files', $options) ) {
       $test->files = $options['files'];
   } else {
       $test->files[] = test_file_path('xliff/amex-test.docx.xlf');
@@ -133,7 +137,7 @@ function integrationCreateTestProject( $options=array() ) {
 function splitJob( $params, $options=array() ) {
     $test = new CurlTest();
 
-    if ( key_exists( 'headers' , $options ) ) {
+    if ( array_key_exists( 'headers' , $options ) ) {
         $test->headers = $options['headers'];
     }
 
@@ -161,7 +165,7 @@ function splitJob( $params, $options=array() ) {
 function mergeJob( $params, $options=array() ) {
     $test = new CurlTest();
 
-    if ( key_exists( 'headers' , $options ) ) {
+    if ( array_key_exists( 'headers' , $options ) ) {
         $test->headers = $options['headers'];
     }
 

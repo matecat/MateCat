@@ -1509,7 +1509,9 @@ class ProjectManager {
                                 $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
 
                                 if ( isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] ) ) {
-                                    $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] );
+                                    $target_extract_external = $this->_strip_external(
+                                            $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ]
+                                    );
 
                                     //we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
                                     //AND IF IT IS ONLY A CHAR? like "*" ?
@@ -1760,6 +1762,13 @@ class ProjectManager {
 
     protected function _insertPreTranslations( $jid ) {
 
+        $status = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $status = Features::filter('status_for_pretranslated_segments',
+                $this->projectStructure['id_customer'],
+                $status,
+                $this->projectStructure
+        );
+
         //    Log::doLog( array_shift( array_chunk( $SegmentTranslations, 5, true ) ) );
 
         foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
@@ -1770,8 +1779,13 @@ class ProjectManager {
 
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
-                //id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
-                $this->projectStructure[ 'query_translations' ]->append( "( '{$translation_row[0]}', $jid, '{$translation_row[3]}', 'TRANSLATED', '{$translation_row[2]}', NOW(), 'DONE', 1, 'ICE' )" );
+
+                $this->projectStructure[ 'query_translations' ]->append(
+                        "( '{$translation_row[0]}',
+                        $jid, '{$translation_row[3]}',
+                        '{$status}',
+                        '{$translation_row[2]}', NOW(), 'DONE', 1, 'ICE' )"
+                );
 
             }
 

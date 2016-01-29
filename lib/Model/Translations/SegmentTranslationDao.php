@@ -37,6 +37,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param $chunk
+     *
+     * @return Translations_SegmentTranslationStruct
+     */
     public function lastTranslationByJobOrChunk( $chunk ) {
       $conn = Database::obtain()->getConnection();
       $query = "SELECT * FROM segment_translations " .
@@ -62,6 +67,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
       return $stmt->fetch();
     }
+
+    /**
+     * @param $id_job
+     *
+     * @return Translations_SegmentTranslationStruct[]
+     */
 
     public function getByJobId($id_job) {
         $conn = $this->con->getConnection();

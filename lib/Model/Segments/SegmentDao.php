@@ -32,6 +32,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return Segments_SegmentStruct[]
+     */
     function getByChunkId( $id_job, $password ) {
         $conn = $this->con->getConnection();
 

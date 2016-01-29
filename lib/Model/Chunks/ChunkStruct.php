@@ -15,6 +15,9 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
     public $target ;
     public $tm_keys ;
 
+    /**
+     * @return Segments_SegmentStruct[]
+     */
     public function getSegments() {
         $dao = new Segments_SegmentDao( Database::obtain() );
         return $dao->getByChunkId( $this->id, $this->password );
@@ -26,6 +29,9 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         return Chunks_ChunkCompletionEventDao::isCompleted( $this, array('is_review' => $params['is_review'] ) ) ;
     }
 
+    /**
+     * @return Translations_SegmentTranslationStruct[]
+     */
     public function getTranslations() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
         return $dao->getByJobId( $this->id );
