@@ -23,7 +23,7 @@ class Executor implements \SplObserver {
     protected $_queueHandler;
 
     /**
-     * @var QueueInfo
+     * @var Context
      */
     protected $_executionContext;
 
@@ -315,4 +315,4 @@ class Executor implements \SplObserver {
 //$argv = array();
 //$argv[ 1 ] = '{"redis_key":"p3_list","queue_length":0,"queue_name":"analysis_queue_P3","pid_set_name":"ch_pid_set_p3","pid_list":[],"pid_list_len":0,"max_executors":"15","loggerName":"tm_analysis_P3.log"}';
 
-Executor::getInstance( QueueInfo::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();
+Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();
