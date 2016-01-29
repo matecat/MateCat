@@ -3312,7 +3312,21 @@ console.log('eccolo: ', typeof token);
             if ( (tt.length) && (!ss) )
                 return;
         }
-        var diff = ( typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        var diff = 'null';
+
+        if( typeof currentItem != 'undefined'){
+            diff = this.dmp.diff_main( currentItem, this.editarea.html() );
+
+            // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
+            // for that we chooiff[0] as a fallback
+            if(typeof diff[1] != 'undefined') {
+                diff = diff[1][1];
+            }
+            else {
+                diff = diff[0][1];
+            }
+        }
+
         if ( diff == ' selected' )
             return;
 
