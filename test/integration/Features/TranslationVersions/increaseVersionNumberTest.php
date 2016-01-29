@@ -48,24 +48,24 @@ class increaseVersionNumberTest extends IntegrationTest {
         ) ) ;
 
         integrationSetTranslation( array(
-            'id_segment' => $segment->id ,
-            'id_job' => $chunk->id,
-            'password' => $chunk->password,
-            'status' => 'translated',
-            'translation' => 'New Translation!' # <-- this changed
-        ) ) ;
+                'id_segment'  => $segment->id,
+                'id_job'      => $chunk->id,
+                'password'    => $chunk->password,
+                'status'      => 'translated',
+                'translation' => 'New Translation!' # <-- this changed
+        ) );
 
         $translations = $chunk->getTranslations();
 
         $this->assertEquals(1, $translations[0]->version_number );
 
         integrationSetTranslation( array(
-            'id_segment' => $segment->id ,
-            'id_job' => $chunk->id,
-            'password' => $chunk->password,
-            'status' => 'translated',
-            'translation' => 'New Translation!' # <-- this changed
-        ));
+                'id_segment'  => $segment->id,
+                'id_job'      => $chunk->id,
+                'password'    => $chunk->password,
+                'status'      => 'translated',
+                'translation' => 'translation changed again!' # <-- this changed
+        ) );
 
         $translations = $chunk->getTranslations();
 
