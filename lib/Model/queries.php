@@ -818,6 +818,16 @@ function getFirstSegmentId( $jid, $password ) {
     return $results;
 }
 
+/**
+ * @param        $jid
+ * @param        $password
+ * @param int    $step
+ * @param        $ref_segment
+ * @param string $where
+ *
+ * @return array
+ * @throws Exception
+ */
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
 
     $queryAfter = "
