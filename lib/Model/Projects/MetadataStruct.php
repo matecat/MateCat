@@ -6,4 +6,6 @@ class Projects_MetadataStruct extends DataAccess_AbstractDaoSilentStruct impleme
     public $id_project ;
     public $key ;
     public $value ;
+
+
 }

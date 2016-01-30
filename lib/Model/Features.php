@@ -12,21 +12,33 @@ class Features {
     );
 
     /**
+     * @param $id_customer
+     * @param $projectStructure
+     */
+    public static function validateProjectCreation($id_customer, $projectStructure) {
+        self::run(__METHOD__, $id_customer, $projectStructure);
+    }
+    /**
      * appendDecorators
      *
      * Loads feature specific decorators, if any
      *
      * @param $id_customer string Id customer to find active features
      * @param $name name of the decorator to activate
-     * @param $controller the controller to work on
-     * @param $template the PHPTAL view to add properties to
+     * @param viewController $controller the controller to work on
+     * @param PHPTAL $template the PHPTAL view to add properties to
      *
      */
+
     public static function appendDecorators($id_customer, $name, viewController $controller, PHPTAL $template) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
         foreach( $features as $feature ) {
             $cls = "Features\\" . $feature->toClassName() . "\\Decorator\\$name" ;
+
+            // XXX: keep this log line because due to a bug in Log class
+            // if this line is missing it won't log load errors.
+            Log::doLog('loading Decorator ' . $cls );
 
             if ( class_exists( $cls ) ) {
                 $obj = new $cls( $controller, $template) ;

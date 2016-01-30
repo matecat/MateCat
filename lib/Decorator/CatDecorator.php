@@ -32,6 +32,8 @@ class CatDecorator {
           $this->decorateForTranslate();
       }
 
+      $this->template->searchable_statuses = $this->searchableStatuses();
+
       Features::appendDecorators(
           $this->job->getProject()->id_customer,
           'CatDecorator',
@@ -40,6 +42,21 @@ class CatDecorator {
           array('project' => $this->job->getProject())
       );
   }
+
+    /**
+     * @return array
+     */
+    private function searchableStatuses() {
+        $statuses = array_merge(
+            Constants_TranslationStatus::$INITIAL_STATUSES,
+            Constants_TranslationStatus::$TRANSLATION_STATUSES,
+            Constants_TranslationStatus::$REVISION_STATUSES
+        );
+
+        return array_map(function($item) {
+            return (object) array( 'value' => $item, 'label' => $item );
+        }, $statuses );
+    }
 
   private function getHeaderMainButtonLabel() {
       if ( $this->isDownloadable() ) {

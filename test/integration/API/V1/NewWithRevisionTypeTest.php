@@ -20,7 +20,7 @@ class NewWithRevisionTypeTest extends IntegrationTest {
         ));
     }
 
-    function tests_revision_type_is_saved_in_project() {
+    function tests_project_type_is_saved_in_project() {
         $this->prepareUserAndKey();
 
         $this->headers = array(
@@ -32,7 +32,7 @@ class NewWithRevisionTypeTest extends IntegrationTest {
             'project_name' => 'foo',
             'target_lang' => 'it',
             'source_lang' => 'en',
-            'revision_type' => 'HT'
+            'project_type' => 'HT'
         );
 
         $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
@@ -44,7 +44,7 @@ class NewWithRevisionTypeTest extends IntegrationTest {
         $project = Projects_ProjectDao::findById( $body->id_project );
         $dao = new Projects_MetadataDao(Database::obtain());
 
-        $this->assertEquals('HT', $dao->get($project->id, 'revision_type')->value );
+        $this->assertEquals('HT', $dao->get($project->id, 'project_type')->value );
     }
 
 

@@ -114,19 +114,19 @@ class ProjectManager {
 
     /**
      * Evaluates the presence of metadata assocaited with project.
-     * At present, only `revision_type` is evaluated.
+     * At present, only `project_type` is evaluated.
      *
      */
     private function evalMetadata () {
-        if ($this->projectStructure['revision_type'] == null) {
+        if ($this->projectStructure['project_type'] == null) {
             return ;
         }
 
         $dao = new Projects_MetadataDao( Database::obtain() );
         $dao->set(
             $this->projectStructure['id_project'],
-            'revision_type',
-            $this->projectStructure['revision_type']
+            'project_type',
+            $this->projectStructure['project_type']
         );
     }
 
@@ -149,7 +149,7 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        Features::run( 'validateProjectCreation',
+        Features::validateProjectCreation(
             $this->projectStructure['id_customer'],
             $this->projectStructure
         );

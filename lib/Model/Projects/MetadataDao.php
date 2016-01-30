@@ -2,11 +2,21 @@
 
 class Projects_MetadataDao {
 
+    /**
+     * @param $id
+     *
+     * @return Projects_MetadataStruct[]
+     */
   public static function getByProjectId( $id ) {
       $dao = new Projects_MetadataDao(Database::obtain());
       return $dao->allByProjectId( $id );
   }
 
+    /**
+     * @param $id
+     *
+     * @return Projects_MetadataStruct[]
+     */
   public function allByProjectId( $id ) {
       $conn = Database::obtain()->getConnection();
       $stmt = $conn->prepare(

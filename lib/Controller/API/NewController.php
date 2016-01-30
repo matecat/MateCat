@@ -58,7 +58,6 @@ class NewController extends ajaxController {
 
     private $owner = "";
     private $current_user = "";
-
     const MAX_NUM_KEYS = 5;
 
     private static $allowed_seg_rules = array(
@@ -103,7 +102,7 @@ class NewController extends ajaxController {
                 'owner_email'       => array(
                         'filter' => FILTER_VALIDATE_EMAIL
                 ),
-                'revision_type' => array(
+                'project_type' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
                 )
 
@@ -167,7 +166,7 @@ class NewController extends ajaxController {
             }
         }
 
-        $this->revision_type   = $__postInput['revision_type'];
+        $this->project_type   = $__postInput['project_type'];
 
         try {
             $this->validateEngines();
@@ -592,7 +591,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
-        $projectStructure[ 'revision_type' ]        = $this->revision_type ;
+        $projectStructure[ 'project_type' ]        = $this->project_type ;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();

@@ -33,6 +33,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         });
     }
 
+    /**
+     * @return Projects_MetadataStruct[]
+     */
     public function getMetadata() {
         return Projects_MetadataDao::getByProjectId( $this->id );
     }

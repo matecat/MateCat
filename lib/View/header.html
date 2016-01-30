@@ -134,11 +134,9 @@
                     <label for="select-status">Status</label>
                     <select id="select-status" class="search-select" >
                         <option value="all" selected="selected">All</option>
-                        <option value="new">New</option>
-                        <option value="draft">Draft</option>
-                        <option value="translated">Translated</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <tal:block tal:repeat="status searchable_statuses">
+                            <option tal:attributes="value status/value" tal:content="status/label"></option>
+                        </tal:block>
                     </select>
                 </div>
                 <div class="block right buttons">
