@@ -40,6 +40,19 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return Projects_MetadataDao::getByProjectId( $this->id );
     }
 
+    /**
+     *
+     * @return array
+     */
+    public function getMetadataAsKeyValue() {
+        $collection = $this->getMetadata();
+        $data  = array();
+        foreach ($collection as $record ) {
+            $data[ $record->key ] = $record->value;
+        }
+        return $data;
+    }
+
     public function isFeatureEnabled( $feature_code ) {
         $feature = $this->getOwnerFeature( $feature_code );
         return \Features::enabled($feature, $this);
