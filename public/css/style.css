@@ -617,6 +617,10 @@ article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 .translated{color:#fff !important}
 
+article .translated, article .approved {
+	text-transform: uppercase;
+}
+
 article .translated:hover,
 article .next-untranslated:hover,
 article .draft:hover,

@@ -444,16 +444,29 @@ UI = {
 		}
 	},
 	createButtons: function() {
+        var button_label = config.status_labels.TRANSLATED ;
+        var label_first_letter = button_label[0];
+
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+            '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
+        this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
+        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId +
+            '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
+            '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+            ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+
 		buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+
         UI.currentSegment.trigger('buttonsCreation');
         buttonsOb.empty().append(UI.segmentButtons);
         buttonsOb.before('<p class="warnings"></p>');
+
         UI.segmentButtons = null;
+
 	},
 
     /**
