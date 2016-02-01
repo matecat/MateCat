@@ -377,8 +377,10 @@ APP = {
                         break;
                     case 'confirm':
                     case 'confirm_checkbox' :
-                        filled_tpl.find('.popup p' )
-                                .append(renderCheckbox( options ));
+                        if ( options['type'] == 'confirm_checkbox' ) {
+                            filled_tpl.find( '.popup p' )
+                                    .append( renderCheckbox( options ) );
+                        }
 
                         filled_tpl.find( '.popup' )
                                 .addClass('confirm_checkbox')
