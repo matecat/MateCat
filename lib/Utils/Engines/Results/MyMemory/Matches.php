@@ -71,6 +71,7 @@ class Engines_Results_MyMemory_Matches {
         $this->segment          = array_key_exists( 'segment', $match ) ? $match[ 'segment' ] : '';
         $this->raw_segment      = array_key_exists( 'raw_segment', $match ) ? $match[ 'raw_segment' ] : '';
         $this->translation      = array_key_exists( 'translation', $match ) ? $match[ 'translation' ] : '';
+        $this->source_note      = array_key_exists( 'source_note', $match ) ? $match[ 'source_note' ] : '';
         $this->target_note      = array_key_exists( 'target_note', $match ) ? $match[ 'target_note' ] : '';
         $this->raw_translation  = array_key_exists( 'raw_translation', $match ) ? $match[ 'raw_translation' ] : '';
         $this->quality          = array_key_exists( 'quality', $match ) ? $match[ 'quality' ] : 0;
