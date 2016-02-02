@@ -227,7 +227,11 @@ class DetectProprietaryXliff {
                 } else {
                     //if conversion enforce is active
                     //we force all xliff files but not files produced by SDL Studio because we can handle them
-                    if ( $fileType[ 'proprietary_short_name' ] == 'trados' ) {
+                    if (
+                        $fileType[ 'proprietary_short_name' ] == 'matecat_converter'
+                        || $fileType[ 'proprietary_short_name' ] == 'trados'
+                        || DetectProprietaryXliff::getMemoryFileType()
+                    ) {
                         $isAConvertedFile = false;
                         //ok don't convert a standard sdlxliff
                     }

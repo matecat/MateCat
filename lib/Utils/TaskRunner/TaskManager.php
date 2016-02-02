@@ -1,0 +1,484 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 16/05/14
+ * Time: 17.01
+ * 
+ */
+
+namespace TaskRunner;
+
+use Analysis\Queue\QueuesList;
+use TaskRunner\Commons\AbstractDaemon,
+    TaskRunner\Commons\Context;
+
+use Analysis\Queue\RedisKeys,
+    Analysis\Queue\QueueInfo;
+
+use \Log, \Exception, \AMQHandler;
+
+/**
+ * Class Analysis_Manager
+ *
+ * Should be the final class when daemons will refactored
+ *
+ */
+class TaskManager extends AbstractDaemon {
+
+    /**
+     * @var \AMQHandler
+     */
+    protected $_queueHandler;
+
+    protected $_runningPids     = 0;
+
+    protected $_context_definitions = array();
+    protected $_contextIndex;
+
+    protected $_configFile;
+
+    /**
+     * @var QueuesList
+     */
+    protected $_queueContextList = array();
+
+    /**
+     * Deleted context ( removed from config file at runtime ) will be putted here to be removed
+     * @var Context[]
+     */
+    protected $_destroyContext = array();
+
+    const ERR_NOT_FORK          = 1;
+    const ERR_NOT_INCREMENT     = 2;
+    const ERR_PID_NOT_PUBLISHED = 3;
+
+    protected function __construct( $configFile = null, $contextIndex = null ) {
+
+        $this->_configFile   = $configFile;
+        $this->_contextIndex = $contextIndex;
+
+        parent::__construct();
+
+        try {
+
+            set_time_limit(0);
+
+            $this->_queueHandler = new AMQHandler();
+            $this->_updateConfiguration();
+
+        } catch ( Exception $ex ){
+
+            self::_TimeStampMsg( str_pad( " " . $ex->getMessage() . " ", 60, "*", STR_PAD_BOTH ) );
+            self::_TimeStampMsg( str_pad( "EXIT", 60, " ", STR_PAD_BOTH ) );
+            die();
+        }
+
+    }
+
+    /**
+     * @param null $args
+     */
+    public function main( $args = null ) {
+
+        /*
+         * Kill all managers. "There can be only one."
+         * Register My Host address ( and also overwrite the old one )
+         */
+        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::VOLUME_ANALYSIS_PID, gethostbyname( gethostname() ) ) ){
+            //kill all it's children
+            $this->_killPids();
+        }
+
+        // BEGIN
+        do {
+
+            try {
+
+                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::VOLUME_ANALYSIS_PID, gethostbyname( gethostname() ) ) ) {
+                    self::_TimeStampMsg( "(parent " . self::$tHandlerPID . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
+                    self::cleanShutDown();
+                    die();
+                }
+
+            } catch ( Exception $e ){
+                self::_TimeStampMsg( "(child " . self::$tHandlerPID .  ") : FATAL !! Redis Server not available. Re-instantiated the connection and re-try in next cycle" );
+                self::_TimeStampMsg( "(child " . self::$tHandlerPID .  ") : FATAL !! " . $e->getMessage() );
+                sleep(1);
+                continue;
+            }
+
+            $this->_waitPid();
+
+            $this->_updateConfiguration();
+
+            foreach ( $this->_queueContextList->list as $context_index => $context ) {
+
+                $numProcessesDiff = $context->pid_list_len - $context->max_executors;
+
+                $numProcessesToLaunchOrDelete = abs( $numProcessesDiff );
+
+                switch ( true ) {
+
+                    case $numProcessesDiff < 0:
+
+                        try {
+
+                            $this->_forkProcesses( $numProcessesToLaunchOrDelete, $context );
+
+                        } catch ( Exception $e ) {
+                            self::_TimeStampMsg( "Exception {$e->getCode()}: " . $e->getMessage() );
+                            $this->RUNNING = false;
+                        }
+
+                        break;
+
+                    case $numProcessesDiff > 0:
+
+                        self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : need to delete $numProcessesToLaunchOrDelete processes" );
+                        $this->_killPids( $context, 0, $numProcessesToLaunchOrDelete );
+                        sleep( 1 );
+
+                        break;
+
+                    default:
+                        if ( !( ( round( microtime(true), 3 ) * 1000 ) % 10 ) ) {
+                            self::_TimeStampMsg( "(parent) : PARENT MONITORING PAUSE (" . self::$tHandlerPID . ") sleeping ...." );
+                        }
+
+                        self::_balanceQueues();
+                        break;
+                }
+            }
+
+            // clean deleted contexts from configuration file
+            $this->_cleanContexts();
+
+            //wait to free cpu
+            sleep( self::$sleepTime );
+
+        } while( $this->RUNNING );
+
+        self::cleanShutDown();
+
+    }
+
+
+    protected function _waitPid(){
+
+        //avoid zombies : parent process knows the death of one of the children
+        $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
+        while ( $dead > 0 ) {
+
+            self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : child $dead exited: deleting file ...." );
+            foreach ( $this->_queueContextList->list as $queue ) {
+                $_was_active = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead );
+                if ( $_was_active ) {
+                    $this->_killPids( null, $dead );
+                }
+            }
+
+            //avoid zombies : parent process knows the death of one of the children
+            $dead = pcntl_waitpid( -1, $status, WNOHANG | WUNTRACED );
+
+            self::_TimeStampMsg( "DONE" );
+
+        }
+
+    }
+
+    protected function _balanceQueues(){
+//        self::_TimeStampMsg( "TODO. Now i do nothing." );
+//        $this->RUNNING = false;
+    }
+
+    /**
+     * Launch a single process over a queue and register it's pid in the right processes queue
+     *
+     * @param int     $numProcesses
+     *
+     * @param Context $context
+     *
+     * @return int|null
+     * @throws Exception
+     */
+    protected function _forkProcesses( $numProcesses, Context $context ) {
+
+        $processLaunched = 0;
+
+        while ( $processLaunched < $numProcesses ) {
+
+            try {
+                $context->pid_list_len = $this->_queueHandler->getRedisClient()->incr( $context->queue_name );
+            } catch ( Exception $e ){
+                throw new Exception( "(parent " . self::$tHandlerPID . ") ERROR: " . $e->getMessage() . " ... EXITING.", static::ERR_NOT_INCREMENT );
+            }
+
+            $pid = pcntl_fork();
+
+            if ( $pid == -1 ) {
+
+                throw new Exception( "(parent " . self::$tHandlerPID . ") : ERROR OCCURRED : cannot fork. PARENT EXITING !!", static::ERR_NOT_FORK );
+
+            } elseif ( $pid ) {
+
+                // parent process continue running
+                $processLaunched += 1;
+                $this->_runningPids += 1;
+
+            } else {
+
+                // child process runs from here
+                pcntl_exec( "/usr/bin/php", array( __DIR__ . DIRECTORY_SEPARATOR . "Executor.php" , json_encode( $context ) ) );
+                posix_kill( posix_getpid(), SIGINT ); //this line of code will never be executed
+                exit;
+
+            }
+
+        }
+
+        //NO Error. Parent returning after $numProcesses process spawned
+        return 0;
+
+    }
+
+    public static function cleanShutDown() {
+
+        //SHUTDOWN
+        static::$__INSTANCE->_killPids();
+        static::$__INSTANCE->_queueHandler->getRedisClient()->del( RedisKeys::VOLUME_ANALYSIS_PID );
+        $msg = str_pad( " TM ANALYSIS " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
+        self::_TimeStampMsg( $msg );
+
+        static::$__INSTANCE->_queueHandler->getRedisClient()->disconnect();
+
+    }
+
+    /**
+     * Process deletion/killing
+     *
+     * <ul>
+     *     <li>Kill a specific Process ID from a specific Queue when $pid and $queueInfo are passed</li>
+     *     <li>Kill a specific Process ID un unknown Queue when only $pid is passed</li>
+     *     <li>Kill a certain number of processes from a queue when $num and $queueInfo are passed</li>
+     *     <li>Kill all processes from a queue when only the $queueInfo is passed</li>
+     *     <li>Kill a number of elements equally from all queues when only $num is passed</li>
+     *     <li>Kill ALL processes when no parameters are sent</li>
+     * </ul>
+     *
+     * @param QueueInfo $queueInfo
+     * @param int       $pid
+     * @param int       $num
+     */
+    protected function _killPids( QueueInfo $queueInfo = null, $pid = 0, $num = 0 ) {
+
+        self::_TimeStampMsg( "Request to kill some processes." );
+        self::_TimeStampMsg( "Pid List: " . @var_export( $queueInfo->pid_set_name, true ) );
+        self::_TimeStampMsg( "Pid:      " . @var_export( $pid, true ) );
+        self::_TimeStampMsg( "Num:      " . @var_export( $num, true ) );
+
+        $numDeleted = 0;
+
+        if ( !empty( $pid ) && !empty( $queueInfo ) ) {
+
+            self::_TimeStampMsg( "Killing pid $pid from " . $queueInfo->pid_set_name );
+            $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid );
+            posix_kill( $pid, SIGINT );
+            $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queueInfo->queue_name );
+
+        } elseif ( !empty( $pid ) && empty( $queueInfo ) ) {
+
+            self::_TimeStampMsg( "Killing pid $pid from a not defined queue. Seek and destroy." );
+            /**
+             * @var $queue QueueInfo
+             */
+            foreach ( $this->_queueContextList->list as $queue ) {
+
+                $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid );
+                if( $deleted ){
+                    posix_kill( $pid, SIGINT );
+                    $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queue->queue_name );
+                    self::_TimeStampMsg( "Found. Killed pid $pid from queue $queue->queue_name." );
+                }
+                $numDeleted += $deleted;
+
+            }
+
+        } elseif ( !empty( $num ) && !empty( $queueInfo ) ) {
+
+            self::_TimeStampMsg( "Killing $num pid from " . $queueInfo->pid_set_name );
+            $queueBefore = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            for( $i = 0; $i < $num; $i++ ){
+                $pid = $this->_queueHandler->getRedisClient()->spop( $queueInfo->pid_set_name );
+                posix_kill( $pid, SIGINT );
+                $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queueInfo->queue_name );
+            }
+            $queueAfter = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $numDeleted = $queueBefore - $queueAfter;
+
+        } elseif ( !empty( $queueInfo ) ) {
+
+            self::_TimeStampMsg( "Killing all processes from " . $queueInfo->pid_set_name );
+            $numDeleted = $this->_queueHandler->getRedisClient()->scard( $queueInfo->pid_set_name );
+            $pid_list = $this->_queueHandler->getRedisClient()->smembers( $queueInfo->pid_set_name );
+            foreach( $pid_list as $pid ){
+                posix_kill( $pid, SIGINT );
+            }
+            $this->_queueHandler->getRedisClient()->del( $queueInfo->pid_set_name );
+            $this->_queueHandler->getRedisClient()->del( $queueInfo->queue_name );
+            $queueInfo->pid_list_len = 0;
+
+        } elseif ( !empty( $num ) ) {
+
+            self::_TimeStampMsg( "Killing $num processes balancing all queues." );
+
+            while ( true ) {
+
+                // if all queues are empty or they have less elements than requested $num
+                //we do not want an infinite loop
+                //so, at least one deletion per cycle
+                $deleted = false;
+                foreach ( $this->_queueContextList->list as $queue ) {
+
+                    //Exit, we reached the right number, exit the while loop
+                    if( $numDeleted >= $num ){
+                        break 2; //exit the while loop
+                    }
+
+                    $_deleted = false;
+                    if( $queue->max_executors < $queue->pid_list_len ){
+                        //ok, queue can be reduced because it's upper limit exceed the max queue consumers
+                        $_deleted = $this->_queueHandler->getRedisClient()->spop( $queue->pid_set_name );
+                        if ( $_deleted ) {
+                            $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queue->queue_name );
+                            posix_kill( $_deleted, SIGINT );
+                        }
+                    }
+
+                    //we do not want an infinite loop
+                    //so, at least one deletion per cycle
+                    $deleted = $_deleted || $deleted;
+
+                    $numDeleted += (int)(bool)$_deleted;
+
+                }
+
+                //no more processes to kill!! Avoid infinite loop
+                if ( !$deleted ) {
+                    break;
+                }
+
+            }
+
+        } elseif ( empty( $queueInfo ) && empty( $pid ) && empty( $num ) ) {
+
+            self::_TimeStampMsg( "Killing ALL processes." );
+            foreach ( $this->_queueContextList->list as $queue ) {
+                $numDeleted += $this->_queueHandler->getRedisClient()->scard( $queue->pid_set_name );
+                $pid_list = $this->_queueHandler->getRedisClient()->smembers( $queue->pid_set_name );
+                foreach ( $pid_list as $pid ){
+                    posix_kill( $pid, SIGINT );
+                }
+                $this->_queueHandler->getRedisClient()->del( $queue->pid_set_name );
+                $this->_queueHandler->getRedisClient()->set( $queue->queue_name, 0 );
+                $queue->pid_list_len = 0;
+            }
+
+        } else {
+            self::_TimeStampMsg( "Parameters not valid. Killing *** NONE ***" );
+        }
+
+        $this->_runningPids -= $numDeleted;
+
+        self::_TimeStampMsg( "Deleted $numDeleted processes." );
+
+    }
+
+    /**
+     * Reload Configuration every cycle
+     *
+     */
+    protected function _updateConfiguration() {
+
+        $config = @parse_ini_file( $this->_configFile, true );
+
+        if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
+            throw new Exception( 'Wrong configuration file provided.' );
+        }
+
+        Log::$fileName              = $config[ 'loggerName' ];
+        $this->_context_definitions = $config[ 'context_definitions' ];
+
+        if ( empty( $this->_contextIndex ) ) {
+            $contextList = $this->_context_definitions;
+        } else {
+            $contextList = array( $this->_context_definitions[ $this->_contextIndex ] );
+        }
+
+        if( empty( $this->_queueContextList->list ) ){
+
+            //First Execution, load build object
+            $this->_queueContextList = QueuesList::get( $contextList );
+
+            //exit method
+            return;
+
+        }
+
+        /**
+         * Compares the keys from array1 against the keys from array2 and returns the difference.
+         * This function is like array_diff() except the comparison is done on the keys instead of the values.
+         *
+         * <pre>
+         *     array_diff:
+         *     Compares array1 against one or more other arrays
+         *     and returns the values in array1 that are not present in any of the other arrays.
+         *</pre>
+         *
+         */
+        if( $diff = array_diff_key( $this->_queueContextList->list, QueuesList::get( $contextList )->list ) ){
+
+            //remove no more present contexts
+            foreach( $diff as $_key => $_cont ){
+                unset( $this->_queueContextList->list[ $_key ] );
+                $this->_destroyContext[] = $_cont;
+            }
+
+        }
+
+        foreach( $this->_context_definitions as $contextName => $context ){
+
+            if( isset( $this->_queueContextList->list[ $contextName ] ) ){
+
+                //update the max executor number for this element
+                $this->_queueContextList->list[ $contextName ]->max_executors = $context[ 'max_executors' ];
+
+            } else {
+
+                //create a new Object executo context
+                $this->_queueContextList->list[ $contextName ] = QueueInfo::buildFromArray( $context );
+
+            }
+
+        }
+
+    }
+
+    /**
+     *
+     * Remove no more present contexts
+     */
+    protected function _cleanContexts(){
+
+        //remove no more present contexts
+        foreach( $this->_destroyContext as $_context ){
+
+            self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : need to delete a context" );
+            $this->_killPids( $_context );
+
+        }
+        $this->_destroyContext = array();
+
+    }
+
+}

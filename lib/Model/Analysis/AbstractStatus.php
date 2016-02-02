@@ -63,7 +63,7 @@ abstract class Analysis_AbstractStatus {
         $this->_resultSet = getProjectStatsVolumeAnalysis( $this->id_project );
 
         try {
-            $amqHandler         = new Analysis_QueueHandler();
+            $amqHandler         = new \AMQHandler();
             $segmentsBeforeMine = $amqHandler->getActualForQID( $this->id_project );
         } catch ( Exception $e ) {
             $segmentsBeforeMine = null;

@@ -22,7 +22,7 @@ class Bootstrap {
 
         self::$CONFIG       = parse_ini_file( 'config.ini', true );
         self::$_ROOT        = realpath( dirname( __FILE__ ) . '/../' );
-        $OAUTH_CONFIG       = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
+        $OAUTH_CONFIG       = @parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
         register_shutdown_function( 'Bootstrap::fatalErrorHandler' );
 
         $mv = parse_ini_file( 'version.ini' );
@@ -181,7 +181,7 @@ class Bootstrap {
 
                 header( "HTTP/1.1 200 OK" );
 
-                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+                if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
                     //json_rersponse
                     if ( INIT::$EXCEPTION_DEBUG ) {
@@ -248,7 +248,11 @@ class Bootstrap {
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path( implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path() );
+
+        set_include_path(
+            implode( PATH_SEPARATOR, $def_path ) . PATH_SEPARATOR . get_include_path()
+        );
+
     }
 
     public static function loadClass( $className ) {
@@ -299,6 +303,11 @@ class Bootstrap {
                 die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
             }
         }
+
+        if ( ! empty( INIT::$PLUGIN_LOAD_PATHS )) {
+            set_include_path( get_include_path() . PATH_SEPARATOR . implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS ));
+        }
+
 
     }
 

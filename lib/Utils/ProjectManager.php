@@ -6,6 +6,9 @@
  * Time: 17.25
  *
  */
+
+use Analysis\DqfQueueHandler;
+
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 class ProjectManager {
@@ -552,38 +555,62 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
 
-        $query_project_summary = "
-            SELECT
-                 COUNT( s.id ) AS project_segments,
-                 SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
-            FROM segments s
-            INNER JOIN files_job fj ON fj.id_file = s.id_file
-            INNER JOIN jobs j ON j.id= fj.id_job
-            LEFT JOIN segment_translations st ON s.id = st.id_segment
-            WHERE j.id_project = %u
-        ";
-
-        $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
-
-        $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
+        /*
+         * This is the old code.
+         *
+         * This query is no more needed because the value of raw word count
+         * are calculated and updated inside the TM Analysis
+         *
+         * The only thing needed here is the status Constants_ProjectStatus::STATUS_FAST_OK
+         *
+         * <code>
+         *         $query_project_summary = "
+         *              SELECT
+         *                   COUNT( s.id ) AS project_segments,
+         *                   SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
+         *              FROM segments s
+         *              INNER JOIN files_job fj ON fj.id_file = s.id_file
+         *              INNER JOIN jobs j ON j.id= fj.id_job
+         *              LEFT JOIN segment_translations st ON s.id = st.id_segment
+         *              WHERE j.id_project = %u
+         *          ";
+         *
+         *          $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
+         *
+         *          $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
+         *
+         *          $update_project_count = "
+         *              UPDATE projects
+         *                SET
+         *                  standard_analysis_wc = %.2F,
+         *                  status_analysis = '%s'
+         *              WHERE id = %u
+         *          ";
+         *
+         *          $update_project_count = sprintf(
+         *                  $update_project_count,
+         *                  $project_summary[ 0 ][ 'project_raw_wordcount' ],
+         *                  $this->projectStructure[ 'status' ],
+         *                  $this->projectStructure[ 'id_project' ]
+         *          );
+         * </code>
+         */
 
         $update_project_count = "
             UPDATE projects
-              SET
-                standard_analysis_wc = %.2F,
-                status_analysis = '%s'
+              SET status_analysis = '%s'
             WHERE id = %u
         ";
 
         $update_project_count = sprintf(
                 $update_project_count,
-                $project_summary[ 0 ][ 'project_raw_wordcount' ],
                 $this->projectStructure[ 'status' ],
                 $this->projectStructure[ 'id_project' ]
         );
 
         $this->dbHandler->query( $update_project_count );
 //        Log::doLog( $this->projectStructure );
+
         //create Project into DQF queue
         if ( INIT::$DQF_ENABLED && !empty( $this->projectStructure[ 'dqf_key' ] ) ) {
 
@@ -593,7 +620,7 @@ class ProjectManager {
             $dqfProjectStruct->name            = $this->projectStructure[ 'project_name' ];
             $dqfProjectStruct->source_language = $this->projectStructure[ 'source_language' ];
 
-            $dqfQueue = new Analysis_DqfQueueHandler();
+            $dqfQueue = new DqfQueueHandler();
 
             try {
 

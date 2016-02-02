@@ -7,15 +7,7 @@
  *
  */
 
-class DataAccess_AbstractDaoSilentStruct extends stdClass {
-
-    public function __construct( Array $array_params = array() ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
-                $this->$property = $value ;
-            }
-        }
-    }
+abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDaoObjectStruct {
 
     /**
      * @return $this
@@ -45,10 +37,6 @@ class DataAccess_AbstractDaoSilentStruct extends stdClass {
             // distinct log levels. Should go in DEBUG level.
             // Log::doLog("DEBUG: Unknown property $name");
         }
-    }
-
-    public function toArray(){
-        return (array)$this;
     }
 
 }

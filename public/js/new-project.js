@@ -59,7 +59,7 @@ $(document).ready(function() {
         UI.checkRTL();
 		if(!$('.template-download').length) return;
 		if (UI.conversionsAreToRestart()) {
-			APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
+			APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
 		}
 		if( UI.checkTMXLangFailure() ){
 			UI.delTMXLangFailure();

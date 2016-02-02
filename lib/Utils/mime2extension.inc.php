@@ -1,4 +1,4 @@
-<?
+<?php
 
 		$reference = array(
 				'application/andrew-inset'         =>

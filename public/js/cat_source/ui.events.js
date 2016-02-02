@@ -1274,46 +1274,6 @@ $.extend(UI, {
 			if (e.button == 2) { // right click
 				// temporarily disabled
 				return true;
-/*
-				if ($('#contextMenu').css('display') == 'block')
-					return true;
-
-				var selection = window.getSelection();
-				if (selection.type == 'Range') { // something is selected
-					var str = selection.toString().trim();
-					if (str.length) { // the trimmed string is not empty
-						UI.currentSelectedText = str;
-
-						UI.currentSearchInTarget = ($(this).hasClass('source')) ? 0 : 1;
-						$('#contextMenu').attr('data-sid', $(this).parents('section').attr('id').split('-')[1]);
-
-						if (UI.customSpellcheck) {
-							var range = selection.getRangeAt(0);
-							var tag = range.startContainer.parentElement;
-							if (($(tag).hasClass('misspelled')) && (tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
-								UI.selectedMisspelledElement = $(tag);
-								var replacements = '';
-								var words = $(tag).attr('data-replacements').split(',');
-								$.each(words, function(item) {
-									replacements += '<a class="words" href="#">' + this + '</a>';
-								});
-								if ((words.length == 1) && (words[0] == '')) {
-									$('#spellCheck .label').hide();
-								} else {
-									$('#spellCheck .label').show();
-								}
-								$('#spellCheck .words').remove();
-								$('#spellCheck').show().find('.label').after(replacements);
-							} else {
-								$('#spellCheck').hide();
-							}
-						}
-
-						UI.showContextMenu(str, e.pageY, e.pageX);
-					}
-				}
-				return false;
-				*/
 			}
 			return true;
 		}).on('dragstart', '.editor .editarea .locked', function() {
@@ -1512,28 +1472,6 @@ $.extend(UI, {
 			$(this).addClass('active');
 			$('.editor .sub-editor').removeClass('open');
 			$('.editor .sub-editor.matches').addClass('open');
-		}).on('click', '.tab-switcher-cc', function(e) {
-			e.preventDefault();
-			$('.editor .submenu .active').removeClass('active');
-			$(this).addClass('active');
-			$('.editor .sub-editor').removeClass('open');
-			$('.editor .sub-editor.concordances').addClass('open');
-			$('.cc-search .search-source').focus();
-//        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
-			//if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-		}).on('click', '.tab-switcher-gl', function(e) {
-			e.preventDefault();
-			$('.editor .submenu .active').removeClass('active');
-			$(this).addClass('active');
-			$('.editor .sub-editor').removeClass('open');
-			$('.editor .sub-editor.glossary').addClass('open');
-			$('.gl-search .search-source').focus();
-		}).on('click', '.tab-switcher-al', function(e) {
-			e.preventDefault();
-			$('.editor .submenu .active').removeClass('active');
-			$(this).addClass('active');
-			$('.editor .sub-editor').removeClass('open');
-			$('.editor .sub-editor.alternatives').addClass('open');
 		}).on('click', '.alternatives a', function(e) {
 			e.preventDefault();
 			$('.editor .tab-switcher-al').click();
