@@ -2,6 +2,9 @@
 
 class Projects_MetadataDao {
 
+    const WORD_COUNT_RAW = 'raw';
+    const WORD_COUNT_EQUIVALENT = 'equivalent';
+
     /**
      * @param $id
      *

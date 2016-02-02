@@ -58,6 +58,9 @@ class CreateRecordInQaJobReviewsTest extends IntegrationTest {
         $project = $this->createProject();
         $project = Projects_ProjectDao::findById( $project->id_project );
 
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $this->assertEquals(1, count( $review_chunks ) );
+
         $chunks = $project->getChunks();
 
         splitJob(array(

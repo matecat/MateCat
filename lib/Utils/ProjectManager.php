@@ -41,6 +41,11 @@ class ProjectManager {
 
     protected $langService;
 
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project ;
+
     const TRANSLATED_USER = 'translated_user';
 
     public function __construct( ArrayObject $projectStructure = null ) {
@@ -90,7 +95,8 @@ class ProjectManager {
                             'skip_lang_validation' => false,
                             'pretranslate_100'     => 0,
                             'dqf_key'              => null,
-                            'owner'                => ''
+                            'owner'                => '',
+                            'word_count_type'      => ''
                     ) );
         }
 
@@ -108,8 +114,21 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param $id
+     *
+     * @throws Exceptions_RecordNotFound
+     */
+    public function setProjectIdAndLoadProject( $id ) {
+        $this->project = Projects_ProjectDao::findById($id);
+        if ( $this->project == FALSE ) {
+            throw new Exceptions_RecordNotFound("Project was not found: id $id ");
+        }
+        $this->projectStructure['id_project'] = $id;
+    }
+
     public function getProjectStructure() {
-        return $this->projectStructure;
+         return $this->projectStructure;
     }
 
     /**
@@ -118,16 +137,52 @@ class ProjectManager {
      *
      */
     private function evalMetadata () {
+        $this->evalProjectType();
+        $this->evalWordCountType();
+    }
+
+    /**
+     *
+     */
+    private function evalWordCountType() {
+        if ($this->projectStructure['word_count_type'] == null) {
+            return ;
+        }
+
+        $dao = new Projects_MetadataDao( Database::obtain() );
+        $dao->set(
+                $this->projectStructure['id_project'],
+                'word_count_type',
+                $this->projectStructure['word_count_type']
+        );
+    }
+
+    /**
+     *
+     */
+    private function evalProjectType() {
         if ($this->projectStructure['project_type'] == null) {
             return ;
         }
 
         $dao = new Projects_MetadataDao( Database::obtain() );
         $dao->set(
-            $this->projectStructure['id_project'],
-            'project_type',
-            $this->projectStructure['project_type']
+                $this->projectStructure['id_project'],
+                'project_type',
+                $this->projectStructure['project_type']
         );
+    }
+
+    /**
+     * Creates record in projects tabele and instantiates the project struct
+     * internally.
+     *
+     */
+    private function createProjectRecord() {
+        $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
+        $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
+        $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
+        $this->project = Projects_ProjectDao::findById( $this->projectStructure['id_project'] );
     }
 
 
@@ -149,7 +204,7 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        Features::validateProjectCreation(
+        Features::run('validateProjectCreation',
             $this->projectStructure['id_customer'],
             $this->projectStructure
         );
@@ -158,11 +213,7 @@ class ProjectManager {
             return false;
         }
 
-        // create project?
-        $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
-        $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
-        $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
-
+        $this->createProjectRecord();
         $this->evalMetadata();
 
         //create user (Massidda 2013-01-24)
@@ -1149,7 +1200,7 @@ class ProjectManager {
          */
         $query = "SELECT
                     SUM( raw_word_count ) AS raw_word_count,
-                    SUM(eq_word_count) AS eq_word_count,
+                    SUM( eq_word_count ) AS eq_word_count,
                     job_first_segment, job_last_segment, s.id, s.show_in_cattool
                         FROM segments s
                         JOIN files_job fj on fj.id_file=s.id_file
@@ -1179,8 +1230,7 @@ class ProjectManager {
             throw new Exception( 'Wrong job id or password. Job segment range not found.', -6 );
         }
 
-        //if fast analysis with equivalent word count is present
-        $count_type  = ( !empty( $row_totals[ 'eq_word_count' ] ) ? 'eq_word_count' : 'raw_word_count' );
+        $count_type = $this->getWordCountType( $row_totals );
         $total_words = $row_totals[ $count_type ];
 
         if ( empty( $requestedWordsPerSplit ) ) {
@@ -1251,6 +1301,21 @@ class ProjectManager {
 
         return $projectStructure[ 'split_result' ];
 
+    }
+
+
+    private function getWordCountType( $row_totals ) {
+        $project_count_type = $this->project->getWordCountType();
+        if (
+                $project_count_type == Projects_MetadataDao::WORD_COUNT_EQUIVALENT &&
+                !empty( $row_totals[ 'eq_word_count' ] )
+        ) {
+            $count_type = 'eq_word_count';
+        } else {
+            $count_type = 'raw_word_count';
+        }
+
+        return $count_type;
     }
 
     /**
@@ -1763,13 +1828,12 @@ class ProjectManager {
     protected function _insertPreTranslations( $jid ) {
 
         $status = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $status = Features::filter('status_for_pretranslated_segments',
+
+        $status = Features::filter('filter_status_for_pretranslated_segments',
                 $this->projectStructure['id_customer'],
                 $status,
                 $this->projectStructure
         );
-
-        //    Log::doLog( array_shift( array_chunk( $SegmentTranslations, 5, true ) ) );
 
         foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
 
@@ -1794,7 +1858,9 @@ class ProjectManager {
         // Executing the Query
         if ( !empty( $this->projectStructure[ 'query_translations' ] ) ) {
 
-            $baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked, match_type )
+            $baseQuery = "INSERT INTO segment_translations (
+                id_segment, id_job, segment_hash, status, translation, translation_date,
+                tm_analysis_status, locked, match_type )
 				values ";
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
@@ -1802,8 +1868,6 @@ class ProjectManager {
             $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 200 ) );
 
             Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
-
-            // Log::doLog( print_r( $this->projectStructure['translations'],true ) );
 
             foreach ( $this->projectStructure[ 'query_translations' ] as $i => $chunk ) {
 

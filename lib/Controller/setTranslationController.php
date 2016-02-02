@@ -411,6 +411,7 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
 
         $propagationTotal = array();
+
         if ( $propagateToTranslated && in_array( $this->status, array(
             Constants_TranslationStatus::STATUS_TRANSLATED,
             Constants_TranslationStatus::STATUS_APPROVED,
@@ -444,15 +445,25 @@ class setTranslationController extends ajaxController {
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
 
+
+
+
         //redundant because the update is made only where status = old status
         if ( $this->status != $old_translation[ 'status' ] ) {
 
-            //cambiato status, sposta i conteggi
-            $old_count = ( !is_null( $old_translation[ 'eq_word_count' ] ) ? $old_translation[ 'eq_word_count' ] : $segment[ 'raw_word_count' ] );
+            $word_count_type = $this->project->getWordCountType();
 
-            //if there is not a row in segment_translations because volume analysis is disabled
-            //search for a just created row
-            $old_status = ( !empty( $old_translation[ 'status' ] ) ? $old_translation[ 'status' ] : Constants_TranslationStatus::STATUS_NEW );
+            // status changed, update counts
+            $old_count = ( !is_null( $old_translation[ 'eq_word_count' ] ) ?
+                    $old_translation[ 'eq_word_count' ] :
+                    $segment[ 'raw_word_count' ] )
+            ;
+
+            // if there is not a row in segment_translations because volume analysis is disabled
+            // search for a just created row
+            $old_status = ( !empty( $old_translation[ 'status' ] ) ?
+                    $old_translation[ 'status' ] :
+                    Constants_TranslationStatus::STATUS_NEW );
 
             $counter = new WordCount_Counter( $old_wStruct );
             $counter->setOldStatus( $old_status );
@@ -469,6 +480,7 @@ class setTranslationController extends ajaxController {
 
             try {
                 $newTotals = $counter->updateDB( $newValues );
+
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
                 Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );

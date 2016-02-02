@@ -459,7 +459,7 @@ UI = {
             '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
             ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 
-		buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
         UI.currentSegment.trigger('buttonsCreation');
         buttonsOb.empty().append(UI.segmentButtons);
@@ -1468,7 +1468,7 @@ UI = {
             status: status,
             caller: 'autosave'
         });
-//		this.setTranslation(this.getSegmentId(segment), status, 'autosave');
+
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {
@@ -1892,8 +1892,6 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
-//        console.log('setStatus - segment: ', segment);
-//        console.log('setStatus - status: ', status);
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {

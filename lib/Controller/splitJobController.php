@@ -81,8 +81,9 @@ class splitJobController extends ajaxController {
             }
 
             $pManager = new ProjectManager();
-            $pStruct  = $pManager->getProjectStructure();
-            $pStruct['id_project'] = $this->project_struct->id ;
+            $pManager->setProjectIdAndLoadProject( $this->project_struct->id );
+
+            $pStruct = $pManager->getProjectStructure();
             $pStruct['id_customer'] = $this->project_struct->id_customer ;
 
             switch ( $this->exec ) {

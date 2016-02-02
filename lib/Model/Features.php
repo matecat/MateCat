@@ -12,13 +12,6 @@ class Features {
     );
 
     /**
-     * @param $id_customer
-     * @param $projectStructure
-     */
-    public static function validateProjectCreation($id_customer, $projectStructure) {
-        self::run(__METHOD__, $id_customer, $projectStructure);
-    }
-    /**
      * appendDecorators
      *
      * Loads feature specific decorators, if any

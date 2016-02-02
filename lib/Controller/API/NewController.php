@@ -591,7 +591,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
-        $projectStructure[ 'project_type' ]        = $this->project_type ;
+        $projectStructure[ 'project_type' ]         = $this->project_type ;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();

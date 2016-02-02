@@ -53,6 +53,19 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return $data;
     }
 
+
+    /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    public function getMetadataValue($key) {
+        $meta = $this->getMetadataAsKeyValue();
+        if ( array_key_exists($key, $meta) ) {
+            return $meta[$key];
+        }
+    }
+
     public function isFeatureEnabled( $feature_code ) {
         $feature = $this->getOwnerFeature( $feature_code );
         return \Features::enabled($feature, $this);
@@ -65,6 +78,18 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
 
     public function isMarkedComplete() {
       return Chunks_ChunkCompletionEventDao::isProjectCompleted( $this );
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getWordCountType() {
+        $type = $this->getMetadataValue('word_count_type');
+        if ( $type == null ) {
+            return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
+        } else {
+            return $type;
+        }
     }
 
     /**

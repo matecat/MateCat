@@ -155,11 +155,11 @@ function splitJob( $params, $options=array() ) {
 
     $response = $test->getResponse();
 
-    if ( !in_array( (int) $response['code'], array(200, 201) )) {
+    if ( !in_array( (int) $response['code'], array(200, 201) ) ) {
         throw new Exception( "invalid response code " . $response['code'] );
     }
 
-    return json_decode( $response['body'] )  ;
+    return json_decode( $response['body'] ) ;
 }
 
 function mergeJob( $params, $options=array() ) {
