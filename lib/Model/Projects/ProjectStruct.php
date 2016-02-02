@@ -84,12 +84,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @return mixed|string
      */
     public function getWordCountType() {
-        $type = $this->getMetadataValue('word_count_type');
-        if ( $type == null ) {
-            return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
-        } else {
-            return $type;
-        }
+        return $this->cachable(__METHOD__, $this->getMetadataValue('word_count_type'), function($type) {
+            if ( $type == null ) {
+                return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
+            } else {
+                return $type;
+            }
+        });
     }
 
     /**

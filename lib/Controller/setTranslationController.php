@@ -428,7 +428,11 @@ class setTranslationController extends ajaxController {
                 ));
 
                 $propagationTotal = propagateTranslation(
-                    $TPropagation, $this->jobData, $this->id_segment, $propagateToTranslated
+                    $TPropagation,
+                        $this->jobData,
+                        $this->id_segment,
+                        $this->project,
+                        $propagateToTranslated
                 );
 
             } catch ( Exception $e ) {
@@ -445,25 +449,14 @@ class setTranslationController extends ajaxController {
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
 
-
-
-
         //redundant because the update is made only where status = old status
         if ( $this->status != $old_translation[ 'status' ] ) {
 
-            $word_count_type = $this->project->getWordCountType();
-
-            // status changed, update counts
-            $old_count = ( !is_null( $old_translation[ 'eq_word_count' ] ) ?
-                    $old_translation[ 'eq_word_count' ] :
-                    $segment[ 'raw_word_count' ] )
-            ;
+            $old_status = $this->statusOrDefault( $old_translation );
+            $old_count = $this->getOldCount( $segment, $old_translation );
 
             // if there is not a row in segment_translations because volume analysis is disabled
             // search for a just created row
-            $old_status = ( !empty( $old_translation[ 'status' ] ) ?
-                    $old_translation[ 'status' ] :
-                    Constants_TranslationStatus::STATUS_NEW );
 
             $counter = new WordCount_Counter( $old_wStruct );
             $counter->setOldStatus( $old_status );
@@ -687,5 +680,43 @@ class setTranslationController extends ajaxController {
         if ( $_Translation['version_number'] == null ) {
             $_Translation['version_number'] = 0 ;
         }
+    }
+
+    /**
+     * @param $old_translation
+     *
+     * @return string
+     */
+    private function statusOrDefault( $old_translation ) {
+        if ( empty( $old_translation['status'] ) ) {
+            return Constants_TranslationStatus::STATUS_NEW ;
+        } else {
+            return $old_translation[ 'status' ] ;
+        }
+    }
+
+
+    /**
+     * Returns the old_count to pass to WordCounter, based on project
+     * configuration, picking from either eq_word_count or raw_word_count
+     *
+     * @param $segment
+     * @param $old_translation
+     *
+     * @return mixed
+     */
+    private function getOldCount($segment, $old_translation ) {
+        $word_count_type = $this->project->getWordCountType();
+
+        if ( $word_count_type == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            $old_count = $segment['raw_word_count'];
+        } else {
+            if ( is_null( $old_translation[ 'eq_word_count' ] ) ) {
+                $old_count = $segment[ 'raw_word_count' ] ;
+            } else {
+                $old_count = $old_translation[ 'eq_word_count' ] ;
+            }
+        }
+        return $old_count ;
     }
 }

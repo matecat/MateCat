@@ -1163,7 +1163,7 @@ function addTranslation( array $_Translation ) {
  * @throws Exception
  * @return int
  */
-function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTranslated = false ) {
+function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project, $propagateToTranslated = false ) {
 
     $db = Database::obtain();
 
@@ -1198,12 +1198,17 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
         }
     }
 
+    if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
+        $sum_sql = "SUM(segments.raw_word_count)";
+    } else {
+        $sum_sql = "SUM(eq_word_count)";
+    }
+
     //if the new status to set is TRANSLATED,
     // sum the equivalent words of segments equals to me with the status different from MINE
     $queryTotals = "
           SELECT
-            SUM(eq_word_count) as total,
-            SUM(segments.raw_word_count) as raw_total,
+            $sum_sql as total,
             status
           FROM segment_translations
             INNER JOIN  segments
@@ -1222,7 +1227,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     try {
         $totals = $db->fetch_array($queryTotals);
     } catch( PDOException $e ) {
-        throw new Exception( "Error in counting total equivalent words for propagation: " . $e->getCode() . ": " . $e->getMessage()
+        throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
                 -$e->getCode() );
     }
@@ -1239,9 +1244,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
         $andStatus
         AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
         AND id_segment != $_idSegment
-    ";
-
-//    Log::doLog( $TranslationPropagate );
+    ";;
 
     try {
         $db->query($TranslationPropagate);

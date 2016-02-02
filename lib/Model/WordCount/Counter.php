@@ -24,6 +24,11 @@ class WordCount_Counter {
     protected $newStatus;
     protected $oldStatus;
 
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project;
+
     protected static $constCache = array();
 
     /**
@@ -53,6 +58,13 @@ class WordCount_Counter {
 
     public function setOldWordCount( WordCount_Struct $oldWCount ) {
         $this->oldWCount = $oldWCount;
+    }
+
+    /**
+     * @param Projects_ProjectStruct $project
+     */
+    public function setProject(Projects_ProjectStruct $project ) {
+        $this->project = $project;
     }
 
     public function setNewStatus( $new_status ) {
@@ -148,8 +160,13 @@ class WordCount_Counter {
                 )
         );
 
+        $sum_sql = $this->getSumSqlBasedOnProjectWordCountType();
+
         $queryStats = "select
-                        st.status, sum(st.eq_word_count) as eq_wc
+                        st.status,
+                        $sum_sql as wc_sum,
+                        sum(st.eq_word_count) ,
+                        sum(s.raw_word_count)
                         from
                             jobs j join segment_translations st  on j.id = st.id_job
                           join segments s on s.id = st.id_segment
@@ -185,11 +202,15 @@ class WordCount_Counter {
         $approved_words   = 0.0;
         $rejected_words   = 0.0;
 
+
+        // find the appropriate column based on
+        // project config.
+
         foreach ( $jobStats as $row_stat ) {
 
             $counter_name = strtolower( $row_stat[ 'status' ] ) . "_words";
             if ( isset( $$counter_name ) ) {
-                $$counter_name += $row_stat[ 'eq_wc' ];
+                $$counter_name += $row_stat[ 'wc_sum' ];
             }
 
         }
@@ -279,6 +300,23 @@ class WordCount_Counter {
 
         return $wStruct;
 
+    }
+
+    private function getSumSqlBasedOnProjectWordCountType() {
+        $sum_eq_word_count = 'sum(st.eq_word_count)';
+        $sum_raw_word_count = 'sum(s.raw_word_count)';
+
+        if ( !$this->project ) {
+            return $sum_eq_word_count ;
+        }
+
+        $type = $this->project->getWordCountType();
+        if ( $type == Projects_MetadataDao::WORD_COUNT_RAW ) {
+            return $sum_raw_word_count ;
+        }
+        else {
+            return $sum_eq_word_count ;
+        }
     }
 
 } 
