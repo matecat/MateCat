@@ -212,4 +212,12 @@ class Log {
 
     }
 
+    /**
+     * Ugly workaround to reset the logger, so the method _writeTo re-initialize the logger configuration
+     *
+     */
+    public static function resetLogger(){
+        self::$logger = null;
+    }
+
 }
