@@ -81,7 +81,8 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
-		}).on('keydown', null, 'ctrl+2', function(e) {
+		})
+                .on('keydown', null, 'ctrl+2', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
@@ -91,7 +92,8 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
-		}).on('keydown', null, 'ctrl+3', function(e) {
+		})
+                .on('keydown', null, 'ctrl+3', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
@@ -101,11 +103,14 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
-		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+		})
+                .on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
-        }).on('keydown', '.editor .editarea', 'return', function(e) {
+        })
+                .on('keydown', '.editor .editarea', 'return', function(e) {
             UI.handleReturn(e);
-		}).on('keydown', '.editor .editarea', 'space', function(e) {
+		})
+                .on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
                 e.preventDefault();
@@ -120,7 +125,8 @@ $.extend(UI, {
                 UI.unnestMarkers();
             }
 
-		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+		})
+                .on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
             UI.editarea.find('.lastInserted').removeClass('lastInserted');
