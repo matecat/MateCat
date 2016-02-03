@@ -306,7 +306,7 @@ class INIT {
             'sxml'
     );
 
-    public static $DEPRECATE_LEGACY_XLIFFS = false;
+    public static $DEPRECATE_LEGACY_XLIFFS = true;
 
     /*
      * The maximum filename length accepted.
