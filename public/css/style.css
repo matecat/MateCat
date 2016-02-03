@@ -3193,6 +3193,7 @@ section .toolbar .tagModeToggle ,section .toolbar  .autofillTag  {
     font-size: 60%;
     margin-right: 5px;
 }
+
 section .toolbar span {
     font-size: 150%;
 }
