@@ -27,7 +27,7 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function varsForUncomplete() {
-        $this->template->header_main_button_label = 'SEND';
+        $this->template->header_main_button_label = 'Mark as complete';
         $this->template->header_main_button_class = 'notMarkedComplete' ;
 
         if ( $this->completable()  ) {
@@ -39,7 +39,7 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function varsForComplete() {
-        $this->template->header_main_button_label = 'SENT';
+        $this->template->header_main_button_label = 'Marked as complete';
         $this->template->header_main_button_class = 'isMarkedComplete' ;
         $this->template->header_main_button_enabled =  false ;
     }

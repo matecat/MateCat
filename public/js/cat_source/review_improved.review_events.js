@@ -176,8 +176,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         $.post( path, modelToSave )
             .done(function( data ) {
-
-                // push the new data to the store
+                // push new data to the store
                 // TODO make an helper for this date conversion
                 data.issue.formattedDate = moment(data.issue.created_at).format('lll');
                 MateCat.db.upsert('segment_translation_issues', data.issue );
@@ -189,10 +188,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                     noPropagation: true,
                 });
             });
-
-
-
-
 
         return false;
     });

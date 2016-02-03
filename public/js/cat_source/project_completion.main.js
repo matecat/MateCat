@@ -6,9 +6,9 @@ ProjectCompletion = {
 
 if ( ProjectCompletion.enabled() ) {
 (function($,config,ProjectCompletion,undefined) {
-    var sendLabel = 'SEND';
-    var sentLabel = 'SENT' ;
-    var sendingLabel = 'SENDING';
+    var sendLabel = 'Mark as complete';
+    var sentLabel = 'Marked as complete' ;
+    var sendingLabel = 'Marking';
 
     var button ;
 
