@@ -184,7 +184,9 @@ $.extend(UI, {
                    restoreSelection();
 
                    if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+
                    segment = $(this).parents('section');
+
                    if($('span.locked', this).length) {
                        segment.addClass('hasTags');
                    } else {

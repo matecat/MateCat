@@ -3187,20 +3187,17 @@ del.diff
 	top: -4px;
 */
 }
-section .toolbar .tagModeToggle ,section .toolbar  .fixMissingTags  {
+section .toolbar .tagModeToggle ,section .toolbar  .autofillTag  {
     float: left;
     display: none;
     font-size: 60%;
     margin-right: 5px;
 }
 
-section .toolbar  .fixMissingTags {
-	display: block;
-}
-
 section .toolbar span {
     font-size: 150%;
 }
+
 .tagModeToggle span:before {
 float: left;
 }
@@ -3375,11 +3372,16 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 }
 
 
-.tagModeToggle , .fixMissingTags  {
-padding: 3px 2px 0px 2px;
+.tagModeToggle ,
+.autofillTag  {
+padding: 4px 2px 0px 2px;
 border: 1px solid #fff;
 color: #444!important;
 }
+.autofillTag{
+	padding-top: 0 ;
+}
+
 
 .tagModeToggle:hover, .tagModeToggle.active {
 	color:#999!important;
@@ -3398,7 +3400,8 @@ section.editor .toolbar {
     display: block;
 }
 
-.tagModeToggle span , .fixMissingTags  span {
+.tagModeToggle span ,
+.autofillTag  span {
 	float: left;
 }
 
@@ -3425,10 +3428,13 @@ margin-left: 5px;
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
-body.tagModes .editor.hasTags .toolbar .tagModeToggle ,body.tagModes .editor.hasTags .toolbar  .fixMissingTags  {
+body.tagModes .editor.hasTags .toolbar .tagModeToggle ,
+body.tagModes .editor.hasTags .toolbar .autofillTag  {
     display: block;
 }
-body.tagmarkDisabled .toolbar .tagModeToggle ,body.tagmarkDisabled .toolbar  .fixMissingTags  {
+
+body.tagmarkDisabled .toolbar .tagModeToggle ,
+body.tagmarkDisabled .toolbar .autofillTag  {
 	display: none !important;
 }
 body.tagModes .editor .toolbar .tagLockCustomize {
