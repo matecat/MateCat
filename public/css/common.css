@@ -2817,11 +2817,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-75v12b');
-	src:url('fonts/icomoon.eot?#iefix-75v12b') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-75v12b') format('woff'),
-		url('fonts/icomoon.ttf?-75v12b') format('truetype'),
-		url('fonts/icomoon.svg?-75v12b#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-24j80y');
+	src:url('fonts/icomoon.eot?#iefix-24j80y') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-24j80y') format('woff'),
+		url('fonts/icomoon.ttf?-24j80y') format('truetype'),
+		url('fonts/icomoon.svg?-24j80y#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2856,6 +2856,27 @@ color: #000;
     content: "\e970";
 }
 
+.icon-format_color_fill:before {
+    content: "\e23a";
+}
+
+.autofillTag {
+    display: block;
+    float: left;
+    cursor: pointer;
+    color: #444!important;
+}
+
+.autofillTag:hover, 
+.autofillTag.active {
+    color: #999!important;
+}
+
+.autofillTag:before {
+    content: "\e23a";
+    font-size: 19px;
+    display: block;    
+}
 /*
 /* mbc extend iconmoon set with icons for matecat chat
 */
@@ -2927,6 +2948,7 @@ a.resume-project:after,
 .tab-switcher-al a:before,
 .error-message p:before,
 .text .alternatives:before,
+.autofillTag:before,
 input.downloadtr-button:before,
 body.manage header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
