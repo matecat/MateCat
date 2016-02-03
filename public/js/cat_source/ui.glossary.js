@@ -254,6 +254,7 @@ $.extend(UI, {
 
 	renderGlossary: function(d, seg) {
 		segment = seg;
+		debugger;
 		segment_id = segment.attr('id');
 //		$('.sub-editor.glossary .overflow .results', segment).empty();
 		$('.sub-editor.glossary .overflow .message', segment).remove();
@@ -268,8 +269,20 @@ $.extend(UI, {
 						return;
 					var disabled = (this.id == '0') ? true : false;
 					cb = this.created_by;
-					if(typeof this.target_note == 'undefined'){ this.comment = ''; }
-					else { this.comment = this.target_note; }
+
+					var sourceNoteEmpty = (typeof this.source_note == 'undefined' || this.source_note == '');
+					var targetNoteEmpty = (typeof this.target_note == 'undefined' || this.target_note == '');
+
+					if( sourceNoteEmpty && targetNoteEmpty ){
+						this.comment = '';
+					}
+					else if( !targetNoteEmpty ){
+						this.comment = this.target_note;
+					}
+					else if( !sourceNoteEmpty ){
+						this.comment = this.source_note;
+					}
+
 					cl_suggestion = UI.getPercentuageClass(this.match);
 					var leftTxt = this.segment;
 					leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
@@ -277,7 +290,30 @@ $.extend(UI, {
 					var rightTxt = this.translation;
 					rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 					rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + UI.decodePlaceholdersToText(leftTxt, true) + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText(rightTxt, true) + '</span></li><li class="details">' + ((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
+					debugger;
+					$('.sub-editor.glossary .overflow .results', segment)
+							.append(
+							'<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '">'+
+								'<li class="sugg-source">' +
+									((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
+									'<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+										UI.decodePlaceholdersToText(leftTxt, true) +
+									'</span>' +
+								'</li>' +
+								'<li class="b sugg-target">' +
+									'<span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
+										UI.decodePlaceholdersToText(rightTxt, true) +
+									'</span>' +
+								'</li>' +
+								'<li class="details">' +
+									((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') +
+									'<ul class="graysmall-details">' +
+										'<li>' + this.last_update_date + '</li>' +
+										'<li class="graydesc">Source: <span class="bold">' + cb + '</span></li>' +
+									'</ul>' +
+								'</li>' +
+							'</ul>'
+					);
 				});
 			});
             $('.sub-editor.glossary .overflow .search-source, .sub-editor.glossary .overflow .search-target', segment).text('');
