@@ -149,7 +149,7 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
-		} ).on('click', '.fixMissingTags', function(e){
+		} ).on('click', '.autofillTag', function(e){
 			e.preventDefault();
 
 			//get source tags from the segment
