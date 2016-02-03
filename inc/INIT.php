@@ -306,6 +306,8 @@ class INIT {
             'sxml'
     );
 
+    public static $DEPRECATE_LEGACY_XLIFFS = false;
+
     /*
      * The maximum filename length accepted.
      * Usually OSes accept names of 255 characters at most.
