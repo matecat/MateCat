@@ -340,5 +340,48 @@ class Utils {
 		return $result;
 	}
 
+	public static function getServerRootUrl() {
+    $s = $_SERVER['HTTPS'] === 'on' ? 's' : '';
+    $protocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))).$s;
+    $port = ($_SERVER['SERVER_PORT'] == '80') ? '' : (':'.$_SERVER['SERVER_PORT']);
+    return $protocol.'://'.$_SERVER['SERVER_NAME'].$port;
+	}
+
+	// Previously in FileFormatConverter
+	//remove UTF-8 BOM
+	public static function stripBOM( $string, $utf = 8 ) {
+		//depending on encoding, different slices are to be cut
+		switch ( $utf ) {
+			case 16:
+				$string = substr( $string, 2 );
+				break;
+			case 32:
+				$string = substr( $string, 4 );
+				break;
+			case 8:
+			default:
+				$string = substr( $string, 3 );
+				break;
+		}
+
+		return $string;
+	}
+
+	public static function isJobBasedOnMateCatFilters($jobId) {
+		$fs = new FilesStorage();
+		$files = $fs->getFilesForJob( $jobId, null );
+		foreach ($files as $file) {
+			$fileType = DetectProprietaryXliff::getInfo( $files[0][ 'xliffFilePath' ] );
+			if ($fileType['proprietary_short_name'] !== 'matecat_converter') {
+				// If only one XLIFF is not created with MateCat Filters, we can't say
+				// that the project is entirely based on new Filters
+				return false;
+			}
+		}
+		// If the flow arrives here, all the files' XLIFFs are based on new Filters
+		return true;
+	}
+
+
 }
 
