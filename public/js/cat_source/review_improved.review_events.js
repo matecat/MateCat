@@ -338,7 +338,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     $(document).on('segment:status:change', function(e, segment, options) {
-        UI.openNextTranslated( segment.id );
+        if ( options.status != 'rejected' ) {
+            UI.openNextTranslated( segment.id );
+        }
     });
 
     $(document).on('click', 'a.approved', function(e) {

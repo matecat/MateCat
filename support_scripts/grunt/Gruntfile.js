@@ -206,6 +206,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-strip');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-sass');
+    grunt.loadNpmTasks('grunt-browserify');
 
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);

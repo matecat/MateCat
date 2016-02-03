@@ -212,14 +212,7 @@ UI = {
         if ($('section').length > config.maxNumSegments) {
             UI.reloadToSegment(UI.currentSegmentId);
         }
-//		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
-//		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
-//		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
-/*
-		if (($('section').length > 500)||((this.initSegNum/this.numOpenedSegments) < 2)||(this.hasToBeRerendered)) {
-			UI.reloadToSegment(UI.currentSegmentId);
-		}
-*/
+
 	},
 	checkIfFinished: function(closing) {
 		if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
@@ -233,23 +226,6 @@ UI = {
 			this.body.addClass('justdone');
 		}
 	},
-/*
-	checkTutorialNeed: function() {
-		if (!Loader.detect('tutorial'))
-			return false;
-		if (!$.cookie('noTutorial')) {
-			$('#dialog').dialog({
-			});
-			$('#hideTutorial').bind('change', function(e) {
-				if ($('#hideTutorial').attr('checked')) {
-					$.cookie('noTutorial', true);
-				} else {
-					$.removeCookie('noTutorial');
-				}
-			});
-		}
-	},
-*/
     closeSegment: function(segment, byButton, operation) {
         console.log('CLOSE SEGMENT');
 
@@ -257,7 +233,6 @@ UI = {
 			this.toSegment = undefined;
 			return true;
 		} else {
-//		    var closeStart = new Date();
             this.autoSave = false;
 
             $(window).trigger({
@@ -272,9 +247,7 @@ UI = {
                 if ((operation == 'translated') || (operation == 'Save'))
                     saveBrevior = false;
             }
-//            console.log('segment.hasClass(modified): ', segment.hasClass('modified'));
-//            console.log('saveBrevior: ', saveBrevior);
-//            console.log('!config.isReview: ', !config.isReview);
+
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
@@ -2407,8 +2380,6 @@ console.log('eccolo: ', typeof token);
         }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
-        this.log('setTranslation', reqData);
-        segment = $('#segment-' + id_segment);
 
         return APP.doRequest({
             data: reqData,
@@ -2419,15 +2390,13 @@ console.log('eccolo: ', typeof token);
                 UI.failedConnection(this[0], 'setTranslation');
                 UI.decrementOfflineCacheRemaining();
             },
-			success: function( d ) {
+			success: function( data ) {
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
-				UI.setTranslation_success(d, this[1]);
-                $(document).trigger('setTranslation:success', d);
+				UI.setTranslation_success(data, this[1]);
+                $(document).trigger('setTranslation:success', data);
 			}
 		});
-
-
 	},
     collectSplittedStatuses: function (sid) {
         statuses = [];
@@ -2782,17 +2751,17 @@ console.log('eccolo: ', typeof token);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, options) {
-        id_segment = options.id_segment;
-        status = options.status;
-        caller = options.caller || false;
-        callback = options.callback;
-        byStatus = options.byStatus;
-        propagate = options.propagate;
-        segment = $('#segment-' + id_segment);
+        var id_segment = options.id_segment;
+        var status = options.status;
+        var caller = options.caller || false;
+        var callback = options.callback;
+        var byStatus = options.byStatus;
+        var propagate = options.propagate;
+        var segment = $('#segment-' + id_segment);
 
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
-        if(typeof d.pee_error_level != 'undefined') {
+        if (typeof d.pee_error_level != 'undefined') {
             $('#edit_log_link' ).removeClass( "edit_1 edit_2 edit_3" ). addClass( UI.pee_error_level_map[d.pee_error_level] );
             UI.body.addClass('peeError');
         }
@@ -2811,24 +2780,16 @@ console.log('eccolo: ', typeof token);
         this.resetRecoverUnsavedSegmentsTimer();
     },
     recoverUnsavedSetTranslations: function() {
-//        console.log('AAA recoverUnsavedSetTranslations');
-//        console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
         $.each(UI.unsavedSegmentsToRecover, function (index) {
             if($('#segment-' + this + ' .editarea').text() === '') {
-//                console.log(this + ' è ancora vuoto');
                 UI.resetRecoverUnsavedSegmentsTimer();
             } else {
-//                console.log(this + ' non è più vuoto, si può mandare');
                 UI.setTranslation({
                     id_segment: this.toString(),
                     status: 'translated'
                 });
-//                UI.setTranslation(this.toString(), 'translated');
-                // elimina l'item dall'array
                 UI.unsavedSegmentsToRecover.splice(index, 1);
-//                console.log('eliminato ' + this.toString());
             }
-            // se non è vuoto rifai il timeout, clearing l'altro
         });
     },
     resetRecoverUnsavedSegmentsTimer: function () {
@@ -2845,7 +2806,6 @@ console.log('eccolo: ', typeof token);
     },
 
     propagateTranslation: function(segment, status, evenTranslated) {
-//        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
         console.log('status: ', status);
         console.log(status == 'translated');
@@ -2859,8 +2819,6 @@ console.log('eccolo: ', typeof token);
 
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
-//                UI.setStatus($(this), 'draft');
-                //set segment as autoPropagated
                 $( this ).data( 'autopropagated', true );
             });
 
@@ -2875,7 +2833,6 @@ console.log('eccolo: ', typeof token);
             this.createHeader(true);
 
         }
-//        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
     },
     switchFooter: function() {
         console.log('switchFooter');

@@ -9,6 +9,7 @@ Review = {
     type : config.reviewType
 };
 
+
 if ( Review.enabled() )
 (function(Review, $, undefined) {
 
@@ -68,44 +69,28 @@ if ( Review.enabled() )
 
         },
 
-        /**
-         * Search for the next translated segment to propose for revision.
-         * This function searches in the current UI first, then falls back
-         * to invoke the server and eventually reload the page to the new
-         * URL.
-         */
         openNextTranslated: function (sid) {
+            console.log('openNextTranslated');
             sid = sid || UI.currentSegmentId;
-            var el = $('#segment-' + sid);
+            el = $('#segment-' + sid);
 
             var translatedList = [];
             var approvedList = [];
 
-            var clickableSelector = UI.targetContainerSelector();
-
-            if ( el.nextAll('.status-translated, .status-approved').length ) {
-
+            if(el.nextAll('.status-translated').length) { // find in next segments in the current file
                 translatedList = el.nextAll('.status-translated');
-                approvedList   = el.nextAll('.status-approved');
-
-
-                if ( translatedList.length ) {
-                    translatedList.first().find( clickableSelector ).click();
-                } else {
-                    approvedList.first().find( clickableSelector ).click();
-
+                if( translatedList.length ) {
+                    translatedList.first().find('.editarea').click();
                 }
 
             } else {
-
                 file = el.parents('article');
-                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () {
+                file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
 
                     var translatedList = $(this).find('.status-translated');
-                    var approvedList   = $(this).find('.status-approved');
 
                     if( translatedList.length ) {
-                        translatedList.first().find( clickableSelector ).click();
+                        translatedList.first().find('.editarea').click();
                     } else {
                         UI.reloadWarning();
                     }
@@ -114,22 +99,14 @@ if ( Review.enabled() )
 
                 });
                 // else
-                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
-
+                if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
                     translatedList = $('section.status-translated');
-                    approvedList   = $('section.status-approved');
 
                     if( translatedList.length ) {
                         if((translatedList.first().is(UI.currentSegment))) {
                             UI.scrollSegment(translatedList.first());
                         } else {
-                            translatedList.first().find( clickableSelector ).click();
-                        }
-                    } else {
-                        if((approvedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(approvedList.first());
-                        } else {
-                            approvedList.first().find( clickableSelector ).click();
+                            translatedList.first().find('.editarea').click();
                         }
                     }
 
@@ -146,16 +123,22 @@ if ( Review.enabled() )
                         },
                         success: function(d) {
                             if( d.nextId == null ) return false;
-                            UI.render({
-                                firstLoad: false,
-                                segmentToOpen: d.nextId
-                            });
+
+                            if( $(".modal[data-type='confirm']").length ) {
+                                $(window).on('statusChanged', function(e) {
+                                    UI.renderAfterConfirm(d.nextId);
+                                });
+                            } else {
+                                UI.renderAfterConfirm(d.nextId);
+                            }
+
                         }
                     });
-
                 }
             }
         }
+
+
 
     });
 })(Review, jQuery);
@@ -384,72 +367,5 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             });
         },
 
-        openNextTranslated: function (sid) {
-            console.log('openNextTranslated');
-            sid = sid || UI.currentSegmentId;
-            el = $('#segment-' + sid);
-
-            var translatedList = [];
-            var approvedList = [];
-
-            if(el.nextAll('.status-translated').length) { // find in next segments in the current file
-                translatedList = el.nextAll('.status-translated');
-                if( translatedList.length ) {
-                    translatedList.first().find('.editarea').click();
-                }
-
-            } else {
-                file = el.parents('article');
-                file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
-
-                    var translatedList = $(this).find('.status-translated');
-
-                    if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
-                    } else {
-                        UI.reloadWarning();
-                    }
-
-                    return false;
-
-                });
-                // else
-                if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
-                    translatedList = $('section.status-translated');
-
-                    if( translatedList.length ) {
-                        if((translatedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(translatedList.first());
-                        } else {
-                            translatedList.first().find('.editarea').click();
-                        }
-                    }
-
-                } else { // find in not loaded segments
-
-                    APP.doRequest({
-                        data: {
-                            action: 'getNextReviseSegment',
-                            id_job: config.job_id,
-                            password: config.password,
-                            id_segment: sid
-                        },
-                        error: function() {
-                        },
-                        success: function(d) {
-                            if( d.nextId == null ) return false;
-                            if($(".modal[data-type='confirm']").length) {
-                                $(window).on('statusChanged', function(e) {
-                                    UI.renderAfterConfirm(d.nextId);
-                                });
-                            } else {
-                                UI.renderAfterConfirm(d.nextId);
-                            }
-
-                        }
-                    });
-                }
-            }
-        }
     });
 }

@@ -3,6 +3,93 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     $.extend(UI, {
         /**
+         * Search for the next translated segment to propose for revision.
+         * This function searches in the current UI first, then falls back
+         * to invoke the server and eventually reload the page to the new
+         * URL.
+         */
+        openNextTranslated: function (sid) {
+            sid = sid || UI.currentSegmentId;
+            var el = $('#segment-' + sid);
+
+            var translatedList = [];
+            var approvedList = [];
+
+            var clickableSelector = UI.targetContainerSelector();
+
+            if ( el.nextAll('.status-translated, .status-approved').length ) {
+
+                translatedList = el.nextAll('.status-translated');
+                approvedList   = el.nextAll('.status-approved');
+
+                if ( translatedList.length ) {
+                    translatedList.first().find( clickableSelector ).click();
+                } else {
+                    approvedList.first().find( clickableSelector ).click();
+
+                }
+
+            } else {
+
+                file = el.parents('article');
+                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () {
+
+                    var translatedList = $(this).find('.status-translated');
+                    var approvedList   = $(this).find('.status-approved');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find( clickableSelector ).click();
+                    } else {
+                        UI.reloadWarning();
+                    }
+
+                    return false;
+
+                });
+                // else
+                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
+
+                    translatedList = $('section.status-translated');
+                    approvedList   = $('section.status-approved');
+
+                    if( translatedList.length ) {
+                        if((translatedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(translatedList.first());
+                        } else {
+                            translatedList.first().find( clickableSelector ).click();
+                        }
+                    } else {
+                        if((approvedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(approvedList.first());
+                        } else {
+                            approvedList.first().find( clickableSelector ).click();
+                        }
+                    }
+
+                } else { // find in not loaded segments
+
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            if( d.nextId == null ) return false;
+                            UI.render({
+                                firstLoad: false,
+                                segmentToOpen: d.nextId
+                            });
+                        }
+                    });
+
+                }
+            }
+        },
+        /**
          * translationIsToSave
          *
          * only check if translation is queued
