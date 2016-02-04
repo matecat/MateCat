@@ -98,6 +98,10 @@ class ManageUtils {
 
             $job[ 'disabled' ] = ( $job_array[ 'status_owner' ] == Constants_JobStatus::STATUS_CANCELLED ) ? "disabled" : "";
             $job[ 'status' ]   = $job_array[ 'status_owner' ];
+            $job[ 'show_download_xliff'] =
+              (INIT::$DEPRECATE_LEGACY_XLIFFS == false ||
+                Utils::isJobBasedOnMateCatFilters($job_array[ 'id' ]) == true);
+
 
             //These vars will be used in projects loop for some flag evaluation.
             $project2info[ $job[ 'pid' ] ][ 'status' ][ ]      = $job[ 'status' ];
@@ -180,8 +184,4 @@ class ManageUtils {
 
     }
 
-
 }
-
-
-?>
