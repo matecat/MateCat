@@ -148,8 +148,6 @@ class getProjectsController extends ajaxController {
         $projects = Features::filter('filter_manage_projects_loaded',
             $_SESSION['cid'], $projects);
 
-        \Log::doLog( $projects );
-
         $this->result[ 'data' ]     = json_encode( $projects );
         $this->result[ 'page' ]     = $this->page;
         $this->result[ 'pnumber' ]  = $projnum[ 0 ][ 'c' ];
