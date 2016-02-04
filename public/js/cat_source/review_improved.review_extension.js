@@ -118,10 +118,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 root.ReviewImproved.reloadQualityReport();
             });
         },
-        createButtons: function() {
+        createButtons: function(segment) {
             root.ReviewImproved.renderButtons();
-
             UI.currentSegment.trigger('buttonsCreation');
+
         },
         copySuggestionInEditarea : function() {
             return ;

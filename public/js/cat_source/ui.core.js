@@ -49,9 +49,9 @@ UI = {
         }
 
 	},
-	activateSegment: function(isNotSimilar) {
+	activateSegment: function(segment, isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
-		this.createButtons();
+		this.createButtons(segment);
 		this.createHeader();
 	},
     evalCurrentSegmentTranslationAndSourceTags : function() {
@@ -879,9 +879,7 @@ UI = {
 		return percentageClass;
 	},
 	getSegments: function(options) {
-        console.log('get segments');
 
-//        console.log('options: ', options);
 		where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');
@@ -900,9 +898,11 @@ UI = {
 				UI.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
-                if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
-				UI.getSegments_success(d, options);
                 $(document).trigger('segments:load', d.data);
+
+                if ($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
+				UI.getSegments_success(d, options);
+
 			}
 		});
 	},
@@ -932,7 +932,6 @@ UI = {
 				this.gotoSegment(seg);
 			}
 			if (options.segmentToScroll) {
-//                seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
 				this.scrollSegment($('#segment-' + options.segmentToScroll));
 			}
 			if (options.segmentToOpen) {
@@ -957,11 +956,8 @@ UI = {
 				this.markSearchResults();
 				if (this.searchMode == 'normal') {
 					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
-//				} else if (this.searchMode == 'source&target') {
-//					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				} else {
 					$('#segment-' + options.segmentToScroll + ' .editarea mark.searchMarker').first().addClass('currSearchItem');
-//					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				}
 			}
 		}

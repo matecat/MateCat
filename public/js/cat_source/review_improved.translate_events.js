@@ -55,5 +55,15 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
         updateVersionDependentViews( segment );
     });
 
+    $(document).on('buttonsCreation', function() {
+        var div = $( '<ul>' + UI.segmentButtons + '</ul>' );
+
+        div.find( '.translated' ).text( 'FIXED' )
+            .removeClass( 'translated' )
+            .addClass( 'fixed' );
+
+        div.find( '.next-untranslated' ).parent().remove();
+    });
+
 })(jQuery, window, ReviewImproved, UI);
 }

@@ -223,6 +223,7 @@ if ( ReviewImproved.enabled() ) {
     $(document).on('segments:load', function(e, data) {
         $.each(data.files, function() {
             $.each( this.segments, function() {
+                // XXX: experimental USE of client side database
                 MateCat.db.upsert('segments', _.clone( this ) );
             });
         });
