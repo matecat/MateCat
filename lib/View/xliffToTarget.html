@@ -83,7 +83,7 @@
             <li><a href="https://www.matecat.com/about/">About</a></li>
             <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
             <li><a href="https://www.matecat.com/support/">Support</a></li>
-            <li><a class="bigred" href="https://www.matecat.com/contacts">LSP? Request a demo</a></li>
+            <li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
         </ul>
     </div>
     <div class="cl"></div>
@@ -442,48 +442,6 @@
 </script>
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
-
-<footer>
-
-    <div class="wrapper">
-
-        <ul class="external-links">
-            <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
-
-            <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
-            <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
-        </ul>
-
-        <nav>
-
-            <ul>
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                </tal:block>
-
-                <tal:block tal:condition="php: empty(logged_user)">
-                    <li><a href="${authURL}" class="authLink">Manage</a></li>
-                </tal:block>
-
-            </ul>
-
-            <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
-                </div>
-            </tal:block>
-
-            <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
-                </div>
-            </tal:block>
-
-        </nav>
-
-    </div>
-</footer>
-
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="/public/js/lib/dropzone/dropzone.js"></script>
