@@ -254,3 +254,40 @@ section.reviewImproved.opened .textarea-container {
     }
 
 }
+
+
+section {
+    .buttons {
+        .button {
+            padding: 8px 18px;
+            border-radius: 2px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #fff;
+            text-transform: uppercase;
+
+            margin: 0 0 0 10px;
+
+        }
+
+        .status-rebutted {
+            background: $rejected-color ;
+            border:1px solid #848689;
+
+            // background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+            // background: -moz-linear-gradient(top,  #09beec,  #119ec4);
+            // background: linear-gradient(top,  #09beec,  #119ec4);
+        }
+
+        .status-fixed {
+            background: $approved-color;
+            border:1px solid #848689;
+
+            // background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+            // background: -moz-linear-gradient(top,  #09beec,  #119ec4);
+            // background: linear-gradient(top,  #09beec,  #119ec4);
+        }
+    }
+
+}

@@ -1,9 +1,16 @@
 
-module.export = {
 
-    render: function() {
-        return <div className="test">
-            <h1>test file</h1>
-            </div>
+var buttons = React.createClass({
+
+    render : function() {
+
+        return <div>
+            <MC.SegmentFixedButton status={this.props.status} sid={this.props.sid} />
+            &nbsp;
+            <MC.SegmentRebuttedButton status={this.props.status} sid={this.props.sid} />
+        </div>
     }
-}
+
+});
+
+export default buttons;

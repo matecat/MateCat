@@ -72,7 +72,7 @@ module.exports = function(grunt) {
          */
 
         browserify: {
-            cattool: {
+            libs: {
                 options: {
                     transform: [
                         [ 'babelify', { presets: ['es2015', 'react'] } ]
@@ -82,11 +82,26 @@ module.exports = function(grunt) {
                     }
                 },
                 src: [
-                    basePath + 'cat_source/es6/cat-entry-point.js'
+                    basePath + 'cat_source/es6/react-libs.js'
                 ],
-                dest: buildPath + 'cat-bundle.js'
+                dest: buildPath + 'react.js'
+            },
+            components: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: ['es2015', 'react'] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + 'cat_source/es6/react/*.js'
+                ],
+                dest: buildPath + 'cat-react.js'
             },
         },
+
 
         /**
          *
@@ -102,7 +117,7 @@ module.exports = function(grunt) {
         concat: {
             app: {
                 options : {
-                    sourceMap: true,
+                    sourceMap: false,
                     sourceMapName: function () {
                         var path = buildPath + '/app.*.source-map.js';
                         var expanded = grunt.file.expand( path );
@@ -116,8 +131,6 @@ module.exports = function(grunt) {
                     },
                 },
                 src: [
-                    buildPath + 'cat-bundle.js',
-
                     basePath + 'common.js',
                     basePath + 'build/templates.js',
                     basePath + 'cat_source/ui.core.js',
@@ -158,7 +171,7 @@ module.exports = function(grunt) {
                 dest: buildPath + 'app.js'
             },
 
-            libraries: {
+            libs: {
                 src: [
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/remodal.min.js',
@@ -171,6 +184,11 @@ module.exports = function(grunt) {
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
+                    basePath + 'lib/lodash.min.js',
+                    basePath + 'lib/moment.min.js',
+                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
+                    basePath + 'lib/lokijs.min.js',
+                    basePath + 'lib/sprintf.min.js',
 
                 ],
                 dest: buildPath + 'libs.js'
@@ -179,6 +197,26 @@ module.exports = function(grunt) {
         },
 
         watch: {
+            react: {
+                files: [
+                    basePath + 'cat_source/es6/react-libs.js'
+                ],
+                tasks: ['browserify:libs'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
+            react: {
+                files: [
+                    basePath + 'cat_source/es6/react/*.js'
+                ],
+                tasks: ['browserify:components'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
             js: {
                 files: [
                     basePath + 'cat_source/templates/**/*.hbs',
@@ -193,17 +231,17 @@ module.exports = function(grunt) {
             },
             css: {
                 files: cssWatchFiles ,
-                tasks: ['development:css'],
+                tasks: ['sass'],
                 options: {
                     interrupt: true,
-                    livereload : true
+                    livereload : false
                 }
             }
         },
         sass: {
             dist: {
                 options : {
-                    sourceMap : true,
+                    sourceMap : false,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -254,26 +292,58 @@ module.exports = function(grunt) {
     // Define your tasks here
     grunt.registerTask('default', ['jshint']);
 
+    /**
+     * bundle:js
+     *
+     * This task includes all the tasks required to build a final
+     * javascript. This is not done in development usually since it
+     * would recompile parts that are heavy and not frequently changed
+     * like libraries.
+     */
     grunt.registerTask('bundle:js', [
         'handlebars',
-        'browserify:cattool',
-        'concat:libraries',
+        'browserify:libs',
+        'browserify:components',
+        'concat:libs',
         'concat:app',
         'replace:version'
     ]);
 
+    /**
+     * development:js
+     *
+     * This task includes compilation of frequently changed develpment files.
+     * This includes handlebars templates, react modules via browserify, and
+     * reconcats other javascript files.
+     * Concat also build the sourceMap. For further reload speed try to turn
+     * off sourceMap.
+     */
     grunt.registerTask('development:js', [
-        'bundle:js',
+        'handlebars',
+        'browserify:components',
+        'concat:app',
+        'replace:version'
     ]);
 
+    /**
+     * development
+     *
+     * Development task rebuilds all javascript bundle, which is heavy and
+     * should be used only when development starts or when libraries may have
+     * changed.
+     * Once this is done, it would be better to rely on `watch` task, to reload
+     * just development bundles.
+     */
     grunt.registerTask('development', [
-        'development:js', 'sass'
+        'bundle:js',
+        'sass'
     ]);
+
 
     grunt.registerTask('deploy', [
         'bundle:js',
         'strip',
-        'sass',  // <-- TODO rename this
+        'sass',
     ]);
 };
 
