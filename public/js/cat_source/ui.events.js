@@ -435,19 +435,11 @@ $.extend(UI, {
 						(n == '39')? '8594' :
 						(n == '40')? '8595' : n;
 				console.log('symbol: ', symbol);
-//				pref = ($.inArray(n, [37, 38, 39, 40]))? '#' : '';
 				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + symbol) + '</span>' + '+');
 				console.log(s.html());
 			}
 			if($('span', s).length > 2) {
-//				console.log('numero span: ', $('span', s).length);
 				UI.writeNewShortcut(c, s, this);
-
-//				$(this).html(s.html().substring(0, s.html().length - 1)).removeClass('changing').addClass('modified').blur();
-//				$(s).remove();
-//				$('.msg', c).remove();
-//				$('#settings-shortcuts.modifying').removeClass('modifying');
-//				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
 			}
 		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
@@ -1429,15 +1421,12 @@ $.extend(UI, {
                 $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
-//			UI.markTags();
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-//            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-//            console.log('l');
 
-		}).on('click', 'a.d, a.a, a.r, a.f', function() {
+		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
 			$("ul.statusmenu", segment).toggle();
@@ -1450,8 +1439,11 @@ $.extend(UI, {
 			UI.changeStatus(this, 'rejected', 1);
 		}).on('click', 'a.f', function() {
 			UI.changeStatus(this, 'draft', 1);
+        }).on('click', 'a.fx', function() {
+			UI.changeStatus(this, 'fixed', 1);
+        }).on('click', 'a.rb', function() {
+			UI.changeStatus(this, 'rebutted', 1);
 		}).on('click', '.editor .outersource .copy', function(e) {
-//        }).on('click', 'a.copysource', function(e) {
 			e.preventDefault();
 			UI.copySource();
 		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
@@ -1460,11 +1452,8 @@ $.extend(UI, {
             e.preventDefault();
 			if(UI.body.hasClass('hideMatches')) UI.switchFooter();
 
-//            UI.currentSegment.trigger('showMatchesLocal');
-//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
         }).on('showMatchesLocal', '.editor', function(e) {
             UI.currentSegment.find('.footer').addClass('showMatches');
-//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
         }).on('click', '.tab-switcher-tm', function(e) {
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');

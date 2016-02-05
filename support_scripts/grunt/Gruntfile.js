@@ -21,6 +21,7 @@ module.exports = function(grunt) {
         cssBase + 'lib/remodal.css',
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
+        cssBase + 'sass/cattool.scss',
     ];
 
     function s4() {
@@ -197,7 +198,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            react: {
+            react_libs: {
                 files: [
                     basePath + 'cat_source/es6/react-libs.js'
                 ],
@@ -223,7 +224,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
                 ],
-                tasks: ['development:js'],
+                tasks: ['concat:js'],
                 options: {
                     interrupt: true,
                     livereload : true
@@ -319,8 +320,18 @@ module.exports = function(grunt) {
      * off sourceMap.
      */
     grunt.registerTask('development:js', [
-        'handlebars',
         'browserify:components',
+        'concat:js',
+    ]);
+
+    /**
+     * Concat js
+     * This task is specific for those javascript files which need to be
+     * concatenated by grunt. This avoid reworking the react components
+     * when it's not needed.
+     */
+    grunt.registerTask('concat:js', [
+        'handlebars',
         'concat:app',
         'replace:version'
     ]);

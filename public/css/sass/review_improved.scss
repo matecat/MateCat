@@ -256,7 +256,16 @@ section.reviewImproved.opened .textarea-container {
 }
 
 
+section.status-fixed .status {
+    background: #F5E014;
+}
+
+section.status-rebutted .status {
+    background: #D300FF;
+}
+
 section {
+
     .buttons {
         .button {
             padding: 8px 18px;

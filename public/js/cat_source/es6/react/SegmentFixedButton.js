@@ -8,8 +8,9 @@ var SegmentFixedButton = React.createClass({
     },
 
     handleClick: function() {
-
         console.log(' fixed clicked');
+        var el = UI.Segment.findEl(this.props.sid);
+        UI.changeStatus(el, 'fixed', true);
     },
 
     render: function() {

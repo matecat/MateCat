@@ -43,7 +43,8 @@
             }
 
             if ( segment.status ) {
-                var status_change_title = segment.status.toLowerCase() +
+                var status_label = config.status_labels[ segment.status ];
+                var status_change_title = status_label +
                     ', click to change it'; 
             } else {
                 var status_change_title = 'Change segment status' ; 

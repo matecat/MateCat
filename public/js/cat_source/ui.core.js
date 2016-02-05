@@ -4,6 +4,7 @@
 UI = null;
 
 UI = {
+    showPostRevisionStatuses : false,
     pee_error_level_map: {
         0: "",
         1: "edit_1",
@@ -624,7 +625,8 @@ UI = {
 
         var data = {
             id_segment : segment.id,
-            show_revision_statuses : UI.showRevisionStatuses()
+            show_revision_statuses : UI.showRevisionStatuses(),
+            show_post_revision_statuses : UI.showPostRevisionStatuses
         };
 
         var menu = MateCat.Templates['segment_status_menu'](data);
@@ -1017,11 +1019,6 @@ UI = {
 		$.each(segments, function() {
 			seg = $('#segment-' + this.sid);
 			$(UI.targetContainerSelector() + ', .area', seg).text(this.translation);
-//			if (UI.body.hasClass('searchActive'))
-//				UI.markSearchResults({
-//					singleSegment: segment,
-//					where: 'no'
-//				})
 			status = (this.status == 'DRAFT') ? 'draft' : (this.status == 'TRANSLATED') ? 'translated' : (this.status == 'APPROVED') ? 'approved' : (this.status == 'REJECTED') ? 'rejected' : '';
 			UI.setStatus(seg, status);
 		});
