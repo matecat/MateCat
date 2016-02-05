@@ -147,14 +147,6 @@ class ConversionHandler {
         if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
-            // By default, use always the new converters...
-            $converterVersion = Constants_ConvertersVersions::LATEST;
-            if ( $this->segmentation_rule !== null ) {
-                // ...but new converters don't support custom segmentation rules.
-                // if $this->segmentation_rule is set use the old ones.
-                $converterVersion = Constants_ConvertersVersions::LEGACY;
-            }
-
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );
                 $single_language = $single_language[ 0 ];
@@ -162,7 +154,7 @@ class ConversionHandler {
                 $single_language = $this->target_lang;
             }
 
-            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language);
+            $convertResult = Filters::sourceToXliff( $file_path, $this->source_lang, $single_language, $this->segmentation_rule);
             Filters::logConversionToXliff($convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule);
 
             if ( $convertResult[ 'isSuccess' ] == 1 ) {
