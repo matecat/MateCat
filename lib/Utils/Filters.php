@@ -107,7 +107,7 @@ class Filters {
         return false;
     }
 
-    public static function sourceToXliff( $filePath, $sourceLang, $targetLang ) {
+    public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation ) {
         $filename  = FilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = FilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
 
@@ -115,6 +115,7 @@ class Filters {
             'documentContent' => "@$filePath;filename=$filename.$extension",
             'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
             'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
+            'segmentation' => $segmentation,
             // The following 2 are needed only by older filters versions
             'fileExtension' => $extension,
             'fileName'      => "$filename.$extension"
