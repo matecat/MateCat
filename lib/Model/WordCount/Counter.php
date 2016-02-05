@@ -69,13 +69,13 @@ class WordCount_Counter {
 
     public function setNewStatus( $new_status ) {
         $this->_verifyStatus( $new_status );
-        $this->newStatusCall = ucfirst( strtolower( $new_status ) ) . 'Words';
+        $this->newStatusCall = $this->methodNameForStatusCall($new_status) ;
         $this->newStatus     = $new_status;
     }
 
     public function setOldStatus( $old_status ) {
         $this->_verifyStatus( $old_status );
-        $this->oldStatusCall = ucfirst( strtolower( $old_status ) ) . 'Words';
+        $this->oldStatusCall = $this->methodNameForStatusCall( $old_status );
         $this->oldStatus     = $old_status;
     }
 
@@ -99,10 +99,8 @@ class WordCount_Counter {
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
 
-        //Log::doLog( $newWCount );
-
-        $callSetNew = 'set' . $this->newStatusCall;
-        $callSetOld = 'set' . $this->oldStatusCall;
+        $callSetNew = 'set' . $this->methodNameForStatusCall( $this->newStatus );
+        $callSetOld = 'set' . $this->methodNameForStatusCall( $this->oldStatus );
 
         $newWCount->$callSetOld( -$words_amount );
         $newWCount->$callSetNew( +$words_amount );
@@ -301,6 +299,26 @@ class WordCount_Counter {
         return $wStruct;
 
     }
+
+    /**
+     * Returns the name of the method to call. In case of fixed and rebutted,
+     * translated and rejected are returned respectively.
+     *
+     * @param $name
+     *
+     * @return string
+     */
+    private function methodNameForStatusCall( $name ) {
+        if ( strtoupper($name) == Constants_TranslationStatus::STATUS_FIXED ) {
+            return 'TranslatedWords';
+        }
+        if ( strtoupper($name) == Constants_TranslationStatus::STATUS_REBUTTED ) {
+            return 'RejectedWords';
+        }
+        return ucfirst( strtolower( $name ) ) . 'Words';
+
+    }
+
 
     private function getSumSqlBasedOnProjectWordCountType() {
         $sum_eq_word_count = 'sum(st.eq_word_count)';

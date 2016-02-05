@@ -193,7 +193,10 @@ class setTranslationController extends ajaxController {
             case Constants_TranslationStatus::STATUS_REJECTED:
             case Constants_TranslationStatus::STATUS_DRAFT:
             case Constants_TranslationStatus::STATUS_NEW:
+            case Constants_TranslationStatus::STATUS_FIXED:
+            case Constants_TranslationStatus::STATUS_REBUTTED:
                 break;
+
             default:
                 //NO debug and NO-actions for un-mapped status
                 $this->result[ 'code' ] = 1;
