@@ -24,7 +24,7 @@ if ( ReviewImproved.enabled() ) {
             .done(function( data ) {
                 if ( data.issues.length ) {
                     $.each( data.issues, function() {
-                        MateCat.db.upsert('segment_translation_issues', _.clone(this) );
+                        MateCat.db.upsert('segment_translation_issues', 'id', _.clone(this) );
                     });
                 }
             });
@@ -39,7 +39,7 @@ if ( ReviewImproved.enabled() ) {
             var mount_point = $( selector );
             if ( mount_point.length == 0 ) return;
 
-            var comments = MateCat.db.getCollection('issue_comments').
+            var comments = MateCat.db.segment_translation_issue_comments.
                 findObjects({ 'id_issue': issue.id });
 
             var data = {
@@ -51,7 +51,7 @@ if ( ReviewImproved.enabled() ) {
         },
 
         getSegmentRecord : function( segment ) {
-            return MateCat.db.getCollection('segments')
+            return MateCat.db.segments
                 .findObject({sid : segment.id });
         },
 
@@ -61,7 +61,7 @@ if ( ReviewImproved.enabled() ) {
             var revertingVersion = segment.el.data('revertingVersion');
 
             if ( revertingVersion ) {
-                version = MateCat.db.getCollection('segment_versions').findObject({
+                version = MateCat.db.segment_versions.findObject({
                     id_segment : record.sid,
                     version_number : revertingVersion + ''
                 });
@@ -89,7 +89,7 @@ if ( ReviewImproved.enabled() ) {
                 // ReviewImproved.renderCommentList( issue );
                 $.getJSON(issue_comments).done(function(data) {
                     $.each( data.comments, function( comment ) {
-                        MateCat.db.upsert('issue_comments', _.clone(this) );
+                        MateCat.db.upsert('segment_translation_issue_comments', 'id', _.clone(this) );
                     });
                     $(document).trigger('issue_comments:load', issue);
                 });
@@ -113,9 +113,9 @@ if ( ReviewImproved.enabled() ) {
 
         updateIssueViews : function( segment ) {
             var targetVersion = segment.el.data('revertingVersion');
-            var record = MateCat.db.getCollection('segments').findObject({sid : segment.id });
+            var record = MateCat.db.segments.findObject({sid : segment.id });
             var version = (targetVersion == null ? record.version_number : targetVersion) ;
-            var issues = MateCat.db.getCollection('segment_translation_issues');
+            var issues = MateCat.db.segment_translation_issues;
             var current_issues = issues.findObjects({
                 id_segment : record.sid, translation_version : version
             });
@@ -135,10 +135,10 @@ if ( ReviewImproved.enabled() ) {
 
         highlightIssue : function(e) {
             var container = $(e.target).closest('.issue-container');
-            var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
+            var issue = MateCat.db.segment_translation_issues.findObject({
                 id : container.data('issue-id') + ''
             });
-            var segment = MateCat.db.getCollection('segments').findObject({sid : issue.id_segment});
+            var segment = MateCat.db.segments.findObject({sid : issue.id_segment});
 
             // TODO: check for this to be really needed
             if ( container.data('current-issue-id') == issue.id ) {
@@ -174,7 +174,7 @@ if ( ReviewImproved.enabled() ) {
             var section = container.closest('section');
 
             var area = section.find('.issuesHighlightArea') ;
-            var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
+            var issue = MateCat.db.segment_translation_issues.findObject({
                 id : container.data('issue-id') + ''
             });
             area.html(
@@ -200,7 +200,7 @@ if ( ReviewImproved.enabled() ) {
                 .done(function( data ) {
                     if ( data.versions.length ) {
                         $.each( data.versions, function() {
-                            MateCat.db.upsert('segment_versions', _.clone(this) );
+                            MateCat.db.upsert('segment_versions', 'id', _.clone(this) );
                         });
                     }
                 })
@@ -210,7 +210,8 @@ if ( ReviewImproved.enabled() ) {
                     if ( data.issues.length ) {
                         $.each( data.issues, function() {
                             this.formattedDate = moment(this.created_at).format('lll');
-                            MateCat.db.upsert('segment_translation_issues', _.clone(this) );
+                            MateCat.db.upsert('segment_translation_issues', 'id',
+                                              _.clone(this) );
                         });
                     }
                 })
@@ -223,8 +224,7 @@ if ( ReviewImproved.enabled() ) {
     $(document).on('segments:load', function(e, data) {
         $.each(data.files, function() {
             $.each( this.segments, function() {
-                // XXX: experimental USE of client side database
-                MateCat.db.upsert('segments', _.clone( this ) );
+                MateCat.db.upsert( 'segments', 'sid', _.clone( this ) );
             });
         });
     });
@@ -248,17 +248,15 @@ if ( ReviewImproved.enabled() ) {
 
     $(document).on('click', '.action-view-issue', function(e) {
         var container =  $(e.target).closest('.issue-container') ;
-        var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
-            id : container.data('issue-id') + ''
-        });
+        var issue = MateCat.db.segment_translation_issues
+            .by('id',container.data('issue-id'));
         ReviewImproved.showIssueDetailModalWindow( issue );
     });
 
     $(document).on('click', 'input[data-action=submit-issue-reply]', function(e) {
         var container = $(e.target).closest('.issue-detail-modal');
-        var issue = MateCat.db.getCollection('segment_translation_issues').findObject({
-            id : container.data('issue-id') + ''
-        });
+        var issue = MateCat.db.segment_translation_issues.by('id',
+            container.data('issue-id'));
 
         var data = {
           message : $('[data-ui=issue-reply-message]').val(),
@@ -277,7 +275,7 @@ if ( ReviewImproved.enabled() ) {
             type: 'POST',
             data : data
         }).done( function( data ) {
-            MateCat.db.upsert('issue_comments', _.clone( data.comment ) );
+            MateCat.db.segment_translation_issue_comments.insert ( data );
             $(document).trigger('issue_comments:load', issue );
             ReviewImproved.renderCommentList( issue );
         });

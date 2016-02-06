@@ -1,9 +1,10 @@
 if ( ReviewImproved.enabled() && !config.isReview ) {
 (function($, root, RI, UI, undefined) {
     var db = window.MateCat.db;
-    var issues = db.getCollection('segment_translation_issues');
-    var versions = db.getCollection('segment_versions');
-    var segments = db.getCollection('segments');
+
+    var issues = db.segment_translation_issues ;
+    var versions = db.segment_versions ;
+    var segments = db.segments ;
 
     issues.on('update', issueRecordChanged);
     issues.on('insert', issueRecordChanged);
@@ -24,7 +25,7 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
 
     function updateHighlightArea( segment ) {
         var text = RI.getTranslationText( segment );
-        var versions = MateCat.db.getCollection('segment_versions');
+        var versions = MateCat.db.segment_versions;
         var revertingVersion = segment.el.data('revertingVersion');
         var textarea_container = template(
             'review_improved/translate_highlight_area', {
@@ -53,6 +54,11 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
 
     $(document).on('segmentVersionChanged', function(e, segment) {
         updateVersionDependentViews( segment );
+    });
+
+    $(document).on('segment:change', function(e, data) {
+        var segment = UI.Segment.find( data.sid );
+        UI.createButtons( segment );
     });
 
     $(document).on('buttonsCreation', function() {

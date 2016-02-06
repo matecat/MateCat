@@ -113,8 +113,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 url: issue_path,
                 type: 'DELETE'
             }).done( function( data ) {
-                var record = MateCat.colls.issues.findOne({id : parsed.id_issue}) ;
-                MateCat.colls.issues.remove( record );
+                var record = MateCat.db.segment_translation_issues.findOne({id : parsed.id_issue}) ;
+                MateCat.segment_translation_issues.remove( record );
                 root.ReviewImproved.reloadQualityReport();
             });
         },
@@ -132,7 +132,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         getSegmentTarget : function() {
             // read status from DOM? wrong approach, read from
             // database instead
-            var segment = db.getCollection('segments').findOne({sid : sid});
+            var segment = db.segments.by('sid', sid);
             var translation =  segment.translation ;
 
             return translation ;

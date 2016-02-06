@@ -634,10 +634,14 @@ UI = {
 		statusMenu.html(menu).show();
 	},
 	deActivateSegment: function(byButton) {
+        // TODO : remove buttons? ..........................
 		UI.removeButtons(byButton);
 		UI.removeHeader(byButton);
 		UI.removeFooter(byButton);
-        $(document).trigger('segment:deactivate', UI.lastOpenedSegment, UI.currentSegment);
+        $(document).trigger('segment:deactivate', {
+            deactivated_segment : UI.lastOpenedSegment,
+            current_segment : UI.currentSegment
+        });
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)
@@ -1113,22 +1117,6 @@ UI = {
 			return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
 		}
 	},
-/*
-// not used anymore?
-
-	closeInplaceEditor: function(ed) {
-		$(ed).removeClass('editing');
-		$(ed).attr('contenteditable', false);
-		$('.graysmall .edit-buttons').remove();
-	},
-	openInplaceEditor: function(ed) {
-		$('.graysmall .translation.editing').each(function() {
-			UI.closeInplaceEditor($(this));
-		});
-		$(ed).addClass('editing').attr('contenteditable', true).after('<span class="edit-buttons"><button class="cancel">Cancel</button><button class="save">Save</button></span>');
-		$(ed).focus();
-	},
-*/
 	millisecondsToTime: function(milli) {
 //		var milliseconds = milli % 1000;
 		var seconds = Math.round((milli / 1000) % 60);
@@ -1858,7 +1846,8 @@ UI = {
 	},
 
 	setStatus: function(segment, status) {
-		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
+		segment.removeClass("status-draft status-translated status-approved status-rejected status-new status-fixed status-rebutted")
+        .addClass("status-" + status);
 	},
 	setStatusButtons: function(button) {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
@@ -2284,7 +2273,10 @@ console.log('eccolo: ', typeof token);
 
     changeStatusOffline: function (sid) {
         if($('#segment-' + sid + ' .editarea').text() != '') {
-            $('#segment-' + sid).removeClass('status-draft status-approved status-new status-rejected').addClass('status-translated');
+            $('#segment-' + sid).removeClass('status-draft status-approved ' +
+                                             'status-new status-rejected ' +
+                                             'status-fixed status-rebutted'
+                                            ).addClass('status-translated');
         }
     },
     addToSetTranslationTail: function (item) {
@@ -2388,6 +2380,13 @@ console.log('eccolo: ', typeof token);
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
                 $(document).trigger('setTranslation:success', data);
+
+                var segment_change_data = {
+                    sid: id_segment,
+                    status: status,
+                    translation : translation
+                };
+                $(document).trigger('segment:change', segment_change_data);
 			}
 		});
 	},

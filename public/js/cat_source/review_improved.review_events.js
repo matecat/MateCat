@@ -4,10 +4,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, RI, UI, undefined) {
 
     var db = window.MateCat.db;
-    var issues = db.getCollection('segment_translation_issues');
-    var versions = db.getCollection('segment_versions');
-    var segments = db.getCollection('segments');
-    var comments = db.getCollection('issue_comments');
+    var issues = db.segment_translation_issues ;
+    var versions = db.segment_versions ;
+    var segments = db.segments ;
+    var comments = db.segment_translation_issue_comments ;
 
     issues.on('update', issueRecordChanged);
     issues.on('insert', issueRecordChanged);
@@ -80,7 +80,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     });
 
-    $(document).on('segment:deactivate', function(e, lastOpenedSegment, currentSegment) {
+    $(document).on('segment:deactivate', function(e, data) {
+        var lastOpenedSegment = data.deactivated_segment ;
         if ( lastOpenedSegment ) {
             restoreFirstTab( lastOpenedSegment );
         }
@@ -179,7 +180,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 // push new data to the store
                 // TODO make an helper for this date conversion
                 data.issue.formattedDate = moment(data.issue.created_at).format('lll');
-                MateCat.db.upsert('segment_translation_issues', data.issue );
+                MateCat.db.upsert('segment_translation_issues', 'id_issue', data.issue );
                 RI.modal.close();
                 RI.reloadQualityReport();
 
@@ -228,7 +229,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var version ;
         var revertingVersion = segment.el.data('revertingVersion');
         var prevBase =  revertingVersion ? revertingVersion : record.version_number ;
-        version = db.getCollection('segment_versions').findObject({
+        version = db.segment_versions.findObject({
             id_segment : record.sid,
             version_number : (prevBase -1) + ''
         });
@@ -255,12 +256,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     }
 
     function updateOriginalTargetView( segment ) {
-        var record = segments.findOne({sid : segment.id });
+        var record = segments.by(sid, segment.id);
         var original_target ;
         var data    = { record : record };
 
         if ( parseInt(record.original_target_provied) ) {
-            var first_version = db.getCollection('segment_versions').findObject( {
+            var first_version = db.segment_versions.findObject({
                 id_segment : record.sid,
                 version_number : '0'
             });
@@ -314,7 +315,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     $(document).on('click', '.action-delete-issue', function(e) {
         id = $(e.target).closest('.issue-container').data('issue-id');
-        var issue = db.getCollection('segment_translation_issues').findObject({
+        var issue = db.segment_translation_issues.findObject({
             id : id + ''
         });
 

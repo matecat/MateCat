@@ -8,7 +8,19 @@ var button = React.createClass({
     },
 
     handleClick : function() {
-        console.log('rebutted clicked');
+        var el = UI.Segment.findEl(this.props.sid);
+        UI.changeStatus(el, 'rebutted', true);
+    },
+
+    handleTranslationSuccess : function(e, data) {
+        console.log('handleTranslationSuccess', data);
+    },
+    componentDidMount: function() {
+        $(document).on('setTranslation:success', this.handleTranslationSuccess);
+    },
+
+    componentWillUnmount: function() {
+        $(document).off('setTranslation:success', this.handleTranslationSuccess);
     },
 
     render: function() {

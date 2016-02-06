@@ -13,6 +13,17 @@ var SegmentFixedButton = React.createClass({
         UI.changeStatus(el, 'fixed', true);
     },
 
+    handleTranslationSuccess : function(e, data) {
+        console.log('handleTranslationSuccess', data);
+    },
+    componentDidMount: function() {
+        $(document).on('setTranslation:success', this.handleTranslationSuccess);
+    },
+
+    componentWillUnmount: function() {
+        $(document).off('setTranslation:success', this.handleTranslationSuccess);
+    },
+
     render: function() {
         var cmd = ((UI.isMac) ? 'CMD' : 'CTRL');
 
