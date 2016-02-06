@@ -8,7 +8,6 @@ var SegmentFixedButton = React.createClass({
     },
 
     handleClick: function() {
-        console.log(' fixed clicked');
         var el = UI.Segment.findEl(this.props.sid);
         UI.changeStatus(el, 'fixed', true);
     },
@@ -17,11 +16,9 @@ var SegmentFixedButton = React.createClass({
         console.log('handleTranslationSuccess', data);
     },
     componentDidMount: function() {
-        $(document).on('setTranslation:success', this.handleTranslationSuccess);
     },
 
     componentWillUnmount: function() {
-        $(document).off('setTranslation:success', this.handleTranslationSuccess);
     },
 
     render: function() {

@@ -113,8 +113,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 url: issue_path,
                 type: 'DELETE'
             }).done( function( data ) {
-                var record = MateCat.db.segment_translation_issues.findOne({id : parsed.id_issue}) ;
-                MateCat.segment_translation_issues.remove( record );
+                var record = MateCat.db.segment_translation_issues
+                    .by('id', parsed.id_issue);
+                MateCat.db.segment_translation_issues.remove( record );
                 root.ReviewImproved.reloadQualityReport();
             });
         },

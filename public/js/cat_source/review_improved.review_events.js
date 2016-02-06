@@ -180,7 +180,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 // push new data to the store
                 // TODO make an helper for this date conversion
                 data.issue.formattedDate = moment(data.issue.created_at).format('lll');
-                MateCat.db.upsert('segment_translation_issues', 'id_issue', data.issue );
+                MateCat.db.segment_translation_issues.insert( data.issue ) ;
                 RI.modal.close();
                 RI.reloadQualityReport();
 
@@ -256,7 +256,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     }
 
     function updateOriginalTargetView( segment ) {
-        var record = segments.by(sid, segment.id);
+        var record = segments.by('sid', segment.id);
         var original_target ;
         var data    = { record : record };
 

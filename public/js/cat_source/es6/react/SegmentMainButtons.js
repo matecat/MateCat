@@ -9,13 +9,20 @@ var buttons = React.createClass({
     },
 
     handleTranslationSuccess : function(e, data) {
-        this.setState( { status : data.status.toUpperCase() } );
+
+        console.debug( 'handleTranslationSuccess', data ) ;
+        if ( this.props.sid == data.sid ) {
+            this.setState( { status : data.status.toUpperCase() } );
+        }
     },
     componentDidMount: function() {
         $(document).on('segment:change', this.handleTranslationSuccess);
     },
 
     componentWillUnmount: function() {
+        console.debug('componentWillUnmount',
+                      ReactDOM.findDOMNode( this ));
+
         $(document).off('segment:change', this.handleTranslationSuccess);
     },
 

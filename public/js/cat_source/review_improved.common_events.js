@@ -255,8 +255,8 @@ if ( ReviewImproved.enabled() ) {
 
     $(document).on('click', 'input[data-action=submit-issue-reply]', function(e) {
         var container = $(e.target).closest('.issue-detail-modal');
-        var issue = MateCat.db.segment_translation_issues.by('id',
-            container.data('issue-id'));
+        var issue = MateCat.db.segment_translation_issues
+            .by('id', container.data('issue-id'));
 
         var data = {
           message : $('[data-ui=issue-reply-message]').val(),
@@ -275,7 +275,7 @@ if ( ReviewImproved.enabled() ) {
             type: 'POST',
             data : data
         }).done( function( data ) {
-            MateCat.db.segment_translation_issue_comments.insert ( data );
+            MateCat.db.segment_translation_issue_comments.insert ( data.comment );
             $(document).trigger('issue_comments:load', issue );
             ReviewImproved.renderCommentList( issue );
         });

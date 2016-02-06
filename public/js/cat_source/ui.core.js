@@ -252,7 +252,7 @@ UI = {
             if ((segment.hasClass('modified')) && (saveBrevior) && (!config.isReview)) {
                 this.saveSegment(segment);
             }
-            this.deActivateSegment(byButton);
+            this.deActivateSegment(byButton, segment);
             this.removeGlossaryMarksFormSource();
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
@@ -633,11 +633,11 @@ UI = {
 
 		statusMenu.html(menu).show();
 	},
-	deActivateSegment: function(byButton) {
-        // TODO : remove buttons? ..........................
-		UI.removeButtons(byButton);
-		UI.removeHeader(byButton);
-		UI.removeFooter(byButton);
+	deActivateSegment: function(byButton, segment) {
+		UI.removeButtons(byButton, segment);
+		UI.removeHeader(byButton, segment);
+		UI.removeFooter(byButton, segment);
+
         $(document).trigger('segment:deactivate', {
             deactivated_segment : UI.lastOpenedSegment,
             current_segment : UI.currentSegment
@@ -1198,7 +1198,6 @@ UI = {
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
-//        APP.confirm({msg: 'The next untranslated segment is outside the current view.', callback: 'renderUntranslatedOutOfView' });
 	},
 	pointBackToSegment: function(segmentId) {
 		if (!this.infiniteScroll)
@@ -1224,7 +1223,6 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
-//		$('p.alternatives', segment).remove();
 	},
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
