@@ -99,13 +99,13 @@ class WordCount_Counter {
         $newWCount->setOldStatus( $this->oldStatus );
         $newWCount->setNewStatus( $this->newStatus );
 
-        $callSetNew = 'set' . $this->methodNameForStatusCall( $this->newStatus );
-        $callSetOld = 'set' . $this->methodNameForStatusCall( $this->oldStatus );
+        if (!$this->equivalentStatuses() ) {
+            $callSetNew = 'set' . $this->methodNameForStatusCall( $this->newStatus );
+            $callSetOld = 'set' . $this->methodNameForStatusCall( $this->oldStatus );
 
-        $newWCount->$callSetOld( -$words_amount );
-        $newWCount->$callSetNew( +$words_amount );
-
-        //Log::doLog( $newWCount );
+            $newWCount->$callSetOld( -$words_amount );
+            $newWCount->$callSetNew( +$words_amount );
+        }
 
         return $newWCount;
 
@@ -319,6 +319,16 @@ class WordCount_Counter {
 
     }
 
+    /**
+     * Checks whether the old and new statuses are equal in regard
+     * of the database column to update.
+     */
+    private function equivalentStatuses() {
+        return (
+                $this->methodNameForStatusCall( $this->newStatus ) ==
+                $this->methodNameForStatusCall( $this->oldStatus )
+        );
+    }
 
     private function getSumSqlBasedOnProjectWordCountType() {
         $sum_eq_word_count = 'sum(st.eq_word_count)';
