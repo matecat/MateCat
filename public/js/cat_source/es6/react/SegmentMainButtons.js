@@ -8,7 +8,7 @@ var buttons = React.createClass({
         }
     },
 
-    handleTranslationSuccess : function(e, data) {
+    handleTranslationSuccess : function(data) {
 
         console.debug( 'handleTranslationSuccess', data ) ;
         if ( this.props.sid == data.sid ) {
@@ -16,14 +16,12 @@ var buttons = React.createClass({
         }
     },
     componentDidMount: function() {
-        $(document).on('segment:change', this.handleTranslationSuccess);
+        MateCat.db.segments.on('update', this.handleTranslationSuccess );
     },
 
     componentWillUnmount: function() {
-        console.debug('componentWillUnmount',
-                      ReactDOM.findDOMNode( this ));
-
-        $(document).off('segment:change', this.handleTranslationSuccess);
+        console.debug('unlistening to events');
+        MateCat.db.segments.removeListener('update', this.handleTranslationSuccess );
     },
 
     render : function() {
