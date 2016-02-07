@@ -7,12 +7,19 @@ class matecat::php {
   package {$packages:
     ensure => installed
   } ->
-  file { 'php.ini':
+  file { 'apache php.ini':
     path    => '/etc/php5/apache2/php.ini',
-    source  => 'puppet:///modules/php/php.ini',
+    source  => 'puppet:///modules/matecat/php.ini',
     owner   => 'root',
     group   => 'root',
     notify  => Service["apache2"]
-  }
+  } ->
+  file { 'cli php.ini': 
+    path    => '/etc/php5/cli/php.ini',
+    source  => 'puppet:///modules/matecat/php.ini',
+    owner   => 'root',
+    group   => 'root',
+    notify  => Service["apache2"]
+  } 
 
 }
