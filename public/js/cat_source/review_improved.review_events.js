@@ -91,6 +91,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         // TODO: restore segment here
     });
 
+    $(document).on('review:text:selected', function(e, data) {
+        // show activator button
+        showIssueSelectionModalWindow( data.selection, data.container );
+    });
+
+
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
         var segment = new UI.Segment( $(e.target).closest('section'));
 
@@ -106,7 +112,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
             selection.toString().length > 0
         ) {
-            showIssueSelectionModalWindow( selection, container );
+            $(document).trigger('review:text:selected', {
+                selection : selection,
+                container: container
+            });
         }
     });
 

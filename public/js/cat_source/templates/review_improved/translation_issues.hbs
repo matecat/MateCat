@@ -30,6 +30,10 @@
           </li>
         {{/each}}
     {{else}}
-      No issues registered for this segment
+      {{#if isReview }}
+        No issues on this translation yet, select a portion of text to start.
+      {{else}}
+        No issues saved for this translation.
+      {{/if}}
     {{/if}}
 </div>
