@@ -1707,7 +1707,7 @@
             }],
             "isocode":"zu",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"zu-ZA"
         }
     ]
