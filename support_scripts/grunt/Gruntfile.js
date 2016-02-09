@@ -24,6 +24,9 @@ module.exports = function(grunt) {
         cssBase + 'sass/cattool.scss',
     ];
 
+    var es2015Preset = require('babel-preset-es2015');
+    var reactPreset = require('babel-preset-react');
+
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16).substring(1);
@@ -76,7 +79,7 @@ module.exports = function(grunt) {
             libs: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: ['es2015', 'react'] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
@@ -90,7 +93,7 @@ module.exports = function(grunt) {
             components: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: ['es2015', 'react'] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
