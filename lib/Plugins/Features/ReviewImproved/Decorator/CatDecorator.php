@@ -26,6 +26,7 @@ class CatDecorator extends \AbstractDecorator {
 
         $this->template->review_type = 'improved';
         $this->template->review_improved = true;
+        $this->template->project_type = null;
 
         $this->template->footer_show_revise_link = false;
 
