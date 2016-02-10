@@ -113,7 +113,7 @@ if ( ReviewImproved.enabled() ) {
 
         updateIssueViews : function( segment ) {
             var targetVersion = segment.el.data('revertingVersion');
-            var record = MateCat.db.segments.findObject({sid : segment.id });
+            var record = MateCat.db.segments.by('sid', segment.id );
             var version = (targetVersion == null ? record.version_number : targetVersion) ;
             var issues = MateCat.db.segment_translation_issues;
             var current_issues = issues.findObjects({

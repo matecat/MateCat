@@ -52,15 +52,9 @@ if ( ReviewImproved.enabled() && !config.isReview)
          * alongside the legacy buttons hadled with jquery.
          */
         createButtons: function(segment) {
-            console.log( 'createButtons');
-
             var data = MateCat.db.segments.by('sid', segment.id);
 
-            if ( data.status.toLowerCase() == 'rejected' ||
-                 data.status.toLowerCase() == 'fixed' ||
-                 data.status.toLowerCase() == 'rebutted'
-               ) {
-
+            if ( showFixedAndRebuttedButtons( data.status ) ) {
                 var mountpoint = segment.el.find('[data-mount="main-buttons"]')[0];
 
                 ReactDOM.render( React.createElement( MC.SegmentMainButtons, {
@@ -75,5 +69,10 @@ if ( ReviewImproved.enabled() && !config.isReview)
             }
         }
     })
+
+    var showFixedAndRebuttedButtons( status ) {
+        status = status.toLowerCase();
+        return status == 'rejected' || status == 'fixed' || status == 'rebutted' ;
+    }
 
 })(jQuery, window);

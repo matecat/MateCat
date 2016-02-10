@@ -1,27 +1,23 @@
 
 
 var buttons = React.createClass({
-
     getInitialState: function() {
         return {
             status : this.props.status.toUpperCase()
         }
     },
 
-    handleTranslationSuccess : function(data) {
-
-        console.debug( 'handleTranslationSuccess', data ) ;
+    handleSegmentUpdate : function(data) {
         if ( this.props.sid == data.sid ) {
             this.setState( { status : data.status.toUpperCase() } );
         }
     },
     componentDidMount: function() {
-        MateCat.db.segments.on('update', this.handleTranslationSuccess );
+        MateCat.db.segments.on('update', this.handleSegmentUpdate );
     },
 
     componentWillUnmount: function() {
-        console.debug('unlistening to events');
-        MateCat.db.segments.removeListener('update', this.handleTranslationSuccess );
+        MateCat.db.segments.removeListener('update', this.handleSegmentUpdate );
     },
 
     render : function() {
@@ -48,7 +44,6 @@ var buttons = React.createClass({
         if ( this.state.status == 'REBUTTED' ) {
             return fixedButton ;
         }
-        return null;
     }
 
 });
