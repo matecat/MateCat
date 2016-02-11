@@ -33,6 +33,7 @@ class CatDecorator {
       }
 
       $this->template->searchable_statuses = $this->searchableStatuses();
+      $this->template->project_type = null;
 
       Features::appendDecorators(
           $this->job->getProject()->id_customer,

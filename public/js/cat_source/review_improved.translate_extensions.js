@@ -70,7 +70,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
         }
     })
 
-    var showFixedAndRebuttedButtons( status ) {
+    var showFixedAndRebuttedButtons = function ( status ) {
         status = status.toLowerCase();
         return status == 'rejected' || status == 'fixed' || status == 'rebutted' ;
     }
