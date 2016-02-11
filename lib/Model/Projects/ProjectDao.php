@@ -37,6 +37,23 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_customer
+     *
+     * @return Projects_ProjectStruct[]
+     */
+
+    static function findByIdCustomer($id_customer) {
+        $conn = Database::obtain()->getConnection();
+        $sql = "SELECT projects.* FROM projects " .
+                " WHERE id_customer = :id_customer ";
+
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( array('id_customer' => $id_customer ) );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Projects_ProjectStruct' );
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param $id
      * @return Projects_ProjectStruct
      */
@@ -78,7 +95,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 OR events.create_date < updates.last_translation_at
                 GROUP BY j.id, j.password
             ) uncomplete ON jobs.id = uncomplete.id
-                AND jobs.password = uncomplete.password ";
+                AND jobs.password = uncomplete.password
+                AND jobs.id_project = :id_project
+                ";
 
         \Log::doLog( $sql );
 
