@@ -85,7 +85,20 @@ class INIT {
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
+
+    /**
+     * Time zone string that should match the one set in the database.
+     * @var string
+     */
     public static $TIME_ZONE = 'Europe/Rome';
+
+    /**
+     * Use this settings to indicate the upperbuond memory limit you want to
+     * apply to fast analysis. You may want to set this to allow analysis of
+     * big files.
+     * @var string memory limit. Example "2048M"
+     */
+    public static $FAST_ANALYSIS_MEMORY_LIMIT;
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
 
