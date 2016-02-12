@@ -48,7 +48,6 @@ class Bootstrap {
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
         INIT::obtain();
 
-        date_default_timezone_set( INIT::$TIME_ZONE );
 
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accessible by the browser
@@ -62,6 +61,8 @@ class Bootstrap {
         if ( empty( INIT::$STORAGE_DIR ) ) {
             INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage" ;
         }
+
+        date_default_timezone_set( INIT::$TIME_ZONE );
 
         INIT::$LOG_REPOSITORY                  = INIT::$STORAGE_DIR . "/log_archive";
         INIT::$UPLOAD_REPOSITORY               = INIT::$STORAGE_DIR . "/upload";
