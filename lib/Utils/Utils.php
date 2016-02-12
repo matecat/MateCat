@@ -367,6 +367,20 @@ class Utils {
 		return $string;
 	}
 
+	public static function isJobBasedOnMateCatFilters($jobId) {
+		$fs = new FilesStorage();
+		$files = $fs->getFilesForJob( $jobId, null );
+		foreach ($files as $file) {
+			$fileType = DetectProprietaryXliff::getInfo( $files[0][ 'xliffFilePath' ] );
+			if ($fileType['proprietary_short_name'] !== 'matecat_converter') {
+				// If only one XLIFF is not created with MateCat Filters, we can't say
+				// that the project is entirely based on new Filters
+				return false;
+			}
+		}
+		// If the flow arrives here, all the files' XLIFFs are based on new Filters
+		return true;
+	}
 
 
 }

@@ -306,6 +306,8 @@ class INIT {
             'sxml'
     );
 
+    public static $DEPRECATE_LEGACY_XLIFFS = true;
+
     /*
      * The maximum filename length accepted.
      * Usually OSes accept names of 255 characters at most.
@@ -313,6 +315,8 @@ class INIT {
      * So we reserve 45 chars for internal purposes.
      */
     public static $MAX_FILENAME_LENGTH = 210;
+
+    public static $PLUGIN_LOAD_PATHS = array();
 
     /**
      * Initialize the Class Instance

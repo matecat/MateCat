@@ -81,7 +81,8 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
-		}).on('keydown', null, 'ctrl+2', function(e) {
+		})
+                .on('keydown', null, 'ctrl+2', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
@@ -91,7 +92,8 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
-		}).on('keydown', null, 'ctrl+3', function(e) {
+		})
+                .on('keydown', null, 'ctrl+3', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
@@ -101,46 +103,43 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
-		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+		})
+                .on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
-        }).on('keydown', '.editor .editarea', 'return', function(e) {
+        })
+                .on('keydown', '.editor .editarea', 'return', function(e) {
             UI.handleReturn(e);
-		}).on('keydown', '.editor .editarea', 'space', function(e) {
+		})
+                .on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
                 e.preventDefault();
                 UI.editarea.find('.lastInserted').removeClass('lastInserted');
-//			console.log('space');
+
                 var node = document.createElement("span");
                 node.setAttribute('class', 'marker monad space-marker lastInserted');
                 node.setAttribute('contenteditable', 'false');
                 node.textContent = htmlDecode(" ");
-//			node.textContent = "&nbsp;";
+
                 insertNodeAtCursor(node);
                 UI.unnestMarkers();
             }
 
-		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+		})
+                .on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
             UI.editarea.find('.lastInserted').removeClass('lastInserted');
-//			console.log('nbsp');
-//			config.nbspPlaceholderClass = '_NBSP';
+
 			var node = document.createElement("span");
 			node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
 			node.setAttribute('contenteditable', 'false');
 			node.textContent = htmlDecode("&nbsp;");
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
-/*
-			setCursorPosition($('.editor .editarea .lastInserted')[0]);
-			console.log('a: ', UI.editarea.html());
-			$('.editor .editarea .lastInserted').after($('.editor .editarea .undoCursorPlaceholder'));
-			console.log('b: ', UI.editarea.html());
-			$('.editor .editarea .lastInserted').removeClass('lastInserted');
-			console.log('c: ', UI.editarea.html());
-*/
+
         });
+
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+shift+l', function() {
@@ -156,6 +155,50 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
+		} ).on('click', '.autofillTag', function(e){
+			e.preventDefault();
+
+			//get source tags from the segment
+			var sourceTags = $( '.source', UI.currentSegment ).html()
+					.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+			//get target tags from the segment
+			var targetTags = $( '.target', UI.currentSegment ).html()
+					.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+			if(targetTags == null ) {
+				targetTags = [];
+			}
+
+			var missingTags = sourceTags;
+			//remove from source tags all the tags in target segment
+			for(var i = 0; i < targetTags.length; i++ ){
+				var pos = missingTags.indexOf(targetTags[i]);
+				if( pos > -1){
+					missingTags.splice(pos,1);
+				}
+			}
+
+			var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
+			var brEnd = $('br.end', UI.currentSegment ).detach();
+
+			//add tags into the target segment
+			for(var i = 0; i < missingTags.length; i++){
+				var addTagClosing = false;
+
+				UI.editarea.html(
+					UI.editarea.html() + missingTags[i]
+				);
+			}
+
+			//add again undoCursorPlaceholder
+			UI.editarea.append(undoCursorPlaceholder )
+					   .append(brEnd);
+
+			//lock tags and run again getWarnings
+			UI.lockTags(UI.editarea);
+			UI.currentSegmentQA();
+
 		}).on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
 			$(this).toggleClass('unlock');
@@ -165,26 +208,6 @@ $.extend(UI, {
 				UI.enableTagMark();
 			}
 			UI.setTagLockCustomizeCookie(false);
-
-//		}).bind('keydown', 'Backspace', function(e) {
-
-//		}).on('click', '#messageBar .close', function(e) {
-//			e.preventDefault();
-//			$('body').removeClass('incomingMsg');
-//			var expireDate = new Date($('#messageBar').attr('data-expire'));
-//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });
-
-//		}).on('change', '#hideAlertConfirmTranslation', function(e) {
-//			console.log($(this).prop('checked'));
-//			if ($(this).prop('checked')) {
-//				console.log('checked');
-//				UI.alertConfirmTranslationEnabled = false;
-//				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
-//			} else {
-//				console.log('unchecked');
-//				UI.alertConfirmTranslationEnabled = true;
-//				$.removeCookie('noAlertConfirmTranslation');
-//			}
 		}).on('click', '#settingsSwitcher', function(e) {
 			e.preventDefault();
 			UI.unbindShortcuts();
@@ -201,24 +224,6 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-//            $.get("https://mymemory.translated.net/api/createranduser",function(data){
-//                //parse to appropriate type
-//                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-//                if(typeof data == 'string'){
-//                    data=jQuery.parseJSON(data);
-//                }
-//                //put value into input field
-//                $('#addtm-tr-key').val(data.key);
-//                $('#addtm-create-key').removeClass('disabled');
-//                setTimeout(function() {
-//                    UI.checkAddTMEnable();
-//                    UI.checkManageTMEnable();
-//                }, 100);
-////                $('#private-tm-user').val(data.id);
-////                $('#private-tm-pass').val(data.pass);
-////                $('#create_private_tm_btn').attr('data-key', data.key);
-//                return false;
-//            });
 
             //call API
             APP.doRequest({
@@ -249,16 +254,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '.addtm-select-file', function() {
-/*
-            $('.addtm-tr .warning-message').hide();
-            if($('#addtm-tr-key').val() == '') {
-                $('#addtm-create-key').click();
-                $('.addtm-tr .warning-message').show();
-                setTimeout(function() {
-                    UI.checkAddTMEnable();
-                }, 500);
-            }
-*/
+
         }).on('click', '#addtm-select-file', function() {
             $('.addtm-select-file').click();
         }).on('change', '.addtm-select-file', function() {

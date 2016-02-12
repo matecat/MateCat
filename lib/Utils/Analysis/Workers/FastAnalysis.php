@@ -2,11 +2,11 @@
 namespace Analysis\Workers;
 
 use \TaskRunner\Commons\AbstractDaemon,
-    \TaskRunner\Commons\QueueElement;
+    \TaskRunner\Commons\QueueElement,
+    TaskRunner\Commons\Context,
+    TaskRunner\Commons\ContextList;
 
-use \Analysis\Queue\RedisKeys,
-    \Analysis\Queue\QueueInfo,
-    \Analysis\Queue\QueuesList;
+use \Analysis\Queue\RedisKeys;
 
 use \AMQHandler,
     \Constants_ProjectStatus as ProjectStatus,
@@ -43,7 +43,7 @@ class FastAnalysis extends AbstractDaemon {
 
 
     /**
-     * @var QueuesList
+     * @var ContextList
      */
     protected $_queueContextList = array();
 
@@ -60,7 +60,7 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         //First Execution, load build object
-        $this->_queueContextList = QueuesList::get( $config[ 'context_definitions' ] );
+        $this->_queueContextList = ContextList::get( $config[ 'context_definitions' ] );
 
     }
 
@@ -69,6 +69,7 @@ class FastAnalysis extends AbstractDaemon {
         parent::__construct();
 
         $this->_configFile = $configFile;
+        Log::resetLogger();
         Log::$fileName = 'fastAnalysis.log';
 
         try {
@@ -601,7 +602,7 @@ class FastAnalysis extends AbstractDaemon {
      *  $config = array(
      *    'total' => null,
      *    'qid' => null,
-     *    'queueInfo' => @var QueueInfo
+     *    'queueInfo' => @var Context
      *  )
      * </pre>
      *
@@ -649,7 +650,7 @@ class FastAnalysis extends AbstractDaemon {
      * @param $queueLen int
      * @param $id_mt_engine int
      *
-     * @return QueueInfo
+     * @return Context
      */
     protected function _getQueueAddressesByPriority( $queueLen, $id_mt_engine ){
 

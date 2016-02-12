@@ -161,10 +161,24 @@ class downloadFileController extends downloadController {
                     $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
                     $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
 
+                    $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
+
                     if ( $this->forceXliff ) {
                         //clean the output filename by removing
                         // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
                         $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
+
+                        if ($fileType['proprietary_short_name'] === 'matecat_converter') {
+                            // Set the XLIFF extension to .xlf
+                            // Internally, MateCat continues using .sdlxliff as default
+                            // extension for the XLIFF behind the projects.
+                            // Changing this behavior requires a huge refactoring that
+                            // it's scheduled for future versions.
+                            // We quickly fixed the behaviour from the user standpoint
+                            // using the following line of code, that changes the XLIFF's
+                            // extension just a moment before it is downloaded by the user.
+                            $output_content[ $fileID ][ 'output_filename' ] = preg_replace("|\\.sdlxliff$|i", ".xlf", $output_content[ $fileID ][ 'output_filename' ]);
+                        }
                     }
 
                     /**
@@ -175,7 +189,6 @@ class downloadFileController extends downloadController {
                     //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
                     $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
 
-                    $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
                     // When the 'proprietary' flag is set to false, the xliff
                     // is not passed to any converter, because is handled
                     // directly inside MateCAT.

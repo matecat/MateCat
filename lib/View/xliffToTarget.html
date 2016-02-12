@@ -48,6 +48,8 @@
             isAnonymousUser: ${isAnonymousUser},
             blueimp_dataType: 'text'
         };
+        var conversionFailed = false;
+        var conversionInfo = {};
     </script>
 
     <style>
@@ -81,7 +83,7 @@
             <li><a href="https://www.matecat.com/about/">About</a></li>
             <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
             <li><a href="https://www.matecat.com/support/">Support</a></li>
-            <li><a class="bigred" href="https://www.matecat.com/contacts">LSP? Request a demo</a></li>
+            <li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
         </ul>
     </div>
     <div class="cl"></div>
@@ -287,26 +289,22 @@
 
 
 
+
+
+
+
 </script>
 
 <!-- The template to display files available for download -->
 <script id="template-download" type="text/x-tmpl">
     {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-download fade">
-        {% if (file.error) { %}
-        <td></td>
-        <td class="name"><span></span></td>
-        <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
-        <td class="file_upload_error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
-            {%=locale.fileupload.errors[file.error] || file.error%}
-        </td>
-        {% } else { %}
         <td class="preview">
-		     {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
+             {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
             {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
-			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            || o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
-			) { %}
+            ) { %}
             <span class="extdoc"></span>
 
             {% mimeok=1 } %}
@@ -315,73 +313,73 @@
              <span class="extzip"></span>
              {% mimeok=1 } %}
 
-			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
+            {% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
             <span class="extppt"></span>
             {% mimeok=1} %}
 
 
-			{% if (o.files[i].type == "text/plain" || o.files[i].type == "application/txt" || o.files[i].type == "browser/internal" || o.files[i].type == "text/anytext" || o.files[i].type == "widetext/plain" || o.files[i].type == "widetext/paragraph" ) { %}
+            {% if (o.files[i].type == "text/plain" || o.files[i].type == "application/txt" || o.files[i].type == "browser/internal" || o.files[i].type == "text/anytext" || o.files[i].type == "widetext/plain" || o.files[i].type == "widetext/paragraph" ) { %}
             <span class="exttxt"></span>
             {% mimeok=1} %}
 
 
-			{% if (o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/msexcel" || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/x-ms-excel" || o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-excel" || o.files[i].type == "application/x-dos_ms_excel"  || o.files[i].type == "application/xls" || o.files[i].type == "application/excel"  || o.files[i].type == "application/xlt" || o.files[i].type == "application/msexcel"  || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || o.files[i].type == "application/vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/x-vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/vnd.sun.xml.calc" || o.files[i].type == "text/comma-separated-values" || o.files[i].type == "text/csv" || o.files[i].type == "application/csv" || o.files[i].type == "application/vnd.msexcel"
+            {% if (o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/msexcel" || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/x-ms-excel" || o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-excel" || o.files[i].type == "application/x-dos_ms_excel"  || o.files[i].type == "application/xls" || o.files[i].type == "application/excel"  || o.files[i].type == "application/xlt" || o.files[i].type == "application/msexcel"  || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || o.files[i].type == "application/vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/x-vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/vnd.sun.xml.calc" || o.files[i].type == "text/comma-separated-values" || o.files[i].type == "text/csv" || o.files[i].type == "application/csv" || o.files[i].type == "application/vnd.msexcel"
 
 
-			) { %}
+            ) { %}
 
             <span class="extxls"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
+            {% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
                 {% if (/resx/.test( o.files[i].fileName.split('.').pop() ) == false) { %}
                 <span class="extxml"></span>
                 {% } %}
             {% mimeok=1} %}
 
 
-			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
+            {% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
 
             <span class="exthtm"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "application/vnd.mif" || o.files[i].type == "application/x-framemaker" || o.files[i].type == "application/x-maker"|| o.files[i].type == "application/x-mif"  ) { %}
+            {% if (o.files[i].type == "application/vnd.mif" || o.files[i].type == "application/x-framemaker" || o.files[i].type == "application/x-maker"|| o.files[i].type == "application/x-mif"  ) { %}
 
             <span class="extmif"></span>
             {% mimeok=1} %}
 
-			 {% if (/idml/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/idml/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extidd"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "application/quarkxpress" || o.files[i].type == "application/x-quark-express" ||  /xtg/.test( o.files[i].fileName.split('.').pop() )) { %}
+            {% if (o.files[i].type == "application/quarkxpress" || o.files[i].type == "application/x-quark-express" ||  /xtg/.test( o.files[i].fileName.split('.').pop() )) { %}
 
             <span class="extqxp"></span>
             {% mimeok=1} %}
 
 
-			 {% if (/g/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/g/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="exttxt"></span>
             {% mimeok=1} %}
 
 
-			 {% if (/ttx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/ttx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extttx"></span>
             {% mimeok=1} %}
 
-			 {% if (/xliff/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/xliff/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extxif"></span>
             {% mimeok=1} %}
 
-			 {% if (/xlf/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/xlf/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extxlf"></span>
             {% mimeok=1} %}
 
-			 {% if (/rc/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/rc/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extrcc"></span>
             {% mimeok=1} %}
 
-			{% if (/resx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            {% if (/resx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extres"></span>
             {% mimeok=1} %}
 
@@ -389,33 +387,38 @@
             <span class="extsgl"></span>
             {% mimeok=1} %}
 
-			{% if (/sgm/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            {% if (/sgm/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extsgm"></span>
             {% mimeok=1} %}
 
-			{% if (/properties/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+            {% if (/properties/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="extpro"></span>
             {% mimeok=1} %}
 
-			 {% if (/tmx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
+             {% if (/tmx/.test( o.files[i].fileName.split('.').pop() ) ) { %}
             <span class="exttmx"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
+            {% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
 
             <span class="extpdf"></span>
             {% mimeok=1} %}
 
-			{% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
-			 <span class="extxif"></span>
+            {% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
+             <span class="extxif"></span>
             {% } %}
 
 
         </td>
         <td class="name">{%=file.fileName%}</td>
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
-        <td colspan="2" class="file_upload_ok">File downloaded! Check your download folder</td>
-        {% } %}
+    {% if (file.error) { %}
+        <td class="file_upload_error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span>
+            {%=locale.fileupload.errors[file.error] || file.error%}
+        </td>
+    {% } else { %}
+            <td colspan="2" class="file_upload_ok">File downloaded! Check your download folder</td>
+    {% } %}
         <td class="delete">
             <button class="btn btn-dange ui-button" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
                 <i class="icon-ban-circle icon-white"></i>
@@ -432,51 +435,13 @@
 
 
 
+
+
+
+
 </script>
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
-
-<footer>
-
-    <div class="wrapper">
-
-        <ul class="external-links">
-            <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
-
-            <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
-            <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
-        </ul>
-
-        <nav>
-
-            <ul>
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                </tal:block>
-
-                <tal:block tal:condition="php: empty(logged_user)">
-                    <li><a href="${authURL}" class="authLink">Manage</a></li>
-                </tal:block>
-
-            </ul>
-
-            <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
-                </div>
-            </tal:block>
-
-            <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
-                </div>
-            </tal:block>
-
-        </nav>
-
-    </div>
-</footer>
-
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="/public/js/lib/dropzone/dropzone.js"></script>
@@ -562,6 +527,7 @@
             maxFileSize: config.maxFileSize,
 
             add: function ( e, data ) {
+                conversionFailed = {};
                 var that = $( this ).data( 'fileupload' ),
                         options = that.options,
                         files = data.files;
@@ -646,7 +612,9 @@
                                             }
                                     );
                                     $( '.size span' ).css( 'visibility', 'visible' );
-                                    $( data.context ).find( '.size + td' ).addClass( 'file_upload_ok' ).html( "<span>" + file.message + "</span>" );
+                                    $( data.context ).find( '.size + td' )
+                                            .addClass( 'file_upload_ok' )
+                                            .html( "<span>" + file.message + "</span>" );
                                 }
                         );
 
@@ -665,12 +633,14 @@
             },
             // Callback for failed (abort or error) uploads:
             fail: function ( e, data ) {
+                conversionFailed = true;
+                conversionInfo = data.originalFiles[0];
                 var that = $( this ).data( 'fileupload' ),
                         template;
                 that._adjustMaxNumberOfFiles( data.files.length );
                 if ( data.context ) {
                     data.context.each( function ( index ) {
-                        if ( data.errorThrown !== 'abort' ) {
+                        if ( data.errorThrown !== 'abort' && data.errorThrown !== 'Internal Server Error' ) {
                             var file = data.files[index];
                             file.error = file.error || data.errorThrown ||
                                     true;
@@ -688,7 +658,32 @@
                                         );
                                     }
                             );
-                        } else {
+                        }
+                        else if ( data.errorThrown == 'Internal Server Error' ) {
+                            var file = {
+                                fileName: data.originalFiles[0].name,
+                                size: data.originalFiles[0].size,
+                                type: data.originalFiles[0].type
+                            };
+
+                            file.error = 'An error occurred. Please, be sure that the xliff file has been downloaded from MateCat';
+                            that._transition( $( this ) ).done(
+                                    function () {
+                                        var node = $( this );
+                                        template = that._renderDownload( [file] )
+                                                .replaceAll( node );
+                                        that._forceReflow( template );
+                                        that._transition( template ).done(
+                                                function () {
+                                                    data.context = $( this );
+                                                    that._trigger( 'failed', e, data );
+                                                }
+                                        );
+                                        $( '.size span' ).css( 'visibility', 'visible' );
+                                    }
+                            );
+                        }
+                        else {
                             that._transition( $( this ) ).done(
                                     function () {
                                         $( this ).remove();
@@ -792,9 +787,11 @@
                 /* END Editing */
             },
             complete: function ( e, data ) {
-                console.log( 'completed!!!' );
-                var result = e.responseJSON; //JSON.parse( data.result );
-                saveAs( b64toBlob( result.fileContent ), result.fileName );
+                if ( !conversionFailed ) {
+                    console.log( 'completed!!!' );
+                    var result = e.responseJSON; //JSON.parse( data.result );
+                    saveAs( b64toBlob( result.fileContent ), result.fileName );
+                }
             }
         } );
 
@@ -805,7 +802,7 @@
 
         $._data( $( '#fileupload' )[0], 'events' )['fileuploadcompleted'] = [];
 //
-        UI.errorsBeforeUpload = function ( file ){
+        UI.errorsBeforeUpload = function ( file ) {
             console.log( 'TUMADRE! errorsBeforeUpload' );
 
             var ext = file.name.split( '.' ).pop();
@@ -914,35 +911,35 @@
             <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
             <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
         </ul>
-<!--
-        <nav>
+        <!--
+                <nav>
 
-            <ul>
+                    <ul>
 
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                </tal:block>
+                        <tal:block tal:condition="php: !empty(logged_user)">
+                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                        </tal:block>
 
-                <tal:block tal:condition="php: empty(logged_user)">
-                    <li><a href="${authURL}" class="authLink">Manage</a></li>
-                </tal:block>
+                        <tal:block tal:condition="php: empty(logged_user)">
+                            <li><a href="${authURL}" class="authLink">Manage</a></li>
+                        </tal:block>
 
-            </ul>
+                    </ul>
 
-            <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
-                </div>
-            </tal:block>
+                    <tal:block tal:condition="php: empty(logged_user)">
+                        <div id='welcomebox'>
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
+                        </div>
+                    </tal:block>
 
-            <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
-                </div>
-            </tal:block>
+                    <tal:block tal:condition="php: !empty(logged_user)">
+                        <div id='welcomebox' tal:attributes="title extended_user">
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        </div>
+                    </tal:block>
 
-        </nav>
--->
+                </nav>
+        -->
     </div>
 </footer>
 

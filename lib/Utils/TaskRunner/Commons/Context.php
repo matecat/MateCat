@@ -56,9 +56,7 @@ class Context {
     protected function __construct( Array $queueElement ) {
 
         foreach( $queueElement as $key => $values ){
-            if ( property_exists( $this, $key ) ){
                 $this->$key = $values;
-            }
         }
 
     }

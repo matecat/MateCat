@@ -9,12 +9,10 @@
 
 namespace TaskRunner;
 
-use Analysis\Queue\QueuesList;
 use TaskRunner\Commons\AbstractDaemon,
-    TaskRunner\Commons\Context;
-
-use Analysis\Queue\RedisKeys,
-    Analysis\Queue\QueueInfo;
+    TaskRunner\Commons\Context,
+    TaskRunner\Commons\ContextList,
+    TaskRunner\Commons\RedisKeys;
 
 use \Log, \Exception, \AMQHandler;
 
@@ -39,7 +37,7 @@ class TaskManager extends AbstractDaemon {
     protected $_configFile;
 
     /**
-     * @var QueuesList
+     * @var ContextList
      */
     protected $_queueContextList = array();
 
@@ -85,7 +83,7 @@ class TaskManager extends AbstractDaemon {
          * Kill all managers. "There can be only one."
          * Register My Host address ( and also overwrite the old one )
          */
-        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::VOLUME_ANALYSIS_PID, gethostbyname( gethostname() ) ) ){
+        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostbyname( gethostname() ) ) ){
             //kill all it's children
             $this->_killPids();
         }
@@ -95,7 +93,7 @@ class TaskManager extends AbstractDaemon {
 
             try {
 
-                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::VOLUME_ANALYSIS_PID, gethostbyname( gethostname() ) ) ) {
+                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostbyname( gethostname() ) ) ) {
                     self::_TimeStampMsg( "(parent " . self::$tHandlerPID . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
                     self::cleanShutDown();
                     die();
@@ -246,7 +244,7 @@ class TaskManager extends AbstractDaemon {
 
         //SHUTDOWN
         static::$__INSTANCE->_killPids();
-        static::$__INSTANCE->_queueHandler->getRedisClient()->del( RedisKeys::VOLUME_ANALYSIS_PID );
+        static::$__INSTANCE->_queueHandler->getRedisClient()->del( RedisKeys::TASK_RUNNER_PID );
         $msg = str_pad( " TM ANALYSIS " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
 
@@ -266,11 +264,11 @@ class TaskManager extends AbstractDaemon {
      *     <li>Kill ALL processes when no parameters are sent</li>
      * </ul>
      *
-     * @param QueueInfo $queueInfo
+     * @param Context $queueInfo
      * @param int       $pid
      * @param int       $num
      */
-    protected function _killPids( QueueInfo $queueInfo = null, $pid = 0, $num = 0 ) {
+    protected function _killPids( Context $queueInfo = null, $pid = 0, $num = 0 ) {
 
         self::_TimeStampMsg( "Request to kill some processes." );
         self::_TimeStampMsg( "Pid List: " . @var_export( $queueInfo->pid_set_name, true ) );
@@ -290,7 +288,7 @@ class TaskManager extends AbstractDaemon {
 
             self::_TimeStampMsg( "Killing pid $pid from a not defined queue. Seek and destroy." );
             /**
-             * @var $queue QueueInfo
+             * @var $queue Context
              */
             foreach ( $this->_queueContextList->list as $queue ) {
 
@@ -418,7 +416,7 @@ class TaskManager extends AbstractDaemon {
         if( empty( $this->_queueContextList->list ) ){
 
             //First Execution, load build object
-            $this->_queueContextList = QueuesList::get( $contextList );
+            $this->_queueContextList = ContextList::get( $contextList );
 
             //exit method
             return;
@@ -436,7 +434,7 @@ class TaskManager extends AbstractDaemon {
          *</pre>
          *
          */
-        if( $diff = array_diff_key( $this->_queueContextList->list, QueuesList::get( $contextList )->list ) ){
+        if( $diff = array_diff_key( $this->_queueContextList->list, ContextList::get( $contextList )->list ) ){
 
             //remove no more present contexts
             foreach( $diff as $_key => $_cont ){

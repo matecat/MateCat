@@ -321,7 +321,7 @@ UI = {
         console.log('copy all sources');
         if(typeof $.cookie('source_copied_to_target-' + config.job_id + "-" + config.password) == 'undefined') {
             APP.confirmAndCheckbox({
-                title: 'Copy all new segments',
+                title: 'Copy source to target',
                 name: 'confirmCopyAllSources',
                 okTxt: 'Yes',
                 cancelTxt: 'No',
@@ -329,8 +329,7 @@ UI = {
                 onCancel: 'abortCopyAllSources',
                 closeOnSuccess: true,
                 msg: "Copy source to target for all new segments?<br/><b>This action cannot be undone.</b>",
-                'checkbox-label': "I want to fill all untranslated target segments with a copy "+
-                                    "of the corresponding source segments."
+                'checkbox-label': "Confirm copy source to target"
             });
         } else {
             this.consecutiveCopySourceNum = [];
@@ -375,7 +374,18 @@ UI = {
     },
     abortCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
-        //$.cookie('source_copied_to_target-' + config.job_id, '0', { expires: 1 });
+        if ( typeof dont_show != 'undefined' && dont_show) {
+            $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+                    '0',
+                    //expiration: 1 day
+                    { expires: 30 });
+        }
+        else {
+            $.cookie('source_copied_to_target-' + config.job_id +"-" + config.password,
+                    null,
+                    //set expiration date before the current date to delete the cookie
+                    {expires: new Date(1)});
+        }
     },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
@@ -3302,7 +3312,21 @@ console.log('eccolo: ', typeof token);
             if ( (tt.length) && (!ss) )
                 return;
         }
-        var diff = ( typeof currentItem == 'undefined') ? 'null' : this.dmp.diff_main( currentItem, this.editarea.html() )[1][1];
+        var diff = 'null';
+
+        if( typeof currentItem != 'undefined'){
+            diff = this.dmp.diff_main( currentItem, this.editarea.html() );
+
+            // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
+            // for that we chooiff[0] as a fallback
+            if(typeof diff[1] != 'undefined') {
+                diff = diff[1][1];
+            }
+            else {
+                diff = diff[0][1];
+            }
+        }
+
         if ( diff == ' selected' )
             return;
 

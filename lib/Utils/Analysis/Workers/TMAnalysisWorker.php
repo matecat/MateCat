@@ -30,7 +30,7 @@ class TMAnalysisWorker extends AbstractWorker {
     protected $_queueHandler;
 
     /**
-     * @var QueueInfo
+     * @var Context
      */
     protected $_mySubscribedQueue;
 
@@ -57,7 +57,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_checkDatabaseConnection();
 
         /**
-         * @var $queueContext QueueInfo
+         * @var $queueContext Context
          */
         $this->_mySubscribedQueue = $queueContext;
 

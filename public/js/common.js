@@ -211,8 +211,14 @@ APP = {
 
         _tpl_checkbox = '' +
                         '<div class="boxed">' +
-                        ' <input type="checkbox" id="popup-checkbox"><label></label>' +
+                        ' <input type="checkbox" id="popup-checkbox" class="confirm_checkbox"><label></label>' +
                         '</div>';
+
+
+        _tpl_checkbox_dontshow = '' +
+                '<div class="boxed">' +
+                ' <input type="checkbox" class="dont_show"><label></label>' +
+                '</div>';
 
         var renderOkButton = function ( options ) {
             var filled_tpl = $(_tpl_button);
@@ -292,7 +298,17 @@ APP = {
             var filled_tpl = $( _tpl_checkbox );
 
             if ( typeof options['checkbox_label'] != 'undefined' ) {
-                filled_tpl.find('label').html(options['checkbox_label']);
+                filled_tpl.find('.confirm_checkbox + label').html(options['checkbox_label']);
+            }
+            return filled_tpl;
+        };
+
+        var renderDontShowCheckbox = function( options ){
+            var filled_tpl = $( _tpl_checkbox_dontshow );
+
+            if ( typeof options['checkbox_label'] != 'undefined' ) {
+                filled_tpl.find('.dont_show + label' )
+                        .html("Don't show this dialog again for the current job");
             }
             return filled_tpl;
         };
@@ -361,6 +377,11 @@ APP = {
                         break;
                     case 'confirm':
                     case 'confirm_checkbox' :
+                        if ( options['type'] == 'confirm_checkbox' ) {
+                            filled_tpl.find( '.popup p' )
+                                    .append( renderCheckbox( options ) );
+                        }
+
                         filled_tpl.find( '.popup' )
                                 .addClass('confirm_checkbox')
                                 .addClass('popup-confirm')
@@ -382,20 +403,29 @@ APP = {
 
                         if ( options['type'] == 'confirm_checkbox' ) {
                             filled_tpl.find( '.popup' )
-                                    .append( renderCheckbox( options ) );
+                                    .append( renderDontShowCheckbox( options ) );
 
-                            disableOk(filled_tpl);
+                            disableOk( filled_tpl );
 
 
-                            $('body').on('click','.modal input[type=checkbox]', function(){
-                                if($('#popup-checkbox').is(':checked')){
-                                    enableOk(filled_tpl);
-
+                            $( 'body' ).on( 'click', '#popup-checkbox', function () {
+                                if ( $( '#popup-checkbox' ).is( ':checked' ) ) {
+                                    enableOk( filled_tpl );
                                 }
-                                else{
-                                    disableOk(filled_tpl);
+                                else {
+                                    disableOk( filled_tpl );
                                 }
-                            })
+                            } )
+                            .on( 'click', '.dont_show', function () {
+                                if ( $( '.dont_show' ).is( ':checked' ) ) {
+                                    //set global variable because the popup will be destroyed on close event.
+                                    dont_show = 1;
+                                }
+                                else {
+                                    dont_show = 0;
+                                }
+
+                            } );
                         }
                         break;
 
@@ -437,38 +467,7 @@ APP = {
                     .unbind('click', UI.disableLink);
         };
 
-
         newPopup = renderPopup( conf );
-
-        //newPopup = '<div class="modal' + ((conf.closeOnSuccess)? ' closeOnSuccess' : '') + '" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
-        //            '   <div class="popup-outer"></div>' +
-        //            '   <div class="popup' + ((conf.type == 'alert')? ' popup-alert' : (conf.type == 'confirm')? ' popup-confirm' : '') + '">' +
-        //            '       <a href="#" class="x-popup remove"></a>' +
-        //            '       <h1>' + conf.title + '</h1>' +
-        //            '       <p>' + conf.content + '</p>';
-        //if(conf.type == 'alert') {
-        //    newPopup += '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>Ok<\a>';
-        //} else if(conf.type == 'confirm') {
-        //    newPopup += renderCancelButton ({
-        //        callback : conf.onCancel,
-        //        context  : conf.context,
-        //        txt      : conf.cancelTxt
-        //    } ) +
-        //            '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +
-        //                     '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + ((typeof conf.context != 'undefined')? ' data-context="' + encodeURI(conf.context) + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';
-        //    APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
-        //    APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
-        //    APP.callerObject = (conf.caller)? conf.caller : null;
-        //} else if(conf.type == 'free') {
-        //    var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
-        //    newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
-        //} else {
-        //    $.each(conf.buttons, function(index) {
-        //        var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
-        //        newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); ' + ((this.closeOnClick)? "$('.x-popup').click(); " : '') + 'return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
-        //    });
-        //}
-        //newPopup += '</div>';
 
         $( 'body' ).append( newPopup );
 

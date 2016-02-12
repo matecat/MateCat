@@ -15,7 +15,7 @@ CHECK_FS = no
 ; Check in new config.ini.sample:
 ; There could be new params to configure.
 ;----------------------------------------
-BUILD_NUMBER = "0.6.5"
+BUILD_NUMBER = "0.6.6"
 
 ;----------------------------------------
 [development]
@@ -30,6 +30,7 @@ QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
+STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
@@ -54,6 +55,7 @@ QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
+STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'
@@ -78,6 +80,7 @@ QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
+STORAGE_DIR = "/home/matecat/cattool/storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
 SMTP_PORT = '25'

@@ -22,7 +22,11 @@ class XliffSAXTranslationReplacer {
 
     protected $sourceInTarget;
 
+    protected static $INTERNAL_TAG_PLACEHOLDER;
+
     public function __construct( $originalXliffFilename, $segments, $trg_lang = null, $outputFile = null ) {
+
+        self::$INTERNAL_TAG_PLACEHOLDER = "§" . base64_encode( openssl_random_pseudo_bytes( 3, $_crypto_strong ) );
 
         if ( is_resource( $outputFile ) ) {
             $this->outputFP = $outputFile;
@@ -79,7 +83,7 @@ class XliffSAXTranslationReplacer {
                preprocess file
              */
             // obfuscate entities because sax automatically does html_entity_decode
-             $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+             $temporary_check_buffer = preg_replace( "/&(.*?);/", self::$INTERNAL_TAG_PLACEHOLDER . '$1' . self::$INTERNAL_TAG_PLACEHOLDER, $this->currentBuffer );
 
             $lastByte = $temporary_check_buffer[ strlen( $temporary_check_buffer ) - 1 ];
 
@@ -105,16 +109,16 @@ class XliffSAXTranslationReplacer {
 
                 //if an entity is still present, fetch some more and repeat the escaping
                 $this->currentBuffer .= fread( $this->originalFP, 9 );
-                $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+                $temporary_check_buffer = preg_replace( "/&(.*?);/", self::$INTERNAL_TAG_PLACEHOLDER . '$1' . self::$INTERNAL_TAG_PLACEHOLDER, $this->currentBuffer );
 
             }
 
             //free stuff outside the loop
             unset( $temporary_check_buffer );
 
-            $this->currentBuffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+            $this->currentBuffer = preg_replace( "/&(.*?);/", self::$INTERNAL_TAG_PLACEHOLDER . '$1' . self::$INTERNAL_TAG_PLACEHOLDER, $this->currentBuffer );
             if ( $escape_AMP ) {
-                $this->currentBuffer = str_replace( "&", '#%amp#%', $this->currentBuffer );
+                $this->currentBuffer = str_replace( "&", self::$INTERNAL_TAG_PLACEHOLDER . 'amp' . self::$INTERNAL_TAG_PLACEHOLDER, $this->currentBuffer );
             }
 
             //get lenght of chunk
@@ -378,7 +382,7 @@ class XliffSAXTranslationReplacer {
      */
     protected function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
         //postprocess string
-        $data = preg_replace( "/#%(.*?)#%/", '&$1;', $data );
+        $data = preg_replace( "/" . self::$INTERNAL_TAG_PLACEHOLDER . '(.*?)' . self::$INTERNAL_TAG_PLACEHOLDER . "/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
         if ( !$treatAsCDATA ) {
             //unix2dos

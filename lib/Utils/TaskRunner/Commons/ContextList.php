@@ -1,5 +1,5 @@
 <?php
-namespace Analysis\Queue;
+namespace TaskRunner\Commons;
 
 /**
  * Created by PhpStorm.
@@ -8,10 +8,10 @@ namespace Analysis\Queue;
  * Time: 17.00
  *
  */
-class QueuesList {
+class ContextList {
 
     /**
-     * @var QueueInfo[]
+     * @var Context[]
      */
     public $list = array();
 
@@ -23,7 +23,7 @@ class QueuesList {
     protected function __construct( Array $queue_info ) {
 
         foreach ( $queue_info as $level => $values ) {
-            $this->list[ $level ] = QueueInfo::buildFromArray( $values );
+            $this->list[ $level ] = Context::buildFromArray( $values );
         }
 
     }
