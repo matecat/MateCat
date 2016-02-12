@@ -1,5 +1,4 @@
 <?php
-date_default_timezone_set( "Europe/Rome" );
 
 /**
  * Created by PhpStorm.
@@ -48,6 +47,8 @@ class Bootstrap {
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
         INIT::obtain();
+
+        date_default_timezone_set( INIT::$TIME_ZONE );
 
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accessible by the browser

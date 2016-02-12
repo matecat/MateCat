@@ -85,6 +85,7 @@ class INIT {
     public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES = 100;
+    public static $TIME_ZONE = 'Europe/Rome';
 
     public static $CONFIG_VERSION_ERR_MESSAGE = "Your config.ini file is not up-to-date.";
 
