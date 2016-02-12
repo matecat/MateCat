@@ -29,81 +29,53 @@ class ProjectCompletionStatus extends ProtectedKleinController {
     }
 
     public function status() {
-        // TODO: move this in to a json presenter class
-        $uncompleted_reviews = \Projects_ProjectDao::uncompletedChunksByProjectId(
-            $this->request->id_project,
-            array('is_review' => true )
-        );
+        $chunks = $this->validator->getProject()->getChunks();
 
-        $uncompleted_translations = \Projects_ProjectDao::uncompletedChunksByProjectId(
-            $this->request->id_project,
-            array('is_review' => false )
-        );
-
-        $is_completed =
-            count($uncompleted_translations) +
-            count($uncompleted_reviews) == 0  ;
-
-        $id_project = $this->request->id_project ;
         $response = array();
-        $response = array('id' => $id_project );
+        $response['revise'] = array();
+        $response['translate'] = array();
 
-        try {
-            if ( $is_completed ) {
-                $jobs = $this->validator->getProject()->getJobs();
-                $response['jobs'] = array();
+        $response['id'] = $this->validator->getProject()->id ;
 
-                foreach($jobs as $job) {
-                    $response['jobs'][] = array(
-                        'id' => $job->id,
-                        'password' => $job->password,
-                        'download_url' => \INIT::$HTTPHOST . "/?action=downloadFile" .
-                            "&id_job=" .  $job->id .
-                            "&password=" . $job->password
+        $any_uncomplete = false;
 
-                    );
-                }
-                $response['completed'] = true;
-            } else  {
-                $response['completed'] = false;
+        foreach( $chunks as $chunk ) {
+            $translate = array(
+                    'id'       => $chunk->id,
+                    'password' => $chunk->password,
+                    'completed' => \Chunks_ChunkCompletionEventDao::isChunkCompleted( $chunk, array(
+                        'is_review' => false
+                    ) )
+            );
 
-                if ( count($uncompleted_reviews) > 0 ) {
-                    $response['revise'] = array();
-                    foreach($uncompleted_reviews as $chunk) {
+            $response['translate'][] = $translate;
 
-                        $password = Features::filter(
-                            'filter_job_password_to_review_password',
-                            $this->validator->getProject()->id_customer,
-                            $chunk->password,
-                            $chunk->id
-                        );
+            $password = Features::filter(
+                    'filter_job_password_to_review_password',
+                    $this->validator->getProject()->id_customer,
+                    $chunk->password,
+                    $chunk->id
+            );
 
-                        $response['revise'][] = array(
-                            'id' => $chunk->id,
-                            'password' => $password
-                        );
-                    }
-                }
+            $revise = array(
+                    'id'       => $chunk->id,
+                    'password' => $password,
+                    'completed' => \Chunks_ChunkCompletionEventDao::isChunkCompleted( $chunk, array(
+                            'is_review' => true
+                    ) )
+            );
 
-                if ( count($uncompleted_translations) > 0 ) {
-                    $response['translate'] = array();
-                    foreach($uncompleted_translations as $chunk) {
-                        $response['translate'][] = array(
-                            'id' => $chunk->id,
-                            'password' => $chunk->password
-                        );
-                    }
-                }
-            }
+            if (! ( $revise['completed'] && $translate['completed'] ) ) $any_uncomplete = true;
 
-            $this->response->json( array(
-                'project_status' => $response
-            ) ) ;
-
-        } catch ( Exception $e ){
-            Log::doLog( $e->getMessage() ) ;
-            // TODO handle 500 response code here
+            $response['revise'][] = $revise;
         }
+
+        $response['completed'] = !$any_uncomplete ;
+
+        $this->response->json( array(
+            'project_status' => $response
+        ) ) ;
+
 
     }
 }
