@@ -124,6 +124,23 @@ class Features {
         return $project->id_qa_model != null;
     }
 
+    /**
+     * Give your plugins the possibilty to install routes
+     *
+     */
+    public static function loadRoutes( \Klein\Klein $klein ) {
+        list( $null, $prefix, $class_name) = explode('/', $_SERVER['REQUEST_URI']);
 
+        if ( $prefix  == 'plugins' ) {
+            $cls = '\\Features\\' .  Utils::underscoreToCamelCase( $class_name );
+
+            if ( class_exists( $cls ) ) {
+                $klein->with("/$prefix/$class_name", function() use ($cls, $klein) {
+                    $cls::loadRoutes( $klein );
+                });
+            }
+        }
+
+    }
 
 }

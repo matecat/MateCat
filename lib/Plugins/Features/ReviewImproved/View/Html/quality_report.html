@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Quality Report - MateCat</title>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/editlog.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+
+    <script type="text/javascript">
+        var config = {
+            basepath: '${basepath | string:/}'
+        };
+    </script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
+    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+</head>
+
+<body>
+
+<header style="padding-bottom:5px" >
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+
+
+
+        <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
+
+
+    </div>
+</header>
+
+<div class="wrapper" tal:condition="emptyJob">
+    <div id="projects">
+        <p class="article msg">
+            <i>There are no edited segments in this job.</i>
+        </p>
+    </div>
+
+</div>
+
+<div class="wrapper" tal:condition="not: emptyJob">
+
+    <!--	<h1>Field test - 1</h1> -->
+
+    <h1 style="margin-bottom:0px">Editing Log - Project: <span id="pname" tal:content="pname">Project</span></h1>
+
+    <div tal:condition="showDQF" id="editlog-boxed"><strong>DQF</strong> is being used to collect editing statistics.
+        Log in to the dashboard to check the data for this job. <a href="https://dqf.taus.net/login" target="blanck"> https://dqf.taus.net/login </a></div>
+
+
+    <h2 style="margin-top:20px;margin-bottom:10px">
+        Stats for translation job <span tal:replace="jid | default"></span> -
+        <b><span tal:replace="source_code">---</span> </b> &gt; <b>
+        <span tal:replace="target_code">---</span></b>
+    </h2>
+
+
+    <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <th>Words</th>
+            <th>Total Time-to-edit <a class="tooltip">?<span>Sum of the time to edit of all segments, including translators' pauses.</span></a></th>
+            <th>Your avg secs/word</th>
+            <th>Your avg PEE</th>
+        </tr>
+        <tr>
+            <td tal:content="stats/valid-word-count | default">N/A</td>
+            <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
+            <td tal:attributes="class php:tte_fast ? 'color_green' : NULL">
+                <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span>
+                <span tal:replace="stats/avg-secs-per-word | string:--"></span>s
+                <small style="color:#000">(other users: <span tal:replace="overall_tte | string:--"></span>s)</small>
+            </td>
+            <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL" >
+                <span tal:replace="stats/avg-pee | string:--"></span>
+                <small>(other users: <span tal:replace="overall_pee | string:--"></span>%)</small>
+            </td>
+        </tr>
+    </table>
+
+    <h2 style="margin-top:20px;margin-bottom:10px">Editing Details</h2>
+
+
+    <div tal:define="file_data php:array()" tal:repeat="file_data data">
+        <span tal:attributes="class string:error-symbol" tal:condition="php:file_data['stats_valid_style'] NE '' "></span>
+        <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats_valid_style}">
+
+            <tr>
+                <th>Segment ID</th>
+                <th>Words</th>
+                <th>Time-to-edit (TTE)</th>
+                <th width="100">Secs/Word</th>
+                <th>Post-editing effort (PEE)</th>
+            </tr>
+
+            <tr>
+                <td><a
+                        tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}#${file_data/id}"><span
+                        tal:replace="file_data/id | default" /></a></td>
+                <td tal:content="file_data/raw_word_count | default">N/A</td>
+                <td tal:content="file_data/display_time_to_edit"></td>
+                <td tal:content="file_data/secs_per_word | default"
+                    title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics."> N/A </td>
+                <td tal:content="file_data/pe_effort_perc | default">%</td>
+
+            </tr>
+        </table>
+
+        <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats_valid_style}">
+
+            <tr>
+                <th style="width: 100px">Segment</th>
+                <td style="text-align:left;font-size:16px;" tal:content="structure file_data/source | default">N/A</td>
+            </tr>
+            <tr>
+                <th style="width: 100px">Suggestion<br/>
+                    (<span tal:content="file_data/suggestion_source | default"></span> -
+                    <span tal:content="file_data/suggestion_match | default"></span>)
+                </th>
+                <td style="text-align:left;font-size:16px;" tal:content="structure file_data/suggestion_view | default">N/A</td>
+            </tr>
+            <tr>
+                <th style="width: 100px">Translation</th>
+                <td style="text-align:left;font-size:16px;" tal:content="structure file_data/translation | default">N/A</td>
+
+            </tr>
+            <tr>
+                <th style="width: 100px">Diff View</th>
+                <td style="text-align:left;font-size:16px;" tal:content="structure file_data/diff | default">N/A</td>
+            </tr>
+            <tr>
+                <th style="width: 100px">QA Issues</th>
+                <td style="text-align:left;font-size:16px;" tal:content="structure file_data/warnings"></td>
+            </tr>
+        </table>
+
+    </div>
+
+</div>
+
+
+<footer>
+    <div class="wrapper">
+
+        <nav>
+            <ul>
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                </tal:block>
+
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <li><a href="${incomingUrl}" class="authLink">Manage</a></li>
+                </tal:block>
+
+                <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
+            </ul>
+
+            <tal:block tal:condition="php: empty(logged_user)">
+                <div id='welcomebox'>
+                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${incomingUrl}">Login</a>)
+                </div>
+            </tal:block>
+
+            <tal:block tal:condition="php: !empty(logged_user)">
+                <div id='welcomebox' tal:attributes="title extended_user">
+                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
+                </div>
+            </tal:block>
+
+        </nav>
+
+        <div id="pagination_box" tal:condition="not: emptyJob">
+            <nav>
+                <ul>
+                    <li id="prev_page" tal:condition="exists: pagination/prev">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/prev}">&lt;&lt;</a>
+                    </li>
+
+                    <li id="first_page" tal:condition="exists: pagination/first">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/first}">
+                            1
+                        </a>
+                    </li>
+                    <li tal:condition="php: pagination['current_page'] > 3">
+                        <span>...</span>
+                    </li>
+                    <li tal:condition="exists: pagination/prev">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/prev}"
+                           tal:content="php: pagination['current_page']-1">
+                        </a>
+                    </li>
+                    <li id="current_page" tal:condition="exists: pagination/current">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/current}">${pagination/current_page}</a>
+                    </li>
+                    <li tal:condition="exists: pagination/next">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/next}"
+                           tal:content="php: pagination['current_page'] +1 ">
+                        </a>
+                    </li>
+                    <li tal:condition="php: pagination['last_page'] > pagination['current_page'] + 2">
+                        <span>...</span>
+                    </li>
+                    <li id="last_page" tal:condition="exists: pagination/last">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/last}">
+                            ${pagination/last_page}
+                        </a>
+                    </li>
+                    <li id="next_page" tal:condition="exists: pagination/next">
+                        <a tal:attributes="href string:${basepath}editlog/${jid}-${password}?start=${pagination/next}">
+                            &gt;&gt;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
+            <!-- <p class="progress">Progress:</p> -->
+            <div class="meter" style="width:10%">
+
+                <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
+            </div>
+            <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
+            <ul>
+
+                <li id="stat-eqwords">
+                    <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                </li>
+                <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
+
+            </ul>
+
+
+        </div>
+
+    </div> <!-- .wrapper -->
+</footer>
+
+
+
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+
+</body>
+</html>

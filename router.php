@@ -20,8 +20,16 @@ Log::$uniqID = uniqid() ;
 
 $klein = new \Klein\Klein();
 
+function route($path, $method, $controller, $action) {
+    global $klein;
+    $klein->respond($method, $path, function() use ($controller, $action) {
+        $reflect = new ReflectionClass($controller);
+        $instance = $reflect->newInstanceArgs(func_get_args());
+        $instance->respond( $action );
+    });
+}
 
-
+$features_router = Features::loadRoutes( $klein );
 
 $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
     // TODO still need to catch fatal errors here with 500 code
@@ -38,6 +46,7 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
             $klein->response()->code(400);
             $klein->response()->json( array('error' => $err_msg ));
             break;
+        case 'Exceptions_RecordNotFound':
         case 'Exceptions\NotFoundError':
             $klein->response()->code(404);
             break;
@@ -128,15 +137,6 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });
-
-function route($path, $method, $controller, $action) {
-    global $klein;
-    $klein->respond($method, $path, function() use ($controller, $action) {
-        $reflect = new ReflectionClass($controller);
-        $instance = $reflect->newInstanceArgs(func_get_args());
-        $instance->respond( $action );
-    });
-}
 
 
 /**

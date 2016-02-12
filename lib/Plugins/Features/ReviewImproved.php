@@ -10,6 +10,7 @@ use ZipArchive ;
 use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
+use Features\ReviewImproved\Controller;
 
 class ReviewImproved extends BaseFeature {
 
@@ -172,6 +173,10 @@ class ReviewImproved extends BaseFeature {
 
 
     }
+
+    public function installRoutes( $klein ) {
+
+    }
     /**
      * @param $array_jobs The jobs array coming from the project_structure
      *
@@ -277,6 +282,23 @@ class ReviewImproved extends BaseFeature {
             )
         );
 
+    }
+
+    /**
+     * Install routes for this plugin
+     *
+     * @param \Klein\Klein $klein
+     */
+
+
+
+    public static function loadRoutes( \Klein\Klein $klein ) {
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]', function ($request, $response, $service) {
+            $controller = new Controller\QualityReportController( $request, $response, $service);
+            $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
+            $controller->setView( $template_path );
+            $controller->respond();
+        });
     }
 
 }

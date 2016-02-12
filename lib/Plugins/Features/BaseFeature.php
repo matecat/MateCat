@@ -19,4 +19,10 @@ class BaseFeature {
         $this->feature = $feature ;
     }
 
+    /**
+     * @param \Klein\Klein $klein
+     *
+     * @return mixed
+     */
+
 }

@@ -6,6 +6,24 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return Jobs_JobStruct
+     */
+    public static function getByIdAndPassword( $id_job, $password ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+                "SELECT * FROM jobs WHERE " .
+                " id = :id_job AND password = :password "
+        );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
+        $stmt->execute( array( 'id_job' => $id_job, 'password' => $password ) );
+
+        return $stmt->fetch();
+    }
+
     public static function getByProjectId( $id_project ) {
         $conn = Database::obtain()->getConnection();
         // TODO: this query should return the minimal data
