@@ -28,6 +28,17 @@ class ProjectCompletionStatusTest extends IntegrationTest {
     }
 
     private function setValidProjectWithAllTranslatedSegments() {
+        $this->createProject();
+        $this->setAllSegmentsTranslated();
+    }
+
+    private function setAllSegmentsTranslated() {
+        $this->test_data->chunks = integrationSetSegmentsTranslated(
+            $this->test_data->project->id_project
+        );
+    }
+
+    private function createProject() {
         $this->prepareUserAndApiKey();
 
         Factory_OwnerFeature::create( array(
@@ -36,14 +47,11 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         ) );
 
         $this->submitProjectWithApiKeys();
-
-        $this->test_data->chunks = integrationSetSegmentsTranslated(
-            $this->test_data->project->id_project
-        );
     }
 
-    function test_is_not_complete_by_default() {
+    function test_is_not_complete_when_segments_are_translated() {
         $this->setValidProjectWithAllTranslatedSegments();
+
         $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
 
         $expected_jobs = array();
@@ -51,20 +59,61 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
         $expected = array(
                 'project_status' => array(
-                        'id'        => $this->test_data->project->id_project,
-                        'completed' => false,
                         'revise'   => array(
                             array(
                                 'id' => $jobs[0]->id,
-                                'password' => $jobs[0]->password
+                                'password' => $jobs[0]->password,
+                                'completed' => false
                             )
                         ),
                         'translate' => array(
                             array(
                                 'id' => $jobs[0]->id,
-                                'password' => $jobs[0]->password
+                                'password' => $jobs[0]->password,
+                                'completed' => false
                             )
                         ),
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
+                )
+        );
+
+        $test          = new CurlTest();
+        $test->path    = '/api/v2/project-completion-status/' .
+                $this->test_data->project->id_project;
+        $test->method  = 'GET';
+        $test->headers = $this->test_data->headers;
+        $response      = $test->getResponse();
+
+        $this->assertEquals( json_encode( $expected ), $response[ 'body' ] );
+
+    }
+
+    function test_is_not_complete_by_default() {
+        $this->createProject();
+        $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
+
+        $expected_jobs = array();
+        $jobs = $project->getJobs();
+
+        $expected = array(
+                'project_status' => array(
+                        'revise'   => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password,
+                                'completed' => false
+                            )
+                        ),
+                        'translate' => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password,
+                                'completed' => false
+                            )
+                        ),
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
                 )
         );
 
@@ -81,8 +130,10 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
     function test_is_complete_when_review_and_translate_are_complete() {
         $this->setValidProjectWithAllTranslatedSegments();
+
         $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
 
+        sleep(1);
         foreach ( $this->test_data->chunks as $chunk ) {
             integrationSetChunkAsComplete( array(
                     'referer' => 'http://example.org/translate/foo/bar',
@@ -101,20 +152,27 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         }
 
         $project       = Projects_ProjectDao::findById( $this->test_data->project->id_project );
-        $expected_jobs = array();
+        $expected_jobs = array('translate' => array(), 'revise' => array() );
+
 
         foreach ( $project->getJobs() as $job ) {
-            $expected_jobs[] = array(
+            $expected_jobs['translate'][] = array(
                     'id'           => $job->id,
                     'password'     => $job->password,
-                    'download_url' => "http://" . $GLOBALS[ 'TEST_URL_BASE' ] . "/?action=downloadFile&id_job=$job->id&password=$job->password"
+                    'completed'    => true,
+            );
+            $expected_jobs['revise'][] = array(
+                    'id'           => $job->id,
+                    'password'     => $job->password,
+                    'completed'    => true,
             );
         }
 
         $expected = array(
                 'project_status' => array(
+                        'revise'      => $expected_jobs['revise'],
+                        'translate'  => $expected_jobs['translate'],
                         'id'        => $this->test_data->project->id_project,
-                        'jobs'      => $expected_jobs,
                         'completed' => true,
                 )
         );
@@ -166,6 +224,8 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $first_chunk  = $chunks[ 0 ];
         $second_chunk = $chunks[ 1 ];
 
+        sleep(1);
+
         // set chunk completed for translate page
         integrationSetChunkAsComplete( array(
             'referer' => 'http://example.org/translate/rest-of-path',
@@ -184,6 +244,8 @@ class ProjectCompletionStatusTest extends IntegrationTest {
             )
         ) );
 
+
+
         $test          = new CurlTest();
         $test->path    = '/api/v2/project-completion-status/' .
                 $this->test_data->project->id_project;
@@ -193,20 +255,32 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $response = $test->getResponse();
         $expected = array(
                 'project_status' => array(
-                        'id'        => $this->test_data->project->id_project,
-                        'completed' => false,
                         'revise'    => array(
                                 array(
+                                        'id'       => $first_chunk->id,
+                                        'password' => $first_chunk->password,
+                                        'completed' => true
+                                ),
+                                array(
                                         'id'       => $second_chunk->id,
-                                        'password' => $second_chunk->password
+                                        'password' => $second_chunk->password,
+                                        'completed' => false
                                 )
                         ),
                         'translate'    => array(
                                 array(
+                                        'id'       => $first_chunk->id,
+                                        'password' => $first_chunk->password,
+                                        'completed' => true
+                                ),
+                                array(
                                         'id'       => $second_chunk->id,
-                                        'password' => $second_chunk->password
+                                        'password' => $second_chunk->password,
+                                        'completed' => false
                                 )
-                        )
+                        ),
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
                 )
         );
 

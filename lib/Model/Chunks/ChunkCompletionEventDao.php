@@ -41,8 +41,11 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      * Returns true or false if the chunk is completed. Requires 'is_review' to be passed
      * as a param.
      *
+     * A chunk is completed when there is at least one completion event which is more recent
+     * than a record un updates table.
+     *
      * @param $chunk chunk to examinate
-     * @param $params list of params for query
+     * @param $params list of params for query: is_review
      *
      * @return true|false
      *
@@ -52,18 +55,24 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         $params = Utils::ensure_keys($params, array('is_review'));
         $is_review = $params['is_review'] || false;
 
-        $sql = "SELECT c.is_review, c.id_job, cc.password " .
-            " FROM chunk_completion_events c " .
-            " LEFT JOIN chunk_completion_updates cc on c.id_job = cc.id_job " .
-            " AND  c.password = cc.password and cc.is_review = c.is_review " .
-            " WHERE c.create_date IS NOT NULL  " .
-            " AND ( c.create_date > cc.last_translation_at OR cc.last_translation_at IS NULL ) " .
-            " AND c.is_review = :is_review " .
+        $sql = "SELECT events.is_review, events.id_job, updates.password " .
+            " FROM chunk_completion_events events " .
+            " LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job " .
+            " AND  events.password = updates.password and events.is_review = updates.is_review " .
+            " WHERE events.create_date IS NOT NULL  " .
+            " AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL ) " .
+            " AND events.is_review = :is_review " .
+            " AND events.id_job = :id_job AND events.password = :password " .
             " GROUP BY id_job, password, is_review " ;
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array( 'is_review' => $is_review ) );
+        $stmt->execute( array(
+                        'id_job'    => $chunk->id,
+                        'password'  => $chunk->password,
+                        'is_review' => $is_review
+                )
+        );
 
         $fetched = $stmt->fetch();
         return $fetched != false ;
