@@ -32,7 +32,7 @@ class NewWithRevisionTypeTest extends IntegrationTest {
             'project_name' => 'foo',
             'target_lang' => 'it',
             'source_lang' => 'en',
-            'project_type' => 'HT'
+            'metadata' => '{ "project_type" : "HT"}'
         );
 
         $this->files[] = test_file_path('xliff/amex-test.docx.xlf');

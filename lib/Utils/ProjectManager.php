@@ -131,46 +131,24 @@ class ProjectManager {
          return $this->projectStructure;
     }
 
-    /**
-     * Evaluates the presence of metadata assocaited with project.
-     * At present, only `project_type` is evaluated.
-     *
-     */
-    private function evalMetadata () {
-        $this->evalProjectType();
-        $this->evalWordCountType();
-    }
 
     /**
      *
      */
-    private function evalWordCountType() {
-        if ($this->projectStructure['word_count_type'] == null) {
+    private function saveMetadata() {
+        if ( empty($this->projectStructure['metadata'] ) ) {
             return ;
         }
 
         $dao = new Projects_MetadataDao( Database::obtain() );
-        $dao->set(
-                $this->projectStructure['id_project'],
-                'word_count_type',
-                $this->projectStructure['word_count_type']
-        );
-    }
-
-    /**
-     *
-     */
-    private function evalProjectType() {
-        if ($this->projectStructure['project_type'] == null) {
-            return ;
+        foreach( $this->projectStructure['metadata'] as $key => $value ) {
+            $dao->set(
+                    $this->projectStructure['id_project'],
+                    $key,
+                    $value
+            );
         }
 
-        $dao = new Projects_MetadataDao( Database::obtain() );
-        $dao->set(
-                $this->projectStructure['id_project'],
-                'project_type',
-                $this->projectStructure['project_type']
-        );
     }
 
     /**
@@ -214,7 +192,7 @@ class ProjectManager {
         }
 
         $this->createProjectRecord();
-        $this->evalMetadata();
+        $this->saveMetadata();
 
         //create user (Massidda 2013-01-24)
         //check if all the keys are valid MyMemory keys

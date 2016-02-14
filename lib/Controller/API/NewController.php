@@ -58,6 +58,8 @@ class NewController extends ajaxController {
 
     private $owner = "";
     private $current_user = "";
+    private $metadata = array();
+
     const MAX_NUM_KEYS = 5;
 
     private static $allowed_seg_rules = array(
@@ -102,8 +104,8 @@ class NewController extends ajaxController {
                 'owner_email'       => array(
                         'filter' => FILTER_VALIDATE_EMAIL
                 ),
-                'project_type' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
+                'metadata' => array(
+                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 )
 
         );
@@ -166,7 +168,15 @@ class NewController extends ajaxController {
             }
         }
 
-        $this->project_type   = $__postInput['project_type'];
+        try {
+            $this->validateMetadataParam($__postInput['metadata']);
+        } catch ( Exception $ex ) {
+            $this->api_output[ 'message' ] = 'Error evaluating metadata param';
+            Log::doLog( $ex->getMessage() );
+
+            return -1;
+        }
+
 
         try {
             $this->validateEngines();
@@ -591,7 +601,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
-        $projectStructure[ 'project_type' ]         = $this->project_type ;
+        $projectStructure[ 'metadata' ]         = $this->metadata ;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
@@ -653,6 +663,26 @@ class NewController extends ajaxController {
 
         return $elem->toArray();
 
+    }
+
+    /**
+     * Expects the metadata param to be a json formatted string and tries to convert it
+     * in array.
+     * Json string is expected to be flat key value, this is enforced padding 1 to json
+     * conversion depth param.
+     *
+     * @param $json_string
+     */
+    private function validateMetadataParam($json_string) {
+        if (!empty($json_string)) {
+            if ( strlen($json_string) > 2048 ) {
+                throw new Exception('metadata string is too long');
+            }
+            $depth = 2 ; // only converts key value structures
+            $assoc = TRUE;
+            $json_string = html_entity_decode($json_string);
+            $this->metadata = json_decode( $json_string, $assoc, $depth );
+        }
     }
 
     private static function parseTmKeyInput( $tmKeyString ) {
