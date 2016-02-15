@@ -132,19 +132,13 @@ class INIT {
     public static $ENABLE_OUTSOURCE = true;
 
     /**
-     * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
-     * ( xliff produced by SDL Trados )
-     *
-     * We are not including the file converters into the Matecat code because we haven't find any open source
-     * library that satisfy the required quality and licensing.
-     *
-     * Here you have two options
-     *  a) Keep $CONVERSION_ENABLED to false, manually convert your files into xliff using SDL Trados, Okapi or similar
-     *  b) Set $CONVERSION_ENABLED to true and implement your own converter
-     *
+     * MateCat Filters configuration
      */
-    public static $CONVERSION_ENABLED = false;
-    public static $USE_ONLY_STABLE_CONVERTERS = true;
+    public static $FILTERS_USER_AGENT = "MateCat Community Instance";
+    public static $FILTERS_ADDRESS = "https://translated-matecat-filters-v1.p.mashape.com";
+    public static $FILTERS_MASHAPE_KEY = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
+    public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
+    public static $FILTERS_EMAIL_FAILURES = false;
 
     /**
      * The MateCat Version
@@ -204,7 +198,7 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
 
-    public static $LEGACY_CONVERSION = false;
+    public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
 
     public function __construct(){
@@ -218,15 +212,6 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
-
-        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-        if( getenv( 'LEGACY_CONVERSION' ) !== false ){
-            self::$LEGACY_CONVERSION = true;
-        }
-
-        if ( getenv( 'UNLOCKABLE_TAGS' ) !== false ) {
-            self::$UNLOCKABLE_TAGS = true;
-        }
 
     }
 
@@ -320,10 +305,6 @@ class INIT {
     public static $UNSUPPORTED_FILE_TYPES = array(
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
-    );
-
-    public static $LEGACY_CONVERSION_SUPPORT = array(
-            'sxml'
     );
 
     public static $DEPRECATE_LEGACY_XLIFFS = true;

@@ -88,25 +88,9 @@ class downloadFileController extends downloadController {
            5)the temporary file is deleted
          */
 
-        // This array will contain all the files of $files_job split by
-        // converter version.
-        $files_job_by_converter_version = array();
-
-        // Detect the converter's version to use for each file, then store
-        // file info accordingly.
-        foreach ( $files_job as $file ) {
-            $fileType = DetectProprietaryXliff::getInfo($file['xliffFilePath']);
-            $files_job_by_converter_version[$fileType[ 'converter_version' ]][] = $file;
-        }
-
-        // Process files according to the converters' versions, one version
-        // at a time
-        foreach ($files_job_by_converter_version as $converter_version => $files_job) {
             //file array is chuncked. Each chunk will be used for a parallel conversion request.
             $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
             foreach ( $files_job as $chunk ) {
-
-                $converter = new FileFormatConverter($converter_version);
 
                 $files_to_be_converted = array();
 
@@ -210,7 +194,7 @@ class downloadFileController extends downloadController {
                     // directly inside MateCAT.
                     $xliffWasNotConverted = ( $fileType[ 'proprietary' ] === false );
 
-                    if ( !INIT::$CONVERSION_ENABLED || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
+                    if ( empty(INIT::$FILTERS_ADDRESS) || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
                         $convertBackToOriginal = false;
                         Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
                     } else {
@@ -227,17 +211,15 @@ class downloadFileController extends downloadController {
 
                         $files_to_be_converted [ $fileID ] = $output_content[ $fileID ];
 
-                    } elseif ( $this->forceXliff ) {
-
-                        $this->cleanFilePath( $output_content[ $fileID ][ 'document_content' ] );
-
                     }
 
                 }
 
-                $convertResult              = $converter->multiConvertToOriginal( $files_to_be_converted, $chosen_machine = false );
+                $convertResult              = Filters::xliffToTarget($files_to_be_converted);
 
                 foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
+
+                    Filters::logConversionToTarget($convertResult[$fileID], $outputPath, $jobData, $file);
 
                     $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
 
@@ -250,7 +232,7 @@ class downloadFileController extends downloadController {
 
 
                         //strip previously added BOM
-                        $encodingConvertedFile[ 1 ] = $converter->stripBOM( $encodingConvertedFile[ 1 ], 16 );
+                        $encodingConvertedFile[ 1 ] = Utils::stripBOM( $encodingConvertedFile[ 1 ], 16 );
 
                         //store new content
                         $output_content[ $fileID ][ 'document_content' ] = $encodingConvertedFile[ 1 ];
@@ -265,7 +247,6 @@ class downloadFileController extends downloadController {
                 unset( $convertResult );
                 
             }
-        }
 
         foreach ( $output_content as $idFile => $fileInformations ) {
             $zipPathInfo = ZipArchiveExtended::zipPathInfo( $output_content[ $idFile ][ 'output_filename' ] );
@@ -541,24 +522,6 @@ class downloadFileController extends downloadController {
                 array( $source, $target, $sourceTokenizer, $targetTokenizer ),
                 $omegatFile );
 
-
-    }
-
-    public function cleanFilePath( &$documentContent ) {
-
-        if ( !function_exists( '_clean' ) ) {
-            function _clean( $file ) {
-                $file_parts = explode( "\\", $file[ 2 ] );
-                $file[ 0 ]  = str_replace( $file[ 2 ], array_pop( $file_parts ), $file[ 0 ] );
-
-                return $file[ 0 ];
-            }
-        }
-
-        //remove system confidential information
-        $documentContent = preg_replace_callback( '|(<file [^>]*?original="([^>]*?)" [^>]*>)|si', '_clean', $documentContent );
-        $documentContent = preg_replace_callback( '|(o-path="([^>]*?))"|si', '_clean', $documentContent );
-        $documentContent = preg_replace_callback( '|(<value key="SDL:OriginalFilePath">([^<]*?)</value>)|si', '_clean', $documentContent );
 
     }
 

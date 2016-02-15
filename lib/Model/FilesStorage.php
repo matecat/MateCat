@@ -148,15 +148,8 @@ class FilesStorage {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
 
-        //ensure old stuff is overwritten
-        // ?? why ?? if we have more than once the same file we are not
-        // be benefiting from the advantages of hard links
-//        if ( is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
-//            Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
-//        }
-
-        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-        if ( INIT::$LEGACY_CONVERSION !== false &&  is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+        //don't save in cache when a specified filter version is forced
+        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false &&  is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
             return true;
         }
 
