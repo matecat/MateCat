@@ -15,11 +15,6 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
        return $stmt->fetch();
     }
 
-    static function getFilesByProjectId( $id_project ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
-    }
-
     static function uncompletedChunksByProjectId( $id_project ) {
         // for each project you can have several jobs, one per targert language.
         // for each job you can have one or more chunks.
