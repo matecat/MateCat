@@ -127,8 +127,8 @@ class ConversionHandler {
         //get storage object
         $fs = new FilesStorage();
 
-        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-        if ( INIT::$LEGACY_CONVERSION !== false ) {
+        //don't load from cache when a specified filter version is forced
+        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
             INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
         }
 

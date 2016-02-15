@@ -137,7 +137,7 @@ class INIT {
     public static $FILTERS_USER_AGENT = "MateCat Community Instance";
     public static $FILTERS_ADDRESS = "https://translated-matecat-filters-v1.p.mashape.com";
     public static $FILTERS_MASHAPE_KEY = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
-    public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = null;
+    public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
     public static $FILTERS_EMAIL_FAILURES = false;
 
     /**
@@ -198,7 +198,7 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
 
-    public static $LEGACY_CONVERSION = false;
+    public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
 
     public function __construct(){
@@ -212,15 +212,6 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
-
-        //TODO: REMOVE SET ENVIRONMENT FOR LEGACY CONVERSION INSTANCES
-        if( getenv( 'LEGACY_CONVERSION' ) !== false ){
-            self::$LEGACY_CONVERSION = true;
-        }
-
-        if ( getenv( 'UNLOCKABLE_TAGS' ) !== false ) {
-            self::$UNLOCKABLE_TAGS = true;
-        }
 
     }
 
