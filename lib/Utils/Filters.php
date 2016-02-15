@@ -39,6 +39,7 @@ class Filters {
                 );
             }
             $url = rtrim(INIT::$FILTERS_ADDRESS, '/') . $endpoint;
+            Log::doLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
@@ -184,23 +185,23 @@ class Filters {
         }
 
         $info = array(
-            'filters_address' => @$response['instanceAddress'],
-            'filters_version' => @$response['instanceVersion'],
-            'client_ip' => Utils::getRealIpAddr(),
-            'to_xliff' => $toXliff,
-            'success' => ($response['isSuccess'] === true),
-            'error_message' => $response['errorMessage'],
-            'conversion_time' => $response['time'],
-            'sent_file_size' => filesize($sentFile),
-            'source_lang' => $jobData['source'],
-            'target_lang' => $jobData['target'],
-            'job_id' => $jobData['id'],
-            'job_pwd' => $jobData['password'],
-            'job_owner' => $jobData['owner'],
-            'source_file_id' => ($toXliff ? null : $sourceFileData['id_file']),
-            'source_file_name' => ($toXliff ? basename($sentFile) : $sourceFileData['filename']),
-            'source_file_ext' => ($toXliff ? pathinfo($sentFile, PATHINFO_EXTENSION) : $sourceFileData['mime_type']),
-            'source_file_sha1' => ($toXliff ? sha1_file($sentFile) : $sourceFileData['sha1_original_file']),
+                'filters_address'  => @$response[ 'instanceAddress' ],
+                'filters_version'  => @$response[ 'instanceVersion' ],
+                'client_ip'        => Utils::getRealIpAddr(),
+                'to_xliff'         => $toXliff,
+                'success'          => ( $response[ 'isSuccess' ] === true ),
+                'error_message'    => $response[ 'errorMessage' ],
+                'conversion_time'  => $response[ 'time' ],
+                'sent_file_size'   => filesize( $sentFile ),
+                'source_lang'      => $jobData[ 'source' ],
+                'target_lang'      => $jobData[ 'target' ],
+                'job_id'           => $jobData[ 'id' ],
+                'job_pwd'          => $jobData[ 'password' ],
+                'job_owner'        => $jobData[ 'owner' ],
+                'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
+                'source_file_name' => ( $toXliff ? FilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
+                'source_file_ext'  => ( $toXliff ? FilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
+                'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
         );
 
         $query = 'INSERT INTO conversions_log ('
@@ -211,17 +212,20 @@ class Filters {
 
         try {
             $preparedStatement = $conn->prepare( $query );
-            $preparedStatement->execute( array_values($info) );
+            $preparedStatement->execute( array_values( $info ) );
+            Log::doLog( $info );
         } catch ( Exception $ex ) {
             Log::doLog( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
-        if (INIT::$FILTERS_EMAIL_FAILURES) {
-            Utils::sendErrMailReport("MateCat: conversion failed.\n\n" . print_r($info, true));
-        }
+        if ( $response[ 'isSuccess' ] !== true ) {
 
-        if ($response['isSuccess'] !== true) {
-            self::backupFailedConversion($sentFile);
+            if ( INIT::$FILTERS_EMAIL_FAILURES ) {
+                Utils::sendErrMailReport( "MateCat: conversion failed.\n\n" . print_r( $info, true ) );
+            }
+
+            self::backupFailedConversion( $sentFile );
+
         }
 
     }
@@ -230,15 +234,18 @@ class Filters {
      * Moves $sentFile to the backup folder, that is like
      *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
      */
-    private static function backupFailedConversion(&$sentFile) {
+    private static function backupFailedConversion( &$sentFile ) {
+
         $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
-          . 'conversion_errors' . DIRECTORY_SEPARATOR
-          . date("Ymd");
+                . 'conversion_errors' . DIRECTORY_SEPARATOR
+                . date( "Ymd" );
         if ( !is_dir( $backupDir ) ) {
             mkdir( $backupDir, 0755, true );
         }
-        $backupFile = $backupDir . DIRECTORY_SEPARATOR . date("His") . '-' . basename($sentFile);
-        if (!rename($sentFile, $backupFile)) {
+
+        $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
+
+        if ( !rename( $sentFile, $backupFile ) ) {
             Log::doLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
         } else {
             $sentFile = $backupFile;

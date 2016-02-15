@@ -280,6 +280,10 @@ class Bootstrap {
      */
     public static function getEnvConfig() {
 
+        if( getenv( 'ENV' ) !== false ){
+            self::$CONFIG['ENV'] = getenv( 'ENV' );
+        }
+
         $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
 
         INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
@@ -307,7 +311,6 @@ class Bootstrap {
         if ( ! empty( INIT::$PLUGIN_LOAD_PATHS )) {
             set_include_path( get_include_path() . PATH_SEPARATOR . implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS ));
         }
-
 
     }
 

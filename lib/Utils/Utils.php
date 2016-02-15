@@ -368,18 +368,30 @@ class Utils {
 	}
 
 	public static function isJobBasedOnMateCatFilters($jobId) {
-		$fs = new FilesStorage();
-		$files = $fs->getFilesForJob( $jobId, null );
-		foreach ($files as $file) {
-			$fileType = DetectProprietaryXliff::getInfo( $files[0][ 'xliffFilePath' ] );
-			if ($fileType['proprietary_short_name'] !== 'matecat_converter') {
-				// If only one XLIFF is not created with MateCat Filters, we can't say
-				// that the project is entirely based on new Filters
-				return false;
+
+		try {
+
+			$fs    = new FilesStorage();
+			$files = $fs->getFilesForJob( $jobId, null );
+			foreach ( $files as $file ) {
+				$fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
+				if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {
+					// If only one XLIFF is not created with MateCat Filters, we can't say
+					// that the project is entirely based on new Filters
+					return false;
+				}
 			}
+
+			// If the flow arrives here, all the files' XLIFFs are based on new Filters
+			return true;
+
+		} catch (\Exception $e ){
+			$msg = " CRITICAL: " . $jobId . " has no files in storage... " . $e->getMessage();
+			Log::doLog( str_repeat("*", strlen( $msg ) + 10 ) );
+			Log::doLog( "*****$msg*****" );
+			Log::doLog( str_repeat("*", strlen( $msg ) + 10 ) );
 		}
-		// If the flow arrives here, all the files' XLIFFs are based on new Filters
-		return true;
+
 	}
 
 

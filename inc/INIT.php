@@ -302,10 +302,6 @@ class INIT {
             'indd' => array( '', "Try converting to INX" )
     );
 
-    public static $LEGACY_CONVERSION_SUPPORT = array(
-            'sxml'
-    );
-
     public static $DEPRECATE_LEGACY_XLIFFS = true;
 
     /*

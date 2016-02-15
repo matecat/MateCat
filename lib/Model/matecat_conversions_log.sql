@@ -3,6 +3,7 @@ CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
 
 CREATE TABLE conversions_log (
+  id BIGINT NOT NULL AUTO_INCREMENT,
   time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   filters_address VARCHAR(21),
   filters_version VARCHAR(100),
@@ -23,7 +24,8 @@ CREATE TABLE conversions_log (
   sent_file_size INT(11) NOT NULL COMMENT 'the number of actual bytes sent to the converter',
   conversion_time INT(11) NOT NULL COMMENT 'in milliseconds',
 
-  PRIMARY KEY (time),
+  PRIMARY KEY (id),
+  KEY(time),
   KEY (filters_address),
   KEY (filters_version),
   KEY (client_ip),
@@ -35,5 +37,5 @@ CREATE TABLE conversions_log (
   KEY (source_lang),
   KEY (target_lang)
 )
-ENGINE = MyISAM
+ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
