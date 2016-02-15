@@ -3,6 +3,7 @@
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
     public $id ;
     public $password ;
+    public $name ;
     public $id_customer ;
     public $create_date ;
     public $id_engine_tm ;

@@ -31,15 +31,13 @@
     </body>
 
     <body class="editlog" tal:condition="php: supportedBrowser NE 0 && !job_archived">
-        <!--metal:use-macro="header.html/main_header"-->
+
         <header style="padding-bottom:5px" >
             <div class="wrapper">       
                 <a href="${basepath}" class="logo"></a>
 
-                <!--tal:block metal:fill-slot="actions"-->
 
                     <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
-                <!--/tal:block -->
 
 
             </div>

@@ -30,14 +30,19 @@ class CatDecorator extends \AbstractDecorator {
 
         $this->template->footer_show_revise_link = false;
 
+
         if ( $this->controller->isRevision() ) {
             // TODO: complete this with the actual URL
-            $this->template->quality_report_href = "javascript:void()";
+            $this->template->quality_report_href =
+                    "/plugins/review_improved/quality_report/" .
+                    "{$this->controller->getJob()->id}/" .
+                    "{$this->controller->getJob()->password}";
         }
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
 
     }
+
 
     private function getOverallQualityClass() {
         $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( array(

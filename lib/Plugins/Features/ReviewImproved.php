@@ -170,13 +170,8 @@ class ReviewImproved extends BaseFeature {
          */
         $translation_model->attach( new SegmentTranslationObserver());
         $translation_model->notify();
-
-
     }
 
-    public function installRoutes( $klein ) {
-
-    }
     /**
      * @param $array_jobs The jobs array coming from the project_structure
      *
@@ -289,8 +284,6 @@ class ReviewImproved extends BaseFeature {
      *
      * @param \Klein\Klein $klein
      */
-
-
 
     public static function loadRoutes( \Klein\Klein $klein ) {
         $klein->respond('GET', '/quality_report/[:id_job]/[:password]', function ($request, $response, $service) {

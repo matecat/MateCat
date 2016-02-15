@@ -49,6 +49,8 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
         case 'Exceptions_RecordNotFound':
         case 'Exceptions\NotFoundError':
             $klein->response()->code(404);
+            $klein->body('not found');
+            $klein->send();
             break;
         default:
             \Log::doLog("$err_msg" );
@@ -149,11 +151,9 @@ route( '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 
 );
 
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
-
     route( '/quality-report', 'GET',
        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
     );
-
 });
 
 $klein->dispatch();

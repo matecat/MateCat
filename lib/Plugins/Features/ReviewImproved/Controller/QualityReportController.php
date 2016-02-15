@@ -21,10 +21,16 @@ class QualityReportController {
     private $response;
     private $service;
 
+
     /**
      * @var \Jobs_JobStruct
      */
     private $job ;
+
+    /**
+     * @var \Chunks_ChunkStruct
+     */
+    private $chunk ;
     /**
      * @var QualityReportModel
      */
@@ -41,41 +47,42 @@ class QualityReportController {
     }
 
     public function respond() {
+        $model = $this->getModel() ;
 
-        $decorator = new QualityReportDecorator( $this->getModel() );
-        $decorator->decorate();
+        $decorator = new QualityReportDecorator( $model );
+
+        $decorator->decorate( $this->view );
 
         $this->response->body( $this->view->execute() );
         $this->response->send();
     }
 
-
     /**
      * @throws \Exceptions_RecordNotFound
      */
     private function getModel() {
-        $this->model = new QualityReportModel( $this->findJob() );
+        $this->model = new QualityReportModel( $this->findChunk() );
         return $this->model ;
     }
 
     /**
-     * @return \Jobs_JobStruct
+     * @return \Chunks_ChunkDao
      * @throws \Exceptions_RecordNotFound
      */
-    private function findJob() {
-        $this->job = \Jobs_JobDao::getByIdAndPassword(
+    private function findChunk() {
+        $this->chunk = \Chunks_ChunkDao::getByIdAndPassword(
                 $this->request->param('id_job'),
                 $this->request->param('password')
         );
 
-        if (! $this->job ) {
+        if (! $this->chunk ) {
             throw new \Exceptions_RecordNotFound();
         }
 
-        if (! $this->job->getProject()->isFeatureEnabled('review_improved')) {
+        if (! $this->chunk->getProject()->isFeatureEnabled('review_improved')) {
             throw new \Exceptions_RecordNotFound();
         }
 
-        return $this->job ;
+        return $this->chunk ;
     }
 }

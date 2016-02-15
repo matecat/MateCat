@@ -4,7 +4,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
   public $id;
   public $password;
   public $id_project ;
-  public $create_date ;
 
   public $job_first_segment ;
   public $job_last_segment ;
