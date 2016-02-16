@@ -53,7 +53,8 @@ class QualityReportDecorator {
         $template->model = $this->model->getStructure();
 
        foreach($this->model->getAllSegments() as $segment ) {
-               $segment['is_approved'] =  $segment['status'] == \Constants_TranslationStatus::STATUS_APPROVED;
+           $segment['translate_url'] = $this->getTranslateUrl() . '#' . $segment['id'];
+           $segment['is_approved'] =  $segment['status'] == \Constants_TranslationStatus::STATUS_APPROVED;
        }
 
 

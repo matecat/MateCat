@@ -88,7 +88,9 @@
                 </colgroup>
                 <tr>
                     <th colspan="1">Segment ID</th>
-                    <td colspan="1" tal:content="segment/id"></td>
+                    <td colspan="1">
+                        <a target="_blank" href="${segment/translate_url}">${segment/id}</a>
+                    </td>
 
                     <th>Source</th>
                     <td style="text-align: left;" tal:content="segment/source"></td>
