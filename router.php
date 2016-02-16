@@ -150,6 +150,9 @@ route( '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 
     'API\V2\TranslationController', 'update'
 );
 
+/**
+ * This should be moved in plugin space
+ */
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/quality-report', 'GET',
        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'

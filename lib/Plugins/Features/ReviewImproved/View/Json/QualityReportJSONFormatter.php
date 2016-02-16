@@ -9,22 +9,18 @@
 
 namespace Features\ReviewImproved\View\Json;
 
-use LQA\ChunkReviewStruct;
+use Features\ReviewImproved\Model\QualityReportModel;
 
 class QualityReportJSONFormatter
 {
 
-    public function __construct(  ) {
-
+    public function __construct( QualityReportModel $model  ) {
+        $this->model = $model ;
     }
 
-    public function renderItem( ChunkReviewStruct $record ) {
-        $row = array(
-            'is_pass' => $record->is_pass,
-            'score' => $record->score,
-            'reviewed_words_count' => $record->reviewed_words_count
-        );
-        return $row;
+    public function render( ) {
+
+
     }
 
 

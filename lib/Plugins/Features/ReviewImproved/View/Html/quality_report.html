@@ -50,7 +50,7 @@
         </tr>
         <tr>
             <th>Creation date</th>
-            <td><span tal:content="model/project/create_date | default"></span></td>
+            <td><span tal:content="model/project/created_at | default"></span></td>
 
             <th>Language pair</th>
             <td><span tal:content="model/job/source"></span> - <span tal:content="model/job/target"></span></td>
@@ -156,7 +156,7 @@
                             </div>
 
                             <div tal:repeat="comment issue/comments">
-                                <div style="width: 200px; display:inline; float:left">${comment/create_date}</div>
+                                <div style="width: 200px; display:inline; float:left">${comment/created_at}</div>
                                 <div style="width: 100%; display: inline;">${comment/comment}</div>
                             </div>
 

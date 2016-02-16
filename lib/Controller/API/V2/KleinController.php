@@ -2,9 +2,18 @@
 
 namespace API\V2 ;
 
+use Klein\Klein;
+
 abstract class KleinController {
 
+    /**
+     * @var \Klein\Reuqest
+     */
     protected $request ;
+
+    /**
+     * @var \Klein\Response
+     */
     protected $response ;
     protected $service ;
     protected $app ;

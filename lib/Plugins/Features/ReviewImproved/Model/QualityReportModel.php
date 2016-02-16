@@ -32,6 +32,9 @@ class QualityReportModel {
 
     private $all_segments = array();
 
+    private $date_format;
+
+
     /**
      * @param \Chunks_ChunkStruct $chunk
      */
@@ -63,21 +66,33 @@ class QualityReportModel {
         return $this->chunk_review;
     }
 
+    /**
+     * @param $format
+     */
+    public function setDateFormat( $format ) {
+        $this->date_format = $format;
+    }
+
     private function buildQualityReportStructure( $records ) {
         $this->quality_report_structure = array(
                 'chunk'   => array(
                         'review' => array(
                                 'percentage' => $this->getChunkReview()->getReviewedPercentage(),
-                                'is_pass'    => $this->getChunkReview()->is_pass,
+                                'is_pass'    => !!$this->getChunkReview()->is_pass,
                                 'score'      => $this->getChunkReview()->score
                         ),
                         'files'  => array()
                 ),
-                'job'     => $this->chunk->getJob(),
+                'job'     => array(
+                        'source' => $this->chunk->getJob()->source,
+                        'target' => $this->chunk->getJob()->target,
+                ),
                 'project' => array(
-                        'metadata'    => $this->getProject()->getMetadataAsKeyValue(),
-                        'id'          => $this->getProject()->id,
-                        'create_date' => $this->getProject()->create_date
+                        'metadata'   => $this->getProject()->getMetadataAsKeyValue(),
+                        'id'         => $this->getProject()->id,
+                        'created_at' => $this->filterDate(
+                                $this->getProject()->create_date
+                        )
                 )
         );
 
@@ -89,7 +104,7 @@ class QualityReportModel {
     }
 
     public function getAllSegments() {
-        return $this->all_segments ;
+        return $this->all_segments;
     }
 
     private function buildFilesSegmentsNestedTree( $records ) {
@@ -146,7 +161,7 @@ class QualityReportModel {
     private function structureNestIssue( $record ) {
         $this->current_issue = new \ArrayObject( array(
                 'id'            => $record[ 'issue_id' ],
-                'create_date'   => $record[ 'issue_create_date' ],
+                'created_at'    => $this->filterDate( $record[ 'issue_create_date' ] ),
                 'category'      => $record[ 'issue_category' ],
                 'severity'      => $record[ 'issue_severity' ],
                 'target_text'   => $record[ 'target_text' ],
@@ -164,9 +179,9 @@ class QualityReportModel {
 
     private function structureNestComment( $record ) {
         $comment = new ArrayObject( array(
-                'comment'     => $record[ 'comment_comment' ],
-                'create_date' => $record[ 'comment_create_date' ],
-                'uid'         => $record[ 'comment_uid' ]
+                'comment'    => $record[ 'comment_comment' ],
+                'created_at' => $this->filterDate( $record[ 'comment_create_date' ] ),
+                'uid'        => $record[ 'comment_uid' ]
         ) );
 
         array_push(
@@ -187,5 +202,15 @@ class QualityReportModel {
                 $this->quality_report_structure[ 'chunk' ][ 'files' ],
                 $this->current_file
         );
+    }
+
+    private function filterDate( $date ) {
+        $out = $date;
+        if ( $this->date_format != null ) {
+            $datetime = new \DateTime( $date );
+            $out      = $datetime->format( $this->date_format );
+        }
+
+        return $out;
     }
 }

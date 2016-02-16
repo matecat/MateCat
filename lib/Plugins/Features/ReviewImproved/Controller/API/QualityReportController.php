@@ -13,6 +13,7 @@ use Features\ReviewImproved\View\Json\QualityReportJSONFormatter as JsonFormatte
 use API\V2\JobPasswordValidator;
 use API\V2\ProtectedKleinController;
 use LQA\ChunkReviewDao;
+use Features\ReviewImproved\Model\QualityReportModel ;
 
 class QualityReportController extends ProtectedKleinController
 {
@@ -22,19 +23,19 @@ class QualityReportController extends ProtectedKleinController
      */
     protected $validator;
 
+    private $model ;
+
+
     public function show() {
 
         $chunk = $this->validator->getChunk();
 
-        $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIds(
-            array( array( $chunk->id, $chunk->password) )
-        );
-        $struct = $chunk_reviews[0];
+        $this->model = new QualityReportModel( $this->validator->getChunk() );
+        $this->model->setDateFormat('c');
 
-        $json = new JsonFormatter();
-        $rendered = $json->renderItem( $struct );
-
-        $this->response->json( $rendered );
+        $this->response->json( array(
+                'quality-report' => $this->model->getStructure()
+        ));
     }
 
     protected function afterConstruct() {
