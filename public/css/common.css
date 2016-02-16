@@ -2216,7 +2216,7 @@ background-size: 25px!important;
 body.filterOpen .searchbox
 {
 	display: block;
-    z-index: 0;
+    z-index: 10;
 	}
 
 	.searchbox label, .mgmt-panel label
