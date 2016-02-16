@@ -17,10 +17,16 @@ class QualityReportDecorator {
     /**
      * @var QualityReportModel
      */
-    public $model;
+    private $model;
+
+    private $download_uri ;
 
     public function __construct( QualityReportModel $model ) {
         $this->model = $model;
+    }
+
+    public function setDownloadURI( $uri ) {
+        $this->download_uri = $uri ;
     }
 
     public function decorate( \PHPTAL $template ) {
@@ -32,6 +38,8 @@ class QualityReportDecorator {
         $template->project = $this->model->getProject();
         $template->job     = $this->model->getChunk()->getJob();
         $template->chunk   = $this->model->getChunk();
+
+        $template->download_uri = $this->download_uri ;
 
         $template->project_meta = array_merge(
                 array(
@@ -56,8 +64,13 @@ class QualityReportDecorator {
            $segment['translate_url'] = $this->getTranslateUrl() . '#' . $segment['id'];
            $segment['is_approved'] =  $segment['status'] == \Constants_TranslationStatus::STATUS_APPROVED;
        }
+    }
 
-
+    public function getFilenameForDownload() {
+        $filename = $this->model->getProject()->name .
+            "-" . $this->model->getChunk()->id .
+            ".html";
+        return $filename ;
     }
 
     private function getTranslateUrl() {

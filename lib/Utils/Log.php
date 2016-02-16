@@ -91,7 +91,6 @@ class Log {
 
     protected static function _getHeader() {
 
-        return '';
         $trace = debug_backtrace( 2 );
 
         $now = date( 'Y-m-d H:i:s' );

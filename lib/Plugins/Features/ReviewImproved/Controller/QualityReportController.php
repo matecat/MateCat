@@ -49,12 +49,26 @@ class QualityReportController {
     public function respond() {
         $model = $this->getModel() ;
 
+
         $decorator = new QualityReportDecorator( $model );
 
+        $decorator->setDownloadURI( $this->downloadURI() );
         $decorator->decorate( $this->view );
 
         $this->response->body( $this->view->execute() );
+
+        if ( $this->isDownload()  ) {
+            $this->response->header(
+                    'Content-Disposition',
+                    "attachment; filename={$decorator->getFilenameForDownload()}"
+            );
+        }
         $this->response->send();
+    }
+
+    private function downloadURI() {
+        list($uri, $query) = explode('?', $this->request->uri());
+        return $uri  . '?download=1';
     }
 
     /**
@@ -65,6 +79,10 @@ class QualityReportController {
         return $this->model ;
     }
 
+    private function isDownload() {
+        $param = $this->request->paramsGet('download');
+        return isset( $param['download'] );
+    }
     /**
      * @return \Chunks_ChunkDao
      * @throws \Exceptions_RecordNotFound
