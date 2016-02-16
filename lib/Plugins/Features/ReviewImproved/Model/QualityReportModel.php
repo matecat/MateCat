@@ -10,12 +10,10 @@ namespace Features\ReviewImproved\Model;
 
 use Log,
         ArrayObject;
+use LQA\ChunkReviewDao;
 
 
 class QualityReportModel {
-
-
-    private $segmentsInfo;
 
     /**
      * @var \Chunks_ChunkStruct
@@ -29,6 +27,10 @@ class QualityReportModel {
     private $current_segment = array();
 
     private $current_issue = array();
+
+    private $chunk_review;
+
+    private $all_segments = array();
 
     /**
      * @param \Chunks_ChunkStruct $chunk
@@ -45,23 +47,52 @@ class QualityReportModel {
         return $this->chunk->getProject();
     }
 
-    public function getSegmentsStructure() {
+    public function getStructure() {
         $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
 
         return $this->buildQualityReportStructure( $records );
     }
 
+    public function getChunkReview() {
+        if ( $this->chunk_review == null ) {
+            $this->chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                    $this->chunk->id, $this->chunk->password
+            );
+        }
+
+        return $this->chunk_review;
+    }
+
     private function buildQualityReportStructure( $records ) {
+        $this->quality_report_structure = array(
+                'chunk'   => array(
+                        'review' => array(
+                                'percentage' => $this->getChunkReview()->getReviewedPercentage(),
+                                'is_pass'    => $this->getChunkReview()->is_pass,
+                                'score'      => $this->getChunkReview()->score
+                        ),
+                        'files'  => array()
+                ),
+                'job'     => $this->chunk->getJob(),
+                'project' => array(
+                        'metadata'    => $this->getProject()->getMetadataAsKeyValue(),
+                        'id'          => $this->getProject()->id,
+                        'create_date' => $this->getProject()->create_date
+                )
+        );
 
-        $this->quality_report_structure = array();
 
+        $this->buildFilesSegmentsNestedTree( $records );
 
-        /**
-         * First thing to do here is extract the file info.
-         * File is the root entity of our structure.
-         *
-         */
+        return $this->quality_report_structure;
 
+    }
+
+    public function getAllSegments() {
+        return $this->all_segments ;
+    }
+
+    private function buildFilesSegmentsNestedTree( $records ) {
         $current_file_id    = null;
         $current_segment_id = null;
         $current_issue_id   = null;
@@ -82,7 +113,7 @@ class QualityReportModel {
                 $this->structureNestIssue( $record );
             }
 
-            if ( $record['comment_id'] != null ) {
+            if ( $record[ 'comment_id' ] != null ) {
                 $this->structureNestComment( $record );
             }
 
@@ -92,17 +123,19 @@ class QualityReportModel {
         }
 
         Log::doLog( $this->quality_report_structure );
-
-        return $this->quality_report_structure;
-
     }
 
     private function structureNestSegment( $record ) {
         $this->current_segment = new ArrayObject( array(
                 'original_translation' => $record[ 'original_translation' ],
-                'id_segment'           => $record[ 'segment_id' ],
+                'translation'          => $record[ 'translation' ],
+                'id'                   => $record[ 'segment_id' ],
+                'source'               => $record[ 'segment_source' ],
+                'status'               => $record[ 'translation_status' ],
                 'issues'               => array()
         ) );
+
+        array_push( $this->all_segments, $this->current_segment );
 
         array_push(
                 $this->current_file[ 'segments' ],
@@ -112,10 +145,14 @@ class QualityReportModel {
 
     private function structureNestIssue( $record ) {
         $this->current_issue = new \ArrayObject( array(
-                'id'          => $record[ 'issue_id' ],
-                'create_date' => $record[ 'issue_create_date' ],
-                'category'    => $record[ 'issue_category' ],
-                'comments'    => array()
+                'id'            => $record[ 'issue_id' ],
+                'create_date'   => $record[ 'issue_create_date' ],
+                'category'      => $record[ 'issue_category' ],
+                'severity'      => $record[ 'issue_severity' ],
+                'target_text'   => $record[ 'target_text' ],
+                'comment'       => $record[ 'issue_comment' ],
+                'replies_count' => $record[ 'issue_replies_count' ],
+                'comments'      => array()
         ) );
 
         array_push(
@@ -126,14 +163,14 @@ class QualityReportModel {
     }
 
     private function structureNestComment( $record ) {
-        $comment = new ArrayObject(array(
+        $comment = new ArrayObject( array(
                 'comment'     => $record[ 'comment_comment' ],
                 'create_date' => $record[ 'comment_create_date' ],
                 'uid'         => $record[ 'comment_uid' ]
-        ));
+        ) );
 
         array_push(
-                $this->current_issue['comments'],
+                $this->current_issue[ 'comments' ],
                 $comment
         );
 
@@ -147,7 +184,7 @@ class QualityReportModel {
         ) );
 
         array_push(
-                $this->quality_report_structure,
+                $this->quality_report_structure[ 'chunk' ][ 'files' ],
                 $this->current_file
         );
     }

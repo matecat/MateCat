@@ -63,7 +63,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @return \LQA\ChunkReviewStruct
      */
     public static function findOneChunkReviewByIdJobAndPassword($id_job, $password) {
-        $records = self::findByReviewPasswordAndJobId(array(
+        $records = self::findChunkReviewsByChunkIds(array(
             array( $id_job, $password)
         ));
         return $records[0];

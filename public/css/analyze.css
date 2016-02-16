@@ -56,7 +56,7 @@ a:hover{text-decoration:none}
 .cl{clear:both}
 
 /* TABELLA */
-.tablestats{font-size:16px;/*margin-top:5px;padding-bottom: 50px;*/clear: both;}
+.tablestats{font-size:16px;clear: both;}
 .tablestats th, .tablestats td{ background:#fff;padding:7px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
 .tablestats th{border-top:1px solid #ccc;background:#F6F6F6;text-align:center;font-size:14px;}
 .tablestats th:first-child {width: 35%; min-width: 250px; border-left:1px solid #ccc;}
@@ -298,11 +298,6 @@ div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn {display:
 
 .subfile.open {
 	display: table-row;
-	/*
-			visibility: visible;
-			position: relative;
-			left: 0px;
-	*/
 }
 
 .subfile td{
@@ -858,7 +853,6 @@ top: 25%;
 {
 	max-height: 250px;
 	overflow: auto;
-<<<<<<< HEAD
 }
 
 @media only screen and (max-width : 1370px) {
@@ -877,19 +871,17 @@ top: 25%;
   width: 98%;
 }
 @media only screen and (max-width : 1200px) {
-	
+
 	.tablestats th {
-		font-size:13px;
+		font-size: 13px;
 	}
 
-
-
 	.tablestats th:first-child,
-	.tablestats td:first-child
-	 {
-  min-width: 200px;
-}
-.subfile p {
-  width: 215px;
-  }
+	.tablestats td:first-child {
+		min-width: 200px;
+	}
+
+	.subfile p {
+		width: 215px;
+	}
 }

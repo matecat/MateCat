@@ -1,7 +1,3 @@
-/*body {min-width:980px;position:relative;text-align:center;margin:0;padding:75px 0 120px 0;font-family:calibri, Arial, Helvetica, sans-serif;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in; }*/
-/*
-body.cattool{background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;}
-*/
 body
 {
 	transition: padding-top 200ms ease-out;
@@ -11,7 +7,6 @@ body.incomingMsg
 {
 	padding-top: 140px;
 }
-body.cattool.editing{/*background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;*/}
 
 input, textarea{font-family:calibri, Arial, Helvetica, sans-serif;font-size:16px;}
 /*header*/
@@ -45,12 +40,6 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
   color: #777;
   height: 27px;
   padding-top: 12px;
-}
-
-.warningbox
-{
-/*background: url(../img/sprite.png) 16px -848px no-repeat!important;
-background-size: 28px!important;*/
 }
 
 #notifbox a
@@ -293,6 +282,14 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 .draft-bar  {	background-color: #d0d1d1;}
 .rejected-bar  {	background-color: #ed1c24;}
 .translated-bar{	background-color: #09beec;}
+
+.rejected-background { background-color: #ed1c24; }
+.approved-backgruond { 	background-color: #7cc576;}
+
+.rejected-foreground { color: #ed1c24; }
+.approved-foreground { 	color: #7cc576;}
+
+
 
 .meter > a {
 	display: block;
@@ -2299,28 +2296,6 @@ body[data-offline-mode="light-off"] .msg span,
     background-image: url(../img/offline-bg.png) !important;
 }
 
-/*.status-translated .text {
--webkit-animation:myfirst 0.7s; /* Chrome, Safari, Opera 
-animation:myfirst 0.7s;
-}
-
- Chrome, Safari, Opera 
-@-webkit-keyframes myfirst
-{
-from {background:#09beec;}
-to {background:#f1f2f2;}
-}
-
- Standard syntax 
-@keyframes myfirst
-{
-from {background:#09beec;}
-to {background:#f1f2f2;}
-}
-
-section.editor.status-translated .status{background-color:#09beec !important}
-section.editor.status-approved .status{background-color:#7cc576 !important;} */
-/*section.editor.status-draft .status{background-color:#dddedf !important;}*/
 section.editor.status-rejected .status{background-color:#dc2e34 !important;}
 
 section.modified .status
@@ -2618,16 +2593,11 @@ section.modified.editor .status
 {
     border-radius: 8px;
     border: 2px solid #7EB30C;
-/* background: #ffff90; */
 }
 
 .editor .editarea .locked.selected
 {
 	cursor: move !important;
-	/*
-		background-color: #fff2d5 !important;
-	*/	
-
 }
 
 .editarea .locked

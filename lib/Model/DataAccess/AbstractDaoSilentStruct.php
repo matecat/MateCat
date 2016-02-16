@@ -42,11 +42,13 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
      * @param $method_name
      * @param $params
      * @param $function
+     *
+     * FIXME: current implementation is bogus because it only allows to pass one parameter.
+     *
      */
     protected function cachable($method_name, $params, $function) {
       if ( !array_key_exists($method_name,  $this->cached_results) ) {
-        $this->cached_results[$method_name] =
-          call_user_func($function, $params);
+        $this->cached_results[$method_name] = call_user_func($function, $params);
       }
       return $this->cached_results[$method_name];
     }

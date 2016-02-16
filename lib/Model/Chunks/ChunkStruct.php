@@ -4,29 +4,37 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
 
     public $id;
     public $password;
-    public $id_project ;
-    public $create_date ;
+    public $id_project;
+    public $create_date;
     public $job_first_segment;
-    public $job_last_segment ;
-    public $last_opened_segment ;
-    public $owner ;
-    public $last_update ;
-    public $source ;
-    public $target ;
-    public $tm_keys ;
+    public $job_last_segment;
+    public $last_opened_segment;
+    public $owner;
+    public $last_update;
+    public $source;
+    public $target;
+    public $tm_keys;
 
-    /**
-     * @return Segments_SegmentStruct[]
+    public $new_words;
+    public $draft_words;
+    public $translated_words;
+    public $approved_words;
+    public $rejected_words;
+
+
+    /** @return Segments_SegmentStruct[]
+     *
      */
     public function getSegments() {
         $dao = new Segments_SegmentDao( Database::obtain() );
+
         return $dao->getByChunkId( $this->id, $this->password );
     }
 
     public function isMarkedComplete( $params ) {
-        $params = \Utils::ensure_keys( $params,  array('is_review') );
+        $params = \Utils::ensure_keys( $params, array( 'is_review' ) );
 
-        return Chunks_ChunkCompletionEventDao::isCompleted( $this, array('is_review' => $params['is_review'] ) ) ;
+        return Chunks_ChunkCompletionEventDao::isCompleted( $this, array( 'is_review' => $params[ 'is_review' ] ) );
     }
 
     /**
@@ -34,11 +42,13 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
      */
     public function getTranslations() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+
         return $dao->getByJobId( $this->id );
     }
 
     public function findLatestTranslation() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+
         return $dao->lastTranslationByJobOrChunk( $this );
     }
 
@@ -52,9 +62,9 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
      */
 
     public function getProject() {
-        return $this->cachable(__function__, $this->getJob(),  function( $job ) {
+        return $this->cachable( __function__, $this->getJob(), function ( $job ) {
             return $job->getProject();
-        });
+        } );
     }
 
     public function isFeatureEnabled( $feature_code ) {
@@ -70,5 +80,18 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         // database table.
         return new Jobs_JobStruct( $this->attributes() );
     }
+
+    /**
+     *
+     * @return float
+     */
+    public function totalWordsCount() {
+        return $this->new_words +
+            $this->draft_words +
+            $this->translated_words +
+            $this->approved_words +
+            $this->rejected_words;
+    }
+
 
 }
