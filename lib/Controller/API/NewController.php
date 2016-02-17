@@ -56,6 +56,9 @@ class NewController extends ajaxController {
 
     private $new_keys = array();
 
+    private $owner = "";
+    private $current_user = "";
+
     const MAX_NUM_KEYS = 5;
 
     private static $allowed_seg_rules = array(
@@ -583,10 +586,6 @@ class NewController extends ajaxController {
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
-        }
-
-        if ( $this->current_user != null ) {
-            $projectStructure[ 'id_customer' ]      = $this->current_user->getEmail() ;
         }
 
         $projectManager = new ProjectManager( $projectStructure );
