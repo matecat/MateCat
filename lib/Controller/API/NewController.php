@@ -56,6 +56,9 @@ class NewController extends ajaxController {
 
     private $new_keys = array();
 
+    private $owner = "";
+    private $current_user = "";
+
     const MAX_NUM_KEYS = 5;
 
     private static $allowed_seg_rules = array(
