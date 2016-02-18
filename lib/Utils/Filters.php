@@ -38,6 +38,15 @@ class Filters {
                   'X-Mashape-Key: '. INIT::$FILTERS_MASHAPE_KEY,
                 );
             }
+
+            if ( PHP_MINOR_VERSION >= 5 ) {
+                /**
+                 * Added in PHP 5.5.0 with FALSE as the default value.
+                 * PHP 5.6.0 changes the default value to TRUE.
+                 */
+                $options[ CURLOPT_SAFE_UPLOAD ] = false;
+            }
+
             $url = rtrim(INIT::$FILTERS_ADDRESS, '/') . $endpoint;
             Log::doLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
