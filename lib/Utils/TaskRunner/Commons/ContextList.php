@@ -1,6 +1,4 @@
 <?php
-namespace TaskRunner\Commons;
-
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,9 +6,21 @@ namespace TaskRunner\Commons;
  * Time: 17.00
  *
  */
+
+namespace TaskRunner\Commons;
+
+/**
+ * Class ContextList
+ *
+ * Vector container for contextes
+ *
+ * @package TaskRunner\Commons
+ */
 class ContextList {
 
     /**
+     * Variable holding contextes
+     *
      * @var Context[]
      */
     public $list = array();
@@ -29,6 +39,8 @@ class ContextList {
     }
 
     /**
+     * Static class builder
+     *
      * @param array $queue_info
      *
      * @return static

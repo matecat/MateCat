@@ -1,13 +1,19 @@
 <?php
-
-namespace Analysis\Queue;
-
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/05/15
  * Time: 13.37
  *
+ */
+
+namespace Analysis\Queue;
+
+/**
+ * Class RedisKeys
+ * @package Analysis\Queue
+ *
+ * This class contains the constant strings used by the analysis to set/get values on Redis
  */
 class RedisKeys {
 

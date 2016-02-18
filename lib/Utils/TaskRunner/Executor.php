@@ -1,4 +1,12 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 04/05/15
+ * Time: 13.37
+ *
+ */
+
 namespace TaskRunner;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\AbstractWorker;
@@ -15,14 +23,25 @@ use \Exception, \Bootstrap, \SplObserver, \SplSubject, \AMQHandler;;
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
 Bootstrap::start();
 
+/**
+ * Class Executor
+ * Process class spawned from the Task Manager
+ * Every Executor is bind to it's context ( queue name, process Redis set, ecc. )
+ *
+ * @package TaskRunner
+ */
 class Executor implements \SplObserver {
 
     /**
+     * Handler of AMQ connector
+     *
      * @var \AMQHandler
      */
     protected $_queueHandler;
 
     /**
+     * Context of execution
+     *
      * @var Context
      */
     protected $_executionContext;
@@ -35,14 +54,29 @@ class Executor implements \SplObserver {
     protected $_frameID = 0;
 
     /**
+     * Static singleton instance reference
+     *
      * @var static
      */
     public static $__INSTANCE;
 
+    /**
+     * Flag for control the instance running status. Setting to false cause the Executor process to stop.
+     *
+     * @var bool
+     */
     public $RUNNING = true;
+
+    /**
+     * The process id of the Executor
+     *
+     * @var int
+     */
     public $_executorPID;
 
     /**
+     * Logging method
+     *
      * @param $msg
      */
     protected function _logMsg( $msg ) {
@@ -52,6 +86,8 @@ class Executor implements \SplObserver {
     }
 
     /**
+     * Concrete worker
+     *
      * @var AbstractWorker
      */
     protected $_worker;
@@ -92,6 +128,8 @@ class Executor implements \SplObserver {
     }
 
     /**
+     * Instance loader
+     *
      * @param Context $queueContext
      *
      * @return static
@@ -126,6 +164,11 @@ class Executor implements \SplObserver {
 
     }
 
+    /**
+     * Posix signal handler
+     *
+     * @param $sig_no
+     */
     public static function sigSwitch( $sig_no ) {
 
 //        static::$__INSTANCE->_logMsg( "Trapped Signal : $sig_no" );
@@ -141,6 +184,11 @@ class Executor implements \SplObserver {
         }
     }
 
+    /**
+     * Main method
+     *
+     * @param null $args
+     */
     public function main( $args = null ) {
 
         $this->_frameID = 1;
@@ -290,6 +338,7 @@ class Executor implements \SplObserver {
     }
     
     /**
+     * Check on redis Set for this process ID
      * @param $pid
      *
      * @return int
@@ -301,6 +350,8 @@ class Executor implements \SplObserver {
     }
 
     /**
+     * Update method, called by the subject when the application tell him to notify the Observer
+     *
      * @param SplSubject $subject
      */
     public function update( SplSubject $subject ) {

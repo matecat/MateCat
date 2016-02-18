@@ -19,24 +19,48 @@ use \Log, \Exception, \AMQHandler;
 /**
  * Class Analysis_Manager
  *
- * Should be the final class when daemons will refactored
+ * Generic Asynchronous Task Runner
  *
  */
 class TaskManager extends AbstractDaemon {
 
     /**
+     * Handler of AMQ connector
+     *
      * @var \AMQHandler
      */
     protected $_queueHandler;
 
+    /**
+     * Number of running processes
+     *
+     * @var int
+     */
     protected $_runningPids     = 0;
 
+    /**
+     * List of contexts loaded from configuration file
+     * @var array
+     */
     protected $_context_definitions = array();
+
+    /**
+     * Optional context index on which the task runner works
+     *
+     * @var null
+     */
     protected $_contextIndex;
 
+    /**
+     * Path to che configuration file
+     *
+     * @var string
+     */
     protected $_configFile;
 
     /**
+     * Context list definitions
+     *
      * @var ContextList
      */
     protected $_queueContextList = array();
@@ -47,10 +71,22 @@ class TaskManager extends AbstractDaemon {
      */
     protected $_destroyContext = array();
 
+    /**
+     * Exception code, error to fork the process
+     */
     const ERR_NOT_FORK          = 1;
-    const ERR_NOT_INCREMENT     = 2;
-    const ERR_PID_NOT_PUBLISHED = 3;
 
+    /**
+     * Exception code, error to increment the number of processes on the Redis key
+     */
+    const ERR_NOT_INCREMENT     = 2;
+
+    /**
+     * TaskManager constructor.
+     *
+     * @param null $configFile
+     * @param null $contextIndex
+     */
     protected function __construct( $configFile = null, $contextIndex = null ) {
 
         $this->_configFile   = $configFile;
@@ -75,7 +111,13 @@ class TaskManager extends AbstractDaemon {
     }
 
     /**
+     * Start execution method
+     *
      * @param null $args
+     *
+     * @throws Exception
+     *
+     * @return void
      */
     public function main( $args = null ) {
 
@@ -161,7 +203,12 @@ class TaskManager extends AbstractDaemon {
 
     }
 
-
+    /**
+     * Waits on or returns the status of the forked childs
+     *
+     * Signal management for child processes termination
+     *
+     */
     protected function _waitPid(){
 
         //avoid zombies : parent process knows the death of one of the children
@@ -185,6 +232,9 @@ class TaskManager extends AbstractDaemon {
 
     }
 
+    /**
+     * Doing nothing for now
+     */
     protected function _balanceQueues(){
 //        self::_TimeStampMsg( "TODO. Now i do nothing." );
 //        $this->RUNNING = false;
@@ -240,6 +290,10 @@ class TaskManager extends AbstractDaemon {
 
     }
 
+    /**
+     * Clean shutdown process for the Manager
+     *
+     */
     public static function cleanShutDown() {
 
         //SHUTDOWN
