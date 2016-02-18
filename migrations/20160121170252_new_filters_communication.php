@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class NewFiltersCommunication extends AbstractMigration
+class NewFiltersCommunication extends AbstractMatecatMigration
 {
     public $sql_up = <<<EOF
 DROP TABLE IF EXISTS `converters`;
@@ -47,11 +47,4 @@ CREATE TABLE `converters_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 EOF;
 
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute($this->sql_down);
-    }
 }

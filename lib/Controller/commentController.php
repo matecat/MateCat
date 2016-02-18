@@ -178,8 +178,11 @@ class commentController extends ajaxController {
             array_push($users, $owner[0]);
         }
 
-        $users = array_filter($users, function($item) {
-            if ( $this->userIsLogged && $this->current_user->uid == $item->uid ) {
+        $userIsLogged = $this->userIsLogged ;
+        $current_uid = $this->current_user->uid ;
+
+        $users = array_filter($users, function($item) use ( $userIsLogged, $current_uid ) {
+            if ( $userIsLogged && $current_uid == $item->uid ) {
                 return false;
             }
 

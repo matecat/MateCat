@@ -216,7 +216,7 @@ class AMQHandler extends Stomp {
     public function getActualForQID( $qid = null ){
 
         if( empty( $this->queueTotalID ) && empty( $qid ) ){
-            throw new Exception( 'Can Not get values without a Queue ID. \Analysis\QueueHandler::setQueueID ' );
+            throw new Exception( 'Can Not get values without a Queue ID. Use \AMQHandler::setQueueID or pass a queue id to this method' );
         }
 
         if( !empty( $qid ) ){

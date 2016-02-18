@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class CreateSegmentNotes extends AbstractMigration {
+class CreateSegmentNotes extends AbstractMatecatMigration {
 
   public $sql_up = <<<EOF
 CREATE TABLE `segment_notes` (
@@ -17,11 +17,4 @@ EOF;
 
   public $sql_down = 'DROP TABLE `segment_notes`';
 
-    public function up() {
-      $this->execute($this->sql_up);
-    }
-
-    public function down() {
-      $this->execute($this->sql_down);
-    }
 }

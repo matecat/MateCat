@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class ApiKeysTable extends AbstractMigration {
+class ApiKeysTable extends AbstractMatecatMigration {
     public $sql_up = <<<EOF
 CREATE TABLE `api_keys` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -19,11 +19,4 @@ EOF;
 
     public $sql_down = 'DROP TABLE `api_keys`';
 
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute($this->sql_down);
-    }
 }
