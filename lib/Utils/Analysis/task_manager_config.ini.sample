@@ -16,7 +16,7 @@ loggerName = 'TaskManager.log'             ;Master Logger for the Task Manager
 ;;##############################
 P1[queue_name]    = "analysis_queue_P1"         ;AMQ queue name
 P1[pid_set_name]  = "ch_pid_set_p1"             ;Redis set list for the processes id
-P1[max_executors] = 100                         ;Number of executors
+P1[max_executors] = 10                          ;Number of executors
 P1[redis_key]     = "p1_list"                   ;Redis list of MateCat projects to be analyzed
 P1[loggerName]    = "tm_analysis_P1.log"        ;Logger name
 ;;##############################
@@ -24,7 +24,7 @@ P1[loggerName]    = "tm_analysis_P1.log"        ;Logger name
 ;;##############################
 P2[queue_name]    = "analysis_queue_P2"
 P2[pid_set_name]  = "ch_pid_set_p2"
-P2[max_executors] = 75
+P2[max_executors] = 5
 P2[redis_key]     = "p2_list"
 P2[loggerName]    = "tm_analysis_P2.log"
 ;;##############################
@@ -32,6 +32,6 @@ P2[loggerName]    = "tm_analysis_P2.log"
 ;;##############################
 P3[queue_name]    = "analysis_queue_P3"
 P3[pid_set_name]  = "ch_pid_set_p3"
-P3[max_executors] = 10
+P3[max_executors] = 1
 P3[redis_key]     = "p3_list"
 P3[loggerName]    = "tm_analysis_P3.log"

@@ -9,7 +9,12 @@
 
 namespace TaskRunner\Commons;
 
-
+/**
+ * Class Context
+ * Context definition for the Executors
+ *
+ * @package TaskRunner\Commons
+ */
 class Context {
 
     /**
@@ -62,6 +67,8 @@ class Context {
     }
 
     /**
+     * Concrete Static builder method
+     *
      * @param array $context
      *
      * @return static
@@ -71,6 +78,7 @@ class Context {
     }
 
     /**
+     * Magic to string method
      *
      * @return string
      */

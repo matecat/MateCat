@@ -1,4 +1,12 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * @author domenico domenico@translated.net / ostico@gmail.com
+ * Date: 04/05/15
+ * Time: 13.37
+ *
+ */
+
 namespace Analysis\Workers;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\Context;
@@ -8,13 +16,19 @@ use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
-use Analysis\Queue\QueueInfo;
 use Analysis\Queue\RedisKeys;
 use \Exception, \AMQHandler;
 use \Database, \PDOException;
 
 include \INIT::$MODEL_ROOT . "/queries.php";
 
+/**
+ * Class TMAnalysisWorker
+ * @package Analysis\Workers
+ *
+ * Concrete worker.
+ * This worker handle a queue element ( a segment ) and perform the analysis on it
+ */
 class TMAnalysisWorker extends AbstractWorker {
 
     /**
@@ -25,24 +39,36 @@ class TMAnalysisWorker extends AbstractWorker {
     protected $_matches = null;
 
     /**
+     * Handler to the AMQ server and Redis Server
+     *
      * @var \AMQHandler
      */
     protected $_queueHandler;
 
     /**
+     * The context object.
+     * It stores the configuration for the worker
+     *
      * @var Context
      */
-    protected $_mySubscribedQueue;
+    protected $_myContext;
 
     const ERR_EMPTY_WORD_COUNT = 4;
     const ERR_WRONG_PROJECT    = 5;
 
+    /**
+     * TMAnalysisWorker constructor.
+     *
+     * @param AMQHandler $queueHandler
+     */
     public function __construct( AMQHandler $queueHandler ) {
         \Log::$fileName = 'tm_analysis.log';
         $this->_queueHandler = $queueHandler;
     }
 
     /**
+     * Concrete Method to start the activity of the worker
+     *
      * @param AbstractElement $queueElement
      * @param Context         $queueContext
      *
@@ -59,7 +85,7 @@ class TMAnalysisWorker extends AbstractWorker {
         /**
          * @var $queueContext Context
          */
-        $this->_mySubscribedQueue = $queueContext;
+        $this->_myContext = $queueContext;
 
         //reset matches vector
         $this->_matches = null;
@@ -130,6 +156,8 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Update the record on the database
+     *
      * @param QueueElement $queueElement
      *
      * @throws Exception
@@ -257,6 +285,8 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Calculate the new score match by the Equivalent word mapping ( the value is inside the queue element )
+     *
      * @param string $tm_match_type
      * @param string $fast_match_type
      * @param array  $equivalentWordMapping
@@ -529,7 +559,7 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * Compare match scores between TM records and MT records when they are extern to MyMemory
+     * Compare match scores between TM records and MT records when they are external to MyMemory
      *
      * @param $a
      * @param $b
@@ -563,6 +593,8 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
+     *
      * @param QueueElement $queueElement
      *
      * @throws EndQueueException
@@ -586,6 +618,12 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Initialize the counter for the analysis.
+     * Take the info from the project and initialize it.
+     * There is a lock for every project on redis, so only one worker can initialize the counter
+     *
+     *  - Set project total segments to analyze, and count the analyzed as segments done
+     *
      * @param $queueElement QueueElement
      * @param $process_pid int
      */
@@ -622,6 +660,11 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Increment the analysis counter:
+     *  - eq_word_count
+     *  - st_word_count
+     *  - num_segments_done
+     *
      * @param $pid
      * @param $eq_words
      * @param $standard_words
@@ -633,6 +676,9 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Decrement the number of segments that we must wait before that this project starts.
+     * There is a list of project ids from witch the interface will read the remaining segments.
+     *
      * @param int $project_id
      *
      * @throws Exception
@@ -643,7 +689,7 @@ class TMAnalysisWorker extends AbstractWorker {
             throw new Exception( 'Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT );
         }
 
-        $working_jobs = $this->_queueHandler->getRedisClient()->lrange( $this->_mySubscribedQueue->redis_key, 0, -1 );
+        $working_jobs = $this->_queueHandler->getRedisClient()->lrange( $this->_myContext->redis_key, 0, -1 );
 
         /**
          * We have an unordered list of numeric keys [1,3,2,5,4]
@@ -666,6 +712,9 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * Every time one element of the project is taken from the queue, the worker try to finalize the project.
+     * Only the last worker can finalize the project by setting a lock on Redis.
+     *
      * @param $_project_id
      */
     protected function _tryToCloseProject( $_project_id ) {
@@ -701,7 +750,7 @@ class TMAnalysisWorker extends AbstractWorker {
             /*
              * Remove this job from the project list
              */
-            $this->_queueHandler->getRedisClient()->lrem( $this->_mySubscribedQueue->redis_key, 0, $_project_id );
+            $this->_queueHandler->getRedisClient()->lrem( $this->_myContext->redis_key, 0, $_project_id );
 
             $this->_doLog ( "--- (Worker $this->_workerPid) : trying to initialize job total word count." );
             foreach ( $_analyzed_report as $job_info ) {
@@ -714,6 +763,8 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
+     * When a segment has an error or was re-queued too much times we want to force it as analyzed
+     *
      * @param $elementQueue QueueElement
      */
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ){

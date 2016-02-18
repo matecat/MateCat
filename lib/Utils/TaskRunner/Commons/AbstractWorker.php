@@ -11,6 +11,10 @@ namespace TaskRunner\Commons;
 use \SplObserver;
 use \SplSubject;
 
+/**
+ * Class AbstractWorker
+ * @package TaskRunner\Commons
+ */
 abstract class AbstractWorker implements SplSubject {
 
     const ERR_REQUEUE_END      = 1;
@@ -18,11 +22,15 @@ abstract class AbstractWorker implements SplSubject {
     const ERR_EMPTY_ELEMENT    = 3;
 
     /**
+     * Observers container
+     *
      * @var SplObserver[]
      */
     protected $_observer;
 
     /**
+     * The last log message
+     *
      * @var string
      */
     protected $_logMsg;
@@ -97,6 +105,7 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
+     * Method used by the Observer to get the logging message
      * @return string
      */
     public function getLogMsg(){
@@ -104,6 +113,7 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
+     * Method to be called when a concrete worker must log
      * @param $msg string
      */
     protected function _doLog( $msg ){
