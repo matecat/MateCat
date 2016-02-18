@@ -10,6 +10,7 @@ Loader = {
         'ui.contribution',
         'ui.tags',
         'ui.concordance',
+        'ui.new',
         'ui.glossary',
         'ui.search',
         'functions',

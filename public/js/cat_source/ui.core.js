@@ -1222,6 +1222,7 @@ UI = {
 		$(editarea).removeClass("indent");
 
 		this.lockTags();
+
 		if (!this.readonly) {
 			this.getContribution(segment, 1);
 			this.getContribution(segment, 2);
@@ -1231,6 +1232,9 @@ UI = {
 		}
 		if (this.debug)
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
+
+        this.getIssues();
+        this.getClock();
 
         $(window).trigger({
             type: "segmentOpened",
