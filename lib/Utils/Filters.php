@@ -28,7 +28,6 @@ class Filters {
                 CURLOPT_POST => true,
                 CURLOPT_USERAGENT => INIT::$FILTERS_USER_AGENT,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_SAFE_UPLOAD => false,
                 CURLOPT_POSTFIELDS => $data,
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
@@ -38,6 +37,15 @@ class Filters {
                   'X-Mashape-Key: '. INIT::$FILTERS_MASHAPE_KEY,
                 );
             }
+
+            if ( PHP_MINOR_VERSION >= 5 ) {
+                /**
+                 * Added in PHP 5.5.0 with FALSE as the default value.
+                 * PHP 5.6.0 changes the default value to TRUE.
+                 */
+                $options[ CURLOPT_SAFE_UPLOAD ] = false;
+            }
+
             $url = rtrim(INIT::$FILTERS_ADDRESS, '/') . $endpoint;
             Log::doLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
