@@ -213,6 +213,30 @@ UI.SegmentFooter.registerTab({
 });
 
 UI.SegmentFooter.registerTab({
+    code                : 'nw',
+    tab_class           : 'new',
+    label               : 'New',
+    activation_priority : 100,
+    tab_position        : 100,
+    is_enabled    : function(segment) {
+        return true;
+    },
+    tab_markup          : function(segment) {
+        return this.label ;
+    },
+    content_markup      : function(segment) {
+        var template = MateCat.Templates['segment_footer/tabs/new_body'];
+        return template();
+    },
+    is_hidden    : function(segment) {
+        return false;
+    },
+    on_activation : function( footer ) {
+        $('.cc-search .search-source', footer.segment.el).focus();
+    }
+});
+
+UI.SegmentFooter.registerTab({
     code                : 'tm',
     tab_class           : 'matches',
     label               : 'Translation Matches',

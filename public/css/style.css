@@ -1045,7 +1045,21 @@ body.cattool:not(.editing) article {
 }
 .graygreen{color:#fff !important;border-top:1px solid #ccc;border-left:1px solid #ccc;width:25px !important;text-align:center !important}
 
+.tab.new .overflow .new-left {
+  float: left;
+  width: 48%;
+  padding: 1%;
+}
 
+.tab.new .overflow .new-left li {
+  list-style: none;
+}
+
+.tab.new .overflow .new-right {
+  float: right;
+  width: 48%;
+  padding: 1%;
+}
 
 
 /*submenu*/
@@ -3823,7 +3837,7 @@ color:red !important;
 {
     background: #b0ffb3;
     text-decoration: none;
-}
+}.
 
 body.cattool table.mgmt-mt th.enable-mt {
     display: none;
