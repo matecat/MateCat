@@ -2,6 +2,11 @@
 
 class Utils {
 
+	public static function api_timestamp( $date_string ) {
+		$datetime = new \DateTime( $date_string );
+		return $datetime->format( 'c' );
+	}
+
     public static function underscoreToCamelCase($string) {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
     }

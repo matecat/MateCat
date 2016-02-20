@@ -63,14 +63,16 @@ class ProjectCompletionStatusTest extends IntegrationTest {
                             array(
                                 'id' => $jobs[0]->id,
                                 'password' => $jobs[0]->password,
-                                'completed' => false
+                                'completed' => false,
+                                'completed_at' => null
                             )
                         ),
                         'translate' => array(
                             array(
                                 'id' => $jobs[0]->id,
                                 'password' => $jobs[0]->password,
-                                'completed' => false
+                                'completed' => false,
+                                'completed_at' => null
                             )
                         ),
                         'id'        => $this->test_data->project->id_project,
@@ -102,14 +104,16 @@ class ProjectCompletionStatusTest extends IntegrationTest {
                             array(
                                 'id' => $jobs[0]->id,
                                 'password' => $jobs[0]->password,
-                                'completed' => false
+                                'completed' => false,
+                                'completed_at' => null
                             )
                         ),
                         'translate' => array(
                             array(
                                 'id' => $jobs[0]->id,
                                 'password' => $jobs[0]->password,
-                                'completed' => false
+                                'completed' => false,
+                                'completed_at' => null
                             )
                         ),
                         'id'        => $this->test_data->project->id_project,
@@ -155,16 +159,24 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $expected_jobs = array('translate' => array(), 'revise' => array() );
 
 
-        foreach ( $project->getJobs() as $job ) {
+        foreach ( $project->getChunks() as $job ) {
+            $translate = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                    $job, array('is_review' => false));
+            $revise = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                    $job, array('is_review' => true));
+
             $expected_jobs['translate'][] = array(
                     'id'           => $job->id,
                     'password'     => $job->password,
                     'completed'    => true,
+                    'completed_at' => Utils::api_timestamp( $translate['create_date'] )
             );
+
             $expected_jobs['revise'][] = array(
                     'id'           => $job->id,
                     'password'     => $job->password,
                     'completed'    => true,
+                    'completed_at' => Utils::api_timestamp( $revise['create_date'] )
             );
         }
 
@@ -244,8 +256,6 @@ class ProjectCompletionStatusTest extends IntegrationTest {
             )
         ) );
 
-
-
         $test          = new CurlTest();
         $test->path    = '/api/v2/project-completion-status/' .
                 $this->test_data->project->id_project;
@@ -253,30 +263,40 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $test->headers = $this->test_data->headers;
 
         $response = $test->getResponse();
+
+        $first_translate = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                $first_chunk, array('is_review' => false));
+        $first_revise  = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                $first_chunk, array('is_review' => true));
+
         $expected = array(
                 'project_status' => array(
                         'revise'    => array(
                                 array(
                                         'id'       => $first_chunk->id,
                                         'password' => $first_chunk->password,
-                                        'completed' => true
+                                        'completed' => true,
+                                        'completed_at' => Utils::api_timestamp( $first_revise['create_date'])
                                 ),
                                 array(
                                         'id'       => $second_chunk->id,
                                         'password' => $second_chunk->password,
-                                        'completed' => false
+                                        'completed' => false,
+                                        'completed_at' => null
                                 )
                         ),
                         'translate'    => array(
                                 array(
                                         'id'       => $first_chunk->id,
                                         'password' => $first_chunk->password,
-                                        'completed' => true
+                                        'completed' => true,
+                                        'completed_at' => Utils::api_timestamp( $first_translate['create_date'])
                                 ),
                                 array(
                                         'id'       => $second_chunk->id,
                                         'password' => $second_chunk->password,
-                                        'completed' => false
+                                        'completed' => false,
+                                        'completed_at' => null
                                 )
                         ),
                         'id'        => $this->test_data->project->id_project,

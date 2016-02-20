@@ -51,11 +51,11 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      *
      */
 
-    public static function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
+    public static function lastCompletionRecord( Chunks_ChunkStruct $chunk, array $params = array() ) {
         $params = Utils::ensure_keys($params, array('is_review'));
         $is_review = $params['is_review'] || false;
 
-        $sql = "SELECT events.is_review, events.id_job, updates.password " .
+        $sql = "SELECT events.create_date, events.is_review, events.id_job, updates.password " .
             " FROM chunk_completion_events events " .
             " LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job " .
             " AND  events.password = updates.password and events.is_review = updates.is_review " .
@@ -63,7 +63,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             " AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL ) " .
             " AND events.is_review = :is_review " .
             " AND events.id_job = :id_job AND events.password = :password " .
-            " GROUP BY id_job, password, is_review " ;
+            " GROUP BY id_job, password, is_review, create_date" ;
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -74,7 +74,11 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
                 )
         );
 
-        $fetched = $stmt->fetch();
+        return $stmt->fetch();
+    }
+
+    public function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
+        $fetched = self::lastCompletionRecord( $chunk, $params);
         return $fetched != false ;
     }
 

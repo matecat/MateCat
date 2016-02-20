@@ -28,6 +28,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         // );
     }
 
+    /**
+     * @return Jobs_JobStruct[]
+     */
     public function getJobs() {
         return $this->cachable(__function__, $this->id, function($id) {
             return Jobs_JobDao::getByProjectId( $id );
@@ -72,6 +75,9 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return \Features::enabled($feature, $this);
     }
 
+    /**
+     * @return Chunks_ChunkStruct[]
+     */
     public function getChunks() {
       $dao = new Chunks_ChunkDao( Database::obtain() );
       return $dao->getByProjectID( $this->id );

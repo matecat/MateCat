@@ -28,6 +28,27 @@ class ProjectCompletionStatus extends ProtectedKleinController {
         }
     }
 
+    private function dataForChunkStatus ( \Chunks_ChunkStruct $chunk, $is_review ) {
+        $record = \Chunks_ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
+                'is_review' => $is_review
+        ) );
+
+        if ( $record != false ) {
+            $is_completed = true;
+            $completed_at = \Utils::api_timestamp( $record['create_date'] );
+        } else {
+            $is_completed = false;
+            $completed_at = null;
+        }
+
+        return array(
+                'id'       => $chunk->id,
+                'password' => $chunk->password,
+                'completed' => $is_completed,
+                'completed_at' => $completed_at
+        );
+    }
+
     public function status() {
         $chunks = $this->validator->getProject()->getChunks();
 
@@ -40,34 +61,20 @@ class ProjectCompletionStatus extends ProtectedKleinController {
         $any_uncomplete = false;
 
         foreach( $chunks as $chunk ) {
-            $translate = array(
-                    'id'       => $chunk->id,
-                    'password' => $chunk->password,
-                    'completed' => \Chunks_ChunkCompletionEventDao::isChunkCompleted( $chunk, array(
-                        'is_review' => false
-                    ) )
-            );
+            $translate = $this->dataForChunkStatus($chunk, false); ;
+            $revise = $this->dataForChunkStatus($chunk, true);
 
-            $response['translate'][] = $translate;
-
-            $password = Features::filter(
+            $revise['password'] = Features::filter(
                     'filter_job_password_to_review_password',
                     $this->validator->getProject()->id_customer,
                     $chunk->password,
                     $chunk->id
             );
 
-            $revise = array(
-                    'id'       => $chunk->id,
-                    'password' => $password,
-                    'completed' => \Chunks_ChunkCompletionEventDao::isChunkCompleted( $chunk, array(
-                            'is_review' => true
-                    ) )
-            );
+            $response['translate'][] = $translate ;
+            $response['revise'][] = $revise ;
 
             if (! ( $revise['completed'] && $translate['completed'] ) ) $any_uncomplete = true;
-
-            $response['revise'][] = $revise;
         }
 
         $response['completed'] = !$any_uncomplete ;
