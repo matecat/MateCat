@@ -94,22 +94,6 @@ CREATE TABLE `files` (
   KEY `filename` (`filename`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-CREATE TABLE `files_innodb` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_project` int(11) NOT NULL,
-  `filename` varchar(255) DEFAULT NULL,
-  `source_language` varchar(45) NOT NULL,
-  `mime_type` varchar(45) DEFAULT NULL,
-  `xliff_file` longblob,
-  `sha1_original_file` varchar(100) DEFAULT NULL,
-  `original_file` longblob,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_project` (`id_project`),
-  KEY `sha1` (`sha1_original_file`) USING HASH,
-  KEY `filename` (`filename`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
   `id_file` int(11) NOT NULL,
@@ -122,22 +106,6 @@ CREATE TABLE `files_job` (
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `files_swap` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_project` int(11) NOT NULL,
-  `filename` varchar(255) DEFAULT NULL,
-  `source_language` varchar(45) NOT NULL,
-  `mime_type` varchar(45) DEFAULT NULL,
-  `xliff_file` longblob,
-  `sha1_original_file` varchar(100) DEFAULT NULL,
-  `original_file` longblob,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_project` (`id_project`),
-  KEY `sha1` (`sha1_original_file`) USING HASH,
-  KEY `filename` (`filename`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -354,67 +322,6 @@ CREATE TABLE `segment_translations_splits` (
   KEY `id_segment` (`id_segment`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `segment_translations_test_3` (
-  `id_segment` bigint(20) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `segment_hash` varchar(45) NOT NULL,
-  `autopropagated_from` bigint(20) DEFAULT NULL,
-  `status` varchar(45) DEFAULT 'NEW',
-  `translation` text,
-  `translation_date` datetime DEFAULT NULL,
-  `time_to_edit` int(11) NOT NULL DEFAULT '0',
-  `match_type` varchar(45) DEFAULT 'NEW',
-  `context_hash` blob,
-  `eq_word_count` double(20,2) DEFAULT NULL,
-  `standard_word_count` double(20,2) DEFAULT NULL,
-  `suggestions_array` text,
-  `suggestion` text,
-  `suggestion_match` int(11) DEFAULT NULL,
-  `suggestion_source` varchar(45) DEFAULT NULL,
-  `suggestion_position` int(11) DEFAULT NULL,
-  `mt_qe` float(19,14) NOT NULL DEFAULT '0.00000000000000',
-  `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
-  `locked` tinyint(4) DEFAULT '0',
-  `warning` tinyint(4) NOT NULL DEFAULT '0',
-  `serialized_errors_list` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `segment_translations_test_partitions` (
-  `id_segment` bigint(20) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `segment_hash` varchar(45) NOT NULL,
-  `autopropagated_from` bigint(20) DEFAULT NULL,
-  `status` varchar(45) DEFAULT 'NEW',
-  `translation` text,
-  `translation_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `time_to_edit` int(11) NOT NULL DEFAULT '0',
-  `match_type` varchar(45) DEFAULT 'NEW',
-  `context_hash` blob,
-  `eq_word_count` double(20,2) DEFAULT NULL,
-  `standard_word_count` double(20,2) DEFAULT NULL,
-  `suggestions_array` text,
-  `suggestion` text,
-  `suggestion_match` int(11) DEFAULT NULL,
-  `suggestion_source` varchar(45) DEFAULT NULL,
-  `suggestion_position` int(11) DEFAULT NULL,
-  `mt_qe` float(19,14) NOT NULL DEFAULT '0.00000000000000',
-  `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
-  `locked` tinyint(4) DEFAULT '0',
-  `warning` tinyint(4) NOT NULL DEFAULT '0',
-  `serialized_errors_list` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`,`translation_date`),
-  KEY `status` (`status`),
-  KEY `id_job` (`id_job`),
-  KEY `translation_date` (`translation_date`) USING BTREE,
-  KEY `tm_analysis_status` (`tm_analysis_status`) USING BTREE,
-  KEY `locked` (`locked`) USING BTREE,
-  KEY `id_segment` (`id_segment`) USING BTREE,
-  KEY `warning` (`warning`),
-  KEY `segment_hash` (`segment_hash`) USING HASH,
-  KEY `auto_idx` (`autopropagated_from`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_file` bigint(20) NOT NULL,
@@ -438,86 +345,6 @@ CREATE TABLE `segments` (
   KEY `id_file_part_idx` (`id_file_part`),
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
-CREATE TABLE `segments_comments` (
-  `id` int(11) NOT NULL,
-  `id_segment` int(11) NOT NULL,
-  `comment` text,
-  `create_date` datetime DEFAULT NULL,
-  `created_by` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_segment` (`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `sts_test` (
-  `id_segment` bigint(20) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `segment_hash` varchar(45) NOT NULL,
-  `autopropagated_from` bigint(20) DEFAULT NULL,
-  `status` varchar(45) DEFAULT 'NEW',
-  `translation` text,
-  `translation_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `time_to_edit` int(11) NOT NULL DEFAULT '0',
-  `match_type` varchar(45) DEFAULT 'NEW',
-  `context_hash` blob,
-  `eq_word_count` double(20,2) DEFAULT NULL,
-  `standard_word_count` double(20,2) DEFAULT NULL,
-  `suggestions_array` text,
-  `suggestion` text,
-  `suggestion_match` int(11) DEFAULT NULL,
-  `suggestion_source` varchar(45) DEFAULT NULL,
-  `suggestion_position` int(11) DEFAULT NULL,
-  `mt_qe` float(19,14) NOT NULL DEFAULT '0.00000000000000',
-  `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
-  `locked` tinyint(4) DEFAULT '0',
-  `warning` tinyint(4) NOT NULL DEFAULT '0',
-  `serialized_errors_list` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`,`translation_date`),
-  KEY `status` (`status`),
-  KEY `id_job` (`id_job`),
-  KEY `translation_date` (`translation_date`) USING BTREE,
-  KEY `tm_analysis_status` (`tm_analysis_status`) USING BTREE,
-  KEY `locked` (`locked`) USING BTREE,
-  KEY `id_segment` (`id_segment`) USING BTREE,
-  KEY `warning` (`warning`),
-  KEY `segment_hash` (`segment_hash`) USING HASH,
-  KEY `auto_idx` (`autopropagated_from`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `sts_test2` (
-  `id_segment` bigint(20) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `segment_hash` varchar(45) NOT NULL,
-  `autopropagated_from` bigint(20) DEFAULT NULL,
-  `status` varchar(45) DEFAULT 'NEW',
-  `translation` text,
-  `translation_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `time_to_edit` int(11) NOT NULL DEFAULT '0',
-  `match_type` varchar(45) DEFAULT 'NEW',
-  `context_hash` blob,
-  `eq_word_count` double(20,2) DEFAULT NULL,
-  `standard_word_count` double(20,2) DEFAULT NULL,
-  `suggestions_array` text,
-  `suggestion` text,
-  `suggestion_match` int(11) DEFAULT NULL,
-  `suggestion_source` varchar(45) DEFAULT NULL,
-  `suggestion_position` int(11) DEFAULT NULL,
-  `mt_qe` float(19,14) NOT NULL DEFAULT '0.00000000000000',
-  `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
-  `locked` tinyint(4) DEFAULT '0',
-  `warning` tinyint(4) NOT NULL DEFAULT '0',
-  `serialized_errors_list` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`,`translation_date`),
-  KEY `status` (`status`),
-  KEY `id_job` (`id_job`),
-  KEY `translation_date` (`translation_date`) USING BTREE,
-  KEY `tm_analysis_status` (`tm_analysis_status`) USING BTREE,
-  KEY `locked` (`locked`) USING BTREE,
-  KEY `id_segment` (`id_segment`) USING BTREE,
-  KEY `warning` (`warning`),
-  KEY `segment_hash` (`segment_hash`) USING HASH,
-  KEY `auto_idx` (`autopropagated_from`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `translators` (
   `username` varchar(100) NOT NULL,
