@@ -62,9 +62,9 @@ class AuthCookie {
             //cookie is an JSON string containing: username,expire date,hash(secret in config file+username+expire date)
             //expire date is timestamp in seconds
             //compute expected hash based on data in cookie
-            $expected_hash = hash( 'sha256', INIT::$AUTHSECRET . $cookie[ 'username' ] . $cookie[ 'uid' ] . $cookie[ 'expire_date' ] );
+            $expected_hash = hash( 'sha256', INIT::$AUTHSECRET . $cookie[ 'username' ] . $cookie[ 'uid' ] . $cookie[ 'expire_date' ] );            
             //check if valid hash and expiration still in time
-            if ( $cookie[ 'hash' ] == $expected_hash and time() < $cookie[ 'expire_date' ] ) {
+            if ( $cookie[ 'hash' ] == $expected_hash and time() < $cookie[ 'expire_date' ] and self::isTokenValid( $cookie[ 'username' ] ) ) {
                 //ok, refresh value
                 //log::doLog("Validation succeed, refreshing cookie");
                 self::setCredentials( $cookie[ 'username' ], $cookie[ 'uid' ] );
@@ -80,7 +80,47 @@ class AuthCookie {
 
         return $valid;
     }
+    
+    public static function isTokenValid($username){
+        $valid = false;
+        
+        $userData = getUserData( $username );
+        
+        if ( is_array( $userData ) && array_key_exists( 'oauth_access_token', $userData ) ) {
+            $accessToken = $userData[ 'oauth_access_token' ];
+            
+            if ( $accessToken !== '' ) {
+                $valid = self::handleTokenRefresh( $username, $accessToken );
+            }
+        }
+        
+        return $valid;
+    }
+    
+    private static function handleTokenRefresh($username, $accessToken) {
+        $client = OauthClient::getInstance()->getClient();
 
+        $client->setAccessToken( $accessToken );
+        
+        if ($client->isAccessTokenExpired()) {
+            $client->refreshToken( $client->getRefreshToken() );
+            
+            $newToken = $client->getAccessToken();
+            
+            $userData = array(
+                'email'                 => $username,
+                'oauth_access_token'    => $newToken
+            );
+            
+            $result = tryInsertUserFromOAuth( $userData );
+
+            if( false == $result ){
+                return false;
+            }
+        }
+        
+        return true;
+    }
 }
 
 ?>

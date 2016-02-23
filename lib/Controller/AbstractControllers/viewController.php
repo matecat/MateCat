@@ -238,6 +238,10 @@ abstract class viewController extends controller {
      * @return bool
      */
     public function isLoggedIn() {
+        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
+            AuthCookie::isTokenValid( $_SESSION[ 'cid' ] );
+        }
+        
         return (
                 ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
                 ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
