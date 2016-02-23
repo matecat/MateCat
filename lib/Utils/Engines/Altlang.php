@@ -31,23 +31,8 @@ class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineIn
      * @return mixed
      * @throws Exception
      */
-    protected function _fixLangCode( $lang ) {
-            
-        $lang = str_replace ("-" , "_" , $lang );
-
-        if($lang == "es_MX")
-        {
-            $lang = "es_LA";
-        }
-        
-        $acceptedLangs = array("es_ES", "es_LA", "en_US", "en_GB", "fr_FR", "fr_CA", "pt_PT", "pt_BR");               
-        
-        if( !in_array( $lang, $acceptedLangs ) ){
-            throw new Exception( "Language Not Supported", -1 );
-        }
-
+    protected function _fixLangCode( $lang ) {            
         return $lang;
-
     }
 
     /**
@@ -97,16 +82,7 @@ class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineIn
     }
 
     public function get( $_config ) {
-
-        try {
-            $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-            $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-        } catch ( Exception $e ){
-            return array(
-                    'error' => array( "message" => $e->getMessage(), 'code' => $e->getCode() )
-            );
-        }
-
+    
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         
         $param_data = json_encode(array(

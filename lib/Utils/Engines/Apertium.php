@@ -32,35 +32,7 @@ class Engines_Apertium extends Engines_AbstractEngine implements Engines_EngineI
      * @throws Exception
      */
     protected function _fixLangCode( $lang ) {
-
-        $acceptedLangs = array( "an", "ast", "br", "ca", "ca_valencia", "cy", "en", "en_US", "eo", "es", "eu", "fr", "gl", "nb", "nn", "oc", "oc_aran", "pt", "pt_BR", "ro");
-        
-        $lang = str_replace ("-" , "_" , $lang );
-        if($lang == "fr_BE" || $lang == "fr_CA")
-        {
-          $lang = "fr";
-        }
-        else if($lang == "es_MX")
-        {
-          $lang = "es";
-        }
-                         
-        
-        if($lang == "pt_BR" || $lang == "en_US" )
-        {
-            $l = array($lang);
-        }
-        else
-        {              
-            $l = explode( "_", trim( $lang ) );
-        }
-        
-        if( !in_array( $l[0], $acceptedLangs ) ){
-            throw new Exception( "Language Not Supported", -1 );
-        }
-
-        return $l[0];
-
+        return $lang;
     }
 
     /**
@@ -108,35 +80,6 @@ class Engines_Apertium extends Engines_AbstractEngine implements Engines_EngineI
     }
 
     public function get( $_config ) {
-        try {
-            $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-            $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-            
-            //fix pair
-            if( $_config[ 'target' ] == "pt_BR" && $_config[ 'source' ] != "es" )
-            {
-                $_config[ 'target' ]= "pt";
-            }
-            else if($_config[ 'target' ] == "en_US" && $_config[ 'source' ] != "es" )
-            {
-                $_config[ 'target' ]= "en";
-            }
-            
-            if($_config[ 'source' ] == "pt_PT" || $_config[ 'source' ] == "pt_BR" )
-            {
-                $_config[ 'source' ] = "pt";
-            }
-            else if($_config[ 'source' ] == "en_US" || $_config[ 'source' ] == "en_GB" )
-            {
-                $_config[ 'source' ] = "en";
-            } 
-            
-            
-        } catch ( Exception $e ){
-            return array(
-                    'error' => array( "message" => $e->getMessage(), 'code' => $e->getCode() )
-            );
-        }
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         
         $param_data = json_encode(array(

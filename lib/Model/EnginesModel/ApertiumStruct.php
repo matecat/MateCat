@@ -23,12 +23,12 @@ class EnginesModel_ApertiumStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $base_url = "http://promsit.com";
+    public $base_url = "http://api.prompsit.com";    
         
     /**
      * @var string
      */
-    public $translate_relative_url = "prompsitws/";
+    public $translate_relative_url = "apertiumws/";    
 
     /**
      * @var string
