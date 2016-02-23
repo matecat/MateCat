@@ -556,10 +556,10 @@
             "localized":[{
                 "en":"Hawaiian"
             }],
-            "isocode":"XNA",
-            "enabled":false,
+            "isocode":"HAW",
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"XN-US"
+            "rfc3066code":"US-HI"
         }
     ,
         {
@@ -779,9 +779,9 @@
                 "en":"Kyrgyz"
             }],
             "isocode":"ky",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ky-KY"
+            "rfc3066code":"ky-KG"
         }
     ,
         {

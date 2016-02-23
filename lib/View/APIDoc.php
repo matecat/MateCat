@@ -798,7 +798,6 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         <div class="block">
             <a name="languages"><h3 class="method-title">Supported languages</h3></a>
 
-
             <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <thead>
                 <th>
@@ -809,80 +808,9 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 <tr>
                     <td>
                         <ul class="lang-list">
-                            <li>Afrikaans (af-ZA)</li>
-                            <li>Albanian (sq-AL)</li>
-                            <li>Arabic (ar-SA)</li>
-                            <li>Armenian (hy-AM)</li>
-                            <li>Basque (eu-ES)</li>
-                            <li>Bengali (bn-IN)</li>
-                            <li>Bielarus (be-BY)</li>
-                            <li>Bosnian (bs-BA)</li>
-                            <li>Breton (br-FR)</li>
-                            <li>Bulgarian (bg-BG)</li>
-                            <li>Catalan (ca-ES)</li>
-                            <li>Chinese Simplified (zh-CN)</li>
-                            <li>Chinese Traditional (zh-TW)</li>
-                            <li>Croatian (hr-HR)</li>
-                            <li>Czech (cs-CZ)</li>
-                            <li>Danish (da-DK)</li>
-                            <li>Dutch (nl-NL)</li>
-                            <li>English (en-GB)</li>
-                            <li>English US (en-US)</li>
-                            <li>Estonian (et-EE)</li>
-                            <li>Faroese (fo-FO)</li>
-                            <li>Finnish (fi-FI)</li>
-                            <li>Flemish (nl-BE)</li>
-                            <li>French (fr-FR)</li>
-                            <li>Galician (gl-ES)</li>
-                            <li>Georgian (ka-GE)</li>
-                            <li>German (de-DE)</li>
-                            <li>Greek (el-GR)</li>
-                            <li>Gujarati (gu-IN)</li>
-                            <li>Hebrew (he-IL)</li>
-                            <li>Hindi (hi-IN)</li>
-                            <li>Hungarian (hu-HU)</li>
-                            <li>Icelandic (is-IS)</li>
-                            <li>Indonesian (id-ID)</li>
-                            <li>Irish Gaelic (ga-IE)</li>
-                            <li>Italian (it-IT)</li>
-                            <li>Japanese (ja-JP)</li>
-                            <li>Kazakh (kk-KZ)</li>
-                            <li>Korean (ko-KR)</li>
-                            <li>Latvian (lv-LV)</li>
-                            <li>Lithuanian (lt-LT)</li>
-                            <li>Macedonian (mk-MK)</li>
-                            <li>Malay (ms-MY)</li>
-                            <li>Maltese (mt-MT)</li>
-                            <li>Maori (mi-NZ)</li>
-                            <li>Mongolian (mn-MN)</li>
-                            <li>Nepali (ne-NP)</li>
-                            <li>Norwegian Bokmål (nb-NO)</li>
-                            <li>Norwegian Nynorsk (nn-NO)</li>
-                            <li>Pakistani (ur-PK)</li>
-                            <li>Pashto (ps-PK)</li>
-                            <li>Persian (fa-IR)</li>
-                            <li>Polish (pl-PL)</li>
-                            <li>Portuguese (pt-PT)</li>
-                            <li>Portuguese Brazil (pt-BR)</li>
-                            <li>Quebecois (fr-CA)</li>
-                            <li>Quechua (qu-XN)</li>
-                            <li>Romanian (ro-RO)</li>
-                            <li>Russian (ru-RU)</li>
-                            <li>Serbian Latin (sr-Latn-RS)</li>
-                            <li>Serbian Cyrillic (sr-Cyrl-RS)</li>
-                            <li>Slovak (sk-SK)</li>
-                            <li>Slovenian (sl-SI)</li>
-                            <li>Spanish (es-ES)</li>
-                            <li>Spanish Latin America (es-MX)</li>
-                            <li>Swedish (sv-SE)</li>
-                            <li>Swiss German (de-CH)</li>
-                            <li>Tamil (ta-LK)</li>
-                            <li>Telugu (te-IN)</li>
-                            <li>Thai (th-TH)</li>
-                            <li>Turkish (tr-TR)</li>
-                            <li>Ukrainian (uk-UA)</li>
-                            <li>Vietnamese (vi-VN)</li>
-                            <li>Welsh (cy-GB)</li>
+                            <?php foreach( Langs_Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
+                            <li><?=$lang['name'] . " (" . $lang['code']  . ")"?></li>
+                            <?php endforeach; ?>
                         </ul>
                     </td>
                 </tr>
@@ -903,43 +831,9 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 </tr>
                 </thead>
                 <tbody>
-                <tr><td>General </td><td>general</td></tr>
-                <tr><td>Accounting &amp; Finance </td><td>accounting_finance</td></tr>
-                <tr><td>Aerospace / Defence </td><td>aerospace_defence</td></tr>
-                <tr><td>Architecture </td><td>architecture</td></tr>
-                <tr><td>Art </td><td>art</td></tr>
-                <tr><td>Automotive </td><td>automotive</td></tr>
-                <tr><td>Certificates, diplomas, licences, cv's, etc </td><td>certificates_diplomas_licences_cv_etc</td></tr>
-                <tr><td>Chemical </td><td>chemical</td></tr>
-                <tr><td>Civil Engineering / Construction </td><td>civil_engineering_construction</td></tr>
-                <tr><td>Corporate Social Responsibility </td><td>corporate_social_responsibility</td></tr>
-                <tr><td>Cosmetics </td><td>cosmetics</td></tr>
-                <tr><td>Culinary </td><td>culinary</td></tr>
-                <tr><td>Electronics /  Electrical Engineering </td><td>electronics_electrical_engineering</td></tr>
-                <tr><td>Energy / Power generation / Oil &amp; Gas </td><td>energy_power_generation_oil_gas</td></tr>
-                <tr><td>Environment </td><td>environment</td></tr>
-                <tr><td>Fashion </td><td>fashion</td></tr>
-                <tr><td>Games / Video Games / Casino </td><td>games_viseogames_casino</td></tr>
-                <tr><td>General Business / Commerce </td><td>general_business_commerce</td></tr>
-                <tr><td>History / Archaeology </td><td>history_archaeology</td></tr>
-                <tr><td>Information Technology </td><td>information_technology</td></tr>
-                <tr><td>Insurance </td><td>insurance</td></tr>
-                <tr><td>Internet, e-commerce </td><td>internet_e-commerce</td></tr>
-                <tr><td>Legal documents / Contracts </td><td>legal_documents_contracts</td></tr>
-                <tr><td>Literary Translations </td><td>literary_translations</td></tr>
-                <tr><td>Marketing &amp; Advertising material / Public Relations </td><td>marketing_advertising_material_public_relations</td></tr>
-                <tr><td>Mathematics and Physics </td><td>matematics_and_physics</td></tr>
-                <tr><td>Mechanical / Manufacturing </td><td>mechanical_manufacturing</td></tr>
-                <tr><td>Media / Journalism / Publishing </td><td>media_journalism_publishing</td></tr>
-                <tr><td>Medical / Pharmaceutical </td><td>medical_pharmaceutical</td></tr>
-                <tr><td>Music </td><td>music</td></tr>
-                <tr><td>Private Correspondence, Letters </td><td>private_correspondence_letters</td></tr>
-                <tr><td>Religion </td><td>religion</td></tr>
-                <tr><td>Science </td><td>science</td></tr>
-                <tr><td>Shipping / Sailing / Maritime </td><td>shipping_sailing_maritime</td></tr>
-                <tr><td>Social Science </td><td>social_science</td></tr>
-                <tr><td>Telecommunications </td><td>telecommunications</td></tr>
-                <tr><td>Travel &amp; Tourism  </td><td>travel_tourism</td></tr>
+                <?php foreach( Langs_LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
+                <tr><td><?=$domains['display']?></td><td><?=$domains['key']?></td></tr>
+                <?php endforeach; ?>
                 </tbody>
             </table>
             <a class="gototop" href="#top">Go to top</a>
