@@ -62,7 +62,9 @@
                 splitSegmentEnabled: true,
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
+                status_labels : JSON.parse( '${status_labels}' )
             };
+
             var renderStart = new Date();
             /*]]>*/
         </script>
@@ -74,8 +76,7 @@
         <script tal:condition="true:review_improved" type="text/javascript">
           /*<![CDATA[*/
           config.lqa_categories = '${lqa_categories}';
-          config.project_type = '${project_type}';
-          config.status_labels = JSON.parse( '${status_labels}' );
+          config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
           /*]]>*/
 
         </script>
