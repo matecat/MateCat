@@ -8,7 +8,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -21,11 +21,33 @@ CREATE TABLE `chunk_completion_events` (
   `source` varchar(45) NOT NULL,
   `create_date` datetime NOT NULL,
   `remote_ip_address` varchar(45) NOT NULL,
+  `is_review` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `chunk_completion_updates` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `job_first_segment` bigint(20) unsigned NOT NULL,
+  `job_last_segment` bigint(20) unsigned NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `source` varchar(45) NOT NULL,
+  `create_date` datetime NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_translation_at` datetime DEFAULT NULL,
+  `is_review` tinyint(1) NOT NULL,
+  `remote_ip_address` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_record` (`id_job`,`password`,`job_first_segment`,`job_last_segment`,`is_review`),
+  KEY `id_project` (`id_project`) USING BTREE,
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `create_date` (`create_date`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -43,7 +65,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -65,8 +87,7 @@ CREATE TABLE `engines` (
   KEY `type` (`type`),
   KEY `active_idx` (`active`) USING BTREE,
   KEY `uid_idx` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `file_references` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -77,7 +98,7 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -88,11 +109,12 @@ CREATE TABLE `files` (
   `xliff_file` longblob,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   `original_file` longblob,
+  `remote_id` text,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
@@ -105,7 +127,7 @@ CREATE TABLE `files_job` (
   `status_analisys` varchar(50) DEFAULT 'NEW' COMMENT 'NEW\nIN PROGRESS\nDONE',
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -163,7 +185,7 @@ CREATE TABLE `jobs` (
   KEY `status_owner_idx` (`status_owner`),
   KEY `status_idx` (`status`),
   KEY `create_date_idx` (`create_date`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `language_stats` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -177,7 +199,7 @@ CREATE TABLE `language_stats` (
   KEY `source_idx` (`source`),
   KEY `target_idx` (`target`),
   KEY `date_idx` (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `memory_keys` (
   `uid` bigint(20) NOT NULL,
@@ -191,7 +213,7 @@ CREATE TABLE `memory_keys` (
   PRIMARY KEY (`uid`,`key_value`),
   KEY `uid_idx` (`uid`),
   KEY `key_value_idx` (`key_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
@@ -200,7 +222,7 @@ CREATE TABLE `notifications` (
   `status` varchar(45) CHARACTER SET latin1 DEFAULT 'UNREAD',
   PRIMARY KEY (`id`),
   KEY `id_comment` (`id_comment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `original_files_map` (
   `sha1` varchar(100) NOT NULL,
@@ -211,7 +233,7 @@ CREATE TABLE `original_files_map` (
   `creation_date` date DEFAULT NULL,
   `segmentation_rule` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`sha1`,`source`,`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `owner_features` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -223,14 +245,24 @@ CREATE TABLE `owner_features` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `project_metadata` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` bigint(20) NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
+  KEY `id_project` (`id_project`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -247,13 +279,85 @@ CREATE TABLE `projects` (
   `remote_ip_address` varchar(45) DEFAULT 'UNKNOWN',
   `for_debug` tinyint(4) NOT NULL DEFAULT '0',
   `pretranslate_100` int(1) DEFAULT '0',
+  `id_qa_model` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `for_debug` (`for_debug`),
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `qa_categories` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_model` bigint(20) NOT NULL,
+  `label` varchar(255) NOT NULL,
+  `id_parent` bigint(20) DEFAULT NULL,
+  `severities` text COMMENT 'json field',
+  PRIMARY KEY (`id`),
+  KEY `id_model` (`id_model`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `qa_chunk_reviews` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` int(11) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `review_password` varchar(45) NOT NULL,
+  `score` bigint(20) NOT NULL DEFAULT '0',
+  `num_errors` int(11) NOT NULL DEFAULT '0',
+  `is_pass` tinyint(4) NOT NULL DEFAULT '0',
+  `force_pass_at` timestamp NULL DEFAULT NULL,
+  `reviewed_words_count` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_job_password` (`id_job`,`password`),
+  KEY `id_project` (`id_project`),
+  KEY `review_password` (`review_password`),
+  KEY `id_job` (`id_job`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `qa_entries` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) DEFAULT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `id_category` bigint(20) NOT NULL,
+  `severity` varchar(255) NOT NULL,
+  `translation_version` int(11) NOT NULL,
+  `start_node` int(11) NOT NULL,
+  `start_offset` int(11) NOT NULL,
+  `end_node` int(11) NOT NULL,
+  `end_offset` int(11) NOT NULL,
+  `target_text` varchar(255) DEFAULT NULL,
+  `is_full_segment` tinyint(4) NOT NULL,
+  `penalty_points` int(11) NOT NULL,
+  `comment` text,
+  `replies_count` int(11) NOT NULL DEFAULT '0',
+  `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `job_and_segment` (`id_job`,`id_segment`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `qa_entry_comments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) DEFAULT NULL,
+  `id_qa_entry` bigint(20) NOT NULL,
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `comment` text,
+  PRIMARY KEY (`id`),
+  KEY `id_qa_entry` (`id_qa_entry`),
+  KEY `create_date` (`create_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `qa_models` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) DEFAULT NULL,
+  `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `label` varchar(255) DEFAULT NULL,
+  `pass_type` varchar(255) DEFAULT NULL,
+  `pass_options` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -262,7 +366,7 @@ CREATE TABLE `segment_notes` (
   `note` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_revisions` (
   `id_job` bigint(20) NOT NULL,
@@ -275,7 +379,21 @@ CREATE TABLE `segment_revisions` (
   `err_style` varchar(512) NOT NULL,
   PRIMARY KEY (`id_job`,`id_segment`),
   KEY `segm_key` (`id_segment`,`id_job`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `segment_translation_versions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_segment` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `translation` text,
+  `version_number` int(11) NOT NULL,
+  `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `propagated_from` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_segment` (`id_segment`) USING BTREE,
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `creation_date` (`creation_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
@@ -300,6 +418,7 @@ CREATE TABLE `segment_translations` (
   `locked` tinyint(4) DEFAULT '0',
   `warning` tinyint(4) NOT NULL DEFAULT '0',
   `serialized_errors_list` varchar(512) DEFAULT NULL,
+  `version_number` int(11) DEFAULT '0',
   PRIMARY KEY (`id_segment`,`id_job`),
   KEY `status` (`status`),
   KEY `id_job` (`id_job`),
@@ -310,7 +429,7 @@ CREATE TABLE `segment_translations` (
   KEY `warning` (`warning`),
   KEY `segment_hash` (`segment_hash`) USING HASH,
   KEY `auto_idx` (`autopropagated_from`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_translations_splits` (
   `id_segment` bigint(20) NOT NULL,
@@ -320,7 +439,7 @@ CREATE TABLE `segment_translations_splits` (
   PRIMARY KEY (`id_segment`,`id_job`),
   KEY `id_job` (`id_job`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -344,7 +463,7 @@ CREATE TABLE `segments` (
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `translators` (
   `username` varchar(100) NOT NULL,
@@ -355,7 +474,7 @@ CREATE TABLE `translators` (
   `mymemory_api_key` varchar(50) NOT NULL,
   PRIMARY KEY (`username`),
   KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `users` (
   `uid` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -366,12 +485,14 @@ CREATE TABLE `users` (
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `api_key` varchar(100) NOT NULL,
+  `oauth_access_token` text,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`),
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
-INSERT INTO `engines` (
+
+        INSERT INTO `engines` (
   `name` ,
   `type` ,
   `description` ,
@@ -408,12 +529,34 @@ NULL);
 UPDATE engines SET id = 0 WHERE name = 'NONE' ;
 UPDATE engines SET id = 1 WHERE name = 'MyMemory (All Pairs)' ;
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150918101657', '2016-02-18 14:28:18', '2016-02-18 14:28:18');
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150918101657', '2016-02-18 14:28:18', '2016-02-18 14:28:18'); 
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150921114813', '2016-02-18 14:28:29', '2016-02-18 14:28:29');
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150921114813', '2016-02-18 14:28:29', '2016-02-18 14:28:29'); 
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150922152051', '2016-02-18 14:28:39', '2016-02-18 14:28:39');
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150922152051', '2016-02-18 14:28:39', '2016-02-18 14:28:39'); 
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151001131124', '2016-02-18 14:28:45', '2016-02-18 14:28:45');
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151001131124', '2016-02-18 14:28:45', '2016-02-18 14:28:45'); 
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-02-18T14:28:45+00:00', '2016-02-18T14:28:45+00:00');
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151120150352', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151123141623', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151126093945', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151204140144', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151219181543', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151229103454', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160108101432', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160115143225', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160116085841', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160120143540', '2016-02-23 13:13:09', '2016-02-23 13:13:09'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-02-18 14:28:45', '2016-02-18 14:28:45'); 
+
+ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-02-23T13:34:57+00:00', '2016-02-23T13:34:57+00:00'); 

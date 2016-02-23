@@ -1,9 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class NewFiltersCommunication extends AbstractMatecatMigration
-{
+class NewFiltersCommunication extends AbstractMatecatMigration {
     public $sql_up = <<<EOF
 DROP TABLE IF EXISTS `converters`;
 DROP TABLE IF EXISTS `converters_log`;

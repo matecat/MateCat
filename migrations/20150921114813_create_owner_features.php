@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class CreateOwnerFeatures extends AbstractMatecatMigration
 {
 
