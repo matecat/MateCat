@@ -186,7 +186,7 @@ function doReplaceAll( Array $queryParams ) {
      * Escape Meta-characters to use in regular expression
      *
      */
-    $_regexpEscapedTrg = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $trg );
+    $_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $trg );
 
     /**
      * Escape for database
