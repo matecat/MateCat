@@ -53,12 +53,32 @@
     ,
         {
             "localized":[{
+                "en":"Aragonese"
+            }],
+            "isocode":"an",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"an-ES"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Armenian"
             }],
             "isocode":"hy",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"hy-AM"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Asturian"
+            }],
+            "isocode":"ast",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ast-ES"
         }
     ,
         {
@@ -211,6 +231,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"ca-ES"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Catalan Valencian"
+            }],
+            "isocode":"cav",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"cav-ES"
         }
     ,
         {
@@ -1048,7 +1078,26 @@
             "rfc3066code":"ny-NY"
         }
     ,
-
+        {
+            "localized":[{
+                "en":"Occitan"
+            }],
+            "isocode":"oc",
+            "enabled":false,
+            "rtl":false,
+            "rfc3066code":"oc-FR"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Occitan Aran"
+            }],
+            "isocode":"oc",
+            "enabled":false,
+            "rtl":false,
+            "rfc3066code":"oc-ES"
+        }
+    ,
         {
             "localized":[{
                 "en":"Palauan"
@@ -1459,6 +1508,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"te-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Tatar"
+            }],
+            "isocode":"tt",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"tt-RU"
         }
     ,
         {
