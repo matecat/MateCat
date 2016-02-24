@@ -404,7 +404,7 @@
                 "en":"Esperanto"
             }],
             "isocode":"eo",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"eo-XN"
         }
@@ -1083,7 +1083,7 @@
                 "en":"Occitan"
             }],
             "isocode":"oc",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"oc-FR"
         }
