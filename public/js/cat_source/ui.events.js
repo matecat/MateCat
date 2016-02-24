@@ -640,7 +640,7 @@ $.extend(UI, {
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-        }).on('click', 'section .sid, section .mbc-comment-link', function(e){
+        }).on('click', 'section .sid, section .segment-side-buttons', function(e){
             UI.closeSegment(UI.currentSegment, 1);
         }).on('click', 'section .actions', function(e){
             e.stopPropagation();

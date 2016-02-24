@@ -612,10 +612,12 @@ if ( MBC.enabled() )
 
         var initCommentLink = function ( el ) {
             var section = new UI.Segment( el );
+
             if ( (!section.isSplit()) || section.isFirstOfSplit() ) {
-                $( el ).find( '.mbc-comment-link' ).remove();
+                $( el ).find( '.segment-side-buttons' ).remove();
                 $( el ).append( $( tpls.commentLink ) );
             }
+
         }
 
         var initCommentLinks = function () {
@@ -663,7 +665,7 @@ if ( MBC.enabled() )
             //
             var delegate = '#outer';
 
-            $( delegate ).on( 'click', '.mbc-comment-balloon-outer, .mbc-comment-link div', function ( e ) {
+            $( delegate ).on( 'click', '.mbc-comment-balloon-outer, .segment-side-buttons div', function ( e ) {
                 e.stopPropagation();
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
@@ -672,7 +674,7 @@ if ( MBC.enabled() )
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
-            $( delegate ).on( 'click', '.mbc-comment-link .txt', function ( e ) {
+            $( delegate ).on( 'click', '.segment-side-buttons .txt', function ( e ) {
                 var section = $( e.target ).closest( 'section' );
                 openSegmentCommentNoScroll( section );
             } );
@@ -872,7 +874,7 @@ if ( MBC.enabled() )
         $( document ).on( 'mbc:segment:update:links', function ( ev, id_segment ) {
             var comments_obj = db.getCommentsCountBySegment( id_segment );
             var el = UI.Segment.findEl( id_segment );
-            resolveCommentLinkIcon( el.find( '.mbc-comment-link' ), comments_obj );
+            resolveCommentLinkIcon( el.find( '.segment-side-buttons' ), comments_obj );
         } );
 
         $( document ).on( 'keydown', '.mbc-comment-textarea', resetTextArea );
@@ -904,18 +906,18 @@ if ( MBC.enabled() )
         } );
 
         $( document ).on( 'mouseover', 'section', function ( e ) {
-            $( e.relatedTarget ).closest( 'section' ).find( '.mbc-comment-link .txt' ).stop();
+            $( e.relatedTarget ).closest( 'section' ).find( '.segment-side-buttons .txt' ).stop();
 
             $( e.target ).closest( 'section' )
-                    .find( '.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)' )
+                    .find( '.segment-side-buttons .txt:has(.mbc-comment-highlight-invite)' )
                     .stop().delay( 300 ).fadeIn( 100 );
         } );
 
         $( document ).on( 'mouseout', 'section', function ( e ) {
-            $( e.relatedTarget ).closest( 'section' ).find( '.mbc-comment-link .txt' ).stop();
+            $( e.relatedTarget ).closest( 'section' ).find( '.segment-side-buttons .txt' ).stop();
 
             $( e.target ).closest( 'section' )
-                    .find( '.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)' )
+                    .find( '.segment-side-buttons .txt:has(.mbc-comment-highlight-invite)' )
                     .stop().delay( 150 ).fadeOut();
         } );
 
