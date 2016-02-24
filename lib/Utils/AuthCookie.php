@@ -64,7 +64,7 @@ class AuthCookie {
             //compute expected hash based on data in cookie
             $expected_hash = hash( 'sha256', INIT::$AUTHSECRET . $cookie[ 'username' ] . $cookie[ 'uid' ] . $cookie[ 'expire_date' ] );            
             //check if valid hash and expiration still in time
-            if ( $cookie[ 'hash' ] == $expected_hash and time() < $cookie[ 'expire_date' ] and self::isTokenValid( $cookie[ 'username' ] ) ) {
+            if ( $cookie[ 'hash' ] == $expected_hash and time() < $cookie[ 'expire_date' ] and self::tryToRefreshToken( $cookie[ 'username' ] ) ) {
                 //ok, refresh value
                 //log::doLog("Validation succeed, refreshing cookie");
                 self::setCredentials( $cookie[ 'username' ], $cookie[ 'uid' ] );
@@ -81,7 +81,7 @@ class AuthCookie {
         return $valid;
     }
     
-    public static function isTokenValid($username){
+    public static function tryToRefreshToken($username){
         $valid = false;
         
         $userData = getUserData( $username );
@@ -90,14 +90,14 @@ class AuthCookie {
             $accessToken = $userData[ 'oauth_access_token' ];
             
             if ( $accessToken !== '' ) {
-                $valid = self::handleTokenRefresh( $username, $accessToken );
+                $valid = self::validOrRefreshedToken( $username, $accessToken );
             }
         }
         
         return $valid;
     }
     
-    private static function handleTokenRefresh($username, $accessToken) {
+    private static function validOrRefreshedToken($username, $accessToken) {
         $client = OauthClient::getInstance()->getClient();
 
         $client->setAccessToken( $accessToken );
