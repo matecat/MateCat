@@ -316,7 +316,18 @@ class getContributionController extends ajaxController {
             if ( $match[ 'created_by' ] == 'MT!' ) {
                 $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
             } else {
-                $match[ 'created_by' ] = $this->__changeSuggestionSource( $match );
+
+                $uid = null;
+                $this->checkLogin();
+                if($this->userIsLogged){
+                    $uid = $this->uid;
+                }
+                $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                        $match,
+                        $this->jobData['tm_keys'],
+                        $this->jobData['owner'],
+                        $uid
+                );
             }
 
             if ( !empty( $match[ 'sentence_confidence' ] ) ) {
@@ -346,7 +357,17 @@ class getContributionController extends ajaxController {
                 if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
                 } else {
-                    $matches[ $k ][ 'created_by' ] = $this->__changeSuggestionSource( $m );
+                    $uid = null;
+                    $this->checkLogin();
+                    if($this->userIsLogged){
+                        $uid = $this->uid;
+                    }
+                    $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                            $m,
+                            $this->jobData['tm_keys'],
+                            $this->jobData['owner'],
+                            $uid
+                    );
                 }
 
             }
@@ -459,105 +480,5 @@ class getContributionController extends ajaxController {
 
         return $regularExpressions;
     }
-
-    /**
-     * if the description is empty, get cascading default descriptions
-     *
-     * First get the job key description, if empty, get the job owner email
-     *
-     * @param $key
-     *
-     * @return null|string
-     * @throws Exception
-     */
-    private function __getDefaultDescription( $key ){
-
-        $description = null;
-
-        $ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $this->jobData[ 'tm_keys' ] ) );
-
-        //search the current key
-        $currentKey = null;
-        for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
-            if ( $ownerKeys[ $i ]->key == $key ) {
-                $description = $ownerKeys[ $i ]->name;
-            }
-        }
-
-        //return if something was found, avoid other computations
-        if ( !empty( $description ) ) return $description;
-
-        return $this->jobData[ 'owner' ];
-    }
-
-    /**
-     *
-     * Get the right su
-     *
-     * @param $match
-     *
-     * @return null|string
-     * @throws Exception
-     */
-    private function __changeSuggestionSource( $match ) {
-
-        $sug_source = $match[ 'created_by' ];
-        $key        = $match[ 'memory_key' ];
-
-        //suggestion is coming from a public TM
-        if ( $sug_source == 'Matecat' ) {
-
-            $description = "Public TM";
-
-        } elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-
-             $description = $sug_source;
-
-        } elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
-
-            //MyMemory returns the key of the match
-
-            //Session Enabled
-            $this->checkLogin();
-            //Session Disabled
-
-            if ( $this->userIsLogged ) {
-
-                //check if the user can see the key.
-                $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
-                $memoryKey->uid         = $this->uid;
-                $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
-                $memoryKey->tm_key->key = $key;
-
-                $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
-
-                if ( count( $currentUserMemoryKey ) > 0 ) {
-
-                    //the current user owns the key: show its description
-                    $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
-                    $description          = $currentUserMemoryKey->tm_key->name;
-
-                }
-
-            }
-
-        }
-
-        /**
-         * if the description is empty, get cascading default descriptions
-         */
-        if ( empty( $description ) ) {
-            $description = $this->__getDefaultDescription( $key );
-        }
-
-        if ( empty( $description ) ) {
-            $description = "No description available"; //this should never be
-        }
-
-        return $description;
-
-    }
-
 }
 
