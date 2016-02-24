@@ -28,6 +28,11 @@ class EntryDao extends \DataAccess_AbstractDao {
         return $stmt->execute( array( 'id' => $record->id ));
     }
 
+    /**
+     * @param $id
+     *
+     * @return EntryStruct
+     */
     public static function findById( $id ) {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
             " FROM qa_entries " .
@@ -39,6 +44,26 @@ class EntryDao extends \DataAccess_AbstractDao {
         $stmt->execute(array('id' => $id));
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
         return $stmt->fetch();
+    }
+
+    /**
+     * @param \Chunks_ChunkStruct $chunk
+     *
+     * @return EntryStruct[]
+     */
+    public static function findAllByChunk( \Chunks_ChunkStruct $chunk ) {
+        $sql = "SELECT * FROM qa_entries
+          JOIN segment_translations
+            ON segment_translations.id_segment = qa_entries.id_segment
+          JOIN jobs
+            ON jobs.id = segment_translations.id_job
+            AND jobs.password = :password AND jobs.id = :id ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(array('id' => $chunk->id, 'password' => $chunk->password ));
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        return $stmt->fetchAll();
     }
 
     public static function findAllByTranslationVersion($id_segment, $id_job, $version) {

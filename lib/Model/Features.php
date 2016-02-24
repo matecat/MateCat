@@ -45,16 +45,16 @@ class Features {
      *
      * @param $method
      * @param $id_customer
+     * @param $filterable
      *
      * @return mixed
      *
      * FIXME: this is not a real filter since the input params are not passed
-     * modified to the next function in the queue.
+     * modified in cascade to the next function in the queue.
      */
-    public static function filter($method, $id_customer) {
+    public static function filter($method, $id_customer, $filterable) {
 
         $args = array_slice( func_get_args(), 2);
-        $returnable = $args[0];
 
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
@@ -66,11 +66,11 @@ class Features {
             $obj = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
-                $returnable = call_user_func_array( array( $obj, $method ), $args );
+                $filterable = call_user_func_array( array( $obj, $method ), $args );
             }
         }
 
-        return $returnable ;
+        return $filterable ;
 
     }
 

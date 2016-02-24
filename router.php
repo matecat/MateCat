@@ -48,6 +48,7 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
             break;
         case 'Exceptions_RecordNotFound':
         case 'Exceptions\NotFoundError':
+            \Log::doLog('Not found error for URI: ' . $_SERVER['REQUEST_URI']);
             $klein->response()->code(404);
             $klein->response()->body('not found');
             $klein->response()->send();
@@ -92,8 +93,8 @@ $klein->respond('GET', '/api/v2/project-translation/[i:id_project]', function() 
     $instance->respond('status');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/versions', function() {
-    $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/translation-issues', function() {
+    $reflect  = new ReflectionClass('API\V2\ChunkTranslationIssueController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });

@@ -1,15 +1,22 @@
 <?php
-
-namespace API\V2  ;
+/**
+ * Created by PhpStorm.
+ * User: fregini
+ * Date: 2/24/16
+ * Time: 12:01 PM
+ */
 
 /**
- * @deprecated use Validators\ChunkPasswordValidator
+ *
+ * This validator is to be used when we want to check that the
  */
+
+namespace API\V2\Validators;
 
 use Chunks_ChunkDao ;
 use Klein\Request ;
 
-class JobPasswordValidator {
+class ChunkPasswordValidator extends Base {
     /**
      * @var \Chunks_ChunkStruct
      */
@@ -25,10 +32,9 @@ class JobPasswordValidator {
 
     public function validate() {
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
-            $this->id_job,
-            $this->password
+                $this->id_job,
+                $this->password
         );
-
     }
 
     public function getChunk() {
