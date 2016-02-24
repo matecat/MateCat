@@ -641,7 +641,10 @@ $.extend(UI, {
 		$('html').click(function() {
 			$(".menucolor").hide();
         }).on('click', 'section .sid, section .segment-side-buttons', function(e){
-            UI.closeSegment(UI.currentSegment, 1);
+            // TODO: investigate the neeed for '.segment-side-buttons'
+            if ( ! eventFromReact(e) ) {
+                UI.closeSegment(UI.currentSegment, 1);
+            }
         }).on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('click', '#quality-report', function(e){

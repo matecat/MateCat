@@ -159,7 +159,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         var form    = $( e.target );
         var segment = new UI.Segment( UI.currentSegment );
-        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation/issues',
+        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
                   config.id_job, config.password, segment.id);
 
         var checked = form.find('input[type=radio]:checked').val() ;

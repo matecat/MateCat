@@ -682,7 +682,7 @@ if ( MBC.enabled() )
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
-            // Click reached #outer
+            // Click reached #outer , close the history balloon
             $( delegate ).on( 'click', function () {
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );

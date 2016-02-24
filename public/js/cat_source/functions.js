@@ -959,3 +959,7 @@ function isTranslated(section) {
 function template( name, data ) {
     return $( MateCat.Templates[ name ]( data ) );
 }
+
+function eventFromReact(e) {
+    return e.target.hasAttribute('data-reactid');
+}

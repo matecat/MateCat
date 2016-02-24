@@ -1393,6 +1393,8 @@ UI = {
             }
 
         });
+
+
         return newSegments;
     },
 

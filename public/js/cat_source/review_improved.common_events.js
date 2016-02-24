@@ -250,9 +250,10 @@ if ( ReviewImproved.enabled() ) {
         );
 
         $.getJSON(path).done(function( data ) {
-
-            console.log ( data );
-
+            $(data.issues).each(function() {
+                MateCat.db.upsert('segment_translation_issues',
+                              'id', this ) ;
+            });
         });
     }
 
