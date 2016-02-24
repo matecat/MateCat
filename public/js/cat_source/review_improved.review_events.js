@@ -223,16 +223,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         section.data('activeTab', id);
     });
 
-
-    $( window ).on( 'segmentOpened', function ( e ) {
-        var segment = e.segment ;
-        ReviewImproved.versionsAndIssuesPromise( segment ).done(function() {
-            updateOriginalTargetView( segment );
-            updateVersionDependentViews( segment );
-        });
-
-    });
-
     function getPreviousTranslationText( segment ) {
         var record = RI.getSegmentRecord(segment);
         var version ;

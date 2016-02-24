@@ -43,14 +43,6 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
         updateHighlightArea( segment );
     }
 
-    $(window).on('segmentOpened', function( e ) {
-        var segment = e.segment;
-
-        ReviewImproved.versionsAndIssuesPromise( segment )
-        .done(function(versions, issues) {
-            updateVersionDependentViews( segment );
-        });
-    });
 
     $(document).on('segmentVersionChanged', function(e, segment) {
         updateVersionDependentViews( segment );

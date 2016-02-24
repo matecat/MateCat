@@ -475,36 +475,10 @@ a.mbc-close-icon:hover {
 
 /*
  ******
- Comment intent element
- ******
- */
-.mbc-comment-link {
-  /* styles based on .sid line 376 style.css */
-  color: #999;
-  cursor: default;
-  display: block;
-  font-size: 12px;
-  height: inherit;
-  padding-bottom: 1px;
-  position: absolute;
-  text-align: center;
-  text-decoration: none;
-  right: -8%;
-  width: 8%;
-  z-index: 999;
-}
-
-section:hover .mbc-comment-link {
-  /* styles based on .sid line 460 style.css */
-  color:#6d6e71
-}
-
-/*
- ******
  Txt in comment intent element
  ******
  */
-.mbc-comment-link .txt {
+.segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
   margin: 6px auto 0;

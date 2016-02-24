@@ -221,13 +221,41 @@ if ( ReviewImproved.enabled() ) {
 
     $(document).on('issue_comments:load', ReviewImproved.commentsLoaded);
 
-    $(document).on('segments:load', function(e, data) {
+
+    $(document).on('files:appended', function initReactComponents() {
+        $('section [data-mount=translation-issues-button]').each(function() {
+            ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
+                    sid : $(this).data('sid')
+                } ), this );
+        });
+    });
+
+    var putSegmentsInStore = function(data) {
         $.each(data.files, function() {
             $.each( this.segments, function() {
                 MateCat.db.upsert( 'segments', 'sid', _.clone( this ) );
             });
         });
+    }
+
+    $(document).on('segments:load', function(e, data) {
+        putSegmentsInStore( data );
+        loadIssues();
     });
+
+    var loadIssues = function() {
+        var path =  sprintf(
+            '/api/v2/jobs/%s/%s/translation-issues',
+            config.id_job, config.password
+        );
+
+        $.getJSON(path).done(function( data ) {
+
+            console.log ( data );
+
+        });
+    }
+
 
     $(document).on('change', '.version-picker', function(e) {
         var segment = new UI.Segment( $(e.target).closest('section'));

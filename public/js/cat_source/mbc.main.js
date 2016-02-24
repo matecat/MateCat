@@ -612,12 +612,13 @@ if ( MBC.enabled() )
 
         var initCommentLink = function ( el ) {
             var section = new UI.Segment( el );
+            var side_buttons;
 
             if ( (!section.isSplit()) || section.isFirstOfSplit() ) {
-                $( el ).find( '.segment-side-buttons' ).remove();
-                $( el ).append( $( tpls.commentLink ) );
+                side_buttons = section.el.find('.segment-side-buttons' );
+                side_buttons.find('.mbc-comment-icon').parent('.txt').remove();
+                side_buttons.append( $(tpls.commentLink ));
             }
-
         }
 
         var initCommentLinks = function () {
@@ -661,15 +662,27 @@ if ( MBC.enabled() )
 
             // XXX: there'a binding on 'section' are delegated to #outer in ui.events.js.
             //      Since our DOM elements are children of `section` we must attach to #outer
-            //      too in order to prevent bubbling.
+            //      to in order to prevent bubbling.
+            //
+            //      If a click event reaches #outer, we assume the user clicked outside
+            //      the section, so we close the balloon.
+            //
             //
             var delegate = '#outer';
 
-            $( delegate ).on( 'click', '.mbc-comment-balloon-outer, .segment-side-buttons div', function ( e ) {
+            // Click on the link to open the balloon, in any segment on the page.
+            $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
                 e.stopPropagation();
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
+            // TODO: investigate and explain why this is needed
+            $( delegate ).on( 'click', '.mbc-comment-balloon-outer', function ( e ) {
+                e.stopPropagation();
+                $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+            } );
+
+            // Click reached #outer
             $( delegate ).on( 'click', function () {
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );

@@ -31,7 +31,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
 
             UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + segment.id +
                 '-button-translated" data-segmentid="segment-' + segment.id +
-                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+                'cccc" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
                 ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 
             var buttonsOb = $('#segment-' + segment.id + '-buttons');

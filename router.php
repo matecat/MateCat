@@ -99,37 +99,37 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/translation-issues', 
     $instance->respond('index');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/versions/[:version_number]', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', function() {
+    $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('index');
+});
+
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', function() {
     $reflect  = new ReflectionClass('API_V2_SegmentVersion');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('detail');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues', function() {
-    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
-
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues', function() {
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
 });
 
-$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]', function() {
+$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('delete');
 });
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]/comments', function() {
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]/comments', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
