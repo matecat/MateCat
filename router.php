@@ -49,8 +49,8 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
         case 'Exceptions_RecordNotFound':
         case 'Exceptions\NotFoundError':
             $klein->response()->code(404);
-            $klein->body('not found');
-            $klein->send();
+            $klein->response()->body('not found');
+            $klein->response()->send();
             break;
         default:
             \Log::doLog("$err_msg" );
