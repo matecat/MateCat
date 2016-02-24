@@ -1,0 +1,51 @@
+
+export default React.createClass({
+    readDatabaseAndReturnState : function() {
+        var segment = MateCat.db.segments.by('sid', this.props.sid); 
+        var issues = MateCat.db.segment_translation_issues
+            .findObjects({ 
+                id_segment :  '' + this.props.sid, 
+                translation_version : segment.version_number 
+            });
+
+        return {
+            issues_on_latest_version : issues 
+        };
+    },
+
+    setStateReadingFromDatabase: function() {
+        this.setState( this.readDatabaseAndReturnState() );
+    },
+
+    componentDidMount: function() {
+        MateCat.db.addListener('segment_translation_issues', 
+                                  ['insert', 'update', 'delete'], 
+                                  this.setStateReadingFromDatabase );
+    },
+
+    componentWillUnmount: function() {
+        MateCat.db.removeListener('segment_translation_issues', 
+                                  ['insert', 'update', 'delete'], 
+                                  this.setStateReadingFromDatabase ); 
+    },
+
+    getInitialState : function() {
+        return this.readDatabaseAndReturnState(); 
+    }, 
+    handleClick : function(e) {
+        e.preventDefault();
+        e.stopPropagation(); 
+        console.log('clicked and stopped'); 
+    },
+
+    render: function() {
+        var count = this.state.issues_on_latest_version.length ; 
+
+        if ( count > 0 ) {
+            return (<div onClick={this.handleClick}><a href="javascript:void(0);">test {count}</a></div>); 
+        } else  {
+            return (<div onClick={this.handleClick}><a href="javascript:void(0);">test </a></div>);
+        }
+
+    }
+}); 
