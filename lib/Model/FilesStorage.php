@@ -446,7 +446,7 @@ class FilesStorage {
             $files = new DirectoryIterator( $path );
         } catch ( Exception $e ) {
             //directory does not exists
-            Log::doLog( "Directory $path does not exists." );
+            Log::doLog( "Directory $path does not exists. If you are creating a project check the source language." );
         }
 
         foreach ( $files as $key => $file ) {
