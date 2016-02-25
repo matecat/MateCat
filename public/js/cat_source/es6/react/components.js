@@ -5,3 +5,5 @@ window.MC.SegmentRebuttedButton = require('./SegmentRebuttedButton').default;
 window.MC.SegmentMainButtons = require('./SegmentMainButtons').default ;
 
 window.TranslationIssuesSideButton = require('./TranslationIssuesSideButton').default ;
+
+window.ReviewSidePanel = require('./ReviewSidePanel').default ;

@@ -17,6 +17,45 @@ ReviewImproved.enabled = function() {
     return Review.type == 'improved';
 }
 
+if (1)
+(function($, ReviewImproved, undefined) {
+
+    var mountpoint ;
+    $(function() {
+        mountpoint = $('[data-mount=review-side-panel]')[0];
+    });
+
+    function mountPanelComponent () {
+        ReactDOM.render( React.createElement( ReviewSidePanel, {
+        } ), mountpoint );
+    }
+
+    function unmountPanelComponent () {
+        ReactDOM.unmountComponentAtNode( mountpoint );
+    }
+
+    $.extend( ReviewImproved, {
+        openPanel : function() {
+            $('article').addClass('review-panel-opened');
+            $('body').addClass('side-tools-opened');
+            hackSnapEngage( true );
+            mountPanelComponent();
+        },
+
+        isPanelOpened : function() {
+            $('article').hasClass('review-panel-opened');
+        },
+
+        closePanel : function() {
+            unmountPanelComponent();
+            hackSnapEngage( false );
+
+            $('article').removeClass('review-panel-opened');
+            $('body').removeClass('side-tools-opened');
+        }
+    });
+})(jQuery, ReviewImproved);
+
 /**
  * Review page
  */
@@ -44,7 +83,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                         $('#quality-report').attr('data-vote', 'fail');
                     }
                 });
-        }
-    })
+        },
 
+    });
 }

@@ -963,3 +963,13 @@ function template( name, data ) {
 function eventFromReact(e) {
     return e.target.hasAttribute('data-reactid');
 }
+
+function hackSnapEngage( on ) {
+    var button = $( document ).find( '#SnapABug_Button' );
+    if ( on ) {
+        button.data( 'mbc-zindex', button.css( 'z-index' ) );
+        button.css( 'z-index', -1 );
+    } else {
+        button.css( 'z-index', button.data( 'mbc-zindex' ) );
+    }
+}

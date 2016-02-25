@@ -651,10 +651,21 @@ $.extend(UI, {
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
         }).on('keydown', function(e) {
-            if((e.which == '27')&&(UI.body.hasClass('editing'))) {
-                // close the current segment
-                UI.closeSegment(UI.currentSegment, 1);
-            };
+
+            var esc = 27 ;
+
+            // ESC should close the current segment only if `article` is not
+            // resized to let space to the tools on the sidebar.
+
+            var handleEscPressed = function() {
+                if ( UI.body.hasClass('editing') &&
+                    !UI.body.hasClass('side-tools-opened') ) {
+                        UI.closeSegment(UI.currentSegment, 1);
+                    }
+            }
+
+            if ( e.which == esc ) handleEscPressed() ;
+
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();

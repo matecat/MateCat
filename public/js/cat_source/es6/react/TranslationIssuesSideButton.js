@@ -33,9 +33,7 @@ export default React.createClass({
         return this.readDatabaseAndReturnState(); 
     }, 
     handleClick : function(e) {
-        e.preventDefault();
-        e.stopPropagation(); 
-        console.log('clicked and stopped'); 
+        ReviewImproved.openPanel();
     },
 
     render: function() {
