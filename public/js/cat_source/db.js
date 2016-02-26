@@ -6,6 +6,12 @@ if ( true ) // < TODO: investigate: chrome raises weird excetpion if this is mis
     root.MateCat = root.MateCat || {};
     db = {};
 
+    // AppState experimental
+    db.appstate = _db.addCollection('appstate', {
+        indices: ['key']
+    }) ;
+    db.appstate.ensureUniqueIndex('key');
+
     // Segments
     db.segments = _db.addCollection('segments', {
         indices: ['sid']

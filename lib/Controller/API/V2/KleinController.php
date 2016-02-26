@@ -7,7 +7,7 @@ use Klein\Klein;
 abstract class KleinController {
 
     /**
-     * @var \Klein\Reuqest
+     * @var \Klein\Request
      */
     protected $request ;
 

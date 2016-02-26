@@ -14,22 +14,6 @@ if ( ReviewImproved.enabled() ) {
             ReviewImproved.renderCommentList( issue );
         },
 
-        loadIssuesForVersion : function( segment ) {
-            var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation/issues?version_number=%s',
-                config.id_job, config.password,
-                segment.id, segment.el.data('revertingVersion')
-            );
-            $.getJSON( issues_path )
-            .done(function( data ) {
-                if ( data.issues.length ) {
-                    $.each( data.issues, function() {
-                        MateCat.db.upsert('segment_translation_issues', 'id', _.clone(this) );
-                    });
-                }
-            });
-        },
-
         // TODO: rerender issue detail instead
         renderCommentList : function( issue ) {
             var selector = sprintf(
@@ -183,50 +167,17 @@ if ( ReviewImproved.enabled() ) {
                 )
             );
         },
-
-        versionsAndIssuesPromise : function( segment ) {
-            var versions_path  = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation/versions',
-                config.id_job, config.password, segment.id
-            );
-
-            var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation/issues',
-                config.id_job, config.password, segment.id
-            );
-
-            return $.when(
-                $.getJSON( versions_path )
-                .done(function( data ) {
-                    if ( data.versions.length ) {
-                        $.each( data.versions, function() {
-                            MateCat.db.upsert('segment_versions', 'id', _.clone(this) );
-                        });
-                    }
-                })
-                ,
-                $.getJSON( issues_path )
-                .done(function( data ) {
-                    if ( data.issues.length ) {
-                        $.each( data.issues, function() {
-                            this.formattedDate = moment(this.created_at).format('lll');
-                            MateCat.db.upsert('segment_translation_issues', 'id',
-                                              _.clone(this) );
-                        });
-                    }
-                })
-            );
-        }
     });
 
     $(document).on('issue_comments:load', ReviewImproved.commentsLoaded);
 
-
     $(document).on('files:appended', function initReactComponents() {
-        $('section [data-mount=translation-issues-button]').each(function() {
-            ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
-                    sid : $(this).data('sid')
-                } ), this );
+        loadDataPromise.done(function() {
+            $('section [data-mount=translation-issues-button]').each(function() {
+                ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
+                        sid : $(this).data('sid')
+                    } ), this );
+            });
         });
     });
 
@@ -244,40 +195,35 @@ if ( ReviewImproved.enabled() ) {
 
     $(document).on('segments:load', function(e, data) {
         putSegmentsInStore( data );
-        loadIssues();
     });
 
-    var loadIssues = function() {
-        var path =  sprintf(
+    var loadDataPromise = (function() {
+        var issues =  sprintf(
             '/api/v2/jobs/%s/%s/translation-issues',
             config.id_job, config.password
         );
 
-        $.getJSON(path).done(function( data ) {
-            $(data.issues).each(function() {
-                MateCat.db.upsert('segment_translation_issues',
-                              'id', this ) ;
-            });
-        });
-    }
+        var versions =  sprintf(
+            '/api/v2/jobs/%s/%s/translation-versions',
+            config.id_job, config.password
+        );
 
+        return $.when(
+            $.getJSON( issues ).done(function( data ) {
+                $(data.issues).each(function() {
+                    MateCat.db.upsert('segment_translation_issues',
+                                  'id', this ) ;
+                });
+            }),
 
-    $(document).on('change', '.version-picker', function(e) {
-        var segment = new UI.Segment( $(e.target).closest('section'));
-        var target = $(e.target);
-        var value = target.val();
-        if ( value == '' ) {
-            segment.el.removeClass('reverted');
-            segment.el.data('revertingVersion', null);
-        }
-        else {
-            segment.el.addClass('reverted');
-            segment.el.data('revertingVersion', value);
-            ReviewImproved.loadIssuesForVersion( segment );
-        }
-
-        $(document).trigger('segmentVersionChanged', segment);
-    });
+            $.getJSON( versions ).done(function( data ) {
+                $(data.versions).each(function() {
+                    MateCat.db.upsert('segment_versions',
+                                  'id', this ) ;
+                });
+            })
+        );
+    })();
 
     $(document).on('click', '.action-view-issue', function(e) {
         var container =  $(e.target).closest('.issue-container') ;
