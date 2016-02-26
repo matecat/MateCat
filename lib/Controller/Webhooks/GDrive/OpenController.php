@@ -16,7 +16,7 @@ class OpenController extends KleinController {
 
     private $file_name; 
     private $source_lang = 'en-US';  // <-- TODO: check why en-GB breaks everything
-    private $target_lang = 'it-IT';
+    private $target_lang = 'fr-FR';
     private $seg_rule = null; 
 
     public function open() {
@@ -132,45 +132,30 @@ class OpenController extends KleinController {
     }
 
     private function correctSourceTargetLang() {
-        $defaultSourceLang = 'en-US';
-        $defaultTargetLang = 'fr-FR';
-        
         if ( isset ( $_COOKIE[ "sourceLang" ] ) ) {
-            if( $_COOKIE[ "sourceLang" ] == "_EMPTY_" ) {
-                $this->source_lang = $defaultSourceLang;
-            } else {
+            if( $_COOKIE[ "sourceLang" ] != "_EMPTY_" ) {
                 $sourceLangHistory   = $_COOKIE[ "sourceLang" ];
                 $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
                 
                 if(count( $sourceLangAr ) > 0) {
                     $this->source_lang = $sourceLangAr[0];
-                } else {
-                    $this->source_lang = $defaultSourceLang;
                 }
             }
         } else {
             setcookie( "sourceLang", "_EMPTY_", time() + ( 86400 * 365 ) );
-            
-            $this->source_lang = $defaultSourceLang;
         }
         
         if ( isset ( $_COOKIE[ "targetLang" ] ) ) {
-            if( $_COOKIE[ "targetLang" ] == "_EMPTY_" ) {
-                $this->target_lang = $defaultTargetLang;
-            } else {
+            if( $_COOKIE[ "targetLang" ] != "_EMPTY_" ) {
                 $targetLangHistory   = $_COOKIE[ "targetLang" ];
                 $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
                 
                 if(count( $targetLangAr ) > 0) {
                     $this->target_lang = $targetLangAr[0];
-                } else {
-                    $this->target_lang = $defaultTargetLang;
                 }
             }
         } else {
             setcookie( "targetLang", "_EMPTY_", time() + ( 86400 * 365 ) );
-            
-            $this->target_lang = $defaultTargetLang;
         }
     }
     
