@@ -1,5 +1,7 @@
 <?php
 
+use \PHPMailer;
+
 class Utils {
 
 	public static function is_assoc($array) {
@@ -86,8 +88,7 @@ class Utils {
           return true ;
         }
 
-		include_once @INIT::$UTILS_ROOT . '/phpmailer/class.phpmailer.php';
-		if( !class_exists( 'PHPMailer', false ) ){
+		if( !class_exists( 'PHPMailer', true ) ){
 			Log::doLog( 'Mailer Error: Class PHPMailer Not Found' );
 			return false;
 		}

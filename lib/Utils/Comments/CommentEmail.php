@@ -1,7 +1,5 @@
 <?php
 
-include_once @INIT::$UTILS_ROOT . '/phpmailer/class.phpmailer.php';
-
 class Comments_CommentEmail {
 
     private $user;
