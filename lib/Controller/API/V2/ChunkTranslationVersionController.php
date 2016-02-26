@@ -20,10 +20,8 @@ class ChunkTranslationVersionController extends ProtectedKleinController {
 
     public function index() {
 
-        $results = \Translations_TranslationVersionDao::
-        getVersionsForTranslation(
-                $this->validator->getChunk()->id,
-                $this->validator->getChunk()->password
+        $results = \Translations_TranslationVersionDao::getVersionsForChunk(
+                $this->validator->getChunk()
         );
 
         $formatted = new JsonFormatter( $results );

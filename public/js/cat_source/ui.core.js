@@ -2368,12 +2368,7 @@ console.log('eccolo: ', typeof token);
 				UI.setTranslation_success(data, this[1]);
                 $(document).trigger('setTranslation:success', data);
 
-                var segment_change_data = {
-                    sid: id_segment,
-                    status: status,
-                    translation : translation
-                };
-                $(document).trigger('segment:change', segment_change_data);
+                $(document).trigger('translation:change', data.translation);
 			}
 		});
 	},

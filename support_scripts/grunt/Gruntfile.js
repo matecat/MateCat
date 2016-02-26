@@ -240,7 +240,7 @@ module.exports = function(grunt) {
                 tasks: ['sass'],
                 options: {
                     interrupt: true,
-                    livereload : false
+                    livereload : true
                 }
             }
         },

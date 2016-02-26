@@ -27,6 +27,32 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    public static function getVersionsForChunk( Chunks_ChunkStruct $chunk ) {
+        $sql = "SELECT * FROM segment_translation_versions " .
+                " WHERE id_job = :id_job " .
+                " ORDER BY creation_date DESC ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute(
+                array( 'id_job' => $chunk->id )
+        );
+
+        $stmt->setFetchMode(
+                PDO::FETCH_CLASS,
+                'Translations_TranslationVersionStruct'
+        );
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param $id_job
+     * @param $id_segment
+     *
+     * @return Translations_TranslationVersionStruct[]
+     */
     public static function getVersionsForTranslation($id_job, $id_segment) {
         $sql = "SELECT * FROM segment_translation_versions " .
             " WHERE id_job = :id_job AND id_segment = :id_segment " .

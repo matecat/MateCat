@@ -63,7 +63,7 @@ if ( true ) // < TODO: investigate: chrome raises weird excetpion if this is mis
         }
     }
 
-    $(document).on('segment:change', function(e, data) {
+    $(document).on('translation:change', function(e, data) {
         var record = MateCat.db.segments.by('sid', data.sid);
         MateCat.db.segments.update( _.extend(record, data) );
     });

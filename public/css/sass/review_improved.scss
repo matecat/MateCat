@@ -67,22 +67,6 @@ article.review-panel-opened {
     }
 }
 
-section .muted-text-box {
-    padding: 4px;
-    width: 100%;
-    background: #efefef;
-    border-bottom: 1px solid #ccc;
-    outline: 0;
-    text-align: left;
-    font-size: 18px;
-    color: #000;
-    border: 1px solid #727272;
-    box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal;
-    word-break: normal !important;
-}
-
 section .version-picker-container {
     text-align: left;
     margin: 10px 0;
@@ -307,7 +291,25 @@ section {
     right: 0;
     width: 22%;
     z-index: 999;
-    margin-top: 52px;
-
+    margin-top: 49px;
     text-align: left ;
+
+    .muted-text-box {
+        padding: 4px;
+        width: 100%;
+        background: #efefef;
+        border-bottom: 1px solid #ccc;
+        outline: 0;
+        font-size: 1em;
+        color: #000;
+        border: 1px solid #727272;
+        box-shadow: 0 1px 2px #ccc;
+        -webkit-box-shadow: 0 1px 2px #ccc;
+        word-break: normal;
+    }
+
+}
+
+.review-issues-overview-panel {
+    margin: 10px;
 }

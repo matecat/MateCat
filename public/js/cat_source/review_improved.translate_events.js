@@ -48,7 +48,7 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
         updateVersionDependentViews( segment );
     });
 
-    $(document).on('segment:change', function(e, data) {
+    $(document).on('translation:change', function(e, data) {
         var segment = UI.Segment.find( data.sid );
         UI.createButtons( segment );
     });
