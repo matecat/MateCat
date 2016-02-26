@@ -33,7 +33,7 @@ export default React.createClass({
         return this.readDatabaseAndReturnState(); 
     }, 
     handleClick : function(e) {
-        ReviewImproved.openPanel();
+        ReviewImproved.openPanel({sid: this.props.sid});
     },
 
     render: function() {

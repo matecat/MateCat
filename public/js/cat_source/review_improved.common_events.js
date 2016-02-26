@@ -238,6 +238,10 @@ if ( ReviewImproved.enabled() ) {
         });
     }
 
+    $(document).on('ready', function() {
+        ReviewImproved.mountPanelComponent();
+    });
+
     $(document).on('segments:load', function(e, data) {
         putSegmentsInStore( data );
         loadIssues();

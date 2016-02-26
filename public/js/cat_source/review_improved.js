@@ -17,29 +17,32 @@ ReviewImproved.enabled = function() {
     return Review.type == 'improved';
 }
 
-if (1)
+if ( ReviewImproved.enabled() )
 (function($, ReviewImproved, undefined) {
 
     var mountpoint ;
+
     $(function() {
         mountpoint = $('[data-mount=review-side-panel]')[0];
     });
 
-    function mountPanelComponent () {
-        ReactDOM.render( React.createElement( ReviewSidePanel, {
-        } ), mountpoint );
-    }
-
-    function unmountPanelComponent () {
-        ReactDOM.unmountComponentAtNode( mountpoint );
-    }
-
     $.extend( ReviewImproved, {
-        openPanel : function() {
+        unmountPanelComponent : function() {
+            ReactDOM.unmountComponentAtNode( mountpoint );
+        },
+
+        mountPanelComponent : function() {
+            ReactDOM.render(
+                React.createElement( ReviewSidePanel, {} ),
+                mountpoint );
+        },
+
+        openPanel : function(data) {
             $('article').addClass('review-panel-opened');
             $('body').addClass('side-tools-opened');
             hackSnapEngage( true );
-            mountPanelComponent();
+
+            $(document).trigger('review-panel:opened', data);
         },
 
         isPanelOpened : function() {
@@ -47,7 +50,8 @@ if (1)
         },
 
         closePanel : function() {
-            unmountPanelComponent();
+            $(document).trigger('review-panel:closed');
+
             hackSnapEngage( false );
 
             $('article').removeClass('review-panel-opened');
