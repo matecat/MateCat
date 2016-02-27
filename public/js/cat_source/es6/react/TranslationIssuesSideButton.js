@@ -21,6 +21,7 @@ export default React.createClass({
         MateCat.db.addListener('segment_translation_issues', 
                                   ['insert', 'update', 'delete'], 
                                   this.setStateReadingFromDatabase );
+
     },
 
     componentWillUnmount: function() {

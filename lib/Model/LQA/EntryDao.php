@@ -88,6 +88,12 @@ class EntryDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param $data
+     *
+     * @return EntryStruct
+     * @throws \Exceptions\ValidationError
+     */
     public static function createEntry( $data ) {
         $data = self::ensureStartAndStopPositionAreOrdered( $data ) ;
 

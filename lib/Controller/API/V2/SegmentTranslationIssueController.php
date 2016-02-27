@@ -56,8 +56,12 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
 
         $struct = $model->save();
 
+        $categories = $this->validator->translation
+                    ->getJob()->getProject()
+                    ->getLqaModel()->getCategories();
 
-        $json = new JsonFormatter();
+
+        $json = new JsonFormatter( $categories );
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( array('issue' => $rendered) );

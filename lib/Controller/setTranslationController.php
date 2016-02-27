@@ -578,7 +578,7 @@ class setTranslationController extends ajaxController {
         $translation = array(
                 'version_number' => $saved_translation['version_number'],
                 'sid'            => $saved_translation['id_segment'],
-                'translation'    => $saved_translation['translation'],
+                'translation'    => \CatUtils::rawxliff2view( $saved_translation['translation'] ),
                 'status'         => $saved_translation['status']
         );
         return $translation ;

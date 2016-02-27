@@ -405,7 +405,7 @@ if ( MBC.enabled() )
 
         var closeSegment = function ( el ) {
             $( '.mbc-comment-balloon-outer' ).remove();
-            hackSnapEngage( false );
+            // hackSnapEngage( false );
             $( 'article' ).removeClass( 'mbc-commenting-opened' );
             $( 'body' ).removeClass( 'side-tools-opened' );
         }

@@ -5,7 +5,15 @@ namespace API\V2\Validators;
 use Exceptions\NotFoundError ;
 
 class SegmentTranslation extends Base {
+
+    /**
+     * @var \Segments_SegmentStruct
+     */
     public $segment;
+
+    /**
+     * @var \Translations_SegmentTranslationStruct
+     */
     public $translation ;
 
     public function validate() {

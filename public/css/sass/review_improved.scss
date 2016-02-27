@@ -284,7 +284,7 @@ section {
 }
 
 #review-side-panel {
-    background-color: #eee;
+    background-color: #fff;
     height: 100%;
     position: fixed;
     top: 0;
@@ -312,4 +312,10 @@ section {
 
 .review-issues-overview-panel {
     margin: 10px;
+}
+
+.review-current-version-container {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
 }

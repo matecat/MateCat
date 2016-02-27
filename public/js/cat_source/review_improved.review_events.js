@@ -9,13 +9,13 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     var segments = db.segments ;
     var comments = db.segment_translation_issue_comments ;
 
-    issues.on('update', issueRecordChanged);
-    issues.on('insert', issueRecordChanged);
-    issues.on('delete', issueRecordChanged);
+    // issues.on('update', issueRecordChanged);
+    // issues.on('insert', issueRecordChanged);
+    // issues.on('delete', issueRecordChanged);
 
-    versions.on('update', versionRecordChanged);
-    versions.on('insert', versionRecordChanged);
-    versions.on('delete', versionRecordChanged);
+    // versions.on('update', versionRecordChanged);
+    // versions.on('insert', versionRecordChanged);
+    // versions.on('delete', versionRecordChanged);
 
     function showIssueSelectionModalWindow(selection, container) {
         var data             = {};
@@ -297,17 +297,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             .html( textarea_container );
     }
 
-    function versionRecordChanged( record ) {
-        var segment = UI.Segment.find( record.id_segment );
-        updateVersionDependentViews( segment );
-    }
-
-    function issueRecordChanged( record ) {
-        var segment = UI.Segment.find( record.id_segment );
-        RI.updateIssueViews( segment );
-    }
-
-
     $(document).on('segmentVersionChanged', function(e, segment) {
         updateVersionDependentViews( segment );
     });
@@ -339,6 +328,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     $(document).on('segment:status:change', function(e, segment, options) {
         if ( options.status != 'rejected' ) {
+            // save to database!!
             UI.openNextTranslated( segment.id );
         }
     });

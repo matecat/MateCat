@@ -3,6 +3,7 @@
 namespace Features\ReviewImproved\Decorator ;
 
 use LQA\ChunkReviewDao;
+use LQA\ModelStruct;
 
 class CatDecorator extends \AbstractDecorator {
 
@@ -22,8 +23,13 @@ class CatDecorator extends \AbstractDecorator {
 
         $model = $project->getLqaModel() ;
 
+        /**
+         * TODO: remove this lqa_categories here, this serialization work should be done
+         * on the client starting from raw category records.
+         */
         $this->template->lqa_categories = $model->getSerializedCategories();
 
+        $this->template->lqa_flat_categories = $this->getCategoriesAsJson($model);
         $this->template->review_type = 'improved';
         $this->template->review_improved = true;
         $this->template->project_type = null;
@@ -43,7 +49,15 @@ class CatDecorator extends \AbstractDecorator {
 
     }
 
+    private function getCategoriesAsJson(ModelStruct $model) {
+        $categories = $model->getCategories();
+        $out = array();
+        foreach($categories as $category) {
+            $out[] = $category->asArray();
+        }
 
+        return json_encode( $out );
+    }
     private function getOverallQualityClass() {
         $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( array(
             array(

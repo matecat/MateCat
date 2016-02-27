@@ -20,13 +20,21 @@ export default React.createClass({
     componentDidMount: function() {
         $(document).on('review-panel:opened', this.openPanel);
         $(document).on('review-panel:closed', this.closePanel);
+
+        $(window).on('segmentOpened', this.segmentOpened);
     },
 
     componentWillUnmount: function() {
         $(document).off('review-panel:opened', this.openPanel);
         $(document).off('review-panel:closed', this.closePanel);
+
+        $(window).off('segmentOpened', this.segmentOpened);
     },
 
+    segmentOpened : function(event) {
+        console.log( event );
+        this.setState({sid: event.segment.id}); 
+    },
     render: function() {
 
         var innerPanel; 

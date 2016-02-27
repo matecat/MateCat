@@ -2,13 +2,17 @@
 
 namespace API\V2\Json  ;
 
+use LQA\EntryStruct;
+
 class SegmentTranslationIssue {
 
-    public function __construct(  ) {
+    private $categories ;
 
+    public function __construct( $categories ) {
+        $this->categories = $categories ;
     }
 
-    public function renderItem( $record ) {
+    public function renderItem( EntryStruct $record ) {
         $row = array(
             'comment'             => $record->comment,
             'created_at'          => date('c', strtotime( $record->create_date) ),
@@ -23,10 +27,14 @@ class SegmentTranslationIssue {
             'end_node'            => $record->end_node,
             'end_offset'          => $record->end_offset,
             'translation_version' => $record->translation_version,
-            'category'            => $record->category,
             'target_text'         => $record->target_text,
         );
         return $row;
+    }
+
+    private function decodeCategoryName( $id ) {
+
+        return null;
     }
 
     public function renderArray( $array ) {

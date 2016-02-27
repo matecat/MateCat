@@ -197,6 +197,12 @@ if ( ReviewImproved.enabled() ) {
         putSegmentsInStore( data );
     });
 
+    var updateLocalTranslationVersions = function( data ) {
+        $(data.versions).each(function() {
+            MateCat.db.upsert('segment_versions', 'id', this ) ;
+        });
+    };
+
     var loadDataPromise = (function() {
         var issues =  sprintf(
             '/api/v2/jobs/%s/%s/translation-issues',
@@ -216,12 +222,10 @@ if ( ReviewImproved.enabled() ) {
                 });
             }),
 
-            $.getJSON( versions ).done(function( data ) {
-                $(data.versions).each(function() {
-                    MateCat.db.upsert('segment_versions',
-                                  'id', this ) ;
-                });
-            })
+            // jQuery oddity here: function must be passed in array,
+            // maybe because we are inside when. Otherwise it doesn't get
+            // fired.
+            $.getJSON( versions ).done( [ updateLocalTranslationVersions ] )
         );
     })();
 
@@ -270,6 +274,15 @@ if ( ReviewImproved.enabled() ) {
         if ( e.which == esc ) {
             ReviewImproved.closePanel();
         }
+    });
+
+    $(document).on('translation:change', function(e, data) {
+        var versions_path =  sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/translation-versions',
+            config.id_job, config.password, data.sid
+        );
+
+        $.getJSON( versions_path ).done( updateLocalTranslationVersions );
     });
 
 }

@@ -52,6 +52,8 @@ class TranslationIssueModel
 
     /**
      * Inserts the struct in database and updates review result
+     *
+     * @return \LQA\EntryStruct
      */
     public function save() {
         $data = $this->issue->attributes();
