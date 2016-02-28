@@ -52,7 +52,7 @@ class EntryDao extends \DataAccess_AbstractDao {
      * @return EntryStruct[]
      */
     public static function findAllByChunk( \Chunks_ChunkStruct $chunk ) {
-        $sql = "SELECT * FROM qa_entries
+        $sql = "SELECT qa_entries.* FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
           JOIN jobs
