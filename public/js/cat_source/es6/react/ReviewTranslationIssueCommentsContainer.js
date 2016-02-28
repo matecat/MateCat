@@ -52,9 +52,16 @@ export default React.createClass({
     render : function() {
 
         var terminal ;
-        var commentLines = this.state.comments.map(function(comment, index) {
-            return <div key={index} className="review-issue-comment-detail">
-            {comment.message}
+
+        var sortedComments = _.sortBy(this.state.comments, function(comment) {
+            return parseInt(comment.id); 
+        }); 
+
+        var commentLines = sortedComments.map(function(comment, index) {
+            console.debug( comment.id ); 
+
+            return <div key={comment.id} className="review-issue-comment-detail">
+            {comment.id} - {comment.message}
             </div>;
         }); 
 
