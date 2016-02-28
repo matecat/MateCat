@@ -46,6 +46,10 @@ export default React.createClass({
         }
     },
 
+    originalTarget : function() {
+        return { __html : UI.decodePlaceholdersToText( this.state.original_target ) };
+    },
+
     render: function() {
 
         var sorted_versions = this.state.versions.sort(function(a,b) {
@@ -60,10 +64,10 @@ export default React.createClass({
         }.bind(this) ); 
 
         return <div className="review-issues-overview-panel"> 
-            <strong>Original target</strong>
 
-            <div className="muted-text-box">
-            {this.state.original_target}
+            <div className="review-original-target-wrapper sidebar-block">
+                <strong>Original target</strong>
+                <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
             </div>
 
             <ReviewCurrentVersion sid={this.props.sid} />

@@ -72,6 +72,40 @@ $.extend(UI, {
 	setEvents: function() {
 		this.bindShortcuts();
 
+        var resetTextArea = function () {
+            console.debug( 'resetting') ;
+            var $this = $(this);
+            var maxHeight = $this.data('maxheight');
+            var minHeight = $this.data('minheight');
+
+            var borderTopWidth = parseFloat( $this.css( "borderTopWidth" ) );
+            var borderBottomWidth = parseFloat( $this.css( "borderBottomWidth" ) );
+            var borders = borderTopWidth + borderBottomWidth;
+            var scrollHeightWithBorders = this.scrollHeight + borders;
+
+            while ( scrollHeightWithBorders > $this.outerHeight() && $this.height() < maxHeight ) {
+                $this.height( $this.height() + 10 );
+            }
+            ;
+
+            while ( scrollHeightWithBorders <= $this.outerHeight() && $this.height() > minHeight ) {
+                $this.height( $this.height() - 10 );
+            }
+
+            if ( $this.height() >= maxHeight ) {
+                $this.css( "overflow-y", "auto" );
+            } else {
+                $this.css( "overflow-y", "hidden" );
+            }
+        }
+
+        $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
+        $( document ).on( 'paste', '.mc-resizable-textarea', function () {
+            setTimeout( function ( el ) {
+                resetTextArea.call( el );
+            }, 100, this );
+        } );
+
         $(document).on('segment:status:change', function(e, segment, options) {
             var staus = options.status ;
             var byStatus = options.byStatus ;
@@ -631,6 +665,7 @@ $.extend(UI, {
                 && !$(e.target).hasClass('translated') // has not clicked on a translated button
                 && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
                 && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
+                && ! eventFromReact(e)
                 )
             {
                 UI.closeSegment(UI.currentSegment, 1);
@@ -1893,7 +1928,8 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
-	}
+    }
+
 });
 
 

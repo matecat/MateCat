@@ -13,6 +13,10 @@ export default React.createClass({
         this.setState({ segment : segment });
     },
 
+    currentTranslation : function () {
+        return { __html : UI.decodePlaceholdersToText( this.state.segment.translation ) };
+    },
+
     render : function() {
 
         var cs = classnames({
@@ -23,9 +27,7 @@ export default React.createClass({
         return <div className={cs} > 
             <strong>Current version</strong>
 
-            <div className="muted-text-box">
-                {this.state.segment.translation}
-            </div>
+            <div className="muted-text-box" dangerouslySetInnerHTML={this.currentTranslation()} />
 
             <ReviewIssuesContainer sid={this.props.sid} 
                 versionNumber={this.state.segment.version_number} />

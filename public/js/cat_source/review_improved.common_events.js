@@ -237,6 +237,7 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', 'input[data-action=submit-issue-reply]', function(e) {
+
         var container = $(e.target).closest('.issue-detail-modal');
         var issue = MateCat.db.segment_translation_issues
             .by('id', container.data('issue-id'));
@@ -246,22 +247,7 @@ if ( ReviewImproved.enabled() ) {
           source_page : config.isReview
         };
 
-        var replies_path = sprintf(
-            '/api/v2/jobs/%s/%s/segments/%s/translation/issues/%s/comments',
-            config.id_job, config.password,
-            issue.id_segment,
-            issue.id
-        );
-
-        $.ajax({
-            url: replies_path,
-            type: 'POST',
-            data : data
-        }).done( function( data ) {
-            MateCat.db.segment_translation_issue_comments.insert ( data.comment );
-            $(document).trigger('issue_comments:load', issue );
-            ReviewImproved.renderCommentList( issue );
-        });
+        ReviewImproved.submitComment( data );
 
     });
 
@@ -275,6 +261,9 @@ if ( ReviewImproved.enabled() ) {
             ReviewImproved.closePanel();
         }
     });
+
+    $('#review-side-panel .review-issue-comments-buttons-right a')
+        .on('click', function(e) { e.stopPropagation();  });
 
     $(document).on('translation:change', function(e, data) {
         var versions_path =  sprintf(

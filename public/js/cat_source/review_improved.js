@@ -27,6 +27,36 @@ if ( ReviewImproved.enabled() )
     });
 
     $.extend( ReviewImproved, {
+        loadComments : function(id_segment, id_issue) {
+            var issue_comments = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
+                config.id_job, config.password,
+                id_segment,
+                id_issue
+            );
+
+            $.getJSON(issue_comments).done(function(data) {
+                $.each( data.comments, function( comment ) {
+                    MateCat.db.upsert('segment_translation_issue_comments', 'id', this );
+                });
+            });
+        },
+        submitComment : function(id_segment, id_issue, data) {
+            var replies_path = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
+                config.id_job, config.password,
+                id_segment,
+                id_issue
+            );
+
+            $.ajax({
+                url: replies_path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                MateCat.db.segment_translation_issue_comments.insert ( data.comment );
+            });
+        },
         unmountPanelComponent : function() {
             ReactDOM.unmountComponentAtNode( mountpoint );
         },

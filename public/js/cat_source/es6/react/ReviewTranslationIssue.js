@@ -33,7 +33,7 @@ export default React.createClass({
 
         <div>{this.state.issue.severity} - {category_label} - {formatted_date} </div>
         {commentLine}
-        <ReviewTranslationIssueCommentsContainer issueId={this.props.issueId} />
+        <ReviewTranslationIssueCommentsContainer sid={this.props.sid} issueId={this.props.issueId} />
         
 
         </div>; 
