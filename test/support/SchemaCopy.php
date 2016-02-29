@@ -41,6 +41,17 @@ class SchemaCopy {
     $conn->query("CREATE DATABASE {$this->config['DB_DATABASE']}");
   }
 
+  function useDatabase(){
+    $conn = $this->getConn($this->config);
+    $conn->query("USE {$this->config['DB_DATABASE']}");
+  }
+
+  function getDatabaseCreationStatement(){
+    $sqlCreation = "CREATE DATABASE {$this->config['DB_DATABASE']};\n";
+    $sqlCreation .= "USE {$this->config['DB_DATABASE']};\n\n";
+    return $sqlCreation;
+  }
+
   function getTables() {
     $conn = $this->getDbConn($this->config);
     $st =  $conn->query("SHOW FULL TABLES WHERE Table_type NOT LIKE 'VIEW' ");
