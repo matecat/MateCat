@@ -11,21 +11,23 @@ class ManageController extends KleinController {
     public function listImportedFiles() {
         Bootstrap::sessionStart(); 
         
-        $sourceLang = 'en-US';
+        $path = $this->getGDriveFilePath();
+        $fileName = $_SESSION['pre_loaded_file'];
         
-        $ckSourceLang = filter_input(INPUT_COOKIE, 'sourceLang');
-        
-        if ( $ckSourceLang != null && $ckSourceLang != false ) {
-            
-            if( $ckSourceLang != "_EMPTY_" ) {
-                $sourceLangHistory   = $ckSourceLang;
-                $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
-                
-                if(count( $sourceLangAr ) > 0) {
-                    $sourceLang = $sourceLangAr[0];
-                }
-            }
+        if(file_exists($path) !== false) {
+            $fileSize = filesize($path);
+
+            $response = array(
+                'fileName' => $fileName,
+                'fileSize' => $fileSize
+            );
+
+            echo json_encode($response);
         }
+    }
+    
+    private function getGDriveFilePath() {
+        $sourceLang = $_SESSION['actualSourceLang'];
         
         $fileName = $_SESSION['pre_loaded_file'];
         $hash = $_SESSION['google_drive_file_sha1'];
@@ -40,17 +42,7 @@ class ManageController extends KleinController {
 
         $path = INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
 
-        if(file_exists($path) !== false) {
-            $fileSize = filesize($path);
-
-            $response = array(
-                'fileName' => $fileName,
-                'fileSize' => $fileSize
-            );
-
-            echo json_encode($response);
-        }
-        
+        return $path;
     }
     
     protected function afterConstruct() {

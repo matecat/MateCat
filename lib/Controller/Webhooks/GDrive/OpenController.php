@@ -157,6 +157,8 @@ class OpenController extends KleinController {
         } else {
             setcookie( "targetLang", "_EMPTY_", time() + ( 86400 * 365 ) );
         }
+        
+        $_SESSION['actualSourceLang'] = $this->source_lang;
     }
     
 }
