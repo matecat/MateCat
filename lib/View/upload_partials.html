@@ -1,7 +1,12 @@
 <div metal:define-macro="pre_uploaded_files"> 
 
-  <h3>Importing google drive files TODO show file name here</h3>
-
+    <div class="upload-files drag uploaded">
+        <table cellpadding="0" cellspacing="0" class="upload-table table-striped" role="presentation">
+            <tbody class="files files-gdrive" data-toggle="modal-gallery" data-target="#modal-gallery">
+            </tbody>
+        </table>
+    </div>
+        
 </div> 
 
 <div class="upload-files drag" metal:define-macro="upload_files">

@@ -57,7 +57,9 @@ $(document).ready(function() {
 	$("#source-lang").on('change', function(e){
 		console.log('source language changed');
         UI.checkRTL();
-		if(!$('.template-download').length) return;
+		if(!$('.template-download').length && !$('.template-gdrive').length) { //.template-download is present when jquery file upload is used and a file is found
+                    return;
+                }
 		if (UI.conversionsAreToRestart()) {
 			APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
 		}
@@ -65,6 +67,10 @@ $(document).ready(function() {
 			UI.delTMXLangFailure();
 		}
 	});
+        
+        if ( config.pre_uploaded_files && config.pre_uploaded_files !== false ) {
+            APP.tryListGDriveFiles();
+        }
 
 	$("#target-lang").change(function(e) {
         UI.checkRTL();

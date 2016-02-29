@@ -162,5 +162,9 @@ route(
     '/webhooks/gdrive/open', 'GET', 
     'Webhooks\GDrive\OpenController', 'open'
 ); 
+route(
+    '/webhooks/gdrive/list', 'GET', 
+    'Webhooks\GDrive\ManageController', 'listImportedFiles'
+); 
 
 $klein->dispatch();
