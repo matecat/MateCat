@@ -73,6 +73,16 @@ APP.tryListGDriveFiles = function() {
     });
 };
 
+APP.restartGDriveConversions = function () {
+    var sourceLang = $("#source-lang").val();
+    
+    $.getJSON('/webhooks/gdrive/change/' + sourceLang, function(response){
+        if(response.success) {
+            console.log('Source language changed.');
+        }
+    });
+};
+
 APP.formatBytes = function(bytes,decimals) {
    if(bytes === 0) return '0 Byte';
    var k = 1024;

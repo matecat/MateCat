@@ -90,6 +90,9 @@ UI = {
     confirmRestartConversions: function () {
         UI.restartConversions();
     },
+    confirmGDriveRestartConversions: function () {
+        APP.restartGDriveConversions();
+    },
     errorsFileSize: function ( file ) {
 
         var ext = file.name.split( '.' ).pop();

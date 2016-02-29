@@ -166,5 +166,9 @@ route(
     '/webhooks/gdrive/list', 'GET', 
     'Webhooks\GDrive\ManageController', 'listImportedFiles'
 ); 
+route(
+    '/webhooks/gdrive/change/[:sourceLanguage]', 'GET', 
+    'Webhooks\GDrive\ManageController', 'changeSourceLanguage'
+); 
 
 $klein->dispatch();

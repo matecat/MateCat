@@ -55,17 +55,24 @@ $(document).ready(function() {
 	});
 
 	$("#source-lang").on('change', function(e){
-		console.log('source language changed');
-        UI.checkRTL();
-		if(!$('.template-download').length && !$('.template-gdrive').length) { //.template-download is present when jquery file upload is used and a file is found
-                    return;
+            console.log('source language changed');
+            UI.checkRTL();
+            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
+                if (UI.conversionsAreToRestart()) {
+                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
                 }
-		if (UI.conversionsAreToRestart()) {
-			APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
-		}
-		if( UI.checkTMXLangFailure() ){
-			UI.delTMXLangFailure();
-		}
+                if( UI.checkTMXLangFailure() ){
+                    UI.delTMXLangFailure();
+                }
+            }
+            else if ($('.template-gdrive').length) {
+                APP.confirm({
+                    msg: 'Source language has been changed.<br/>The files will be reimported.',
+                    callback: 'confirmGDriveRestartConversions'
+                });
+            } else {
+                return;
+            }
 	});
         
         if ( config.pre_uploaded_files && config.pre_uploaded_files !== false ) {
