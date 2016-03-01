@@ -1,6 +1,7 @@
 <?php
 
-use \PHPMailer;
+use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
@@ -84,85 +85,33 @@ class Utils {
 	}
 
 	public static function sendErrMailReport( $htmlContent, $subject = null ){
+
         if ( EnvWrap::isTest() ) {
           return true ;
         }
 
-		if( !class_exists( 'PHPMailer', true ) ){
-			Log::doLog( 'Mailer Error: Class PHPMailer Not Found' );
-			return false;
-		}
-
+		$config = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
 		$mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
-		if( empty($mailConf) ){
+		$handler = new \AMQHandler();
 
-			Log::doLog( "No eMail in configuration file found. Ensure that '" . INIT::$ROOT . "/inc/Error_Mail_List.inc' exists and contains a valid mail list. One per row." );
-			Log::doLog( "Message not sent." );
-			return false;
-
-		} else {
-
-			$mail = new PHPMailer();
-
-			$mail->IsSMTP();
-			$mail->Host       = $mailConf['server_configuration']['Host'];
-			$mail->Port       = $mailConf['server_configuration']['Port'];
-			$mail->Sender     = $mailConf['server_configuration']['Sender'];
-			$mail->Hostname   = $mailConf['server_configuration']['Hostname'];
-
-			$mail->From       = $mailConf['server_configuration']['From'];
-			$mail->FromName   = $mailConf['server_configuration']['FromName'];
-			$mail->ReturnPath = $mailConf['server_configuration']['ReturnPath'];
-			$mail->AddReplyTo( $mail->ReturnPath, $mail->FromName );
-
-			if( !empty($mailConf['email_list']) ){
-				foreach( $mailConf['email_list'] as $email => $uName ){
-					$mail->AddAddress( $email, $uName );
-				}
-			}
-
-		}
-
-		$mail->XMailer  = 'Translated Mailer';
-		$mail->CharSet = 'UTF-8';
-		$mail->IsHTML();
-
-		/*
-		 *
-		 * "X-Priority",
-		 *  "1″ This is the most common way of setting the priority of an email.
-		 *  "3″ is normal, and "5″ is the lowest.
-		 *  "2″ and "4″ are in-betweens, and frankly.
-		 *
-		 *  I’ve never seen anything but "1″ or "3″ used.
-		 *
-		 * Microsoft Outlook adds these header fields when setting a message to High priority:
-		 *
-		 * X-Priority: 1 (Highest)
-		 * X-MSMail-Priority: High
-		 * Importance: High
-         *
-		 */
-		$mail->Priority = 1;
+		//First Execution, load build object
+		$contextList = ContextList::get( $config[ 'context_definitions' ] );
 
         if( empty( $subject ) ){
-		    $mail->Subject = 'Alert from Matecat: ' . php_uname('n');
+			$subject = 'Alert from MateCat: ' . php_uname('n');
         } else {
-            $mail->Subject = $subject . ' ' . php_uname('n');
+            $subject .= ' ' . php_uname('n');
         }
 
-		$mail->Body    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
+		$queue_element = array_merge( array(), $mailConf );
+		$queue_element['subject'] = $subject;
+		$queue_element['body'] = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-		$txtContent = preg_replace(  '|<br[\x{20}/]*>|ui', "\n\n", $htmlContent );
-		$mail->AltBody = strip_tags( $txtContent );
+		$element = new QueueElement();
+		$element->params = $queue_element;
+		$element->classLoad = '\AsyncTasks\Workers\ErrMailWorker';
 
-		$mail->MsgHTML($mail->Body);
-
-		if(!$mail->Send()) {
-			Log::doLog( 'Mailer Error: ' . $mail->ErrorInfo );
-			Log::doLog( "Message could not be sent: \n\n" . $mail->AltBody );
-			return false;
-		}
+		$handler->send( $contextList->list['MAIL']->queue_name, $element, array( 'persistent' => true ) );
 
 		Log::doLog( 'Message has been sent' );
 		return true;

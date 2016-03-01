@@ -7,7 +7,7 @@
  * 
  */
 
-use \Analysis\Queue\QueueInfo,
+use \TaskRunner\Commons\Context,
     \Analysis\Queue\RedisKeys;
 
 use \Stomp,
@@ -239,7 +239,7 @@ class AMQHandler extends Stomp {
         return $this;
     }
 
-    public function reQueue( $failed_segment, QueueInfo $queueInfo ){
+    public function reQueue( $failed_segment, Context $queueInfo ){
 
         if ( !empty( $failed_segment ) ) {
             Log::doLog( "Failed " . var_export( $failed_segment, true ) );

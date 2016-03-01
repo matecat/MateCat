@@ -29,10 +29,13 @@ function _updateConfiguration() {
 
 
 $contextList = _updateConfiguration();
-$handler     = new AMQHandler();
+$handler     = new AMQHandler( "tcp://localhost:61613" );
 
-$queue_element = array();
-$queue_element['subject'] = "monit alert -- Status succeeded mysql_slave_monitor";
+$mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+
+//$queue_element = array();
+$queue_element = array_merge( array(), $mailConf );
+$queue_element['subject'] = "monit alert -- Status succeeded mysql_slave_monitor: " . php_uname('n');
 $queue_element['body'] = <<<XXX
 Status succeeded Service mysql_slave_monitor
 
@@ -49,4 +52,4 @@ $element = new QueueElement();
 $element->params = $queue_element;
 $element->classLoad = '\AsyncTasks\Workers\ErrMailWorker';
 
-$handler->send( $contextList->list['P3']->queue_name, $element, array( 'persistent' => true ) );
+$handler->send( $contextList->list['MAIL']->queue_name, $element, array( 'persistent' => true ) );

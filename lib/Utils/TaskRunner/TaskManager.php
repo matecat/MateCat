@@ -508,7 +508,7 @@ class TaskManager extends AbstractDaemon {
             } else {
 
                 //create a new Object executo context
-                $this->_queueContextList->list[ $contextName ] = QueueInfo::buildFromArray( $context );
+                $this->_queueContextList->list[ $contextName ] = Context::buildFromArray( $context );
 
             }
 

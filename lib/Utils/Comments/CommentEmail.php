@@ -1,5 +1,8 @@
 <?php
 
+use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\QueueElement;
+
 class Comments_CommentEmail {
 
     private $user;
@@ -14,32 +17,37 @@ class Comments_CommentEmail {
     }
 
     public function deliver() {
-        $mail = new PHPMailer();
 
-        $mail->IsSMTP();
-        $mail->Host       = INIT::$SMTP_HOST ;
-        $mail->Port       = INIT::$SMTP_PORT ;
-        $mail->Sender     = INIT::$SMTP_SENDER ;
-        $mail->Hostname   = INIT::$SMTP_HOSTNAME ;
+        $config = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
 
-        $mail->From       = INIT::$SMTP_SENDER ;
-        $mail->FromName   = INIT::$MAILER_FROM_NAME ;
-        $mail->ReturnPath = INIT::$MAILER_RETURN_PATH ;
+        $mailConf[ 'Host' ]       = INIT::$SMTP_HOST;
+        $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
+        $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
+        $mailConf[ 'hostname' ]   = INIT::$SMTP_HOSTNAME;
+        $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
+        $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
+        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
-        $mail->AddReplyTo( $mail->ReturnPath, $mail->FromName );
+        $handler = new \AMQHandler();
 
-        $mail->Subject = $this->buildSubject();
-        $mail->Body = $this->buildHTMLMessage();
-        $mail->AltBody = $this->buildTextMessage();
+        //First Execution, load build object
+        $contextList = ContextList::get( $config[ 'context_definitions' ] );
 
-        $mail->MsgHTML($mail->Body);
+        $queue_element               = array_merge( array(), $mailConf );
+        $queue_element[ 'address' ] = array( $this->user->email, $this->user->first_name );
+        $queue_element[ 'subject' ] = $this->buildSubject();
+        $queue_element[ 'htmlBody' ] = $this->buildHTMLMessage();
+        $queue_element[ 'altBody' ] = $this->buildTextMessage();
 
-        $mail->XMailer  = 'Translated Mailer';
-		$mail->CharSet = 'UTF-8';
-		$mail->IsHTML();
-        $mail->AddAddress( $this->user->email, $this->user->first_name );
-        $mail->Send();
-        Log::doLog('email sent');
+        $element = new QueueElement();
+        $element->params = $queue_element;
+        $element->classLoad = '\AsyncTasks\Workers\CommentMailWorker';
+
+        $handler->send( $contextList->list['MAIL']->queue_name, $element, array( 'persistent' => true ) );
+
+        Log::doLog( 'Message has been sent' );
+        return true;
+
     }
 
     private function buildHTMLMessage() {

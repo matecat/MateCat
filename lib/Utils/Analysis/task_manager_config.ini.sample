@@ -35,3 +35,12 @@ P3[pid_set_name]  = "ch_pid_set_p3"
 P3[max_executors] = 1
 P3[redis_key]     = "p3_list"
 P3[loggerName]    = "tm_analysis_P3.log"
+
+;;##############################
+;;##### Key Name MailQueue #####
+;;##############################
+MAIL[queue_name]    = "mail_queue"
+MAIL[pid_set_name]  = "ch_pid_set_mail"
+MAIL[max_executors] = 1
+MAIL[redis_key]     = "mail_list"
+MAIL[loggerName]    = "mail_queue.log"
