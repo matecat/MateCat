@@ -73,6 +73,11 @@ class OpenController extends KleinController {
         if ($downloadUrl) {
             $this->file_name = $file->getTitle(); 
 
+            //TODO: Analyse mimetype when other formats are enabled
+            if (substr($this->file_name, -5) !== '.pptx') {
+                $this->file_name .= '.pptx';
+            }
+            
             $request = new \Google_Http_Request($downloadUrl, 'GET', null, null);
             $httpRequest = $service->getClient()->getAuth()->authenticatedRequest($request);
             if ($httpRequest->getResponseHttpCode() == 200) {
