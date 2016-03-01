@@ -1,7 +1,6 @@
 export default React.createClass({
 
     getInitialState: function() {
-
         return this.getStateFromSid( this.props.sid );
     },
 
@@ -57,7 +56,8 @@ export default React.createClass({
         }); 
 
         var version_components = sorted_versions.map( function(v) {
-            if ( v.version_number != "0" ) {
+            // if ( v.version_number != "0" ) {
+            if ( true ) {
                 return (<ReviewTranslationVersion key={v.id} versionId={v.id} 
                         versionNumber={v.version_number}  />); 
             }

@@ -130,6 +130,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         targetContainerSelector : function() {
             return '.errorTaggingArea';
         },
+
         getSegmentTarget : function() {
             // read status from DOM? wrong approach, read from
             // database instead

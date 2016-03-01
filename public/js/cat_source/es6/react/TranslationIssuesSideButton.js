@@ -41,9 +41,9 @@ export default React.createClass({
         var count = this.state.issues_on_latest_version.length ; 
 
         if ( count > 0 ) {
-            return (<div onClick={this.handleClick}><a href="javascript:void(0);">test {count}</a></div>); 
+            return (<div onClick={this.handleClick}><a href="javascript:void(0);">revise ({count})</a></div>); 
         } else  {
-            return (<div onClick={this.handleClick}><a href="javascript:void(0);">test </a></div>);
+            return (<div onClick={this.handleClick}><a href="javascript:void(0);">revise </a></div>);
         }
 
     }

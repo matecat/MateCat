@@ -14,7 +14,8 @@ window.ReviewCurrentVersion = require('./ReviewCurrentVersion').default ;
 window.ReviewIssuesContainer = require('./ReviewIssuesContainer').default ;
 window.ReviewTranslationIssue = require('./ReviewTranslationIssue').default ;
 window.ReviewTranslationIssueCommentsContainer = require('./ReviewTranslationIssueCommentsContainer').default ;
-
+window.ReviewIssueSelectionPanel = require('./ReviewIssueSelectionPanel').default ; 
+window.ReviewIssueCategorySelector = require('./ReviewIssueCategorySelector').default ; 
 
 window.classnames = require('classnames'); 
 

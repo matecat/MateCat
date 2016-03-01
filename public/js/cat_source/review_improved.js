@@ -103,6 +103,32 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     $.extend(ReviewImproved, {
+        submitIssue : function(sid, data, options) {
+
+            var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
+                  config.id_job, config.password, sid);
+
+            var segment = UI.Segment.find( sid );
+
+            var submitIssue = function() {
+                $.post( path, data )
+                .done(function( data ) {
+                    MateCat.db.segment_translation_issues.insert( data.issue ) ;
+                    ReviewImproved.reloadQualityReport();
+
+                    options.done( data );
+                })
+            }
+
+            UI.setTranslation({
+                id_segment: segment.id,
+                status: 'rejected',
+                caller: false,
+                byStatus: false,
+                propagate: false,
+                callback : submitIssue
+            });
+        },
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
                 config.id_job, config.password);

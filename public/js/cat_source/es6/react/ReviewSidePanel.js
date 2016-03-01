@@ -3,14 +3,13 @@ export default React.createClass({
 
     getInitialState: function() {
         return {
-            visible: false, 
+            visible: false,
         }
     },
 
     openPanel : function(e, data) {
-        console.log( data );
-
-        this.setState({sid: data.sid, visible: true}); 
+        console.log( data ) ; 
+        this.setState({sid: data.sid, visible: true, selection : data.selection }); 
     }, 
 
     closePanel : function(e, data) {
@@ -22,6 +21,7 @@ export default React.createClass({
         $(document).on('review-panel:closed', this.closePanel);
 
         $(window).on('segmentOpened', this.segmentOpened);
+
     },
 
     componentWillUnmount: function() {
@@ -32,17 +32,27 @@ export default React.createClass({
     },
 
     segmentOpened : function(event) {
-        console.log( event );
-        this.setState({sid: event.segment.id}); 
+        this.setState({sid: event.segment.id, select_issue: false}); 
+    },
+
+    submitIssueCallback : function( data ) {
+        console.log( 'submitIssueCallback' ); 
+
+        this.setState({ selection : null }); 
     },
     render: function() {
-
         var innerPanel; 
         var classes = classnames({
             'hidden' : !this.state.visible 
         }); 
 
-        if ( this.state.visible ) {
+        if ( this.state.visible && this.state.selection != null ) {
+            innerPanel = <div className="review-side-inner1">
+                <ReviewIssueSelectionPanel submitIssueCallback={this.submitIssueCallback} 
+                selection={this.state.selection} sid={this.state.sid} />
+            </div>
+        }
+        else if ( this.state.visible ) {
             innerPanel = <div className="review-side-inner1">
                 <TranslationIssuesOverviewPanel sid={this.state.sid} />
             </div>;

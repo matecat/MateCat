@@ -2247,7 +2247,7 @@ console.log('eccolo: ', typeof token);
             this.checkConnection( 'Set Translation check Authorized' );
 
         } else {
-            if ( !this.executingSetTranslation ) this.execSetTranslationTail();
+            if ( !this.executingSetTranslation ) return this.execSetTranslationTail();
         }
     },
     alreadyInSetTranslationTail: function (sid) {
@@ -2287,7 +2287,7 @@ console.log('eccolo: ', typeof token);
         if ( UI.setTranslationTail.length ) {
             item = UI.setTranslationTail[0];
             UI.setTranslationTail.shift(); // to move on ajax callback
-            UI.execSetTranslation(item);
+            return UI.execSetTranslation(item);
         }
     },
 
@@ -2364,6 +2364,9 @@ console.log('eccolo: ', typeof token);
             },
 			success: function( data ) {
                 UI.executingSetTranslation = false;
+                if ( typeof callback == 'function' ) {
+                    callback(data);
+                }
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
                 $(document).trigger('setTranslation:success', data);

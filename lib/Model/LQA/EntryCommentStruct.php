@@ -8,5 +8,5 @@ class EntryCommentStruct extends \DataAccess_AbstractDaoSilentStruct implements 
     public $id_qa_entry ;
     public $create_date ;
     public $comment ;
-
+    public $source_page ;
 }

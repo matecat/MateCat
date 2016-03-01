@@ -16,6 +16,7 @@ class TranslationIssueComment {
             'id_issue'   => $record->id_qa_entry,
             'created_at' => date('c', strtotime( $record->create_date) ),
             'message'    => $record->comment,
+            'source_page' => $record->source_page
         );
     }
 

@@ -26,17 +26,19 @@ export default React.createClass({
     },
 
     componentDidMount : function() {
-        MateCat.db.addListener('segment_translation_issue_comments', ['insert', 'delete'], this.commentsChanged);
+        MateCat.db.addListener('segment_translation_issue_comments', 
+                               ['insert', 'delete'], this.commentsChanged);
         ReviewImproved.loadComments(this.props.sid, this.props.issueId);
     },
     componentWillUnmount: function() {
-        MateCat.db.removeListener('segment_translation_issue_comments', ['insert', 'delete'], this.commentsChanged);
+        MateCat.db.removeListener('segment_translation_issue_comments', 
+                                  ['insert', 'delete'], this.commentsChanged);
     },
     sendClick : function() {
         // send action invokes ReviewImproved function
         var data = {
           message : this.state.comment_text,
-          source_page : config.isReview
+          source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
         };
         ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ) ;
     },
@@ -58,10 +60,15 @@ export default React.createClass({
         }); 
 
         var commentLines = sortedComments.map(function(comment, index) {
-            console.debug( comment.id ); 
+            var source_page ; 
+            if ( comment.source_page == '1' ) {
+                source_page = 'Translator' ; 
+            } else {
+                source_page = 'Revisor'; 
+            }
 
             return <div key={comment.id} className="review-issue-comment-detail">
-            {comment.id} - {comment.message}
+                <strong>{source_page}:</strong> {comment.message}
             </div>;
         }); 
 
