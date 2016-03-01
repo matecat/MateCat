@@ -7,6 +7,15 @@ export default React.createClass({
         }
     },
 
+    issueMouseEnter : function( issue, event, reactid ) {
+        var node = $('.muted-text-box', ReactDOM.findDOMNode( this ) ) ;
+        ReviewImproved.highlightIssue( issue, node );
+    },
+    issueMouseLeave : function() {
+        var selection = document.getSelection();
+        selection.removeAllRanges();
+    },
+
     componentWillReceiveProps : function( nextProps ) {
         var sid = nextProps.sid; 
         var segment =  MateCat.db.segments.by('sid', nextProps.sid);
@@ -27,9 +36,12 @@ export default React.createClass({
         return <div className={cs} > 
             <strong>Current version</strong>
 
-            <div className="muted-text-box" dangerouslySetInnerHTML={this.currentTranslation()} />
+            <div className="muted-text-box"
+                dangerouslySetInnerHTML={this.currentTranslation()} />
 
             <ReviewIssuesContainer sid={this.props.sid} 
+                issueMouseEnter={this.issueMouseEnter}
+                issueMouseLeave={this.issueMouseLeave}
                 versionNumber={this.state.segment.version_number} />
 
         </div>;

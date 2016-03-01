@@ -27,6 +27,40 @@ if ( ReviewImproved.enabled() )
     });
 
     $.extend( ReviewImproved, {
+
+        deleteIssue : function( issue ) {
+            var message = sprintf(
+                "You are about to delete the issue on string '%s' posted on %s." ,
+                issue.target_text,
+                moment( issue.created_at ).format('lll')
+            );
+
+            APP.confirm({
+                name : 'Confirm issue deletion',
+                callback : 'deleteTranslationIssue',
+                msg: message,
+                okTxt: 'Yes delete this issue',
+                context: JSON.stringify({
+                    id_segment : issue.id_segment,
+                    id_issue : issue.id
+                })
+            });
+        },
+
+        highlightIssue : function(issue, node) {
+            console.log('highlightIssue', issue, node );
+            var selection = document.getSelection();
+            selection.removeAllRanges();
+
+            var contents = node.contents();
+            var range = document.createRange();
+
+            range.setStart( contents[ issue.start_node ], issue.start_offset );
+            range.setEnd( contents[ issue.end_node ], issue.end_offset );
+
+            selection.addRange( range );
+        },
+
         loadComments : function(id_segment, id_issue) {
             var issue_comments = sprintf(
                 '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',

@@ -50,7 +50,6 @@ export default React.createClass({
     },
 
     render: function() {
-
         var sorted_versions = this.state.versions.sort(function(a,b) {
             return parseInt(a.version_number) < parseInt(b.version_number); 
         }); 
@@ -58,8 +57,10 @@ export default React.createClass({
         var version_components = sorted_versions.map( function(v) {
             // if ( v.version_number != "0" ) {
             if ( true ) {
-                return (<ReviewTranslationVersion key={v.id} versionId={v.id} 
-                        versionNumber={v.version_number}  />); 
+                return (
+                    <ReviewTranslationVersion key={v.id} versionId={v.id}
+                        versionNumber={v.version_number}  />
+                );
             }
         }.bind(this) ); 
 
@@ -70,8 +71,13 @@ export default React.createClass({
                 <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
             </div>
 
-            <ReviewCurrentVersion sid={this.props.sid} />
+            <div className="review-version-wrapper">
+                <ReviewCurrentVersion sid={this.props.sid} />
+            </div>
+
+            <div className="review-previous-versions-wrapper">
             {version_components}
+            </div>
 
 
         </div>

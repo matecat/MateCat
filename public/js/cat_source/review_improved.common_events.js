@@ -117,56 +117,56 @@ if ( ReviewImproved.enabled() ) {
             UI.Segment.findEl( record.sid ).find('[data-mount=translation-issues]').html( tpl );
         },
 
-        highlightIssue : function(e) {
-            var container = $(e.target).closest('.issue-container');
-            var issue = MateCat.db.segment_translation_issues.findObject({
-                id : container.data('issue-id') + ''
-            });
-            var segment = MateCat.db.segments.findObject({sid : issue.id_segment});
+        // highlightIssue : function(e) {
+        //     var container = $(e.target).closest('.issue-container');
+        //     var issue = MateCat.db.segment_translation_issues.findObject({
+        //         id : container.data('issue-id') + ''
+        //     });
+        //     var segment = MateCat.db.segments.findObject({sid : issue.id_segment});
 
-            // TODO: check for this to be really needed
-            if ( container.data('current-issue-id') == issue.id ) {
-                return ;
-            }
+        //     // TODO: check for this to be really needed
+        //     if ( container.data('current-issue-id') == issue.id ) {
+        //         return ;
+        //     }
 
-            // TODO: check for this to be really needed
-            container.data('current-issue-id', issue.id);
-            var selection = document.getSelection();
-            selection.removeAllRanges();
+        //     // TODO: check for this to be really needed
+        //     container.data('current-issue-id', issue.id);
+        //     var selection = document.getSelection();
+        //     selection.removeAllRanges();
 
-            var area = container.closest('section').find('.issuesHighlightArea') ;
+        //     var area = container.closest('section').find('.issuesHighlightArea') ;
 
-            // TODO: fix this to take into account cases when monads are in place
-            var contents       = area.contents() ;
-            var range = document.createRange();
+        //     // TODO: fix this to take into account cases when monads are in place
+        //     var contents       = area.contents() ;
+        //     var range = document.createRange();
 
-            range.setStart( contents[ issue.start_node ], issue.start_offset );
-            range.setEnd( contents[ issue.end_node ], issue.end_offset );
+        //     range.setStart( contents[ issue.start_node ], issue.start_offset );
+        //     range.setEnd( contents[ issue.end_node ], issue.end_offset );
 
-            selection.addRange( range );
-        },
+        //     selection.addRange( range );
+        // },
 
-        resetHighlight : function(e) {
-            var selection = document.getSelection();
-            selection.removeAllRanges();
+        // resetHighlight : function(e) {
+        //     var selection = document.getSelection();
+        //     selection.removeAllRanges();
 
-            var segment = new UI.Segment( $(e.target).closest('section'));
-            var container = $(e.target).closest('.issue-container');
+        //     var segment = new UI.Segment( $(e.target).closest('section'));
+        //     var container = $(e.target).closest('.issue-container');
 
-            container.data('current-issue-id', null) ; // TODO: check for this to be really needed
+        //     container.data('current-issue-id', null) ; // TODO: check for this to be really needed
 
-            var section = container.closest('section');
+        //     var section = container.closest('section');
 
-            var area = section.find('.issuesHighlightArea') ;
-            var issue = MateCat.db.segment_translation_issues.findObject({
-                id : container.data('issue-id') + ''
-            });
-            area.html(
-                UI.decodePlaceholdersToText(
-                    ReviewImproved.getTranslationText( segment )
-                )
-            );
-        },
+        //     var area = section.find('.issuesHighlightArea') ;
+        //     var issue = MateCat.db.segment_translation_issues.findObject({
+        //         id : container.data('issue-id') + ''
+        //     });
+        //     area.html(
+        //         UI.decodePlaceholdersToText(
+        //             ReviewImproved.getTranslationText( segment )
+        //         )
+        //     );
+        // },
     });
 
     $(document).on('issue_comments:load', ReviewImproved.commentsLoaded);

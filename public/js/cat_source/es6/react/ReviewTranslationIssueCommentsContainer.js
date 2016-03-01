@@ -12,8 +12,13 @@ export default React.createClass({
         this.setState({ replying: true });
     },
 
-    componentWillReceiveProps : function() {
-        ReviewImproved.loadComments(this.props.sid, this.props.issueId);
+    componentWillReceiveProps : function(nextProps) {
+
+        if ( nextProps.sid != this.props.sid ) {
+            // ReviewImproved.loadComments(this.props.sid, this.props.issueId);
+        }
+
+        // TODO: change this, loading via ajax here is too heavy
     },
 
     commentsChanged : function() {
