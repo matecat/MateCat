@@ -197,6 +197,7 @@ class INIT {
     public static $OAUTH_CLIENT_APP_NAME;
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
+    public static $OAUTH_BROWSER_API_KEY;
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
@@ -206,6 +207,7 @@ class INIT {
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
         self::$OAUTH_CLIENT_SECRET   = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
         self::$OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
+        self::$OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
 
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
         self::$OAUTH_SCOPES       = array(

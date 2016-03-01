@@ -340,6 +340,9 @@ class newProjectController extends viewController {
 
         $this->template->pre_uploaded_files =  $_SESSION['pre_loaded_file'];
 
+        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
+        $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
+        
     }
 
 }

@@ -3708,3 +3708,24 @@ width: 250px;
 
 table.left-aligned tr td { text-align: left; }
 table.left-aligned tr th { text-align: left; }
+
+button.load-gdrive {
+    font-family: calibri, Arial, Helvetica, sans-serif;
+    font-size: 1.1em;
+    margin: 1.5rem auto;
+    padding: 0.5rem 0.9rem 1.7rem 2.0rem;
+    border: 0.1rem solid #B7B9BC;
+    background: url(../img/logo-drive-16.png) 0.5rem 0.65rem no-repeat;
+    background-color: #F5F5F5;
+    cursor: pointer;
+}
+
+.modal-gdrive {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    background: rgba(255, 255, 255, 0.5);
+}
