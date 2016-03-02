@@ -87,8 +87,8 @@ export default React.createClass({
 
         return <div className="review-issue-selection-panel">
 
-        <div className="title">Error selection</div> 
-        <div className="subtitle">Select issue type</div>
+        <h3>Error selection</h3> 
+        <h4>Select issue type</h4>
 
         <table className="review-issue-category-list">
         <tbody>

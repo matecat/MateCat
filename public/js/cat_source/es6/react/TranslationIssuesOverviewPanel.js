@@ -78,7 +78,7 @@ export default React.createClass({
         return <div className="review-issues-overview-panel"> 
 
             <div className="review-original-target-wrapper sidebar-block">
-                <strong>Original target</strong>
+                <h3>Original target</h3>
                 <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
             </div>
 

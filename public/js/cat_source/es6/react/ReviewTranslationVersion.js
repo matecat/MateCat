@@ -46,7 +46,7 @@ export default React.createClass({
         return <div className="review-version-wrapper">
             <div className={cs} >
             <div className="review-version-header">
-                <strong>{versionLabel} {this.props.versionNumber}</strong>
+                <h3>{versionLabel} {this.props.versionNumber}</h3>
             </div>
 
             <div className="collapsable">
