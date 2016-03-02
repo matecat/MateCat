@@ -1,6 +1,4 @@
-
 export default React.createClass({
-
     getInitialState: function() {
         return {
             visible: false,
@@ -8,7 +6,6 @@ export default React.createClass({
     },
 
     openPanel : function(e, data) {
-        console.log( data ) ; 
         this.setState({sid: data.sid, visible: true, selection : data.selection }); 
     }, 
 

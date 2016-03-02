@@ -49,6 +49,31 @@ export default React.createClass({
         return { __html : UI.decodePlaceholdersToText( this.state.original_target ) };
     },
 
+    getTrackChangesForCurrentVersion : function() {
+        if ( this.state.segment.version_number != '0' ) {
+            // no track changes possibile for first version
+            var previous = this.findPreviousVersion( this.state.segment.version_number );
+            return trackChangesHTML(
+                UI.clenaupTextFromPleaceholders(previous.translation),
+                this.state.segment.translation );
+        }
+    },
+
+    findPreviousVersion : function( version_number ) {
+        return this.state.versions.filter(function(item) {
+            return parseInt( item.version_number ) == parseInt( version_number ) -1 ;
+        }.bind(this) )[0];
+    },
+
+    getTrackChangesForOldVersion : function(version) {
+        if ( version.version_number != "0" ) {
+            var previous = this.findPreviousVersion( version.version_number );
+            return trackChangesHTML(
+                UI.clenaupTextFromPleaceholders(previous.translation),
+                version.translation );
+        }
+    },
+
     render: function() {
         var sorted_versions = this.state.versions.sort(function(a,b) {
             return parseInt(a.version_number) < parseInt(b.version_number); 
@@ -57,8 +82,8 @@ export default React.createClass({
         var previousVersions = sorted_versions.map( function(v) {
             return (
                 <ReviewTranslationVersion 
+                trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
                 sid={this.state.segment.sid}
-                key={v.version_number} 
                 versionNumber={v.version_number}  
                 isCurrent={false} 
                 translation={v.translation} 
@@ -67,7 +92,7 @@ export default React.createClass({
         }.bind(this) ); 
 
         var currentVersion = <ReviewTranslationVersion 
-            key={this.state.segment.version_number}
+            trackChangesMarkup={this.getTrackChangesForCurrentVersion()}
             sid={this.state.segment.sid}
             versionNumber={this.state.segment.version_number}
             isCurrent={true} 

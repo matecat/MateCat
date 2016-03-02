@@ -519,3 +519,15 @@ table.review-issue-category-list {
 .review-issue-detail:last-child {
     border-bottom:0;
 }
+.review-track-changes-box {
+    .added {
+        background: #b0ffb3;
+        text-decoration: none;
+    }
+
+    .deleted {
+        background: #ffc7ca;
+        text-decoration: line-through;
+    }
+
+}

@@ -1,9 +1,16 @@
-
 export default React.createClass({
     getInitialState : function() {
+        console.log( 'props ------------', this.props );
+
         return {
-            collapsed : !this.props.isCurrent
+            collapsed : this.props.isCurrent == false
         }; 
+    },
+
+    componentWillReceiveProps : function(nextProps) {
+        console.log( 'receiving props', nextProps );
+
+        this.setState({ collapsed : !nextProps.isCurrent });
     },
 
     issueMouseEnter : function( issue, event, reactid ) {
@@ -26,6 +33,10 @@ export default React.createClass({
         this.setState({trackChanges : !this.state.trackChanges });
     },
 
+    getMarkupForTrackChanges : function() {
+        return { __html :  this.props.trackChangesMarkup  };
+    },
+
     render : function() {
         var cs = classnames({
             collapsed : this.state.collapsed,
@@ -43,6 +54,11 @@ export default React.createClass({
 
         var labelForToggle = this.state.trackChanges ? 'Issues' : 'Track changes' ;
 
+        if ( this.props.trackChangesMarkup ) {
+            var trackChangesLink = <a href="#" onClick={this.toggleTrackChanges}
+                    className="review-track-changes-toggle">{labelForToggle}</a>;
+        }
+
         return <div className="review-version-wrapper">
             <div className={cs} >
             <div className="review-version-header">
@@ -55,10 +71,10 @@ export default React.createClass({
                 dangerouslySetInnerHTML={this.translationMarkup()} />
 
                 <div style={styleForTrackChanges}
-                className="muted-text-box review-track-changes-box">Track changes go here</div>
+                className="muted-text-box review-track-changes-box"
+                dangerouslySetInnerHTML={this.getMarkupForTrackChanges()} />
 
-                <a href="#" onClick={this.toggleTrackChanges} 
-                className="review-track-changes-toggle">{labelForToggle}</a>
+                {trackChangesLink}
 
                 <ReviewIssuesContainer 
                     issueMouseEnter={this.issueMouseEnter} 
