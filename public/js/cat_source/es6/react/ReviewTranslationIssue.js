@@ -16,9 +16,9 @@ export default React.createClass({
     },
 
     deleteIssue : function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        ReviewImproved.deleteIssue(this.state.issue);
+        event.preventDefault(); 
+        event.stopPropagation(); 
+        ReviewImproved.deleteIssue(this.state.issue); 
     },
     render : function() {
         var category_label = this.categoryLabel();
@@ -32,16 +32,16 @@ export default React.createClass({
             <strong>Comment:</strong> { comment }</div>; 
         }
 
-        var deleteIssue ;
+        var deleteIssue ; 
 
         if ( config.isReview ) {
-            deleteIssue = <a href="#" onClick={this.deleteIssue}>delete issue</a>;
+            deleteIssue = <a href="#" onClick={this.deleteIssue}>delete issue</a>; 
         }
 
-        return <div className="review-issue-detail"
+        return <div className="review-issue-detail" 
             onMouseEnter={this.props.issueMouseEnter.bind(null, this.state.issue) }
             onMouseLeave={this.props.issueMouseLeave} >
-            <strong>Issue # {this.props.index} </strong>
+            <strong>Issue # {this.props.index} </strong> 
 
             <span className="review-issue-severity">{this.state.issue.severity}</span>
             -
@@ -54,8 +54,8 @@ export default React.createClass({
 
             {deleteIssue}
 
-            <ReviewTranslationIssueCommentsContainer
-                sid={this.props.sid}
+            <ReviewTranslationIssueCommentsContainer 
+                sid={this.props.sid} 
                 issueId={this.props.issueId} />
         </div>; 
     }

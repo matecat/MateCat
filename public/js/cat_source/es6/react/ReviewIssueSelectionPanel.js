@@ -30,18 +30,24 @@ export default React.createClass({
     },
 
     buttonClasses : function() {
-
         var severitySet = this.state.severity != null ; 
         var categorySet = this.state.category != null; 
+        var disabled = this.state.submitDone || !(categorySet && severitySet) ;
 
         return classnames({
             'mc-button' : true,
             'blue-button' : true, 
-            'disabled' : !(categorySet && severitySet)
+            'disabled' : disabled 
         });
     },
 
     sendClick : function() {
+        if ( this.state.submitDone ) {
+            return; 
+        }
+
+        this.setState({ submitDone : true }); 
+
         ReviewImproved.submitIssue(this.props.sid, {
             'id_category'         : this.state.category.id,
             'severity'            : this.state.severity.label, 
@@ -77,6 +83,8 @@ export default React.createClass({
             }
         }.bind(this)); 
 
+        var buttonLabel = (this.state.submitDone ? 'Sending...' : 'Send'); 
+
         return <div className="review-issue-selection-panel">
 
         <div className="title">Error selection</div> 
@@ -97,7 +105,7 @@ export default React.createClass({
 
             <div className="review-issue-buttons-right">
                 <a onClick={this.sendClick} 
-                    className={this.buttonClasses()} >Send</a>
+                    className={this.buttonClasses()} >{buttonLabel}</a>
             </div>
         </div>
         </div> 

@@ -8,25 +8,25 @@ export default React.createClass({
 
     getInitialState : function() {
         return {
-            issues : this.getIssuesFromDb(this.props.sid,
+            issues : this.getIssuesFromDb(this.props.sid, 
                                           this.props.versionNumber)
         }
     },
 
     componentWillReceiveProps : function( nextProps ) {
         var issues = this.getIssuesFromDb( nextProps.sid, nextProps.versionNumber) ;
-        this.setState({ issues: issues });
+        this.setState({ issues: issues }); 
     },
 
     componentDidMount : function() {
-        MateCat.db.addListener('segment_translation_issues',
-                               ['delete'], this.issueDeleted );
-
+        MateCat.db.addListener('segment_translation_issues', 
+                               ['delete'], this.issueDeleted ); 
+        
 
     },
 
     componentWillUnmount : function() {
-        MateCat.db.removeListener('segment_translation_issues',
+        MateCat.db.removeListener('segment_translation_issues', 
                                ['delete'], this.issueDeleted );
     },
 
@@ -49,10 +49,10 @@ export default React.createClass({
 
             issues = sorted_issues.map(function( item, index ) {
                 index = index + 1 ; 
-                return <ReviewTranslationIssue
-                    issueMouseEnter={this.props.issueMouseEnter}
+                return <ReviewTranslationIssue 
+                    issueMouseEnter={this.props.issueMouseEnter} 
                     issueMouseLeave={this.props.issueMouseLeave}
-                    sid={this.props.sid} index={index}
+                    sid={this.props.sid} index={index} 
                     issueId={item.id} key={item.id} />
 
             }.bind(this) );

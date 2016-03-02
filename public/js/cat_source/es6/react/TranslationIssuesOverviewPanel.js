@@ -54,15 +54,26 @@ export default React.createClass({
             return parseInt(a.version_number) < parseInt(b.version_number); 
         }); 
 
-        var version_components = sorted_versions.map( function(v) {
-            // if ( v.version_number != "0" ) {
-            if ( true ) {
-                return (
-                    <ReviewTranslationVersion key={v.id} versionId={v.id}
-                        versionNumber={v.version_number}  />
-                );
-            }
+        var previousVersions = sorted_versions.map( function(v) {
+            return (
+                <ReviewTranslationVersion 
+                sid={this.state.segment.sid}
+                key={v.version_number} 
+                versionNumber={v.version_number}  
+                isCurrent={false} 
+                translation={v.translation} 
+                />
+            ); 
         }.bind(this) ); 
+
+        var currentVersion = <ReviewTranslationVersion 
+            key={this.state.segment.version_number}
+            sid={this.state.segment.sid}
+            versionNumber={this.state.segment.version_number}
+            isCurrent={true} 
+            translation={this.state.segment.translation} />
+
+        var fullList = [currentVersion].concat(previousVersions); 
 
         return <div className="review-issues-overview-panel"> 
 
@@ -71,15 +82,7 @@ export default React.createClass({
                 <div className="muted-text-box" dangerouslySetInnerHTML={this.originalTarget()} />
             </div>
 
-            <div className="review-version-wrapper">
-                <ReviewCurrentVersion sid={this.props.sid} />
-            </div>
-
-            <div className="review-previous-versions-wrapper">
-            {version_components}
-            </div>
-
-
+            {fullList}
         </div>
         ;
     }

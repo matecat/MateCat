@@ -293,7 +293,7 @@ section {
     z-index: 999;
     margin-top: 49px;
     text-align: left ;
-    overflow: scroll;
+    overflow: scroll; 
 
     .muted-text-box {
         padding: 4px;
@@ -328,4 +328,16 @@ section {
 .review-issue-comment-reply textarea {
     width: 100%;
     margin: 10px 0;
+}
+
+.review-previous-versions-wrapper {
+    .review-version-header {
+    }
+    position: fixed;
+    margin-bottom: 40px;
+    bottom: 0;
+}
+
+.review-version-wrapper .collapsed .collapsable {
+    display: none; 
 }
