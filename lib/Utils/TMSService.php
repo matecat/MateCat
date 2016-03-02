@@ -408,8 +408,23 @@ class TMSService {
                 break;
         }
 
+        $chunkDAO = new Chunks_ChunkDao(Database::obtain());
+        /**
+         * @var $chunks Chunks_ChunkStruct[]
+         */
+        $chunks = $chunkDAO->getByJobID($jid);
 
         foreach ( $result as $k => $row ) {
+
+            $idChunk = 1;
+            foreach ( $chunks as $i => $chunk ) {
+                if($row[ 'id_segment' ] >= $chunk->job_first_segment  &&
+                        $row['id_segment'] <= $chunk->job_last_segment){
+                    $idChunk = $i+1;
+                    break;
+                }
+            }
+
 
             $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
 
@@ -418,6 +433,8 @@ class TMSService {
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . $row[ 'filename' ] . '</prop>
+        <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
+        <prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . htmlspecialchars( $row[ 'segment' ] ) . '</seg>
         </tuv>
