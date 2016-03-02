@@ -627,7 +627,14 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
     $jPassword = $db->escape( $jPassword );
 
     $sql = "
-        SELECT id_segment, segment_translations.id_job, filename, segment, translation, translation_date
+        SELECT
+        id_segment,
+        segment_translations.id_job,
+        filename,
+        segment,
+        translation,
+        translation_date,
+        segment_translations.status
         FROM segment_translations
         JOIN segments ON id = id_segment
 
