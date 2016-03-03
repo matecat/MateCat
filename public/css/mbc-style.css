@@ -623,6 +623,10 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   z-index: 10001;
 }
 
+.side-tools-opened article.mbc-commenting-opened .mbc-comment-balloon-outer {
+  top:43px;
+}
+
 /*
  ******
  ******

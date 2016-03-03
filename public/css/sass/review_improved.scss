@@ -146,7 +146,7 @@ section.reviewImproved .errorTaggingArea {
 
 section.reviewImproved.opened {
     .errorTaggingArea, .editableTarget, .trackChanges {
-        font-family: "calibri, Arial, Helvetica, sans-serif";
+        font-family: "calibri", Arial, Helvetica, sans-serif;
         padding: 3px;
         line-height: 27px;
         padding: 4px 0 0 0 ;
@@ -161,6 +161,14 @@ section.reviewImproved.opened {
     .errorTaggingArea::selection {
         background-color: #FFFF00;
     }
+}
+
+span.review-issue-label:hover {
+    cursor: help;
+}
+
+.review-version-wrapper .muted-text-box::selection {
+    background-color: #FFFF00;
 }
 
 section.reviewImproved.opened.reverted {
@@ -297,12 +305,13 @@ section {
 
     .muted-text-box {
         padding: 4px;
-        width: 100%;
+        width: 96%;
         background: #efefef;
         border-bottom: 1px solid #ccc;
         outline: 0;
         font-size: 1em;
         color: #000;
+        margin: 10px 0;
         border: 1px solid #727272;
         box-shadow: 0 1px 2px #ccc;
         -webkit-box-shadow: 0 1px 2px #ccc;
@@ -326,7 +335,7 @@ section {
 }
 
 .review-issue-comment-reply textarea {
-    width: 100%;
+    width: 95%;
     margin: 10px 0;
 }
 
@@ -338,6 +347,175 @@ section {
     bottom: 0;
 }
 
+/*
 .review-version-wrapper .collapsed .collapsable {
     display: none; 
+}
+*/
+
+.review-track-changes-toggle {
+    position: absolute;
+    right: 4%;
+    border: 1px solid #727272;
+    color: #333;
+    font-size: 14px;
+    background: #fff;
+    padding: 2px 4px;
+    text-decoration: none !important;
+    margin-top: -11px;
+    border-radius: 0px 0px 0px 4px;
+    -webkit-box-shadow: inset 0px 1px 2px #666;
+    box-shadow: inset 0px 1px 2px #666;
+}
+
+.review-version-wrapper .collapsable .muted-text-box {
+    position: relative;
+}
+
+.review-issues-container {
+    margin-top: 23px;
+}
+
+.segment-side-buttons .revise-button {
+    text-decoration: none!important;
+    font-size: 28px;
+    color: #999;
+    font-weight: bold;
+}
+.segment-side-buttons .revise-button:hover {
+    color: #666;
+}
+
+.revise-button-counter {
+    left: 52px;
+    position: absolute;
+    top: 0;
+    background: #dc2e34;
+    color: #fff;
+     border: 1px solid #fff;
+    border-radius: 14px;
+    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0px 6px;
+    text-align: center;
+}
+
+.review-version-wrapper {
+    border-top: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+.review-triangle {
+    display:none;
+    border-top: 10px solid #f7f7f7;
+    border-left: 12px solid transparent;
+    -webkit-filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 0.2));
+        margin-left: 8px;
+    margin-top: 10px;
+}
+
+.side-tools-opened .review-triangle  {
+     display:block;
+}
+
+#review-side-panel h3 {
+    margin: 10px 0 5px;
+}
+
+#review-side-panel h4 {
+    margin: 10px 0 0;
+}
+
+.review-issue-detail h4 {
+    float:left;
+}
+
+span.review-issue-label {
+    font-size: 12px;
+    color: #999;
+    float: left;
+}
+
+.review-issue-severity {
+    float: left;
+    clear: both;
+    margin-right: 5px;
+    font-size: 12px;
+    color: #999;
+}
+
+.review-issue-date {
+    float: right;
+    margin: 10px 0 5px;
+    font-size: 12px;
+}
+
+.review-issue-detail {
+    margin: 0 auto;
+    overflow: hidden;
+    border-bottom: 1px solid #f4f4f4;
+    padding: 0px 0 10px 0;
+}
+
+.review-issue-comment, .review-issue-comment-container {
+    width: 100%;
+    float: left;
+    padding: 4px 0 0;
+    font-size: 15px;
+}
+
+a.cancel-project {
+    float: left;
+    text-decoration: none;
+    font-size: 13px;
+    color: #999;
+    margin-top: -18px;
+}
+
+a.cancel-project:hover {
+    color: #333;
+}
+
+.review-issue-comment-buttons {
+    margin: 5px 0;
+}
+
+.review-issue-selection-panel {
+    padding: 10px;
+}
+
+.mc-resizable-textarea {
+    width:96%;
+}
+
+table.review-issue-category-list tr td:first-child {
+    font-size: 14px;
+    width: 82%;
+}
+
+table.review-issue-category-list tr td {
+    border-bottom: 1px solid #efefef;
+}
+
+table.review-issue-category-list tr:hover {
+    background:#efefef;
+}
+
+table.review-issue-category-list {
+    margin: 20px 0;
+}
+
+.review-issue-buttons-right {
+    float: right;
+    margin-top: 15px;
+}
+
+.review-side-inner1 {
+    margin-bottom: 70px;
+}
+
+.review-issue-detail:last-child {
+    border-bottom:0;
 }
