@@ -57,15 +57,15 @@ class Log {
 
                 if ( empty( self::$logger ) ) {
 
-                    $matecatRedisHandler = new \RedisHandler();
+//                    $matecatRedisHandler = new \RedisHandler();
 
                     // Init a RedisHandler with a LogstashFormatter.
                     // The parameters may differ depending on your configuration of Redis.
                     // Important: The parameter 'logs' must be equal to the key you defined
                     // in your logstash configuration.
-                    $redisHandler      = new RedisHandler( $matecatRedisHandler->getConnection(), 'phplogs' );
-                    $logStashFormatter = new LogstashFormatter( 'MateCat', gethostname() );
-                    $redisHandler->setFormatter( $logStashFormatter );
+//                    $redisHandler      = new RedisHandler( $matecatRedisHandler->getConnection(), 'phplogs' );
+//                    $logStashFormatter = new LogstashFormatter( 'MateCat', gethostname() );
+//                    $redisHandler->setFormatter( $logStashFormatter );
 
                     //Log on file
                     $fileHandler   = new StreamHandler( self::$fileNamePath );
@@ -73,7 +73,8 @@ class Log {
                     $fileHandler->setFormatter( $fileFormatter );
 
                     // Create a Logger instance with the RedisHandler
-                    self::$logger = new Logger( 'MateCat', array( $redisHandler, $fileHandler ) );
+//                    self::$logger = new Logger( 'MateCat', array( $redisHandler, $fileHandler ) );
+                    self::$logger = new Logger( 'MateCat', array( $fileHandler ) );
 
                 }
 

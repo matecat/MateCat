@@ -1,3 +1,6 @@
+CREATE DATABASE matecat;
+USE matecat;
+
 CREATE TABLE `api_keys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) NOT NULL,
@@ -8,7 +11,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -87,7 +90,8 @@ CREATE TABLE `engines` (
   KEY `type` (`type`),
   KEY `active_idx` (`active`) USING BTREE,
   KEY `uid_idx` (`uid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 CREATE TABLE `file_references` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -98,7 +102,7 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -109,12 +113,11 @@ CREATE TABLE `files` (
   `xliff_file` longblob,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   `original_file` longblob,
-  `remote_id` text,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
@@ -127,7 +130,7 @@ CREATE TABLE `files_job` (
   `status_analisys` varchar(50) DEFAULT 'NEW' COMMENT 'NEW\nIN PROGRESS\nDONE',
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -185,7 +188,7 @@ CREATE TABLE `jobs` (
   KEY `status_owner_idx` (`status_owner`),
   KEY `status_idx` (`status`),
   KEY `create_date_idx` (`create_date`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `language_stats` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -199,7 +202,7 @@ CREATE TABLE `language_stats` (
   KEY `source_idx` (`source`),
   KEY `target_idx` (`target`),
   KEY `date_idx` (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `memory_keys` (
   `uid` bigint(20) NOT NULL,
@@ -213,7 +216,7 @@ CREATE TABLE `memory_keys` (
   PRIMARY KEY (`uid`,`key_value`),
   KEY `uid_idx` (`uid`),
   KEY `key_value_idx` (`key_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
@@ -222,7 +225,7 @@ CREATE TABLE `notifications` (
   `status` varchar(45) CHARACTER SET latin1 DEFAULT 'UNREAD',
   PRIMARY KEY (`id`),
   KEY `id_comment` (`id_comment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `original_files_map` (
   `sha1` varchar(100) NOT NULL,
@@ -233,7 +236,7 @@ CREATE TABLE `original_files_map` (
   `creation_date` date DEFAULT NULL,
   `segmentation_rule` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`sha1`,`source`,`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `owner_features` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -245,14 +248,14 @@ CREATE TABLE `owner_features` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `project_metadata` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -486,14 +489,12 @@ CREATE TABLE `users` (
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `api_key` varchar(100) NOT NULL,
-  `oauth_access_token` text,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`),
   KEY `api_key` (`api_key`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
-
-        INSERT INTO `engines` (
+INSERT INTO `engines` (
   `name` ,
   `type` ,
   `description` ,
@@ -530,36 +531,70 @@ NULL);
 UPDATE engines SET id = 0 WHERE name = 'NONE' ;
 UPDATE engines SET id = 1 WHERE name = 'MyMemory (All Pairs)' ;
 
+CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
  INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150918101657', '2016-02-18 14:28:18', '2016-02-18 14:28:18'); 
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150921114813', '2016-02-18 14:28:29', '2016-02-18 14:28:29'); 
+# Grants for 'matecat'@'%'
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat`.* TO 'matecat'@'%';
+CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
+USE matecat_conversions_log ;
+CREATE TABLE conversions_log (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  filters_address VARCHAR(21),
+  filters_version VARCHAR(100),
+  client_ip VARCHAR(15) NOT NULL,
+  to_xliff TINYINT(1) NOT NULL COMMENT 'true for source-to-xliff conversions, false for xliff-to-target',
+  source_file_ext VARCHAR(45) NOT NULL,
+  source_file_name VARCHAR(255) NOT NULL,
+  success TINYINT(1) NOT NULL,
+  error_message VARCHAR(255),
+  job_owner VARCHAR(100),
+  job_id INT(11),
+  job_pwd VARCHAR(45),
+  source_file_id INT(11) COMMENT 'when to_xliff is false, this contains the SOURCE file\'s file_id, that you can easily find in "files" and "files_job" tables',
+  source_file_sha1 VARCHAR(100) COMMENT 'when to_xliff is true, this is the sha1 of the sent file; when to_xliff is false, this is the "sha1_original_file" in the "file" table of the source file',
+  source_lang VARCHAR(45) NOT NULL,
+  target_lang VARCHAR(45) NOT NULL,
+  segmentation VARCHAR(512),
+  sent_file_size INT(11) NOT NULL COMMENT 'the number of actual bytes sent to the converter',
+  conversion_time INT(11) NOT NULL COMMENT 'in milliseconds',
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150922152051', '2016-02-18 14:28:39', '2016-02-18 14:28:39'); 
+  PRIMARY KEY (id),
+  KEY(time),
+  KEY (filters_address),
+  KEY (filters_version),
+  KEY (client_ip),
+  KEY (source_file_ext),
+  KEY (job_owner),
+  KEY (job_id),
+  KEY (source_file_id),
+  KEY (source_file_sha1),
+  KEY (source_lang),
+  KEY (target_lang)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARACTER SET = utf8;
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151001131124', '2016-02-18 14:28:45', '2016-02-18 14:28:45'); 
+#Create the user 'matecat'@'%' ( even if already created )
+# Grants for 'matecat'@'%'
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat_conversions_log`.* TO 'matecat'@'%' IDENTIFIED BY 'matecat01';
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151120150352', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151120150352', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151123141623', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151126093945', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151204140144', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151219181543', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151229103454', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160108101432', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160115143225', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160116085841', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160120143540', '2016-02-23 13:13:09', '2016-02-23 13:13:09'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-02-18 14:28:45', '2016-02-18 14:28:45'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-02-23 13:34:57', '2016-02-23 13:34:57'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160301134214', '2016-03-01T13:48:39+00:00', '2016-03-01T13:48:39+00:00'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150921114813', '2016-02-18 14:28:29', '2016-02-18 14:28:29'); 
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150918101657', '2016-02-18 14:28:18', '2016-02-18 14:28:18');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150922152051', '2016-02-18 14:28:39', '2016-02-18 14:28:39');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151001131124', '2016-02-18 14:28:45', '2016-02-18 14:28:45');
 
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151123141623', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151126093945', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151204140144', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151219181543', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151229103454', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160108101432', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160115143225', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160116085841', '2016-02-20 09:55:27', '2016-02-20 09:55:27'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160120143540', '2016-02-23 13:13:09', '2016-02-23 13:13:09'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-02-18 14:28:45', '2016-02-18 14:28:45'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-02-23 13:34:57', '2016-02-23 13:34:57'); 
-
- INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160301134214', '2016-03-01T13:48:39+00:00', '2016-03-01T13:48:39+00:00'); 

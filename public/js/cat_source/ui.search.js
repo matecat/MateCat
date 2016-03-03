@@ -407,11 +407,20 @@ $.extend(UI, {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html()
                     .replace(/&lt;/g, UI.openTagPlaceholder)
-                    .replace(/&gt;/g, UI.closeTagPlaceholder)
-                    .replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
-                    .replace(openTagReg, '&lt;')
-                    .replace(closeTagReg, '&gt;')
-                    .replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
+ 					.split(UI.openTagPlaceholder);
+
+				$.each(tt, function(i, elem){
+					elem = elem.replace(/&gt;/g, UI.closeTagPlaceholder)
+							.split(UI.closeTagPlaceholder);
+					$.each(elem, function(j, text){
+						elem[j] = text.replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
+					});
+					tt[i] = elem.join(UI.closeTagPlaceholder);
+				});
+				tt = tt.join(UI.openTagPlaceholder)
+						.replace(openTagReg, '&lt;')
+						.replace(closeTagReg, '&gt;')
+                		.replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
                 $(this).html(tt);
 			}
 		});

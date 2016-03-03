@@ -364,6 +364,6 @@ class Executor implements \SplObserver {
 }
 
 //$argv = array();
-//$argv[ 1 ] = '{"redis_key":"p3_list","queue_length":0,"queue_name":"analysis_queue_P3","pid_set_name":"ch_pid_set_p3","pid_list":[],"pid_list_len":0,"max_executors":"15","loggerName":"tm_analysis_P3.log"}';
+//$argv[ 1 ] = '{"redis_key":"mail_list","queue_length":0,"queue_name":"mail_queue","pid_set_name":"ch_pid_set_mail","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"mail_queue.log"}';
 
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

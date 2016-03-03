@@ -181,18 +181,20 @@ class commentController extends ajaxController {
         $userIsLogged = $this->userIsLogged ;
         $current_uid = $this->current_user->uid ;
 
-        $users = array_filter($users, function($item) use ( $userIsLogged, $current_uid ) {
+        // find deep duplicates
+        $uidSentList = array();
+        $users = array_filter($users, function($item) use ( $userIsLogged, $current_uid, &$uidSentList ) {
             if ( $userIsLogged && $current_uid == $item->uid ) {
                 return false;
             }
 
-            // FIXME: unoptimal way to find deep duplicates
-            foreach( $users as $k => $v ) {
-                if ( $item->uid == $v->uid ) {
-                    return false;
-                }
+            // find deep duplicates
+            if ( array_search( $item->uid, $uidSentList ) !== false ) {
+                return false;
             }
+            $uidSentList[] = $item->uid;
             return true ;
+
         });
 
         return $users;

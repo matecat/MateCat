@@ -949,31 +949,31 @@ top: 5%;
 	.popup-languages .header
 		{
 		width: 96.2%;
-		}     
-    
-.popup ul
-	{
-	margin:0px;
-	padding:0;
-	float:left;
-	list-style:none;
-	font-size:14px;
-	}
-	.format-box ul {
-		width: 100px;
-	}
-	.popup-languages ul
-		{
-        -webkit-column-count: 5;
-        column-count: 5;	
-        -moz-column-count: 5;
-        width:100% !important;
-        margin-top:20px;
 		}
-		
-		@-moz-document url-prefix() {
-   .popup-languages ul {
-         height: 520px;
+
+.popup ul {
+    margin: 0px;
+    padding: 0;
+    float: left;
+    list-style: none;
+    font-size: 14px;
+}
+
+.format-box ul {
+    width: 100px;
+}
+
+.popup-languages ul {
+    -webkit-column-count: 5;
+    column-count: 5;
+    -moz-column-count: 5;
+    width: 100% !important;
+    margin-top: 8px;
+}
+
+@-moz-document url-prefix() {
+    .popup-languages ul {
+        height: 520px;
     }
 }
 
@@ -982,12 +982,11 @@ top: 5%;
 	margin: 3px 0px 3px 2px;
 	padding: 1px 5px;
 	}
-	.popup-languages ul li
-		{
-		float: left;
-		display: inline;
-		margin: 0px 0px 1px 2px;
-		}
+.popup-languages ul li
+{
+    display: inline-block;
+    margin: 0px 0px 1px 2px;
+}
 #deselectMultilang
     {
     margin-left: 30px;
@@ -1007,46 +1006,37 @@ top: 5%;
 .close{background:url(../img/x.png) center 1px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
 .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background:url(../img/x.png) center -30px no-repeat;}
 
-.listlang
-	{
-	float:left;
-	padding:0 0 0 0;
-	margin:0 10px 50px 5px;
-	width:220px;
-	font-size:100%;
-	}
+.listlang {
+    float: left;
+    padding: 0 0 0 0;
+    margin: 0 10px 50px 5px;
+    width: 220px;
+    font-size: 100%;
+}
 
-.listlang li
-	{
-/*
-	height:18px;
-*/
-	width:200px;
-	padding:1px 0 1px 0;
-	overflow:hidden !important;
-	border-bottom:1px dotted #ccc;
-	line-height:24px;
-	}
-	.listlang li.on
-		{
-		font-weight:bold;
-		}		
-
-.listlang label
-    {
-    float: right;
+.listlang li {
+    width: 200px;
+    padding: 1px 0 1px 0;
+    overflow: hidden !important;
+    border-bottom: 1px dotted #ccc;
+    line-height: 22px;
     text-align: left;
-    cursor: pointer;
-    width: 88%;
-    padding-left: 0%;
-    padding-top:4px;
-    }
+}
 
-.listlang input
-	{
-	float: left;
+.listlang li.on {
+    font-weight: bold;
+}
+
+.listlang label {
+    display: inline-block;
+    cursor: pointer;
+    padding-left: 0%;
+    padding-top: 4px;
+}
+
+.listlang input {
     margin-top: 8px;
-	}
+}
 .popup .header input
 	{
 	float:right;

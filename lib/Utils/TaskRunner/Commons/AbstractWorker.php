@@ -61,6 +61,14 @@ abstract class AbstractWorker implements SplSubject {
      */
     abstract public function process( AbstractElement $queueElement, Context $queueContext );
 
+    /**
+     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
+     *
+     * @param QueueElement $queueElement
+     *
+     * @return void
+     */
+    abstract protected function _checkForReQueueEnd(  QueueElement $queueElement );
 
     /**
      * Attach an SplObserver
