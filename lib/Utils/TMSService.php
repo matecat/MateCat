@@ -416,16 +416,23 @@ class TMSService {
 
         foreach ( $result as $k => $row ) {
 
+            /**
+             * evaluate the incremental chunk index.
+             * If there's more than 1 chunk, add a 'id_chunk' prop to the segment
+             */
             $idChunk = 1;
-            foreach ( $chunks as $i => $chunk ) {
-                if($row[ 'id_segment' ] >= $chunk->job_first_segment  &&
-                        $row['id_segment'] <= $chunk->job_last_segment){
-                    $idChunk = $i+1;
-                    break;
+            $chunkPropString = '';
+            if(count($chunks) > 1) {
+                foreach ( $chunks as $i => $chunk ) {
+                    if ( $row[ 'id_segment' ] >= $chunk->job_first_segment &&
+                            $row[ 'id_segment' ] <= $chunk->job_last_segment
+                    ) {
+                        $idChunk = $i + 1;
+                        break;
+                    }
                 }
+                $chunkPropString = '<prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>';
             }
-
-
             $dateCreate = new DateTime( $row[ 'translation_date' ], new DateTimeZone( 'UTC' ) );
 
             $tmx = '
@@ -434,7 +441,7 @@ class TMSService {
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . $row[ 'filename' ] . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
-        <prop type="x-MateCAT-id_chunk">' . $idChunk . '</prop>
+        '.$chunkPropString.'
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . htmlspecialchars( $row[ 'segment' ] ) . '</seg>
         </tuv>
