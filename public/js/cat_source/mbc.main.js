@@ -403,7 +403,7 @@ if ( MBC.enabled() )
             renderSegmentBalloon( el );
         }
 
-        var closeSegment = function ( el ) {
+        var closeBalloon = function () {
             $( '.mbc-comment-balloon-outer' ).remove();
             // hackSnapEngage( false );
             $( 'article' ).removeClass( 'mbc-commenting-opened' );
@@ -650,6 +650,16 @@ if ( MBC.enabled() )
             }
         }
 
+        /**
+         * Close balloon if the user click on some dead area
+         * of the page.
+         */
+        $(document).on('click', function(e) {
+            if (e.target.closest('section') == null) {
+                closeBalloon();
+            }
+        });
+
         $( document ).on( 'ready', function () {
             initConstants();
 
@@ -776,7 +786,7 @@ if ( MBC.enabled() )
             if ( e.which == '27' ) {
                 e.preventDefault();
                 $( '.mbc-history-balloon-outer.mbc-visible' ).toggleClass( 'mbc-visible' );
-                closeSegment( $( '.mbc-comment-balloon-outer:visible' ).closest( 'section' ) );
+                closeBalloon();
             }
         } );
 
@@ -866,7 +876,7 @@ if ( MBC.enabled() )
         } );
 
         $( window ).on( 'segmentClosed', function ( e ) {
-            closeSegment( $( e.segment ) );
+            closeBalloon();
         } );
 
         $( window ).on( 'segmentOpened', function ( e ) {

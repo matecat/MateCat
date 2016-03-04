@@ -263,6 +263,12 @@ if ( ReviewImproved.enabled() ) {
         }
     });
 
+    $(document).on('click', function( e ) {
+        if (e.target.closest('section, #review-side-panel') == null) {
+            ReviewImproved.closePanel();
+        }
+    });
+
     $('#review-side-panel .review-issue-comments-buttons-right a')
         .on('click', function(e) { e.stopPropagation();  });
 
