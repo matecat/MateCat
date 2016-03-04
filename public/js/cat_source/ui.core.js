@@ -767,7 +767,8 @@ UI = {
 				UI.failedConnection(0, 'getMoreSegments');
 			},
 			success: function(d) {
-				UI.getMoreSegments_success(d);
+                $(document).trigger('segments:load', d.data);
+                UI.getMoreSegments_success(d);
 			}
 		});
 	},
