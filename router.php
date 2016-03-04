@@ -177,5 +177,9 @@ route(
     '/webhooks/gdrive/change/[:sourceLanguage]', 'GET', 
     'Webhooks\GDrive\ManageController', 'changeSourceLanguage'
 ); 
+route(
+    '/webhooks/gdrive/delete/[:file]', 'GET',
+    'Webhooks\GDrive\ManageController', 'deleteImportedFile'
+);
 
 $klein->dispatch();

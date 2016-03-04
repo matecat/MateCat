@@ -41,10 +41,12 @@ APP.tryListGDriveFiles = function() {
                 .append (
                     $('<button/>', {
                         'class': 'btn btn-dange ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary',
-                        'data-type': '',
-                        'data-url': 'http://matecat.dev:8080/lib/Utils/fileupload/?file=' + listFiles.fileName + '&_method=DELETE',
+                        'data-file': listFiles.fileName,
                         'role': 'button',
-                        'aria-disabled': 'false'
+                        'aria-disabled': 'false',
+                        click: function() {
+                            APP.deleteGDriveFile( $(this).data('file') );
+                        }
                     })
                     .append (
                         $('<span/>', {
@@ -79,6 +81,14 @@ APP.restartGDriveConversions = function () {
     $.getJSON('/webhooks/gdrive/change/' + sourceLang, function(response){
         if(response.success) {
             console.log('Source language changed.');
+        }
+    });
+};
+
+APP.deleteGDriveFile = function (fileName) {
+    $.getJSON('/webhooks/gdrive/delete/' + fileName, function(response){
+        if(response.success) {
+            window.open('/', '_self');
         }
     });
 };

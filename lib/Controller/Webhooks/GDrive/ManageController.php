@@ -6,6 +6,8 @@ use Bootstrap ;
 use Log;
 use API\V2\KleinController ;
 use INIT ; 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class ManageController extends KleinController {
     public function listImportedFiles() {
@@ -54,6 +56,10 @@ class ManageController extends KleinController {
         return $cacheFileDir;
     }
     
+    private function getUploadDir(){
+        return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input(INPUT_COOKIE, 'upload_session');
+    }
+    
     public function changeSourceLanguage() {
         Bootstrap::sessionStart();
         
@@ -75,7 +81,7 @@ class ManageController extends KleinController {
         
             $renameDirSuccess = rename($originalCacheFileDir, $newCacheFileDir);
 
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input(INPUT_COOKIE, 'upload_session');
+            $uploadDir = $this->getUploadDir();
 
             $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
             $newUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
@@ -104,6 +110,45 @@ class ManageController extends KleinController {
         );
         
         $this->response->json($response);
+    }
+    
+    private function deleteDirectory($dir) {
+        $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+        
+        foreach($files as $file) {
+            if ($file->isDir()){
+                rmdir($file->getRealPath());
+            } else {
+                unlink($file->getRealPath());
+            }
+        }
+        
+        rmdir($dir);
+    }
+    
+    public function deleteImportedFile() {
+        Bootstrap::sessionStart();
+        
+        $fileName = $_SESSION['pre_loaded_file'];
+        
+        $success = false;
+        
+        if($this->request->file == $fileName) {
+            $pathCache = $this->getCacheFileDir();
+            $pathUpload = $this->getUploadDir();
+            
+            $this->deleteDirectory($pathCache);
+            $this->deleteDirectory($pathUpload);
+        
+            $_SESSION['pre_loaded_file'] = null;
+            
+            $success = true;
+        }
+        
+        $this->response->json( array(
+            "success" => $success
+        ));
     }
     
     protected function afterConstruct() {
