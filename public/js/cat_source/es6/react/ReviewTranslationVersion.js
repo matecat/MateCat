@@ -1,16 +1,12 @@
 export default React.createClass({
     getInitialState : function() {
-        console.log( 'props ------------', this.props );
-
         return {
             collapsed : this.props.isCurrent == false
         }; 
     },
 
     componentWillReceiveProps : function(nextProps) {
-        console.log( 'receiving props', nextProps );
-
-        this.setState({ collapsed : !nextProps.isCurrent });
+        this.setState({ collapsed : !nextProps.isCurrent, trackChanges : false });
     },
 
     issueMouseEnter : function( issue, event, reactid ) {

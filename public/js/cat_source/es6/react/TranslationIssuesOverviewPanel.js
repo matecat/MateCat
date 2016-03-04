@@ -5,7 +5,6 @@ export default React.createClass({
     },
 
     componentWillReceiveProps : function( nextProps ) {
-        console.log( nextProps );
         this.setState( this.getStateFromSid( nextProps.sid ) );
     }, 
 
@@ -55,7 +54,7 @@ export default React.createClass({
             var previous = this.findPreviousVersion( this.state.segment.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders(previous.translation),
-                this.state.segment.translation );
+                UI.clenaupTextFromPleaceholders( this.state.segment.translation ));
         }
     },
 
@@ -70,7 +69,7 @@ export default React.createClass({
             var previous = this.findPreviousVersion( version.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders(previous.translation),
-                version.translation );
+                UI.clenaupTextFromPleaceholders( version.translation ));
         }
     },
 
@@ -80,7 +79,7 @@ export default React.createClass({
         }); 
 
         var previousVersions = sorted_versions.map( function(v) {
-            var key = 'version-' + v.id ;
+            var key = 'version-' + v.id + '-' + this.props.sid ;
 
             return (
                 <ReviewTranslationVersion 
@@ -94,9 +93,11 @@ export default React.createClass({
             ); 
         }.bind(this) ); 
 
+        var key = 'version-0-' + this.props.sid ;
         var currentVersion = <ReviewTranslationVersion 
             trackChangesMarkup={this.getTrackChangesForCurrentVersion()}
             sid={this.state.segment.sid}
+            key={'version-0'}
             versionNumber={this.state.segment.version_number}
             isCurrent={true} 
             translation={this.state.segment.translation} />
