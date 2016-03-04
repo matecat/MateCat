@@ -2,6 +2,7 @@
 .settings
 .idea
 .project
+nbproject/
 
 # Configuration files
 .num_processes
