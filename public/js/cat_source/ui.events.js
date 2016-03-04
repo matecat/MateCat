@@ -72,7 +72,7 @@ $.extend(UI, {
 	setEvents: function() {
 		this.bindShortcuts();
 
-        var resetTextArea = function () {
+        var resetTextArea = _.debounce( function () {
             console.debug( 'resetting') ;
             var $this = $(this);
             var maxHeight = $this.data('maxheight');
@@ -97,7 +97,7 @@ $.extend(UI, {
             } else {
                 $this.css( "overflow-y", "hidden" );
             }
-        }
+        }, 100 );
 
         $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
         $( document ).on( 'paste', '.mc-resizable-textarea', function () {

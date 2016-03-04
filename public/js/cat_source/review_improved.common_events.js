@@ -197,6 +197,7 @@ if ( ReviewImproved.enabled() ) {
         putSegmentsInStore( data );
     });
 
+
     var updateLocalTranslationVersions = function( data ) {
         $(data.versions).each(function() {
             MateCat.db.upsert('segment_versions', 'id', this ) ;
