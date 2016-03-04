@@ -22,7 +22,7 @@ class ManageController extends KleinController {
                 'fileSize' => $fileSize
             );
 
-            echo json_encode($response);
+            $this->response->json($response);
         }
     }
     
@@ -103,7 +103,7 @@ class ManageController extends KleinController {
             "success" => ($renameDirSuccess && $renameFileRefSuccess)
         );
         
-        echo json_encode($response);
+        $this->response->json($response);
     }
     
     protected function afterConstruct() {
