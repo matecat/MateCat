@@ -9,6 +9,17 @@ Review = {
     type : config.reviewType
 };
 
+$.extend( UI, {
+    clenaupTextFromPleaceholders : function(text) {
+        text = text
+            .replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+        return text;
+    }
+});
 
 if ( Review.enabled() )
 (function(Review, $, undefined) {
@@ -35,16 +46,6 @@ if ( Review.enabled() )
     });
 
     $.extend(UI, {
-
-        clenaupTextFromPleaceholders : function(text) {
-            text = text
-                .replace( config.lfPlaceholderRegex, "\n" )
-                .replace( config.crPlaceholderRegex, "\r" )
-                .replace( config.crlfPlaceholderRegex, "\r\n" )
-                .replace( config.tabPlaceholderRegex, "\t" )
-                .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-            return text;
-        },
 
         trackChanges: function (editarea) {
             var source = UI.currentSegment.find('.original-translation').text();

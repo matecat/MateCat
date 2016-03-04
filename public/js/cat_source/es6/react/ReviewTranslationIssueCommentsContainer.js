@@ -35,6 +35,10 @@ export default React.createClass({
     },
     sendClick : function() {
         // send action invokes ReviewImproved function
+        if ( this.state.comment_text.length == 0 ) {
+            return ;
+        }
+
         var data = {
           message : this.state.comment_text,
           source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property

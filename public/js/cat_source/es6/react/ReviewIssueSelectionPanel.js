@@ -5,7 +5,8 @@ export default React.createClass({
     getInitialState : function() {
         return {
             category : null, 
-            severity : null 
+            severity : '',
+            submitDisabled : true,
         }; 
     },
     autoShortLabel : function(label) {
@@ -21,28 +22,25 @@ export default React.createClass({
 
         this.setState({
             category : category, 
-            severity : severity
+            severity : severity,
+            submitDisabled : severity == ''
         }); 
     },
 
     buttonClasses : function() {
-        var severitySet = this.state.severity != null ; 
-        var categorySet = this.state.category != null; 
-        var disabled = this.state.submitDone || !(categorySet && severitySet) ;
-
         return classnames({
             'mc-button' : true,
             'blue-button' : true, 
-            'disabled' : disabled 
+            'disabled' : this.state.submitDisabled
         });
     },
 
     sendClick : function() {
-        if ( this.state.submitDone ) {
+        if ( this.state.submitDisabled ) {
             return; 
         }
 
-        this.setState({ submitDone : true }); 
+        this.setState({ submitDone: true, submitDisabled : true });
 
         var message = $('textarea', ReactDOM.findDOMNode( this )).val();
 
