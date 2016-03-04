@@ -2894,50 +2894,6 @@ console.log('eccolo: ', typeof token);
 		}).show();
 	},
 
-	/*
-	 // for future implementation
-
-	 getSegmentComments: function(segment) {
-	 var id_segment = $(segment).attr('id').split('-')[1];
-	 var id_translator = config.id_translator;
-	 $.ajax({
-	 url: config.basepath + '?action=getSegmentComment',
-	 data: {
-	 action: 'getSegmentComment',
-	 id_segment: id_segment,
-	 id_translator: id_translator
-	 },
-	 type: 'POST',
-	 dataType: 'json',
-	 context: segment,
-	 success: function(d){
-	 $('.numcomments',this).text(d.data.length);
-	 $.each(d.data, function() {
-	 $('.comment-area ul .newcomment',segment).before('<li><p><strong>'+this.author+'</strong><span class="date">'+this.date+'</span><br />'+this.text+'</p></li>');
-	 });
-	 }
-	 });
-	 },
-
-	 addSegmentComment: function(segment) {
-	 var id_segment = $(segment).attr('id').split('-')[1];
-	 var id_translator = config.id_translator;
-	 var text = $('.newcomment textarea',segment).val();
-	 $.ajax({
-	 url: config.basepath + '?action=addSegmentComment',
-	 data: {
-	 action: 'addSegmentComment',
-	 id_segment: id_segment,
-	 id_translator: id_translator,
-	 text: text
-	 },
-	 type: 'POST',
-	 dataType: 'json',
-	 success: function(d){
-	 }
-	 });
-	 },
-	 */
     storeClientInfo: function () {
         clientInfo = {
             xRes: window.screen.availWidth,
