@@ -67,13 +67,10 @@ export default React.createClass({
             var selectedValue = "";
 
             if ( this.state.category && this.state.category.id == category.id ) {
-                // we are rerendering due to a selection,
-                // so pass selected value property on the right component.
                 selectedValue = this.state.severity ;
             }
 
             var k = 'category-selector-' + i ;
-            console.debug( k )  ;
 
             categoryComponents.push(
                 <ReviewIssueCategorySelector 
@@ -86,7 +83,11 @@ export default React.createClass({
                 category.subcategories.forEach( function(category, ii) {
                     var key = '' + i + '-' + ii;
                     var kk = 'category-selector-' + key ;
-                    console.debug( kk );
+                    var selectedValue = "";
+
+                    if ( this.state.category && this.state.category.id == category.id ) {
+                        selectedValue = this.state.severity ;
+                    }
 
                     categoryComponents.push(
                         <ReviewIssueCategorySelector 
