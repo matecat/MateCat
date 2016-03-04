@@ -6,6 +6,8 @@ class ProtectedKleinController extends KleinController {
     protected $api_secret ;
     protected $api_record ;
 
+    protected $request;
+
     private function validateAuth() {
         $headers = $this->request->headers();
 

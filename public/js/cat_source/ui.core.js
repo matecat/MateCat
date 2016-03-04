@@ -1263,8 +1263,6 @@ UI = {
 						'		</li>' +
 						'		<li class="wordcounter">' +
                         '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
-//                '			To-do: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
-//						'			<span id="rejected" class="hidden">Rejected: <strong>' + fs.REJECTED_FORMATTED + '</strong></span>' +
 						'		</li>' +
 						'	</ul>';
 			}
@@ -1296,25 +1294,22 @@ UI = {
 				}
 			}
 		});
+
+        $(document).trigger('files:appended');
+
 		if (starting) {
 			this.init();
 		}
+
 	},
     stripSpans: function (str) {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
     normalizeSplittedSegments: function (segments) {
-//        console.log('segments: ', segments);
-
         newSegments = [];
         $.each(segments, function (index) {
-//            console.log('seg: ', this.segment.split(UI.splittedTranslationPlaceholder));
-//            console.log('aaa: ', this.segment);
             splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
-//            console.log('splittedSourceAr: ', splittedSourceAr);
             if(splittedSourceAr.length > 1) {
-//            if(this.split_points_source.length) {
-//                console.log('a');
                 segment = this;
                 splitGroup = [];
                 $.each(splittedSourceAr, function (i) {
@@ -1368,16 +1363,10 @@ UI = {
         var t = config.time_to_edit_enabled;
         newSegments = '';
         $.each(segments, function(index) {
-//                this.readonly = true;
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
-            // temp, simulation
-//            this.same_source_segments = true;
-            // end temp
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
-//            console.log('this: ', this);
             if(typeof this.segment == 'object') console.log(this);
-//            console.log('this.segment: ', this);
 
             try {
                 if($.parseHTML(this.segment).length) {
@@ -1390,9 +1379,7 @@ UI = {
                 //so SKIP in a catched exception
             }
 
-//            console.log('corrected: ', this.segment.replace(/<span(.*?)>/gi, ''));
             var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-//            console.log('escapedSegment: ', escapedSegment);
 
             /* this is to show line feed in source too, because server side we replace \n with placeholders */
             escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
@@ -1406,6 +1393,8 @@ UI = {
             }
 
         });
+
+
         return newSegments;
     },
 
@@ -2258,7 +2247,7 @@ console.log('eccolo: ', typeof token);
             this.checkConnection( 'Set Translation check Authorized' );
 
         } else {
-            if ( !this.executingSetTranslation ) this.execSetTranslationTail();
+            if ( !this.executingSetTranslation ) return this.execSetTranslationTail();
         }
     },
     alreadyInSetTranslationTail: function (sid) {
@@ -2298,7 +2287,7 @@ console.log('eccolo: ', typeof token);
         if ( UI.setTranslationTail.length ) {
             item = UI.setTranslationTail[0];
             UI.setTranslationTail.shift(); // to move on ajax callback
-            UI.execSetTranslation(item);
+            return UI.execSetTranslation(item);
         }
     },
 
@@ -2375,16 +2364,14 @@ console.log('eccolo: ', typeof token);
             },
 			success: function( data ) {
                 UI.executingSetTranslation = false;
+                if ( typeof callback == 'function' ) {
+                    callback(data);
+                }
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
                 $(document).trigger('setTranslation:success', data);
 
-                var segment_change_data = {
-                    sid: id_segment,
-                    status: status,
-                    translation : translation
-                };
-                $(document).trigger('segment:change', segment_change_data);
+                $(document).trigger('translation:change', data.translation);
 			}
 		});
 	},

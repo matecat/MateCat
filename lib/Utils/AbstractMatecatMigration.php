@@ -25,7 +25,7 @@ class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
         $devDatabase = new SchemaCopy($dev_ini['development']);
         $statements = $devDatabase->getTablesStatements();
 
-        $sql = "";
+        $sql = $devDatabase->getDatabaseCreationStatement();
         foreach($statements as $key => $statement ) {
             $sql .= preg_replace('/AUTO_INCREMENT=\d+/i', '', $statement[0]['Create Table']);
             $sql .= "; \n\n";
@@ -44,14 +44,16 @@ class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
                 continue;
             }
 
-            $sql .= "\n INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES (" .
-              " '${record['version']}', '${record['start_time']}', '${record['end_time']}'); \n";
+            $sql .= "\nINSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES (" .
+              " '${record['version']}', '${record['start_time']}', '${record['end_time']}');";
         }
 
         if ( $direction == 'up' ) {
-            $sql .= "\n INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES (" .
-                    " '$this->version', '" . date('c') ."', '" . date('c') . "'); \n";
+            $sql .= "\nINSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES (" .
+                    " '$this->version', '" . date('c') ."', '" . date('c') . "');";
         }
+
+        $sql .= $seedLoader->getConversionLogSchema();
 
         file_put_contents( INIT::$ROOT . '/lib/Model/matecat.sql', $sql );
     }

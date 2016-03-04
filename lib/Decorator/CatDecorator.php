@@ -25,6 +25,9 @@ class CatDecorator {
       $this->template->header_main_button_label = $this->getHeaderMainButtonLabel();
       $this->template->header_main_button_id = 'downloadProject';
 
+
+      $this->template->status_labels = json_encode( $this->getStatusLabels() );
+
       if ( $this->controller->isRevision() ) {
           $this->decorateForRevision();
       }
@@ -57,6 +60,18 @@ class CatDecorator {
         return array_map(function($item) {
             return (object) array( 'value' => $item, 'label' => $item );
         }, $statuses );
+    }
+
+    private function getStatusLabels() {
+        return array(
+                Constants_TranslationStatus::STATUS_NEW        => 'New',
+                Constants_TranslationStatus::STATUS_DRAFT      => 'Draft',
+                Constants_TranslationStatus::STATUS_TRANSLATED => 'Translated',
+                Constants_TranslationStatus::STATUS_APPROVED   => 'Approved',
+                Constants_TranslationStatus::STATUS_REJECTED   => 'Rejected',
+                Constants_TranslationStatus::STATUS_FIXED      => 'Fixed',
+                Constants_TranslationStatus::STATUS_REBUTTED   => 'Rebutted'
+        );
     }
 
   private function getHeaderMainButtonLabel() {

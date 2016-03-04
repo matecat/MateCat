@@ -20,6 +20,7 @@ class TranslationIssueComment extends ProtectedKleinController {
         $data = array(
             'comment' => $this->request->message,
             'id_qa_entry' => $this->validator->issue->id,
+            'source_page' => $this->request->source_page
         );
 
         $result = EntryCommentDao::createComment( $data );

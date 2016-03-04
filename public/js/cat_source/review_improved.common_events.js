@@ -14,22 +14,6 @@ if ( ReviewImproved.enabled() ) {
             ReviewImproved.renderCommentList( issue );
         },
 
-        loadIssuesForVersion : function( segment ) {
-            var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation/issues?version_number=%s',
-                config.id_job, config.password,
-                segment.id, segment.el.data('revertingVersion')
-            );
-            $.getJSON( issues_path )
-            .done(function( data ) {
-                if ( data.issues.length ) {
-                    $.each( data.issues, function() {
-                        MateCat.db.upsert('segment_translation_issues', 'id', _.clone(this) );
-                    });
-                }
-            });
-        },
-
         // TODO: rerender issue detail instead
         renderCommentList : function( issue ) {
             var selector = sprintf(
@@ -133,118 +117,117 @@ if ( ReviewImproved.enabled() ) {
             UI.Segment.findEl( record.sid ).find('[data-mount=translation-issues]').html( tpl );
         },
 
-        highlightIssue : function(e) {
-            var container = $(e.target).closest('.issue-container');
-            var issue = MateCat.db.segment_translation_issues.findObject({
-                id : container.data('issue-id') + ''
-            });
-            var segment = MateCat.db.segments.findObject({sid : issue.id_segment});
+        // highlightIssue : function(e) {
+        //     var container = $(e.target).closest('.issue-container');
+        //     var issue = MateCat.db.segment_translation_issues.findObject({
+        //         id : container.data('issue-id') + ''
+        //     });
+        //     var segment = MateCat.db.segments.findObject({sid : issue.id_segment});
 
-            // TODO: check for this to be really needed
-            if ( container.data('current-issue-id') == issue.id ) {
-                return ;
-            }
+        //     // TODO: check for this to be really needed
+        //     if ( container.data('current-issue-id') == issue.id ) {
+        //         return ;
+        //     }
 
-            // TODO: check for this to be really needed
-            container.data('current-issue-id', issue.id);
-            var selection = document.getSelection();
-            selection.removeAllRanges();
+        //     // TODO: check for this to be really needed
+        //     container.data('current-issue-id', issue.id);
+        //     var selection = document.getSelection();
+        //     selection.removeAllRanges();
 
-            var area = container.closest('section').find('.issuesHighlightArea') ;
+        //     var area = container.closest('section').find('.issuesHighlightArea') ;
 
-            // TODO: fix this to take into account cases when monads are in place
-            var contents       = area.contents() ;
-            var range = document.createRange();
+        //     // TODO: fix this to take into account cases when monads are in place
+        //     var contents       = area.contents() ;
+        //     var range = document.createRange();
 
-            range.setStart( contents[ issue.start_node ], issue.start_offset );
-            range.setEnd( contents[ issue.end_node ], issue.end_offset );
+        //     range.setStart( contents[ issue.start_node ], issue.start_offset );
+        //     range.setEnd( contents[ issue.end_node ], issue.end_offset );
 
-            selection.addRange( range );
-        },
+        //     selection.addRange( range );
+        // },
 
-        resetHighlight : function(e) {
-            var selection = document.getSelection();
-            selection.removeAllRanges();
+        // resetHighlight : function(e) {
+        //     var selection = document.getSelection();
+        //     selection.removeAllRanges();
 
-            var segment = new UI.Segment( $(e.target).closest('section'));
-            var container = $(e.target).closest('.issue-container');
+        //     var segment = new UI.Segment( $(e.target).closest('section'));
+        //     var container = $(e.target).closest('.issue-container');
 
-            container.data('current-issue-id', null) ; // TODO: check for this to be really needed
+        //     container.data('current-issue-id', null) ; // TODO: check for this to be really needed
 
-            var section = container.closest('section');
+        //     var section = container.closest('section');
 
-            var area = section.find('.issuesHighlightArea') ;
-            var issue = MateCat.db.segment_translation_issues.findObject({
-                id : container.data('issue-id') + ''
-            });
-            area.html(
-                UI.decodePlaceholdersToText(
-                    ReviewImproved.getTranslationText( segment )
-                )
-            );
-        },
-
-        versionsAndIssuesPromise : function( segment ) {
-            var versions_path  = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation/versions',
-                config.id_job, config.password, segment.id
-            );
-
-            var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation/issues',
-                config.id_job, config.password, segment.id
-            );
-
-            return $.when(
-                $.getJSON( versions_path )
-                .done(function( data ) {
-                    if ( data.versions.length ) {
-                        $.each( data.versions, function() {
-                            MateCat.db.upsert('segment_versions', 'id', _.clone(this) );
-                        });
-                    }
-                })
-                ,
-                $.getJSON( issues_path )
-                .done(function( data ) {
-                    if ( data.issues.length ) {
-                        $.each( data.issues, function() {
-                            this.formattedDate = moment(this.created_at).format('lll');
-                            MateCat.db.upsert('segment_translation_issues', 'id',
-                                              _.clone(this) );
-                        });
-                    }
-                })
-            );
-        }
+        //     var area = section.find('.issuesHighlightArea') ;
+        //     var issue = MateCat.db.segment_translation_issues.findObject({
+        //         id : container.data('issue-id') + ''
+        //     });
+        //     area.html(
+        //         UI.decodePlaceholdersToText(
+        //             ReviewImproved.getTranslationText( segment )
+        //         )
+        //     );
+        // },
     });
 
     $(document).on('issue_comments:load', ReviewImproved.commentsLoaded);
 
-    $(document).on('segments:load', function(e, data) {
+    $(document).on('files:appended', function initReactComponents() {
+        loadDataPromise.done(function() {
+            $('section [data-mount=translation-issues-button]').each(function() {
+                ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
+                        sid : $(this).data('sid')
+                    } ), this );
+            });
+        });
+    });
+
+    var putSegmentsInStore = function(data) {
         $.each(data.files, function() {
             $.each( this.segments, function() {
                 MateCat.db.upsert( 'segments', 'sid', _.clone( this ) );
             });
         });
+    }
+
+    $(document).on('ready', function() {
+        ReviewImproved.mountPanelComponent();
     });
 
-    $(document).on('change', '.version-picker', function(e) {
-        var segment = new UI.Segment( $(e.target).closest('section'));
-        var target = $(e.target);
-        var value = target.val();
-        if ( value == '' ) {
-            segment.el.removeClass('reverted');
-            segment.el.data('revertingVersion', null);
-        }
-        else {
-            segment.el.addClass('reverted');
-            segment.el.data('revertingVersion', value);
-            ReviewImproved.loadIssuesForVersion( segment );
-        }
-
-        $(document).trigger('segmentVersionChanged', segment);
+    $(document).on('segments:load', function(e, data) {
+        putSegmentsInStore( data );
     });
+
+    var updateLocalTranslationVersions = function( data ) {
+        $(data.versions).each(function() {
+            MateCat.db.upsert('segment_versions', 'id', this ) ;
+        });
+    };
+
+    var loadDataPromise = (function() {
+        var issues =  sprintf(
+            '/api/v2/jobs/%s/%s/translation-issues',
+            config.id_job, config.password
+        );
+
+        var versions =  sprintf(
+            '/api/v2/jobs/%s/%s/translation-versions',
+            config.id_job, config.password
+        );
+
+        return $.when(
+            $.getJSON( issues ).done(function( data ) {
+                $(data.issues).each(function() {
+                    MateCat.db.upsert('segment_translation_issues',
+                                  'id', this ) ;
+                });
+            }),
+
+            // jQuery oddity here: function must be passed in array,
+            // maybe because we are inside when. Otherwise it doesn't get
+            // fired.
+            $.getJSON( versions ).done( [ updateLocalTranslationVersions ] )
+        );
+    })();
 
     $(document).on('click', '.action-view-issue', function(e) {
         var container =  $(e.target).closest('.issue-container') ;
@@ -254,6 +237,7 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', 'input[data-action=submit-issue-reply]', function(e) {
+
         var container = $(e.target).closest('.issue-detail-modal');
         var issue = MateCat.db.segment_translation_issues
             .by('id', container.data('issue-id'));
@@ -263,22 +247,31 @@ if ( ReviewImproved.enabled() ) {
           source_page : config.isReview
         };
 
-        var replies_path = sprintf(
-            '/api/v2/jobs/%s/%s/segments/%s/translation/issues/%s/comments',
-            config.id_job, config.password,
-            issue.id_segment,
-            issue.id
-        );
-
-        $.ajax({
-            url: replies_path,
-            type: 'POST',
-            data : data
-        }).done( function( data ) {
-            MateCat.db.segment_translation_issue_comments.insert ( data.comment );
-            $(document).trigger('issue_comments:load', issue );
-            ReviewImproved.renderCommentList( issue );
-        });
+        ReviewImproved.submitComment( data );
 
     });
+
+    $(window).on('segmentClosed', function( e ) {
+        // ReviewImproved.closePanel();
+    });
+
+    $( document ).on( 'keydown', function ( e ) {
+        var esc = '27' ;
+        if ( e.which == esc ) {
+            ReviewImproved.closePanel();
+        }
+    });
+
+    $('#review-side-panel .review-issue-comments-buttons-right a')
+        .on('click', function(e) { e.stopPropagation();  });
+
+    $(document).on('translation:change', function(e, data) {
+        var versions_path =  sprintf(
+            '/api/v2/jobs/%s/%s/segments/%s/translation-versions',
+            config.id_job, config.password, data.sid
+        );
+
+        $.getJSON( versions_path ).done( updateLocalTranslationVersions );
+    });
+
 }

@@ -51,6 +51,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param $id_job
+     *
+     * @return Jobs_JobStruct
+     */
     public static function getById( $id_job ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ?");

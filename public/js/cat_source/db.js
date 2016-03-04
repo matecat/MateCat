@@ -6,6 +6,12 @@ if ( true ) // < TODO: investigate: chrome raises weird excetpion if this is mis
     root.MateCat = root.MateCat || {};
     db = {};
 
+    // AppState experimental
+    db.appstate = _db.addCollection('appstate', {
+        indices: ['key']
+    }) ;
+    db.appstate.ensureUniqueIndex('key');
+
     // Segments
     db.segments = _db.addCollection('segments', {
         indices: ['sid']
@@ -34,6 +40,18 @@ if ( true ) // < TODO: investigate: chrome raises weird excetpion if this is mis
 
     root.MateCat.db = db;
 
+    MateCat.db.addListener = function(collection, events, func) {
+        _.each(events, function (event) {
+            MateCat.db[collection].on( event, func );
+        });
+    }
+
+    MateCat.db.removeListener = function(collection, events, func) {
+        _.each(events, function (event) {
+            MateCat.db[collection].removeListener( event, func );
+        });
+    }
+
     MateCat.db.upsert = function(collection, key, data) {
         var coll = MateCat.db[collection];
         var record = coll.by(key, data[key]) ;
@@ -45,7 +63,7 @@ if ( true ) // < TODO: investigate: chrome raises weird excetpion if this is mis
         }
     }
 
-    $(document).on('segment:change', function(e, data) {
+    $(document).on('translation:change', function(e, data) {
         var record = MateCat.db.segments.by('sid', data.sid);
         MateCat.db.segments.update( _.extend(record, data) );
     });

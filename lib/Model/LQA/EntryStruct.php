@@ -20,7 +20,6 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $comment ;
     public $create_date ;
     public $target_text ;
-    public $category ;
 
     public function setDefaults() {
         // set the translation reading the version number on the

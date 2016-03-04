@@ -18,6 +18,13 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
         return CategoryDao::getSerializedModel( $this->id );
     }
 
+    /**
+     * @return CategoryStruct[]
+     */
+    public function getCategories() {
+        return CategoryDao::getCategoriesByModel( $this );
+    }
+
 
     /**
      * @return mixed

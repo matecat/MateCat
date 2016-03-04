@@ -6,11 +6,11 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
     var versions = db.segment_versions ;
     var segments = db.segments ;
 
-    issues.on('update', issueRecordChanged);
-    issues.on('insert', issueRecordChanged);
+    // issues.on('update', issueRecordChanged);
+    // issues.on('insert', issueRecordChanged);
 
-    versions.on('update', versionRecordChanged);
-    versions.on('insert', versionRecordChanged);
+    // versions.on('update', versionRecordChanged);
+    // versions.on('insert', versionRecordChanged);
 
     function issueRecordChanged( record ) {
         var segment = UI.Segment.find( record.id_segment );
@@ -20,7 +20,7 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
 
     function versionRecordChanged( record ) {
         var segment = UI.Segment.find( record.id_segment );
-        updateVersionDependentViews( segment )
+        updateVersionDependentViews( segment );
     }
 
     function updateHighlightArea( segment ) {
@@ -43,20 +43,12 @@ if ( ReviewImproved.enabled() && !config.isReview ) {
         updateHighlightArea( segment );
     }
 
-    $(window).on('segmentOpened', function( e ) {
-        var segment = e.segment;
-
-        ReviewImproved.versionsAndIssuesPromise( segment )
-        .done(function(versions, issues) {
-            updateVersionDependentViews( segment );
-        });
-    });
 
     $(document).on('segmentVersionChanged', function(e, segment) {
         updateVersionDependentViews( segment );
     });
 
-    $(document).on('segment:change', function(e, data) {
+    $(document).on('translation:change', function(e, data) {
         var segment = UI.Segment.find( data.sid );
         UI.createButtons( segment );
     });

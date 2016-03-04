@@ -17,6 +17,113 @@ ReviewImproved.enabled = function() {
     return Review.type == 'improved';
 }
 
+if ( ReviewImproved.enabled() )
+(function($, ReviewImproved, undefined) {
+
+    var mountpoint ;
+
+    $(function() {
+        mountpoint = $('[data-mount=review-side-panel]')[0];
+    });
+
+    $.extend( ReviewImproved, {
+
+        deleteIssue : function( issue ) {
+            var message = sprintf(
+                "You are about to delete the issue on string '%s' posted on %s." ,
+                issue.target_text,
+                moment( issue.created_at ).format('lll')
+            );
+
+            APP.confirm({
+                name : 'Confirm issue deletion',
+                callback : 'deleteTranslationIssue',
+                msg: message,
+                okTxt: 'Yes delete this issue',
+                context: JSON.stringify({
+                    id_segment : issue.id_segment,
+                    id_issue : issue.id
+                })
+            });
+        },
+
+        highlightIssue : function(issue, node) {
+            console.log('highlightIssue', issue, node );
+            var selection = document.getSelection();
+            selection.removeAllRanges();
+
+            var contents = node.contents();
+            var range = document.createRange();
+
+            range.setStart( contents[ issue.start_node ], issue.start_offset );
+            range.setEnd( contents[ issue.end_node ], issue.end_offset );
+
+            selection.addRange( range );
+        },
+
+        loadComments : function(id_segment, id_issue) {
+            var issue_comments = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
+                config.id_job, config.password,
+                id_segment,
+                id_issue
+            );
+
+            $.getJSON(issue_comments).done(function(data) {
+                $.each( data.comments, function( comment ) {
+                    MateCat.db.upsert('segment_translation_issue_comments', 'id', this );
+                });
+            });
+        },
+        submitComment : function(id_segment, id_issue, data) {
+            var replies_path = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
+                config.id_job, config.password,
+                id_segment,
+                id_issue
+            );
+
+            $.ajax({
+                url: replies_path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                MateCat.db.segment_translation_issue_comments.insert ( data.comment );
+            });
+        },
+        unmountPanelComponent : function() {
+            ReactDOM.unmountComponentAtNode( mountpoint );
+        },
+
+        mountPanelComponent : function() {
+            ReactDOM.render(
+                React.createElement( ReviewSidePanel, {} ),
+                mountpoint );
+        },
+
+        openPanel : function(data) {
+            $('article').addClass('review-panel-opened');
+            $('body').addClass('side-tools-opened');
+            hackSnapEngage( true );
+
+            $(document).trigger('review-panel:opened', data);
+        },
+
+        isPanelOpened : function() {
+            $('article').hasClass('review-panel-opened');
+        },
+
+        closePanel : function() {
+            $(document).trigger('review-panel:closed');
+
+            hackSnapEngage( false );
+
+            $('article').removeClass('review-panel-opened');
+            $('body').removeClass('side-tools-opened');
+        }
+    });
+})(jQuery, ReviewImproved);
+
 /**
  * Review page
  */
@@ -29,30 +136,33 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         segment.el.find('.errorTaggingArea').click();
     });
 
-    // Register footer
-    UI.SegmentFooter.registerTab({
-        code                : 'review',
-        tab_class           : 'review',
-        label               : 'Revise',
-        activation_priority : 60,
-        tab_position        : 50,
-        is_enabled    : function( footer ) {
-            return true;
-        },
-        tab_markup          : function( footer ) {
-            return this.label ;
-        },
-        content_markup      : function( footer ) {
-            var data = { id : footer.segment.id };
-            return MateCat.Templates['review_improved/review_tab_content'](data);
-        },
-        is_hidden    : function( footer ) {
-            return false;
-        },
-    });
-
-
     $.extend(ReviewImproved, {
+        submitIssue : function(sid, data, options) {
+
+            var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
+                  config.id_job, config.password, sid);
+
+            var segment = UI.Segment.find( sid );
+
+            var submitIssue = function() {
+                $.post( path, data )
+                .done(function( data ) {
+                    MateCat.db.segment_translation_issues.insert( data.issue ) ;
+                    ReviewImproved.reloadQualityReport();
+
+                    options.done( data );
+                })
+            }
+
+            UI.setTranslation({
+                id_segment: segment.id,
+                status: 'rejected',
+                caller: false,
+                byStatus: false,
+                propagate: false,
+                callback : submitIssue
+            });
+        },
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
                 config.id_job, config.password);
@@ -67,43 +177,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                         $('#quality-report').attr('data-vote', 'fail');
                     }
                 });
-        }
-    })
+        },
 
-}
-
-/**
- * Translate page
- */
-
-if ( ReviewImproved.enabled() && !config.isReview ) {
-(function($, root, undefined) {
-    UI.SegmentFooter.registerTab({
-        code                : 'review',
-        tab_class           : 'review',
-        label               : 'Review issues',
-        activation_priority : 60,
-        tab_position        : 50,
-        is_enabled    : function( footer ) {
-            return true;
-        },
-        tab_markup          : function( footer ) {
-            return this.label ;
-        },
-        content_markup      : function( footer ) {
-            var data = { id : footer.segment.id };
-            return MateCat.Templates['review_improved/issues_tab_content'](data);
-        },
-        is_hidden    : function( footer ) {
-            return false;
-        },
     });
-
-    $.extend(UI, {
-        showRevisionStatuses : function() {
-            return false;
-        }
-    });
-
-})(jQuery, window) ;
 }

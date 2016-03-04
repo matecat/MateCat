@@ -3,7 +3,7 @@ if ( ReviewImproved.enabled() ) {
     $.extend(UI, {
         get showPostRevisionStatuses() {
             return true;
-        }
+        },
     });
 })(jQuery, window);
 }

@@ -495,8 +495,6 @@ class setTranslationController extends ajaxController {
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
             Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
-//                $x1 = explode( "\n" , var_export( $old_translation, true) );
-//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
             $db->rollback();
 
             return $e->getCode();
@@ -518,6 +516,8 @@ class setTranslationController extends ajaxController {
         $this->result[ 'code' ]       = 1;
         $this->result[ 'data' ]       = "OK";
         $this->result[ 'version' ]    = date_create( $_Translation[ 'translation_date' ] )->getTimestamp();
+
+        $this->result[ 'translation' ] = $this->getTranslationObject($_Translation);
 
         /* FIXME: added for code compatibility with front-end. Remove. */
         $_warn   = $check->getWarnings();
@@ -567,6 +567,21 @@ class setTranslationController extends ajaxController {
             }
         }
 
+    }
+
+    /**
+     * This method returns a representation of the saved translation which
+     * should be as much as possible compliant with the future API v2.
+     *
+     */
+    private function getTranslationObject( $saved_translation ) {
+        $translation = array(
+                'version_number' => $saved_translation['version_number'],
+                'sid'            => $saved_translation['id_segment'],
+                'translation'    => \CatUtils::rawxliff2view( $saved_translation['translation'] ),
+                'status'         => $saved_translation['status']
+        );
+        return $translation ;
     }
 
     private function recountJobTotals( $old_status ) {

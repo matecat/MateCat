@@ -2819,11 +2819,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-24j80y');
-	src:url('fonts/icomoon.eot?#iefix-24j80y') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-24j80y') format('woff'),
-		url('fonts/icomoon.ttf?-24j80y') format('truetype'),
-		url('fonts/icomoon.svg?-24j80y#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-bq1095');
+	src:url('fonts/icomoon.eot?#iefix-bq1095') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-bq1095') format('woff'),
+		url('fonts/icomoon.ttf?-bq1095') format('truetype'),
+		url('fonts/icomoon.svg?-bq1095#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -3492,6 +3492,10 @@ text-align: left;
 
 .icon-split:before {
     content: "\f03d";
+}
+
+.icon-error_outline:before {
+    content: "\e001";
 }
 
 .icon-warning:before {

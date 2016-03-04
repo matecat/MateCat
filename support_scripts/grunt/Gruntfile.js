@@ -11,6 +11,7 @@ module.exports = function(grunt) {
     grunt.log.ok( 'Matecat Version: ' + version );
 
     var cssWatchFiles = [
+        cssBase + 'sass/variables.scss',
         cssBase + 'common.css',
         cssBase + 'style.css',
         cssBase + 'mbc-style.css',
@@ -239,7 +240,7 @@ module.exports = function(grunt) {
                 tasks: ['sass'],
                 options: {
                     interrupt: true,
-                    livereload : false
+                    livereload : true
                 }
             }
         },

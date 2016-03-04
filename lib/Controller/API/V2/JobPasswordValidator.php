@@ -2,9 +2,11 @@
 
 namespace API\V2  ;
 
-use Log;
+/**
+ * @deprecated use Validators\ChunkPasswordValidator
+ */
+
 use Chunks_ChunkDao ;
-use Exceptions_RecordNotFound ;
 use Klein\Request ;
 
 class JobPasswordValidator {

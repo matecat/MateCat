@@ -7,7 +7,15 @@ use API\V2\ValidationError ;
 class SegmentTranslationIssue extends Base {
 
     public $issue ;
+    /**
+     * @var \Translations_SegmentTranslationStruct
+     */
     public $translation ;
+
+    /**
+     * @var \Segments_SegmentStruct
+     */
+    public $segment ;
 
     private $parent_validator ;
 
@@ -16,6 +24,8 @@ class SegmentTranslationIssue extends Base {
         $this->parent_validator->validate();
 
         $this->translation = $this->parent_validator->translation ;
+
+        $this->segment =$this->parent_validator->segment ;
 
         if ( $this->request->id_issue ) {
             $this->ensureIssueIsInScope();

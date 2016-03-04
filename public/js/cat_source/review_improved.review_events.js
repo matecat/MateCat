@@ -9,18 +9,16 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     var segments = db.segments ;
     var comments = db.segment_translation_issue_comments ;
 
-    issues.on('update', issueRecordChanged);
-    issues.on('insert', issueRecordChanged);
-    issues.on('delete', issueRecordChanged);
+    // issues.on('update', issueRecordChanged);
+    // issues.on('insert', issueRecordChanged);
+    // issues.on('delete', issueRecordChanged);
 
-    versions.on('update', versionRecordChanged);
-    versions.on('insert', versionRecordChanged);
-    versions.on('delete', versionRecordChanged);
+    // versions.on('update', versionRecordChanged);
+    // versions.on('insert', versionRecordChanged);
+    // versions.on('delete', versionRecordChanged);
 
-    function showIssueSelectionModalWindow(selection, container) {
+    function getSelectionData(selection, container) {
         var data             = {};
-
-        var selection = document.getSelection();
 
         data.start_node = $.inArray( selection.anchorNode, container.contents() );
         data.start_offset = selection.anchorOffset;
@@ -29,26 +27,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         data.end_offset = selection.focusOffset;
 
         data.selected_string = selection.toString() ;
-        RI.lastSelection     = data.selected_string ;
-        data.lqa_categories  = JSON.parse( config.lqa_categories ) ;
 
-        var tpl = root.template('review_improved/error_selection', data);
-
-        if ( RI.modal ) {
-            RI.modal.destroy();
-        }
-
-        RI.modal = tpl.remodal({});
-
-        tpl.on('keydown', function(e)  {
-            var esc = 27 ;
-            e.stopPropagation();
-            if ( e.which == esc ) {
-                RI.modal.close();
-            }
-        });
-
-        RI.modal.open();
+        return data ;
     }
 
     function overrideButtons() {
@@ -91,31 +71,25 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         // TODO: restore segment here
     });
 
-    $(document).on('review:text:selected', function(e, data) {
-        // show activator button
-        showIssueSelectionModalWindow( data.selection, data.container );
-    });
+    // $(document).on('review:text:selected', function(e, data) {
+    //     // show activator button
+    //     showIssueSelectionModalWindow( data.selection, data.container );
+    // });
 
+    var textSelectedInsideSelectionArea = function( selection, container ) {
+        return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
+            $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
+            selection.toString().length > 0 ;
+    }
 
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
         var segment = new UI.Segment( $(e.target).closest('section'));
-
-        if ( segment.el.data('revertingVersion') ) return ;
-
         var selection = document.getSelection();
-        // var leftMouseButton = 3 ;
         var container = $(e.target);
 
-        if (
-            // e.which == leftMouseButton &&
-            $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
-            $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
-            selection.toString().length > 0
-        ) {
-            $(document).trigger('review:text:selected', {
-                selection : selection,
-                container: container
-            });
+        if ( textSelectedInsideSelectionArea(selection, container ) )  {
+            var selection = getSelectionData( selection, container ) ;
+            RI.openPanel( { sid: segment.id,  selection : selection });
         }
     });
 
@@ -123,7 +97,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         overrideButtons();
     });
 
-    $(document).on('click', 'section .textarea-container .tab-content', function(e) {
+    $(document).on('click', 'section .textarea-container .errorTaggingArea', function(e) {
         var section = $(e.target).closest('section') ;
         var segment = new UI.Segment( section );
 
@@ -132,10 +106,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             UI.scrollSegment( segment.el );
         }
 
-        // if ( UI.currentSegmentId != segment.id ) {
-        //     UI.openSegment( segment );
-        //     UI.scrollSegment( segment.el );
-        // }
     });
 
     $(document).on('click', '.reviewImproved .tab-switcher-review', function(e) {
@@ -159,7 +129,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         var form    = $( e.target );
         var segment = new UI.Segment( UI.currentSegment );
-        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation/issues',
+        var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
                   config.id_job, config.password, segment.id);
 
         var checked = form.find('input[type=radio]:checked').val() ;
@@ -177,7 +147,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             'end_node'            : form.find('input[name=end_node]').val(),
             'end_offset'          : form.find('input[name=end_offset]').val(),
             'comment'             : comment,
-            'formattedDate'       : moment().format('lll')
+            'formattedDate'       : moment().format('lll') // TODO: check if this is still required
         };
 
         /**
@@ -221,16 +191,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         // save current status
         var id = $(this).data('id');
         section.data('activeTab', id);
-    });
-
-
-    $( window ).on( 'segmentOpened', function ( e ) {
-        var segment = e.segment ;
-        ReviewImproved.versionsAndIssuesPromise( segment ).done(function() {
-            updateOriginalTargetView( segment );
-            updateVersionDependentViews( segment );
-        });
-
     });
 
     function getPreviousTranslationText( segment ) {
@@ -307,17 +267,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             .html( textarea_container );
     }
 
-    function versionRecordChanged( record ) {
-        var segment = UI.Segment.find( record.id_segment );
-        updateVersionDependentViews( segment );
-    }
-
-    function issueRecordChanged( record ) {
-        var segment = UI.Segment.find( record.id_segment );
-        RI.updateIssueViews( segment );
-    }
-
-
     $(document).on('segmentVersionChanged', function(e, segment) {
         updateVersionDependentViews( segment );
     });
@@ -349,6 +298,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     $(document).on('segment:status:change', function(e, segment, options) {
         if ( options.status != 'rejected' ) {
+            // save to database!!
             UI.openNextTranslated( segment.id );
         }
     });
@@ -378,9 +328,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             revertingVersion : revertingVersion
         };
 
-        var versionSelectHTML = MateCat.Templates['review_improved/version_selection']( data );
-
-        container.html(versionSelectHTML);
         container.append(buttonHTML);
     }
 

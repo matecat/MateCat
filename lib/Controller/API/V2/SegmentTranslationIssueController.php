@@ -36,7 +36,7 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
             'id_job'              => $this->request->id_job,
             'id_category'         => $this->request->id_category,
             'severity'            => $this->request->severity,
-            'translation_version' => $this->validator->segment_translation->version_number,
+            'translation_version' => $this->validator->translation->version_number,
             'target_text'         => $this->request->target_text,
             'start_node'          => $this->request->start_node,
             'start_offset'        => $this->request->start_offset,
@@ -56,8 +56,12 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
 
         $struct = $model->save();
 
+        $categories = $this->validator->translation
+                    ->getJob()->getProject()
+                    ->getLqaModel()->getCategories();
 
-        $json = new JsonFormatter();
+
+        $json = new JsonFormatter( $categories );
         $rendered = $json->renderItem( $struct );
 
         $this->response->json( array('issue' => $rendered) );

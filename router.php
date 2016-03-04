@@ -48,9 +48,10 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
             break;
         case 'Exceptions_RecordNotFound':
         case 'Exceptions\NotFoundError':
+            \Log::doLog('Not found error for URI: ' . $_SERVER['REQUEST_URI']);
             $klein->response()->code(404);
-            $klein->body('not found');
-            $klein->send();
+            $klein->response()->body('not found');
+            $klein->response()->send();
             break;
         default:
             \Log::doLog("$err_msg" );
@@ -92,43 +93,49 @@ $klein->respond('GET', '/api/v2/project-translation/[i:id_project]', function() 
     $instance->respond('status');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/versions', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/translation-issues', function() {
+    $reflect  = new ReflectionClass('API\V2\ChunkTranslationIssueController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('index');
+});
+
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/translation-versions', function() {
+    $reflect  = new ReflectionClass('\API\V2\ChunkTranslationVersionController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('index');
+});
+
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', function() {
     $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/versions/[:version_number]', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', function() {
     $reflect  = new ReflectionClass('API_V2_SegmentVersion');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('detail');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues', function() {
-    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
-
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues', function() {
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
 });
 
-$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]', function() {
+$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('delete');
 });
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]/comments', function() {
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('create');
 });
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation/issues/[:id_issue]/comments', function() {
+$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
