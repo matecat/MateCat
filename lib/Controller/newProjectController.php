@@ -333,10 +333,15 @@ class newProjectController extends viewController {
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
         $this->template->DQF_enabled = INIT::$DQF_ENABLED;
 
+        $preUpload = filter_input(INPUT_GET, 'preupload');
+
+        if(!$preUpload || $preUpload != '1') {
+            $_SESSION['pre_loaded_file'] = null;
+        }
 
         $this->template->use_pre_uploaded_files = 
             $_SESSION['pre_loaded_file'] && 
-            $_GET['preupload'] ; 
+            $preUpload;
 
         $this->template->pre_uploaded_files =  $_SESSION['pre_loaded_file'];
 

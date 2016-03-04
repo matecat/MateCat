@@ -62,7 +62,8 @@
                 splitSegmentEnabled: true,
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
-                status_labels : JSON.parse( '${status_labels}' )
+                status_labels : JSON.parse( '${status_labels}' ),
+                pre_uploaded_files : '${pre_uploaded_files|string:false}'
             };
 
             var renderStart = new Date();

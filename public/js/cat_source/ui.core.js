@@ -1687,10 +1687,26 @@ UI = {
 
         var downloadable = (t == 'translated' || t == 'approved') ;
 
+        var isGDriveFile = false;
+
+        if ( config.pre_uploaded_files && config.pre_uploaded_files !== 'false') {
+            isGDriveFile = true;
+        }
+
+        var label = '';
+
         if ( downloadable ) {
-            var label = 'DOWNLOAD TRANSLATION';
+            if(isGDriveFile){
+                label = 'SEND TO GOOGLE DRIVE';
+            } else {
+                label = 'DOWNLOAD TRANSLATION';
+            }
         } else {
-            var label = 'PREVIEW';
+            if(isGDriveFile){
+                label = 'SEND PREVIEW TO GOOGLE DRIVE';
+            } else {
+                label = 'PREVIEW';
+            }
         }
 
         $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
@@ -1881,8 +1897,14 @@ UI = {
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
+            var labelDownloading = 'DOWNLOADING';
+
+            if ( config.pre_uploaded_files && config.pre_uploaded_files !== 'false') {
+                labelDownloading = 'SENDING';
+            }
+
             //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val(labelDownloading);
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({

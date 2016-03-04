@@ -669,6 +669,9 @@ class catController extends viewController {
             $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
 
+        \Bootstrap::sessionStart();
+        $this->template->pre_uploaded_files =  $_SESSION['pre_loaded_file'];
+
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
         $this->decorator = new CatDecorator( $this, $this->template );
@@ -719,6 +722,10 @@ class catController extends viewController {
         }
 
         return $return;
+    }
+
+    public function getDownloadFileName() {
+        return $this->downloadFileName;
     }
 
 }

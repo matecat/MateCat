@@ -75,11 +75,33 @@ class CatDecorator {
     }
 
   private function getHeaderMainButtonLabel() {
-      if ( $this->isDownloadable() ) {
-          return 'DOWNLOAD TRANSLATION';
-      } else {
-          return 'PREVIEW';
+      \Bootstrap::sessionStart();
+
+      $fileName = $_SESSION['pre_loaded_file'];
+
+      $isGDriveFile = false;
+
+      if($fileName == $this->controller->getDownloadFileName()) {
+          $isGDriveFile = true;
       }
+
+      $label = '';
+
+      if ( $this->isDownloadable() ) {
+          if($isGDriveFile) {
+            $label = 'SEND TO GOOGLE DRIVE';
+          } else {
+            $label = 'DOWNLOAD TRANSLATION';
+          }
+      } else {
+          if($isGDriveFile) {
+            $label = 'SEND PREVIEW TO GOOGLE DRIVE';
+          } else {
+            $label = 'PREVIEW';
+          }
+      }
+
+      return $label;
   }
 
   private function downloadStatus() {
