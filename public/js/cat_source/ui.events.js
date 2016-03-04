@@ -1608,27 +1608,6 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
- /*
-        }).on('mousedown', function(e) {
-
-            console.log('mousedown');
-            console.log('prima: ', UI.editarea.is(":focus"));
-            saveSelection();
-            $('.editor .rangySelectionBoundary').addClass('focusOut');
-            hasFocusBefore = UI.editarea.is(":focus");
-            setTimeout(function() {
-                hasFocusAfter = UI.editarea.is(":focus");
-                if(hasFocusBefore && !hasFocusAfter) {
-                    console.log('blurred from editarea');
-                } else if(!hasFocusBefore && hasFocusAfter) {
-                    console.log('focused in editarea');
-                    restoreSelection();
-                } else {
-                    $('.editor .rangySelectionBoundary.focusOut').remove();
-
-                }
-            }, 50);
-            */
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 
@@ -1643,18 +1622,6 @@ $.extend(UI, {
 			handlepaste(this, ev);
             UI.lockTags(UI.editarea);
 
-            /*
-			$(window).trigger({
-				type: "pastedInEditarea",
-				segment: segment
-			});
-
-			setTimeout(function() {
-				UI.saveInUndoStack('paste');
-			}, 100);
-            UI.lockTags(UI.editarea);
-			UI.currentSegmentQA();
- */
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
@@ -1663,50 +1630,18 @@ $.extend(UI, {
 			e.preventDefault();
 			tab = $(this).parents('.concordances');
 			container = $('.overflow', $(tab));
-//			console.log($(container).height());
 			if($(tab).hasClass('extended')) {
 				UI.setExtendedConcordances(false);
-
-/*
-				$(tab).removeClass('extended')
-//				console.log(container.height());
-				$(container).removeAttr('style');
-//				console.log($(container).height());
-				$(this).text('More');
-*/
 			} else {
 				UI.setExtendedConcordances(true);
-
-//				$(container).css('height', $(tab).height() + 'px');
-//				$(tab).addClass('extended');
-//				$(this).text('Less');
-//				UI.custom.extended_concordance = true;
-//				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
-        }).on('keyup', '.editor .editarea', function(e) {
-			if ( e.which == 13 ){
-//				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-
-                //replace all divs with a br and remove all br without a class
-//                var divs = $( this ).find( 'div' );
-//                if( divs.length ){
-//					divs.each(function(){
-//						$(this).find( 'br:not([class])' ).remove();
-//						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
-//					});
-//                } else {
-//                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-//                }
-			}
 		}).on('click', '.tagMode .crunched', function(e) {
             e.preventDefault();
             UI.setCrunchedTagMode();
-//            UI.currentSegment.attr('data-tagMode', 'crunched');
         }).on('click', '.tagMode .extended', function(e) {
             e.preventDefault();
             UI.setExtendedTagMode();
-//            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
 
