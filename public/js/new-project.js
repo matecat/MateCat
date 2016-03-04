@@ -103,7 +103,7 @@ $(document).ready(function() {
 
         tm_data = UI.extractTMdataFromTable();
 
-        if ( config.pre_uploaded_files ) {
+        if ( config.pre_uploaded_files && config.pre_uploaded_files !== 'false') {
             var filename = config.pre_uploaded_files ; 
         }
         else {
