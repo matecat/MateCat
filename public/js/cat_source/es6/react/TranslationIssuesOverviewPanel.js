@@ -80,10 +80,13 @@ export default React.createClass({
         }); 
 
         var previousVersions = sorted_versions.map( function(v) {
+            var key = 'version-' + v.id ;
+
             return (
                 <ReviewTranslationVersion 
                 trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
                 sid={this.state.segment.sid}
+                key={key}
                 versionNumber={v.version_number}  
                 isCurrent={false} 
                 translation={v.translation} 

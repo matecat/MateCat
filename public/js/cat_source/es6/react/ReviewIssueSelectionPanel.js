@@ -90,6 +90,8 @@ export default React.createClass({
         <h3>Error selection</h3> 
         <h4>Select issue type</h4>
 
+        <p>You selected "{this.props.selection.selected_string}" from segment {this.props.sid}</p>
+
         <table className="review-issue-category-list">
         <tbody>
             {categoryComponents}
