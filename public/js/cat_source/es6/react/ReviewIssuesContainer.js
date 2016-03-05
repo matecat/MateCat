@@ -61,7 +61,7 @@ export default React.createClass({
 
         }
         else {
-            issues = <div class="review-no-issues">No issues on this version</div>;
+            issues = <div className="review-no-issues">No issues on this version</div>;
         }
 
         return <div className={cs} > 
