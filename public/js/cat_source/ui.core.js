@@ -4,6 +4,10 @@
 UI = null;
 
 UI = {
+    statusHandleTitleAttr : function( status ) {
+        status = status.toUpperCase();
+        return config.status_labels[ status ] + ', click to change it';
+    },
     showPostRevisionStatuses : false,
     pee_error_level_map: {
         0: "",
@@ -1817,6 +1821,10 @@ UI = {
 	setStatus: function(segment, status) {
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new status-fixed status-rebutted")
         .addClass("status-" + status);
+
+        segment
+            .find( '.status-container a' )
+            .attr( 'title', UI.statusHandleTitleAttr(status) );
 	},
 	setStatusButtons: function(button) {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
