@@ -1287,22 +1287,18 @@ $.extend(UI, {
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
-//					$('#' + $(this).attr('data-segmentid') + '-close').click();
                 }
 
 			}
 			UI.checkHeaviness();
 			if ( UI.blockButtons ) {
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-//					console.log('segment is already loaded');
 				} else {
-//					console.log('segment is not loaded');
 
 					if (!UI.noMoreSegmentsAfter) {
 						UI.reloadWarning();
 					}
 				}
- //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			if(!UI.offline) UI.blockButtons = true;
@@ -1686,11 +1682,8 @@ $.extend(UI, {
         $('#replace-target').on('focus', function() {
             if(!$('#enable-replace').prop('checked')) {
                 $('label[for=enable-replace]').trigger('click');
-//                $('#replace-target').trigger('click');
                 $('#replace-target').focus();
             }
-//            console.log('aaa');
-//            console.log($('#enable-replace').prop('checked'));
         });
         $('#replace-target').on('input', function() {
             if($(this).val() != '') {
