@@ -276,7 +276,6 @@
 
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <!-- <p class="progress">Progress:</p> -->
                     <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -291,10 +290,6 @@
                             <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                        <!--
-                        <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
-                        <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                        -->
                    </ul>
                     <ul class="statistics-details">
 <!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->
