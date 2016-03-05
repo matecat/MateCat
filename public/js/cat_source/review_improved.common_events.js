@@ -90,4 +90,9 @@ if ( ReviewImproved.enabled() ) {
         $.getJSON( versions_path ).done( updateLocalTranslationVersions );
     });
 
+    $(document).on('translation:change', function(e, data) {
+        var record = MateCat.db.segments.by('sid', data.sid);
+        MateCat.db.segments.update( _.extend(record, data) );
+    });
+
 }
