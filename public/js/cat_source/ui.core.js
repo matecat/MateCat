@@ -1399,18 +1399,37 @@ UI = {
         return newSegments;
     },
 
-    saveSegment: function(segment) {
-		var status = (segment.hasClass('status-translated')) ? 'translated' : (segment.hasClass('status-approved')) ? 'approved' : (segment.hasClass('status-rejected')) ? 'rejected' : (segment.hasClass('status-new')) ? 'new' : 'draft';
+    getStatusForAutoSave : function( segment ) {
+        var status ;
+        if (segment.hasClass('status-translated')) {
+            status = 'translated';
+        }
+        else if (segment.hasClass('status-approved')) {
+            status = 'approved' ;
+        }
+        else if (segment.hasClass('status-rejected')) {
+            status = 'rejected';
+        }
+        else if (segment.hasClass('status-new')) {
+            status = 'new';
+        }
+        else {
+            status = 'draft';
+        }
+
 		if (status == 'new') {
 			status = 'draft';
 		}
-		console.log('SAVE SEGMENT');
+        console.debug('status', status);
+        return status;
+    },
+
+    saveSegment: function(segment) {
 		this.setTranslation({
             id_segment: this.getSegmentId(segment),
-            status: status,
+            status: this.getStatusForAutoSave( segment ) ,
             caller: 'autosave'
         });
-
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {
