@@ -632,7 +632,7 @@ function ParsedHash( hash ) {
     this.onlyActionRemoved = function( hash ) {
         var current = new ParsedHash( hash );
         var diff = this.toString().split( current.toString() );
-        return diff[1] == actionSep + MBC.const.commentAction ;
+        return MBC.enabled() && (diff[1] == actionSep + MBC.const.commentAction) ;
     }
 
     this.hashCleanupRequired = function() {
