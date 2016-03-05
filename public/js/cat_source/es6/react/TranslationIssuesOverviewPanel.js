@@ -20,9 +20,14 @@ export default React.createClass({
 
     },
     getVersions : function( sid ) {
-        return MateCat.db.segment_versions.findObjects({
+        var versions = MateCat.db.segment_versions.findObjects({
             id_segment : '' + sid
         });
+
+        var sorted = _.sortBy(versions, function(version) {
+            return parseInt(version.version_number);
+        }).reverse();
+        return sorted;
     },
 
     getOriginalTarget : function( segment ) {
@@ -74,11 +79,8 @@ export default React.createClass({
     },
 
     render: function() {
-        var sorted_versions = this.state.versions.sort(function(a,b) {
-            return parseInt(a.version_number) < parseInt(b.version_number); 
-        }); 
 
-        var previousVersions = sorted_versions.map( function(v) {
+        var previousVersions = this.state.versions.map( function(v) {
             var key = 'version-' + v.id + '-' + this.props.sid ;
 
             return (
