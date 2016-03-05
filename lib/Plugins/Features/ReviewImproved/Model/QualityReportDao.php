@@ -78,6 +78,7 @@ FROM segment_translations st
 
   LEFT JOIN qa_entries issues
     ON issues.id_segment = st.id_segment
+    AND issues.translation_version = st.version_number
 
   LEFT JOIN qa_entry_comments comments
     ON comments.id_qa_entry = issues.id
