@@ -169,13 +169,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             $.getJSON( path )
                 .success( function( data ) {
-                    console.debug( data );
+                    var review = data['quality-report'].chunk.review ;
 
-                    if ( parseInt(data.is_pass) ) {
-                        $('#quality-report').attr('data-vote', 'excellent') ; }
-                    else {
-                        $('#quality-report').attr('data-vote', 'fail');
-                    }
+                    window.quality_report_btn_component.setState({
+                        is_pass : review.is_pass,
+                        score : review.score
+                    });
                 });
         },
 

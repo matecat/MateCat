@@ -311,7 +311,9 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                     UI.failedConnection( data, 'setRevision' );
                 },
                 success: function(d) {
-                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
+                    window.quality_report_btn_component.setState({
+                        vote: d.data.overall_quality_class
+                    });
                 }
             });
         },

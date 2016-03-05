@@ -71,6 +71,8 @@
 
         <script tal:condition="true:isReview" type="text/javascript">
             config.review_password = '${review_password}';
+            config.overall_quality_class = '${overall_quality_class}';
+            config.quality_report_href = '${quality_report_href}';
         </script>
 
         <script tal:condition="true:review_improved" type="text/javascript">

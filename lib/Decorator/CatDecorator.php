@@ -99,6 +99,7 @@ class CatDecorator {
       $this->template->review_class = 'review' ;
       $this->template->review_type = 'simple';
 
+      // TODO: move this logic in javascript QualityReportButton component
       if ( $this->controller->getQaOverall() == 'fail' ||
           $this->controller->getQaOverall() == 'poor' ) {
           $this->template->header_quality_report_item_class = 'hide' ;

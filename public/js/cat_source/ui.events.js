@@ -1714,7 +1714,16 @@ $.extend(UI, {
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
     }
-
 });
 
+if ( config.isReview ) {
+    $(document).on('ready', function() {
+        window.quality_report_btn_component = ReactDOM.render(
+            React.createElement( Review_QualityReportButton, {
+                vote                : config.overall_quality_class,
+                quality_report_href : config.quality_report_href
+            }), $('#quality-report-button')[0] );
+
+    });
+}
 

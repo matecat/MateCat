@@ -124,5 +124,12 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         renderButtons : renderButtons,
     });
 
+    $(document).on('ready', function() {
+        // first step in the direction to not rely on HTML rendering.
+        // we fetch quality-report data on page load to get the score
+        // to show in quality-report button.
+        ReviewImproved.reloadQualityReport();
+    });
+
 })($, window, ReviewImproved, UI);
 }

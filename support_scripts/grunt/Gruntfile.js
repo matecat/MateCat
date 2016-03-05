@@ -215,7 +215,7 @@ module.exports = function(grunt) {
             },
             react: {
                 files: [
-                    basePath + 'cat_source/es6/react/*.js'
+                    basePath + 'cat_source/es6/react/**/*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {

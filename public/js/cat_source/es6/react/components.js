@@ -18,4 +18,4 @@ window.ReviewIssueCategorySelector = require('./ReviewIssueCategorySelector').de
 
 window.classnames = require('classnames'); 
 
-
+window.Review_QualityReportButton = require('./review/QualityReportButton').default ;
