@@ -68,12 +68,14 @@ if ( ReviewImproved.enabled() ) {
     $( document ).on( 'keydown', function ( e ) {
         var esc = '27' ;
         if ( e.which == esc ) {
-            ReviewImproved.closePanel();
+            if (!$('.modal').is(':visible')) {
+                ReviewImproved.closePanel();
+            }
         }
     });
 
     $(document).on('click', function( e ) {
-        if (e.target.closest('section, #review-side-panel') == null) {
+        if (e.target.closest('.modal, section, #review-side-panel') == null) {
             ReviewImproved.closePanel();
         }
     });
