@@ -109,7 +109,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $this->insertVersionRecords(array(
             'status_condition' => $status_condition,
             'where_condition' => $where_condition,
-            'where_options' => $where_options
+            'where_options' => $where_options,
+            'propagation' => $propagation
         ));
 
         $this->updateVersionNumberOnFutureUpdates(array(
@@ -140,7 +141,11 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $params = Utils::ensure_keys($params, array(
             'status_condition', 'where_condition', 'where_options'
         ));
-        extract($params);
+
+        $where_condition = $params['where_condition'];
+        $status_condition = $params['status_condition'];
+        $where_options = $params['where_options'];
+        $propagation = $params['propagation']; // TODO: check this, bug suspect
 
         /**
          * This query makes and insert while reading from segment_translations.
@@ -171,7 +176,10 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $params = Utils::ensure_keys($params, array(
             'status_condition', 'where_condition', 'where_options'
         ));
-        extract($params);
+
+        $where_condition = $params['where_condition'];
+        $status_condition = $params['status_condition'];
+        $where_options = $params['where_options'];
 
         /**
          * Update segment_translations to change the version number
