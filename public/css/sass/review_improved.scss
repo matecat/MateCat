@@ -194,6 +194,7 @@ section {
     right: 0;
     width: 22%;
     z-index: 999;
+    min-width:215px;
     margin-top: 49px;
     text-align: left ;
     overflow: scroll; 
@@ -281,10 +282,18 @@ section {
     color: #666;
 }
 
+.translation-issues-button {
+    cursor: pointer;
+    margin: 6px auto 0;
+    padding: 10px 0;
+    position: relative;
+    width: 80px;
+}
+
 .revise-button-counter {
-    left: 52px;
+    left: 44px;
     position: absolute;
-    top: 0;
+    top: 10px;
     background: #dc2e34;
     color: #fff;
      border: 1px solid #fff;
@@ -311,8 +320,17 @@ section {
     margin-top: 10px;
 }
 
-.review-side-panel-opened .review-triangle  {
+.review-side-panel-opened section.opened .review-triangle  {
      display:block;
+}
+
+/* code to hide scroll of the body */
+.review-side-panel-opened {
+    overflow-y: hidden!important;
+}
+
+.review-side-panel-opened .mbc-comment-balloon-outer {
+    display:none!important;
 }
 
 #review-side-panel h3 {
@@ -352,6 +370,16 @@ span.review-issue-label {
     overflow: hidden;
     border-bottom: 1px solid #f4f4f4;
     padding: 0px 0 10px 0;
+    margin-left: -10px;
+    padding-left: 15px;
+}
+
+.segment-side-buttons .txt {
+    margin: -10px auto 0;
+}
+
+.review-issue-detail:hover {
+    box-shadow: inset 3px 0px 0px yellow;
 }
 
 .review-issue-comment, .review-issue-comment-container {
@@ -378,7 +406,7 @@ a.cancel-project:hover {
 }
 
 .review-issue-selection-panel {
-    padding: 10px;
+    padding: 10px 10px 40px 10px;
 }
 
 .mc-resizable-textarea {
@@ -425,4 +453,9 @@ table.review-issue-category-list {
         text-decoration: line-through;
     }
 
+}
+
+
+.review-side-panel-opened a.cancel-project:before {
+    margin-right: 5px;
 }
