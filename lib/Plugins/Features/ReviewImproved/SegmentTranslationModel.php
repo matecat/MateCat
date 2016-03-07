@@ -18,9 +18,9 @@ class SegmentTranslationModel
     private $model ;
 
     /**
-     * @var \Jobs_JobStruct
+     * @var \Chunks_ChunkStruct
      */
-    private $job ;
+    private $chunk ;
 
     /**
      * @var ChunkReviewStruct
@@ -35,15 +35,23 @@ class SegmentTranslationModel
     public function __construct(\SegmentTranslationModel $model ) {
 
         $this->model = $model;
-        $this->job = \Jobs_JobDao::getById( $this->model->getTranslation()->id_job );
+        $this->chunk = \Chunks_ChunkDao::getBySegmentTranslation( $this->model->getTranslation()) ;
 
         $reviews =  \LQA\ChunkReviewDao::findChunkReviewsByChunkIds(array(
             array(
-                $this->job->id, $this->job->password
+                $this->chunk->id, $this->chunk->password
             )
         ));
         return $this->chunk_review = $reviews[0];
 
+    }
+
+    public function recountScore() {
+        $score = \LQA\ChunkReviewDao::getScoreForChunk( $this->chunk );
+        $this->chunk_review->score = $score ;
+
+        $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
+        $chunk_review_model->updatePassFailResult();
     }
 
     /**

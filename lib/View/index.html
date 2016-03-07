@@ -72,6 +72,8 @@
 
         <script tal:condition="true:isReview" type="text/javascript">
             config.review_password = '${review_password}';
+            config.overall_quality_class = '${overall_quality_class}';
+            config.quality_report_href = '${quality_report_href}';
         </script>
 
         <script tal:condition="true:review_improved" type="text/javascript">
@@ -134,7 +136,7 @@
     </body>
 
     <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
-      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived" define="catpage string:true">
+      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -277,7 +279,6 @@
 
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <!-- <p class="progress">Progress:</p> -->
                     <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -292,10 +293,6 @@
                             <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                        <!--
-                        <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
-                        <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                        -->
                    </ul>
                     <ul class="statistics-details">
 <!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->

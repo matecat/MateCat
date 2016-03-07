@@ -5,7 +5,8 @@ export default React.createClass({
     getInitialState : function() {
         return {
             category : null, 
-            severity : null 
+            severity : '',
+            submitDisabled : true,
         }; 
     },
     autoShortLabel : function(label) {
@@ -16,47 +17,42 @@ export default React.createClass({
         return JSON.parse(config.lqa_nested_categories).categories ; 
     },
 
-    severitySelected : function( category, severity ) {
+    severitySelected : function( category, event ) {
+        var severity = $(ReactDOM.findDOMNode( event.target )).val() ;
+
         this.setState({
             category : category, 
-            severity : severity
-        }); 
-    },
-
-    handleCommentChange : function( event ) {
-        this.setState({
-            message : event.target.value 
+            severity : severity,
+            submitDisabled : severity == ''
         }); 
     },
 
     buttonClasses : function() {
-        var severitySet = this.state.severity != null ; 
-        var categorySet = this.state.category != null; 
-        var disabled = this.state.submitDone || !(categorySet && severitySet) ;
-
         return classnames({
             'mc-button' : true,
             'blue-button' : true, 
-            'disabled' : disabled 
+            'disabled' : this.state.submitDisabled
         });
     },
 
     sendClick : function() {
-        if ( this.state.submitDone ) {
+        if ( this.state.submitDisabled ) {
             return; 
         }
 
-        this.setState({ submitDone : true }); 
+        this.setState({ submitDone: true, submitDisabled : true });
+
+        var message = $('textarea', ReactDOM.findDOMNode( this )).val();
 
         ReviewImproved.submitIssue(this.props.sid, {
             'id_category'         : this.state.category.id,
-            'severity'            : this.state.severity.label, 
+            'severity'            : this.state.severity,
             'target_text'         : this.props.selection.selected_string, 
             'start_node'          : this.props.selection.start_node, 
             'start_offset'        : this.props.selection.start_offset, 
             'end_node'            : this.props.selection.end_node,
             'end_offset'          : this.props.selection.end_offset, 
-            'comment'             : this.state.message, 
+            'comment'             : message,
         },
         { done : this.props.submitIssueCallback }
         ); 
@@ -66,18 +62,37 @@ export default React.createClass({
         var categoryComponents = []; 
         
         this.issueCategories().forEach(function(category, i) {
+            var selectedValue = "";
+
+            if ( this.state.category && this.state.category.id == category.id ) {
+                selectedValue = this.state.severity ;
+            }
+
+            var k = 'category-selector-' + i ;
+
             categoryComponents.push(
                 <ReviewIssueCategorySelector 
+                    key={k}
                     severitySelected={this.severitySelected} 
-                    nested={false} category={category} key={i} />); 
+                    selectedValue={selectedValue}
+                    nested={false} category={category} />);
 
             if ( category.subcategories.length > 0 ) {
                 category.subcategories.forEach( function(category, ii) {
-                    var key = i + '-' + ii;
+                    var key = '' + i + '-' + ii;
+                    var kk = 'category-selector-' + key ;
+                    var selectedValue = "";
+
+                    if ( this.state.category && this.state.category.id == category.id ) {
+                        selectedValue = this.state.severity ;
+                    }
+
                     categoryComponents.push(
                         <ReviewIssueCategorySelector 
-                        severitySelected={this.severitySelected}
-                            nested={true} category={category} key={key} />
+                            key={kk}
+                            selectedValue={selectedValue}
+                            severitySelected={this.severitySelected}
+                            nested={true} category={category}  />
                     );
                 }.bind(this) ); 
             }
@@ -90,6 +105,8 @@ export default React.createClass({
         <h3>Error selection</h3> 
         <h4>Select issue type</h4>
 
+        <p>You selected "{this.props.selection.selected_string}" from segment {this.props.sid}</p>
+
         <table className="review-issue-category-list">
         <tbody>
             {categoryComponents}
@@ -100,8 +117,8 @@ export default React.createClass({
         <div className="review-issue-terminal">
             <textarea data-minheight="40" data-maxheight="90"
                 className="mc-textinput mc-textarea mc-resizable-textarea"
-                        placeholder="Write a comment..."
-                        onChange={this.handleCommentChange} />
+                placeholder="Write a comment..."
+                />
 
             <div className="review-issue-buttons-right">
                 <a onClick={this.sendClick} 

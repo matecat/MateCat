@@ -4,6 +4,10 @@
 UI = null;
 
 UI = {
+    statusHandleTitleAttr : function( status ) {
+        status = status.toUpperCase();
+        return config.status_labels[ status ] + ', click to change it';
+    },
     showPostRevisionStatuses : false,
     pee_error_level_map: {
         0: "",
@@ -767,7 +771,8 @@ UI = {
 				UI.failedConnection(0, 'getMoreSegments');
 			},
 			success: function(d) {
-				UI.getMoreSegments_success(d);
+                $(document).trigger('segments:load', d.data);
+                UI.getMoreSegments_success(d);
 			}
 		});
 	},
@@ -1398,18 +1403,37 @@ UI = {
         return newSegments;
     },
 
-    saveSegment: function(segment) {
-		var status = (segment.hasClass('status-translated')) ? 'translated' : (segment.hasClass('status-approved')) ? 'approved' : (segment.hasClass('status-rejected')) ? 'rejected' : (segment.hasClass('status-new')) ? 'new' : 'draft';
+    getStatusForAutoSave : function( segment ) {
+        var status ;
+        if (segment.hasClass('status-translated')) {
+            status = 'translated';
+        }
+        else if (segment.hasClass('status-approved')) {
+            status = 'approved' ;
+        }
+        else if (segment.hasClass('status-rejected')) {
+            status = 'rejected';
+        }
+        else if (segment.hasClass('status-new')) {
+            status = 'new';
+        }
+        else {
+            status = 'draft';
+        }
+
 		if (status == 'new') {
 			status = 'draft';
 		}
-		console.log('SAVE SEGMENT');
+        console.debug('status', status);
+        return status;
+    },
+
+    saveSegment: function(segment) {
 		this.setTranslation({
             id_segment: this.getSegmentId(segment),
-            status: status,
+            status: this.getStatusForAutoSave( segment ) ,
             caller: 'autosave'
         });
-
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {
@@ -1559,14 +1583,8 @@ UI = {
          * @see propagateTranslation
          *
          */
-//		if(d.data.editable.length + d.data.not_editable.length) {
-//			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
-//		}
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
-            //Remove trailing spaces for string comparison
-//            console.log( "PostProcessEditArea: " + UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) );
-//            console.log( "SetCurrSegmentValue: " + this.translation );
             if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) {
                 sameContentIndex = ind;
             }
@@ -1585,52 +1603,20 @@ UI = {
         $.each(d.data.editable, function() {
             numSeg += this.involved_id.length;
         });
-//		console.log('numAlt: ', numAlt);
-//		console.log('numSeg: ', numSeg);
         if(numAlt) {
-//            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
             tab = UI.currentSegment.find('.tab-switcher-al');
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
             tab.show();
-//            tab.trigger('click');
         }
     },
     renderAlternatives: function(d) {
-//        console.log('renderAlternatives d: ', d);
-//		console.log($('.editor .submenu').length);
-//		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
-//        console.log('escapedSegment: ', escapedSegment);
-/*
-		function prepareTranslationDiff( translation ){
-			_str = translation.replace( config.lfPlaceholderRegex, "\n" )
-					.replace( config.crPlaceholderRegex, "\r" )
-					.replace( config.crlfPlaceholderRegex, "\r\n" )
-					.replace( config.tabPlaceholderRegex, "\t" )
-				//.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
-					.replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-
-			_str  = htmlDecode(_str );
-			_edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
-
-			//Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
-			//used to detect initial and final spaces in html diff
-			_str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
-			_edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
-
-			diff_obj = UI.dmp.diff_main( _edit, _str );
-			UI.dmp.diff_cleanupEfficiency( diff_obj );
-			return diff_obj;
-		}
-*/
         mainStr = UI.currentSegment.find('.editarea').text();
         $.each(d.data.editable, function(index) {
-//            console.log('this.translation: ', this.translation);
             diff_obj = UI.execDiff(mainStr, this.translation);
-//            diff_obj = prepareTranslationDiff( this.translation );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
@@ -1851,6 +1837,10 @@ UI = {
 	setStatus: function(segment, status) {
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new status-fixed status-rebutted")
         .addClass("status-" + status);
+
+        segment
+            .find( '.status-container a' )
+            .attr( 'title', UI.statusHandleTitleAttr(status) );
 	},
 	setStatusButtons: function(button) {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
@@ -2915,50 +2905,6 @@ console.log('eccolo: ', typeof token);
 		}).show();
 	},
 
-	/*
-	 // for future implementation
-
-	 getSegmentComments: function(segment) {
-	 var id_segment = $(segment).attr('id').split('-')[1];
-	 var id_translator = config.id_translator;
-	 $.ajax({
-	 url: config.basepath + '?action=getSegmentComment',
-	 data: {
-	 action: 'getSegmentComment',
-	 id_segment: id_segment,
-	 id_translator: id_translator
-	 },
-	 type: 'POST',
-	 dataType: 'json',
-	 context: segment,
-	 success: function(d){
-	 $('.numcomments',this).text(d.data.length);
-	 $.each(d.data, function() {
-	 $('.comment-area ul .newcomment',segment).before('<li><p><strong>'+this.author+'</strong><span class="date">'+this.date+'</span><br />'+this.text+'</p></li>');
-	 });
-	 }
-	 });
-	 },
-
-	 addSegmentComment: function(segment) {
-	 var id_segment = $(segment).attr('id').split('-')[1];
-	 var id_translator = config.id_translator;
-	 var text = $('.newcomment textarea',segment).val();
-	 $.ajax({
-	 url: config.basepath + '?action=addSegmentComment',
-	 data: {
-	 action: 'addSegmentComment',
-	 id_segment: id_segment,
-	 id_translator: id_translator,
-	 text: text
-	 },
-	 type: 'POST',
-	 dataType: 'json',
-	 success: function(d){
-	 }
-	 });
-	 },
-	 */
     storeClientInfo: function () {
         clientInfo = {
             xRes: window.screen.availWidth,
@@ -3150,7 +3096,7 @@ $(window).resize(function() {
         focusSegment: function(segment) {
             var clickableEditArea = segment.find('.editarea:not(.opened)');
             if ( clickableEditArea.length == 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
-                UI.scrollSegment( segment );
+                UI.openSegment( segment );
             }
             else {
                 clickableEditArea.trigger('click');

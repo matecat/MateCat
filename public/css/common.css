@@ -7,7 +7,7 @@ Description:      Common CSS rules.
 
 body
 {
-	min-width: 980px;
+	min-width: 1024px;
 	position: relative;
 	text-align: center;
 	margin: 0;
@@ -3222,6 +3222,8 @@ transform: rotate(-45deg);
 a.cancel-project:before, a.resume-project:before{
 	content: "\f014";
 }
+
+
 a.archive-project:before, a.unarchive-project:before {
     content: "\e605";
     font-size: 14px;

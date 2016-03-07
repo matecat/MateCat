@@ -5,7 +5,6 @@ export default React.createClass({
     },
 
     componentWillReceiveProps : function( nextProps ) {
-        console.log( nextProps );
         this.setState( this.getStateFromSid( nextProps.sid ) );
     }, 
 
@@ -21,9 +20,14 @@ export default React.createClass({
 
     },
     getVersions : function( sid ) {
-        return MateCat.db.segment_versions.findObjects({
+        var versions = MateCat.db.segment_versions.findObjects({
             id_segment : '' + sid
         });
+
+        var sorted = _.sortBy(versions, function(version) {
+            return parseInt(version.version_number);
+        }).reverse();
+        return sorted;
     },
 
     getOriginalTarget : function( segment ) {
@@ -55,7 +59,7 @@ export default React.createClass({
             var previous = this.findPreviousVersion( this.state.segment.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders(previous.translation),
-                this.state.segment.translation );
+                UI.clenaupTextFromPleaceholders( this.state.segment.translation ));
         }
     },
 
@@ -70,20 +74,20 @@ export default React.createClass({
             var previous = this.findPreviousVersion( version.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders(previous.translation),
-                version.translation );
+                UI.clenaupTextFromPleaceholders( version.translation ));
         }
     },
 
     render: function() {
-        var sorted_versions = this.state.versions.sort(function(a,b) {
-            return parseInt(a.version_number) < parseInt(b.version_number); 
-        }); 
 
-        var previousVersions = sorted_versions.map( function(v) {
+        var previousVersions = this.state.versions.map( function(v) {
+            var key = 'version-' + v.id + '-' + this.props.sid ;
+
             return (
                 <ReviewTranslationVersion 
                 trackChangesMarkup={this.getTrackChangesForOldVersion( v )}
                 sid={this.state.segment.sid}
+                key={key}
                 versionNumber={v.version_number}  
                 isCurrent={false} 
                 translation={v.translation} 
@@ -91,9 +95,11 @@ export default React.createClass({
             ); 
         }.bind(this) ); 
 
+        var key = 'version-0-' + this.props.sid ;
         var currentVersion = <ReviewTranslationVersion 
             trackChangesMarkup={this.getTrackChangesForCurrentVersion()}
             sid={this.state.segment.sid}
+            key={'version-0'}
             versionNumber={this.state.segment.version_number}
             isCurrent={true} 
             translation={this.state.segment.translation} />

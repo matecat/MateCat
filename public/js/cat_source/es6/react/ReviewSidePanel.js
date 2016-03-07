@@ -29,7 +29,7 @@ export default React.createClass({
     },
 
     segmentOpened : function(event) {
-        this.setState({sid: event.segment.id, select_issue: false}); 
+        this.setState({sid: event.segment.id, selection: null});
     },
 
     submitIssueCallback : function( data ) {

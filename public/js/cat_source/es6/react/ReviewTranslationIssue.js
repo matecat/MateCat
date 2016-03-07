@@ -35,13 +35,14 @@ export default React.createClass({
         var deleteIssue ; 
 
         if ( config.isReview ) {
-            deleteIssue = <a href="#" onClick={this.deleteIssue}><a href="#" title="Cancel project" className="cancel-project"> Delete issue</a></a>; 
+            deleteIssue = <a href="#" className="cancel-project"
+                onClick={this.deleteIssue}>Delete issue</a>;
         }
 
-         return <div className="review-issue-detail" 
+        return <div className="review-issue-detail"
             onMouseEnter={this.props.issueMouseEnter.bind(null, this.state.issue) }
             onMouseLeave={this.props.issueMouseLeave} >
-            <h4>Issue # {this.props.index} </h4> <span className="review-issue-date">{formatted_date} </span>
+            <h4>Issue # {this.props.progressiveNumber} </h4> <span className="review-issue-date">{formatted_date} </span>
             <br />
             <span className="review-issue-severity">{this.state.issue.severity} - </span><span className="review-issue-label">{category_label} </span>
             <br />

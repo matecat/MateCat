@@ -10,7 +10,6 @@ window.TranslationIssuesSideButton = require('./TranslationIssuesSideButton').de
 window.ReviewSidePanel = require('./ReviewSidePanel').default ;
 window.TranslationIssuesOverviewPanel = require('./TranslationIssuesOverviewPanel').default ;
 window.ReviewTranslationVersion = require('./ReviewTranslationVersion').default ; 
-window.ReviewCurrentVersion = require('./ReviewCurrentVersion').default ; 
 window.ReviewIssuesContainer = require('./ReviewIssuesContainer').default ;
 window.ReviewTranslationIssue = require('./ReviewTranslationIssue').default ;
 window.ReviewTranslationIssueCommentsContainer = require('./ReviewTranslationIssueCommentsContainer').default ;
@@ -19,4 +18,4 @@ window.ReviewIssueCategorySelector = require('./ReviewIssueCategorySelector').de
 
 window.classnames = require('classnames'); 
 
-
+window.Review_QualityReportButton = require('./review/QualityReportButton').default ;

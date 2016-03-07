@@ -1,6 +1,8 @@
 export default React.createClass({
     getInitialState : function() {
         return {
+            sendLabel : 'Send',
+            sendDisabled : true,
             replying : false,
             comments : MateCat.db.segment_translation_issue_comments.findObjects({
                 'id_issue' : this.props.issueId
@@ -12,17 +14,9 @@ export default React.createClass({
         this.setState({ replying: true });
     },
 
-    componentWillReceiveProps : function(nextProps) {
-
-        if ( nextProps.sid != this.props.sid ) {
-            // ReviewImproved.loadComments(this.props.sid, this.props.issueId);
-        }
-
-        // TODO: change this, loading via ajax here is too heavy
-    },
-
     commentsChanged : function() {
         this.setState({
+            sendLabel : 'Send',
             replying : false,
             comments : MateCat.db.segment_translation_issue_comments.findObjects({
                 'id_issue' : this.props.issueId
@@ -41,15 +35,30 @@ export default React.createClass({
     },
     sendClick : function() {
         // send action invokes ReviewImproved function
+        if ( this.state.comment_text.length == 0 ) {
+            return ;
+        }
+
         var data = {
           message : this.state.comment_text,
           source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
         };
+
+        this.setState({ sendLabel : 'Sending', sendDisabled : true });
         ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ) ;
     },
 
     handleCommentChange : function(event) {
-        this.setState({ comment_text : event.target.value });
+        var text = event.target.value ;
+        var disabled = true;
+
+        if ( text.length > 0 ) {
+            disabled = false;
+        }
+        this.setState({
+            comment_text : text,
+            sendDisabled : disabled
+        });
     },
 
     cancelClick : function() {
@@ -85,6 +94,13 @@ export default React.createClass({
             </div>;
         }
         else {
+
+            var buttonClasses = classnames({
+                'mc-button' : true,
+                'blue-button' : true,
+                'disabled' : this.state.sendDisabled
+            });
+
             terminal = <div className="review-issue-comment-reply">
                 <div className="review-issue-comment-reply-text">
 
@@ -96,7 +112,7 @@ export default React.createClass({
             </div>
             <div className="review-issue-comment-buttons">
             <div className="review-issue-comment-buttons-right">
-            <a onClick={this.sendClick} className="mc-button blue-button">Send</a>
+            <a onClick={this.sendClick} className={buttonClasses}>{this.state.sendLabel}</a>
             </div>
             </div>
             </div>;

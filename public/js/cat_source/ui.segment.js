@@ -43,9 +43,8 @@
             }
 
             if ( segment.status ) {
-                var status_label = config.status_labels[ segment.status ];
-                var status_change_title = status_label +
-                    ', click to change it'; 
+                var status_change_title = UI
+                    .statusHandleTitleAttr( segment.status );
             } else {
                 var status_change_title = 'Change segment status' ; 
             }

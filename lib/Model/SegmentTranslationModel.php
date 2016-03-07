@@ -16,8 +16,7 @@ class SegmentTranslationModel extends AbstractModelSubject {
      */
     private $job;
 
-    public function __construct(
-        Translations_SegmentTranslationStruct $translation) {
+    public function __construct(Translations_SegmentTranslationStruct $translation) {
         $this->translation = $translation;
         $this->job = $translation->getJob();
     }

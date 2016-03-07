@@ -32,7 +32,26 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         } else {
             return $fetched;
         }
+    }
 
+    /**
+     * @param Translations_SegmentTranslationStruct $translation
+     *
+     * @return Chunks_ChunkStruct
+     */
+    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation ) {
+        $sql = "select * from jobs where id = :id_job
+           AND jobs.job_first_segment <= :id_segment
+           AND jobs.job_last_segment >= :id_segment ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(array(
+                'id_job' => $translation->id_job,
+                'id_segment' => $translation->id_segment
+        ));
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkStruct' );
+        return $stmt->fetch();
     }
 
     /**

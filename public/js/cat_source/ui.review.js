@@ -9,6 +9,17 @@ Review = {
     type : config.reviewType
 };
 
+$.extend( UI, {
+    clenaupTextFromPleaceholders : function(text) {
+        text = text
+            .replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+        return text;
+    }
+});
 
 if ( Review.enabled() )
 (function(Review, $, undefined) {
@@ -35,16 +46,6 @@ if ( Review.enabled() )
     });
 
     $.extend(UI, {
-
-        clenaupTextFromPleaceholders : function(text) {
-            text = text
-                .replace( config.lfPlaceholderRegex, "\n" )
-                .replace( config.crPlaceholderRegex, "\r" )
-                .replace( config.crlfPlaceholderRegex, "\r\n" )
-                .replace( config.tabPlaceholderRegex, "\t" )
-                .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-            return text;
-        },
 
         trackChanges: function (editarea) {
             var source = UI.currentSegment.find('.original-translation').text();
@@ -210,10 +211,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 "vote":"Excellent"
             }
         ];
-        // end temp
-//        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
-//        UI.createStatQualityPanel();
-//        UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -226,7 +223,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
 
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
-//        console.log($('.editor .sub-editor'));
         $('.editor .sub-editor.open').removeClass('open');
         if($(this).hasClass('untouched')) {
             $(this).removeClass('untouched');
@@ -310,12 +306,15 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                     UI.failedConnection( data, 'setRevision' );
                 },
                 success: function(d) {
-                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
+                    window.quality_report_btn_component.setState({
+                        vote: d.data.overall_quality_class
+                    });
                 }
             });
         },
         trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
+            var diff = UI.dmp.diff_main(UI.currentSegment
+                .find('.original-translation').text()
                     .replace( config.lfPlaceholderRegex, "\n" )
                     .replace( config.crPlaceholderRegex, "\r" )
                     .replace( config.crlfPlaceholderRegex, "\r\n" )

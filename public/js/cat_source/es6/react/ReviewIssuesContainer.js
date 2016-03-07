@@ -48,18 +48,20 @@ export default React.createClass({
             });
 
             issues = sorted_issues.map(function( item, index ) {
-                index = index + 1 ; 
+                var prog = sorted_issues.length - index;
+
                 return <ReviewTranslationIssue 
                     issueMouseEnter={this.props.issueMouseEnter} 
                     issueMouseLeave={this.props.issueMouseLeave}
-                    sid={this.props.sid} index={index} 
+                    sid={this.props.sid}
+                    progressiveNumber={prog}
                     issueId={item.id} key={item.id} />
 
             }.bind(this) );
 
         }
         else {
-            issues = <div class="review-no-issues">No issues on this version</div>;
+            issues = <div className="review-no-issues">No issues on this version</div>;
         }
 
         return <div className={cs} > 

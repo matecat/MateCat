@@ -31,6 +31,25 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
+    public static function getScoreForChunk( \Chunks_ChunkStruct $chunk ) {
+        $sql = "select sum(penalty_points) from qa_entries e
+            join segment_translations st
+
+            on st.version_number = e.translation_version
+            and st.id_segment = e.id_segment
+            join jobs on jobs.id = st.id_job
+            WHERE jobs.id = :id_job AND jobs.password = :password
+             ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(array('id_job' => $chunk->id , 'password' => $chunk->password ));
+        $count =  $stmt->fetch();
+
+        $score = $count[0] == null ? 0 : $count[0];
+        return $score ;
+    }
+
 
     /**
      * @param array $chunk_ids Example: array( array($id_job, $password), ... )
@@ -103,6 +122,17 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         );
         return $stmt->fetch() ;
 
+    }
+
+    public static function updateRecord( ChunkReviewStruct $chunk_review ) {
+        $sql = "UPDATE qa_chunk_reviews set score = :score WHERE id = :id ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        return $stmt->execute( array(
+                'score' => $chunk_review->score,
+                'id' => $chunk_review->id )
+        );
     }
 
     /**

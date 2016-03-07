@@ -1,16 +1,12 @@
 export default React.createClass({
     getInitialState : function() {
-        console.log( 'props ------------', this.props );
-
         return {
             collapsed : this.props.isCurrent == false
         }; 
     },
 
     componentWillReceiveProps : function(nextProps) {
-        console.log( 'receiving props', nextProps );
-
-        this.setState({ collapsed : !nextProps.isCurrent });
+        this.setState({ collapsed : !nextProps.isCurrent, trackChanges : false });
     },
 
     issueMouseEnter : function( issue, event, reactid ) {
@@ -43,7 +39,12 @@ export default React.createClass({
             'review-translation-version' : true 
         });
 
-        var versionLabel = this.props.isCurrent ? 'Current version' : 'Version' ; 
+        if ( this.props.isCurrent ) {
+            var versionLabel = sprintf('Version %s (current)', this.props.versionNumber );
+        } else {
+            var versionLabel = sprintf('Version %s', this.props.versionNumber );
+        }
+
 
         var styleForVersionText = { 
             display: this.state.trackChanges ? 'none' : 'block' 
@@ -62,7 +63,7 @@ export default React.createClass({
         return <div className="review-version-wrapper">
             <div className={cs} >
             <div className="review-version-header">
-                <h3>{versionLabel} {this.props.versionNumber}</h3>
+                <h3>{versionLabel}</h3>
             </div>
 
             <div className="collapsable">

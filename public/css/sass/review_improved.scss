@@ -2,15 +2,6 @@
     user-select: none;
 }
 
-.segment-footer-panel {
-    h3 {
-        margin: 20px 0 0 1px;
-        padding-bottom: 4px;
-        text-align: left;
-    }
-
-}
-
 article.review-panel-opened {
     -webkit-transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
@@ -18,101 +9,6 @@ article.review-panel-opened {
     -webkit-transition: width .2s ease;
     transition: width .2s ease;
     width: 71.5%;
-}
-
-.messages-area-wrapper {
-    margin-top: 10px;
-
-    .messages-list-container {
-        max-height: 300px;
-        overflow-y: auto;
-        margin-bottom: 10px;
-        border-top: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        padding: 8px 8px 0 0;
-    }
-}
-
-.translation-issues-area {
-    max-height: 200px;
-    overflow-y: auto;
-    text-align: left;
-    padding: 10px 0;
-    margin: 0 0 10px;
-
-    .issue-container {
-        border-bottom: 1px solid #d4d4d1;
-        padding: 8px 4px;
-
-    }
-
-    .issue-container:hover {
-        background-color: #eee;
-    }
-
-    .issue-comment-container {
-        padding: 4px 0;
-    }
-}
-
-.trackChanges {
-    .deleted {
-        background: #ffc7ca;
-        text-decoration: line-through;
-    }
-
-    .added  {
-        background: #b0ffb3;
-        text-decoration: none;
-    }
-}
-
-section .version-picker-container {
-    text-align: left;
-    margin: 10px 0;
-}
-
-.issue-detail-modal, .error-selection-modal {
-
-    #error-selection-form table {
-        margin-bottom: 20px;
-
-        tr.start td.first {
-            font-weight: bold;
-        }
-    }
-
-    .message-form-container textarea,
-    .error-message-container textarea {
-       width: 100%;
-    }
-    text-align: left;
-
-    table {
-        width: 100%;
-    }
-}
-.segment-footer-left-panel {
-    width: 45.6%;
-    padding: 0 1%;
-    margin: 0 0 2% 0;
-    float: left;
-    border: 3px solid #fff;
-}
-
-.segment-footer-right-panel {
-    float: right;
-    width: 45%;
-    margin-right: 2.9%;
-    margin-top: 2px;
-}
-
-section.reviewImproved.reverted {
-
-    .tab {
-        background-color: #eee;
-    }
-
 }
 
 section.reviewImproved.opened {
@@ -255,7 +151,6 @@ section.reviewImproved.opened .textarea-container {
 
 }
 
-
 section.status-fixed .status {
     background: #F5E014;
 }
@@ -299,6 +194,7 @@ section {
     right: 0;
     width: 22%;
     z-index: 999;
+    min-width:215px;
     margin-top: 49px;
     text-align: left ;
     overflow: scroll; 
@@ -386,10 +282,18 @@ section {
     color: #666;
 }
 
+.translation-issues-button {
+    cursor: pointer;
+    margin: 6px auto 0;
+    padding: 10px 0;
+    position: relative;
+    width: 80px;
+}
+
 .revise-button-counter {
-    left: 52px;
+    left: 44px;
     position: absolute;
-    top: 0;
+    top: 10px;
     background: #dc2e34;
     color: #fff;
      border: 1px solid #fff;
@@ -416,8 +320,17 @@ section {
     margin-top: 10px;
 }
 
-.side-tools-opened .review-triangle  {
+.review-side-panel-opened section.opened .review-triangle  {
      display:block;
+}
+
+/* code to hide scroll of the body */
+.review-side-panel-opened {
+    overflow-y: hidden!important;
+}
+
+.review-side-panel-opened .mbc-comment-balloon-outer {
+    display:none!important;
 }
 
 #review-side-panel h3 {
@@ -457,6 +370,16 @@ span.review-issue-label {
     overflow: hidden;
     border-bottom: 1px solid #f4f4f4;
     padding: 0px 0 10px 0;
+    margin-left: -10px;
+    padding-left: 15px;
+}
+
+.segment-side-buttons .txt {
+    margin: -10px auto 0;
+}
+
+.review-issue-detail:hover {
+    box-shadow: inset 3px 0px 0px yellow;
 }
 
 .review-issue-comment, .review-issue-comment-container {
@@ -483,7 +406,7 @@ a.cancel-project:hover {
 }
 
 .review-issue-selection-panel {
-    padding: 10px;
+    padding: 10px 10px 40px 10px;
 }
 
 .mc-resizable-textarea {
@@ -530,4 +453,9 @@ table.review-issue-category-list {
         text-decoration: line-through;
     }
 
+}
+
+
+.review-side-panel-opened a.cancel-project:before {
+    margin-right: 5px;
 }
