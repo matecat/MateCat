@@ -108,7 +108,8 @@ module.exports = function(grunt) {
                     basePath + '../css/style.css',
                     basePath + '../css/mbc-style.css',
                     basePath + '../css/segment-notes.css',
-                    basePath + '../css/project-completion-feature.css'
+                    basePath + '../css/project-completion-feature.css',
+                    basePath + '../holidays/*.css'
                 ],
                 dest: basePath + '../css/app.css'
             }
