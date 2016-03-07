@@ -85,6 +85,9 @@
             <li id='filterSwitch' title="Search or Filter results">
                 <span class="numbererror"></span>
             </li>
+            <li id="advanced-filter" title="Filter segments">
+                <a class="filter"></a>
+            </li>
         </ul>
 
         <a href="${basepath}" class="logo">
@@ -95,6 +98,57 @@
         </div>
 
     </div>   <!-- .wrapper -->
+    <!-- hardcorded advanced filtering -->
+    <div class="advanced-filter-searchbox searchbox">
+            <form>
+                <div class="block">
+                    <label for="search-projectname">segment status</label>
+                    <select class="search-select">
+                        <option>All</option>
+                        <option>Completed</option>
+                        <option>Translated</option>
+                    </select>
+                </div>
+
+                <div class="block">
+                    <label for="select-source">Data sample</label>
+                    <input type="checkbox" />
+                </div>
+
+                <div class="block">
+                    <a class="search-settings">Settings</a>
+                    <div class="search-settings-panel hide">
+                        <div class="slider">Slider here</div>
+                        <h4>Sample criteria</h4>
+
+                        <div class="block">
+                            <input type="radio" /><label>Edit distance</label>
+                        </div>
+                        <div class="block">
+                            <input type="radio" /><label>Regular interval</label>
+                            <select class="advanced-regular-interval">
+                                <option>5</option>
+                                <option>10</option>
+                                <option>15</option>
+                            </select>
+                        </div>
+                        <div class="block">
+                            <input type="radio" /><label>Segment lenght</label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="block right">
+                    <input id="clear-filter" type="button" class="btn" value="CLEAR" />
+                    <input id="exec-filter" type="submit" class="btn" value="FILTER" />
+
+                </div>
+            </form>
+
+        </div>
+
     <div tal:attributes="class string:searchbox${filtered_class}">
         <form>
 
@@ -166,4 +220,5 @@
 
 </header>
 </body>
+
 </html>

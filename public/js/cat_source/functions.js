@@ -972,3 +972,12 @@ function hackSnapEngage( on ) {
         button.css( 'z-index', button.data( 'mbc-zindex' ) );
     }
 }
+
+// advanced filtering
+
+
+$(function() {
+	$(document).on('click',".filtering .search-settings",function() {
+		$(".search-settings-panel").toggleClass('hide');
+	});
+});
