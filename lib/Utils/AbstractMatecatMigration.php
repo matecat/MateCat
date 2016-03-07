@@ -21,17 +21,18 @@ class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
 
     private function resetSchemaDump($direction) {
 
-        $dev_ini = parse_ini_file(INIT::$ROOT . '/inc/config.ini', true);
-        $devDatabase = new SchemaCopy($dev_ini['development']);
-        $statements = $devDatabase->getTablesStatements();
+        $config_ini = parse_ini_file(INIT::$ROOT . '/inc/config.ini', true);
+        $current_env = $config_ini['ENV'];
+        $database = new SchemaCopy($config_ini[$current_env]);
+        $statements = $database->getTablesStatements();
 
-        $sql = $devDatabase->getDatabaseCreationStatement();
+        $sql = $database->getDatabaseCreationStatement();
         foreach($statements as $key => $statement ) {
             $sql .= preg_replace('/AUTO_INCREMENT=\d+/i', '', $statement[0]['Create Table']);
             $sql .= "; \n\n";
         }
 
-        $seedLoader = new SeedLoader( $dev_ini['development']);
+        $seedLoader = new SeedLoader( $config_ini[ $current_env ]);
         $sql .= $seedLoader->getSeedSql();
 
 
