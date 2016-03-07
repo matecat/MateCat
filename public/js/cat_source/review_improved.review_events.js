@@ -53,6 +53,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
     }
 
+    $(document).on('translation:change', function() {
+        ReviewImproved.reloadQualityReport();
+    });
+
     $(document).on('segment:status:change', function(e, segment, options) {
         if ( options.status != 'rejected' ) {
             // save to database!!

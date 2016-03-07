@@ -48,11 +48,10 @@ class SegmentTranslationModel
 
     public function recountScore() {
         $score = \LQA\ChunkReviewDao::getScoreForChunk( $this->chunk );
-
         $this->chunk_review->score = $score ;
-        \LQA\ChunkReviewDao::updateRecord($this->chunk_review);
 
-
+        $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
+        $chunk_review_model->updatePassFailResult();
     }
 
     /**

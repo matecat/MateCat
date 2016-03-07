@@ -27,7 +27,9 @@ class QualityReportButton extends React.Component {
         var label = "QUALITY REPORT"; 
 
         if ( this.state.score != null ) {
-            label = sprintf("QUALITY REPORT (score %s)", this.state.score); 
+            label = sprintf("QUALITY REPORT (%s|%s)",
+                            this.state.percentage_reviewed,
+                            this.state.score);
         }
 
         return <a id="quality-report"

@@ -71,7 +71,7 @@ class ChunkReviewModel
      *
      * @throws \Exception
      */
-    private function updatePassFailResult() {
+    public function updatePassFailResult() {
         $score_per_mille =  $this->chunk_review->score /
             $this->chunk_review->reviewed_words_count * 1000 ;
 

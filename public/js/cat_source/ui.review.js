@@ -211,10 +211,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
                 "vote":"Excellent"
             }
         ];
-        // end temp
-//        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
-//        UI.createStatQualityPanel();
-//        UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -227,7 +223,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
 
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
-//        console.log($('.editor .sub-editor'));
         $('.editor .sub-editor.open').removeClass('open');
         if($(this).hasClass('untouched')) {
             $(this).removeClass('untouched');
@@ -318,7 +313,8 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             });
         },
         trackChanges: function (editarea) {
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
+            var diff = UI.dmp.diff_main(UI.currentSegment
+                .find('.original-translation').text()
                     .replace( config.lfPlaceholderRegex, "\n" )
                     .replace( config.crPlaceholderRegex, "\r" )
                     .replace( config.crlfPlaceholderRegex, "\r\n" )
