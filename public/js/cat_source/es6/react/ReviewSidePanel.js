@@ -7,7 +7,6 @@ export default React.createClass({
 
     openPanel : function(e, data) {
         this.setState({sid: data.sid, visible: true, selection : data.selection }); 
-        UI.scrollSegment( UI.Segment.find( data.sid ).el ) ;
     }, 
 
     closePanel : function(e, data) {

@@ -107,6 +107,14 @@ if ( ReviewImproved.enabled() )
             hackSnapEngage( true );
 
             $(document).trigger('review-panel:opened', data);
+
+            window.setTimeout( function(data) {
+                var el = UI.Segment.find( data.sid ).el ;
+                if ( UI.currentSegmentId != data.sid ) {
+                    UI.focusSegment( el );
+                }
+                UI.scrollSegment( el );
+            }, 500, data);
         },
 
         isPanelOpened : function() {
@@ -120,6 +128,11 @@ if ( ReviewImproved.enabled() )
 
             $('article').removeClass('review-panel-opened');
             $('body').removeClass('side-tools-opened review-side-panel-opened');
+
+
+            window.setTimeout( function() {
+                UI.scrollSegment( UI.currentSegment );
+            }, 100);
         }
     });
 })(jQuery, ReviewImproved);
@@ -172,8 +185,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                     var review = data['quality-report'].chunk.review ;
 
                     window.quality_report_btn_component.setState({
-                        is_pass             : review.is_pass,
-                        score               : review.score,
+                        is_pass : review.is_pass,
+                        score : review.score,
                         percentage_reviewed : review.percentage
                     });
                 });

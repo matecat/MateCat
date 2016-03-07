@@ -80,9 +80,6 @@ if ( ReviewImproved.enabled() ) {
         }
     });
 
-    $('#review-side-panel .review-issue-comments-buttons-right a')
-        .on('click', function(e) { e.stopPropagation();  });
-
     $(document).on('translation:change', function(e, data) {
         var versions_path =  sprintf(
             '/api/v2/jobs/%s/%s/segments/%s/translation-versions',

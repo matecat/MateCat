@@ -3074,7 +3074,7 @@ $(window).resize(function() {
         focusSegment: function(segment) {
             var clickableEditArea = segment.find('.editarea:not(.opened)');
             if ( clickableEditArea.length == 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
-                UI.scrollSegment( segment );
+                UI.openSegment( segment );
             }
             else {
                 clickableEditArea.trigger('click');
