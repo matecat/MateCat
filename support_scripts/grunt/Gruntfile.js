@@ -6,6 +6,15 @@ module.exports = function(grunt) {
     var incPath = '../../inc/';
     var cssBase = '../../public/css/';
 
+    var cssFiles = [
+        basePath + '../css/common.css',
+        basePath + '../css/style.css',
+        basePath + '../css/mbc-style.css',
+        basePath + '../css/segment-notes.css',
+        basePath + '../css/project-completion-feature.css',
+        basePath + '../css/editlog.css'
+    ]
+
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
     grunt.log.ok( 'Matecat Version: ' + version );
@@ -23,6 +32,7 @@ module.exports = function(grunt) {
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
         cssBase + 'sass/cattool.scss',
+        cssBase + '../holidays/*.css',
     ];
 
     var es2015Preset = require('babel-preset-es2015');
@@ -179,6 +189,8 @@ module.exports = function(grunt) {
 
             libs: {
                 src: [
+                    basePath + 'lib/lodash.min.js',
+                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/remodal.min.js',
                     basePath + 'lib/waypoints.min.js',

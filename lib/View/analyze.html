@@ -35,6 +35,8 @@
     <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
+    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
+
 </head>
 
 

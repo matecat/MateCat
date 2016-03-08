@@ -216,7 +216,7 @@ class getWarningController extends ajaxController {
                             '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
                             $globalMessage[ 'message' ],
                             md5( $globalMessage[ 'message' ] ),
-                            $globalMessage[ 'expiry' ]
+                            $globalMessage[ 'expire' ]
                     );
         }
         return null;

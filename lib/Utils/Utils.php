@@ -369,6 +369,97 @@ class Utils {
 
 	}
 
+	/**
+	 * @param      $match
+	 * @param      $job_tm_keys
+	 * @param      $job_owner
+	 * @param 	   $uid
+	 *
+	 * @return null|string
+	 * @throws Exception
+	 */
+	public static function changeMemorySuggestionSource( $match, $job_tm_keys, $job_owner, $uid){
+		$sug_source = $match[ 'created_by' ];
+		$key        = $match[ 'memory_key' ];
 
+		//suggestion is coming from a public TM
+		if ( $sug_source == 'Matecat' ) {
+
+			$description = "Public TM";
+
+		} elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
+
+			$description = $sug_source;
+
+		} elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
+
+			//MyMemory returns the key of the match
+
+			if ( $uid !== null ) { //user is logged and uid is set
+
+				//check if the user can see the key.
+				$memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+				$memoryKey->uid         = $uid;
+				$memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+				$memoryKey->tm_key->key = $key;
+
+				$memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+				$currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
+
+				if ( count( $currentUserMemoryKey ) > 0 ) {
+
+					//the current user owns the key: show its description
+					$currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
+					$description          = $currentUserMemoryKey->tm_key->name;
+
+				}
+
+			}
+
+		}
+
+		/**
+		 * if the description is empty, get cascading default descriptions
+		 */
+		if ( empty( $description ) ) {
+			$description = self::getDefaultKeyDescription( $key, $job_tm_keys, $job_owner );
+		}
+
+		if ( empty( $description ) ) {
+			$description = "No description available"; //this should never be
+		}
+
+		return $description;
+	}
+
+	/**
+	 * if the description is empty, get cascading default descriptions
+	 *
+	 * First get the job key description, if empty, get the job owner email
+	 *
+	 * @param $key
+	 *
+	 * @return null|string
+	 * @throws Exception
+	 */
+	public static function getDefaultKeyDescription( $key, $job_tm_keys, $job_owner ){
+
+		$description = null;
+
+		$ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $job_tm_keys ) );
+
+		//search the current key
+		$currentKey = null;
+		for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
+			if ( $ownerKeys[ $i ]->key == $key ) {
+				$description = $ownerKeys[ $i ]->name;
+			}
+		}
+
+		//return if something was found, avoid other computations
+		if ( !empty( $description ) ) return $description;
+
+		return $job_owner;
+	}
 }
 
