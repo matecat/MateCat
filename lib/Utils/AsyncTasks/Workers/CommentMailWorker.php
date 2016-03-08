@@ -62,6 +62,13 @@ class CommentMailWorker extends AbstractWorker {
         $mail->XMailer = 'MateCat Mailer';
         $mail->CharSet = 'UTF-8';
         $mail->IsHTML();
+
+        if( empty( $queueElement->params[ 'address' ][ 0 ] ) ){
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Mailer Error: You must provide at least one recipient email address." );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody );
+            throw new EndQueueException( " Mailer Error: You must provide at least one recipient email address." );
+        }
+
         $mail->AddAddress( $queueElement->params[ 'address' ][ 0 ], $queueElement->params[ 'address' ][ 1 ] );
 
         if ( !$mail->Send() ) {
