@@ -75,8 +75,8 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', function( e ) {
-        if (e.target.closest('.modal, section, #review-side-panel') == null) {
-            ReviewImproved.closePanel();
+        if (e.target.closest('header, .modal, section, #review-side-panel') == null) {
+            ReviewImproved.closePanel( );
         }
     });
 
