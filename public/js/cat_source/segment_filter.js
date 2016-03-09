@@ -7,22 +7,32 @@ SegmentFilter.enabled = function() {
 
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
-    SF.overrides = { }
+    SF.overrides = { original : {}, current : {} }
 
-    SF.overrides.getSegmentsMarkup = UI.getSegmentMarkup ;
-    SF.overrides.openSegment       = UI.openSegment ;
-    SF.overrides.editAreaClick     = UI.editAreaClick ;
-    SF.overrides.rulesForNextSegment = UI.rulesForNextSegment ;
-    SF.overrides.rulesForNextUntranslatedSegment = UI.rulesForNextUntranslatedSegment ;
-    SF.overrides.evalNextSegment = UI.evalNextSegment ;
-    SF.overrides.gotoPreviousSegment = UI.gotoPreviousSegment ;
-    SF.overrides.gotoNextSegment = UI.gotoNextSegment ;
+    SF.overrides.original.getSegmentsMarkup               = UI.getSegmentMarkup ;
+    SF.overrides.original.openSegment                     = UI.openSegment ;
+    SF.overrides.original.editAreaClick                   = UI.editAreaClick ;
+    SF.overrides.original.rulesForNextSegment             = UI.rulesForNextSegment ;
+    SF.overrides.original.rulesForNextUntranslatedSegment = UI.rulesForNextUntranslatedSegment ;
+    SF.overrides.original.evalNextSegment                 = UI.evalNextSegment ;
+    SF.overrides.original.gotoPreviousSegment             = UI.gotoPreviousSegment ;
+    SF.overrides.original.gotoNextSegment                 = UI.gotoNextSegment ;
 
-    SF.filtering = function() {
-        return true;
-    },
+    $.extend(SF, {
+        filtering : function() {
+            return true;
+        },
 
-    $.extend(UI, {
+        switchOffFiltering : function() {
+            $.extend(UI, SF.overrides.original);
+        },
+        switchOnFiltering : function() {
+            $.extend(UI, SF.overrides.current);
+        }
+    });
+
+
+    $.extend(SF.overrides.current, {
         gotoPreviousSegment: function() {
             var rules = 'section:not(.muted)';
             var prev = $('.editor').prevAll( rules ).first();
@@ -104,12 +114,12 @@ if (SegmentFilter.enabled())
         editAreaClick : function(e, operation, action) {
             var e = arguments[0];
             if ( ! UI.isMuted(e.target) ) {
-                SF.overrides.editAreaClick.apply( e.target, arguments );
+                SF.overrides.original.editAreaClick.apply( e.target, arguments );
             }
         },
 
         getSegmentMarkup : function() {
-            var markup = SF.overrides.getSegmentsMarkup.apply( undefined, arguments );
+            var markup = SF.overrides.original.getSegmentsMarkup.apply( undefined, arguments );
             var segment = arguments[0];
             if ( parseInt( segment.sid ) % 2 == 1 ) {
                 markup = $(markup).addClass('muted');
@@ -122,7 +132,7 @@ if (SegmentFilter.enabled())
 
 
     $(document).on('ready', function() {
-
+        SF.switchOnFiltering();
     });
 
 
