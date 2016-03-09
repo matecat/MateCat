@@ -343,8 +343,6 @@ $.extend(UI, {
                 console.log('CONTROLLO: ', $('#uploadTMX').text());
                 operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
                 UI.checkTMKey($('#addtm-tr-key').val(), operation);
-//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
-
             }
 
         // end addtmx

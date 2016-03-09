@@ -825,13 +825,24 @@ UI = {
 	},
 
     /**
+     * rulesForNextSegment
+     *
+     * Defines the css selectors to be used to determine the next
+     * segment to open.
+     */
+    rulesForNextUntranslatedSegment : function(status, section) {
+        var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
+        return rules ;
+    },
+
+    /**
      * evalNextSegment
      *
      * Evaluates the next segment and populates this.nextSegmentId ;
      *
      */
     evalNextSegment: function( section, status ) {
-		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
+        var rules = UI.rulesForNextUntranslatedSegment( status, section );
 		var n = $(section).nextAll(rules).first();
 
 		if (!n.length) {
@@ -1042,7 +1053,8 @@ UI = {
             }
 		}
 	},
-	gotoNextUntranslatedSegment: function() {console.log('gotoNextUntranslatedSegment');
+	gotoNextUntranslatedSegment: function() {
+        console.log('gotoNextUntranslatedSegment');
 		if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
 			if (!UI.nextUntranslatedSegmentId) {
 				UI.closeSegment(UI.currentSegment);
