@@ -704,16 +704,7 @@ UI = {
     nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = this.getSegmentId($('section').last());
-//		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
-//            var start = new Date().getTime();
-//            for (var i = 0; i < 1e7; i++) {
-//                if ((new Date().getTime() - start) > 2000 ){
-//                    break;
-//                }
-//            }
-
-			//controlla che il segmento non sia nell'area visualizzata?
 			if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
 				found = parseInt(this);
 				return false;

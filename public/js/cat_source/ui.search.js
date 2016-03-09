@@ -39,11 +39,8 @@ $.extend(UI, {
 
 		if ($('#search-target').val() !== '') {
 			this.searchParams.target = $('#search-target').val();
-//			if ($('#enable-replace').is(':checked'))
-//				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 		} else {
 			delete this.searchParams.target;
-//			$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 		}
 
 		if ($('#select-status').val() !== '') {
@@ -71,15 +68,6 @@ $.extend(UI, {
 
 		this.searchMode = ((typeof p.source == 'undefined') && (typeof p.target == 'undefined')) ? 'onlyStatus' :
 				((typeof p.source != 'undefined') && (typeof p.target != 'undefined')) ? 'source&target' : 'normal';
-		if (this.searchMode == 'onlyStatus') {
-
-//			APP.alert('Status only search is temporarily disabled');
-//			return false;
-		}
-		else if (this.searchMode == 'source&target') {
-//			APP.alert('Combined search is temporarily disabled');
-//			return false;
-		}
 
 		var source = (p.source) ? p.source : '';
 		var target = (p.target) ? p.target : '';
@@ -119,21 +107,19 @@ $.extend(UI, {
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
 		this.updateSearchDisplay();
 		if (this.pendingRender) {
-			if (this.pendingRender.detectSegmentToScroll)
+			if (this.pendingRender.detectSegmentToScroll) {
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
+			}
 			$('#outer').empty();
 
 			this.render(this.pendingRender);
 			this.pendingRender = false;
 		}
-//		console.log(this.editarea.html());
 	},
 	execReplaceAll: function() {
-//		console.log('replace all');
 		$('.search-display .numbers').text('No segments found');
 		$('.editarea mark.searchMarker').remove();
 		this.applySearch();
-//		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
 
         if ( $('#search-target').val() !== '' ) {
             this.searchParams.target = $('#search-target').val();
@@ -283,13 +269,12 @@ $.extend(UI, {
 		where = options.where;
 		seg = options.seg;
 		singleSegment = options.singleSegment || false;
-//		console.log('singleSegment: ', singleSegment);
+
 		if (typeof where == 'undefined') {
 			this.clearSearchMarkers();
 		}
 		var p = this.searchParams;
-//        console.log('mode: ' + mode + ' - coso: ' + coso);
-//		var targetToo = typeof p.target != 'undefined';
+
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
@@ -315,10 +300,9 @@ $.extend(UI, {
 			if (typeof where == 'undefined') {
 				UI.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
 				UI.doMarkSearchResults(trgHasTags, $(q + " .targetarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
-//				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
-//				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+
 				$('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
-//				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
 					var a = $(this).text();
 					$(this).replaceWith(a);
@@ -359,8 +343,6 @@ $.extend(UI, {
             var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
             regTxt = regTxt.replace(/(\W)/gi, "\\$1");
             regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
-
-//			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder).replace(/\W/gi, "$1" );
 
             var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
             var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase);
@@ -444,14 +426,11 @@ $.extend(UI, {
 		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
 	},
 	gotoNextResultItem: function(unmark) {
-//        if(UI.goingToNext) {
-//			console.log('already going to next');
-//			return false;
-//		}
+
 		var p = this.searchParams;
-console.log('gotoNextResultItem');
+
 		if (this.searchMode == 'onlyStatus') {
-			console.log('only status');
+
 			var status = (p.status == 'all') ? '' : '.status-' + p.status;
 			el = $('section.currSearchSegment');
 			if (p.status == 'all') {
@@ -477,8 +456,8 @@ console.log('gotoNextResultItem');
 			}
 		} else if (this.searchMode == 'source&target') {
 
-			m = $(".targetarea mark.currSearchItem"); // ***
-//            console.log($(m).nextAll('mark.searchMarker').length);
+			m = $(".targetarea mark.currSearchItem");
+
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
 				$(m).removeClass('currSearchItem');
@@ -496,29 +475,16 @@ console.log('gotoNextResultItem');
 						skipCurrent: skipCurrent,
 						unmark: unmark
 					});
-				} else {//console.log('b');
+				} else {
 					setTimeout(function() {
 						UI.gotoNextResultItem(false);
 					}, 500);
 				}
 			}
 
-
-/*
-			var seg = $("section.currSearchSegment");
-//            var m = $("section.currSearchSegment mark.searchMarker");
-//            seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
-			if (seg.length) {
-//                $(seg).removeClass('currSearchSegment');
-//                $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
-				this.gotoSearchResultAfter({
-					el: 'segment-' + $(seg).attr('id').split('-')[1]
-				});
-			}
-*/			
 		} else {
 			m = $("mark.currSearchItem");
-//            console.log($(m).nextAll('mark.searchMarker').length);
+
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
 				$(m).removeClass('currSearchItem');
@@ -542,18 +508,14 @@ console.log('gotoNextResultItem');
 				}
 			}
 		}
-//        console.log('stop');
-//		UI.goingToNext = false;
 	},
 	gotoSearchResultAfter: function(options) {
 		console.log('options: ', options);
 		el = options.el;
 		skipCurrent = (options.skipCurrent || false);
 		unmark = (options.unmark || false);
-//		        console.log(UI.goingToNext);
 
 		var p = this.searchParams;
-//        console.log($('#' + el + ":has(mark.searchMarker)").length);
 
 		if (this.searchMode == 'onlyStatus') { // searchMode: onlyStatus
 			var status = (p.status == 'all') ? '' : '.status-' + p.status;
@@ -561,8 +523,6 @@ console.log('gotoNextResultItem');
 			if (p.status == 'all') {
 				this.scrollSegment($('#' + el).next());
 			} else {
-//				console.log($('#' + el));
-//				console.log($('#' + el).nextAll(status).length);
 				if ($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
 					nextToGo = $('#' + el).nextAll(status).first();
 					nextToGo.addClass('currSearchSegment');
@@ -631,35 +591,6 @@ console.log('gotoNextResultItem');
 					});
 				}
 			}
-/*
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
-			destination = (($('#' + el + ":has(mark.searchMarker)").length) && (!$('#' + el).hasClass('currSearchSegment'))) ? $('#' + el) : $('#' + el).nextAll(status + ":has(mark.searchMarker)").first();
-//            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();            
-//            console.log(destination);
-			if ($(destination).length) {
-				$('section.currSearchSegment').removeClass('currSearchSegment');
-				$(destination).addClass('currSearchSegment');
-				this.scrollSegment(destination);
-			} else {
-				// load new segments
-				if (!this.searchResultsSegments) {
-					this.pendingRender = {
-						firstLoad: false,
-						applySearch: true,
-						detectSegmentToScroll: true
-					};
-				} else {
-					seg2scroll = this.nextUnloadedResultSegment();
-					$('#outer').empty();
-					this.render({
-						firstLoad: false,
-						applySearch: true,
-						segmentToScroll: seg2scroll
-					});
-				}
-			}
-*/
-
 		}
 	},
 	checkSearchChanges: function() {

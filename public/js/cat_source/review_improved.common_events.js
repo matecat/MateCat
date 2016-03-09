@@ -61,10 +61,6 @@ if ( ReviewImproved.enabled() ) {
         );
     })();
 
-    $(window).on('segmentClosed', function( e ) {
-        // ReviewImproved.closePanel();
-    });
-
     $( document ).on( 'keydown', function ( e ) {
         var esc = '27' ;
         if ( e.which == esc ) {
