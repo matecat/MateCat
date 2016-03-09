@@ -26,6 +26,7 @@ class xliffToTargetController extends downloadController {
               "type" => mime_content_type($file_path),
               "message" => "File downloaded! Check your download folder"
             ));
+            $this->_filename = $conversion['fileName'];
         } else {
             $this->error = true;
             $this->errorMessage =  $conversion[0]['errorMessage'];
