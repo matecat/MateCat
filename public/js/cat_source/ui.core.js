@@ -3048,6 +3048,75 @@ console.log('eccolo: ', typeof token);
         $('#outer').empty();
         this.start();
     },
+
+
+    /**
+     * Edit area click
+     *
+     * This function can be extended in order for other modules
+     * to change the behaviour of segment activation.
+     *
+     * TODO: .editarea class is bound to presentation and logic
+     * and should be decoupled in future refactorings.
+     *
+     */
+    editAreaClick : function(e, operation, action) {
+
+        if (typeof operation == 'undefined') {
+            operation = 'clicking';
+        }
+
+        UI.saveInUndoStack('click');
+        this.onclickEditarea = new Date();
+
+        UI.notYetOpened = false;
+        UI.closeTagAutocompletePanel();
+        UI.removeHighlightCorrespondingTags();
+
+        if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+            if (operation == 'moving') {
+                if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
+                    UI.segmentToOpen = segment;
+                    UI.blockOpenSegment = true;
+
+                    console.log('ctrl+down troppo vicini');
+                } else {
+                    UI.blockOpenSegment = false;
+                }
+
+                UI.recentMoving = true;
+                clearTimeout(UI.recentMovingTimeout);
+                UI.recentMovingTimeout = setTimeout(function() {
+                    UI.recentMoving = false;
+                }, 1000);
+
+            } else {
+                UI.blockOpenSegment = false;
+            }
+            UI.lastOperation = operation;
+
+            UI.openSegment(this, operation);
+            if (action == 'openConcordance')
+                UI.openConcordance();
+
+            if (operation != 'moving') {
+                segment = $('#segment-' + $(this).data('sid'));
+                if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+                    UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                }
+            }
+        }
+
+        if (UI.editarea != '') {
+            UI.lockTags(UI.editarea);
+            UI.checkTagProximity();
+        }
+
+        if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
+
+    }
+
+
 };
 
 $(document).ready(function() {

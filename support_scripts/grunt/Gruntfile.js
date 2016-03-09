@@ -179,6 +179,9 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/segment_notes.*.js',
                     basePath + 'cat_source/review_improved.js',
                     basePath + 'cat_source/review_improved.*.js',
+
+                    basePath + 'cat_source/segment_filter.js',
+
                     basePath + 'cat_source/handlebars-helpers.js',
 
                     basePath + 'tm.js',
