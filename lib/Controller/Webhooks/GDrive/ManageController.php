@@ -145,6 +145,21 @@ class ManageController extends KleinController {
         ));
     }
     
+    public function getUserEmail() {
+        $email = null;
+
+        $dao = new \Users_UserDao( \Database::obtain() );
+        $user = $dao->getByUid( $_SESSION['uid'] );
+
+        if($user != null) {
+            $email = $user->email;
+        }
+
+        $this->response->json( array(
+            "email" => $email
+        ));
+    }
+
     protected function afterConstruct() {
         Bootstrap::sessionStart();  
     }
