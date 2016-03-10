@@ -17,7 +17,6 @@ if (SegmentFilter.enabled())
         // $.extend(UI, SF.overrides.new);
     };
 
-
     $.extend(SF, {
         lastFilterData : null,
 

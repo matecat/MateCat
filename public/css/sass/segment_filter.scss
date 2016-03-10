@@ -35,3 +35,26 @@ section.muted .editarea {
 section.muted .translation-issues-button {
   display: none; 
 }
+
+.search-settings-panel {
+    background: #efefef;
+    padding: 10px;
+    position: absolute;
+    width: 205px;
+    border: 1px solid #666;
+    top: 48px;
+}
+
+.advanced-sample-size {
+    float:right;
+}
+
+.search-settings-panel .block {
+    float:none;
+}
+
+.search-settings-panel .block label {
+    text-transform: none!important;
+    font-size: 13px;
+    margin-left: 5px;
+}

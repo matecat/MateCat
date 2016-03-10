@@ -513,31 +513,12 @@ body.filtering .mbc-history-balloon-outer {
     display:none;
 }
 
+
+/**
+ * TODO: move this to mbc styles?
+ */
 .mbc-history-balloon-outer {
     right: 145px;
-}
-
-.search-settings-panel {
-    background: #efefef;
-    padding: 10px;
-    position: absolute;
-    width: 205px;
-    border: 1px solid #666;
-    top: 48px;
-}
-
-.advanced-regular-interval {
-    float:right;
-}
-
-.search-settings-panel .block {
-    float:none;
-}
-
-.search-settings-panel .block label {
-    text-transform: none!important;
-    font-size: 13px;
-    margin-left: 5px;
 }
 
 
