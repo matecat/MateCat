@@ -541,36 +541,3 @@ body.filtering .mbc-history-balloon-outer {
 }
 
 
-section.muted .text {
-    zoom: 0.8;
-    width: 94%;
-    margin: 0 3%!important;
-}
-
-section.muted .editarea:hover,
-section.muted .editarea
- {
-    border:none!important;
-}
-
-section.muted .status {
-    opacity: 0.2;
-}
-
-section.muted .text,
-section.muted .status,
-section.muted .editarea {
-    cursor: not-allowed;
-}
-
-.search-settings-panel h4 {
-    text-transform: uppercase;
-    font-size: 13px;
-}
-
-.data-sample-segment .sid,
-.data-sample-segment .sid .txt,
-.data-sample-segment p.split-shortcut
- {
-    background: #BCBCBC !important;
-}

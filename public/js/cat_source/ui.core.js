@@ -825,14 +825,21 @@ UI = {
 	},
 
     /**
-     * rulesForNextSegment
+     * selectorForNextUntranslatedSegment
      *
      * Defines the css selectors to be used to determine the next
      * segment to open.
      */
-    rulesForNextUntranslatedSegment : function(status, section) {
-        var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
-        return rules ;
+    selectorForNextUntranslatedSegment : function(status, section) {
+        var selector = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
+        return selector ;
+    },
+
+    /**
+     * selectorForNextSegment
+     */
+    selectorForNextSegment : function() {
+        return 'section';
     },
 
     /**
@@ -842,11 +849,11 @@ UI = {
      *
      */
     evalNextSegment: function( section, status ) {
-        var rules = UI.rulesForNextUntranslatedSegment( status, section );
-		var n = $(section).nextAll(rules).first();
+        var selector = UI.selectorForNextUntranslatedSegment( status, section );
+		var n = $(section).nextAll(selector).first();
 
 		if (!n.length) {
-			n = $(section).parents('article').next().find(rules).first();
+			n = $(section).parents('article').next().find(selector).first();
 		}
 
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
@@ -857,7 +864,7 @@ UI = {
         var i = $(section).next();
 
         if (!i.length) {
-			i = $(section).parents('article').next().find('section').first();
+			i = $(section).parents('article').next().find( UI.selectorForNextSegment() ).first();
 		}
 		if (i.length) {
 			this.nextSegmentId = this.getSegmentId($(i));
@@ -1039,12 +1046,14 @@ UI = {
 		console.log('giusto');
 	},
 	gotoNextSegment: function() {
-		var next = $('.editor').next();
+        var selector = UI.selectorForNextSegment() ;
+		var next = $('.editor').nextAll( selector  ).first();
+
 		if (next.is('section')) {
 			this.scrollSegment(next);
 			$(UI.targetContainerSelector(), next).trigger("click", "moving");
 		} else {
-			next = this.currentFile.next().find('section:first');
+			next = this.currentFile.next().find( selector ).first();
 			if (next.length) {
 				this.scrollSegment(next);
 				$(UI.targetContainerSelector(), next).trigger("click", "moving");
@@ -1062,7 +1071,8 @@ UI = {
 				UI.reloadWarning();
 			}
 		} else {
-			$("#segment-" + UI.nextUntranslatedSegmentId + " " + UI.targetContainerSelector() ).trigger("click");
+			$("#segment-" + UI.nextUntranslatedSegmentId +
+                " " + UI.targetContainerSelector() ).trigger("click");
 		}
 	},
 
@@ -1084,11 +1094,12 @@ UI = {
 		});
 	},
 	gotoPreviousSegment: function() {
-		var prev = $('.editor').prev();
+        var selector = UI.selectorForNextSegment() ;
+		var prev = $('.editor').prevAll( selector ).first();
 		if (prev.is('section')) {
 			$(UI.targetContainerSelector(), prev).click();
 		} else {
-			prev = $('.editor').parents('article').prev().find('section:last');
+			prev = $('.editor').parents('article').prevAll( selector ).first();
 			if (prev.length) {
 				$(UI.targetContainerSelector() , prev).click();
 			} else {

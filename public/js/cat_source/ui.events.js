@@ -524,17 +524,6 @@ $.extend(UI, {
 			goodbye(e);
 		};
 
-
-
-
-// no more used:
-		$("header .filter").click(function(e) {
-			e.preventDefault();
-			UI.body.toggleClass('filtering');
-
-		});
-
-
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
 		});

@@ -633,16 +633,35 @@ $.extend(UI, {
 			$(this).attr('data-searchItems', $('mark.searchMarker', this).length);
 		});
 	},
+
+    searchIsOpen : function() {
+        // TODO: change the name of this, filter is not a good name.
+        // This panel opens search actually.
+        return $('body').hasClass('filterOpen') ;
+    },
+    closeSearch : function() {
+        $('body').removeClass('filterOpen');
+    },
+    openSearch : function() {
+        $(document).trigger('header-tool:open', { name: 'search' });
+        $('body').addClass('filterOpen');
+        $('#search-source').focus();
+    },
 	toggleSearch: function(e) {
-		if (!this.searchEnabled)
-			return;
+		if (!this.searchEnabled) return;
 		e.preventDefault();
-		if ($('body').hasClass('filterOpen')) {
-			$('body').removeClass('filterOpen');
+
+		if ( UI.searchIsOpen() )  {
+            UI.closeSearch();
 		} else {
-			$('body').addClass('filterOpen');
-			$('#search-source').focus();
+            UI.openSearch();
 		}
         this.fixHeaderHeightChange();
 	},
+});
+
+$(document).on('header-tool:open', function(e, data) {
+    if ( data.name != 'search' ) {
+        UI.closeSearch();
+    }
 });

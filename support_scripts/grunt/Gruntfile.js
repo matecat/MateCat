@@ -31,6 +31,7 @@ module.exports = function(grunt) {
         cssBase + 'lib/remodal.css',
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
+        cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
         cssBase + '../holidays/*.css',
     ];
@@ -181,6 +182,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/review_improved.*.js',
 
                     basePath + 'cat_source/segment_filter.js',
+                    basePath + 'cat_source/segment_filter.*.js',
 
                     basePath + 'cat_source/handlebars-helpers.js',
 
