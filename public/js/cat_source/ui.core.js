@@ -1042,20 +1042,20 @@ UI = {
 		});
 	},
 	test: function(params) {
-		console.log('params: ', params);
-		console.log('giusto');
+        // TODO: remove thi function once we know who's calling it.
+        console.warn('This function does nothing and should be removed.');
 	},
 	gotoNextSegment: function() {
         var selector = UI.selectorForNextSegment() ;
 		var next = $('.editor').nextAll( selector  ).first();
 
 		if (next.is('section')) {
-			this.scrollSegment(next);
+			UI.scrollSegment(next);
 			$(UI.targetContainerSelector(), next).trigger("click", "moving");
 		} else {
-			next = this.currentFile.next().find( selector ).first();
+			next = UI.currentFile.next().find( selector ).first();
 			if (next.length) {
-				this.scrollSegment(next);
+				UI.scrollSegment(next);
 				$(UI.targetContainerSelector(), next).trigger("click", "moving");
 			} else {
                 UI.closeSegment(UI.currentSegment, 1, 'save');
@@ -1080,7 +1080,7 @@ UI = {
         quick = quick || false;
 
         if ($('#segment-' + this.currentSegmentId).length) {
-			this.scrollSegment(this.currentSegment, false, quick);
+			UI.scrollSegment(this.currentSegment, false, quick);
 		} else {
 			$('#outer').empty();
 			this.render({
@@ -1103,11 +1103,11 @@ UI = {
 			if (prev.length) {
 				$(UI.targetContainerSelector() , prev).click();
 			} else {
-				this.topReached();
+				UI.topReached();
 			}
 		}
 		if (prev.length)
-			this.scrollSegment(prev);
+			UI.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
         if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {

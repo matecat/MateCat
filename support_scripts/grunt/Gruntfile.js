@@ -27,7 +27,6 @@ module.exports = function(grunt) {
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
-        cssBase + 'review_improved.css' ,
         cssBase + 'lib/remodal.css',
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
