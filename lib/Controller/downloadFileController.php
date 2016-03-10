@@ -395,7 +395,6 @@ class downloadFileController extends downloadController {
         // $mimeType = 'application/vnd.google-apps.presentation';
         $mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
         $file->setMimeType( $mimeType );
-        $file->setTitle('Test slides');
 
 
         $additionalParams = array(
