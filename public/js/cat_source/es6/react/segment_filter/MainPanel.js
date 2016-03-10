@@ -35,6 +35,12 @@ class MainPanel extends React.Component {
             'search-settings-panel' : true
         }); 
 
+        var options = Object.keys(config.status_labels).map(function(item, index) {
+            return <option key={index} value={item}>{config.status_labels[item]}</option>;
+        });
+
+        var fullOptions = [<option key="" value="">All</option>].concat( options );
+
         return <div className="advanced-filter-searchbox searchbox">
             <form>
                 <div className="block">
@@ -42,9 +48,7 @@ class MainPanel extends React.Component {
                     <select 
                         onChange={this.filterSelectChanged.bind(this)}
                         value={this.state.selectedStatus} className="search-select">
-                        <option value="">All</option>
-                        <option value="translated">Translated</option>
-                        <option value="rejected">Rejected</option>
+                        {fullOptions}
                     </select>
                 </div>
 
