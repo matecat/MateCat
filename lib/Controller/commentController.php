@@ -174,7 +174,7 @@ class commentController extends ajaxController {
         $users = $userDao->getByUids( $result );
         $owner = $userDao->getProjectOwner( $this->job['id'] );
 
-        if ( !empty( $owner[ 0 ] ) && !empty( $owner[ 1 ] ) ) {
+        if ( !empty( $owner[ 0 ]->uid ) && !empty( $owner[ 0 ]->email ) ) {
             array_push( $users, $owner[ 0 ] );
         }
 
