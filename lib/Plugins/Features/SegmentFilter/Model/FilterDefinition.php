@@ -24,7 +24,23 @@ class FilterDefinition {
     }
 
     public function isSampled() {
-        return array_key_exists('sampling', $this->filter_data);
+        return array_key_exists('sample', $this->filter_data);
+    }
+
+    public function isFiltered() {
+        return !empty( $this->filter_data['status'] );
+    }
+
+    public function sampleData() {
+        return $this->filter_data['sample'];
+    }
+
+    public function sampleType() {
+        return $this->filter_data['sample']['type'];
+    }
+
+    public function sampleSize() {
+        return $this->filter_data['sample']['size'];
     }
 
     public function getSegmentStatus() {

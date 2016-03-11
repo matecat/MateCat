@@ -34,7 +34,7 @@ class SegmentFilterModel {
         $result = null;
 
         if ( $this->filter->isSampled() ) {
-            // sampling filter
+            $result = SegmentFilterDao::findSegmentIdsForSample($this->chunk, $this->filter);
         }
         else {
             $result = SegmentFilterDao::findSegmentIdsBySimpleFilter($this->chunk, $this->filter);
