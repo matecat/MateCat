@@ -1675,7 +1675,7 @@ UI = {
 
         var isGDriveFile = false;
 
-        if ( config.pre_uploaded_files && config.pre_uploaded_files !== 'false') {
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
             isGDriveFile = true;
         }
 
@@ -1889,7 +1889,7 @@ UI = {
 
             var labelDownloading = 'DOWNLOADING';
 
-            if ( config.pre_uploaded_files && config.pre_uploaded_files !== 'false') {
+            if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
                 labelDownloading = 'SENDING';
             }
 

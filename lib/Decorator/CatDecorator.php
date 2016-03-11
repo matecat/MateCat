@@ -75,26 +75,18 @@ class CatDecorator {
     }
 
   private function getHeaderMainButtonLabel() {
-      \Bootstrap::sessionStart();
-
-      $fileName = $_SESSION['pre_loaded_file'];
-
-      $isGDriveFile = false;
-
-      if($fileName == $this->controller->getDownloadFileName()) {
-          $isGDriveFile = true;
-      }
+      $isGDriveProject = $this->controller->isCurrentProjectGDrive();
 
       $label = '';
 
       if ( $this->isDownloadable() ) {
-          if($isGDriveFile) {
+          if($isGDriveProject) {
             $label = 'SEND TO GOOGLE DRIVE';
           } else {
             $label = 'DOWNLOAD TRANSLATION';
           }
       } else {
-          if($isGDriveFile) {
+          if($isGDriveProject) {
             $label = 'SEND PREVIEW TO GOOGLE DRIVE';
           } else {
             $label = 'PREVIEW';
