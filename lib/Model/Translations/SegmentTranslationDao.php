@@ -89,4 +89,50 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $data
+     *
+     * @return int
+     */
+    public static function updateEditDistanceForSetTranslation($data) {
+        $sql = "UPDATE segment_translations
+            SET edit_distance = :edit_distance
+              WHERE id_segment = :id_segment
+              AND id_job = :id_job
+              AND segment_hash = :segment_hash";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $exec = $stmt->execute( array(
+                'id_segment'    => $data[ 'id_segment' ],
+                'id_job'        => $data[ 'id_job' ],
+                'segment_hash'  => $data[ 'segment_hash' ],
+                'edit_distance' => $data[ 'edit_distance' ]
+        ) );
+
+        return $stmt->rowCount();
+    }
+
+
+    public static function updateEditDistanceForPropagation($data) {
+        $sql = "UPDATE segment_translations
+            SET edit_distance = :edit_distance
+              WHERE id_segment <> :id_segment
+              AND id_job = :id_job
+              AND segment_hash = :segment_hash         ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $exec = $stmt->execute(array(
+            'id_segment' => $data['id_segment'],
+            'id_job' => $data['id_job'],
+            'segment_hash' => $data['segment_hash'],
+            'edit_distance' => $data['edit_distance']
+        ) );
+
+        return $stmt->rowCount();
+    }
+
 }

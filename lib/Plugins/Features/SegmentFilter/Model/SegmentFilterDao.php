@@ -50,14 +50,12 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
-
-        /**
-         * first thing to do here is to find the number of records to return.
-         * based on the sample size we do a count
-         */
-        // first thing to do here is to find the number of records to return
-
+    /**
+     * @param $filter
+     *
+     * @return object
+     */
+    private static function __getWhereFromFilter( FilterDefinition $filter ) {
         $where = '';
         $where_data = array();
 
@@ -65,6 +63,35 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             $where = " AND st.status = :status ";
             $where_data = array('status' => $filter->getSegmentStatus() );
         }
+        return (object) array( 'sql' => $where, 'data' => $where_data );
+    }
+
+
+    private static function __getData( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+        $data = array(
+                'id_job' => $chunk->id,
+                'job_first_segment' => $chunk->job_first_segment,
+                'job_last_segment' => $chunk->job_last_segment,
+                'password' => $chunk->password
+        );
+
+        if ( $filter->getSegmentStatus()) {
+            $data = array_merge( $data, array(
+                'status' => $filter->getSegmentStatus()
+            ));
+        }
+
+        return $data;
+    }
+    /**
+     * @param $chunk
+     * @param $filter
+     *
+     * @return object
+     */
+    private static function __getLimit( Chunks_ChunkStruct $chunk, FilterDefinition $filter) {
+
+        $where = self::__getWhereFromFilter( $filter );
 
         $countSql = "SELECT st.id_segment AS id
           FROM
@@ -74,20 +101,15 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
-           $where ";
+           $where->sql ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $countSql );
 
-        $data = array(
-                'id_job' => $chunk->id,
-                'job_first_segment' => $chunk->job_first_segment,
-                'job_last_segment' => $chunk->job_last_segment,
-                'password' => $chunk->password
-        );
+        $data = self::__getData( $chunk, $filter );
 
-        if (!empty($where_data) ) {
-            $data = array_merge($data, $where_data);
+        if (!empty($where->data ) ) {
+            $data = array_merge($data, $where->data );
         }
 
         $stmt->execute($data);
@@ -97,17 +119,93 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             // TODO: handle case
         }
 
-        $limit = ceil(( $count / 100 ) * $filter->sampleSize());
+        $limit = round(( $count / 100 ) * $filter->sampleSize());
+        return (object) array(
+                'limit' => $limit,
+                'count' => $count,
+                'sample_size' => $filter->sampleSize()
+        );
+    }
+
+    public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+
+        $limit = self::__getLimit($chunk, $filter);
+        $where = self::__getWhereFromFilter( $filter );
 
         $sql = '';
 
-        if ( $filter->sampleType() == 'segment_length') {
-            $sql = self::getSqlForSegmentLength( $limit, $where );
+        switch ( $filter->sampleType() ) {
+            case 'segment_length':
+                $data = self::__getData( $chunk, $filter );
+                $sql = self::getSqlForSegmentLength( $limit, $where );
+                break;
+            case 'edit_distance':
+                $data = self::__getData( $chunk, $filter );
+                $sql = self::getSqlForEditDistance( $limit, $where );
+                break;
+            case 'regular_intervals':
+                $data = self::__getData( $chunk, $filter );
+                $sql = self::getSqlForRegularIntervals( $limit, $where );
+                break;
+            default:
+                throw new \Exception('Sample type is not valid: '. $filter->sampleType());
+                break;
         }
 
+        $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->execute($data);
         return $stmt->fetchAll();
+    }
+
+    /**
+     * @param $limit
+     * @param $where
+     *
+     * @return string
+     */
+    public static function getSqlForRegularIntervals( $limit, $where ) {
+
+        $ratio = round($limit->count / $limit->limit ) ;
+
+        $sql = "SELECT id FROM (
+            SELECT st.id_segment AS id,
+            @curRow := @curRow + 1 AS row_number
+
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.password = :password
+           AND jobs.id = :id_job
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           JOIN segments s ON s.id = st.id_segment
+           JOIN (SELECT @curRow := -1) r --  using -1 here makes the sample start from the first segment
+           WHERE 1
+           $where->sql
+           ORDER BY st.id_segment ASC
+           ) sub WHERE row_number % $ratio = 0 ";
+
+        return $sql ;
+    }
+
+    public static function getSqlForEditDistance( $limit, $where ) {
+        $sql = "SELECT id FROM (
+            SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.password = :password
+           AND jobs.id = :id_job
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           JOIN segments s ON s.id = st.id_segment
+           WHERE 1
+           $where->sql
+           ORDER BY st.edit_distance DESC
+           LIMIT $limit->limit ) sub ORDER BY 1";
+
+        return $sql ;
     }
 
     public static function getSqlForSegmentLength( $limit, $where ) {
@@ -121,9 +219,10 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            JOIN segments s ON s.id = st.id_segment
-           $where
+           WHERE 1
+           $where->sql
            ORDER BY CHAR_LENGTH(s.segment) DESC
-           LIMIT $limit ) sub ORDER BY 1 ";
+           LIMIT $limit->limit ) sub ORDER BY 1 ";
 
         return $sql ;
     }

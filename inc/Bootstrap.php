@@ -27,6 +27,9 @@ class Bootstrap {
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];
 
+
+
+
         $this->_setIncludePath();
         spl_autoload_register( 'Bootstrap::loadClass' );
         require_once 'Predis/autoload.php';
@@ -129,7 +132,11 @@ class Bootstrap {
             }
         }
 
+
+        WorkerClient::init();
+
     }
+
 
     public static function fatalErrorHandler() {
 

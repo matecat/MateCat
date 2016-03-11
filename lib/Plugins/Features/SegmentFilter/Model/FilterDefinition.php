@@ -24,7 +24,7 @@ class FilterDefinition {
     }
 
     public function isSampled() {
-        return array_key_exists('sample', $this->filter_data);
+        return array_key_exists('sample', $this->filter_data) && $this->filter_data['sample'] == true;
     }
 
     public function isFiltered() {

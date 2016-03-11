@@ -40,7 +40,6 @@ class SegmentTranslationIssue {
     public function renderArray( $array ) {
         $out = array();
 
-        \Log::doLog( $array);
         foreach($array as $record) {
             $out[] = $this->renderItem( $record );
         }
