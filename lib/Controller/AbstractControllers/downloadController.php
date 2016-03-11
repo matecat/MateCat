@@ -29,14 +29,14 @@ abstract class downloadController extends controller {
     }
 
     public function finalize() {
-        $this->sessionStart();
-
-        $gdriveFileName = $_SESSION['pre_loaded_file'];
-
         try {
             $this->unlockToken();
 
-            if( !isset($_SESSION['pre_loaded_file']) || $gdriveFileName == null || $gdriveFileName == '' ) {
+            $project = \Projects_ProjectDao::findByJobId($this->id_job);
+
+            $isGDriveProject = \Projects_ProjectDao::isGDriveProject($project->id);
+
+            if( !$isGDriveProject ) {
                 $buffer = ob_get_contents();
                 ob_get_clean();
                 ob_start("ob_gzhandler");  // compress page before sending
