@@ -24,11 +24,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     $(document).on('click', 'section .textarea-container .errorTaggingArea', function(e) {
         var section = $(e.target).closest('section') ;
-        var segment = new UI.Segment( section );
 
-        if ( ! segment.el.hasClass('opened') ) {
-            UI.openSegment( segment );
-            UI.scrollSegment( segment.el );
+        if ( ! section.hasClass('opened') ) {
+            UI.scrollSegment( section );
+            UI.openSegment( section );
         }
 
     });

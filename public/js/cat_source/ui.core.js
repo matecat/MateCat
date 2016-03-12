@@ -955,7 +955,7 @@ UI = {
 				this.scrollSegment($('#segment-' + options.segmentToScroll));
 			}
 			if (options.segmentToOpen) {
-				$('#segment-' + options.segmentToOpen + ' .editarea').click();
+				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
 			}
 
 			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
