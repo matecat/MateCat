@@ -8,8 +8,7 @@ class SegmentTranslationIssue {
 
     private $categories ;
 
-    public function __construct( $categories ) {
-        $this->categories = $categories ;
+    public function __construct( ) {
     }
 
     public function renderItem( EntryStruct $record ) {
