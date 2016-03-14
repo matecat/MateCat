@@ -10,6 +10,8 @@ if ( SegmentFilter.enabled() )
     var original_gotoNextSegment = UI.gotoNextSegment ;
     var original_gotoPreviousSegment = UI.gotoPreviousSegment ;
 
+    var original_openNextTranslated = UI.openNextTranslated ;
+
     var gotoPreviousSegment = function() {
         var list = SegmentFilter.lastFilterData['segment_ids'] ;
         var index = list.indexOf('' + UI.currentSegmentId);
@@ -39,6 +41,17 @@ if ( SegmentFilter.enabled() )
     };
 
     $.extend(UI, {
+        openNextTranslated : function() {
+            // this is expected behaviour in review
+            // change this if we are filtering, go to the next
+            // segment, assuming the sample is what we want to revise.
+            if ( SF.filtering() ) {
+                gotoNextSegment.apply(undefined, arguments);
+            }
+            else {
+                original_gotoNextSegment.apply(undefined, arguments);
+            }
+        },
         gotoPreviousSegment : function() {
             if ( SF.filtering() ) {
                 gotoPreviousSegment.apply(undefined, arguments);
