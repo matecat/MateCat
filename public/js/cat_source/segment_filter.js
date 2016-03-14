@@ -72,7 +72,6 @@ if (SegmentFilter.enabled())
 
         if ( UI.body.hasClass('filtering') ) {
             SF.closeFilter();
-            window.segment_filter_panel.resetState();
         } else {
             SF.openFilter();
         }
