@@ -2,14 +2,24 @@ class MainPanel extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
+
+        this.state = this.defaultState();
+    }
+
+    defaultState() {
+        return {
             searchSettingsOpen : false, 
             selectedStatus : '',
             samplingEnabled : false,
             samplingType : 'edit_distance',
             samplingSize : '10',
-            clearEnabled : false,
+            filtering : false,
+            filteredCount : 0
         }
+    }
+
+    resetState() {
+        this.setState( this.defaultState() );
     }
 
     toggleSettings() {
@@ -20,6 +30,8 @@ class MainPanel extends React.Component {
 
     clearClick(e) {
         e.preventDefault();
+
+        SegmentFilter.closeFilter();
         // TODO
     }
 
@@ -37,6 +49,10 @@ class MainPanel extends React.Component {
         SegmentFilter.filterSubmit({
             status : this.state.selectedStatus,
             sample : sample
+        });
+
+        this.setState({
+            searchSettingsOpen : false
         });
     }
 
@@ -77,6 +93,18 @@ class MainPanel extends React.Component {
 
         var submitEnabled = this.submitEnabled();
 
+        var filteringInfo;
+
+        if ( this.state.filtering ) {
+            if (this.state.filteredCount > 0) {
+                filteringInfo = <div className="block">Showing {this.state.filteredCount} segments</div>;
+            }
+            else {
+                filteringInfo = <div className="block">No segments matched by this filter</div>;
+            }
+
+        }
+
         return <div className="advanced-filter-searchbox searchbox">
             <form>
                 <div className="block">
@@ -95,7 +123,7 @@ class MainPanel extends React.Component {
                         checked={this.state.samplingEnabled} />
                 </div>
 
-                <div className="block">
+                <div className="block"><div className="search-settings-info">5% - Edit distance</div>
                     <a className="search-settings"
                         onClick={this.toggleSettings.bind(this)}>Settings</a>
                     <div className={searchSettingsClass}>
@@ -136,11 +164,13 @@ class MainPanel extends React.Component {
                     </div>
                 </div>
 
+                {filteringInfo}
+
                 <div className="block right">
                     <input id="clear-filter"
                         type="button"
                         onClick={this.clearClick.bind(this)}
-                        className={classnames({btn: true, disabled: !this.state.clearEnabled})}
+                        className={classnames({btn: true, disabled: !this.state.filtering})}
                         value="CLEAR" />
 
                     <input onClick={this.submitClick.bind(this)} id="exec-filter"

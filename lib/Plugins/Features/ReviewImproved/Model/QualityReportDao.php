@@ -31,10 +31,14 @@ SELECT
   f.id AS file_id,
   f.filename AS file_filename,
 
-  otv.translation original_translation,
+  CASE WHEN otv.translation != NULL  THEN
+    otv.translation ELSE st.translation
+  END original_translation,
+
   st.version_number,
   st.translation as translation,
   st.status as translation_status,
+  st.edit_distance as edit_distance,
 
   s.id AS segment_id,
   s.segment AS segment_source,

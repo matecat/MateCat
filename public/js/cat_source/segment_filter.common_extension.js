@@ -10,8 +10,10 @@ if ( SegmentFilter.enabled() )
     var original_gotoNextSegment = UI.gotoNextSegment ;
     var original_gotoPreviousSegment = UI.gotoPreviousSegment ;
 
+    var original_openNextTranslated = UI.openNextTranslated ;
+
     var gotoPreviousSegment = function() {
-        var list = SegmentFilter.lastFilterData['segment_ids'] ;
+        var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf('' + UI.currentSegmentId);
         var nextFiltered = list[ index - 1 ];
 
@@ -25,7 +27,7 @@ if ( SegmentFilter.enabled() )
     };
 
     var gotoNextSegment = function() {
-        var list = SegmentFilter.lastFilterData['segment_ids'] ;
+        var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf('' + UI.currentSegmentId);
         var nextFiltered = list[ index + 1 ];
 
@@ -39,6 +41,17 @@ if ( SegmentFilter.enabled() )
     };
 
     $.extend(UI, {
+        openNextTranslated : function() {
+            // this is expected behaviour in review
+            // change this if we are filtering, go to the next
+            // segment, assuming the sample is what we want to revise.
+            if ( SF.filtering() ) {
+                gotoNextSegment.apply(undefined, arguments);
+            }
+            else {
+                original_gotoNextSegment.apply(undefined, arguments);
+            }
+        },
         gotoPreviousSegment : function() {
             if ( SF.filtering() ) {
                 gotoPreviousSegment.apply(undefined, arguments);
@@ -88,7 +101,7 @@ if ( SegmentFilter.enabled() )
             var segment = arguments[0];
 
             if (SF.filtering()) {
-                if ( SF.lastFilterData['segment_ids'].indexOf( segment.sid ) === -1 ) {
+                if ( SF.getLastFilterData()['segment_ids'].indexOf( segment.sid ) === -1 ) {
                     markup = $(markup).addClass('muted');
                     markup = $('<div/>').append(markup).html();
                 }

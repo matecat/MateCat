@@ -2,30 +2,25 @@
 SegmentFilter = window.SegmentFilter || {};
 
 SegmentFilter.enabled = function() {
-    return true;
+    return ReviewImproved.enabled();
 }
 
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
 
-    var switchOffFiltering = function() {
-        $('.muted').removeClass('muted');
-        // $.extend(UI, SF.overrides.original);
-    };
-
-    var switchOnFiltering = function() {
-        // $.extend(UI, SF.overrides.new);
-    };
+    var lastFilterData = null ;
 
     $.extend(SF, {
-        lastFilterData : null,
+        getLastFilterData : function() {
+            return lastFilterData;
+        },
 
         filterPanelOpen : function() {
             return UI.body.hasClass('filtering');
         },
         filtering : function() {
             // TODO change this, more specific when filter is submitted.
-            return UI.body.hasClass('filtering');
+            return lastFilterData != null;
         },
 
         filterSubmit : function( data ) {
@@ -36,7 +31,9 @@ if (SegmentFilter.enabled())
                               );
 
             $.getJSON(path).done(function( data ) {
-                SF.lastFilterData = data;
+                $(document).trigger('segment-filter:filter-data:load', { data: data });
+
+                lastFilterData = data;
 
                 $('#outer').empty();
 
@@ -45,17 +42,23 @@ if (SegmentFilter.enabled())
                     segmentToOpen: data['segment_ids'][0]
                 });
 
+                window.segment_filter_panel.setState({
+                    filteredCount : data.count,
+                    filtering : true
+                });
+
             });
         },
 
         openFilter : function() {
             UI.body.addClass('filtering');
             $(document).trigger('header-tool:open', { name: 'filter' });
-            switchOnFiltering();
         },
         closeFilter : function() {
             UI.body.removeClass('filtering');
-            switchOffFiltering();
+            $('.muted').removeClass('muted');
+            lastFilterData = null;
+            window.segment_filter_panel.resetState();
         }
     });
 

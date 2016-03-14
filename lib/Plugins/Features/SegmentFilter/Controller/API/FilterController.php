@@ -40,7 +40,8 @@ class FilterController extends \API\V2\ProtectedKleinController {
         }, $this->model->getSegmentIds());
 
         $this->response->json( array(
-            'segment_ids' => $ids_as_array
+            'segment_ids' => $ids_as_array,
+            'count' => count($ids_as_array)
         ));
     }
 
