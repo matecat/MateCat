@@ -13,7 +13,7 @@ class MainPanel extends React.Component {
             samplingEnabled : false,
             samplingType : 'edit_distance',
             samplingSize : '10',
-            clearEnabled : false,
+            filtering : false,
         }
     }
 
@@ -151,7 +151,7 @@ class MainPanel extends React.Component {
                     <input id="clear-filter"
                         type="button"
                         onClick={this.clearClick.bind(this)}
-                        className={classnames({btn: true, disabled: !this.state.clearEnabled})}
+                        className={classnames({btn: true, disabled: !this.state.filtering})}
                         value="CLEAR" />
 
                     <input onClick={this.submitClick.bind(this)} id="exec-filter"

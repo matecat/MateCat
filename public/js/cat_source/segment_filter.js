@@ -30,13 +30,14 @@ if (SegmentFilter.enabled())
                 SF.lastFilterData = data;
 
                 $('#outer').empty();
+                ReviewImproved.enabled() && ReviewImproved.closePanel();
 
                 UI.render({
                     firstLoad: false,
                     segmentToOpen: data['segment_ids'][0]
                 });
 
-                window.segment_filter_panel.setState({clearEnabled: true});
+                window.segment_filter_panel.setState({fitlering: true});
 
             });
         },
