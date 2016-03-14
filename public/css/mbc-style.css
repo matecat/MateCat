@@ -863,14 +863,6 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
  ******
  */
 
-section:hover .mbc-comment-icon-button,
-.segment-side-buttons:hover .mbc-comment-icon-button,
-.mbc-comment-icon-button:hover,
-.mbc-comment-icon-button.txt.has-object 
- { 
-    opacity: 1;
-    display:block;
-}
 
 .mbc-comment-icon-button {
     opacity:0;
@@ -880,3 +872,12 @@ section:hover .mbc-comment-icon-button,
   -o-transition: opacity 1s ease-in-out;
   transition: opacity 1s ease-in-out;
 }
+
+section:hover .mbc-comment-icon-button,
+.segment-side-buttons:hover .mbc-comment-icon-button,
+.mbc-comment-icon-button:hover
+ { 
+    opacity: 1;
+    display:block;
+}
+

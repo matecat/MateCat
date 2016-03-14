@@ -279,7 +279,9 @@ section {
     font-weight: bold;
 }
 
-
+.segment-side-buttons {
+  color: #666!important;
+}
 
 
 .translation-issues-button {
@@ -299,13 +301,14 @@ section {
   transition: opacity 1s ease-in-out;
 }
 
-.revise-button.has-object,
+
 section:hover .translation-issues-button .revise-button,
 .translation-issues-button:hover .revise-button,
-.segment-side-buttons:hover .translation-issues-button .revise-button
+.segment-side-buttons:hover .translation-issues-button .revise-button,
+.has-object
 
  {
-    opacity:1;
+    opacity:1!important;
     display:block;
 }
 
@@ -328,6 +331,8 @@ section:hover .translation-issues-button .revise-button,
     border-top: 1px solid #ccc;
     margin-top: 20px;
 }
+
+
 
 .review-triangle {
     display:none;
@@ -521,6 +526,10 @@ body.filtering .searchbox .block {
     margin-top:5px;
 }
 
+.advanced-filter-searchbox {
+    z-index:1!important;
+}
+
 body.filtering .searchbox .search-settings {
     text-decoration: underline;
     padding-top: 4px;
@@ -528,8 +537,27 @@ body.filtering .searchbox .search-settings {
     cursor:pointer;
 }
 
+body.cattool .filter, 
+body.cattool .filter:hover {
+    background:transparent!important;
+    cursor:pointer;
+}
+body.cattool .filter:hover {
+    color: #ccc;
+}
+
+.cattool header .filter {
+    font-size: 24px;
+    padding: 10px;
+}
+
+
 body.filtering .mbc-history-balloon-outer {
     display:none;
+}
+
+body.filtering #review-side-panel {
+    top: 48px;
 }
 
 
