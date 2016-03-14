@@ -31,10 +31,11 @@ if (SegmentFilter.enabled())
                               );
 
             $.getJSON(path).done(function( data ) {
+                $(document).trigger('segment-filter:filter-data:load', { data: data });
+
                 lastFilterData = data;
 
                 $('#outer').empty();
-                ReviewImproved.enabled() && ReviewImproved.closePanel();
 
                 UI.render({
                     firstLoad: false,

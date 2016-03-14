@@ -28,6 +28,9 @@ if ( ReviewImproved.enabled() ) {
         putSegmentsInStore( data );
     });
 
+    $(document).on('segment-filter:filter-data:load', function() {
+        ReviewImproved.closePanel();
+    });
 
     var updateLocalTranslationVersions = function( data ) {
         $(data.versions).each(function() {
@@ -71,6 +74,10 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', function( e ) {
+        if (e.target.closest('body') == null ) {
+            // it's a detatched element, likely the APPROVE button.
+            return ;
+        }
         if (e.target.closest('header, .modal, section, #review-side-panel') == null) {
             ReviewImproved.closePanel( );
         }
