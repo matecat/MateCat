@@ -2,7 +2,7 @@
 SegmentFilter = window.SegmentFilter || {};
 
 SegmentFilter.enabled = function() {
-    return true;
+    return ReviewImproved.enabled();
 }
 
 if (SegmentFilter.enabled())
