@@ -459,3 +459,66 @@ table.review-issue-category-list {
 .review-side-panel-opened a.cancel-project:before {
     margin-right: 5px;
 }
+
+/* advanced filtering */
+
+header .filter:before {
+    content: "\f0b0";
+}
+
+header .filter {
+    display: block !important;
+    text-decoration: none;
+    color: #eee;
+    box-shadow:none;
+    border:0;
+    padding: 12px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.advanced-filter-searchbox {
+    display:none;
+}
+
+.filtering .advanced-filter-searchbox {
+    display:block;
+    height: 48px;
+}
+
+.filtering {padding-top:120px!important;}
+
+body.filtering .advanced-filter-searchbox input[type=button], body.filtering .advanced-filter-searchbox input[type=submit] {
+    width: 80px !important;
+    background: #dcdedf!important;
+}
+
+body.filtering .searchbox form {
+    width: 91%;
+    padding: 10px 5% 0 4% !important;
+}
+
+body.filtering .searchbox .block {
+    margin-top:5px;
+}
+
+body.filtering .searchbox .search-settings {
+    text-decoration: underline;
+    padding-top: 4px;
+    float: left;
+    cursor:pointer;
+}
+
+body.filtering .mbc-history-balloon-outer {
+    display:none;
+}
+
+
+/**
+ * TODO: move this to mbc styles?
+ */
+.mbc-history-balloon-outer {
+    right: 145px;
+}
+
+

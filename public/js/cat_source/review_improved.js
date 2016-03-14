@@ -128,11 +128,11 @@ if ( ReviewImproved.enabled() )
 
             $('article').removeClass('review-panel-opened');
             $('body').removeClass('side-tools-opened review-side-panel-opened');
-
-
-            window.setTimeout( function() {
-                UI.scrollSegment( UI.currentSegment );
-            }, 100);
+            if ( ReviewImproved.isPanelOpened() ) {
+                window.setTimeout( function() {
+                    UI.scrollSegment( UI.currentSegment );
+                }, 100);
+            }
         }
     });
 })(jQuery, ReviewImproved);

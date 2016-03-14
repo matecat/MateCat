@@ -2950,7 +2950,7 @@ a.resume-project:after,
 .text .alternatives:before,
 .autofillTag:before,
 input.downloadtr-button:before,
-body.manage header .filter:before,
+header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
@@ -2980,7 +2980,7 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .t
 	-moz-osx-font-smoothing: grayscale;
 }
 
-body.manage header .filter:before {
+header .filter:before {
     content: "\f0b0";
 }
 

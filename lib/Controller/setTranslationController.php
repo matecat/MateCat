@@ -20,6 +20,8 @@ class setTranslationController extends ajaxController {
 
     protected $jobData = array();
 
+
+
     /**
      * @var Chunks_ChunkStruct
      */
@@ -37,6 +39,10 @@ class setTranslationController extends ajaxController {
      */
     private $VersionsHandler ;
 
+    /**
+     * @var FeatureSet
+     */
+    protected $feature_set;
 
     public function __construct() {
 
@@ -161,7 +167,7 @@ class setTranslationController extends ajaxController {
              */
             $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
-
+            $this->feature_set = FeatureSet::fromIdCustomer($this->project->id_customer);
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
@@ -326,6 +332,7 @@ class setTranslationController extends ajaxController {
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
 
+        // TODO: move this into a feature callback
         $this->evaluateVersionSave( $_Translation, $old_translation );
 
 
@@ -357,7 +364,7 @@ class setTranslationController extends ajaxController {
             return -1;
         }
 
-        Features::run( 'postAddSegmentTranslation', $this->project->id_customer, array(
+        $this->feature_set->run('postAddSegmentTranslation', array(
             'chunk' => $this->chunk,
             'is_review' => $this->isRevision()
         ));
@@ -393,39 +400,37 @@ class setTranslationController extends ajaxController {
             }
         }
 
-        $propagateToTranslated = true;
+        $doPropagation = true;
 
         //for the moment, this is set explicitely
         if ( $this->propagate == false ) {
-            $propagateToTranslated = false;
+            $doPropagation = false;
         }
 
         //propagate translations
+
         $TPropagation = array();
-
-        ( $propagateToTranslated ) ? $TPropagation[ 'status' ] = $this->status : null /* NO OP */
-        ;
-
-        $TPropagation[ 'id_job' ]                 = $this->id_job;
-        $TPropagation[ 'translation' ]            = $translation;
-        $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
-        $TPropagation[ 'serialized_errors_list' ] = $err_json;
-        $TPropagation[ 'warning' ] = $check->thereAreWarnings();
-        $TPropagation[ 'segment_hash' ] = $old_translation[ 'segment_hash' ];
-
         $propagationTotal = array();
 
-        if ( $propagateToTranslated && in_array( $this->status, array(
+        if ( $doPropagation && in_array( $this->status, array(
             Constants_TranslationStatus::STATUS_TRANSLATED,
             Constants_TranslationStatus::STATUS_APPROVED,
             Constants_TranslationStatus::STATUS_REJECTED
             ) )
         ) {
 
+            $TPropagation[ 'status' ]                 = $this->status;
+            $TPropagation[ 'id_job' ]                 = $this->id_job;
+            $TPropagation[ 'translation' ]            = $translation;
+            $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
+            $TPropagation[ 'serialized_errors_list' ] = $err_json;
+            $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
+            $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
+
             try {
                 $this->VersionsHandler->savePropagation( array(
                     'propagation'             => $TPropagation,
-                    'propagate_to_translated' => $propagateToTranslated,
+                    'propagate_to_translated' => $doPropagation, // TODO: remove, this is no longer needed.
                     'old_translation'         => $old_translation,
                     'job_data'                => $this->jobData
                 ));
@@ -435,7 +440,7 @@ class setTranslationController extends ajaxController {
                         $this->jobData,
                         $this->id_segment,
                         $this->project,
-                        $propagateToTranslated
+                        $doPropagation
                 );
 
             } catch ( Exception $e ) {
@@ -547,9 +552,12 @@ class setTranslationController extends ajaxController {
 
         }
 
-        Features::run('setTranslationCommitted', $this->project->id_customer, $_Translation, $old_translation);
-
         $db->commit();
+
+        $this->feature_set->run('setTranslationCommitted', array(
+                'translation' => $_Translation,
+                'old_translation' => $old_translation,
+                'propagation' => $TPropagation ));
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...

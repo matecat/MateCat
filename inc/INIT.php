@@ -215,6 +215,8 @@ class INIT {
 
     }
 
+
+
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
     public static $SUPPORTED_FILE_TYPES = array(

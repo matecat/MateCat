@@ -25,6 +25,8 @@ class CatDecorator {
       $this->template->header_main_button_label = $this->getHeaderMainButtonLabel();
       $this->template->header_main_button_id = 'downloadProject';
 
+      $this->template->segmentFilterEnabled = false;
+
 
       $this->template->status_labels = json_encode( $this->getStatusLabels() );
 

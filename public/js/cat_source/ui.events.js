@@ -343,8 +343,6 @@ $.extend(UI, {
                 console.log('CONTROLLO: ', $('#uploadTMX').text());
                 operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
                 UI.checkTMKey($('#addtm-tr-key').val(), operation);
-//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
-
             }
 
         // end addtmx
@@ -526,12 +524,6 @@ $.extend(UI, {
 			goodbye(e);
 		};
 
-
-// no more used:
-		$("header .filter").click(function(e) {
-			e.preventDefault();
-			UI.body.toggleClass('filtering');
-		});
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
 		});
@@ -772,64 +764,10 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-        }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
-//            console.log('MOUSEDOWN');
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
-		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
-            if (typeof operation == 'undefined') {
-				operation = 'clicking';
-            }
-
-            UI.saveInUndoStack('click');
-            this.onclickEditarea = new Date();
-
-			UI.notYetOpened = false;
-			UI.closeTagAutocompletePanel();
-            UI.removeHighlightCorrespondingTags();
-
-            if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
-				if (operation == 'moving') {
-					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
-						UI.segmentToOpen = segment;
-						UI.blockOpenSegment = true;
-
-						console.log('ctrl+down troppo vicini');
-					} else {
-						UI.blockOpenSegment = false;
-					}
-
-					UI.recentMoving = true;
-					clearTimeout(UI.recentMovingTimeout);
-					UI.recentMovingTimeout = setTimeout(function() {
-						UI.recentMoving = false;
-					}, 1000);
-
-				} else {
-					UI.blockOpenSegment = false;
-				}
-				UI.lastOperation = operation;
-
-				UI.openSegment(this, operation);
-				if (action == 'openConcordance')
-					UI.openConcordance();
-
-				if (operation != 'moving') {
-                    segment = $('#segment-' + $(this).data('sid'));
-                    if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                        UI.scrollSegment($('#segment-' + $(this).data('sid')));
-                    }
-                }
-			}
-
-            if (UI.editarea != '') {
-                UI.lockTags(UI.editarea);
-                UI.checkTagProximity();
-            }
-
-            if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
-		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
+		}).on('click', '.editarea', UI.editAreaClick
+        ).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
@@ -1719,4 +1657,3 @@ if ( config.isReview ) {
 
     });
 }
-

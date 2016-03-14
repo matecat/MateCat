@@ -61,10 +61,6 @@ if ( ReviewImproved.enabled() ) {
         );
     })();
 
-    $(window).on('segmentClosed', function( e ) {
-        // ReviewImproved.closePanel();
-    });
-
     $( document ).on( 'keydown', function ( e ) {
         var esc = '27' ;
         if ( e.which == esc ) {
@@ -75,8 +71,8 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', function( e ) {
-        if (e.target.closest('.modal, section, #review-side-panel') == null) {
-            ReviewImproved.closePanel();
+        if (e.target.closest('header, .modal, section, #review-side-panel') == null) {
+            ReviewImproved.closePanel( );
         }
     });
 

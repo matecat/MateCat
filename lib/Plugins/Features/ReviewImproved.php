@@ -155,7 +155,9 @@ class ReviewImproved extends BaseFeature {
      * @param $new_translation
      * @param $old_translation
      */
-    public function setTranslationCommitted($new_translation, $old_translation) {
+    public function setTranslationCommitted($params) {
+        $new_translation = $params['translation'];
+        $old_translation = $params['old_translation'];
 
         $new_translation_struct =  new Translations_SegmentTranslationStruct( $new_translation );
         $old_translation_struct = new Translations_SegmentTranslationStruct( $old_translation );
