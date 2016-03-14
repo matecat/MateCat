@@ -334,7 +334,9 @@ class downloadFileController extends downloadController {
                     # TODO: this is a good point to test transmission back
                     $output_content = array_pop( $output_content );
 
-                    $this->updateFileOnGDrive($remote_id, $output_content) ;
+                    if($remote_id != null) {
+                        $this->updateFileOnGDrive($remote_id, $output_content) ;
+                    }
                     //always an array with 1 element, pop it, Ex: array( array() )
                     $this->setContent( $output_content );
                 }
@@ -395,7 +397,6 @@ class downloadFileController extends downloadController {
         // $mimeType = 'application/vnd.google-apps.presentation';
         $mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
         $file->setMimeType( $mimeType );
-        $file->setTitle('Test slides');
 
 
         $additionalParams = array(

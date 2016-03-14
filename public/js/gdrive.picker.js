@@ -5,13 +5,17 @@
 
     var pickerApiLoaded = false;
     var oauthToken;
+    var oauthEmail;
 
     function onAuthApiLoad() {
-        window.gapi.auth.authorize ({
-            'client_id': clientId,
-            'scope': scope,
-            'immediate': false
-        }, handleAuthResult );
+        if( !oauthToken ) {
+            window.gapi.auth.authorize ({
+                'client_id': clientId,
+                'scope': scope,
+                'immediate': false,
+                'authuser': oauthEmail
+            }, handleAuthResult );
+        }
     }
 
     function onPickerApiLoad() {
@@ -33,6 +37,7 @@
                 setOAuthToken(oauthToken).
                 setDeveloperKey(developerKey).
                 setCallback(pickerCallback).
+                enableFeature(google.picker.Feature.MINE_ONLY).
                 build();
             picker.setVisible(true);
         }
@@ -67,6 +72,12 @@
             } else {
                 gapi.load( 'auth', { 'callback': onAuthApiLoad } );
                 gapi.load( 'picker', { 'callback': onPickerApiLoad } );
+            }
+        });
+
+        $.getJSON('/webhooks/gdrive/getEmail', function ( response ) {
+            if( response && response.hasOwnProperty('email') ) {
+                oauthEmail = response.email;
             }
         });
     });

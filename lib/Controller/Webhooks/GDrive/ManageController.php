@@ -9,10 +9,8 @@ use INIT ;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-class ManageController extends KleinController {
-    public function listImportedFiles() {
-        Bootstrap::sessionStart();
-        
+class ManageController extends KleinController {   
+    public function listImportedFiles() {        
         $path = $this->getGDriveFilePath();
         $fileName = $_SESSION['pre_loaded_file'];
         
@@ -61,8 +59,6 @@ class ManageController extends KleinController {
     }
     
     public function changeSourceLanguage() {
-        Bootstrap::sessionStart();
-        
         $originalSourceLang = $_SESSION['actualSourceLang'];
         
         $fileHash = $_SESSION['google_drive_file_sha1'];
@@ -128,8 +124,6 @@ class ManageController extends KleinController {
     }
     
     public function deleteImportedFile() {
-        Bootstrap::sessionStart();
-        
         $fileName = $_SESSION['pre_loaded_file'];
         
         $success = false;
@@ -151,7 +145,22 @@ class ManageController extends KleinController {
         ));
     }
     
-    protected function afterConstruct() {
+    public function getUserEmail() {
+        $email = null;
 
+        $dao = new \Users_UserDao( \Database::obtain() );
+        $user = $dao->getByUid( $_SESSION['uid'] );
+
+        if($user != null) {
+            $email = $user->email;
+        }
+
+        $this->response->json( array(
+            "email" => $email
+        ));
+    }
+
+    protected function afterConstruct() {
+        Bootstrap::sessionStart();  
     }
 }

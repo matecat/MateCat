@@ -669,8 +669,7 @@ class catController extends viewController {
             $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
 
-        \Bootstrap::sessionStart();
-        $this->template->pre_uploaded_files =  $_SESSION['pre_loaded_file'];
+        $this->template->isGDriveProject =  $this->isCurrentProjectGDrive();
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
@@ -728,4 +727,7 @@ class catController extends viewController {
         return $this->downloadFileName;
     }
 
+    public function isCurrentProjectGDrive() {
+        return \Projects_ProjectDao::isGDriveProject($this->job->id_project);
+    }
 }
