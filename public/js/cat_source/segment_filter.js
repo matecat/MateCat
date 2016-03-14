@@ -8,15 +8,19 @@ SegmentFilter.enabled = function() {
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
 
+    var lastFilterData = null ;
+
     $.extend(SF, {
-        lastFilterData : null,
+        getLastFilterData : function() {
+            return lastFilterData;
+        },
 
         filterPanelOpen : function() {
             return UI.body.hasClass('filtering');
         },
         filtering : function() {
             // TODO change this, more specific when filter is submitted.
-            return UI.body.hasClass('filtering');
+            return lastFilterData != null;
         },
 
         filterSubmit : function( data ) {
@@ -27,7 +31,7 @@ if (SegmentFilter.enabled())
                               );
 
             $.getJSON(path).done(function( data ) {
-                SF.lastFilterData = data;
+                lastFilterData = data;
 
                 $('#outer').empty();
                 ReviewImproved.enabled() && ReviewImproved.closePanel();
@@ -37,7 +41,7 @@ if (SegmentFilter.enabled())
                     segmentToOpen: data['segment_ids'][0]
                 });
 
-                window.segment_filter_panel.setState({fitlering: true});
+                window.segment_filter_panel.setState({filtering: true});
 
             });
         },
@@ -49,6 +53,7 @@ if (SegmentFilter.enabled())
         closeFilter : function() {
             UI.body.removeClass('filtering');
             $('.muted').removeClass('muted');
+            lastFilterData = null;
             window.segment_filter_panel.resetState();
         }
     });

@@ -13,7 +13,7 @@ if ( SegmentFilter.enabled() )
     var original_openNextTranslated = UI.openNextTranslated ;
 
     var gotoPreviousSegment = function() {
-        var list = SegmentFilter.lastFilterData['segment_ids'] ;
+        var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf('' + UI.currentSegmentId);
         var nextFiltered = list[ index - 1 ];
 
@@ -27,7 +27,7 @@ if ( SegmentFilter.enabled() )
     };
 
     var gotoNextSegment = function() {
-        var list = SegmentFilter.lastFilterData['segment_ids'] ;
+        var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf('' + UI.currentSegmentId);
         var nextFiltered = list[ index + 1 ];
 
@@ -101,7 +101,7 @@ if ( SegmentFilter.enabled() )
             var segment = arguments[0];
 
             if (SF.filtering()) {
-                if ( SF.lastFilterData['segment_ids'].indexOf( segment.sid ) === -1 ) {
+                if ( SF.getLastFilterData()['segment_ids'].indexOf( segment.sid ) === -1 ) {
                     markup = $(markup).addClass('muted');
                     markup = $('<div/>').append(markup).html();
                 }
