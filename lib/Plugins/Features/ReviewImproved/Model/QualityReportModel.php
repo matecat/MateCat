@@ -147,6 +147,7 @@ class QualityReportModel {
                 'id'                   => $record[ 'segment_id' ],
                 'source'               => $record[ 'segment_source' ],
                 'status'               => $record[ 'translation_status' ],
+                'edit_distance'        => round( $record[ 'edit_distance'] / 1000, 2),
                 'issues'               => array()
         ) );
 
