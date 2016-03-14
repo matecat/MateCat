@@ -2,7 +2,12 @@ class MainPanel extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
+
+        this.state = this.defaultState();
+    }
+
+    defaultState() {
+        return {
             searchSettingsOpen : false, 
             selectedStatus : '',
             samplingEnabled : false,
@@ -10,6 +15,10 @@ class MainPanel extends React.Component {
             samplingSize : '10',
             clearEnabled : false,
         }
+    }
+
+    resetState() {
+        this.setState( this.defaultState() );
     }
 
     toggleSettings() {
@@ -20,6 +29,8 @@ class MainPanel extends React.Component {
 
     clearClick(e) {
         e.preventDefault();
+
+        SegmentFilter.closeFilter();
         // TODO
     }
 

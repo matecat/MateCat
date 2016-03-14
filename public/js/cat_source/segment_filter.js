@@ -8,15 +8,6 @@ SegmentFilter.enabled = function() {
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
 
-    var switchOffFiltering = function() {
-        $('.muted').removeClass('muted');
-        // $.extend(UI, SF.overrides.original);
-    };
-
-    var switchOnFiltering = function() {
-        // $.extend(UI, SF.overrides.new);
-    };
-
     $.extend(SF, {
         lastFilterData : null,
 
@@ -45,17 +36,19 @@ if (SegmentFilter.enabled())
                     segmentToOpen: data['segment_ids'][0]
                 });
 
+                window.segment_filter_panel.setState({clearEnabled: true});
+
             });
         },
 
         openFilter : function() {
             UI.body.addClass('filtering');
             $(document).trigger('header-tool:open', { name: 'filter' });
-            switchOnFiltering();
         },
         closeFilter : function() {
             UI.body.removeClass('filtering');
-            switchOffFiltering();
+            $('.muted').removeClass('muted');
+            window.segment_filter_panel.resetState();
         }
     });
 
@@ -79,6 +72,7 @@ if (SegmentFilter.enabled())
 
         if ( UI.body.hasClass('filtering') ) {
             SF.closeFilter();
+            window.segment_filter_panel.resetState();
         } else {
             SF.openFilter();
         }
