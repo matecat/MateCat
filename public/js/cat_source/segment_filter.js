@@ -42,7 +42,10 @@ if (SegmentFilter.enabled())
                     segmentToOpen: data['segment_ids'][0]
                 });
 
-                window.segment_filter_panel.setState({filtering: true});
+                window.segment_filter_panel.setState({
+                    filteredCount : data.count,
+                    filtering : true
+                });
 
             });
         },

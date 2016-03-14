@@ -14,6 +14,7 @@ class MainPanel extends React.Component {
             samplingType : 'edit_distance',
             samplingSize : '10',
             filtering : false,
+            filteredCount : 0
         }
     }
 
@@ -48,6 +49,10 @@ class MainPanel extends React.Component {
         SegmentFilter.filterSubmit({
             status : this.state.selectedStatus,
             sample : sample
+        });
+
+        this.setState({
+            searchSettingsOpen : false
         });
     }
 
@@ -87,6 +92,18 @@ class MainPanel extends React.Component {
         var fullOptions = [<option key="" value="">All</option>].concat( options );
 
         var submitEnabled = this.submitEnabled();
+
+        var filteringInfo;
+
+        if ( this.state.filtering ) {
+            if (this.state.filteredCount > 0) {
+                filteringInfo = <div className="block">Showing {this.state.filteredCount} segments</div>;
+            }
+            else {
+                filteringInfo = <div className="block">No segments matched by this filter</div>;
+            }
+
+        }
 
         return <div className="advanced-filter-searchbox searchbox">
             <form>
@@ -146,6 +163,8 @@ class MainPanel extends React.Component {
                         </div>
                     </div>
                 </div>
+
+                {filteringInfo}
 
                 <div className="block right">
                     <input id="clear-filter"
