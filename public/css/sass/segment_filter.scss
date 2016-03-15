@@ -32,9 +32,11 @@ section.muted .editarea {
     background: #BCBCBC !important;
 }
 
+/*
 section.muted .translation-issues-button {
   display: none; 
 }
+*/
 
 .search-settings-panel {
     background: #efefef;
@@ -57,4 +59,102 @@ section.muted .translation-issues-button {
     text-transform: none!important;
     font-size: 13px;
     margin-left: 5px;
+}
+
+
+/* advanced filtering */
+
+header .filter:before {
+    content: "\f0b0";
+}
+
+header .filter {
+    display: block !important;
+    text-decoration: none;
+    color: #eee;
+    box-shadow:none;
+    border:0;
+    padding: 12px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.advanced-filter-searchbox {
+    display:none;
+}
+
+.advanced-filter-searchbox .search-select {
+    margin-left:5px;
+}
+
+.filtering .advanced-filter-searchbox {
+    display:block;
+    height: 48px;
+}
+
+.filtering {padding-top:120px!important;}
+
+body.filtering .advanced-filter-searchbox input[type=button], body.filtering .advanced-filter-searchbox input[type=submit] {
+    width: 80px !important;
+    background: #dcdedf!important;
+}
+
+body.filtering .searchbox form {
+    width: 91%;
+    padding: 10px 5% 0 4% !important;
+}
+
+body.filtering .searchbox .block {
+    margin-top:5px;
+}
+
+.advanced-filter-searchbox {
+    z-index:1!important;
+}
+
+body.filtering .searchbox .search-settings {
+    text-decoration: underline;
+    padding-top: 4px;
+    float: left;
+    cursor:pointer;
+}
+
+body.cattool .filter, 
+body.cattool .filter:hover {
+    background:transparent!important;
+    cursor:pointer;
+}
+body.cattool .filter:hover {
+    color: #ccc;
+}
+
+.cattool header .filter {
+    font-size: 24px;
+    padding: 10px;
+}
+
+
+body.filtering .mbc-history-balloon-outer {
+    display:none;
+}
+
+body.filtering #review-side-panel {
+    top: 48px;
+}
+
+.search-settings-info {
+    float: left;
+    padding-top: 4px;
+    margin-right: 10px;
+    color: #666;
+}
+
+.filter-segments-count {
+    float: right!important;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.filtering section.muted .segment-side-buttons {
+    zoom: 0.8;
 }
