@@ -114,7 +114,7 @@ class MainPanel extends React.Component {
 
         if ( this.state.filtering ) {
             if (this.state.filteredCount > 0) {
-                filteringInfo = <div className="block">Showing {this.state.filteredCount} segments</div>;
+                filteringInfo = <div className="block filter-segments-count">Showing {this.state.filteredCount} segments</div>;
             }
             else {
                 filteringInfo = <div className="block">No segments matched by this filter</div>;
@@ -190,7 +190,7 @@ class MainPanel extends React.Component {
 
                 {currentSampleSettings}
 
-                {filteringInfo}
+                
 
                 <div className="block right">
                     <input id="clear-filter"
@@ -205,6 +205,8 @@ class MainPanel extends React.Component {
                             value="FILTER" />
                 </div>
             </form>
+
+            {filteringInfo}
 
         </div>; 
     }
