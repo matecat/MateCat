@@ -73,6 +73,10 @@
             <td><span tal:content="model/chunk/review/score"></span></td>
         </tr>
 
+        <tr>
+            <th>Reviewer name</th>
+            <td colspan="5" tal:content="model/chunk/review/reviewer_name"></td>
+        </tr>
     </table>
 
     <div style="margin-bottom: 20px;" tal:repeat="file model/chunk/files">

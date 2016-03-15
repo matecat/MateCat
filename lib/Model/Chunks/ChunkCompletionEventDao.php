@@ -55,7 +55,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         $params = Utils::ensure_keys($params, array('is_review'));
         $is_review = $params['is_review'] || false;
 
-        $sql = "SELECT events.create_date, events.is_review, events.id_job, updates.password " .
+        $sql = "SELECT events.uid, events.create_date, events.is_review, events.id_job, updates.password " .
             " FROM chunk_completion_events events " .
             " LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job " .
             " AND  events.password = updates.password and events.is_review = updates.is_review " .
@@ -74,6 +74,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
                 )
         );
 
+        // TODO: change this returned object to be a Struct
         return $stmt->fetch();
     }
 
