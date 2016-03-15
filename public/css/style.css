@@ -3932,7 +3932,7 @@ section.loaded .footer .tab.open { display: block ; }
  */
 .segment-side-buttons {
   /* styles based on .sid line 376 style.css */
-  color: #999;
+  color: #666;
   cursor: default;
   display: block;
   font-size: 12px;

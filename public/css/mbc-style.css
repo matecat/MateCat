@@ -485,6 +485,7 @@ a.mbc-close-icon:hover {
   padding: 10px 0;
   position: relative;
   width: 80px;
+  display: block!important;
 }
 
 /*
@@ -855,5 +856,28 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 
 .mbc-visible {
   display: block!important;
+}
+/*
+ ******
+ Pure css solution to hide and unhide the button
+ ******
+ */
+
+
+.mbc-comment-icon-button {
+    opacity:0;
+    -webkit-transition: opacity 1s ease-in-out;
+  -moz-transition: opacity 1s ease-in-out;
+  -ms-transition: opacity 1s ease-in-out;
+  -o-transition: opacity 1s ease-in-out;
+  transition: opacity 1s ease-in-out;
+}
+
+section:hover .mbc-comment-icon-button,
+.segment-side-buttons:hover .mbc-comment-icon-button,
+.mbc-comment-icon-button:hover
+ { 
+    opacity: 1;
+    display:block;
 }
 

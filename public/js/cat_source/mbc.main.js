@@ -186,6 +186,7 @@ if ( MBC.enabled() )
 
             if ( comments_obj.active > 0 ) {
                 root.append( highlight );
+                root.addClass('has-object');
                 highlight.text( limitNum( comments_obj.active ) );
             }
 
@@ -921,21 +922,6 @@ if ( MBC.enabled() )
             }
         } );
 
-        $( document ).on( 'mouseover', 'section', function ( e ) {
-            $( e.relatedTarget ).closest( 'section' ).find( '.segment-side-buttons .txt' ).stop();
-
-            $( e.target ).closest( 'section' )
-                    .find( '.segment-side-buttons .txt:has(.mbc-comment-highlight-invite)' )
-                    .stop().delay( 300 ).fadeIn( 100 );
-        } );
-
-        $( document ).on( 'mouseout', 'section', function ( e ) {
-            $( e.relatedTarget ).closest( 'section' ).find( '.segment-side-buttons .txt' ).stop();
-
-            $( e.target ).closest( 'section' )
-                    .find( '.segment-side-buttons .txt:has(.mbc-comment-highlight-invite)' )
-                    .stop().delay( 150 ).fadeOut();
-        } );
 
         // Interfaces
         $.extend( MBC, {

@@ -123,7 +123,7 @@ class MainPanel extends React.Component {
                         checked={this.state.samplingEnabled} />
                 </div>
 
-                <div className="block">
+                <div className="block"><div className="search-settings-info">5% - Edit distance</div>
                     <a className="search-settings"
                         onClick={this.toggleSettings.bind(this)}>Settings</a>
                     <div className={searchSettingsClass}>

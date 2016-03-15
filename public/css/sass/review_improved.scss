@@ -275,19 +275,41 @@ section {
 .segment-side-buttons .revise-button {
     text-decoration: none!important;
     font-size: 28px;
-    color: #999;
+    color: #666;
     font-weight: bold;
 }
-.segment-side-buttons .revise-button:hover {
-    color: #666;
+
+.segment-side-buttons {
+  color: #666!important;
 }
+
 
 .translation-issues-button {
     cursor: pointer;
-    margin: 6px auto 0;
+    margin: 0 auto;
     padding: 10px 0;
     position: relative;
     width: 80px;
+}
+
+.translation-issues-button .revise-button {
+    opacity:0;
+    -webkit-transition: opacity 1s ease-in-out;
+  -moz-transition: opacity 1s ease-in-out;
+  -ms-transition: opacity 1s ease-in-out;
+  -o-transition: opacity 1s ease-in-out;
+  transition: opacity 1s ease-in-out;
+}
+
+
+section:hover .translation-issues-button .revise-button,
+.translation-issues-button:hover .revise-button,
+.segment-side-buttons:hover .translation-issues-button .revise-button,
+.has-object
+
+ {
+    opacity:1!important;
+    display:block;
 }
 
 .revise-button-counter {
@@ -309,6 +331,8 @@ section {
     border-top: 1px solid #ccc;
     margin-top: 20px;
 }
+
+
 
 .review-triangle {
     display:none;
@@ -481,6 +505,10 @@ header .filter {
     display:none;
 }
 
+.advanced-filter-searchbox .search-select {
+    margin-left:5px;
+}
+
 .filtering .advanced-filter-searchbox {
     display:block;
     height: 48px;
@@ -502,6 +530,10 @@ body.filtering .searchbox .block {
     margin-top:5px;
 }
 
+.advanced-filter-searchbox {
+    z-index:1!important;
+}
+
 body.filtering .searchbox .search-settings {
     text-decoration: underline;
     padding-top: 4px;
@@ -509,8 +541,34 @@ body.filtering .searchbox .search-settings {
     cursor:pointer;
 }
 
+body.cattool .filter, 
+body.cattool .filter:hover {
+    background:transparent!important;
+    cursor:pointer;
+}
+body.cattool .filter:hover {
+    color: #ccc;
+}
+
+.cattool header .filter {
+    font-size: 24px;
+    padding: 10px;
+}
+
+
 body.filtering .mbc-history-balloon-outer {
     display:none;
+}
+
+body.filtering #review-side-panel {
+    top: 48px;
+}
+
+.search-settings-info {
+    float: left;
+    padding-top: 4px;
+    margin-right: 10px;
+    color: #666;
 }
 
 
