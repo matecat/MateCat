@@ -114,8 +114,6 @@ class QualityReportModel {
 
         foreach ( $records as $record ) {
 
-            \Log::doLog( $record );
-
             if ( $current_file_id != $record[ 'file_id' ] ) {
                 $this->structureNestFile( $record );
             }
@@ -137,7 +135,6 @@ class QualityReportModel {
             $current_issue_id   = $record[ 'issue_id' ];
         }
 
-        Log::doLog( $this->quality_report_structure );
     }
 
     private function structureNestSegment( $record ) {
