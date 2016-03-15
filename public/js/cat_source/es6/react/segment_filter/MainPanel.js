@@ -78,6 +78,22 @@ class MainPanel extends React.Component {
         }); 
     }
 
+    humanSampleType() {
+        var map = {
+            'segment_length' : 'Segment length',
+            'regular_intervals' : 'Regular intervals',
+            'edit_distance' : 'Edit distance'
+        };
+
+        return map[this.state.samplingType];
+    }
+
+    samplingSizeChanged(e) {
+        this.setState({
+            samplingSize : e.target.value,
+        });
+    }
+
     render() {
 
         var searchSettingsClass = classnames({
@@ -94,6 +110,7 @@ class MainPanel extends React.Component {
         var submitEnabled = this.submitEnabled();
 
         var filteringInfo;
+        var currentSampleSettings ;
 
         if ( this.state.filtering ) {
             if (this.state.filteredCount > 0) {
@@ -105,30 +122,15 @@ class MainPanel extends React.Component {
 
         }
 
-        return <div className="advanced-filter-searchbox searchbox">
-            <form>
-                <div className="block">
-                    <label htmlFor="search-projectname">segment status</label>
-                    <select 
-                        onChange={this.filterSelectChanged.bind(this)}
-                        value={this.state.selectedStatus} className="search-select">
-                        {fullOptions}
-                    </select>
-                </div>
-
-                <div className="block">
-                    <label htmlFor="select-source">Data sample</label>
-                    <input type="checkbox"
-                        onClick={this.samplingEnabledClick.bind(this)}
-                        checked={this.state.samplingEnabled} />
-                </div>
-
-                <div className="block"><div className="search-settings-info">5% - Edit distance</div>
+        if ( this.state.samplingEnabled ) {
+            currentSampleSettings = <div className="block">
+                    <div className="search-settings-info">{this.state.samplingSize}% - {this.humanSampleType()}</div>
                     <a className="search-settings"
                         onClick={this.toggleSettings.bind(this)}>Settings</a>
                     <div className={searchSettingsClass}>
                         Select the sample size
-                        <select defaultValue="5"
+                        <select value={this.state.samplingSize}
+                        onChange={this.samplingSizeChanged.bind(this)}
                             className="advanced-sample-size">
                             <option value="5">5%</option>
                             <option value="10">10%</option>
@@ -162,7 +164,31 @@ class MainPanel extends React.Component {
                                 name="samplingType" type="radio" /><label htmlFor="sample-segment-length">Segment length</label>
                         </div>
                     </div>
+                </div>;
+
+        }
+
+
+        return <div className="advanced-filter-searchbox searchbox">
+            <form>
+                <div className="block">
+                    <label htmlFor="search-projectname">segment status</label>
+                    <select
+                        onChange={this.filterSelectChanged.bind(this)}
+                        value={this.state.selectedStatus} className="search-select">
+                        {fullOptions}
+                    </select>
                 </div>
+
+                <div className="block">
+                    <label htmlFor="data-sample-checkbox">Data sample</label>
+                    <input type="checkbox"
+                        id="data-sample-checkbox"
+                        onClick={this.samplingEnabledClick.bind(this)}
+                        checked={this.state.samplingEnabled} />
+                </div>
+
+                {currentSampleSettings}
 
                 {filteringInfo}
 
