@@ -36,10 +36,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
     });
 
-    $(document).on('setTranslation:success', function(e, data) {
-        // ReviewImproved.reloadQualityReport();
-    });
-
     function getPreviousTranslationText( segment ) {
         var record = RI.getSegmentRecord(segment);
         var version ;

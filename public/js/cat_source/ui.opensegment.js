@@ -93,6 +93,8 @@
 
             if(!this.noGlossary) this.getGlossary(segment.el, true, 0);
 
+            UI.setEditingSegment( segment.el );
+
             this.opening = true;
 
             if (!(this.currentSegment.is(this.lastOpenedSegment))) {
@@ -102,7 +104,8 @@
             }
 
             this.opening = false;
-            this.body.addClass('editing');
+
+            // this.body.addClass('editing');
 
             segment.el.addClass("editor");
 

@@ -639,28 +639,32 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-        $('#outer').click(function(e) {
-            var container = $(UI.currentSegment);
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                && container.has(e.target).length === 0 // ... nor a descendant of the container
-                && !$(e.target).hasClass('translated') // has not clicked on a translated button
-                && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
-                && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
-                && ! eventFromReact(e)
-                )
-            {
-                UI.closeSegment(UI.currentSegment, 1);
-            }
 
+        // This is where we decide if a segment is to close or not.
+        // Beware that closeSegment is also called on openSegment
+        // ( other segments are closed when a new one is opened ).
+        //
+        $('#outer').click(function(e) {
+
+             var close = function() {
+                UI.setEditingSegment( null );
+                UI.closeSegment(UI.currentSegment, 1);
+            };
+
+            if ( eventFromReact(e) ) return;
+            if ( $(e.target).closest('section .sid').length ) close()  ;
+            if ( $(e.target).closest('section .segment-side-buttons').length ) close();
+
+            if ( !$(e.target).closest('section').length ) close();
         });
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-        }).on('click', 'section .sid, section .segment-side-buttons', function(e){
-            // TODO: investigate the neeed for '.segment-side-buttons'
-            if ( ! eventFromReact(e) ) {
-                UI.closeSegment(UI.currentSegment, 1);
-            }
+        // }).on('click', 'section .sid, section .segment-side-buttons', function(e){
+        //     // TODO: investigate the neeed for '.segment-side-buttons'
+        //     if ( ! eventFromReact(e) ) {
+        //         UI.closeSegment(UI.currentSegment, 1);
+        //     }
         }).on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('click', '#quality-report', function(e){
@@ -676,6 +680,7 @@ $.extend(UI, {
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') ) {
+                        UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }
             }
@@ -736,20 +741,8 @@ $.extend(UI, {
             if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     UI.showEditToolbar();
-//                    if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
-             /*
-                        if(!UI.editarea.find('.locked.selected').length) {
-                            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                                if(!UI.isFirefox) UI.showEditToolbar();
-                            }
-                        } else {
-                            console.log('A tag is selected');
-                            console.log(UI.editarea.find('.locked.selected')[0]);
-                            setCursorPosition(UI.editarea.find('.locked.selected')[0]);
-                        }
-            */
 		}).on('mousedown', '.editarea', function(e) {
             if(e.which == 3) {
                 e.preventDefault();

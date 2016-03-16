@@ -73,6 +73,12 @@ if ( ReviewImproved.enabled() ) {
         }
     });
 
+    $(document).on('editingSegment:change', function(e, data) {
+        if ( data.segment == null ) {
+            ReviewImproved.closePanel();
+        }
+    });
+
     $(document).on('click', function( e ) {
         if (e.target.closest('body') == null ) {
             // it's a detatched element, likely the APPROVE button.

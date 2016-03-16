@@ -4,6 +4,24 @@
 UI = null;
 
 UI = {
+
+    setEditingSegment : function(segment) {
+        if ( segment != null ) {
+            UI.body.addClass('editing');
+            console.debug('editing addClass');
+        } else {
+            UI.body.removeClass('editing');
+            console.debug('editing removeClass');
+        }
+
+        UI._editingSegment = segment ;
+        $(document).trigger('editingSegment:change', {segment: segment});
+    },
+
+    get editingSegment() {
+        return UI._editingSegment ;
+    },
+
     statusHandleTitleAttr : function( status ) {
         status = status.toUpperCase();
         return config.status_labels[ status ] + ', click to change it';
@@ -231,12 +249,12 @@ UI = {
 			this.body.addClass('justdone');
 		}
 	},
-    closeSegment: function(segment, byButton, operation) {
-        console.log('CLOSE SEGMENT');
 
-		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
-			this.toSegment = undefined;
+    closeSegment: function(segment, byButton, operation) {
+		if ( typeof segment == 'undefined' ) {
+
 			return true;
+
 		} else {
             this.autoSave = false;
 
@@ -261,7 +279,8 @@ UI = {
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
 
-            this.body.removeClass('editing');
+            // this.body.removeClass('editing');
+
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
@@ -282,18 +301,19 @@ UI = {
 	},
     copySource: function() {
         var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
-//		var source_val = $.trim($(".source", this.currentSegment).text());
+
         // Test
         //source_val = source_val.replace(/&quot;/g,'"');
 
-        // Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
+        // Attention I use .text to obtain a entity conversion,
+        // by I ignore the quote conversion done before adding to the data-original
         // I hope it still works.
 
         this.saveInUndoStack('copysource');
         $(".editarea", this.currentSegment).html(source_val).keyup().focus();
-//		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
+
         this.saveInUndoStack('copysource');
-//		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
+
         this.highlightEditarea();
 
         this.currentSegmentQA();
