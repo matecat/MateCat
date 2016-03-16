@@ -117,7 +117,7 @@ class MainPanel extends React.Component {
                 filteringInfo = <div className="block filter-segments-count">Showing {this.state.filteredCount} segments</div>;
             }
             else {
-                filteringInfo = <div className="block">No segments matched by this filter</div>;
+                filteringInfo = <div className="block filter-segments-count">No segments matched by this filter</div>;
             }
 
         }

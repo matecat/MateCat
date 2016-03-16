@@ -1919,9 +1919,7 @@ body.rtl-target .editor .editarea span
 
 .search-editarea{overflow: auto;min-height:22px !important;cursor:text}
 
-textarea, input, .editarea, .search-editarea, select  {
-	outline: none !important
-}
+
 .source
 {
     position:relative;
@@ -3932,7 +3930,7 @@ section.loaded .footer .tab.open { display: block ; }
  */
 .segment-side-buttons {
   /* styles based on .sid line 376 style.css */
-  color: #666;
+  color: #999;
   cursor: default;
   display: block;
   font-size: 12px;

@@ -32,6 +32,7 @@ section.reviewImproved.opened .outersource .copy {
 section.reviewImproved.opened .textarea-container {
     width: 100%;
     padding: 0 4px;
+    font-size:18px;
 }
 
 section.reviewImproved .errorTaggingArea {
@@ -499,5 +500,7 @@ table.review-issue-category-list {
 .mbc-history-balloon-outer {
     right: 145px;
 }
-
+.error-selection-highlight {
+    background: yellow;
+}
 
