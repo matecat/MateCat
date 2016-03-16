@@ -2049,7 +2049,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
             "SELECT p.id AS pid,
                             p.name,
                             p.password,
-                            p.tm_analysis_wc
+                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE %s
