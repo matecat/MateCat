@@ -11,34 +11,34 @@ export default React.createClass({
         this.setState({ value: nextProps.selectedValue });
     },
 
-    componentDidMount: function() {
-        var row = ReactDOM.findDOMNode( this );
-        var slider = $(row).find('.issue.-slider').slider();
-
-        if ( this.props.focus ) {
-            React.findDOMNode(this.refs.select).focus();
-        }
-
-    },
     render : function() {
-        var default_severity = <option key={'value-'} value="" >---</option>;
-        var severities = this.props.category.severities.map(function(severity, i) {
-            return <option key={'value-' + severity.label} value={severity.label}>{severity.label}</option> ;
-        }.bind(this)); 
+        // It may happen for a category to come with no severities. In this case
+        // the category should be considered to be a header for the nested
+        // subcategories. Don't print the select box if no severity is found.
+        var select = null;
 
-        var full_severities = [default_severity].concat( severities );
+        if ( this.props.category.severities ) {
+            var default_severity = <option key={'value-'} value="" >---</option>;
+            var severities = this.props.category.severities.map(function(severity, i) {
+                return <option key={'value-' + severity.label} value={severity.label}>{severity.label}</option> ;
+            }.bind(this));
+
+            var full_severities = [default_severity].concat( severities );
+
+            select = <select
+                ref="select"
+                value={this.state.value}
+                autoFocus={this.props.focus}
+                onChange={this.props.severitySelected.bind(null, this.props.category)}
+                name="severities">
+            {full_severities}
+            </select>
+        }
 
         return <tr>
         <td>{this.props.category.label}</td>
         <td>
-        <select
-            ref="select"
-            value={this.state.value}
-            onChange={this.props.severitySelected.bind(null, this.props.category)}
-            name="severities" tabindex="1">
-
-        {full_severities}
-        </select>
+            { select }
         </td>
         </tr> ; 
     }

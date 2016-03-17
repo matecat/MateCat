@@ -60,6 +60,7 @@ export default React.createClass({
 
     render : function() {
         var categoryComponents = []; 
+        var withSeverities = 0;
         
         this.issueCategories().forEach(function(category, i) {
             var selectedValue = "";
@@ -70,16 +71,23 @@ export default React.createClass({
 
             var k = 'category-selector-' + i ;
 
+            if (category.severities != null) {
+                withSeverities++ ;
+            }
+
             categoryComponents.push(
                 <ReviewIssueCategorySelector 
                     key={k}
-                    focus={i == 0}
+                    focus={withSeverities == 1}
                     severitySelected={this.severitySelected} 
                     selectedValue={selectedValue}
                     nested={false} category={category} />);
 
             if ( category.subcategories.length > 0 ) {
                 category.subcategories.forEach( function(category, ii) {
+                    if (category.severities != null) {
+                        withSeverities++ ;
+                    }
                     var key = '' + i + '-' + ii;
                     var kk = 'category-selector-' + key ;
                     var selectedValue = "";
@@ -91,9 +99,11 @@ export default React.createClass({
                     categoryComponents.push(
                         <ReviewIssueCategorySelector 
                             key={kk}
+                            focus={withSeverities == 1}
                             selectedValue={selectedValue}
                             severitySelected={this.severitySelected}
-                            nested={true} category={category}  />
+                            nested={true}
+                            category={category}  />
                     );
                 }.bind(this) ); 
             }
