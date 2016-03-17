@@ -14,6 +14,11 @@ export default React.createClass({
     componentDidMount: function() {
         var row = ReactDOM.findDOMNode( this );
         var slider = $(row).find('.issue.-slider').slider();
+
+        if ( this.props.focus ) {
+            React.findDOMNode(this.refs.select).focus();
+        }
+
     },
     render : function() {
         var default_severity = <option key={'value-'} value="" >---</option>;
@@ -27,6 +32,7 @@ export default React.createClass({
         <td>{this.props.category.label}</td>
         <td>
         <select
+            ref="select"
             value={this.state.value}
             onChange={this.props.severitySelected.bind(null, this.props.category)}
             name="severities" tabindex="1">

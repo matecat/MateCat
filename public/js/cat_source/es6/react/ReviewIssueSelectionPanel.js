@@ -73,6 +73,7 @@ export default React.createClass({
             categoryComponents.push(
                 <ReviewIssueCategorySelector 
                     key={k}
+                    focus={i == 0}
                     severitySelected={this.severitySelected} 
                     selectedValue={selectedValue}
                     nested={false} category={category} />);
@@ -121,8 +122,8 @@ export default React.createClass({
                 />
 
             <div className="review-issue-buttons-right">
-                <a onClick={this.sendClick} 
-                    className={this.buttonClasses()}>{buttonLabel}</a>
+                <button onClick={this.sendClick}
+                    className={this.buttonClasses()}>{buttonLabel}</button>
             </div>
         </div>
         </div> 
