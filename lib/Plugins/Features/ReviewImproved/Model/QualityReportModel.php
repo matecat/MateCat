@@ -157,8 +157,15 @@ class QualityReportModel {
     }
 
     private function structureNestSegment( $record ) {
+        if ( $record['original_translation'] == null ) {
+            $original_translation = $record['translation'];
+        }
+        else {
+            $original_translation = $record['original_translation'];
+        }
+
         $this->current_segment = new ArrayObject( array(
-                'original_translation' => $record[ 'original_translation' ],
+                'original_translation' => $original_translation,
                 'translation'          => $record[ 'translation' ],
                 'id'                   => $record[ 'segment_id' ],
                 'source'               => $record[ 'segment_source' ],

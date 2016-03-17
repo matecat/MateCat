@@ -31,9 +31,7 @@ SELECT
   f.id AS file_id,
   f.filename AS file_filename,
 
-  CASE WHEN otv.translation != NULL  THEN
-    otv.translation ELSE st.translation
-  END original_translation,
+  otv.translation AS original_translation,
 
   st.version_number,
   st.translation as translation,
