@@ -101,8 +101,8 @@ class MainPanel extends React.Component {
             'search-settings-panel' : true
         }); 
 
-        var options = Object.keys(config.status_labels).map(function(item, index) {
-            return <option key={index} value={item}>{config.status_labels[item]}</option>;
+        var options = config.searchable_statuses.map(function(item, index) {
+            return <option key={index} value={item.value}>{item.label}</option>;
         });
 
         var fullOptions = [<option key="" value="">All</option>].concat( options );
