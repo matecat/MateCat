@@ -395,7 +395,7 @@ class downloadFileController extends downloadController {
 
         $file = $service->files->get($fileId);
         // $mimeType = 'application/vnd.google-apps.presentation';
-        $mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        $mimeType = \GDrive::officeMimeFromGoogle( $file->mimeType );
         $file->setMimeType( $mimeType );
 
 

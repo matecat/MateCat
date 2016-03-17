@@ -17,9 +17,12 @@ class ManageController extends KleinController {
         if(file_exists($path) !== false) {
             $fileSize = filesize($path);
 
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+
             $response = array(
                 'fileName' => $fileName,
-                'fileSize' => $fileSize
+                'fileSize' => $fileSize,
+                'fileExtension' => $fileExtension
             );
 
             $this->response->json($response);
