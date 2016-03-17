@@ -978,7 +978,7 @@ UI = {
 				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
 			}
 
-			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
+			if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
 				UI.openSegment(UI.editarea);
 			}
 			if (options.caller == 'link2file') {
