@@ -32,6 +32,7 @@ section.reviewImproved.opened .outersource .copy {
 section.reviewImproved.opened .textarea-container {
     width: 100%;
     padding: 0 4px;
+    font-size:18px;
 }
 
 section.reviewImproved .errorTaggingArea {
@@ -151,8 +152,46 @@ section.reviewImproved.opened .textarea-container {
 
 }
 
+.fx {
+    position:relative;
+}
+
+.fx:after {
+      position: absolute;
+    content: "";
+    width: 9px;
+    right: 0;
+    top: 0;
+    height: 29px;
+    background: 
+    repeating-linear-gradient( 135deg, transparent, transparent 11px, #fff 10px, #fff 18px ), 
+    linear-gradient( to bottom, #7cc576, #7cc576  )
+}
+
+.rb {
+    position:relative;
+}
+
+.rb:after {
+      position: absolute;
+    content: "";
+    width: 9px;
+    right: 0;
+    top: 0;
+    height: 29px;
+    background: 
+    repeating-linear-gradient( 135deg, transparent, transparent 11px, #fff 10px, #fff 18px ), 
+    linear-gradient( to bottom, #dc2e34, #dc2e34  )
+}
+
 section.status-fixed .status {
-    background: #F5E014;
+    background: #7cc576 url(../img/stripes.png) repeat !important;
+        background-size: 200% !important;
+}
+
+section.status-rebutted .status {
+    background: #dc2e34 url(../img/stripes.png) repeat !important;
+        background-size: 200% !important;
 }
 
 section.status-rebutted .status {
@@ -499,5 +538,7 @@ table.review-issue-category-list {
 .mbc-history-balloon-outer {
     right: 145px;
 }
-
+.error-selection-highlight {
+    background: yellow;
+}
 

@@ -101,7 +101,7 @@ body.filtering .advanced-filter-searchbox input[type=button], body.filtering .ad
 
 body.filtering .searchbox form {
     width: 91%;
-    padding: 10px 5% 0 4% !important;
+    padding: 11px 5% 0 4% !important;
 }
 
 body.filtering .searchbox .block {
@@ -114,7 +114,6 @@ body.filtering .searchbox .block {
 
 body.filtering .searchbox .search-settings {
     text-decoration: underline;
-    padding-top: 4px;
     float: left;
     cursor:pointer;
 }
@@ -138,13 +137,16 @@ body.filtering .mbc-history-balloon-outer {
     display:none;
 }
 
+#data-sample-checkbox {
+    margin: 0 5px!important;
+}
+
 body.filtering #review-side-panel {
     top: 48px;
 }
 
 .search-settings-info {
     float: left;
-    padding-top: 4px;
     margin-right: 10px;
     color: #666;
 }

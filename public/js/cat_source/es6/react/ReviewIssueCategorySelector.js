@@ -29,7 +29,7 @@ export default React.createClass({
         <select
             value={this.state.value}
             onChange={this.props.severitySelected.bind(null, this.props.category)}
-            name="severities">
+            name="severities" tabindex="1">
 
         {full_severities}
         </select>

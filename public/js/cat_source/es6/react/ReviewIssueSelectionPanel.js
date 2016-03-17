@@ -103,10 +103,10 @@ export default React.createClass({
         return <div className="review-issue-selection-panel">
 
         <h3>Error selection</h3> 
+       
+
+        <p>You selected "<span className="error-selection-highlight">{this.props.selection.selected_string}</span>" from segment {this.props.sid}</p>
         <h4>Select issue type</h4>
-
-        <p>You selected "{this.props.selection.selected_string}" from segment {this.props.sid}</p>
-
         <table className="review-issue-category-list">
         <tbody>
             {categoryComponents}
@@ -122,7 +122,7 @@ export default React.createClass({
 
             <div className="review-issue-buttons-right">
                 <a onClick={this.sendClick} 
-                    className={this.buttonClasses()} >{buttonLabel}</a>
+                    className={this.buttonClasses()}>{buttonLabel}</a>
             </div>
         </div>
         </div> 
