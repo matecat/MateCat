@@ -6,6 +6,7 @@ module.exports = function(grunt) {
     var cssFiles = [
         basePath + '../css/common.css',
         basePath + '../css/style.css',
+		basePath + '../css/lexiqa.css',
         basePath + '../css/mbc-style.css',
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
@@ -106,6 +107,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + '../css/common.css',
                     basePath + '../css/style.css',
+					basePath + '../css/lexiqa.css',
                     basePath + '../css/mbc-style.css',
                     basePath + '../css/segment-notes.css',
                     basePath + '../css/project-completion-feature.css',

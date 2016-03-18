@@ -159,6 +159,7 @@ UI = {
                 type: "allTranslated"
             });
         }
+        
         $(window).trigger({
             type: "statusChanged",
             segment: segment,
@@ -2163,7 +2164,7 @@ console.log('eccolo: ', typeof token);
 		}, config.warningPollingInterval);
 	},
 
-	checkWarnings: function(openingSegment) {
+	checkWarnings: function(openingSegment) {        
 		var dd = new Date();
 		var ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
@@ -2530,6 +2531,8 @@ console.log('eccolo: ', typeof token);
                 UI.executingSetTranslation = false;
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(d, this[1]);
+//FOTD
+                UI.doLexiQA(segment,reqData.translation,id_segment);
                 $(document).trigger('setTranslation:success', d);
 			}
 		});
@@ -3392,7 +3395,102 @@ console.log('eccolo: ', typeof token);
             return false;
         }
     },
+    doLexiQA: function(segment,translation,id_segment) {
+       //FOTD 
+       console.log('HELO FROM FOTD');
+        console.log('segment: ');
+        console.dir(segment);
+        //var html = $.parseHTML($(segment).find('.source').html());
+        var html = $(segment).find('.source').html();
+        html = html.replace(/<.*?>/g,'');
+        
+        html = html.replace(/\&gt;/g,'>').replace(/\&lt;/g,'<');
+        console.log('source : '+html);
+        //console.log(html[0].wholeText);
+        //console.dir();
+        console.log('target: '+ translation);
+        console.log(segment.context.baseURI);
+        console.log('segment_id: ' +id_segment);
 
+        console.log('source_lang: '+ config.source_rfc);
+        console.log('target_lang: '+ config.target_rfc);
+        if (!UI.lexiqaWarnings)
+            UI.lexiqaWarnings = [];
+        //console.dir(reqData);
+        
+        //var myWindow = window.open('')
+        $.ajax({type: "POST",
+            url: "http://backend.lexiqa.net/genqapage",
+            data: {
+            qaData:  {
+                    sourcelanguage: config.source_rfc,
+                    targetlanguage: config.target_rfc,
+                    sourcetext: html+'',
+                    targettext: translation,
+                    returnUrl: segment.context.baseURI,
+                    segmentId: id_segment,
+                    partnerId: "matecat"
+                }
+            },
+            success:function(result){
+                console.log(result);
+                //myWindow.location =result.qaurl;
+                if (result.qaurl && result.qaurl!=='') {
+                    //do something here -- enable qa errors
+                     var ind;
+                    if ((ind = UI.lexiqaWarnings.indexOf(id_segment))<0) {
+                UI.lexiqaWarnings.push(id_segment);
+                $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                .find('.numbererror').text(UI.lexiqaWarnings.length);                    
+                    $('#go2lexiqa').attr('href', result.qaurl);
+                    }
+                      console.log('lexiqa warnings (1): '+UI.lexiqaWarnings.length);
+                }
+                else {
+                    //do something else
+                    var ind;
+                    if ((ind = UI.lexiqaWarnings.indexOf(id_segment))>=0) {
+                        UI.lexiqaWarnings.splice(ind,1);
+                        console.log('lexiqa warnings (1): '+UI.lexiqaWarnings.length);
+                    }
+                    if ( UI.lexiqaWarnings.length ==0) {
+                        //remove link and warning
+                    $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!")
+                .find('.numbererror').text('');                    
+                    $('#go2lexiqa').attr('href', "#");                        
+                    }
+                    else {
+                         $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                .find('.numbererror').text(UI.lexiqaWarnings.length);   
+                    }
+                }
+            }});                
+        
+    },
+    getLexiqaWarnings: function() {
+        //FOTD
+       $.ajax({type: "GET",
+            url: "http://backend.lexiqa.net/matecaterrors",
+            data: {id: 'matecat-'+config.job_id+'-'+config.password },
+            success:function(results){
+                console.dir(results);
+                if (results.errors!=0) {
+                    //only do something if there are errors in lexiqa server
+                    UI.lexiqaWarnings = [];
+                    results.segments.forEach(function(element) {
+                        UI.lexiqaWarnings.push(element);
+                    });
+                     $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                .find('.numbererror').text(results.errors);                    
+                    $('#go2lexiqa').attr('href', results.qaurl);
+                }
+                else {
+                    $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!")
+                .find('.numbererror').text('');                    
+                    $('#go2lexiqa').attr('href', "#");  
+                }             
+            }});                
+    },
     start: function () {
         APP.init();
         APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -3405,6 +3503,7 @@ console.log('eccolo: ', typeof token);
         });
         //launch segments check on opening
         UI.checkWarnings(true);
+        UI.getLexiqaWarnings();
         $('html').trigger('start');
     },
     restart: function () {
