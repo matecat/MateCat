@@ -122,7 +122,8 @@ class INIT {
     const JOB_ARCHIVABILITY_THRESHOLD = 90;
 
     /**
-     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
+     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external
+     * translation provider (translated.net by default).
      * You can set it to false, but We are happy if you keep this on.
      * For each translation outsourced to Translated.net (the main Matecat developer),
      * Matecat gets more development budget and bugs fixes and new features get implemented faster.
@@ -130,6 +131,11 @@ class INIT {
      * @var bool
      */
     public static $ENABLE_OUTSOURCE = true;
+
+    /**
+     * This option diables the UI elements that show the volume analysis.
+     */
+    public static $ENABLE_VOLUME_ANALYSIS = true;
 
     /**
      * MateCat Filters configuration

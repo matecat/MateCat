@@ -320,7 +320,6 @@ class analyzeController extends viewController {
         $this->template->pname                      = $this->pname;
         $this->template->pid                        = $this->pid;
         $this->template->project_password           = $this->ppassword;
-        $this->template->project_not_found          = $this->project_not_found;
         $this->template->fast_wc_time               = $this->fast_wc_time;
         $this->template->tm_wc_time                 = $this->tm_wc_time;
         $this->template->tm_wc_unit                 = $this->tm_wc_unit;
@@ -336,6 +335,7 @@ class analyzeController extends viewController {
         $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
+        $this->template->enable_volume_analysis     = INIT::$ENABLE_VOLUME_ANALYSIS;
         $this->template->outsource_service_login    = $this->_outsource_login_API;
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 

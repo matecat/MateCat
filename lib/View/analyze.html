@@ -18,8 +18,11 @@
             isLoggedIn: '${isLoggedIn}',
             showModalBoxLogin: '${showModalBoxLogin}',
             enable_outsource: ${enable_outsource | string:false},
+            enable_volume_analysis: ${enable_volume_analysis | string:false},
             daemon_warning: ${daemon_misconfiguration},
-            support_mail: '${support_mail}'
+            support_mail: '${support_mail}',
+            id_project: '${pid}',
+            password: '${project_password}'
         };
     </script>
 
@@ -48,8 +51,7 @@
     </div>
 </header>
 
-<content tal:condition="not:project_not_found">
-<div class="loadingbar open start">
+<div tal:condition="enable_volume_analysis" class="loadingbar open start">
 
     <div class="wrapper" id="shortloading">
         <p class="label">Fast word counting...</p>
@@ -71,7 +73,7 @@
     </div>
 </div>
 
-<div class="wrapper-container">
+<div tal:condition="enable_outsource" class="wrapper-container">
     <div class="wrapper">
         <h1 id="pid" title="" data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password">
             <span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
@@ -89,10 +91,6 @@
                         <span class="wordPerDay">3.000 w/day</span>
                     </span>
             </li>
-            <!--
-            <li class="desc">Trados analysis does not handle internal partial matches, machine translation, collaborative TMs like MyMemory and 100% in-context matches.
-            </li>
-            -->
 
         </ul>
 
@@ -112,13 +110,7 @@
                         <span class="wordPerDay">3.000 w/day</span>
                     </span>
             </li>
-            <!-- <li class="desc">This is what MateCat reccomends you to use to estimate costs and delivery dates.
-           Payable words reppresent an estimation of the real effort required for the project. <a href="#" id="more" class="more">+</a>
-           <div class="content">
 
-           This is what MateCat reccomends you to use to estimate costs and delivery dates. Payable words reppresent an estimation of the real effort required for the project. eg. 100 repeated words are more like 30 new words to translate. To estimate fair payable %, MateCat use aggregated statistics on translator performance and/or industry accepted discount levels. MT payable % strictly depends on the language pair.
-
-           </div></li>-->
         </ul>
 
         <ul id="raw-words" class="cost-table">
@@ -133,9 +125,6 @@
                     </span>
             </li>
 
-            <!--
-            <li class="desc">The total words without any repetition discount.</li>
-            -->
         </ul>
         <div class="cl"></div>
 
@@ -150,20 +139,14 @@
         <br/>
 
 
-        <!--
-                    <div class="billed-message">MateCat usage fee is <strong>$<span id="usageFee">86.25</span></strong> for this project ($<span id="pricePerWord">0.003</span> per word).
-                        <br /><small style="font-size: 10pt">Translate for free. You pay only when you download the completed translation.
-                            <br />Using MateCat you are <strong>saving aprox. $<span id="discount">600</span></strong> (<span id="totalFastWC">34,350</span> - <span id="totalTMWC">28,000</span> words at $0.10 per word) thanks to the more matches leveraged.</small></div>
-        -->
+
         <br/>
 
 
         <br/>
 
         <div class="cl"></div>
-        <!--
-        <a href="#" class="details more-table">Warning: 5 of 17 files analysed are missing</a>
-        -->
+
 
 
         <!-- The file upload form used as target for the file upload widget -->
@@ -404,20 +387,7 @@
 
         </tal:block>
 
-        <!--
-            <div class="sendit">
-                <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>
-                <div class="cl"></div>
-                <div class="job">
 
-                    <p> Job #1 link:</p>
-                    <input name="" type="text" class="input" value="mat.ly/IUrHPU "/>
-                    <input type="text" class="input" value="200" size="2"/>
-                    <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a>
-                </div>
-                <div class="cl"></div>
-            </div>
-        -->
     </div>
     <div class="cl"></div>
 </div>
@@ -489,9 +459,6 @@
     <!-- END DIV POPUP-SPLIT INTERNO -->
 </div>
 <!-- END DIV POPUP-SPLIT -->
-
-
-</content>
 
 <footer>
     <div class="wrapper">
