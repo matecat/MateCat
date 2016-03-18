@@ -65,11 +65,6 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
        return $stmt->fetch();
     }
 
-    static function getFilesByProjectId( $id_project ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
-    }
-
     /**
      * Returns uncompleted chunks by project ID. Requires 'is_review' to be passed
      * as a param to filter the query.

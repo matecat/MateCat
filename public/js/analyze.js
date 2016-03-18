@@ -163,9 +163,7 @@ UI = {
 			});
 		});
 
-        if ( config.enable_volume_analysis ) {
-		    this.pollData();
-        }
+		this.pollData();
 	},
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
@@ -216,8 +214,8 @@ UI = {
 			data: {
 				action: "splitJob",
 				exec: "check",
-				project_id: $('#pid').attr('data-pid'),
-				project_pass: $('#pid').attr('data-pwd'),
+                project_id: config.id_project,
+                project_pass: config.password,
 				job_id: $('.popup-split h1 .jid').attr('data-jid'),
 				job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
 				num_split: $('.popup-split h1 .chunks').text(),
@@ -288,8 +286,8 @@ UI = {
 			data: {
 				action: "splitJob",
 				exec: "merge",
-				project_id: $('#pid').attr('data-pid'),
-				project_pass: $('#pid').attr('data-pwd'),
+				project_id: config.id_project,
+				project_pass: config.password,
 				job_id: jid
 			},
 			complete: function(d) {
@@ -314,8 +312,8 @@ UI = {
 			data: {
 				action: "splitJob",
 				exec: "apply",
-				project_id: $('#pid').attr('data-pid'),
-				project_pass: $('#pid').attr('data-pwd'),
+				project_id: config.id_project,
+				project_pass: config.password,
 				job_id: $('.popup-split h1 .jid').attr('data-jid'),
 				job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
 				num_split: $('.popup-split h1 .chunks').text(),
@@ -677,7 +675,7 @@ UI = {
                         $( '#longloading .approved-bar' ).css( 'width', '100%' );
                         $( '#analyzedSegmentsReport' ).text( s.SEGMENTS_ANALYZED_PRINT );
 
-                        if (config.enable_outsource) precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
+                        precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
 
                         setTimeout( function () {
                             $( '#shortloading' ).remove();
@@ -700,7 +698,7 @@ UI = {
                         mew.find('.word-number').removeClass( 'loading' ).text( rwc.find('.word-number').text() );
                         mew.find('.days').html( rwc.find('.days' ).html() ).show();
 
-                        if ( config.enable_outsource ) precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
+                        precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
 
                         $( '#shortloading' ).remove();
                         $( '#longloading .meter' ).remove();
@@ -730,13 +728,8 @@ UI = {
 
 	},
     downloadAnalysisReport: function () {
-        var pid = $("#pid").attr("data-pid");
-
-        if( typeof $("#pid").attr("data-pwd") === 'undefined' ){
-            var jpassword =  $('tbody.tablestats' ).attr('data-pwd');
-        }
-
-        var ppassword = $("#pid").attr("data-pwd");
+        var pid = config.id_project ;
+        var ppassword = config.password ;
 
         var form =  '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
                     '				<input type=hidden name="action" value="downloadAnalysisReport">' +
@@ -829,7 +822,7 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 $(document).ready(function() {
 	APP.init();
 	if (config.showModalBoxLogin == 1) {
-	$('#popupWrapper').fadeToggle();
+	    $('#popupWrapper').fadeToggle();
 	}
 	$('#sign-in').click(function(e) {
 		e.preventDefault();

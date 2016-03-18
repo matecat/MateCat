@@ -133,11 +133,6 @@ class INIT {
     public static $ENABLE_OUTSOURCE = true;
 
     /**
-     * This option diables the UI elements that show the volume analysis.
-     */
-    public static $ENABLE_VOLUME_ANALYSIS = true;
-
-    /**
      * MateCat Filters configuration
      */
     public static $FILTERS_USER_AGENT = "MateCat Community Instance";
