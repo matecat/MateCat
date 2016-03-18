@@ -119,7 +119,7 @@ class analyzeController extends viewController {
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
         $langDomains = Langs_LanguageDomains::getInstance();
-        $this->subject = $langDomains::getDisplayDomain($this->subject);
+        $this->subject = $langDomains::getDisplayDomain($this->subject);  // subject is null !!??!?!?!
         $this->template->subject                    = $this->model->subject;
 
         $this->template->isLoggedIn = $this->isLoggedIn();

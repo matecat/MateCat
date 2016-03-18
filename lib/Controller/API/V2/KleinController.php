@@ -30,4 +30,6 @@ abstract class KleinController {
     public function respond($method) {
         $this->$method() ;
     }
+
+    abstract function afterConstruct() ;
 }

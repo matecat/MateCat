@@ -6,31 +6,30 @@
  * Date: 3/18/16
  * Time: 3:24 PM
  */
-
 class Analysis_AnalysisModel {
 
-    public $pname = "";
-    public $total_raw_word_count = 0;
+    public $pname                      = "";
+    public $total_raw_word_count       = 0;
     public $total_raw_word_count_print = "";
-    public $fast_analysis_wc = 0;
-    public $tm_analysis_wc = 0;
-    public $standard_analysis_wc = 0;
-    public $fast_analysis_wc_print = "";
+    public $fast_analysis_wc           = 0;
+    public $tm_analysis_wc             = 0;
+    public $standard_analysis_wc       = 0;
+    public $fast_analysis_wc_print     = "";
     public $standard_analysis_wc_print = "";
-    public $tm_analysis_wc_print = "";
-    public $raw_wc_time = 0;
-    public $fast_wc_time = 0;
-    public $tm_wc_time = 0;
-    public $standard_wc_time = 0;
-    public $fast_wc_unit = "";
-    public $tm_wc_unit = "";
-    public $raw_wc_unit = "";
-    public $standard_wc_unit = "";
-    public $jobs = array();
-    public $project_not_found = false;
-    public $project_status = "";
-    public $num_segments = 0;
-    public $num_segments_analyzed = 0;
+    public $tm_analysis_wc_print       = "";
+    public $raw_wc_time                = 0;
+    public $fast_wc_time               = 0;
+    public $tm_wc_time                 = 0;
+    public $standard_wc_time           = 0;
+    public $fast_wc_unit               = "";
+    public $tm_wc_unit                 = "";
+    public $raw_wc_unit                = "";
+    public $standard_wc_unit           = "";
+    public $jobs                       = array();
+    public $project_not_found          = false;
+    public $project_status             = "";
+    public $num_segments               = 0;
+    public $num_segments_analyzed      = 0;
     public $proj_payable_rates;
     public $subject;
 
@@ -43,9 +42,13 @@ class Analysis_AnalysisModel {
      */
     private $chunk;
 
-    public function __construct( Projects_ProjectStruct $project, Chunks_ChunkStruct $chunk=null) {
-        $this->chunk = $chunk ;
-        $this->project = $project ;
+    public function __construct( Projects_ProjectStruct $project, Chunks_ChunkStruct $chunk = null ) {
+        $this->chunk   = $chunk;
+        $this->project = $project;
+    }
+
+    public function getProject() {
+        return $this->project;
     }
 
     public function loadData() {
@@ -257,16 +260,13 @@ class Analysis_AnalysisModel {
     private function getProjectData() {
         if ( $this->chunk == null ) {
             $project_by_jobs_data = getProjectData( $this->project->id, $this->project->password );
-        }
-        else {
+        } else {
             $project_by_jobs_data = getProjectData( $this->project->id, $this->project->password,
                     $this->chunk->id, $this->chunk->password );
         }
-        return $project_by_jobs_data ;
+
+        return $project_by_jobs_data;
     }
-
-
-
 
 
 }

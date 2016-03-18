@@ -12,7 +12,7 @@ use Features\ReviewImproved\Model\QualityReportModel;
 use INIT;
 
 
-class QualityReportDecorator {
+class QualityReportDecorator extends \AbstractModelViewDecorator {
 
     /**
      * @var QualityReportModel

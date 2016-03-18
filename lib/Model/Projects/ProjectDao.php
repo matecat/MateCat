@@ -66,6 +66,25 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id
+     * @param $password
+     *
+     * @return Projects_ProjectStruct
+     * @throws \Exceptions\NotFoundError
+     */
+    static function findByIdAndPassword( $id, $password ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = ? AND password = ? ");
+        $stmt->execute( array( $id, $password ) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_ProjectStruct');
+        $fetched =  $stmt->fetch();
+        if ( !fetched ) {
+            throw new Exceptions\NotFoundError();
+        }
+        return $fetched;
+    }
+
+    /**
      * Returns uncompleted chunks by project ID. Requires 'is_review' to be passed
      * as a param to filter the query.
      *
