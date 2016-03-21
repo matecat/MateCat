@@ -194,7 +194,7 @@ $(document).ready(function() {
 							$('.uploadbtn').attr('value','Analyze').removeAttr('disabled').removeClass('disabled');
 
 						} else {
-							location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
+                            location.href = d.analyze_url ;
 						}
 
 					} else {

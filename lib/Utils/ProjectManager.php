@@ -615,7 +615,7 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
-
+        $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
 
         /*
          * This is the old code.
@@ -717,6 +717,19 @@ class ProjectManager {
         Features::run( 'postProjectCreate',
             $this->projectStructure['id_customer'],
             $this->projectStructure
+        );
+    }
+
+    /**
+     * @param $projectStructure
+     *
+     * @return string
+     */
+    private function analyzeURL() {
+        return Routes::analyze( array(
+            'project_name' => $this->projectStructure['project_name'],
+            'id_project' => $this->projectStructure['result']['id_project'],
+            'password' => $this->projectStructure['result']['ppassword'])
         );
     }
 

@@ -14,6 +14,13 @@ class Utils {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
     }
 
+	/**
+	 * @param $params
+	 * @param $required_keys
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
     public static function ensure_keys($params, $required_keys) {
         $missing = array();
 

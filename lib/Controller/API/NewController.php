@@ -632,17 +632,12 @@ class NewController extends ajaxController {
 
             $this->api_output[ 'new_keys' ] = $this->new_keys;
 
-            $this->api_output[ 'analyze_url' ] = $this->analyzeURL($projectStructure);
+            $this->api_output[ 'analyze_url' ] = $projectStructure[ 'result' ][ 'analyze_url' ];
         }
 
     }
 
-    private function analyzeURL($projectStructure) {
-        return INIT::$HTTPHOST . "/analyze/" .
-            $projectStructure[ 'project_name' ] . "/" .
-            $projectStructure[ 'result' ][ 'id_project' ] . "-" .
-            $projectStructure[ 'result' ][ 'ppassword' ];
-    }
+
 
     private function validateAuthHeader() {
         if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
