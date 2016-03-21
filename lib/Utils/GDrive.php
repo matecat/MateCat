@@ -20,19 +20,22 @@ class GDrive {
             case self::MIME_GOOGLE_SHEETS:
                 return self::MIME_XLSX;
         }
-        
-        return null;
+
+        return $googleMime;
     }
     
     public static function officeExtensionFromMime ( $googleMime ) {
         switch( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
+            case self::MIME_DOCX:
                 return '.docx';
 
             case self::MIME_GOOGLE_SLIDES:
+            case self::MIME_PPTX:
                 return '.pptx';
 
             case self::MIME_GOOGLE_SHEETS:
+            case self::MIME_XLSX:
                 return '.xlsx';
         }
         
