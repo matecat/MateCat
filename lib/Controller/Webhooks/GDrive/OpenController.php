@@ -59,7 +59,12 @@ class OpenController extends KleinController {
             $file = $service->files->get($fileId);
             $mime = \GDrive::officeMimeFromGoogle( $file->mimeType );
             $links = $file->getExportLinks() ;
-            $downloadUrl = $links[ $mime ];
+
+            if($links != null) {
+                $downloadUrl = $links[ $mime ];
+            } else {
+                $downloadUrl = $file->getDownloadUrl();
+            }
         }
         else {
             throw new Exception( " no ids or export ids found ");
