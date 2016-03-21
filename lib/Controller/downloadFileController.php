@@ -393,22 +393,37 @@ class downloadFileController extends downloadController {
         $client->setAccessToken( $token );
         $service = new Google_Service_Drive( $client );
 
-        $file = $service->files->get($fileId);
+        $gdriveFile = $service->files->get($fileId);
         // $mimeType = 'application/vnd.google-apps.presentation';
-        $mimeType = \GDrive::officeMimeFromGoogle( $file->mimeType );
-        $file->setMimeType( $mimeType );
-
+        $mimeType = \GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
+        $gdriveFile->setMimeType( $mimeType );
 
         $additionalParams = array(
             'mimeType' => $mimeType,
-            'newRevision' => FALSE,
             'data' => $content->getContent(),
             'uploadType' => 'media'
         );
 
-        $upload = $service->files->update( $fileId, $file, $additionalParams );
+        $jobFiles = Files_FileDao::getByJobId( $this->id_job );
+        if(count($jobFiles) > 0){
+            $dbFile = $jobFiles[0];
 
-        // Log::doLog( $upload );
+            if( $dbFile != null && property_exists($dbFile, 'translation_remote_id') && $dbFile->translation_remote_id != null ) {
+                $gdriveFile = $service->files->get( $dbFile->translation_remote_id );
+                $additionalParams['newRevision'] = FALSE;
+                $upload = $service->files->update( $dbFile->translation_remote_id, $gdriveFile, $additionalParams );
+            } else {
+                $dbJob = Jobs_JobDao::getById( $this->id_job );
+
+                $newGDriveFile = new Google_Service_Drive_DriveFile();
+                $newGDriveFile->setTitle($gdriveFile->title . ' - ' . $dbJob->target);
+                $additionalParams['convert'] = TRUE;
+                $upload = $service->files->insert( $newGDriveFile, $additionalParams );
+
+                Files_FileDao::updateField($dbFile, 'translation_remote_id', $upload->id);
+            }
+            // Log::doLog( $upload );
+        }
     }
 
     protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {

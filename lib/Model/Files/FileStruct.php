@@ -11,6 +11,7 @@ class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
   public $original_file ;
   public $segmentation_rule;
   public $remote_id;
+  public $translation_remote_id;
 
 
 }
