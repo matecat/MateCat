@@ -60,7 +60,7 @@ abstract class downloadController extends controller {
      *
      * @return string The zip binary
      */
-    protected static function composeZip( Array $output_content, $outputFile=null ) {
+    protected static function composeZip( Array $output_content, $outputFile=null , $isOriginalFile=false) {
         if(empty($outputFile)){
             $outputFile = tempnam("/tmp", "zipmatecat");
         }
@@ -77,7 +77,8 @@ abstract class downloadController extends controller {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
-            $fName = self::sanitizeFileExtension( $fName );
+            if($isOriginalFile!=true)
+                $fName = self::sanitizeFileExtension( $fName );
 
             $nFinfo = FilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
