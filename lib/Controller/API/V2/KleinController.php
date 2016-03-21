@@ -4,7 +4,7 @@ namespace API\V2 ;
 
 use Klein\Klein;
 
-abstract class KleinController {
+class KleinController {
 
     /**
      * @var \Klein\Request
@@ -30,6 +30,4 @@ abstract class KleinController {
     public function respond($method) {
         $this->$method() ;
     }
-
-    abstract function afterConstruct() ;
 }
