@@ -135,8 +135,8 @@ function getOutsourceQuote( clickedButton, callback ) {
     APP.doRequest({
         data: {
             action: 'outsourceTo',
-            pid: $('#pid').attr('data-pid'),
-            ppassword: $("#pid").attr("data-pwd"),
+            pid: config.id_project,
+            ppassword: config.password,
             fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
             typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
             jobs: [
@@ -397,8 +397,8 @@ function updateCartParameters() {
     APP.doRequest({
         data: {
             action: 'outsourceTo',
-            pid: $('#pid').attr('data-pid'),
-            ppassword: $("#pid").attr("data-pwd"),
+            pid: config.id_project,
+            ppassword: config.password,
             fixedDelivery: $( "#forceDeliveryChosenDate" ).text(),
             typeOfService: $( "input[name='revision']" ).is(":checked") ? "premium" : "professional",
             jobs: [

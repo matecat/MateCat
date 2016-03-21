@@ -35,6 +35,11 @@ class analyzeController extends viewController {
      */
     private $chunk ;
 
+    /**
+     * @var FeatureSet
+     */
+    private $features ;
+
     public function __construct() {
 
         parent::sessionStart();
@@ -72,6 +77,9 @@ class analyzeController extends viewController {
             $this->jpassword = null;
             $this->ppassword = $pass;
         }
+
+        $this->features = new FeatureSet();
+        $this->features->loadFromIdCustomer( $this->project->id_customer );
 
     }
 
@@ -114,7 +122,8 @@ class analyzeController extends viewController {
         $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
         $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->build_number               = INIT::$BUILD_NUMBER;
-        $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
+        $this->template->enable_outsource           = $this->features->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
+
         $this->template->outsource_service_login    = $this->_outsource_login_API;
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 

@@ -287,6 +287,13 @@ class FilesStorage {
 
     }
 
+    /**
+     * @param $projectDate
+     * @param $projectID
+     * @param $zipName
+     *
+     * @return string
+     */
     public function getOriginalZipPath( $projectDate, $projectID, $zipName ){
 
         $datePath = date_create( $projectDate )->format('Ymd');

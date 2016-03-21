@@ -78,7 +78,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $stmt->execute( array( $id, $password ) );
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_ProjectStruct');
         $fetched =  $stmt->fetch();
-        if ( !fetched ) {
+        if ( !$fetched) {
             throw new Exceptions\NotFoundError();
         }
         return $fetched;

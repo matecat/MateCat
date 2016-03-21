@@ -812,10 +812,12 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 
     getOutsourceQuote( $( elementsToAskQuoteFor.splice( 0, 1 ) ), function( quoteData ) {
         // remember whether outsource popup should be rendered compressed (0) or expanded (1)
-        UI.showPopupDetails = quoteData.data[0][0].show_info;
 
-        // recursively call self with the remaining elements ( Array.splice(0,1) has already reduced the size )
-        precomputeOutsourceQuotes( elementsToAskQuoteFor );
+        if ( quoteData.data )  {
+            UI.showPopupDetails = quoteData.data[0][0].show_info;
+            // recursively call self with the remaining elements ( Array.splice(0,1) has already reduced the size )
+            precomputeOutsourceQuotes( elementsToAskQuoteFor );
+        }
     });
 }
 

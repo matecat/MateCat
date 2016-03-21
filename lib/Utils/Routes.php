@@ -2,27 +2,31 @@
 
 class Routes {
 
-    public static function analyze( $params ) {
-        $params = Utils::ensure_keys($params,
-                array('project_name', 'id_project', 'password')
+    public static function analyze( $params, $options = array() ) {
+        $params = \Utils::ensure_keys( $params,
+                array( 'project_name', 'id_project', 'password' )
         );
 
-        return INIT::$HTTPHOST . "/analyze/" .
-            $params[ 'project_name' ] . "/" .
-            $params[ 'id_project' ] . "-" .
-            $params[ 'password' ];
+        $host = self::httpHost( $options );
+
+        return $host . "/analyze/" .
+        $params[ 'project_name' ] . "/" .
+        $params[ 'id_project' ] . "-" .
+        $params[ 'password' ];
     }
 
-    public static function translate( $params ) {
+    public static function httpHost( $params ) {
+        $host = INIT::$HTTPHOST;
 
-    }
+        if ( !empty( $params[ 'http_host' ] ) ) {
+            $host = $params[ 'http_host' ];
+        }
 
-    public static function manage( $params ) {
+        if ( empty( $host ) ) {
+            throw new Exception( 'HTTP_HOST is not set ' );
+        }
 
-    }
-
-    public static function revise( $params ) {
-
+        return $host;
     }
 
 }

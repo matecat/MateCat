@@ -48,7 +48,7 @@ class FeatureSet {
      * modified in cascade to the next function in the queue.
      */
     public function filter($method, $filterable) {
-        $args = array_slice( func_get_args(), 2);
+        $args = array_slice( func_get_args(), 1);
 
         foreach( $this->features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
