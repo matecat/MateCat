@@ -8,6 +8,7 @@
  */
 class Analysis_AnalysisModel {
 
+    public $pid ;
     public $pname                      = "";
     public $total_raw_word_count       = 0;
     public $total_raw_word_count_print = "";
@@ -56,6 +57,8 @@ class Analysis_AnalysisModel {
         $lang_handler = Langs_Languages::getInstance();
 
         $this->subject = $project_data[ 0 ][ 'subject' ];
+
+        $this->pid = $this->project->id ;
 
         foreach ( $project_data as &$p_jdata ) {
 

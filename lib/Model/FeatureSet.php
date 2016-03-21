@@ -32,7 +32,37 @@ class FeatureSet {
      */
     public function loadFromIdCustomer( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        array_merge( $this->features, $features );
+        $this->features = array_merge( $this->features, $features );
+    }
+
+    /**
+     * Returns the filtered subject variable passed to all enabled features.
+     *
+     * @param $method
+     * @param $id_customer
+     * @param $filterable
+     *
+     * @return mixed
+     *
+     * FIXME: this is not a real filter since the input params are not passed
+     * modified in cascade to the next function in the queue.
+     */
+    public function filter($method, $filterable) {
+        $args = array_slice( func_get_args(), 2);
+
+        foreach( $this->features as $feature ) {
+            $name = "Features\\" . $feature->toClassName() ;
+            // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
+            // here, so the feature initializer should not need the project strucutre at all.
+            // The `id_customer` should be enough. XXX
+            $obj = new $name( $feature );
+
+            if ( method_exists( $obj, $method ) ) {
+                $filterable = call_user_func_array( array( $obj, $method ), $args );
+            }
+        }
+
+        return $filterable ;
     }
 
     /**

@@ -63,7 +63,6 @@ class Features {
      * modified in cascade to the next function in the queue.
      */
     public static function filter($method, $id_customer, $filterable) {
-
         $args = array_slice( func_get_args(), 2);
 
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );

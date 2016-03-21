@@ -98,7 +98,7 @@ class analyzeController extends viewController {
         $this->template->total_raw_word_count_print = $this->model->total_raw_word_count_print;
         $this->template->pname                      = $this->model->pname;
         $this->template->pid                        = $this->model->pid;
-        $this->template->project_password           = $this->model->ppassword;
+        $this->template->project_password           = $this->ppassword;
         $this->template->fast_wc_time               = $this->model->fast_wc_time;
         $this->template->tm_wc_time                 = $this->model->tm_wc_time;
         $this->template->tm_wc_unit                 = $this->model->tm_wc_unit;

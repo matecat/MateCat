@@ -21,6 +21,11 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         return $this->getById( $conn->lastInsertId() );
     }
 
+    /**
+     * @param $id_customer
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct[]
+     */
     public static function getByIdCustomer( $id_customer ) {
         $conn = Database::obtain()->getConnection();
 
