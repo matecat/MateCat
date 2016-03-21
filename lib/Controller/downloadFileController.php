@@ -343,7 +343,7 @@ class downloadFileController extends downloadController {
                 $this->unlockToken(
                     array(
                             "code" => -110,
-                            "message" => "Download failed. Please contact " . INIT::$SUPPORT_MAIL
+                            "message" => "Download failed. Please, try again in 5 minutes. If it still fails, please, contact" . INIT::$SUPPORT_MAIL
                     )
                 );
                 throw $e; // avoid sent Headers and empty file content with finalize method
