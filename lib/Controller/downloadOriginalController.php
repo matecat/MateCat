@@ -97,7 +97,7 @@ class downloadOriginalController extends downloadController {
                     $this->_filename = $pathInfo[ 'basename' ] . ".zip";
                 }
 
-                $this->content = self::composeZip( $output_content ); //add zip archive content here;
+                $this->content = self::composeZip( $output_content,null,true ); //add zip archive content here;
 
             } elseif ( count( $output_content ) == 1 ) {
                 $this->setContent( $output_content );
