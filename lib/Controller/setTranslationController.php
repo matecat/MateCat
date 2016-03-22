@@ -405,7 +405,7 @@ class setTranslationController extends ajaxController {
             foreach ( $propagationTotal as $__pos => $old_value ) {
                 $counter->setOldStatus( $old_value[ 'status' ] );
                 $counter->setNewStatus( $this->status );
-                $newValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
+                $newValues[] = $counter->getUpdatedValues( $old_value[ 'countSeg' ]*$old_count );
             }
 
             try {

@@ -1195,7 +1195,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
     //if the new status to set is TRANSLATED,
     // sum the equivalent words of segments equals to me with the status different from MINE
     $queryTotals = "
-           SELECT SUM(eq_word_count) as total, status
+           SELECT SUM(eq_word_count) as total,COUNT(id_segment)as countSeg, status
            FROM segment_translations
            WHERE id_job = {$params['id_job']}
            AND segment_hash = '" . $params[ 'segment_hash' ] . "'
