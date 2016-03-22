@@ -84,6 +84,10 @@ class analyzeController extends viewController {
     }
 
     public function doAction() {
+        $this->features->run('beginDoAction', 'analyzeController', array(
+                'project' => $this->project
+        ));
+
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();
     }
