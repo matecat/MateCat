@@ -119,7 +119,7 @@ $.extend( UI, {
         numMatches = Object.size( d.data.matches );
         if ( numMatches ) {
             UI.renderGlossary( d, segment );
-            $( '.tab-switcher-gl a .number', segment ).text( '(' + numMatches + ')' ).attr( 'data-num', numMatches );
+            $( '.tab-switcher-gl a .number', segment ).text( ' (' + numMatches + ')' ).attr( 'data-num', numMatches );
         } else {
             $( '.tab-switcher-gl a .number', segment ).text( '' ).attr( 'data-num', 0 );
         }
