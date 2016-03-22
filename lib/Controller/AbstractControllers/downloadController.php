@@ -77,8 +77,9 @@ abstract class downloadController extends controller {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
-            if($isOriginalFile!=true)
+            if($isOriginalFile!=true) {
                 $fName = self::sanitizeFileExtension( $fName );
+            }
 
             $nFinfo = FilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
