@@ -12,7 +12,9 @@ class manageController extends viewController {
 	public $notAllCancelled = 0;
 
 	public function __construct() {
-		parent::__construct(true);
+		$isAuthRequired = true;
+		parent::__construct( $isAuthRequired );
+
 		parent::makeTemplate("manage.html");
 
         $filterArgs = array(
