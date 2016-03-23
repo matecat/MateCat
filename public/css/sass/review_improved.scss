@@ -542,3 +542,58 @@ table.review-issue-category-list {
     background: yellow;
 }
 
+
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+{
+/*visibility: hidden;*/
+text-indent: -10000px;
+display: inline-block;
+overflow: hidden;
+position: relative;
+margin: 0px 4px;
+width: 7px;
+height: 8px;
+padding-top: 0px;
+}
+
+
+body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
+body.rtl-target.tagModes .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+body.tagModes .locked.endTag
+{
+ -ms-transform: rotate(-180deg); /* IE 9 */
+    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
+    transform: rotate(-180deg);
+}
+body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+{
+ -ms-transform: rotate(0deg); /* IE 9 */
+    -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
+    transform: rotate(0deg);
+}
+
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag:before,
+{
+content: "\f04b";
+visibility: visible;
+position: absolute;
+font-size: 7px;
+transform: scaleY(1.4);
+ -webkit-transform: scaleY(1.4);
+ -ms-transform: scaleY(1.4);
+left: 10000px;
+}
+
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag:before,
+{
+content: "\e603";
+visibility: visible;
+position: absolute;
+font-size: 10px;
+top: -2px;
+left: 9999px;
+}

@@ -123,19 +123,16 @@ $.extend(UI, {
             return false;
         }
 
-		var editarea = (typeof el == 'undefined') ? UI.editarea : el;
-        el = (typeof el == 'undefined') ? UI.editarea : el;
+		var area = (typeof el == 'undefined') ? UI.editarea : el;
 
-        if (el != '') {
-            if (this.noTagsInSegment({
-                area: el,
-                starting: false
-            })) {
-                return false;
-            }
+        if (this.noTagsInSegment({
+            area: area,
+            starting: false
+        })) {
+            return false;
         }
 
-        $(editarea).first().each(function() {
+        $(area).first().each(function() {
             saveSelection();
             var tx = $(this).html();
             brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";

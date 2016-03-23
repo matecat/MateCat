@@ -3,6 +3,11 @@
 if ( ReviewImproved.enabled() ) {
 
     $(document).on('files:appended', function initReactComponents() {
+        // Lock tags
+        $('.errorTaggingArea').each(function() {
+             UI.lockTags(this);
+        });
+
         loadDataPromise.done(function() {
             $('section [data-mount=translation-issues-button]').each(function() {
                 ReactDOM.render( React.createElement( TranslationIssuesSideButton, {

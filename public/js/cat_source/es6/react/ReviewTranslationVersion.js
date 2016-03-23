@@ -33,6 +33,15 @@ export default React.createClass({
         return { __html :  this.props.trackChangesMarkup  };
     },
 
+    componentDidMount : function() {
+        var node = ReactDOM.findDOMNode( this.refs.highlightArea );
+        UI.lockTags( $( node ) );
+    },
+    componentDidUpdate : function( prevProps, prevState ) {
+        var node = ReactDOM.findDOMNode( this.refs.highlightArea );
+        UI.lockTags( $( node ) );
+    },
+
     render : function() {
         var cs = classnames({
             collapsed : this.state.collapsed,
@@ -68,7 +77,7 @@ export default React.createClass({
 
             <div className="collapsable">
 
-                <div className="muted-text-box" style={styleForVersionText}
+                <div ref="highlightArea" className="muted-text-box issueHighlightArea" style={styleForVersionText}
                 dangerouslySetInnerHTML={this.translationMarkup()} />
 
                 <div style={styleForTrackChanges}
