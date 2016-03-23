@@ -2130,12 +2130,16 @@ console.log('eccolo: ', typeof token);
                     showOnce: true,
                     expire: this.expire
                 });
+
                 return false;
             }
         });
 	},
 	showMessage: function(options) {
-		APP.showMessage(options);
+
+        APP.showMessage(options);
+        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+
 	},
 	checkVersion: function() {
 		if(this.version != config.build_number) {

@@ -241,7 +241,7 @@ class INIT {
                     'xltm' => array( '', '', 'extxls' ),
                     'ods'  => array( '', '', 'extxls' ),
                     'ots'  => array( '', '', 'extxls' ),
-                    'csv'  => array( '', '', 'extxls' ),
+                    //'csv'  => array( '', '', 'extxls' ),
                     'tsv'  => array( '', '', 'extxls' ),
                     'ppt'  => array( '', '', 'extppt' ),
                     'pps'  => array( '', '', 'extppt' ),
