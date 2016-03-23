@@ -76,7 +76,6 @@ class FeatureSet {
             $obj  = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
-                \Log::doLog( " calling $name, $method, with args " . var_export( $args, true ) );
                 call_user_func_array( array( $obj, $method ), $args );
             }
         }
