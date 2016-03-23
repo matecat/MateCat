@@ -7,19 +7,14 @@ $('html').on('copySourceToTarget', 'section', function() {
 });
 
 $.extend(UI, {
-/*
-    tagLockCustomize: function(e) {
-        e.preventDefault();
-        console.log('vediamo');
-    },
-*/
     noTagsInSegment: function(options) {
-        editarea = options.area;
-        starting = options.starting;
-        if(starting) return false;
+        var editarea = options.area;
+        var starting = options.starting;
+
+        if (starting) return false;
 
         try{
-            if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+            if ( $(editarea).html().match(/\&lt;.*?\&gt;/gi) ) {
                 return false;
             } else {
                 return true;
@@ -113,25 +108,25 @@ $.extend(UI, {
 		if (!this.taglockEnabled)
 			return false;
 		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
-		elements.each(function() {
-//			UI.lockTags(this);
-		});
 	},
 
-	// TAG LOCK
+    /**
+     * This function replaces tags with monads
+     */
 	lockTags: function(el) {
-		if (this.body.hasClass('tagmarkDisabled'))
+
+		if (this.body.hasClass('tagmarkDisabled')) {
 			return false;
-		editarea = (typeof el == 'undefined') ? UI.editarea : el;
+        }
+
+        if (!this.taglockEnabled) {
+            return false;
+        }
+
+		var editarea = (typeof el == 'undefined') ? UI.editarea : el;
         el = (typeof el == 'undefined') ? UI.editarea : el;
-//        console.log('typeof el: ', typeof el);
-		if (!this.taglockEnabled)
-			return false;
-//        console.log('this.noTagsInSegment(): ', this.noTagsInSegment());
-//		console.log('IL SEGMENTO: ', $('#segment-' + el.attr('data-sid')));
-//        console.log('devo interrompere il lockTags?: ', this.noTagsInSegment($(el).parents('section').first()));
-//        console.log('elemento: ', el);
-        if(el != '') {
+
+        if (el != '') {
             if (this.noTagsInSegment({
                 area: el,
                 starting: false
@@ -144,67 +139,51 @@ $.extend(UI, {
             saveSelection();
             var tx = $(this).html();
             brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-                   brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
-//			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
-//			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
-                   tx = tx.replace(/<span/gi, "<pl")
-                       .replace(/<\/span/gi, "</pl")
-                       .replace(/&lt;/gi, "<")
-                       .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
-                       .replace(/</gi, "&lt;")
-                       .replace(/\&lt;pl/gi, "<span")
-                       .replace(/\&lt;\/pl/gi, "</span")
-                       .replace(/\&lt;div\>/gi, "<div>")
-                       .replace(/\&lt;\/div\>/gi, "</div>")
-                       .replace(/\&lt;br\>/gi, "<br>")
-                       .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
-                       .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
+            brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+            tx = tx.replace(/<span/gi, "<pl")
+            .replace(/<\/span/gi, "</pl")
+            .replace(/&lt;/gi, "<")
+            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+            .replace(/</gi, "&lt;")
+            .replace(/\&lt;pl/gi, "<span")
+            .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;div\>/gi, "<div>")
+            .replace(/\&lt;\/div\>/gi, "</div>")
+            .replace(/\&lt;br\>/gi, "<br>")
+            .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
+            .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
-                   if (UI.isFirefox) {
-                       tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-//                tx = tx.replace(/(<span class="[^"]*" contenteditable="true"\>)(:?<span class="[^"]*" contenteditable="true"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-                   } else {
-                       tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-//                tx = tx.replace(/(<span contenteditable="true" class="[^"]*"\>)(:?<span contenteditable="true" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-                   }
+            if (UI.isFirefox) {
+                tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+            } else {
+                tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+            }
 
-//			if (UI.isFirefox) {
-//				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
-//				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
-//			} else {
-//				// fix nested encapsulation
-//				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
-//				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"true\" class=\"$2\">$3</span>");
-//			}
+            tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
+            tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 
-                   tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
-                   tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
-                   var prevNumTags = $('span.locked', this).length;
-                   $(this).html(tx);
-                   restoreSelection();
+            var prevNumTags = $('span.locked', this).length;
 
-                   if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+            $(this).html(tx);
 
-                   segment = $(this).parents('section');
+            restoreSelection();
 
-                   if($('span.locked', this).length) {
-                       segment.addClass('hasTags');
-                   } else {
-                       segment.removeClass('hasTags');
-                   }
-                   $('span.locked', this).addClass('monad');
-                   UI.detectTagType(this);
+            if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-//            UI.checkTagsInSegment();
-               });
+            var segment = $(this).parents('section');
 
+            if($('span.locked', this).length) {
+                segment.addClass('hasTags');
+            } else {
+                segment.removeClass('hasTags');
+            }
+            $('span.locked', this).addClass('monad');
+            UI.detectTagType(this);
+        });
+    },
 
-
-	},
     detectTagType: function (area) {
         $('span.locked', area).each(function () {
-//                console.log(segment.attr('id') + ' - ' + $(this).text());
-//                console.log($(this).text().startsWith('</'));
             if($(this).text().startsWith('</')) {
                 $(this).addClass('endTag')
             } else {

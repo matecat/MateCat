@@ -1356,14 +1356,7 @@ UI = {
                 });
 
                 $.each(splittedSourceAr, function (i) {
-//                    console.log('bbb: ', this);
-//                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
                     translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
-//                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
-//                    console.log('ddd: ', this);
-                    //temp
-                    //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
-                    //end temp
                     status = segment.target_chunk_lengths.statuses[i];
                     segData = {
                         autopropagated_from: "0",
@@ -1371,7 +1364,6 @@ UI = {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
-//                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
                         segment_hash: segment.segment_hash,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
@@ -2606,31 +2598,21 @@ console.log('eccolo: ', typeof token);
         return '.editarea';
     },
 
-    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
-        area = $( selector, context ).clone();
-        /*
-         console.log($(area).html());
-         var txt = this.fixBR($(area).html());
-         console.log(txt);
-         return txt;
-         */
+        var area = $( selector, context ).clone();
         var divs = $( area ).find( 'div' );
+
         if( divs.length ){
             divs.each(function(){
                 $(this).find( 'br:not([class])' ).remove();
                 $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
             });
         } else {
-//			console.log('post process 1: ', $(area).html());
-//			console.log($(area).find( 'br:not([class])' ).length);
             $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
             $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-
-//			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
-//			console.log('post process 2: ', $(area).html());
         }
 
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
@@ -2639,7 +2621,6 @@ console.log('eccolo: ', typeof token);
         $(area).find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
 
         return $(area).text();
-
     },
 
     /**
@@ -2663,7 +2644,6 @@ console.log('eccolo: ', typeof token);
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
 
-//		if(toLog) console.log('_str: ', _str);
 		return _str;
     },
 	encodeSpacesAsPlaceholders: function(str, root) {
