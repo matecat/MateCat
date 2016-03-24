@@ -187,11 +187,20 @@ $.extend(UI, {
 
                    segment = $(this).parents('section');
 
-                   if($('span.locked', this).length) {
-                       segment.addClass('hasTags');
-                   } else {
-                       segment.removeClass('hasTags');
-                   }
+            if ( UI.hasSourceOrTargetTags() ) {
+                UI.currentSegment.addClass( 'hasTagsToggle' );
+                segment.addClass( 'hasTags' );
+            } else {
+                UI.currentSegment.removeClass( 'hasTagsToggle' );
+                segment.removeClass( 'hasTags' );
+            }
+
+            if ( UI.hasMissingTargetTags() ) {
+                segment.addClass( 'hasTagsAutofill' );
+            } else {
+                segment.removeClass( 'hasTagsAutofill' );
+            }
+
                    $('span.locked', this).addClass('monad');
                    UI.detectTagType(this);
 
@@ -683,6 +692,27 @@ $.extend(UI, {
         }
 
 	},
+
+    hasSourceOrTargetTags: function () {
+
+        return ( UI.editarea.find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
+    }
+
+    ,
+
+    hasMissingTargetTags: function () {
+
+        var sourceTags = $( '.source', UI.currentSegment ).html()
+                .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        var targetTags = $( '.target', UI.currentSegment ).html()
+                .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        return ( $( sourceTags ).not( targetTags ).length > 0 )
+
+
+    }
+
 
 });
 

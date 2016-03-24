@@ -1240,10 +1240,24 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
-            if(!UI.editarea.find('.locked').length) {
-                UI.currentSegment.removeClass('hasTags');
+
+
+            if ( UI.hasSourceOrTargetTags() ) {
+                UI.currentSegment.addClass( 'hasTagsToggle' );
+                segment.addClass( 'hasTags' );
+            } else {
+                UI.currentSegment.removeClass( 'hasTagsToggle' );
+                segment.removeClass( 'hasTags' );
             }
-/*
+
+            if ( UI.hasMissingTargetTags() ) {
+                segment.addClass( 'hasTagsAutofill' );
+            } else {
+                segment.removeClass( 'hasTagsAutofill' );
+            }
+
+
+			/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);

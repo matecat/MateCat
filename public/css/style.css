@@ -3428,8 +3428,9 @@ margin-left: 5px;
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
-body.tagModes .editor.hasTags .toolbar .tagModeToggle ,
-body.tagModes .editor.hasTags .toolbar .autofillTag  {
+
+body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
+body.tagModes .editor.hasTagsAutofill .toolbar .autofillTag  {
     display: block;
 }
 
