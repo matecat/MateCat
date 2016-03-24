@@ -151,22 +151,42 @@ class glossaryController extends ajaxController {
          *
          */
         if ( $this->automatic ) {
-            $tmp_Result = array();
+            $tmp_result = array();
             foreach ( $TMS_RESULT as $k => $val ) {
                 if ( ( $res = mb_stripos( $this->segment, preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $k ) ) ) === false ) {
                     unset( $TMS_RESULT[ $k ] );
                 } else {
-                    $tmp_Result[ $k ] = $res;
+                    $tmp_result[ $k ] = $res;
                 }
+
+
             }
-            asort( $tmp_Result );
-            $tmp_Result = array_keys( $tmp_Result );
+            asort( $tmp_result );
+            $tmp_result = array_keys( $tmp_result );
 
             $ordered_Result = array();
-            foreach ( $tmp_Result as $glossary_matches ) {
+            foreach ( $tmp_result as $glossary_matches ) {
                 $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
             }
             $TMS_RESULT = $ordered_Result;
+        }
+
+        //check if user is logged. If so, get the uid.
+        $this->checkLogin();
+        $uid = null;
+        if($this->userIsLogged){
+            $uid = $this->uid;
+        }
+
+        foreach($TMS_RESULT as $k => $glossaryMatch){
+
+            $TMS_RESULT[$k][0]['last_updated_by'] = Utils::changeMemorySuggestionSource(
+                    $glossaryMatch[0],
+                    $this->job_info['tm_keys'],
+                    $this->job_info['owner'],
+                    $uid);
+
+            $TMS_RESULT[$k][0]['created_by'] = $TMS_RESULT[$k][0]['last_updated_by'];
         }
         $this->result[ 'data' ][ 'matches' ] = $TMS_RESULT;
 
@@ -382,5 +402,4 @@ class glossaryController extends ajaxController {
         $this->result[ 'data' ] = ( $set_successful ? 'OK' : null );
 
     }
-
 }

@@ -3,6 +3,11 @@
 if ( ReviewImproved.enabled() ) {
 
     $(document).on('files:appended', function initReactComponents() {
+        // Lock tags
+        $('.errorTaggingArea').each(function() {
+             UI.lockTags(this);
+        });
+
         loadDataPromise.done(function() {
             $('section [data-mount=translation-issues-button]').each(function() {
                 ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
@@ -28,6 +33,9 @@ if ( ReviewImproved.enabled() ) {
         putSegmentsInStore( data );
     });
 
+    $(document).on('segment-filter:filter-data:load', function() {
+        ReviewImproved.closePanel();
+    });
 
     var updateLocalTranslationVersions = function( data ) {
         $(data.versions).each(function() {
@@ -61,10 +69,6 @@ if ( ReviewImproved.enabled() ) {
         );
     })();
 
-    $(window).on('segmentClosed', function( e ) {
-        // ReviewImproved.closePanel();
-    });
-
     $( document ).on( 'keydown', function ( e ) {
         var esc = '27' ;
         if ( e.which == esc ) {
@@ -74,9 +78,19 @@ if ( ReviewImproved.enabled() ) {
         }
     });
 
-    $(document).on('click', function( e ) {
-        if (e.target.closest('.modal, section, #review-side-panel') == null) {
+    $(document).on('editingSegment:change', function(e, data) {
+        if ( data.segment == null ) {
             ReviewImproved.closePanel();
+        }
+    });
+
+    $(document).on('click', function( e ) {
+        if (e.target.closest('body') == null ) {
+            // it's a detatched element, likely the APPROVE button.
+            return ;
+        }
+        if (e.target.closest('header, .modal, section, #review-side-panel') == null) {
+            ReviewImproved.closePanel( );
         }
     });
 

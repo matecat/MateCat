@@ -1,5 +1,14 @@
 <?php
 
+
+/**
+ * Class Features
+ *
+ * This class should be replaced by FeatureSet, which will be capable
+ * to work with owner based features and environment based features.
+ *
+ *
+ */
 class Features {
     const PROJECT_COMPLETION = 'project_completion' ;
     const TRANSLATION_VERSIONS = 'translation_versions'  ;
@@ -10,6 +19,7 @@ class Features {
         Features::TRANSLATION_VERSIONS,
         Features::REVIEW_IMPROVED
     );
+
 
     /**
      * appendDecorators
@@ -53,7 +63,6 @@ class Features {
      * modified in cascade to the next function in the queue.
      */
     public static function filter($method, $id_customer, $filterable) {
-
         $args = array_slice( func_get_args(), 2);
 
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );

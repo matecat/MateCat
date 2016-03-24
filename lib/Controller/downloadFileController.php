@@ -217,11 +217,11 @@ class downloadFileController extends downloadController {
 
                 }
 
-                $convertResult              = Filters::xliffToTarget($files_to_be_converted);
+                $convertResult = Filters::xliffToTarget($files_to_be_converted);
 
-                foreach ( array_keys( $files_to_be_converted ) as $fileID ) {
+                foreach ( array_keys( $files_to_be_converted ) as $pos => $fileID ) {
 
-                    Filters::logConversionToTarget($convertResult[$fileID], $outputPath, $jobData, $file);
+                    Filters::logConversionToTarget($convertResult[ $fileID ], $files_to_be_converted[ $fileID ][ 'out_xliff_name' ], $jobData, $chunk[ $pos ] );
 
                     $output_content[ $fileID ][ 'document_content' ] = $this->ifGlobalSightXliffRemoveTargetMarks( $convertResult[ $fileID ] [ 'document_content' ], $files_to_be_converted[ $fileID ][ 'output_filename' ] );
 
@@ -351,7 +351,7 @@ class downloadFileController extends downloadController {
                 $this->unlockToken(
                     array(
                             "code" => -110,
-                            "message" => "Download failed. Please contact " . INIT::$SUPPORT_MAIL
+                            "message" => "Download failed. Please, try again in 5 minutes. If it still fails, please, contact " . INIT::$SUPPORT_MAIL
                     )
                 );
                 throw $e; // avoid sent Headers and empty file content with finalize method

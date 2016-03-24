@@ -27,18 +27,19 @@
     <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
+    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
+
 </head>
 
 
 <body>
-<div tal:condition="true:project_not_found" metal:use-macro="unsupported_browser.html/project_not_found"/>
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
     </div>
 </header>
 
-<content tal:condition="not:project_not_found">
+
 <div class="loadingbar">
 
     <div class="wrapper" id="shortloading">
@@ -236,7 +237,7 @@
                         <thead>
                         <tr>
                             <th></th>
-                            <th>Payable</th>
+                            <th tal:condition="enable_outsource" >Payable</th>
                             <th>Total</th>
                             <th class="new" width="100">New</th>
                             <th class="repetition">Repetition</th>
@@ -433,7 +434,6 @@
 <!-- END DIV POPUP-SPLIT -->
 
 
-</content>
 
 <footer>
     <div class="wrapper">

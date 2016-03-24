@@ -130,7 +130,12 @@ class NewController extends ajaxController {
 
         $this->project_name = $__postInput[ 'project_name' ];
         $this->source_lang  = $__postInput[ 'source_lang' ];
-        $this->target_lang  = $__postInput[ 'target_lang' ];
+
+        $langTarget = explode( ',', $__postInput[ 'target_lang' ] );
+        $langTarget = array_map('trim',$langTarget);
+        $langTarget = array_unique($langTarget);
+        $this->target_lang = implode( ',', $langTarget );
+
         $this->tms_engine   = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
         $this->mt_engine    = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
         $this->seg_rule     = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
@@ -627,13 +632,12 @@ class NewController extends ajaxController {
 
             $this->api_output[ 'new_keys' ] = $this->new_keys;
 
-            $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
-                    $projectStructure[ 'project_name' ] . "/" .
-                    $projectStructure[ 'result' ][ 'id_project' ] . "-" .
-                    $projectStructure[ 'result' ][ 'ppassword' ];
+            $this->api_output[ 'analyze_url' ] = $projectStructure[ 'result' ][ 'analyze_url' ];
         }
 
     }
+
+
 
     private function validateAuthHeader() {
         if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {

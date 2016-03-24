@@ -63,6 +63,7 @@
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
+                searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
                 isGDriveProject : ${isGDriveProject|string:false}
             };
 
@@ -185,8 +186,9 @@
         <h1>
 
         </h1>
+        <div data-mount="review-side-panel"></div>
+
         <div id="outer">
-          <div data-mount="review-side-panel"></div>
 
        	</div>
 
@@ -233,8 +235,6 @@
     </div>
 </div>
 
-
-
         <footer>
             <a href="#" id="settingsSwitcher" title="Settings"></a>
             <div class="wrapper">
@@ -259,7 +259,7 @@
                                     href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>
 
-                        <li><a id="edit_log_link" tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="${editLogClass}" title="vediamo"><span>Editing Log</span></a></li>
+                        <li><a id="edit_log_link" tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="${editLogClass}"><span>Editing Log</span></a></li>
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 

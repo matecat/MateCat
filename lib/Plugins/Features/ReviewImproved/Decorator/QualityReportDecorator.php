@@ -12,12 +12,12 @@ use Features\ReviewImproved\Model\QualityReportModel;
 use INIT;
 
 
-class QualityReportDecorator {
+class QualityReportDecorator extends \AbstractModelViewDecorator {
 
     /**
      * @var QualityReportModel
      */
-    private $model;
+    protected $model;
 
     private $download_uri ;
 
@@ -29,7 +29,10 @@ class QualityReportDecorator {
         $this->download_uri = $uri ;
     }
 
-    public function decorate( \PHPTAL $template ) {
+    /**
+     * @param $template \PHPTAL
+     */
+    public function decorate( $template ) {
         $template->current_date = strftime('%c', strtotime('now')) ;
 
         $template->basepath     = INIT::$BASEURL;

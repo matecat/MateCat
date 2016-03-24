@@ -65,9 +65,23 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
        return $stmt->fetch();
     }
 
-    static function getFilesByProjectId( $id_project ) {
+    /**
+     * @param $id
+     * @param $password
+     *
+     * @return Projects_ProjectStruct
+     * @throws \Exceptions\NotFoundError
+     */
+    static function findByIdAndPassword( $id, $password ) {
         $conn = Database::obtain()->getConnection();
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
+        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = ? AND password = ? ");
+        $stmt->execute( array( $id, $password ) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_ProjectStruct');
+        $fetched =  $stmt->fetch();
+        if ( !$fetched) {
+            throw new Exceptions\NotFoundError();
+        }
+        return $fetched;
     }
 
     /**

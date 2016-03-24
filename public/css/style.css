@@ -1919,9 +1919,7 @@ body.rtl-target .editor .editarea span
 
 .search-editarea{overflow: auto;min-height:22px !important;cursor:text}
 
-textarea, input, .editarea, .search-editarea, select  {
-	outline: none !important
-}
+
 .source
 {
     position:relative;

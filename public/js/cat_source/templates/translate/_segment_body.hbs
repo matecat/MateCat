@@ -1,5 +1,6 @@
 <div class="body">
-  <div class="header toggle" id="segment-{{segment.sid}}-header"></div>
+  <div class="header toggle" id="segment-{{segment.sid}}-header">
+  </div>
   <div class="text">
     <div class="wrap">
       <div class="outersource">
@@ -11,10 +12,15 @@
           <p>ALT+CTRL+I</p>
         </div>
         <div class="target item" id="segment-{{segment.sid}}-target">
-          {{> translate/_text_area_container}}
+          <span class="hide toggle">
+            <!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->
+          </span>
+
+          {{> translate/_text_area_container }}
+
+           <!-- .textarea-container -->
           <ul class="buttons toggle" data-mount="main-buttons" id="segment-{{segment.sid}}-buttons"></ul>
         </div> <!-- .target -->
-
       </div>
     </div> <!-- .wrap -->
     <div class="status-container">

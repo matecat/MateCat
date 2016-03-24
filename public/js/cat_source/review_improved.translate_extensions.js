@@ -8,6 +8,9 @@ if ( ReviewImproved.enabled() && !config.isReview)
     };
 
     $.extend(UI, {
+        showRevisionStatuses : function() {
+            return false;
+        },
         cleanupLegacyButtons : function( segment ) {
             var buttonsOb = $('#segment-' + segment.id + '-buttons');
             buttonsOb.empty();

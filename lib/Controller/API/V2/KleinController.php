@@ -4,7 +4,7 @@ namespace API\V2 ;
 
 use Klein\Klein;
 
-abstract class KleinController {
+class KleinController {
 
     /**
      * @var \Klein\Request

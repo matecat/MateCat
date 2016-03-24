@@ -29,10 +29,6 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $this->getByUid( $conn->lastInsertId() );
     }
 
-    /**
-     * getByUid 
-     *
-     */ 
     public function getByUid( $id ) {
         $conn = $this->con->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE uid = ?");

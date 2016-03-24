@@ -25,6 +25,8 @@ class CatDecorator {
       $this->template->header_main_button_label = $this->getHeaderMainButtonLabel();
       $this->template->header_main_button_id = 'downloadProject';
 
+      $this->template->segmentFilterEnabled = false;
+
 
       $this->template->status_labels = json_encode( $this->getStatusLabels() );
 
@@ -38,13 +40,7 @@ class CatDecorator {
       $this->template->searchable_statuses = $this->searchableStatuses();
       $this->template->project_type = null;
 
-      Features::appendDecorators(
-          $this->job->getProject()->id_customer,
-          'CatDecorator',
-          $this->controller,
-          $this->template,
-          array('project' => $this->job->getProject())
-      );
+
   }
 
     /**

@@ -60,6 +60,7 @@ export default React.createClass({
 
     render : function() {
         var categoryComponents = []; 
+        var withSeverities = 0;
         
         this.issueCategories().forEach(function(category, i) {
             var selectedValue = "";
@@ -70,15 +71,23 @@ export default React.createClass({
 
             var k = 'category-selector-' + i ;
 
+            if (category.severities != null) {
+                withSeverities++ ;
+            }
+
             categoryComponents.push(
                 <ReviewIssueCategorySelector 
                     key={k}
+                    focus={withSeverities == 1}
                     severitySelected={this.severitySelected} 
                     selectedValue={selectedValue}
                     nested={false} category={category} />);
 
             if ( category.subcategories.length > 0 ) {
                 category.subcategories.forEach( function(category, ii) {
+                    if (category.severities != null) {
+                        withSeverities++ ;
+                    }
                     var key = '' + i + '-' + ii;
                     var kk = 'category-selector-' + key ;
                     var selectedValue = "";
@@ -90,9 +99,11 @@ export default React.createClass({
                     categoryComponents.push(
                         <ReviewIssueCategorySelector 
                             key={kk}
+                            focus={withSeverities == 1}
                             selectedValue={selectedValue}
                             severitySelected={this.severitySelected}
-                            nested={true} category={category}  />
+                            nested={true}
+                            category={category}  />
                     );
                 }.bind(this) ); 
             }
@@ -103,10 +114,10 @@ export default React.createClass({
         return <div className="review-issue-selection-panel">
 
         <h3>Error selection</h3> 
+       
+
+        <p>You selected "<span className="error-selection-highlight">{this.props.selection.selected_string}</span>" from segment {this.props.sid}</p>
         <h4>Select issue type</h4>
-
-        <p>You selected "{this.props.selection.selected_string}" from segment {this.props.sid}</p>
-
         <table className="review-issue-category-list">
         <tbody>
             {categoryComponents}
@@ -121,8 +132,8 @@ export default React.createClass({
                 />
 
             <div className="review-issue-buttons-right">
-                <a onClick={this.sendClick} 
-                    className={this.buttonClasses()} >{buttonLabel}</a>
+                <button onClick={this.sendClick}
+                    className={this.buttonClasses()}>{buttonLabel}</button>
             </div>
         </div>
         </div> 

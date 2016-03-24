@@ -787,7 +787,7 @@
                 /* END Editing */
             },
             complete: function ( e, data ) {
-                if ( !conversionFailed ) {
+                if ( conversionFailed == false || JSON.stringify(conversionFailed) === JSON.stringify({}) ) {
                     console.log( 'completed!!!' );
                     var result = e.responseJSON; //JSON.parse( data.result );
                     saveAs( b64toBlob( result.fileContent ), result.fileName );

@@ -77,9 +77,10 @@ class QualityReportModel {
         $this->quality_report_structure = array(
                 'chunk'   => array(
                         'review' => array(
-                                'percentage' => $this->getChunkReview()->getReviewedPercentage(),
-                                'is_pass'    => !!$this->getChunkReview()->is_pass,
-                                'score'      => $this->getChunkReview()->score
+                                'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
+                                'is_pass'       => !!$this->getChunkReview()->is_pass,
+                                'score'         => $this->getChunkReview()->score,
+                                'reviewer_name' => $this->getReviewerName()
                         ),
                         'files'  => array()
                 ),
@@ -103,6 +104,24 @@ class QualityReportModel {
 
     }
 
+    /**
+     * @return string
+     */
+    private function getReviewerName() {
+        $completion_event = \Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                $this->chunk, array( 'is_review' => true )
+        );
+        $name             = '';
+
+        if ( $completion_event[ 'uid' ] != null ) {
+            $userDao = new \Users_UserDao( \Database::obtain() );
+            $user    = $userDao->getByUid( $completion_event[ 'uid' ] );
+            $name    = $user->fullName();
+        }
+
+        return $name;
+    }
+
     public function getAllSegments() {
         return $this->all_segments;
     }
@@ -113,8 +132,6 @@ class QualityReportModel {
         $current_issue_id   = null;
 
         foreach ( $records as $record ) {
-
-            \Log::doLog( $record );
 
             if ( $current_file_id != $record[ 'file_id' ] ) {
                 $this->structureNestFile( $record );
@@ -137,16 +154,23 @@ class QualityReportModel {
             $current_issue_id   = $record[ 'issue_id' ];
         }
 
-        Log::doLog( $this->quality_report_structure );
     }
 
     private function structureNestSegment( $record ) {
+        if ( $record['original_translation'] == null ) {
+            $original_translation = $record['translation'];
+        }
+        else {
+            $original_translation = $record['original_translation'];
+        }
+
         $this->current_segment = new ArrayObject( array(
-                'original_translation' => $record[ 'original_translation' ],
+                'original_translation' => $original_translation,
                 'translation'          => $record[ 'translation' ],
                 'id'                   => $record[ 'segment_id' ],
                 'source'               => $record[ 'segment_source' ],
                 'status'               => $record[ 'translation_status' ],
+                'edit_distance'        => round( $record[ 'edit_distance' ] / 1000, 2 ),
                 'issues'               => array()
         ) );
 

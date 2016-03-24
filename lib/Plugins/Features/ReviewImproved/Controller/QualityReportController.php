@@ -49,7 +49,6 @@ class QualityReportController {
     public function respond() {
         $model = $this->getModel() ;
 
-
         $decorator = new QualityReportDecorator( $model );
 
         $decorator->setDownloadURI( $this->downloadURI() );

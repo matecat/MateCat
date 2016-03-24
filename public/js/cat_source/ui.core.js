@@ -4,6 +4,24 @@
 UI = null;
 
 UI = {
+
+    setEditingSegment : function(segment) {
+        if ( segment != null ) {
+            UI.body.addClass('editing');
+            console.debug('editing addClass');
+        } else {
+            UI.body.removeClass('editing');
+            console.debug('editing removeClass');
+        }
+
+        UI._editingSegment = segment ;
+        $(document).trigger('editingSegment:change', {segment: segment});
+    },
+
+    get editingSegment() {
+        return UI._editingSegment ;
+    },
+
     statusHandleTitleAttr : function( status ) {
         status = status.toUpperCase();
         return config.status_labels[ status ] + ', click to change it';
@@ -231,12 +249,12 @@ UI = {
 			this.body.addClass('justdone');
 		}
 	},
-    closeSegment: function(segment, byButton, operation) {
-        console.log('CLOSE SEGMENT');
 
-		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
-			this.toSegment = undefined;
+    closeSegment: function(segment, byButton, operation) {
+		if ( typeof segment == 'undefined' ) {
+
 			return true;
+
 		} else {
             this.autoSave = false;
 
@@ -261,7 +279,8 @@ UI = {
 
             this.lastOpenedEditarea.attr('contenteditable', 'false');
 
-            this.body.removeClass('editing');
+            // this.body.removeClass('editing');
+
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
             if (!this.opening) {
@@ -282,18 +301,19 @@ UI = {
 	},
     copySource: function() {
         var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
-//		var source_val = $.trim($(".source", this.currentSegment).text());
+
         // Test
         //source_val = source_val.replace(/&quot;/g,'"');
 
-        // Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
+        // Attention I use .text to obtain a entity conversion,
+        // by I ignore the quote conversion done before adding to the data-original
         // I hope it still works.
 
         this.saveInUndoStack('copysource');
         $(".editarea", this.currentSegment).html(source_val).keyup().focus();
-//		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
+
         this.saveInUndoStack('copysource');
-//		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
+
         this.highlightEditarea();
 
         this.currentSegmentQA();
@@ -704,16 +724,7 @@ UI = {
     nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = this.getSegmentId($('section').last());
-//		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
-//            var start = new Date().getTime();
-//            for (var i = 0; i < 1e7; i++) {
-//                if ((new Date().getTime() - start) > 2000 ){
-//                    break;
-//                }
-//            }
-
-			//controlla che il segmento non sia nell'area visualizzata?
 			if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
 				found = parseInt(this);
 				return false;
@@ -834,17 +845,35 @@ UI = {
 	},
 
     /**
+     * selectorForNextUntranslatedSegment
+     *
+     * Defines the css selectors to be used to determine the next
+     * segment to open.
+     */
+    selectorForNextUntranslatedSegment : function(status, section) {
+        var selector = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
+        return selector ;
+    },
+
+    /**
+     * selectorForNextSegment
+     */
+    selectorForNextSegment : function() {
+        return 'section';
+    },
+
+    /**
      * evalNextSegment
      *
      * Evaluates the next segment and populates this.nextSegmentId ;
      *
      */
     evalNextSegment: function( section, status ) {
-		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
-		var n = $(section).nextAll(rules).first();
+        var selector = UI.selectorForNextUntranslatedSegment( status, section );
+		var n = $(section).nextAll(selector).first();
 
 		if (!n.length) {
-			n = $(section).parents('article').next().find(rules).first();
+			n = $(section).parents('article').next().find(selector).first();
 		}
 
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
@@ -855,7 +884,7 @@ UI = {
         var i = $(section).next();
 
         if (!i.length) {
-			i = $(section).parents('article').next().find('section').first();
+			i = $(section).parents('article').next().find( UI.selectorForNextSegment() ).first();
 		}
 		if (i.length) {
 			this.nextSegmentId = this.getSegmentId($(i));
@@ -946,10 +975,10 @@ UI = {
 				this.scrollSegment($('#segment-' + options.segmentToScroll));
 			}
 			if (options.segmentToOpen) {
-				$('#segment-' + options.segmentToOpen + ' .editarea').click();
+				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
 			}
 
-			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
+			if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
 				UI.openSegment(UI.editarea);
 			}
 			if (options.caller == 'link2file') {
@@ -1033,25 +1062,28 @@ UI = {
 		});
 	},
 	test: function(params) {
-		console.log('params: ', params);
-		console.log('giusto');
+        // TODO: remove thi function once we know who's calling it.
+        console.warn('This function does nothing and should be removed.');
 	},
 	gotoNextSegment: function() {
-		var next = $('.editor').next();
+        var selector = UI.selectorForNextSegment() ;
+		var next = $('.editor').nextAll( selector  ).first();
+
 		if (next.is('section')) {
-			this.scrollSegment(next);
+			UI.scrollSegment(next);
 			$(UI.targetContainerSelector(), next).trigger("click", "moving");
 		} else {
-			next = this.currentFile.next().find('section:first');
+			next = UI.currentFile.next().find( selector ).first();
 			if (next.length) {
-				this.scrollSegment(next);
+				UI.scrollSegment(next);
 				$(UI.targetContainerSelector(), next).trigger("click", "moving");
 			} else {
                 UI.closeSegment(UI.currentSegment, 1, 'save');
             }
 		}
 	},
-	gotoNextUntranslatedSegment: function() {console.log('gotoNextUntranslatedSegment');
+	gotoNextUntranslatedSegment: function() {
+        console.log('gotoNextUntranslatedSegment');
 		if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
 			if (!UI.nextUntranslatedSegmentId) {
 				UI.closeSegment(UI.currentSegment);
@@ -1059,7 +1091,8 @@ UI = {
 				UI.reloadWarning();
 			}
 		} else {
-			$("#segment-" + UI.nextUntranslatedSegmentId + " " + UI.targetContainerSelector() ).trigger("click");
+			$("#segment-" + UI.nextUntranslatedSegmentId +
+                " " + UI.targetContainerSelector() ).trigger("click");
 		}
 	},
 
@@ -1067,7 +1100,7 @@ UI = {
         quick = quick || false;
 
         if ($('#segment-' + this.currentSegmentId).length) {
-			this.scrollSegment(this.currentSegment, false, quick);
+			UI.scrollSegment(this.currentSegment, false, quick);
 		} else {
 			$('#outer').empty();
 			this.render({
@@ -1081,19 +1114,20 @@ UI = {
 		});
 	},
 	gotoPreviousSegment: function() {
-		var prev = $('.editor').prev();
+        var selector = UI.selectorForNextSegment() ;
+		var prev = $('.editor').prevAll( selector ).first();
 		if (prev.is('section')) {
 			$(UI.targetContainerSelector(), prev).click();
 		} else {
-			prev = $('.editor').parents('article').prev().find('section:last');
+			prev = $('.editor').parents('article').prevAll( selector ).first();
 			if (prev.length) {
 				$(UI.targetContainerSelector() , prev).click();
 			} else {
-				this.topReached();
+				UI.topReached();
 			}
 		}
 		if (prev.length)
-			this.scrollSegment(prev);
+			UI.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
         if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
@@ -1322,14 +1356,7 @@ UI = {
                 });
 
                 $.each(splittedSourceAr, function (i) {
-//                    console.log('bbb: ', this);
-//                    console.log('source?: ', segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]));
                     translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
-//                    translation = (segment.translation == '')? '' : segment.translation.substring(segment.split_points_target[i], segment.split_points_target[i+1]);
-//                    console.log('ddd: ', this);
-                    //temp
-                    //segment.target_chunk_lengths = {"len":[0,9,13],"statuses":["TRANSLATED","APPROVED"]};
-                    //end temp
                     status = segment.target_chunk_lengths.statuses[i];
                     segData = {
                         autopropagated_from: "0",
@@ -1337,7 +1364,6 @@ UI = {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
-//                        segment: segment.segment.substring(segment.split_points_source[i], segment.split_points_source[i+1]),
                         segment_hash: segment.segment_hash,
                         sid: segment.sid + '-' + (i + 1),
                         split_group: splitGroup,
@@ -2118,12 +2144,16 @@ console.log('eccolo: ', typeof token);
                     showOnce: true,
                     expire: this.expire
                 });
+
                 return false;
             }
         });
 	},
 	showMessage: function(options) {
-		APP.showMessage(options);
+
+        APP.showMessage(options);
+        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+
 	},
 	checkVersion: function() {
 		if(this.version != config.build_number) {
@@ -2590,31 +2620,21 @@ console.log('eccolo: ', typeof token);
         return '.editarea';
     },
 
-    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
-        area = $( selector, context ).clone();
-        /*
-         console.log($(area).html());
-         var txt = this.fixBR($(area).html());
-         console.log(txt);
-         return txt;
-         */
+        var area = $( selector, context ).clone();
         var divs = $( area ).find( 'div' );
+
         if( divs.length ){
             divs.each(function(){
                 $(this).find( 'br:not([class])' ).remove();
                 $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
             });
         } else {
-//			console.log('post process 1: ', $(area).html());
-//			console.log($(area).find( 'br:not([class])' ).length);
             $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
             $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-
-//			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
-//			console.log('post process 2: ', $(area).html());
         }
 
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
@@ -2623,7 +2643,6 @@ console.log('eccolo: ', typeof token);
         $(area).find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
 
         return $(area).text();
-
     },
 
     /**
@@ -2647,7 +2666,6 @@ console.log('eccolo: ', typeof token);
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
 
-//		if(toLog) console.log('_str: ', _str);
 		return _str;
     },
 	encodeSpacesAsPlaceholders: function(str, root) {
@@ -3079,6 +3097,75 @@ console.log('eccolo: ', typeof token);
         $('#outer').empty();
         this.start();
     },
+
+
+    /**
+     * Edit area click
+     *
+     * This function can be extended in order for other modules
+     * to change the behaviour of segment activation.
+     *
+     * TODO: .editarea class is bound to presentation and logic
+     * and should be decoupled in future refactorings.
+     *
+     */
+    editAreaClick : function(e, operation, action) {
+
+        if (typeof operation == 'undefined') {
+            operation = 'clicking';
+        }
+
+        UI.saveInUndoStack('click');
+        this.onclickEditarea = new Date();
+
+        UI.notYetOpened = false;
+        UI.closeTagAutocompletePanel();
+        UI.removeHighlightCorrespondingTags();
+
+        if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+            if (operation == 'moving') {
+                if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
+                    UI.segmentToOpen = segment;
+                    UI.blockOpenSegment = true;
+
+                    console.log('ctrl+down troppo vicini');
+                } else {
+                    UI.blockOpenSegment = false;
+                }
+
+                UI.recentMoving = true;
+                clearTimeout(UI.recentMovingTimeout);
+                UI.recentMovingTimeout = setTimeout(function() {
+                    UI.recentMoving = false;
+                }, 1000);
+
+            } else {
+                UI.blockOpenSegment = false;
+            }
+            UI.lastOperation = operation;
+
+            UI.openSegment(this, operation);
+            if (action == 'openConcordance')
+                UI.openConcordance();
+
+            if (operation != 'moving') {
+                segment = $('#segment-' + $(this).data('sid'));
+                if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+                    UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                }
+            }
+        }
+
+        if (UI.editarea != '') {
+            UI.lockTags(UI.editarea);
+            UI.checkTagProximity();
+        }
+
+        if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
+
+    }
+
+
 };
 
 $(document).ready(function() {

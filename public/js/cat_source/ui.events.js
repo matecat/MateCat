@@ -343,8 +343,6 @@ $.extend(UI, {
                 console.log('CONTROLLO: ', $('#uploadTMX').text());
                 operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
                 UI.checkTMKey($('#addtm-tr-key').val(), operation);
-//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
-
             }
 
         // end addtmx
@@ -526,12 +524,6 @@ $.extend(UI, {
 			goodbye(e);
 		};
 
-
-// no more used:
-		$("header .filter").click(function(e) {
-			e.preventDefault();
-			UI.body.toggleClass('filtering');
-		});
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
 		});
@@ -647,28 +639,32 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-        $('#outer').click(function(e) {
-            var container = $(UI.currentSegment);
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                && container.has(e.target).length === 0 // ... nor a descendant of the container
-                && !$(e.target).hasClass('translated') // has not clicked on a translated button
-                && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
-                && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
-                && ! eventFromReact(e)
-                )
-            {
-                UI.closeSegment(UI.currentSegment, 1);
-            }
 
+        // This is where we decide if a segment is to close or not.
+        // Beware that closeSegment is also called on openSegment
+        // ( other segments are closed when a new one is opened ).
+        //
+        $('#outer').click(function(e) {
+
+             var close = function() {
+                UI.setEditingSegment( null );
+                UI.closeSegment(UI.currentSegment, 1);
+            };
+
+            if ( eventFromReact(e) ) return;
+            if ( $(e.target).closest('section .sid').length ) close()  ;
+            if ( $(e.target).closest('section .segment-side-buttons').length ) close();
+
+            if ( !$(e.target).closest('section').length ) close();
         });
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-        }).on('click', 'section .sid, section .segment-side-buttons', function(e){
-            // TODO: investigate the neeed for '.segment-side-buttons'
-            if ( ! eventFromReact(e) ) {
-                UI.closeSegment(UI.currentSegment, 1);
-            }
+        // }).on('click', 'section .sid, section .segment-side-buttons', function(e){
+        //     // TODO: investigate the neeed for '.segment-side-buttons'
+        //     if ( ! eventFromReact(e) ) {
+        //         UI.closeSegment(UI.currentSegment, 1);
+        //     }
         }).on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('click', '#quality-report', function(e){
@@ -684,6 +680,7 @@ $.extend(UI, {
             var handleEscPressed = function() {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') ) {
+                        UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                     }
             }
@@ -744,20 +741,8 @@ $.extend(UI, {
             if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     UI.showEditToolbar();
-//                    if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
-             /*
-                        if(!UI.editarea.find('.locked.selected').length) {
-                            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                                if(!UI.isFirefox) UI.showEditToolbar();
-                            }
-                        } else {
-                            console.log('A tag is selected');
-                            console.log(UI.editarea.find('.locked.selected')[0]);
-                            setCursorPosition(UI.editarea.find('.locked.selected')[0]);
-                        }
-            */
 		}).on('mousedown', '.editarea', function(e) {
             if(e.which == 3) {
                 e.preventDefault();
@@ -772,64 +757,10 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-        }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
-//            console.log('MOUSEDOWN');
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
-		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
-            if (typeof operation == 'undefined') {
-				operation = 'clicking';
-            }
-
-            UI.saveInUndoStack('click');
-            this.onclickEditarea = new Date();
-
-			UI.notYetOpened = false;
-			UI.closeTagAutocompletePanel();
-            UI.removeHighlightCorrespondingTags();
-
-            if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
-				if (operation == 'moving') {
-					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
-						UI.segmentToOpen = segment;
-						UI.blockOpenSegment = true;
-
-						console.log('ctrl+down troppo vicini');
-					} else {
-						UI.blockOpenSegment = false;
-					}
-
-					UI.recentMoving = true;
-					clearTimeout(UI.recentMovingTimeout);
-					UI.recentMovingTimeout = setTimeout(function() {
-						UI.recentMoving = false;
-					}, 1000);
-
-				} else {
-					UI.blockOpenSegment = false;
-				}
-				UI.lastOperation = operation;
-
-				UI.openSegment(this, operation);
-				if (action == 'openConcordance')
-					UI.openConcordance();
-
-				if (operation != 'moving') {
-                    segment = $('#segment-' + $(this).data('sid'));
-                    if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                        UI.scrollSegment($('#segment-' + $(this).data('sid')));
-                    }
-                }
-			}
-
-            if (UI.editarea != '') {
-                UI.lockTags(UI.editarea);
-                UI.checkTagProximity();
-            }
-
-            if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
-		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
+		}).on('click', '.editarea', UI.editAreaClick
+        ).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
@@ -1719,4 +1650,3 @@ if ( config.isReview ) {
 
     });
 }
-

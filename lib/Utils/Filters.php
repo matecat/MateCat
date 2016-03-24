@@ -198,7 +198,7 @@ class Filters {
                 'client_ip'        => Utils::getRealIpAddr(),
                 'to_xliff'         => $toXliff,
                 'success'          => ( $response[ 'isSuccess' ] === true ),
-                'error_message'    => $response[ 'errorMessage' ],
+                'error_message'    => @$response[ 'errorMessage' ],
                 'conversion_time'  => $response[ 'time' ],
                 'sent_file_size'   => filesize( $sentFile ),
                 'source_lang'      => $jobData[ 'source' ],

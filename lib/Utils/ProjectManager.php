@@ -11,6 +11,8 @@ use Analysis\DqfQueueHandler;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
+use FeatureSet ;
+
 class ProjectManager {
 
     /**
@@ -111,6 +113,10 @@ class ProjectManager {
 
         $this->dbHandler = Database::obtain();
 
+        $this->features = new FeatureSet();
+        if ( !empty( $this->projectStructure['id_customer']) ) {
+           $this->features->loadFromIdCustomer(( $this->projectStructure['id_customer']));
+        }
 
     }
 
@@ -124,7 +130,14 @@ class ProjectManager {
         if ( $this->project == FALSE ) {
             throw new Exceptions_RecordNotFound("Project was not found: id $id ");
         }
-        $this->projectStructure['id_project'] = $id;
+        $this->projectStructure['id_project'] = $this->project->id ;
+        $this->projectStructure['id_customer'] = $this->project->id_customer ;
+        $this->reloadFeatures();
+
+    }
+    private function reloadFeatures() {
+        $this->features = new FeatureSet();
+        $this->features->loadFromIdCustomer( $this->project->id_customer );
     }
 
     public function getProjectStructure() {
@@ -182,10 +195,7 @@ class ProjectManager {
          * in the database.
          * Validations should populate the projectStructure with errors and codes.
          */
-        Features::run('validateProjectCreation',
-            $this->projectStructure['id_customer'],
-            $this->projectStructure
-        );
+        $this->features->run('validateProjectCreation', $this->projectStructure);
 
         if (! empty( $this->projectStructure['result']['errors'] )) {
             return false;
@@ -651,7 +661,7 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
-
+        $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
 
         /*
          * This is the old code.
@@ -707,7 +717,6 @@ class ProjectManager {
         );
 
         $this->dbHandler->query( $update_project_count );
-//        Log::doLog( $this->projectStructure );
 
         //create Project into DQF queue
         if ( INIT::$DQF_ENABLED && !empty( $this->projectStructure[ 'dqf_key' ] ) ) {
@@ -749,10 +758,21 @@ class ProjectManager {
             }
         }
 
-
-        Features::run( 'postProjectCreate',
-            $this->projectStructure['id_customer'],
+        $this->features->run('postProjectCreate',
             $this->projectStructure
+        );
+    }
+
+    /**
+     * @param $projectStructure
+     *
+     * @return string
+     */
+    private function analyzeURL() {
+        return Routes::analyze( array(
+            'project_name' => $this->projectStructure['project_name'],
+            'id_project' => $this->projectStructure['result']['id_project'],
+            'password' => $this->projectStructure['result']['ppassword'])
         );
     }
 
@@ -1061,7 +1081,7 @@ class ProjectManager {
             }
         }
 
-        Features::run('processJobsCreated', $projectStructure['id_customer'], $projectStructure );
+        $this->features->run('processJobsCreated', $projectStructure );
     }
 
     private function insertSegmentNotesForFile() {
@@ -1419,7 +1439,7 @@ class ProjectManager {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
         $this->_splitJob( $projectStructure );
 
-        Features::run( 'postJobSplitted', $projectStructure['id_customer'], $projectStructure );
+        $this->features->run( 'postJobSplitted', $projectStructure );
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
@@ -1505,8 +1525,7 @@ class ProjectManager {
 
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
-        Features::run('postJobMerged',
-            $projectStructure['id_customer'],
+        $this->features->run('postJobMerged',
             $projectStructure
         );
     }
@@ -1734,7 +1753,7 @@ class ProjectManager {
 
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         //split the query in to chunks if there are too much segments
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 200 ) );
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 100 ) );
 
         Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
 
@@ -1843,8 +1862,7 @@ class ProjectManager {
 
         $status = Constants_TranslationStatus::STATUS_TRANSLATED;
 
-        $status = Features::filter('filter_status_for_pretranslated_segments',
-                $this->projectStructure['id_customer'],
+        $status = $this->features->filter('filter_status_for_pretranslated_segments',
                 $status,
                 $this->projectStructure
         );
@@ -1879,7 +1897,7 @@ class ProjectManager {
 
             Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure[ 'query_translations' ] ) );
             //split the query in to chunks if there are too much segments
-            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 200 ) );
+            $this->projectStructure[ 'query_translations' ]->exchangeArray( array_chunk( $this->projectStructure[ 'query_translations' ]->getArrayCopy(), 100 ) );
 
             Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure[ 'query_translations' ] ) );
 

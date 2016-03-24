@@ -17,10 +17,14 @@ class TranslationIssueComment extends ProtectedKleinController {
     }
 
     public function create() {
+        \Bootstrap::sessionStart();
+        $uid = $_SESSION['uid'];
+
         $data = array(
             'comment' => $this->request->message,
             'id_qa_entry' => $this->validator->issue->id,
-            'source_page' => $this->request->source_page
+            'source_page' => $this->request->source_page,
+            'uid' => $uid
         );
 
         $result = EntryCommentDao::createComment( $data );

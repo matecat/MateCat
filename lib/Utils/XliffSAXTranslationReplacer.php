@@ -26,7 +26,14 @@ class XliffSAXTranslationReplacer {
 
     public function __construct( $originalXliffFilename, $segments, $trg_lang = null, $outputFile = null ) {
 
-        self::$INTERNAL_TAG_PLACEHOLDER = "§" . base64_encode( openssl_random_pseudo_bytes( 3, $_crypto_strong ) );
+        self::$INTERNAL_TAG_PLACEHOLDER = "§" .
+                substr(
+                        str_replace(
+                                array( '+', '/' ),
+                                '',
+                                base64_encode( openssl_random_pseudo_bytes( 10, $_crypto_strong ) )
+                        ), 0, 4
+                );
 
         if ( is_resource( $outputFile ) ) {
             $this->outputFP = $outputFile;

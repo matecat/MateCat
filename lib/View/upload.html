@@ -67,6 +67,8 @@
         };
     </script>
 
+    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
+
 </head>
 <body tal:condition="not:supportedBrowser">
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
@@ -761,12 +763,12 @@ Connect your TAUS DQF account to measure productivity.
 
     <div class="wrapper">
 
-            <ul class="external-links">
-                <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
+        <ul class="external-links">
+            <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
 
-                <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
-                <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
-            </ul>
+            <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
+            <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
+        </ul>
 
         <nav>
 

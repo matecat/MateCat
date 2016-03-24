@@ -633,7 +633,14 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
     $jPassword = $db->escape( $jPassword );
 
     $sql = "
-        SELECT id_segment, segment_translations.id_job, filename, segment, translation, translation_date
+        SELECT
+        id_segment,
+        segment_translations.id_job,
+        filename,
+        segment,
+        translation,
+        translation_date,
+        segment_translations.status
         FROM segment_translations
         JOIN segments ON id = id_segment
 
@@ -1213,17 +1220,15 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
     //if the new status to set is TRANSLATED,
     // sum the equivalent words of segments equals to me with the status different from MINE
     $queryTotals = "
-          SELECT
-            $sum_sql as total,
-            status
-          FROM segment_translations
-            INNER JOIN  segments
-            ON segments.id = segment_translations.id_segment
-          WHERE id_job = {$params['id_job']}
-           AND segment_translations.segment_hash = '{$params['segment_hash']}'
-           AND id_segment
-                BETWEEN {$job_data['job_first_segment']}
-                    AND {$job_data['job_last_segment']}
+           SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
+
+           FROM segment_translations
+              INNER JOIN  segments
+              ON segments.id = segment_translations.id_segment
+
+           WHERE id_job = {$params['id_job']}
+           AND segment_translations.segment_hash = '" . $params[ 'segment_hash' ] . "'
+           AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
            AND id_segment != $_idSegment
            AND status != '{$params['status']}'
            GROUP BY status
@@ -2073,7 +2078,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
             "SELECT p.id AS pid,
                             p.name,
                             p.password,
-                            p.tm_analysis_wc
+                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE %s

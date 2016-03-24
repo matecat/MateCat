@@ -50,6 +50,36 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     /**
      * @param $id_job
      * @param $id_segment
+     * @param $version_number
+     *
+     * @return null|Translations_TranslationVersionStruct
+     */
+    public static function getVersionNumberForTranslation($id_job, $id_segment, $version_number) {
+        $sql = "SELECT * FROM segment_translation_versions " .
+                " WHERE id_job = :id_job AND id_segment = :id_segment " .
+                " AND version_number = :version_number ;";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute(
+                array( 'id_job' => $id_job,
+                       'id_segment' => $id_segment,
+                        'version_number' => $version_number
+                )
+        );
+
+        $stmt->setFetchMode(
+                PDO::FETCH_CLASS,
+                'Translations_TranslationVersionStruct'
+        );
+
+        return $stmt->fetch();
+    }
+
+    /**
+     * @param $id_job
+     * @param $id_segment
      *
      * @return Translations_TranslationVersionStruct[]
      */

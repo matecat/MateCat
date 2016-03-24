@@ -31,6 +31,8 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
 
     public function create() {
 
+        \Bootstrap::sessionStart();
+
         $data = array(
             'id_segment'          => $this->request->id_segment,
             'id_job'              => $this->request->id_job,
@@ -43,7 +45,8 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
             'end_node'            => $this->request->end_node,
             'end_offset'          => $this->request->end_offset,
             'is_full_segment'     => false,
-            'comment'             => $this->request->comment
+            'comment'             => $this->request->comment,
+            'uid'                 => $_SESSION['uid']
         );
 
         $struct = new \LQA\EntryStruct( $data );

@@ -85,6 +85,9 @@
             <li id='filterSwitch' title="Search or Filter results">
                 <span class="numbererror"></span>
             </li>
+            <li tal:condition="segmentFilterEnabled" id="advanced-filter" title="Filter segments">
+                <a class="filter"></a>
+            </li>
         </ul>
 
         <a href="${basepath}" class="logo">
@@ -95,6 +98,10 @@
         </div>
 
     </div>   <!-- .wrapper -->
+    <!-- hardcorded advanced filtering -->
+
+    <div id="segment-filter-mountpoint"></div>
+
     <div tal:attributes="class string:searchbox${filtered_class}">
         <form>
 
@@ -166,4 +173,5 @@
 
 </header>
 </body>
+
 </html>

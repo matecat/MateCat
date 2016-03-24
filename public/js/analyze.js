@@ -26,46 +26,11 @@ UI = {
 		if ((mew.text() != '0') && (mew.text() != ''))
 			mew.removeClass('loading');
 
-		//        fit_text_to_container($("#pname"));
-
-
-
-		/*        
-		 $(".part1").click(function(e){
-		 e.preventDefault();
-		 $(".part1files").toggle();
-		 });
-		 $(".part2").click(function(e){
-		 e.preventDefault();
-		 $(".part2files").toggle();
-		 });
-		 $(".part4").click(function(e){
-		 e.preventDefault();
-		 $(".part4files").toggle();
-		 });
-		 */
 		$(".part3").click(function(e) {
 			e.preventDefault();
             $(this).parents('tbody').find(".part3files").toggleClass('open');
             $(".loadingbar").removeClass('start');
 		});
-		/*        
-		 $(".split").click(function(e){
-		 e.preventDefault();
-		 $(".grayed").toggle();
-		 $(".split-box").toggle();
-		 $("body").addClass("popup-opened");
-		 
-		 });
-		 
-		 // still used?
-		 $(".split-box .uploadbtn, .close, .grayed").click(function(e){
-		 e.preventDefault();
-		 $(".grayed").toggle();
-		 $(".split-box").toggle();
-		 $("body").removeClass("popup-opened");
-		 });
-		 */
 
         function wordCountTotalOrPayable( job ) {
             var total = 0;
@@ -197,37 +162,8 @@ UI = {
 				}
 			});
 		});
-		$(".stopbtn").click(function(e) {
-			e.preventDefault();
-			$(this).toggleClass('stopped');
-			if ($(this).hasClass('stopped')) {
-				tt = 'Restart';
-				act = 'cancel';
-				UI.stopPolling = true;
-			} else {
-				tt = 'Cancel';
-				act = 'restart';
-				UI.stopPolling = false;
-				UI.pollData();
-			}
-
-			//	    	tt = ($(this).hasClass('stopped'))? 'Restart' : 'Cancel';
-			//	    	act = ($(this).hasClass('stopped'))? 'cancel' : 'restart';
-			$(this).text(tt);
-			APP.doRequest({
-				data: {
-					action: 'pauseResume',
-					pid: $('#pid').data('pid'),
-					act: act
-				},
-				success: function(d) {
-				}
-			});
-
-		});
 
 		this.pollData();
-		this.checkSticky();
 	},
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
@@ -264,12 +200,10 @@ UI = {
 	checkStatus: function(status) {
 		if (config.status == status) {
 			$('.loadingbar').removeClass('start');
-//            this.progressBar(UI.progressPerc);
 			this.progressBar(config.totalAnalyzed / config.totalSegments);
 		}
 	},
 	checkSplit: function(job) {
-//        console.log('split');
 
 		var ar = new Array();
 		$('.popup-split ul.jobs li .input-small').each(function() {
@@ -280,8 +214,8 @@ UI = {
 			data: {
 				action: "splitJob",
 				exec: "check",
-				project_id: $('#pid').attr('data-pid'),
-				project_pass: $('#pid').attr('data-pwd'),
+                project_id: config.id_project,
+                project_pass: config.password,
 				job_id: $('.popup-split h1 .jid').attr('data-jid'),
 				job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
 				num_split: $('.popup-split h1 .chunks').text(),
@@ -352,8 +286,8 @@ UI = {
 			data: {
 				action: "splitJob",
 				exec: "merge",
-				project_id: $('#pid').attr('data-pid'),
-				project_pass: $('#pid').attr('data-pwd'),
+				project_id: config.id_project,
+				project_pass: config.password,
 				job_id: jid
 			},
 			complete: function(d) {
@@ -378,8 +312,8 @@ UI = {
 			data: {
 				action: "splitJob",
 				exec: "apply",
-				project_id: $('#pid').attr('data-pid'),
-				project_pass: $('#pid').attr('data-pwd'),
+				project_id: config.id_project,
+				project_pass: config.password,
 				job_id: $('.popup-split h1 .jid').attr('data-jid'),
 				job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
 				num_split: $('.popup-split h1 .chunks').text(),
@@ -423,39 +357,17 @@ UI = {
 		$('#longloading p').html(error);
 		$('#longloading').show();
 	},
-	checkSticky: function() {
-		if (!!$('.sticky').offset()) { // make sure ".sticky" element exists
-			var stickyTop = $('.sticky').offset().top; // returns number 
-			$(window).scroll(function() { // scroll event
-				var windowTop = $(window).scrollTop(); // returns number 
-				if (stickyTop < windowTop) {
-					$('.sticky').css({
-						position: 'fixed',
-						top: 50,
-						left: 0
-					});
-				} else {
-					$('.sticky').css('position', 'static');
-				}
-			});
-		}
-	},
 	pollData: function() {
-		if (this.stopPolling)
-			return;
-		var pid = $("#pid").attr("data-pid");
+		if (this.stopPolling) return;
 
-        if( typeof $("#pid").attr("data-pwd") === 'undefined' ){
-            var jpassword =  $('tbody.tablestats' ).attr('data-pwd');
-        }
+		var pid = config.id_project;
+        var ppassword = config.password ;
 
-		var ppassword = $("#pid").attr("data-pwd");
 		APP.doRequest({
 			data: {
 				action: 'getVolumeAnalysis',
 				pid: pid,
                 ppassword: ppassword,
-                jpassword: jpassword
 			},
 			success: function ( d ) {
 				if ( d.data ) {
@@ -762,12 +674,15 @@ UI = {
 
                         $( '#longloading .approved-bar' ).css( 'width', '100%' );
                         $( '#analyzedSegmentsReport' ).text( s.SEGMENTS_ANALYZED_PRINT );
+
                         precomputeOutsourceQuotes( $( '.uploadbtn.translate' ) );
+
                         setTimeout( function () {
                             $( '#shortloading' ).remove();
                             $( '#longloading .meter' ).remove();
                             $( '#longloading' ).show();
-                            $( '#longloading p' ).addClass( 'loaded' ).html( '<span class="complete">Analysis complete</span>' ).append( '<a class="downloadAnalysisReport">Download Analysis Report</a>' );
+                            $( '#longloading p' ).addClass( 'loaded' ).html( '<span class="complete">Analysis complete</span>' )
+								.append( '<a class="downloadAnalysisReport">Download Analysis Report</a>' );
                             $( '.splitbtn' ).removeClass( 'disabled' ).attr( 'title', '' );
                         }, 1000 );
 
@@ -788,7 +703,8 @@ UI = {
                         $( '#shortloading' ).remove();
                         $( '#longloading .meter' ).remove();
                         $( '#longloading' ).show();
-                        $( '#longloading p' ).addClass( 'loaded' ).html( '<span class="complete">This job is too big.</span>' ).append( '<span class="analysisNotPerformed">The analysis was not performed.</span>' );
+                        $( '#longloading p' ).addClass( 'loaded' ).html( '<span class="complete">This job is too big.</span>' )
+								.append( '<span class="analysisNotPerformed">The analysis was not performed.</span>' );
                         $( '.splitbtn' ).removeClass( 'disabled' ).attr( 'title', '' );
 
                     } else{
@@ -812,13 +728,8 @@ UI = {
 
 	},
     downloadAnalysisReport: function () {
-        var pid = $("#pid").attr("data-pid");
-
-        if( typeof $("#pid").attr("data-pwd") === 'undefined' ){
-            var jpassword =  $('tbody.tablestats' ).attr('data-pwd');
-        }
-
-        var ppassword = $("#pid").attr("data-pwd");
+        var pid = config.id_project ;
+        var ppassword = config.password ;
 
         var form =  '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
                     '				<input type=hidden name="action" value="downloadAnalysisReport">' +
@@ -901,22 +812,26 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 
     getOutsourceQuote( $( elementsToAskQuoteFor.splice( 0, 1 ) ), function( quoteData ) {
         // remember whether outsource popup should be rendered compressed (0) or expanded (1)
-        UI.showPopupDetails = quoteData.data[0][0].show_info;
 
-        // recursively call self with the remaining elements ( Array.splice(0,1) has already reduced the size )
-        precomputeOutsourceQuotes( elementsToAskQuoteFor );
+        if ( quoteData.data )  {
+            UI.showPopupDetails = quoteData.data[0][0].show_info;
+            // recursively call self with the remaining elements ( Array.splice(0,1) has already reduced the size )
+            precomputeOutsourceQuotes( elementsToAskQuoteFor );
+        }
     });
 }
 
 $(document).ready(function() {
-		APP.init();
-		if (config.showModalBoxLogin == 1) {
-		$('#popupWrapper').fadeToggle();
-		}
-		$('#sign-in').click(function(e) {
-			e.preventDefault();
-			APP.googole_popup($(e.target).data('oauth'));
-			});
-		UI.init();
-		UI.outsourceInit();
+	APP.init();
+	if (config.showModalBoxLogin == 1) {
+	    $('#popupWrapper').fadeToggle();
+	}
+	$('#sign-in').click(function(e) {
+		e.preventDefault();
+		APP.googole_popup($(e.target).data('oauth'));
 		});
+	UI.init();
+	if ( config.enable_outsource ) {
+		UI.outsourceInit();
+	}
+});

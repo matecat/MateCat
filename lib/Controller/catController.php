@@ -676,6 +676,12 @@ class catController extends viewController {
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
+        Features::appendDecorators(
+            $this->getJob()->getProject()->id_customer,
+            'CatDecorator',
+            $this,
+            $this->template
+        );
     }
 
     public function getJobStats() {

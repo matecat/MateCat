@@ -67,7 +67,7 @@ class SegmentVersionTest extends IntegrationTest {
         $translation = $translations[0];
 
         $test          = new CurlTest();
-        $test->path    = sprintf("/api/v2/jobs/%s/%s/segments/%s/translation/versions",
+        $test->path    = sprintf("/api/v2/jobs/%s/%s/segments/%s/translation-versions",
             $chunk->id, $chunk->password, $segment->id
         );
         $test->method  = 'GET';

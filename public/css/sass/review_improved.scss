@@ -32,6 +32,7 @@ section.reviewImproved.opened .outersource .copy {
 section.reviewImproved.opened .textarea-container {
     width: 100%;
     padding: 0 4px;
+    font-size:18px;
 }
 
 section.reviewImproved .errorTaggingArea {
@@ -151,8 +152,46 @@ section.reviewImproved.opened .textarea-container {
 
 }
 
+.fx {
+    position:relative;
+}
+
+.fx:after {
+      position: absolute;
+    content: "";
+    width: 9px;
+    right: 0;
+    top: 0;
+    height: 29px;
+    background: 
+    repeating-linear-gradient( 135deg, transparent, transparent 11px, #fff 10px, #fff 18px ), 
+    linear-gradient( to bottom, #7cc576, #7cc576  )
+}
+
+.rb {
+    position:relative;
+}
+
+.rb:after {
+      position: absolute;
+    content: "";
+    width: 9px;
+    right: 0;
+    top: 0;
+    height: 29px;
+    background: 
+    repeating-linear-gradient( 135deg, transparent, transparent 11px, #fff 10px, #fff 18px ), 
+    linear-gradient( to bottom, #dc2e34, #dc2e34  )
+}
+
 section.status-fixed .status {
-    background: #F5E014;
+    background: #7cc576 url(../img/stripes.png) repeat !important;
+        background-size: 200% !important;
+}
+
+section.status-rebutted .status {
+    background: #dc2e34 url(../img/stripes.png) repeat !important;
+        background-size: 200% !important;
 }
 
 section.status-rebutted .status {
@@ -275,19 +314,45 @@ section {
 .segment-side-buttons .revise-button {
     text-decoration: none!important;
     font-size: 28px;
-    color: #999;
+    color: #666;
     font-weight: bold;
 }
-.segment-side-buttons .revise-button:hover {
-    color: #666;
+
+.segment-side-buttons {
+  color: #666!important;
 }
+
 
 .translation-issues-button {
     cursor: pointer;
-    margin: 6px auto 0;
+    margin: 0 auto;
     padding: 10px 0;
     position: relative;
     width: 80px;
+}
+
+section:not(.opened) .translation-issues-button {
+        padding: 0 0 5px;
+}
+
+.translation-issues-button .revise-button {
+    opacity:0;
+    -webkit-transition: opacity 1s ease-in-out;
+  -moz-transition: opacity 1s ease-in-out;
+  -ms-transition: opacity 1s ease-in-out;
+  -o-transition: opacity 1s ease-in-out;
+  transition: opacity 1s ease-in-out;
+}
+
+
+section:hover .translation-issues-button .revise-button,
+.translation-issues-button:hover .revise-button,
+.segment-side-buttons:hover .translation-issues-button .revise-button,
+.has-object
+
+ {
+    opacity:1!important;
+    display:block;
 }
 
 .revise-button-counter {
@@ -305,10 +370,16 @@ section {
     text-align: center;
 }
 
+section:not(.opened) .revise-button-counter {
+    top:2px;
+}
+
 .review-version-wrapper {
     border-top: 1px solid #ccc;
     margin-top: 20px;
 }
+
+
 
 .review-triangle {
     display:none;
@@ -458,4 +529,71 @@ table.review-issue-category-list {
 
 .review-side-panel-opened a.cancel-project:before {
     margin-right: 5px;
+}
+
+
+/**
+ * TODO: move this to mbc styles?
+ */
+.mbc-history-balloon-outer {
+    right: 145px;
+}
+.error-selection-highlight {
+    background: yellow;
+}
+
+
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+{
+/*visibility: hidden;*/
+text-indent: -10000px;
+display: inline-block;
+overflow: hidden;
+position: relative;
+margin: 0px 4px;
+width: 7px;
+height: 8px;
+padding-top: 0px;
+}
+
+
+body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
+body.rtl-target.tagModes .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+body.tagModes .locked.endTag
+{
+ -ms-transform: rotate(-180deg); /* IE 9 */
+    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
+    transform: rotate(-180deg);
+}
+body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+{
+ -ms-transform: rotate(0deg); /* IE 9 */
+    -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
+    transform: rotate(0deg);
+}
+
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag:before,
+{
+content: "\f04b";
+visibility: visible;
+position: absolute;
+font-size: 7px;
+transform: scaleY(1.4);
+ -webkit-transform: scaleY(1.4);
+ -ms-transform: scaleY(1.4);
+left: 10000px;
+}
+
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag:before,
+{
+content: "\e603";
+visibility: visible;
+position: absolute;
+font-size: 10px;
+top: -2px;
+left: 9999px;
 }

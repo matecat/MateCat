@@ -24,30 +24,21 @@ class analyzeController extends viewController {
     private $pid;
     private $ppassword;
     private $jpassword;
-    private $pname = "";
-    private $total_raw_word_count = 0;
-    private $total_raw_word_count_print = "";
-    private $fast_analysis_wc = 0;
-    private $tm_analysis_wc = 0;
-    private $standard_analysis_wc = 0;
-    private $fast_analysis_wc_print = "";
-    private $standard_analysis_wc_print = "";
-    private $tm_analysis_wc_print = "";
-    private $raw_wc_time = 0;
-    private $fast_wc_time = 0;
-    private $tm_wc_time = 0;
-    private $standard_wc_time = 0;
-    private $fast_wc_unit = "";
-    private $tm_wc_unit = "";
-    private $raw_wc_unit = "";
-    private $standard_wc_unit = "";
-    private $jobs = array();
-    private $project_not_found = false;
-    private $project_status = "";
-    private $num_segments = 0;
-    private $num_segments_analyzed = 0;
-    private $proj_payable_rates;
-    private $subject;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project ;
+
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    private $chunk ;
+
+    /**
+     * @var FeatureSet
+     */
+    private $features ;
 
     public function __construct() {
 
@@ -69,236 +60,36 @@ class analyzeController extends viewController {
         $this->jid = $postInput[ 'jid' ];
         $pass      = $postInput[ 'password' ];
 
+        $this->project = Projects_ProjectDao::findById( $this->pid );
+
         if ( !empty( $this->jid ) ) {
+            // we are looking for a chunk
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->jid, $pass);
+
             parent::makeTemplate( "jobAnalysis.html" );
             $this->jpassword = $pass;
             $this->ppassword = null;
         } else {
+            $this->project_not_found = $this->project->password != $pass;
+
             parent::makeTemplate( "analyze.html" );
             $this->jid       = null;
             $this->jpassword = null;
             $this->ppassword = $pass;
         }
 
+        $this->features = new FeatureSet();
+        $this->features->loadFromIdCustomer( $this->project->id_customer );
+
     }
 
     public function doAction() {
+        $this->features->run('beginDoAction', 'analyzeController', array(
+                'project' => $this->project
+        ));
 
-        $project_by_jobs_data = getProjectData( $this->pid, $this->ppassword, $this->jid, $this->jpassword );
-
-        $lang_handler = Langs_Languages::getInstance();
-
-        if ( empty( $project_by_jobs_data ) ) {
-            $this->project_not_found = true;
-            return;
-        }
-
-        //pick the project subject from the first job
-        if ( count( $project_by_jobs_data ) > 0 ) {
-            $this->subject = $project_by_jobs_data[ 0 ][ 'subject' ];
-        }
-
-        foreach ( $project_by_jobs_data as &$p_jdata ) {
-
-            $p_jdata['filename'] = ZipArchiveExtended::getFileName($p_jdata['filename']);
-
-            //json_decode payable rates
-            $p_jdata[ 'payable_rates' ] = json_decode( $p_jdata[ 'payable_rates' ], true );
-
-            $this->num_segments += $p_jdata[ 'total_segments' ];
-            if ( empty( $this->pname ) ) {
-                $this->pname = $p_jdata[ 'name' ];
-            }
-
-            if ( empty( $this->project_status ) ) {
-                $this->project_status = $p_jdata[ 'status_analysis' ];
-                if ( $this->standard_analysis_wc == 0 ) {
-                    $this->standard_analysis_wc = $p_jdata[ 'standard_analysis_wc' ];
-                }
-            }
-
-            //equivalent word count global
-            if ( $this->tm_analysis_wc == 0 ) {
-                $this->tm_analysis_wc = $p_jdata[ 'tm_analysis_wc' ];
-            }
-            if ( $this->tm_analysis_wc == 0 ) {
-                $this->tm_analysis_wc = $p_jdata[ 'fast_analysis_wc' ];
-            }
-            $this->tm_analysis_wc_print = number_format( $this->tm_analysis_wc, 0, ".", "," );
-
-            if ( $this->fast_analysis_wc == 0 ) {
-                $this->fast_analysis_wc       = $p_jdata[ 'fast_analysis_wc' ];
-                $this->fast_analysis_wc_print = number_format( $this->fast_analysis_wc, 0, ".", "," );
-            }
-
-            // if zero then print empty instead of 0
-            if ( $this->standard_analysis_wc == 0 ) {
-                $this->standard_analysis_wc_print = "";
-            }
-
-            if ( $this->fast_analysis_wc == 0 ) {
-                $this->fast_analysis_wc_print = "";
-            }
-
-            if ( $this->tm_analysis_wc == 0 ) {
-                $this->tm_analysis_wc_print = "";
-            }
-
-            $this->total_raw_word_count += $p_jdata[ 'file_raw_word_count' ];
-
-            $source = $lang_handler->getLocalizedName( $p_jdata[ 'source' ] );
-            $target = $lang_handler->getLocalizedName( $p_jdata[ 'target' ] );
-
-            if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
-
-                if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] ) ) {
-                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] = '';
-                }
-
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'jid' ]    = $p_jdata[ 'jid' ];
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'source' ] = $source;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'target' ] = $target;
-
-            }
-
-            $source_short = $p_jdata[ 'source' ];
-            $target_short = $p_jdata[ 'target' ];
-            $password     = $p_jdata[ 'jpassword' ];
-
-
-            unset( $p_jdata[ 'name' ] );
-            unset( $p_jdata[ 'source' ] );
-            unset( $p_jdata[ 'target' ] );
-            unset( $p_jdata[ 'jpassword' ] );
-
-
-            unset( $p_jdata[ 'fast_analysis_wc' ] );
-            unset( $p_jdata[ 'tm_analysis_wc' ] );
-            unset( $p_jdata[ 'standard_analysis_wc' ] );
-
-
-            if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ] ) ) {
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ]                   = array();
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jid' ]          = $p_jdata[ 'jid' ];
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source' ]       = $source;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target' ]       = $target;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jpassword' ]    = $password;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source_short' ] = $source_short;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target_short' ] = $target_short;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'rates' ]                                 = $p_jdata[ 'payable_rates' ];
-
-                if ( !array_key_exists( "total_raw_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
-                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] = 0;
-                }
-
-                if ( !array_key_exists( "total_eq_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
-                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] = 0;
-                }
-
-            }
-
-            //calculate total word counts per job (summing different files)
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] += $p_jdata[ 'file_raw_word_count' ];
-            //format the total (yeah, it's ugly doing it every cycle)
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ], 0, ".", "," );
-
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] += $p_jdata[ 'file_eq_word_count' ];
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ], 0, ".", "," );
-
-            $p_jdata[ 'file_eq_word_count' ]  = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
-            $p_jdata[ 'file_raw_word_count' ] = number_format( $p_jdata[ 'file_raw_word_count' ], 0, ".", "," );
-
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'files' ][ $p_jdata[ 'id_file' ] ] = $p_jdata;
-
-            $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] = ( count( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ] ) > 1 ? 'splitted' : '' );
-
-        }
-
-        $raw_wc_time  = $this->total_raw_word_count / INIT::$ANALYSIS_WORDS_PER_DAYS;
-        $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
-        $fast_wc_time = $this->fast_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
-
-        $raw_wc_unit  = 'day';
-        $tm_wc_unit   = 'day';
-        $fast_wc_unit = 'day';
-
-        if ( $raw_wc_time > 0 and $raw_wc_time < 1 ) {
-            $raw_wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $raw_wc_unit = 'hour';
-        }
-
-        if ( $raw_wc_time > 0 and $raw_wc_time < 1 ) {
-            $raw_wc_time *= 60; //convert to minutes
-            $raw_wc_unit = 'minute';
-        }
-
-        if ( $raw_wc_time > 1 ) {
-            $raw_wc_unit .= 's';
-        }
-
-
-        if ( $tm_wc_time > 0 and $tm_wc_time < 1 ) {
-            $tm_wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $tm_wc_unit = 'hour';
-        }
-
-        if ( $tm_wc_time > 0 and $tm_wc_time < 1 ) {
-            $tm_wc_time *= 60; //convert to minutes
-            $tm_wc_unit = 'minute';
-        }
-
-        if ( $tm_wc_time > 1 ) {
-            $tm_wc_unit .= 's';
-        }
-
-        if ( $fast_wc_time > 0 and $fast_wc_time < 1 ) {
-            $fast_wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $fast_wc_unit = 'hour';
-        }
-
-        if ( $fast_wc_time > 0 and $fast_wc_time < 1 ) {
-            $fast_wc_time *= 60; //convert to minutes
-            $fast_wc_unit = 'minute';
-        }
-
-        if ( $fast_wc_time > 1 ) {
-            $fast_wc_unit .= 's';
-        }
-
-        $this->raw_wc_time  = ceil( $raw_wc_time );
-        $this->fast_wc_time = ceil( $fast_wc_time );
-        $this->tm_wc_time   = ceil( $tm_wc_time );
-        $this->raw_wc_unit  = $raw_wc_unit;
-        $this->tm_wc_unit   = $tm_wc_unit;
-        $this->fast_wc_unit = $fast_wc_unit;
-
-
-        if ( $this->raw_wc_time == 8 and $this->raw_wc_unit == "hours" ) {
-            $this->raw_wc_time = 1;
-            $this->raw_wc_unit = "day";
-        }
-        if ( $this->raw_wc_time == 60 and $this->raw_wc_unit == "minutes" ) {
-            $this->raw_wc_time = 1;
-            $this->raw_wc_unit = "hour";
-        }
-
-        if ( $this->fast_wc_time == 8 and $this->fast_wc_time == "hours" ) {
-            $this->fast_wc_time = 1;
-            $this->fast_wc_time = "day";
-        }
-        if ( $this->tm_wc_time == 60 and $this->tm_wc_time == "minutes" ) {
-            $this->tm_wc_time = 1;
-            $this->tm_wc_time = "hour";
-        }
-
-        if ( $this->total_raw_word_count == 0 ) {
-            $this->total_raw_word_count_print = "";
-        } else {
-            $this->total_raw_word_count_print = number_format( $this->total_raw_word_count, 0, ".", "," );
-        }
-
-//        echo "<pre>" . print_r ( $this->jobs, true ) . "</pre>"; exit;
-
+        $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
+        $this->model->loadData();
     }
 
     public function setTemplateVars() {
@@ -308,40 +99,41 @@ class analyzeController extends viewController {
             return;
         }
 
-        $this->template->jobs                       = $this->jobs;
-        $this->template->fast_analysis_wc           = $this->fast_analysis_wc;
-        $this->template->fast_analysis_wc_print     = $this->fast_analysis_wc_print;
-        $this->template->tm_analysis_wc             = $this->tm_analysis_wc;
-        $this->template->tm_analysis_wc_print       = $this->tm_analysis_wc_print;
-        $this->template->standard_analysis_wc       = $this->standard_analysis_wc;
-        $this->template->standard_analysis_wc_print = $this->standard_analysis_wc_print;
-        $this->template->total_raw_word_count       = $this->total_raw_word_count;
-        $this->template->total_raw_word_count_print = $this->total_raw_word_count_print;
-        $this->template->pname                      = $this->pname;
-        $this->template->pid                        = $this->pid;
+        $this->template->jobs                       = $this->model->jobs;
+        $this->template->fast_analysis_wc           = $this->model->fast_analysis_wc;
+        $this->template->fast_analysis_wc_print     = $this->model->fast_analysis_wc_print;
+        $this->template->tm_analysis_wc             = $this->model->tm_analysis_wc;
+        $this->template->tm_analysis_wc_print       = $this->model->tm_analysis_wc_print;
+        $this->template->standard_analysis_wc       = $this->model->standard_analysis_wc;
+        $this->template->standard_analysis_wc_print = $this->model->standard_analysis_wc_print;
+        $this->template->total_raw_word_count       = $this->model->total_raw_word_count;
+        $this->template->total_raw_word_count_print = $this->model->total_raw_word_count_print;
+        $this->template->pname                      = $this->model->pname;
+        $this->template->pid                        = $this->model->pid;
         $this->template->project_password           = $this->ppassword;
-        $this->template->project_not_found          = $this->project_not_found;
-        $this->template->fast_wc_time               = $this->fast_wc_time;
-        $this->template->tm_wc_time                 = $this->tm_wc_time;
-        $this->template->tm_wc_unit                 = $this->tm_wc_unit;
-        $this->template->fast_wc_unit               = $this->fast_wc_unit;
-        $this->template->standard_wc_unit           = $this->standard_wc_unit;
-        $this->template->raw_wc_time                = $this->raw_wc_time;
-        $this->template->standard_wc_time           = $this->standard_wc_time;
-        $this->template->raw_wc_unit                = $this->raw_wc_unit;
-        $this->template->project_status             = $this->project_status;
-        $this->template->num_segments               = $this->num_segments;
-        $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
+        $this->template->fast_wc_time               = $this->model->fast_wc_time;
+        $this->template->tm_wc_time                 = $this->model->tm_wc_time;
+        $this->template->tm_wc_unit                 = $this->model->tm_wc_unit;
+        $this->template->fast_wc_unit               = $this->model->fast_wc_unit;
+        $this->template->standard_wc_unit           = $this->model->standard_wc_unit;
+        $this->template->raw_wc_time                = $this->model->raw_wc_time;
+        $this->template->standard_wc_time           = $this->model->standard_wc_time;
+        $this->template->raw_wc_unit                = $this->model->raw_wc_unit;
+        $this->template->project_status             = $this->model->project_status;
+        $this->template->num_segments               = $this->model->num_segments;
+        $this->template->num_segments_analyzed      = $this->model->num_segments_analyzed;
+
         $this->template->logged_user                = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
         $this->template->extended_user              = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->build_number               = INIT::$BUILD_NUMBER;
-        $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
+        $this->template->enable_outsource           = $this->features->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
+
         $this->template->outsource_service_login    = $this->_outsource_login_API;
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
         $langDomains = Langs_LanguageDomains::getInstance();
-        $this->subject = $langDomains::getDisplayDomain($this->subject);
-        $this->template->subject                    = $this->subject;
+        $this->subject = $langDomains::getDisplayDomain($this->subject);  // subject is null !!??!?!?!
+        $this->template->subject                    = $this->model->subject;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
