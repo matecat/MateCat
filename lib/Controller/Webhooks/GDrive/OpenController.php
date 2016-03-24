@@ -56,10 +56,15 @@ class OpenController extends KleinController {
         else if ( array_key_exists('exportIds', $state) ) {
             // forge a request to the APIs V3 to get export download URL
             $fileId = $state['exportIds'][0];
-            $mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
             $file = $service->files->get($fileId);
+            $mime = \GDrive::officeMimeFromGoogle( $file->mimeType );
             $links = $file->getExportLinks() ;
-            $downloadUrl = $links[ $mime ];
+
+            if($links != null) {
+                $downloadUrl = $links[ $mime ];
+            } else {
+                $downloadUrl = $file->getDownloadUrl();
+            }
         }
         else {
             throw new Exception( " no ids or export ids found ");
@@ -72,10 +77,11 @@ class OpenController extends KleinController {
 
         if ($downloadUrl) {
             $this->file_name = $file->getTitle(); 
+            $file_extension = \GDrive::officeExtensionFromMime( $file->mimeType );
 
             //TODO: Analyse mimetype when other formats are enabled
-            if (substr($this->file_name, -5) !== '.pptx') {
-                $this->file_name .= '.pptx';
+            if (substr($this->file_name, -5) !== $file_extension) {
+                $this->file_name .= $file_extension;
             }
             
             $request = new \Google_Http_Request($downloadUrl, 'GET', null, null);

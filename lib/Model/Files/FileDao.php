@@ -22,6 +22,31 @@ class Files_FileDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    public static function getByRemoteId( $remote_id ) {
+      $conn = Database::obtain()->getConnection();
+      $stmt = $conn->prepare(
+        "SELECT * FROM files " .
+        " WHERE remote_id = :remote_id "
+      );
+
+      $stmt->execute( array( 'remote_id' => $remote_id ) );
+      $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
+      return $stmt->fetch();
+    }
+
+    public static function updateField( $file, $field, $value ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+            "UPDATE files SET $field = :value " .
+            " WHERE id = :id "
+        );
+
+        return $stmt->execute( array(
+            'value' => $value,
+            'id' => $file->id
+        ));
+    }
+
     function _buildResult( $array_result ) {
         return null;
     }

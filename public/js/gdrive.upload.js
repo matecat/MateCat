@@ -2,6 +2,16 @@ APP.tryListGDriveFiles = function() {
     $.getJSON('/webhooks/gdrive/list', function(listFiles){
         if(listFiles && listFiles.hasOwnProperty('fileName')){
             //TODO: Iterate when multiple files are enabled
+            var iconClass = '';
+
+            if ( listFiles.fileExtension == 'docx' ) {
+                iconClass = 'extgdoc';
+            } else if ( listFiles.fileExtension == 'pptx' ) {
+                iconClass = 'extgsli';
+            } else if ( listFiles.fileExtension == 'xlsx' ) {
+                iconClass = 'extgsheet';
+            }
+
             $('.files-gdrive').html('');
 
             $('<tr/>', {
@@ -14,7 +24,7 @@ APP.tryListGDriveFiles = function() {
                 })
                 .append (
                     $('<span/>', {
-                        'class': 'extsli'
+                        'class': iconClass
                     })
                 )
             )

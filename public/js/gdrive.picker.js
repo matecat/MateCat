@@ -33,7 +33,9 @@
     function createPicker() {
         if ( pickerApiLoaded && oauthToken ) {
             var picker = new google.picker.PickerBuilder().
+                addView(google.picker.ViewId.DOCUMENTS).
                 addView(google.picker.ViewId.PRESENTATIONS).
+                addView(google.picker.ViewId.SPREADSHEETS).
                 setOAuthToken(oauthToken).
                 setDeveloperKey(developerKey).
                 setCallback(pickerCallback).
