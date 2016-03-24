@@ -48,6 +48,12 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param $feature_code
+     * @param $email
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct
+     */
     public static function getByOwnerEmailAndCode( $feature_code, $email ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM owner_features " .

@@ -65,7 +65,11 @@ class getSegmentsController extends ajaxController {
 			$this->ref_segment = 0;
 		}
 
-        $data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
+        $data = getMoreSegments(
+                $this->jid, $this->password, $this->step,
+                $this->ref_segment, $this->where,
+                $this->getOptionalQueryFields()
+        );
 
         $this->prepareNotes( $data );
 
@@ -178,6 +182,19 @@ class getSegmentsController extends ajaxController {
         $this->result['data']['files'] = $this->data;
 
         $this->result['data']['where'] = $this->where;
+    }
+
+
+    private function getOptionalQueryFields() {
+        $job = Jobs_JobDao::getById( $this->jid );
+        $feature = $job->getProject()->getOwnerFeature('translation_versions');
+        $options = array();
+
+        if ( $feature ) {
+            $options['optional_fields'] = 'st.version_number';
+        }
+
+        return $options;
     }
 
     private function attachNotes( &$segment ) {

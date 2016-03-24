@@ -1,5 +1,13 @@
 <?php
 
+namespace Features\TranslationVersions ;
+
+use Translations_TranslationVersionDao;
+use Constants;
+use Projects_ProjectDao;
+use Features ;
+use Log, \Exception, Utils, \Database;
+
 /**
  * Class SegmentTranslationVersionHandler
  *
@@ -72,11 +80,11 @@ class SegmentTranslationVersionHandler {
     public function saveVersion( $new_translation, $old_translation ) {
 
         if ( $this->feature_enalbed !== true ) {
-            return ;
+            return false;
         }
 
         if ( empty($old_translation ) ) {
-            return;
+            return false;
         }
 
         /**
@@ -86,7 +94,7 @@ class SegmentTranslationVersionHandler {
          */
         if ( $old_translation['translation'] ==
             $new_translation['translation'] ) {
-            return ;
+            return false;
         }
 
         $this->prepareDao();
