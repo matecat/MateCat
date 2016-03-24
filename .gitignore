@@ -46,4 +46,4 @@ vendor
 .env
 
 phinx.yml
-
+plugins/*
