@@ -8,6 +8,7 @@ use API\V2\KleinController ;
 use INIT ; 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use GDrive;
 
 class ManageController extends KleinController {   
     public function listImportedFiles() {        
@@ -40,7 +41,7 @@ class ManageController extends KleinController {
     }
     
     private function getCacheFileDir(){
-        $sourceLang = $_SESSION['actualSourceLang'];
+        $sourceLang = $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ];
         
         $fileHash = $_SESSION['google_drive_file_sha1'];
                     
@@ -62,7 +63,7 @@ class ManageController extends KleinController {
     }
     
     public function changeSourceLanguage() {
-        $originalSourceLang = $_SESSION['actualSourceLang'];
+        $originalSourceLang = $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ];
         
         $fileHash = $_SESSION['google_drive_file_sha1'];
         
@@ -74,7 +75,7 @@ class ManageController extends KleinController {
         
             $originalCacheFileDir = $this->getCacheFileDir();
 
-            $_SESSION['actualSourceLang'] = $newSourceLang;
+            $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
 
             $newCacheFileDir = $this->getCacheFileDir();
         
@@ -88,19 +89,19 @@ class ManageController extends KleinController {
             $renameFileRefSuccess = rename($originalUploadRefFile, $newUploadRefFile);
 
             if($renameDirSuccess && $renameFileRefSuccess) {
-                $ckSourceLang = filter_input(INPUT_COOKIE, 'sourceLang');
+                $ckSourceLang = filter_input(INPUT_COOKIE, GDrive::COOKIE_SOURCE_LANG);
 
-                if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === "_EMPTY_" ) {
+                if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === GDrive::EMPTY_VAL ) {
                     $ckSourceLang = '';
                 }
 
                 $newCookieVal = $newSourceLang . '||' . $ckSourceLang;
 
-                setcookie( "sourceLang", $newCookieVal, time() + ( 86400 * 365 ), '/' );
+                setcookie( GDrive::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/' );
             } else {
                 Log::doLog('Error when moving cache file dir to ' . $newCacheFileDir);
 
-                $_SESSION['actualSourceLang'] = $originalSourceLang;
+                $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
             }
         }
         

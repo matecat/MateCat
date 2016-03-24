@@ -11,6 +11,7 @@ use Google_Http_Request ;
 use Utils ;
 use INIT ; 
 use ConversionHandler ; 
+use GDrive ;
 
 class OpenController extends KleinController {
 
@@ -143,9 +144,9 @@ class OpenController extends KleinController {
     }
 
     private function correctSourceTargetLang() {
-        if ( isset ( $_COOKIE[ "sourceLang" ] ) ) {
-            if( $_COOKIE[ "sourceLang" ] != "_EMPTY_" ) {
-                $sourceLangHistory   = $_COOKIE[ "sourceLang" ];
+        if ( isset ( $_COOKIE[ GDrive::COOKIE_SOURCE_LANG ] ) ) {
+            if( $_COOKIE[ GDrive::COOKIE_SOURCE_LANG ] != GDrive::EMPTY_VAL ) {
+                $sourceLangHistory   = $_COOKIE[ GDrive::COOKIE_SOURCE_LANG ];
                 $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
                 
                 if(count( $sourceLangAr ) > 0) {
@@ -153,12 +154,12 @@ class OpenController extends KleinController {
                 }
             }
         } else {
-            setcookie( "sourceLang", "_EMPTY_", time() + ( 86400 * 365 ) );
+            setcookie( GDrive::COOKIE_SOURCE_LANG, GDrive::EMPTY_VAL, time() + ( 86400 * 365 ) );
         }
         
-        if ( isset ( $_COOKIE[ "targetLang" ] ) ) {
-            if( $_COOKIE[ "targetLang" ] != "_EMPTY_" ) {
-                $targetLangHistory   = $_COOKIE[ "targetLang" ];
+        if ( isset ( $_COOKIE[ GDrive::COOKIE_TARGET_LANG ] ) ) {
+            if( $_COOKIE[ GDrive::COOKIE_TARGET_LANG ] != GDrive::EMPTY_VAL ) {
+                $targetLangHistory   = $_COOKIE[ GDrive::COOKIE_TARGET_LANG ];
                 $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
                 
                 if(count( $targetLangAr ) > 0) {
@@ -166,10 +167,10 @@ class OpenController extends KleinController {
                 }
             }
         } else {
-            setcookie( "targetLang", "_EMPTY_", time() + ( 86400 * 365 ) );
+            setcookie( GDrive::COOKIE_TARGET_LANG, GDrive::EMPTY_VAL, time() + ( 86400 * 365 ) );
         }
         
-        $_SESSION['actualSourceLang'] = $this->source_lang;
+        $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
     }
     
 }

@@ -1,6 +1,14 @@
 <?php
 
 class GDrive {
+
+    const SESSION_ACTUAL_SOURCE_LANG = 'actualSourceLang';
+
+    const COOKIE_SOURCE_LANG = 'sourceLang';
+    const COOKIE_TARGET_LANG = 'targetLang';
+
+    const EMPTY_VAL = '_EMPTY_';
+
     const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
     const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
