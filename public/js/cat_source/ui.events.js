@@ -1247,16 +1247,14 @@ $.extend( UI, {
 
             if ( UI.hasSourceOrTargetTags() ) {
                 UI.currentSegment.addClass( 'hasTagsToggle' );
-                segment.addClass( 'hasTags' );
             } else {
                 UI.currentSegment.removeClass( 'hasTagsToggle' );
-                segment.removeClass( 'hasTags' );
             }
 
             if ( UI.hasMissingTargetTags() ) {
-                segment.addClass( 'hasTagsAutofill' );
+				UI.currentSegment.addClass( 'hasTagsAutofill' );
             } else {
-                segment.removeClass( 'hasTagsAutofill' );
+				UI.currentSegment.removeClass( 'hasTagsAutofill' );
             }
 
 
