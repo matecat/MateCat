@@ -301,8 +301,14 @@ class createProjectController extends ajaxController {
         $projectManager = new ProjectManager( $projectStructure );
         $projectManager->createProject();
 
+        $this->clearSessionFiles();
+
         $this->result = $projectStructure[ 'result' ];
 
+    }
+
+    private function clearSessionFiles() {
+        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
     }
 
     private static function sanitizeTmKeyArr( $elem ) {

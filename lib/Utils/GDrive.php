@@ -3,6 +3,9 @@
 class GDrive {
 
     const SESSION_ACTUAL_SOURCE_LANG = 'actualSourceLang';
+    const SESSION_FILE_LIST = 'gdriveFileList';
+    const SESSION_FILE_NAME = 'fileName';
+    const SESSION_FILE_HASH = 'fileHash';
 
     const COOKIE_SOURCE_LANG = 'sourceLang';
     const COOKIE_TARGET_LANG = 'targetLang';
@@ -47,6 +50,23 @@ class GDrive {
                 return '.xlsx';
         }
         
+        return null;
+    }
+
+    public static function findFileIdByName ( $fileName, $session ) {
+        if( isset( $session[ self::SESSION_FILE_LIST ] )
+                && is_array( $session[ self::SESSION_FILE_LIST ] )
+                && count( $session[ self::SESSION_FILE_LIST ] ) > 0 ) {
+
+            $fileList = $session[ self::SESSION_FILE_LIST ];
+
+            foreach ( $fileList as $fileId => $file ) {
+                if( $file[ self::SESSION_FILE_NAME ] === $fileName ) {
+                    return $fileId;
+                }
+            }
+        }
+
         return null;
     }
 }

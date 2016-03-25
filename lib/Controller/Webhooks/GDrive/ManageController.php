@@ -11,40 +11,54 @@ use RecursiveIteratorIterator;
 use GDrive;
 
 class ManageController extends KleinController {   
-    public function listImportedFiles() {        
-        $path = $this->getGDriveFilePath();
-        $fileName = $_SESSION['pre_loaded_file'];
+    public function listImportedFiles() {
+        $response = array();
         
-        if(file_exists($path) !== false) {
-            $fileSize = filesize($path);
+        $fileList = $_SESSION[ GDrive::SESSION_FILE_LIST ];
 
-            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+        foreach ( $fileList as $fileId => $file) {
+            $path = $this->getGDriveFilePath( $file );
 
-            $response = array(
-                'fileName' => $fileName,
-                'fileSize' => $fileSize,
-                'fileExtension' => $fileExtension
-            );
+            $fileName = $file[ GDrive::SESSION_FILE_NAME ];
 
-            $this->response->json($response);
+            if(file_exists($path) !== false) {
+                $fileSize = filesize($path);
+
+                $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+                $response[ 'files' ][] = array(
+                    'fileId' => $fileId,
+                    'fileName' => $fileName,
+                    'fileSize' => $fileSize,
+                    'fileExtension' => $fileExtension
+                );
+            } else {
+                unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] );
+            }
         }
+
+        $this->response->json($response);
     }
     
-    private function getGDriveFilePath() {
-        $fileName = $_SESSION['pre_loaded_file'];
+    private function getGDriveFilePath( $file ) {
+        $fileName = $file[ GDrive::SESSION_FILE_NAME ];
         
-        $cacheFileDir = $this->getCacheFileDir();
+        $cacheFileDir = $this->getCacheFileDir( $file );
         
         $path = $cacheFileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
         
         return $path;
     }
     
-    private function getCacheFileDir(){
+    private function getCacheFileDir( $file, $lang = '' ){
         $sourceLang = $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ];
         
-        $fileHash = $_SESSION['google_drive_file_sha1'];
-                    
+        if( $lang !== '' ) {
+            $sourceLang = $lang;
+        }
+
+        $fileHash = $file[ GDrive::SESSION_FILE_HASH ];
+
         $cacheTreeAr = array(
             'firstLevel'  => $fileHash{0} . $fileHash{1},
             'secondLevel' => $fileHash{2} . $fileHash{3},
@@ -64,49 +78,59 @@ class ManageController extends KleinController {
     
     public function changeSourceLanguage() {
         $originalSourceLang = $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ];
-        
-        $fileHash = $_SESSION['google_drive_file_sha1'];
-        
+
         $newSourceLang = $this->request->sourceLanguage;
         
-        $renameSuccess = false;
+        $fileList = $_SESSION[ GDrive::SESSION_FILE_LIST ];
         
-        if($newSourceLang !== $originalSourceLang) {
+        $success = true;
         
-            $originalCacheFileDir = $this->getCacheFileDir();
+        foreach( $fileList as $fileId => $file ) {
+            if($success) {
+                $fileHash = $file[ GDrive::SESSION_FILE_HASH ];
 
+                if($newSourceLang !== $originalSourceLang) {
+
+                    $originalCacheFileDir = $this->getCacheFileDir( $file, $originalSourceLang );
+
+                    $newCacheFileDir = $this->getCacheFileDir( $file, $newSourceLang );
+
+                    $renameDirSuccess = rename($originalCacheFileDir, $newCacheFileDir);
+
+                    $uploadDir = $this->getUploadDir();
+
+                    $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
+                    $newUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
+
+                    $renameFileRefSuccess = rename($originalUploadRefFile, $newUploadRefFile);
+
+                    if(!$renameDirSuccess || !$renameFileRefSuccess) {
+                        Log::doLog('Error when moving cache file dir to ' . $newCacheFileDir);
+
+                        $success = false;
+                    }
+                }
+            }
+        }
+
+        if( $success ) {
             $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
 
-            $newCacheFileDir = $this->getCacheFileDir();
-        
-            $renameDirSuccess = rename($originalCacheFileDir, $newCacheFileDir);
+            $ckSourceLang = filter_input(INPUT_COOKIE, GDrive::COOKIE_SOURCE_LANG);
 
-            $uploadDir = $this->getUploadDir();
-
-            $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
-            $newUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
-
-            $renameFileRefSuccess = rename($originalUploadRefFile, $newUploadRefFile);
-
-            if($renameDirSuccess && $renameFileRefSuccess) {
-                $ckSourceLang = filter_input(INPUT_COOKIE, GDrive::COOKIE_SOURCE_LANG);
-
-                if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === GDrive::EMPTY_VAL ) {
-                    $ckSourceLang = '';
-                }
-
-                $newCookieVal = $newSourceLang . '||' . $ckSourceLang;
-
-                setcookie( GDrive::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/' );
-            } else {
-                Log::doLog('Error when moving cache file dir to ' . $newCacheFileDir);
-
-                $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
+            if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === GDrive::EMPTY_VAL ) {
+                $ckSourceLang = '';
             }
+
+            $newCookieVal = $newSourceLang . '||' . $ckSourceLang;
+
+            setcookie( GDrive::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/' );
+        } else {
+            $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
         }
         
         $response = array(
-            "success" => ($renameDirSuccess && $renameFileRefSuccess)
+            "success" => $success
         );
         
         $this->response->json($response);
@@ -128,18 +152,20 @@ class ManageController extends KleinController {
     }
     
     public function deleteImportedFile() {
-        $fileName = $_SESSION['pre_loaded_file'];
+        $fileId = $this->request->fileId;
         
         $success = false;
         
-        if($this->request->file == $fileName) {
-            $pathCache = $this->getCacheFileDir();
-            $pathUpload = $this->getUploadDir();
+        if( isset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] ) ) {
+            $file = $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ];
             
+            $pathCache = $this->getCacheFileDir( $file );
+
             $this->deleteDirectory($pathCache);
-            $this->deleteDirectory($pathUpload);
-        
-            $_SESSION['pre_loaded_file'] = null;
+
+            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] );
+
+            Log::doLog( 'File ' . $fileId . ' removed.' );
             
             $success = true;
         }

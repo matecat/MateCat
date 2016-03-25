@@ -333,21 +333,24 @@ class newProjectController extends viewController {
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
         $this->template->DQF_enabled = INIT::$DQF_ENABLED;
 
-        $preUpload = filter_input(INPUT_GET, 'preupload');
-
-        if(!$preUpload || $preUpload != '1') {
-            $_SESSION['pre_loaded_file'] = null;
-        }
-
-        $this->template->use_pre_uploaded_files = 
-            $_SESSION['pre_loaded_file'] && 
-            $preUpload;
-
-        $this->template->pre_uploaded_files =  $_SESSION['pre_loaded_file'];
+        $this->template->isGDrive = $this->isGDrive();
 
         $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
         $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
-        
+    }
+
+    private function isGDrive() {
+        $gdrive = intval( filter_input(INPUT_GET, 'gdrive') );
+
+        $isGDrive= false;
+
+        if($gdrive === 1) {
+            $isGDrive = true;
+        } else {
+            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
+        }
+
+        return $isGDrive;
     }
 
 }

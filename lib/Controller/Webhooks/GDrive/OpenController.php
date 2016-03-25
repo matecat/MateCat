@@ -11,130 +11,154 @@ use Google_Http_Request ;
 use Utils ;
 use INIT ; 
 use ConversionHandler ; 
-use GDrive ;
+use GDrive;
 
 class OpenController extends KleinController {
 
-    private $file_name; 
-    private $source_lang = 'en-US';  // <-- TODO: check why en-GB breaks everything
+    private $source_lang = 'en-US';
     private $target_lang = 'fr-FR';
-    private $seg_rule = null; 
+    private $seg_rule = null;
+
+    private $oauthClient = null;
+    private $gdriveService = null;
+
+    private $guid = null;
 
     public function open() {
 
-        // TODO: assuming a user is logged in for now
-        // start session 
+        $this->doAuth();
+
+        $this->correctSourceTargetLang();
+
+        $this->doImport();
+
+        $this->doRedirect();
+
+    }
+
+    private function doAuth() {
         Bootstrap::sessionStart(); 
 
-        // check $_SESSION['upload_session']; 
-        //
         $dao = new \Users_UserDao( \Database::obtain() ); 
         $user = $dao->getByUid( $_SESSION['uid'] ); 
 
-        $guid = Utils::create_guid(); 
-        setcookie( "upload_session", $guid, time() + 86400, '/' );
+        $token = $user->oauth_access_token ;
 
-        // set a new cookie 
+        $this->oauthClient = OauthClient::getInstance()->getClient();
+        $this->oauthClient->setAccessToken( $token );
+        $this->gdriveService = new Google_Service_Drive( $this->oauthClient );
+    }
 
-        $token = $user->oauth_access_token ; 
+    private function doImport() {
 
         $state = json_decode( $this->request->param('state'), TRUE );
 
         \Log::doLog( $state );
 
-        $client = OauthClient::getInstance()->getClient();
-        $client->setAccessToken( $token ); 
-        $service = new Google_Service_Drive( $client );
+        $this->guid = Utils::create_guid();
+        setcookie( "upload_session", $this->guid, time() + 86400, '/' );
 
-        // TODO: handle token expired HERE 
-        // \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-        //
+        $listOfIds = array();
+
         if ( array_key_exists( 'ids', $state) ) {
-            $fileId = $state['ids'][0];
-            $file = $service->files->get($fileId);
-            $downloadUrl = $file->getDownloadUrl();
+            $listOfIds = $state['ids'];
         }
         else if ( array_key_exists('exportIds', $state) ) {
-            // forge a request to the APIs V3 to get export download URL
-            $fileId = $state['exportIds'][0];
-            $file = $service->files->get($fileId);
-            $mime = \GDrive::officeMimeFromGoogle( $file->mimeType );
-            $links = $file->getExportLinks() ;
-
-            if($links != null) {
-                $downloadUrl = $links[ $mime ];
-            } else {
-                $downloadUrl = $file->getDownloadUrl();
-            }
+            $listOfIds = $state['exportIds'];
         }
         else {
             throw new Exception( " no ids or export ids found ");
         }
 
-        // Save in session to allow createProject to insert
-        // the database record representing the file along with its
-        // google drive ids.
-        $_SESSION['google_drive_file_id'] = $fileId ;
+        $countIds = count( $listOfIds );
 
-        if ($downloadUrl) {
-            $this->file_name = $file->getTitle(); 
-            $file_extension = \GDrive::officeExtensionFromMime( $file->mimeType );
+        for( $i = 0; $i < $countIds; $i++ ) {
+            $this->importFile( $listOfIds[$i] );
+        }
+    }
 
-            //TODO: Analyse mimetype when other formats are enabled
-            if (substr($this->file_name, -5) !== $file_extension) {
-                $this->file_name .= $file_extension;
-            }
-            
-            $request = new \Google_Http_Request($downloadUrl, 'GET', null, null);
-            $httpRequest = $service->getClient()->getAuth()->authenticatedRequest($request);
-            if ($httpRequest->getResponseHttpCode() == 200) {
-                $body =  $httpRequest->getResponseBody();
-                $directory = Utils::uploadDirFromSessionCookie( $guid );
-                mkdir($directory, 0755, true);
+    private function importFile( $fileId ) {
+        $file = $this->gdriveService->files->get( $fileId );
+        $mime = GDrive::officeMimeFromGoogle( $file->mimeType );
+        $links = $file->getExportLinks() ;
 
-                $file_path = Utils::uploadDirFromSessionCookie( $guid, $this->file_name ); 
-                $saved = file_put_contents( $file_path, $httpRequest->getResponseBody() ); 
+        $downloadUrl = '';
 
-                if ( $saved !== FALSE ) {
-                    $this->correctSourceTargetLang();
-                    $this->doConversion( $guid ); 
-                    $_SESSION['pre_loaded_file'] = $this->file_name ;
-
-                    header("Location: /?preupload=1", true, 302);
-                    exit; 
-                }
-
-            } else {
-                // An error occurred.
-                return null;
-            }
+        if($links != null) {
+            $downloadUrl = $links[ $mime ];
         } else {
-            // The file doesn't have any content stored on Drive.
-            return null;
+            $downloadUrl = $file->getDownloadUrl();
         }
 
+        if ($downloadUrl) {
+
+            $fileName = $file->getTitle();
+            $file_extension = GDrive::officeExtensionFromMime( $file->mimeType );
+
+            if ( substr( $fileName, -5 ) !== $file_extension ) {
+                $fileName .= $file_extension;
+            }
+
+            $request = new \Google_Http_Request( $downloadUrl, 'GET', null, null );
+            $httpRequest = $this->gdriveService
+                    ->getClient()
+                    ->getAuth()
+                    ->authenticatedRequest( $request );
+
+            if ( $httpRequest->getResponseHttpCode() == 200 ) {
+                $body = $httpRequest->getResponseBody();
+                $directory = Utils::uploadDirFromSessionCookie( $this->guid );
+                mkdir( $directory, 0755, true );
+
+                $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
+                $saved = file_put_contents( $filePath, $httpRequest->getResponseBody() );
+
+                if ( $saved !== FALSE ) {
+                    $fileHash = sha1_file( $filePath );
+
+                    $this->addFileToSession( $fileId, $fileName, $fileHash );
+
+                    $this->doConversion( $fileName );
+                } else {
+                    throw new Exception( 'Error when saving file.' );
+                }
+            } else {
+                throw new Exception( 'Error when downloading file.' );
+            }
+        } else {
+            throw new Exception( 'Unable to get the file URL.' );
+        }
     }
 
-    protected function afterConstruct() {
+    private function addFileToSession( $fileId, $fileName, $fileHash ) {
+        if( !isset( $_SESSION[ GDrive::SESSION_FILE_LIST ] )
+                || !is_array( $_SESSION[ GDrive::SESSION_FILE_LIST ] ) ) {
+            $_SESSION[ GDrive::SESSION_FILE_LIST ] = array();
+        }
 
+        $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] = array(
+            GDrive::SESSION_FILE_NAME => $fileName,
+            GDrive::SESSION_FILE_HASH => $fileHash
+        );
     }
 
-    private function doConversion( $cookieDir ) {
+    private function doConversion( $file_name ) {
+        $uploadDir = $this->guid;
 
         $intDir         = INIT::$UPLOAD_REPOSITORY . 
-            DIRECTORY_SEPARATOR . $cookieDir;
+            DIRECTORY_SEPARATOR . $uploadDir;
 
         $errDir         = INIT::$STORAGE_DIR .
             DIRECTORY_SEPARATOR .
             'conversion_errors'  . 
-            DIRECTORY_SEPARATOR . $cookieDir;
+            DIRECTORY_SEPARATOR . $uploadDir;
 
         $conversionHandler = new ConversionHandler();
-        $conversionHandler->setFileName( $this->file_name );
+        $conversionHandler->setFileName( $file_name );
         $conversionHandler->setSourceLang( $this->source_lang );
         $conversionHandler->setTargetLang( $this->target_lang );
         $conversionHandler->setSegmentationRule( $this->seg_rule );
-        $conversionHandler->setCookieDir( $cookieDir );
+        $conversionHandler->setCookieDir( $uploadDir );
         $conversionHandler->setIntDir( $intDir );
         $conversionHandler->setErrDir( $errDir ); 
 
@@ -173,4 +197,13 @@ class OpenController extends KleinController {
         $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
     }
     
+    private function doRedirect() {
+        header("Location: /?gdrive=1", true, 302);
+        exit;
+    }
+
+    protected function afterConstruct() {
+
+    }
+
 }

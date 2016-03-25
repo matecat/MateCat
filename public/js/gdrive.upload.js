@@ -1,86 +1,87 @@
 APP.tryListGDriveFiles = function() {
     $.getJSON('/webhooks/gdrive/list', function(listFiles){
-        if(listFiles && listFiles.hasOwnProperty('fileName')){
-            //TODO: Iterate when multiple files are enabled
-            var iconClass = '';
+        $('.files-gdrive').html('');
 
-            if ( listFiles.fileExtension == 'docx' ) {
-                iconClass = 'extgdoc';
-            } else if ( listFiles.fileExtension == 'pptx' ) {
-                iconClass = 'extgsli';
-            } else if ( listFiles.fileExtension == 'xlsx' ) {
-                iconClass = 'extgsheet';
-            }
+        if( listFiles && listFiles.hasOwnProperty('files') ) {
+            $.each( listFiles.files, function( index, file ) {
+                var iconClass = '';
 
-            $('.files-gdrive').html('');
+                if ( file.fileExtension == 'docx' ) {
+                    iconClass = 'extgdoc';
+                } else if ( file.fileExtension == 'pptx' ) {
+                    iconClass = 'extgsli';
+                } else if ( file.fileExtension == 'xlsx' ) {
+                    iconClass = 'extgsheet';
+                }
 
-            $('<tr/>', {
-                'class': 'template-gdrive fade ready',
-                'style': 'display: table-row;'
-            })
-            .append (
-                $('<td/>', {
-                    'class': 'preview'
+                $('<tr/>', {
+                    'class': 'template-gdrive fade ready',
+                    'style': 'display: table-row;'
                 })
                 .append (
-                    $('<span/>', {
-                        'class': iconClass
-                    })
-                )
-            )
-            .append (
-                $('<td/>', {
-                    'class': 'name',
-                    text: listFiles.fileName
-                })
-            )
-            .append (
-                $('<td/>', {
-                    'class': 'size'
-                })
-                .append (
-                    $('<span/>', {
-                        text: APP.formatBytes(listFiles.fileSize)
-                    })
-                )
-            )
-            .append (
-                $('<td/>', {
-                    'class': 'delete'
-                })
-                .append (
-                    $('<button/>', {
-                        'class': 'btn btn-dange ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary',
-                        'data-file': listFiles.fileName,
-                        'role': 'button',
-                        'aria-disabled': 'false',
-                        click: function() {
-                            APP.deleteGDriveFile( $(this).data('file') );
-                        }
+                    $('<td/>', {
+                        'class': 'preview'
                     })
                     .append (
                         $('<span/>', {
-                            'class': 'ui-button-icon-primary ui-icon ui-icon-trash'
+                            'class': iconClass
                         })
                     )
+                )
+                .append (
+                    $('<td/>', {
+                        'class': 'name',
+                        text: file.fileName
+                    })
+                )
+                .append (
+                    $('<td/>', {
+                        'class': 'size'
+                    })
                     .append (
                         $('<span/>', {
-                            'class': 'ui-button-text'
+                            text: APP.formatBytes(file.fileSize)
+                        })
+                    )
+                )
+                .append (
+                    $('<td/>', {
+                        'class': 'delete'
+                    })
+                    .append (
+                        $('<button/>', {
+                            'class': 'btn btn-dange ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary',
+                            'data-fileid': file.fileId,
+                            'role': 'button',
+                            'aria-disabled': 'false',
+                            click: function() {
+                                APP.deleteGDriveFile( $(this).data('fileid') );
+                            }
                         })
                         .append (
-                            $('<i/>', {
-                                'class': 'icon-ban-circle icon-white'
+                            $('<span/>', {
+                                'class': 'ui-button-icon-primary ui-icon ui-icon-trash'
                             })
                         )
                         .append (
                             $('<span/>', {
-                                text: 'Delete'
+                                'class': 'ui-button-text'
                             })
+                            .append (
+                                $('<i/>', {
+                                    'class': 'icon-ban-circle icon-white'
+                                })
+                            )
+                            .append (
+                                $('<span/>', {
+                                    text: 'Delete'
+                                })
+                            )
                         )
                     )
                 )
-            )
-            .appendTo('.files-gdrive');
+                .appendTo('.files-gdrive');
+            });
         }
     });
 };
@@ -95,10 +96,10 @@ APP.restartGDriveConversions = function () {
     });
 };
 
-APP.deleteGDriveFile = function (fileName) {
-    $.getJSON('/webhooks/gdrive/delete/' + fileName, function(response){
+APP.deleteGDriveFile = function (fileId) {
+    $.getJSON('/webhooks/gdrive/delete/' + fileId, function(response){
         if(response.success) {
-            window.open('/', '_self');
+            APP.tryListGDriveFiles();
         }
     });
 };

@@ -120,8 +120,6 @@ class ConversionHandler {
 
         //compute hash to locate the file in the cache
         $sha1 = sha1_file( $file_path );
-        
-        $_SESSION['google_drive_file_sha1'] = $sha1 ;
 
         //initialize path variable
         $cachedXliffPath = false;
