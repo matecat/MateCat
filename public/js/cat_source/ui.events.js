@@ -1091,9 +1091,19 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
-            if(!UI.editarea.find('.locked').length) {
-                UI.currentSegment.removeClass('hasTags');
-            }
+
+			if ( UI.hasSourceOrTargetTags() ) {
+				UI.currentSegment.addClass( 'hasTagsToggle' );
+			} else {
+				UI.currentSegment.removeClass( 'hasTagsToggle' );
+			}
+
+			if ( UI.hasMissingTargetTags() ) {
+				UI.currentSegment.addClass( 'hasTagsAutofill' );
+			} else {
+				UI.currentSegment.removeClass( 'hasTagsAutofill' );
+			}
+
 			UI.registerQACheck();
                 if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which = '32')) ) {
                 } else {
