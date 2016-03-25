@@ -2,9 +2,11 @@
 
 namespace Features ;
 
+use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
 use Log ;
 use FilesStorage ;
+use LQA\ChunkReviewDao;
 use Translations_SegmentTranslationStruct;
 use ZipArchive ;
 use Chunks_ChunkDao  ;
@@ -130,12 +132,30 @@ class ReviewImproved extends BaseFeature {
      * postJobMerged
      *
      * Deletes the previously created record and creates the new records matching the new chunks.
-     * TODO: this action should merge revision data as well.
      */
     public function postJobMerged( $projectStructure ) {
         $id_job = $projectStructure['job_to_merge'] ;
+
+        $old_reviews = \LQA\ChunkReviewDao::findByIdJob( $id_job );
+
+        $score = 0;
+        $reviewed_words_count = 0 ;
+
+        foreach($old_reviews as $row ) {
+            $score = $score + $row->score;
+            $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
+        }
+
         \LQA\ChunkReviewDao::deleteByJobId( $id_job );
+
         $this->createQaChunkReviewRecord( $id_job, $projectStructure );
+        $new_reviews = \LQA\ChunkReviewDao::findByIdJob( $id_job );
+        $new_reviews[0]->score = $score;
+        $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
+
+        $model = new ChunkReviewModel( $new_reviews[0]);
+        $model->updatePassFailResult();
+
     }
 
     /**

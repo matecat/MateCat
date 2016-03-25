@@ -225,6 +225,7 @@ UI = {
                 var pretranslated = ( null == d.data.eq_word_count );
 				var total = $('.popup-split .wordsum .total-w').attr('data-val');
 				var prog = 0;
+                var val;
 				if (!$.isEmptyObject(d.data)) {
 
                     var editAreaList = $( '.popup-split ul.jobs li .input-small' );
