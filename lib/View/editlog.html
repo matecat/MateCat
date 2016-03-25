@@ -84,11 +84,11 @@
                     <td tal:attributes="class php:tte_fast ? 'color_green' : NULL">
                         <span tal:condition="tte_fast"><b><i>You're fast!</i></b></span>
                         <span tal:replace="stats/avg-secs-per-word | string:--"></span>s
-                        <small style="color:#000">(other users: <span tal:replace="overall_tte | string:--"></span>s)</small>
+                        <!--<small style="color:#000">(other users: <span tal:replace="overall_tte | string:&#45;&#45;"></span>s)</small>-->
                     </td>
                     <td tal:attributes="class php:pee_slow ? 'bg_orange' : NULL" >
                         <span tal:replace="stats/avg-pee | string:--"></span>
-                        <small>(other users: <span tal:replace="overall_pee | string:--"></span>%)</small>
+                        <!--<small>(other users: <span tal:replace="overall_pee | string:&#45;&#45;"></span>%)</small>-->
                     </td>
                 </tr>
             </table>
