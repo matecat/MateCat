@@ -14,7 +14,6 @@ use TaskRunner\Commons\AbstractDaemon;
  */
 class LanguageStatsRunner extends AbstractDaemon {
 
-
     public function __construct() {
         parent::__construct();
         Log::$fileName   = "languageStats.log";
@@ -102,11 +101,14 @@ class LanguageStatsRunner extends AbstractDaemon {
                 usleep( 100 );
             }
 
+            Log::doLog( "Everything completed. I can die." );
+            echo "Everything completed. I can die.\n";
+
             //for the moment, this daemon is single-loop-execution
             $this->RUNNING = false;
 
             if ( $this->RUNNING ) {
-                sleep( self::$sleeptime );
+                sleep( self::$sleepTime );
             }
 
         } while ( $this->RUNNING );
@@ -116,6 +118,13 @@ class LanguageStatsRunner extends AbstractDaemon {
         // TODO: Implement cleanShutDown() method.
     }
 
+    /**
+     * Every cycle reload and update Daemon configuration.
+     * @return void
+     */
+    protected function _updateConfiguration() {
+        // TODO: Implement _updateConfiguration() method.
+    }
 }
 
 $lsr = LanguageStatsRunner::getInstance();
