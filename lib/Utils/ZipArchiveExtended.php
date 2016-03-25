@@ -125,6 +125,7 @@ class ZipArchiveExtended extends ZipArchive {
 
             if( $pathBySlash[ 0 ] == '__MACOSX' ) continue;
             if( $pathBySlash[ 0 ] == '__reference' ) continue;
+            if( $pathBySlash[ 0 ] == '__meta' ) continue;
 
             if( end($pathBySlash) == '.DS_Store' ) continue;
 

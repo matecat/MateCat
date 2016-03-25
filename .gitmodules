@@ -1,21 +1,21 @@
 [submodule "tools/puppet/modules/apache"]
 	path = support_scripts/puppet/modules/apache
-	url = git@github.com:puppetlabs/puppetlabs-apache.git
+	url = https://github.com/puppetlabs/puppetlabs-apache.git
 [submodule "tools/puppet/modules/stdlib"]
 	path = support_scripts/puppet/modules/stdlib
-	url = git@github.com:puppetlabs/puppetlabs-stdlib.git
+	url = https://github.com/puppetlabs/puppetlabs-stdlib.git
 [submodule "tools/puppet/modules/concat"]
 	path = support_scripts/puppet/modules/concat
-	url = git@github.com:puppetlabs/puppetlabs-concat.git
+	url = https://github.com/puppetlabs/puppetlabs-concat.git
 [submodule "tools/puppet/modules/java"]
 	path = support_scripts/puppet/modules/java
-	url = git@github.com:puppetlabs/puppetlabs-java.git
+	url = https://github.com/puppetlabs/puppetlabs-java.git
 [submodule "tools/puppet/modules/mysql"]
 	path = support_scripts/puppet/modules/mysql
-	url = git@github.com:puppetlabs/puppetlabs-mysql.git
+	url = https://github.com/puppetlabs/puppetlabs-mysql.git
 [submodule "tools/puppet/modules/apt"]
 	path = support_scripts/puppet/modules/apt
-	url = git@github.com:puppetlabs/puppetlabs-apt.git
+	url = https://github.com/puppetlabs/puppetlabs-apt.git
 [submodule "tools/puppet/modules/wget"]
 	path = support_scripts/puppet/modules/wget
 	url = git://github.com/maestrodev/puppet-wget.git

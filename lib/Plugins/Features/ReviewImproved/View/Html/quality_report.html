@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Quality Report - MateCat</title>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+
+    <script type="text/javascript">
+        var config = {
+            basepath: '${basepath | string:/}'
+        };
+    </script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
+    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+</head>
+
+<body>
+
+<header style="padding-bottom:5px" >
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+
+        <a tal:attributes="href download_uri"  class="downloadtr-button backbtn">Download this report</a>
+        <a tal:attributes="href translate_url"  class="downloadtr-button backbtn" >< Back to Translation</a>
+    </div>
+</header>
+
+<div class="wrapper">
+
+    <h1>Quality Report - Project: <span id="pname" tal:content="project/name"></span>
+
+    </h1>
+
+    <table class="tablestats left-aligned" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <th>Project number</th>
+            <td><span tal:content="model/project/id"></span></td>
+
+            <th>Total source words count</th>
+            <td><span tal:content="model/project/metadata/total_source_words | default"></span></td>
+
+            <th>Report date</th>
+            <td><span>${current_date}</span></td>
+        </tr>
+        <tr>
+            <th>Creation date</th>
+            <td><span tal:content="model/project/created_at | default"></span></td>
+
+            <th>Language pair</th>
+            <td><span tal:content="model/job/source"></span> - <span tal:content="model/job/target"></span></td>
+
+            <th>Vendor</th>
+            <td><span tal:content="model/project/metadata/vendor | default"></span></td>
+        </tr>
+
+        <tr>
+            <th>Percentage reviewed</th>
+            <td><span tal:content="model/chunk/review/percentage | default"></span>%</td>
+
+            <th>Pass/Fail</th>
+            <td>
+                <strong tal:condition="true: model/chunk/review/is_pass" class="approved-foreground">PASS</strong>
+                <strong tal:condition="not: model/chunk/review/is_pass" class="rejected-foreground">FAIL</strong>
+            </td>
+
+            <th>Score</th>
+            <td><span tal:content="model/chunk/review/score"></span></td>
+        </tr>
+
+        <tr>
+            <th>Reviewer name</th>
+            <td colspan="5" tal:content="model/chunk/review/reviewer_name"></td>
+        </tr>
+    </table>
+
+    <div style="margin-bottom: 20px;" tal:repeat="file model/chunk/files">
+        <h2>File name: <span tal:content="file/filename"></span></h2>
+
+        <div style="margin-bottom: 30px" tal:repeat="segment file/segments">
+
+            <table class="tablestats continue left-aligned" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <colgroup>
+                    <col width="100px" />
+                    <col width="100px" />
+                    <col width="150px" />
+                </colgroup>
+                <tr>
+                    <th colspan="1">Segment ID</th>
+                    <td colspan="1">
+                        <a target="_blank" href="${segment/translate_url}">${segment/id}</a>
+                    </td>
+
+                    <th>Source</th>
+                    <td style="text-align: left;" tal:content="segment/source"></td>
+
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>
+                        <strong class="approved-foreground" tal:condition="true: segment/is_approved" tal:content="segment/status"></strong>
+                        <strong class="rejected-foreground" tal:condition="not: segment/is_approved" tal:content="segment/status"></strong>
+                    </td>
+                    <th>Post Edited</th>
+                    <td style="text-align: left;" tal:content="segment/translation"></td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Edit distance</th>
+                    <td tal:content="segment/edit_distance"></td>
+
+                    <th>Original Target</th>
+                    <td tal:content="segment/original_translation"></td>
+                </tr>
+            </table>
+
+
+            <tal:block tal:condition="true: segment/issues">
+
+
+            <h3>Issues</h3>
+
+            <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr tal:repeat="issue segment/issues">
+                    <th style="vertical-align: top" width="20" tal:content="repeat/issue/number"></th>
+                    <td style="text-align:left">
+                        <span style="padding-right: 10px; ">
+                            <strong>Category:</strong> <span tal:content="issue/category"></span>
+                        </span>
+
+                        <span style="padding-right: 10px;">
+                            <strong>Severity</strong> <span tal:content="issue/severity"></span>
+
+                        </span>
+
+                        <span style="padding-right: 10px;">
+                            <strong>Target text:</strong> <span tal:content="issue/target_text"></span>
+                        </span>
+
+
+                        <tal:block condition="exists: issue/comment">
+                            <span style="padding-right: 10px;">
+                                <strong>Reviewer comment:</strong> ${issue/comment}
+                            </span>
+                        </tal:block>
+
+                        <tal:block condition="true: issue/replies_count">
+
+                            <div style="margin: 10px 0;"><strong>Discussion</strong></div>
+                            <hr />
+                            <div class="">
+                                <div style="width: 200px; display:inline; float:left;"><strong>Date</strong></div>
+                                <div style="width: 100%; display:inline;"><strong>Comment</strong></div>
+                            </div>
+
+                            <div tal:repeat="comment issue/comments">
+                                <div style="width: 200px; display:inline; float:left">${comment/created_at}</div>
+                                <div style="width: 100%; display: inline;">${comment/comment}</div>
+                            </div>
+
+                        </tal:block>
+                    </td>
+                </tr>
+
+            </table>
+
+            </tal:block>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+
+</body>
+</html>

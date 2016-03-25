@@ -7,6 +7,10 @@ class CurlTest {
   public $params = array();
   public $files = array();
 
+  public $enable_xdebug = true ;
+
+  public $referer ;
+
   private $url ;
 
   private $response_header ;
@@ -21,7 +25,7 @@ class CurlTest {
     $this->params  = @$options['params'];
     $this->files   = @$options['files'];
     $this->method  = @$options['method'];
-
+    $this->referer = @$options['referer'];
   }
 
   function run() {
@@ -57,6 +61,16 @@ class CurlTest {
       $this->url .= "?" . http_build_query( $this->params );
     }
 
+
+    if ( $this->referer != null ) {
+        \Log::doLog('referer: ' .  $this->referer );
+        curl_setopt($ch, CURLOPT_REFERER, $this->referer )  ;
+    }
+
+    if ( $this->enable_xdebug ) {
+      $this->headers[] = "Cookie: XDEBUG_SESSION=MATECAT_TEST" ;
+    }
+
     $this->setHeaders($ch) ;
 
     curl_setopt($ch, CURLOPT_URL, $this->url );
@@ -88,6 +102,10 @@ class CurlTest {
 
   public function getResponse() {
     if ( $this->run() ) {
+      // var_dump($this->response_body);
+      // var_dump($this->response_header);
+      // var_dump("Response code: " . $this->response_code);
+
       return array(
         'header' => $this->response_header,
         'body' => $this->response_body,

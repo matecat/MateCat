@@ -77,8 +77,12 @@ function prepareTestSchema($testDatabase, $devDatabase) {
 function integrationSetChunkAsComplete( $options ) {
     $test = new CurlTest();
 
-    if ( key_exists( 'headers' , $options ) ) {
+    if ( array_key_exists( 'headers' , $options ) ) {
         $test->headers = $options['headers'];
+    }
+
+    if ( array_key_exists( 'referer', $options ) ) {
+        $test->referer = $options['referer'];
     }
 
     $test->path = '?action=Features_ProjectCompletion_SetChunkCompleted';
@@ -97,10 +101,13 @@ function integrationSetChunkAsComplete( $options ) {
     return json_decode( $response['body'] )  ;
 }
 
+/**
+ * Creates a project via API call
+ */
 function integrationCreateTestProject( $options=array() ) {
   $test = new CurlTest();
 
-  if ( key_exists( 'headers' , $options ) ) {
+  if ( array_key_exists( 'headers' , $options ) ) {
       $test->headers = $options['headers'];
   }
 
@@ -112,7 +119,11 @@ function integrationCreateTestProject( $options=array() ) {
     'source_lang' => 'en'
   );
 
-  if ( key_exists('files', $options) ) {
+    if ( array_key_exists( 'params', $options )) {
+        $test->params = array_merge($test->params, $options['params']);
+    }
+
+  if ( array_key_exists('files', $options) ) {
       $test->files = $options['files'];
   } else {
       $test->files[] = test_file_path('xliff/amex-test.docx.xlf');
@@ -122,6 +133,60 @@ function integrationCreateTestProject( $options=array() ) {
 
   return json_decode( $response['body'] ) ;
 }
+
+function splitJob( $params, $options=array() ) {
+    $test = new CurlTest();
+
+    if ( array_key_exists( 'headers' , $options ) ) {
+        $test->headers = $options['headers'];
+    }
+
+    $test->path = '?action=splitJob';
+    $test->method = 'POST';
+    $test->params = array(
+        'job_id'       => $params['id_job'],
+        'project_id'   => $params['id_project'],
+        'project_pass' => $params['project_pass'],
+        'exec'         => 'apply',
+        'job_pass'     => $params['job_pass'],
+        'num_split'    => $params['num_split'],
+        'split_values' => $params['split_values']
+    );
+
+    $response = $test->getResponse();
+
+    if ( !in_array( (int) $response['code'], array(200, 201) ) ) {
+        throw new Exception( "invalid response code " . $response['code'] );
+    }
+
+    return json_decode( $response['body'] ) ;
+}
+
+function mergeJob( $params, $options=array() ) {
+    $test = new CurlTest();
+
+    if ( array_key_exists( 'headers' , $options ) ) {
+        $test->headers = $options['headers'];
+    }
+
+    $test->path = '?action=splitJob';
+    $test->method = 'POST';
+    $test->params = array(
+        'job_id'       => $params['id_job'],
+        'project_id'   => $params['id_project'],
+        'exec'         => 'merge',
+        'project_pass' => $params['project_pass'],
+    );
+
+    $response = $test->getResponse();
+
+    if ( !in_array( (int) $response['code'], array(200, 201) )) {
+        throw new Exception( "invalid response code " . $response['code'] );
+    }
+
+    return json_decode( $response['body'] )  ;
+}
+
 
 function integrationSetSegmentsTranslated( $project_id ) {
     $chunksDao = new Chunks_ChunkDao( Database::obtain() ) ;
@@ -140,7 +205,6 @@ function integrationSetSegmentsTranslated( $project_id ) {
     }
 
     return $chunks ;
-
 }
 
 function integrationSetTranslation($options) {
@@ -174,4 +238,28 @@ function integrationSetTranslation($options) {
   return $body ;
 
 
+}
+
+function sig_handler($signo) {
+     switch ($signo) {
+         case SIGTERM:
+             // handle shutdown tasks
+             restoreDevelopmentConfigFile();
+             exit;
+             break;
+         case SIGHUP:
+             restoreDevelopmentConfigFile();
+             break;
+         case SIGUSR1:
+             restoreDevelopmentConfigFile();
+             break;
+         default:
+             // handle all other signals
+     }
+}
+
+function setupSignalHandler() {
+    pcntl_signal(SIGTERM, "sig_handler");
+    pcntl_signal(SIGHUP,  "sig_handler");
+    pcntl_signal(SIGUSR1, "sig_handler");
 }

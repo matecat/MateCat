@@ -1,0 +1,42 @@
+{
+  "model": {
+    "version" : 1,
+    "label": "MateCat default",
+
+    "categories": [
+      {
+        "label": "Tag issues (mismatches, whitespaces)"
+      },
+      {
+        "label": "Translation errors (mistranslation, additions/omissions)"
+      },
+      {
+        "label": "Terminology and translation consistency"
+      },
+      {
+        "label": "Language quality (grammar, punctuation, spelling)"
+      },
+      {
+        "label": "Style (readability, consistent style and tone)"
+      }],
+      "severities": [
+        {
+          "label": "Enhancement",
+          "penalty": 0
+        },
+        {
+          "label": "Error",
+          "penalty": 1
+        }
+      ],
+
+      "passfail" : {
+        "type" : "points_per_thousand",
+        "options" : {
+          "limit" : 20
+        }
+      }
+
+  }
+
+}

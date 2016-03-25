@@ -4,38 +4,67 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
 
     public $id;
     public $password;
-    public $id_project ;
-    public $create_date ;
+    public $id_project;
+    public $create_date;
     public $job_first_segment;
-    public $job_last_segment ;
-    public $last_opened_segment ;
-    public $owner ;
-    public $last_update ;
-    public $source ;
-    public $target ;
-    public $tm_keys ;
+    public $job_last_segment;
+    public $last_opened_segment;
+    public $owner;
+    public $last_update;
+    public $source;
+    public $target;
+    public $tm_keys;
 
+    public $new_words;
+    public $draft_words;
+    public $translated_words;
+    public $approved_words;
+    public $rejected_words;
+
+
+    /** @return Segments_SegmentStruct[]
+     *
+     */
     public function getSegments() {
         $dao = new Segments_SegmentDao( Database::obtain() );
+
         return $dao->getByChunkId( $this->id, $this->password );
     }
 
-    public function isMarkedComplete() {
-        return Chunks_ChunkCompletionEventDao::isCompleted( $this ) ;
+    public function isMarkedComplete( $params ) {
+        $params = \Utils::ensure_keys( $params, array( 'is_review' ) );
+
+        return Chunks_ChunkCompletionEventDao::isCompleted( $this, array( 'is_review' => $params[ 'is_review' ] ) );
     }
 
+    /**
+     * @return Translations_SegmentTranslationStruct[]
+     */
     public function getTranslations() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+
         return $dao->getByJobId( $this->id );
     }
 
     public function findLatestTranslation() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
+
         return $dao->lastTranslationByJobOrChunk( $this );
     }
 
+    /**
+     * getProject
+     *
+     * Returns the project struct, caching the result on the instance to avoid
+     * unnecessary queries.
+     *
+     * @return \Projects_ProjectStruct
+     */
+
     public function getProject() {
-        return $this->getJob()->getProject();
+        return $this->cachable( __function__, $this->getJob(), function ( $job ) {
+            return $job->getProject();
+        } );
     }
 
     public function isFeatureEnabled( $feature_code ) {
@@ -49,7 +78,20 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         // I'm doing this to keep the concepts of Chunk and Job as
         // separated as possible even though they share the same
         // database table.
-        return new Jobs_JobStruct( $this->toArray() );
+        return new Jobs_JobStruct( $this->attributes() );
     }
+
+    /**
+     *
+     * @return float
+     */
+    public function totalWordsCount() {
+        return $this->new_words +
+            $this->draft_words +
+            $this->translated_words +
+            $this->approved_words +
+            $this->rejected_words;
+    }
+
 
 }

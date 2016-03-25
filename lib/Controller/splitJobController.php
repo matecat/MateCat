@@ -25,6 +25,14 @@ class splitJobController extends ajaxController {
 
     private $project_data;
 
+    /**
+     * @var \Projects_ProjectStruct
+     *
+     * This is the new variable to use to store all data for the project. This should be
+     * used instead of the data provided by `queries.php`.
+     */
+    private $project_struct ;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -55,6 +63,7 @@ class splitJobController extends ajaxController {
         $this->num_split    = $__postInput[ 'num_split' ];
         $this->split_values = $__postInput[ 'split_values' ];
 
+        $this->project_struct = \Projects_ProjectDao::findById( $__postInput['project_id'] ) ;
     }
 
     protected function valuesToInt( $float_val ){
@@ -72,7 +81,10 @@ class splitJobController extends ajaxController {
             }
 
             $pManager = new ProjectManager();
-            $pStruct  = $pManager->getProjectStructure();
+            $pManager->setProjectIdAndLoadProject( $this->project_struct->id );
+
+            $pStruct = $pManager->getProjectStructure();
+            $pStruct['id_customer'] = $this->project_struct->id_customer ;
 
             switch ( $this->exec ) {
                 case 'merge':

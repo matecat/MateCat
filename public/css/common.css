@@ -7,7 +7,7 @@ Description:      Common CSS rules.
 
 body
 {
-	min-width: 980px;
+	min-width: 1024px;
 	position: relative;
 	text-align: center;
 	margin: 0;
@@ -2047,7 +2047,7 @@ header .searchbox {
     border-radius: 0 2px 2px 0;
     text-decoration: none;
     text-align: center;
-    padding: 4px 10px !Important;
+    padding: 4px 10px !important;
     margin: 0 !important;
     float: right;
 }
@@ -2817,11 +2817,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-24j80y');
-	src:url('fonts/icomoon.eot?#iefix-24j80y') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-24j80y') format('woff'),
-		url('fonts/icomoon.ttf?-24j80y') format('truetype'),
-		url('fonts/icomoon.svg?-24j80y#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-bq1095');
+	src:url('fonts/icomoon.eot?#iefix-bq1095') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-bq1095') format('woff'),
+		url('fonts/icomoon.ttf?-bq1095') format('truetype'),
+		url('fonts/icomoon.svg?-bq1095#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2950,7 +2950,7 @@ a.resume-project:after,
 .text .alternatives:before,
 .autofillTag:before,
 input.downloadtr-button:before,
-body.manage header .filter:before,
+header .filter:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
@@ -2980,7 +2980,7 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .t
 	-moz-osx-font-smoothing: grayscale;
 }
 
-body.manage header .filter:before {
+header .filter:before {
     content: "\f0b0";
 }
 
@@ -3220,6 +3220,8 @@ transform: rotate(-45deg);
 a.cancel-project:before, a.resume-project:before{
 	content: "\f014";
 }
+
+
 a.archive-project:before, a.unarchive-project:before {
     content: "\e605";
     font-size: 14px;
@@ -3492,6 +3494,10 @@ text-align: left;
     content: "\f03d";
 }
 
+.icon-error_outline:before {
+    content: "\e001";
+}
+
 .icon-warning:before {
     content: "\f071";
 }
@@ -3703,3 +3709,6 @@ width: 250px;
     }
 
 }
+
+table.left-aligned tr td { text-align: left; }
+table.left-aligned tr th { text-align: left; }

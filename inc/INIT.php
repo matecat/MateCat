@@ -122,7 +122,8 @@ class INIT {
     const JOB_ARCHIVABILITY_THRESHOLD = 90;
 
     /**
-     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
+     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external
+     * translation provider (translated.net by default).
      * You can set it to false, but We are happy if you keep this on.
      * For each translation outsourced to Translated.net (the main Matecat developer),
      * Matecat gets more development budget and bugs fixes and new features get implemented faster.
@@ -214,6 +215,8 @@ class INIT {
         );
 
     }
+
+
 
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;

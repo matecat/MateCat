@@ -3,6 +3,7 @@
 class Features_ProjectCompletion_JobStatusTest extends IntegrationTest {
 
     function setup() {
+
     }
 
     function testsNoResponseIfFeatureNotEnabled() {

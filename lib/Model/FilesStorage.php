@@ -32,6 +32,8 @@ class FilesStorage {
     private $cacheDir;
     private $zipDir;
 
+    const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
+
     public function __construct( $files = null, $cache = null, $zip = null ) {
 
         //override default config
@@ -221,7 +223,7 @@ class FilesStorage {
      */
     public function cacheZipArchive( $hash, $zipPath ){
 
-        $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . "__##originalZip##";
+        $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER;
 
         //ensure old stuff is overwritten
         if ( is_dir( $thisZipDir ) ) {
@@ -241,14 +243,14 @@ class FilesStorage {
         if( !$outcome1 ){
             //Original directory deleted!!!
             //CLEAR ALL CACHE
-            Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . "__##originalZip##" );
+            Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
             return $outcome1;
         }
 
         unlink( $zipPath );
 
         //link this zip to the upload directory by creating a file name as the ash of the zip file
-        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . "__##originalZip##" );
+        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
 
         return true;
 
@@ -285,6 +287,13 @@ class FilesStorage {
 
     }
 
+    /**
+     * @param $projectDate
+     * @param $projectID
+     * @param $zipName
+     *
+     * @return string
+     */
     public function getOriginalZipPath( $projectDate, $projectID, $zipName ){
 
         $datePath = date_create( $projectDate )->format('Ymd');
@@ -303,7 +312,7 @@ class FilesStorage {
         //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
         foreach ( $linkFiles as $k => $linkFile ) {
 
-            if( strpos( $linkFile, "__##originalZip##" ) !== false ){
+            if( strpos( $linkFile, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ){
                 $zipFilesHash[ ] = $linkFile;
                 unset( $linkFiles[ $k ] );
             } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
@@ -645,6 +654,39 @@ class FilesStorage {
         $results = $db->fetch_array( $query );
 
         return $results[ 0 ][ 'xliff_file' ];
+    }
+
+    /**
+     * Gets the file path of the temporary uploaded zip, when the project is not
+     * yet created. Useful to perform prelimiray validation on the project.
+     * This function was created to perform validations on the TKIT zip file
+     * format loaded via API.
+     *
+     * XXX: This function only handles the case in which the zip file is *one* for the
+     * project.
+     *
+     * @param projectStructure the projectStructure of new project.
+     */
+
+    public function getTemporaryUploadedZipFile( $uploadToken ) {
+        $files  = scandir( INIT::$UPLOAD_REPOSITORY . '/' . $uploadToken );
+
+        foreach($files as $file) {
+            Log::doLog( $file );
+            if ( strpos( $file, FilesStorage::ORIGINAL_ZIP_PLACEHOLDER) !== false ) {
+                $zip_name = $file ;
+            }
+        }
+
+        $files = scandir(INIT::$ZIP_REPOSITORY .  '/' . $zip_name);
+        foreach ($files as $file) {
+            if ( strpos( $file, '.zip') !== false ) {
+                $zip_file = $file;
+                break;
+            }
+        }
+
+        return INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file ;
     }
 
     /**

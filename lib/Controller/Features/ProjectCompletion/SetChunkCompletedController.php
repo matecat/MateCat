@@ -20,7 +20,6 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     public function doAction() {
-        // ensure the record exists
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
             $this->__postInput['id_job'],
             $this->__postInput['password']
@@ -36,10 +35,12 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function processInsert() {
+
         $params = array(
             'uid' => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),
-            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER
+            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review' => $this->isRevision()
         );
 
         $event = Chunks_ChunkCompletionEventDao::createFromChunk(

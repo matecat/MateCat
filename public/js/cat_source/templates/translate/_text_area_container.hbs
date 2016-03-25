@@ -1,0 +1,29 @@
+<div class="textarea-container">
+  <span class="loader"></span>
+  <div class="{{editarea_classes_string}}"
+       {{#if readonly}} contenteditable="false" {{/if}}
+                        spellcheck="true"
+                        lang="{{lang}}"
+                        id="segment-{{segment.sid}}-editarea"
+                        data-sid="{{segment.sid}}"
+                        >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}</div>
+  <div class="toolbar">
+    {{{tagLockCustomizable}}}
+    {{#if tagModesEnabled }}
+    <a href="#" class="tagModeToggle" alt="Display full/short tags" title="Display full/short tags">
+      <span class="icon-chevron-left"></span>
+      <span class="icon-tag-expand"></span>
+      <span class="icon-chevron-right"></span>
+    </a>
+    <a href="#" class="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"></a>
+    {{/if}}
+
+    <ul class="editToolbar">
+      <li class="uppercase" title="Uppercase"></li>
+      <li class="lowercase" title="Lowercase"></li>
+      <li class="capitalize" title="Capitalized"></li>
+    </ul>
+  </div>
+
+  <p class="save-warning" title="Segment modified but not saved"></p>
+</div>

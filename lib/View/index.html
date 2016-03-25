@@ -3,13 +3,19 @@
     <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title tal:condition="php: !catController::isRevision()">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
-        <title tal:condition="php: catController::isRevision()">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:condition="not:isReview">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:condition="true:isReview">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
         <script type="text/javascript">
             /*<![CDATA[*/
+
+            var getStackTrace = function() {
+              var obj = {};
+              Error.captureStackTrace(obj, getStackTrace);
+              return obj.stack;
+            };
             var config = {
                 basepath: '${basepath | string:/}',
                 maxFileSize: ${maxFileSize},
@@ -27,7 +33,7 @@
                 mt_enabled: ${mt_enabled | string:true},
                 id_job: '${jid}',
                 get job_id() {
-                  /* console.info('job_id is deprecated, use id_job instead'); */
+                  console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
                 },
                 password: '${password}',
@@ -48,17 +54,37 @@
                 alternativesEnabled: true,
                 brPlaceholdEnabled: '${brPlaceholdEnabled}',
                 survey: false,
-                isReview: ${isReview},
+                isReview: ${isReview | string: false},
+                reviewType: '${review_type}',
                 enableReview: true,
                 stat_quality: ${structure php: stat_quality },
-                overall_quality: '${overall_quality}',
                 offlineModeEnabled: true,
                 splitSegmentEnabled: true,
                 copySourceInterval: ${copySourceInterval},
-                projectCompletionFeature : ${projectCompletionFeature}
+                project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
+                status_labels : JSON.parse( '${status_labels}' ),
+                searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}')
             };
+
             var renderStart = new Date();
             /*]]>*/
+        </script>
+
+        <script tal:condition="true:isReview" type="text/javascript">
+            config.review_password = '${review_password}';
+            config.overall_quality_class = '${overall_quality_class}';
+            config.quality_report_href = '${quality_report_href}';
+        </script>
+
+        <script tal:condition="true:review_improved" type="text/javascript">
+          /*<![CDATA[*/
+          // TODO: remove the nested one, should be nested on the client.
+          config.lqa_nested_categories = '${lqa_categories}';
+          config.lqa_flat_categories = '${lqa_flat_categories}';
+
+          config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
+          /*]]>*/
+
         </script>
 
         <script tal:condition="true:comments_enabled" type="text/javascript">
@@ -99,6 +125,8 @@
         </tal:block>
 
         <tal:block tal:condition="not:use_compiled_assets" >
+            <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+            <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
             <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
         </tal:block>
 
@@ -107,7 +135,8 @@
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
 
-    <body class="cattool${reviewClass}${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived" define="catpage string:true">
+    <body class="cattool ${review_class} ${job_archived}${source_rtl}${target_rtl}${hideMatchesClass}"
+      tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -156,10 +185,11 @@
         <h1>
 
         </h1>
+        <div data-mount="review-side-panel"></div>
+
         <div id="outer">
 
        	</div>
-
 
         <nav id="jobNav" class="slideMenu">
             <ul id="segmentNavBar" class="bar">
@@ -205,11 +235,7 @@
 </div>
 
         <footer>
-			<a href="#" id="settingsSwitcher" title="Settings"></a>
-
-			<!--
-						<a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
-			-->
+            <a href="#" id="settingsSwitcher" title="Settings"></a>
             <div class="wrapper">
 
                 <nav>
@@ -222,12 +248,12 @@
                             <li><a href="${authURL}" class="authLink">Manage</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: !catController::isRevision()">
+                        <tal:block tal:condition="footer_show_revise_link">
                             <li><a
                                     href="${basepath}revise/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Revise</a></li>
                         </tal:block>
 
-                        <tal:block tal:condition="php: catController::isRevision()">
+                        <tal:block tal:condition="footer_show_translate_link">
                             <li><a
                                     href="${basepath}translate/${pname}/${source}-${target}/${jid}-${password}#${last_opened_segment}">Translate</a></li>
                         </tal:block>
@@ -247,12 +273,11 @@
                             <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
                         </div>
                     </tal:block>
-					
+
                 </nav>
 
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <!-- <p class="progress">Progress:</p> -->
                     <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -267,10 +292,6 @@
                             <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                        <!--
-                        <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
-                        <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                        -->
                    </ul>
                     <ul class="statistics-details">
 <!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->
@@ -281,8 +302,8 @@
                             <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
                         </li>
                     </ul>
-			
-		</div>
+
+        </div>
 
                 <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
                     <p class="progress">Calculating word count...</p>
@@ -425,37 +446,6 @@ $(window).resize(function() {
     </template>
     <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
     </template>
-    <!--
-    <template id="tpl-review-stat-quality">
-
-        <div class="popup-outer outer-stat-quality hide"></div>
-        <div class="popup-stat-quality slide-panel hide" data-type="view">
-
-            <h1>
-                <a href="#" class="btn-ok right">Close</a>
-                Overall Quality
-            </h1>
-            
-            <div class="popup-box">
-                <div class="slide-panel-body">
-                    <table>
-                        <thead>
-                        <th>Error Type</th>
-                        <th>Max Num. of Errors</th>
-                        <th>Found</th>
-                        <th>Vote</th>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <p>Job's overall rate is calculated as the average of the ratings for each type of error.</p>
-        </div>
-
-    </template>
--->
 <div class="offline_stuffs" ></div>
 <!-- Snapengage -->
 <script src="${basepath}public/js/lib/snapengage.js"></script>

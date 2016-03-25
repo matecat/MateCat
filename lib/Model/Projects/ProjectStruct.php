@@ -1,9 +1,9 @@
 <?php
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
-
     public $id ;
     public $password ;
+    public $name ;
     public $id_customer ;
     public $create_date ;
     public $id_engine_tm ;
@@ -14,26 +14,71 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $remote_ip_address ;
     public $for_debug ;
     public $pretranslate_100 ;
+    public $id_qa_model ;
 
-    protected $cached_results = array();
-    // protected static $cachables = array('getJobs') ;
-
+    /**
+     * @param $feature_code
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct
+     */
     public function getOwnerFeature( $feature_code ) {
-      return OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
-        $feature_code, $this->id_customer
-      );
+        $ret = OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
+            $feature_code, $this->id_customer
+        );
+
+        return $ret ;
     }
 
+    /**
+     * @return Jobs_JobStruct[]
+     */
     public function getJobs() {
-      return $this->cachable(__function__, $this->id, function($id) {
-        return Jobs_JobDao::getByProjectId( $id );
-      });
+        return $this->cachable(__function__, $this->id, function($id) {
+            return Jobs_JobDao::getByProjectId( $id );
+        });
+    }
+
+    /**
+     * @return Projects_MetadataStruct[]
+     */
+    public function getMetadata() {
+        return Projects_MetadataDao::getByProjectId( $this->id );
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getMetadataAsKeyValue() {
+        $collection = $this->getMetadata();
+        $data  = array();
+        foreach ($collection as $record ) {
+            $data[ $record->key ] = $record->value;
+        }
+        return $data;
+    }
+
+
+    /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    public function getMetadataValue($key) {
+        $meta = $this->getMetadataAsKeyValue();
+        if ( array_key_exists($key, $meta) ) {
+            return $meta[$key];
+        }
     }
 
     public function isFeatureEnabled( $feature_code ) {
-      return $this->getOwnerFeature( $feature_code ) !== false ;
+        $feature = $this->getOwnerFeature( $feature_code );
+        return \Features::enabled($feature, $this);
     }
 
+    /**
+     * @return Chunks_ChunkStruct[]
+     */
     public function getChunks() {
       $dao = new Chunks_ChunkDao( Database::obtain() );
       return $dao->getByProjectID( $this->id );
@@ -42,4 +87,28 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public function isMarkedComplete() {
       return Chunks_ChunkCompletionEventDao::isProjectCompleted( $this );
     }
+
+    /**
+     * @return mixed|string
+     */
+    public function getWordCountType() {
+        return $this->cachable(__METHOD__, $this->getMetadataValue('word_count_type'), function($type) {
+            if ( $type == null ) {
+                return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
+            } else {
+                return $type;
+            }
+        });
+    }
+
+    /**
+     * @return \LQA\ModelStruct
+     *
+     */
+    public function getLqaModel() {
+        return $this->cachable(__METHOD__, $this->id_qa_model, function($id_qa_model) {
+            return \LQA\ModelDao::findById( $id_qa_model ) ;
+        });
+    }
+
 }

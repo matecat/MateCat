@@ -120,10 +120,8 @@ if ( MBC.enabled() )
             ' </div>',
 
         commentLink : '' +
-            '<div class="mbc-comment-link">' +
-            '   <div class="txt">' +
-            '       <span class="mbc-comment-icon icon-bubble2"></span>' +
-            '   </div>' +
+            '<div class="mbc-comment-icon-button txt">' +
+            '   <span class="mbc-comment-icon icon-bubble2"></span>' +
             '</div>',
 
         commentIconHighlightNumber : '' +

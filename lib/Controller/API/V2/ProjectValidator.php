@@ -1,6 +1,8 @@
 <?php
 
-class API_V2_ProjectValidator {
+namespace API\V2 ;
+
+class ProjectValidator {
 
   private $api_record ;
   private $id_project ;
@@ -21,7 +23,9 @@ class API_V2_ProjectValidator {
   }
 
   public function validate() {
-    $this->project = Projects_ProjectDao::findById( $this->id_project );
+    $this->project = \Projects_ProjectDao::findById( $this->id_project );
+
+    \Log::doLog( $this->project );
 
     if ($this->project == false) {
       return false;
@@ -35,11 +39,17 @@ class API_V2_ProjectValidator {
   }
 
   private function validateFeatureEnabled() {
+      \Log::doLog( var_export( $this->feature, true ));
+
     return $this->feature == null ||
       $this->project->getOwnerFeature( $this->feature )  ;
   }
 
   private function inProjectScope() {
-    return $this->api_record->getUser()->email == $this->project->id_customer ;
+
+      \Log::doLog ( $this->api_record->getUser()->email );
+      \Log::doLog ( $this->project->id_customer );
+
+       return $this->api_record->getUser()->email == $this->project->id_customer ;
   }
 }

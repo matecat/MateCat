@@ -63,6 +63,7 @@ $.extend(UI, {
 	},
 	getContribution: function(segment, next) {
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+
 		if ($(n).hasClass('loaded')) {
             if(segment.find('.footer .matches .overflow').text().length) {
                 this.spellCheck();
@@ -112,13 +113,13 @@ $.extend(UI, {
 				is_concordance: 0,
 				id_segment: id_segment,
 				text: txt,
-				id_job: config.job_id,
+				id_job: config.id_job,
 				num_results: this.numContributionMatchesResults,
 				id_translator: config.id_translator
 			},
 			context: $('#' + id),
 			error: function() {
-//                console.log('getContribution error');
+        console.log('getContribution error');
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
@@ -141,7 +142,7 @@ $.extend(UI, {
         $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
     },
     getContribution_success: function(d, segment) {
-        this.addInStorage('contribution-' + config.job_id + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
+        this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
 
         this.appendAddTMXButton( segment );
 
@@ -167,54 +168,54 @@ $.extend(UI, {
                 this.renderContributionErrors(d.errors, segment);
 
     },
-	renderContributions: function(d, segment) {
-        if(!d) return true;
-		var isActiveSegment = $(segment).hasClass('editor');
-		var editarea = $('.editarea', segment);
 
+  renderContributions: function(d, segment) {
+    if(!d) return true;
 
-		if(d.data.matches.length) {
-			var editareaLength = editarea.text().trim().length;
-			if (isActiveSegment) {
-				editarea.removeClass("indent");
-			} else {
-				if (editareaLength === 0)
-					editarea.addClass("indent");
-			}
-			var translation = d.data.matches[0].translation;
-			var perc_t = $(".percentuage", segment).attr("title");
+    var isActiveSegment = $(segment).hasClass('editor');
+    var editarea = $('.editarea', segment);
 
-			$(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
-			var match = d.data.matches[0].match;
+    if ( d.data.matches.length) {
+      var editareaLength = editarea.text().trim().length;
+      if (isActiveSegment) {
+        editarea.removeClass("indent");
+      } else {
+        if (editareaLength === 0)
+          editarea.addClass("indent");
+      }
+      var translation = d.data.matches[0].translation;
+      var perc_t = $(".percentuage", segment).attr("title");
 
-			var copySuggestionDone = false;
-			var segment_id = segment.attr('id');
+      $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
+      var match = d.data.matches[0].match;
+
+      var copySuggestionDone = false;
+      var segment_id = segment.attr('id');
       $(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).empty();
+      $('.sub-editor.matches .overflow', segment).empty();
 
-			$.each(d.data.matches, function(index) {
+      $.each(d.data.matches, function(index) {
+        if ((this.segment === '') || (this.translation === ''))
+          return;
+        var disabled = (this.id == '0') ? true : false;
+        cb = this.created_by;
 
-				if ((this.segment === '') || (this.translation === ''))
-					return;
-				var disabled = (this.id == '0') ? true : false;
-				cb = this.created_by;
-
-				if ("sentence_confidence" in this &&
-						(
-								this.sentence_confidence !== "" &&
-								this.sentence_confidence !== 0 &&
-								this.sentence_confidence != "0" &&
-								this.sentence_confidence !== null &&
-								this.sentence_confidence !== false &&
-								typeof this.sentence_confidence != 'undefined'
-								)
-						) {
+        if ("sentence_confidence" in this &&
+            (
+                this.sentence_confidence !== "" &&
+                this.sentence_confidence !== 0 &&
+                this.sentence_confidence != "0" &&
+                this.sentence_confidence !== null &&
+                this.sentence_confidence !== false &&
+                typeof this.sentence_confidence != 'undefined'
+                )
+            ) {
                     suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
                 } else if (this.match != 'MT') {
-					suggestion_info = this.last_update_date;
-				} else {
-					suggestion_info = '';
-				}
+          suggestion_info = this.last_update_date;
+        } else {
+          suggestion_info = '';
+        }
 //                console.log('typeof fieldTest: ', typeof d.data.fieldTest);
                 if (typeof d.data.fieldTest == 'undefined') {
                     percentClass = UI.getPercentuageClass(this.match);
@@ -277,16 +278,16 @@ $.extend(UI, {
 			if (UI.debug)
 				console.log('no matches');
 
-			$(segment).addClass('loaded');
+      $(segment).addClass('loaded');
 
-			if((config.mt_enabled)&&(!config.id_translator)) {
+      if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
-		}
+    }
     $(window).trigger('renderContribution:complete', segment);
-	},
+  },
         renderContributionErrors: function(errors, segment) {
             $('.tab.sub-editor.matches .engine-errors', segment).empty();
             $('.tab.sub-editor.matches .engine-errors', segment).hide();
@@ -341,8 +342,6 @@ $.extend(UI, {
         this.setContributionTail.push(item);
     },
     execSetContributionTail: function () {
-//        console.log('execSetContributionTail');
-
         if ( UI.setContributionTail.length ) {
             item = UI.setContributionTail[0];
             UI.setContributionTail.shift();
@@ -403,7 +402,7 @@ $.extend(UI, {
 		APP.doRequest({
 			data: {
 				action: 'setContribution',
-				id_job: config.job_id,
+				id_job: config.id_job,
 				source: source,
 				target: target,
 				source_lang: config.source_rfc,
@@ -422,8 +421,8 @@ $.extend(UI, {
 			success: function(d) {
                 console.log('execSetContribution success');
                 UI.executingSetContribution = false;
-                UI.removeFromStorage('contribution-' + config.job_id + '-' + segment_id );
-//                localStorage.removeItem('contribution-' + config.job_id + '-' + segment_id );
+                UI.removeFromStorage('contribution-' + config.id_job + '-' + segment_id );
+//                localStorage.removeItem('contribution-' + config.id_job + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -490,7 +489,7 @@ $.extend(UI, {
 				target_lang: config.target_lang,
 				password: config.password,
 				time_to_edit: time_to_edit,
-				id_job: config.job_id,
+				id_job: config.id_job,
 				chosen_suggestion_index: chosen_suggestion
 			},
 			context: reqArguments,
@@ -503,7 +502,7 @@ $.extend(UI, {
                 UI.executingSetContributionMT = false;
                 UI.execSetContributionTail();
 				if (d.errors.length)
-					UI.processErrors(d.error, 'setContributionMT');
+					UI.processErrors(d.errors, 'setContributionMT');
 			}
 		});
 	},
@@ -542,7 +541,7 @@ $.extend(UI, {
 					action: 'deleteContribution',
 					source_lang: config.source_lang,
 					target_lang: config.target_lang,
-					id_job: config.job_id,
+					id_job: config.id_job,
 					password: config.password,
 					seg: source,
 					tra: target,

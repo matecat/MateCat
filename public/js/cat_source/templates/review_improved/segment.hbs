@@ -1,0 +1,35 @@
+<section id="segment-{{segment.sid}}"
+         class="reviewImproved {{segment_classes}}"
+         data-hash="{{segment.segment_hash}}"
+         data-autopropagated="{{autoPropagated}}"
+         data-propagable="{{autoPropagable}}"
+         data-version="{{segment.version}}"
+         data-split-group="{{splitGroup}}"
+         data-split-original-id="{{originalId}}"
+         data-tagmode="crunched">
+
+    <a tabindex="-1" href="#{{segment.sid}}"></a>
+    <div class="sid" title="{{segment.sid}}">
+        <div class="txt">{{{shortened_sid}}}</div>
+        <div class="actions">
+            <a class="split" href="#" title="Click to split segment">
+                <span class="icon-split"></span>
+            </a>
+            <p class="split-shortcut">CTRL + S</p>
+        </div>
+    </div>
+    {{#if start_job_marker}}
+    <span class="start-job-marker"></span>
+    {{else if end_job_marker}}
+    <span class="end-job-marker"></span>
+    {{/if}}
+
+    <div data-mount="segment_body"></div>
+
+     <!-- .body -->
+    <ul class="statusmenu"></ul>
+
+    <div class="segment-side-buttons">
+      <div data-mount="translation-issues-button" class="translation-issues-button" data-sid="{{segment.sid}}"></div>
+    </div>
+</section>

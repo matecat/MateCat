@@ -2,6 +2,11 @@
 
 class Files_FileDao extends DataAccess_AbstractDao {
 
+    /**
+     * @param $id_job
+     *
+     * @return Files_FileStruct[]
+     */
     public static function getByJobId( $id_job ) {
       $conn = Database::obtain()->getConnection();
       $stmt = $conn->prepare(
@@ -15,10 +20,16 @@ class Files_FileDao extends DataAccess_AbstractDao {
       return $stmt->fetchAll();
     }
 
-    function getByProjectId( $id_project ) {
-        $conn = $this->con->getConnection();
+    /**
+     * @param $id_project
+     *
+     * @return Files_FileStruct[]
+     */
+    public static function getByProjectId( $id_project ) {
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM files where id_project = ? ");
         $stmt->execute( array( $id_project ) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
         return $stmt->fetchAll();
     }
 

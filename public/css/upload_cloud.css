@@ -328,7 +328,7 @@ opacity:0;
 }
  
   .name  {
-    width: 50% !Important;
+    width: 50% !important;
   }
   
 
@@ -373,7 +373,7 @@ h2.payoff
 
 .uploadbtn{background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
 	background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-	background: linear-gradient(top,  #09beec,  #119ec4);width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !Important;min-width:250px; margin:20px 0px 8px 0px;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
+	background: linear-gradient(top,  #09beec,  #119ec4);width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !important;min-width:250px; margin:20px 0px 8px 0px;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
 .uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
 .disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc}
@@ -388,7 +388,7 @@ h2.payoff
 .upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
 
-.btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !Important;font-size:14px !Important;margin:0px 0 0 10px !important;}
+.btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !important;font-size:14px !important;margin:0px 0 0 10px !important;}
 .btncontinue .fileinput-button{font-size:14px;margin-left:5px}
 
 
@@ -398,7 +398,7 @@ h2.payoff
 
 
 
-.preview {border-right:none !Important; width:30px;}
+.preview {border-right:none !important; width:30px;}
 .preview img{margin:5px 0 0 10px}
 
 .delete, .cancel{border-right:none !important;}
@@ -424,7 +424,7 @@ background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#1
 
 .delete button{background: url(../img/delete-retina.png) center center no-repeat !important;background-size:12px 13px !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px}
 .delete button:hover, .cancel button:hover{background:#ca2a2e url(../img/delete-white-retina.png) center center no-repeat !important;background-size:12px 13px !important;}
-.cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !Important;display:block;float:left;}
+.cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !important;display:block;float:left;}
 
 
 a{text-decoration:underline}
@@ -439,7 +439,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 /* upload footer */
 .upload-footer{width:100%;background:#ebebec;padding:15px 0 10px 0;border-top:1px dashed #ccc;margin-top:-1px}
 .upload-footer .btn{float:left;padding:5px 10px 0 30px;width:auto;margin-bottom:0px !important}
-.upload-footer p{text-align:left !Important;float:left;margin:5px 10px 0px 20px !Important;font-size:18px !Important;line-height:20px !Important;}
+.upload-footer p{text-align:left !important;float:left;margin:5px 10px 0px 20px !important;font-size:18px !important;line-height:20px !important;}
 
 .ui-progressbar-value{display:none !important}
 table .ui-progressbar-value{display:block !important}
@@ -496,7 +496,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 .uploaded.dragging .file-drop{display:none !important}
 .uploaded .upload-footer{display:block !important}
 .file-drop{margin:0px auto 50px auto!important}
-#fileupload{margin:0 !important;padding:0 !Important}
+#fileupload{margin:0 !important;padding:0 !important}
 .upload-files
 	{
 	
@@ -581,7 +581,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 .progress-extended{display:none}
 
-.error{color:#FF3300;text-align:left !Important}
+.error{color:#FF3300;text-align:left !important}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 

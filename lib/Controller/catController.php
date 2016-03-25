@@ -38,11 +38,20 @@ class catController extends viewController {
     private $last_opened_segment;
 
     private $qa_data = '[]';
+
     private $qa_overall = '';
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
     private $job ;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project ;
 
     /**
      * @var string
@@ -52,6 +61,16 @@ class catController extends viewController {
 
     private $mt_id;
 
+    /**
+     * @var string
+     * Review password generally corresponds to job password.
+     * Translate and revise pages share the same password, exception
+     * made for scenarios in which the review page must be protected
+     * by second layer of authorization. In such cases, this variable
+     * holds a different password than the job's password.
+     */
+    private $review_password = "";
+
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
@@ -60,7 +79,7 @@ class catController extends viewController {
         parent::makeTemplate( "index.html" );
 
         $filterArgs = array(
-                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
@@ -73,6 +92,8 @@ class catController extends viewController {
         $this->password   = $getInput->password;
         $this->start_from = $getInput->start;
         $this->page       = $getInput->page;
+
+        $this->review_password = $getInput->password;
 
         if ( isset( $_GET[ 'step' ] ) ) {
             $this->step = $_GET[ 'step' ];
@@ -102,13 +123,39 @@ class catController extends viewController {
     }
 
     private function doAuth() {
-
-        //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
             $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
         }
+    }
 
+    /**
+     * findJobByIdAndPassword
+     *
+     * Finds the current chunk by job id and password. if in revision then
+     * pass the control to a filter, to allow plugin to interact with the
+     * authorization process.
+     *
+     * Filters may restore the password to the actual password contained in
+     * `jobs` table, while the request may have come with a different password
+     * for the purpose of access control.
+     *
+     * This is done to avoid the rewrite of preexisting implementations.
+     */
+    private function findJobByIdAndPassword() {
+        if ( self::isRevision() ) {
+            $this->project = Projects_ProjectDao::findByJobId( $this->jid );
+
+            $this->password = Features::filter(
+                'filter_review_password_to_job_password',
+                $this->project->id_customer,
+                $this->password,
+                $this->jid
+            );
+
+        }
+
+        $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
     }
 
     public function doAction() {
@@ -116,8 +163,8 @@ class catController extends viewController {
         $lang_handler = Langs_Languages::getInstance();
 
         try {
-            $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-        } catch( \Exception $e ){
+            $this->findJobByIdAndPassword();
+        } catch( \Exceptions_RecordNotFound $e ){
             $this->job_not_found = true;
             return;
         }
@@ -548,8 +595,8 @@ class catController extends viewController {
         $this->template->user_keys             = $this->_keyList;
         $this->template->job_stats             = $this->job_stats;
         $this->template->stat_quality          = $this->qa_data;
-        $this->template->overall_quality       = $this->qa_overall;
-        $this->template->overall_quality_class = strtolower( str_replace( ' ', '', $this->qa_overall ) );
+
+        $this->template->overall_quality_class = strtolower( $this->getQaOverall() );
 
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
@@ -564,8 +611,9 @@ class catController extends viewController {
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
-        $this->template->isReview         = var_export( self::isRevision(), true );
-        $this->template->reviewClass      = ( self::isRevision() ? ' review' : '' );
+        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+
         $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
@@ -626,6 +674,12 @@ class catController extends viewController {
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
+        Features::appendDecorators(
+            $this->getJob()->getProject()->id_customer,
+            'CatDecorator',
+            $this,
+            $this->template
+        );
     }
 
     public function getJobStats() {
@@ -633,10 +687,24 @@ class catController extends viewController {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return Chunks_ChunkStruct
      */
     public function getJob() {
       return $this->job ;
+    }
+
+    /**
+     * @return string
+     */
+
+    public function getReviewPassword() {
+        return $this->review_password ;
+    }
+
+
+    public function getQaOverall() {
+        // TODO: is this str_replace really required?
+        return str_replace( ' ', '', $this->qa_overall );
     }
 
     /**

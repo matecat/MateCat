@@ -186,6 +186,7 @@ if ( MBC.enabled() )
 
             if ( comments_obj.active > 0 ) {
                 root.append( highlight );
+                root.addClass('has-object');
                 highlight.text( limitNum( comments_obj.active ) );
             }
 
@@ -388,18 +389,9 @@ if ( MBC.enabled() )
             }, 500 );
         }
 
-        function hackSnapEngage( on ) {
-            var button = $( document ).find( '#SnapABug_Button' );
-            if ( on ) {
-                button.data( 'mbc-zindex', button.css( 'z-index' ) );
-                button.css( 'z-index', -1 );
-            } else {
-                button.css( 'z-index', button.data( 'mbc-zindex' ) );
-            }
-        }
-
         var openSegmentComment = function ( el ) {
             $( 'article' ).addClass( 'mbc-commenting-opened' );
+            $( 'body' ).addClass( 'side-tools-opened' );
             hackSnapEngage( true );
             renderSegmentBalloon( el );
             scrollSegment( el );
@@ -407,14 +399,16 @@ if ( MBC.enabled() )
 
         var openSegmentCommentNoScroll = function ( el ) {
             $( 'article' ).addClass( 'mbc-commenting-opened' );
+            $( 'body' ).addClass( 'side-tools-opened' );
             hackSnapEngage( true );
             renderSegmentBalloon( el );
         }
 
-        var closeSegment = function ( el ) {
+        var closeBalloon = function () {
             $( '.mbc-comment-balloon-outer' ).remove();
-            hackSnapEngage( false );
+            // hackSnapEngage( false );
             $( 'article' ).removeClass( 'mbc-commenting-opened' );
+            $( 'body' ).removeClass( 'side-tools-opened' );
         }
 
         var renderCommentIconLink = function ( el ) {
@@ -537,7 +531,7 @@ if ( MBC.enabled() )
                 action: 'comment',
                 _sub: 'create',
                 id_client: config.id_client,
-                id_job: config.job_id,
+                id_job: config.id_job,
                 id_segment: segment.absoluteId,
                 username: getUsername(),
                 password: config.password,
@@ -588,7 +582,7 @@ if ( MBC.enabled() )
             var data = {
                 action: 'comment',
                 _sub: 'getRange',
-                id_job: config.job_id,
+                id_job: config.id_job,
                 first_seg: UI.getSegmentId( UI.firstSegment ),
                 last_seg: UI.getSegmentId( UI.lastSegment ),
                 password: config.password
@@ -612,9 +606,12 @@ if ( MBC.enabled() )
 
         var initCommentLink = function ( el ) {
             var section = new UI.Segment( el );
+            var side_buttons;
+
             if ( (!section.isSplit()) || section.isFirstOfSplit() ) {
-                $( el ).find( '.mbc-comment-link' ).remove();
-                $( el ).append( $( tpls.commentLink ) );
+                side_buttons = section.el.find('.segment-side-buttons' );
+                side_buttons.find('.mbc-comment-icon').parent('.txt').remove();
+                side_buttons.append( $(tpls.commentLink ));
             }
         }
 
@@ -654,25 +651,47 @@ if ( MBC.enabled() )
             }
         }
 
+        /**
+         * Close balloon if the user click on some dead area
+         * of the page.
+         */
+        $(document).on('click', function(e) {
+            if (e.target.closest('section') == null) {
+                closeBalloon();
+            }
+        });
+
         $( document ).on( 'ready', function () {
             initConstants();
 
             // XXX: there'a binding on 'section' are delegated to #outer in ui.events.js.
             //      Since our DOM elements are children of `section` we must attach to #outer
-            //      too in order to prevent bubbling.
+            //      to in order to prevent bubbling.
+            //
+            //      If a click event reaches #outer, we assume the user clicked outside
+            //      the section, so we close the balloon.
+            //
             //
             var delegate = '#outer';
 
-            $( delegate ).on( 'click', '.mbc-comment-balloon-outer, .mbc-comment-link div', function ( e ) {
+            // Click on the link to open the balloon, in any segment on the page.
+            $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
                 e.stopPropagation();
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
+            // TODO: investigate and explain why this is needed
+            $( delegate ).on( 'click', '.mbc-comment-balloon-outer', function ( e ) {
+                e.stopPropagation();
+                $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+            } );
+
+            // Click reached #outer , close the history balloon
             $( delegate ).on( 'click', function () {
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
-            $( delegate ).on( 'click', '.mbc-comment-link .txt', function ( e ) {
+            $( delegate ).on( 'click', '.segment-side-buttons .txt', function ( e ) {
                 var section = $( e.target ).closest( 'section' );
                 openSegmentCommentNoScroll( section );
             } );
@@ -691,7 +710,7 @@ if ( MBC.enabled() )
                 var data = {
                     action: 'comment',
                     _sub: 'resolve',
-                    id_job: config.job_id,
+                    id_job: config.id_job,
                     id_client: config.id_client,
                     id_segment: segment.absoluteId,
                     password: config.password,
@@ -768,7 +787,7 @@ if ( MBC.enabled() )
             if ( e.which == '27' ) {
                 e.preventDefault();
                 $( '.mbc-history-balloon-outer.mbc-visible' ).toggleClass( 'mbc-visible' );
-                closeSegment( $( '.mbc-comment-balloon-outer:visible' ).closest( 'section' ) );
+                closeBalloon();
             }
         } );
 
@@ -858,7 +877,7 @@ if ( MBC.enabled() )
         } );
 
         $( window ).on( 'segmentClosed', function ( e ) {
-            closeSegment( $( e.segment ) );
+            closeBalloon();
         } );
 
         $( window ).on( 'segmentOpened', function ( e ) {
@@ -872,7 +891,7 @@ if ( MBC.enabled() )
         $( document ).on( 'mbc:segment:update:links', function ( ev, id_segment ) {
             var comments_obj = db.getCommentsCountBySegment( id_segment );
             var el = UI.Segment.findEl( id_segment );
-            resolveCommentLinkIcon( el.find( '.mbc-comment-link' ), comments_obj );
+            resolveCommentLinkIcon( el.find( '.segment-side-buttons' ), comments_obj );
         } );
 
         $( document ).on( 'keydown', '.mbc-comment-textarea', resetTextArea );
@@ -903,21 +922,6 @@ if ( MBC.enabled() )
             }
         } );
 
-        $( document ).on( 'mouseover', 'section', function ( e ) {
-            $( e.relatedTarget ).closest( 'section' ).find( '.mbc-comment-link .txt' ).stop();
-
-            $( e.target ).closest( 'section' )
-                    .find( '.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)' )
-                    .stop().delay( 300 ).fadeIn( 100 );
-        } );
-
-        $( document ).on( 'mouseout', 'section', function ( e ) {
-            $( e.relatedTarget ).closest( 'section' ).find( '.mbc-comment-link .txt' ).stop();
-
-            $( e.target ).closest( 'section' )
-                    .find( '.mbc-comment-link .txt:has(.mbc-comment-highlight-invite)' )
-                    .stop().delay( 150 ).fadeOut();
-        } );
 
         // Interfaces
         $.extend( MBC, {

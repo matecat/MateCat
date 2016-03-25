@@ -1,18 +1,14 @@
 ProjectCompletion = {
     enabled : function() {
-        return config.projectCompletionFeature ;
+        return config.project_completion_feature_enabled;
     }
 }
 
 if ( ProjectCompletion.enabled() ) {
 (function($,config,ProjectCompletion,undefined) {
-
-    var lastStats = null;
-    var sendLabel = 'SEND';
-    var sentLabel = 'SENT' ;
-    var sendingLabel = 'SENDING';
-
-    var clickableStatusClass = 'translated';
+    var sendLabel = 'Mark as complete';
+    var sentLabel = 'Marked as complete' ;
+    var sendingLabel = 'Marking';
 
     var button ;
 
@@ -54,12 +50,12 @@ if ( ProjectCompletion.enabled() ) {
         });
     }
 
-    var evalSendButtonStatus = function() {
+    var evalSendButtonStatus = function( stats ) {
         // assume a translation was edited, button should be clickable again
         button.removeClass('isMarkableAsComplete isMarkedComplete');
         button.addClass('notMarkedComplete');
 
-        if ( isClickableStatus(  ) ) {
+        if ( isClickableStatus( stats ) ) {
             button.addClass('isMarkableAsComplete');
             button.removeAttr('disabled');
         } else {
@@ -69,8 +65,28 @@ if ( ProjectCompletion.enabled() ) {
         button.val( sendLabel );
     }
 
-    var isClickableStatus = function() {
-        return translationStatus( lastStats ) == clickableStatusClass ;
+    function isClickableStatus( stats ) {
+        if (config.isReview) {
+            /**
+             * Review step
+             *
+             * In this case the job is markable as complete when 'DRAFT' count is 0
+             * and 'TRANSLATED' is < 0 and 'APPROVED' + 'REJECTED' > 0.
+             */
+
+            return stats.DRAFT <= 0 &&
+                ( stats.APPROVED + stats.REJECTED ) > 0 ;
+        }
+        else {
+            /**
+             * Translation step
+             *
+             * This condition covers the case in which the project is pretranslated.
+             * When a project is pretranslated, the 'translated' count can be 0 or
+             * less.
+             */
+            return parseInt( stats.DRAFT ) == 0 && parseInt( stats.REJECTED ) == 0 ;
+        }
     }
 
     $(document).on('click', '#markAsCompleteButton', function(ev) {
@@ -84,8 +100,7 @@ if ( ProjectCompletion.enabled() ) {
     $(document).on('setTranslation:success', function(ev, data) {
         console.log('setTranslation:success');
 
-        lastStats = data.stats ;
-        evalSendButtonStatus();
+        evalSendButtonStatus( data.stats );
     });
 
 

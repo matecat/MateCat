@@ -1,8 +1,19 @@
 <?php
 
-abstract class API_V2_KleinController {
+namespace API\V2 ;
 
+use Klein\Klein;
+
+class KleinController {
+
+    /**
+     * @var \Klein\Request
+     */
     protected $request ;
+
+    /**
+     * @var \Klein\Response
+     */
     protected $response ;
     protected $service ;
     protected $app ;

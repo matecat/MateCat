@@ -247,7 +247,6 @@ abstract class DataAccess_AbstractDao {
      * @return bool
      */
     protected function _destroyCache( $query ){
-
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
             return $this->cache_con->delete( $query );
@@ -263,5 +262,111 @@ abstract class DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
     protected abstract function _buildResult( $array_result );
+
+    /**
+     * Returns a string suitable for updates of the fields
+     * provided by the attributes array.
+     *
+     * @param $attrs array of full attributes to update
+     * @param $mask array of attributes to include in the update
+     * @return string
+     */
+
+    protected static function buildUpdateSet( $attrs, $mask ) {
+        $map = array();
+        $pks = static::$primary_keys;
+
+        if ( empty($mask) ) {
+            $mask = array_keys( $attrs );
+        }
+
+        foreach( $attrs as $key => $value ) {
+            if ( !in_array( $key, $pks ) && in_array($key, $mask) ) {
+                $map[] =  " $key = :$key " ;
+            }
+        }
+
+        return implode(', ', $map);
+    }
+
+    /**
+     * Returns a string suitable to identify the struct to perform
+     * update or delete operations via PDO data binding.
+     *
+     * @return string
+     * @param $attrs array of attributes of the struct
+     */
+
+    protected static function buildPkeyCondition( $attrs ) {
+        $map = array();
+
+        foreach( $attrs as $key => $value ) {
+            if ( in_array( $key, static::$primary_keys )) {
+                $map[] =  " $key = :$key " ;
+            }
+
+        }
+
+        return implode(' AND ', $map);
+    }
+
+    /**
+     * Ensures the primary keys are populated on the struct.
+     *
+     * @throw \Exceptions\ValidationError
+     */
+
+    protected static function ensurePrimaryKeyValues( $struct ) {
+        $attrs = self::structKeys( $struct );
+
+        foreach ( $attrs as $k => $v) {
+            if ( $v == null ) {
+                throw new \Exceptions\ValidationError("pkey '$k' is null");
+            }
+        }
+    }
+
+    /**
+     * Returns an array of the specified attributes, plus the primary
+     * keys specified by the current DAO.
+     *
+     * @return array the struct's primary keys
+     */
+
+    protected static function structKeys( $struct ) {
+        $keys = static::$primary_keys  ;
+        return $struct->attributes( $keys );
+    }
+
+    /**
+     * Updates the struct. The record is found via the primary
+     * key attributes provided by the struct.
+     *
+     * @param $struct The struct to update
+     * @param array $mask a mask to provide to limit the update to the specified fields.
+     */
+
+    public static function updateStruct( $struct, $options=array() ) {
+        $struct->ensureValid();
+
+        $attrs = $struct->attributes();
+
+        $sql = " UPDATE " . static::TABLE ;
+        $sql .= " SET " . self::buildUpdateSet( $attrs, $options['fields'] );
+        $sql .= " WHERE " . self::buildPkeyCondition( $attrs );
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $data = array_merge(
+            $struct->attributes( $options['fields'] ),
+            self::structKeys( $struct )
+        );
+
+        \Log::doLog("SQL", $sql);
+        \Log::doLog("data", $data);
+
+        return $stmt->execute( $data );
+    }
 
 }

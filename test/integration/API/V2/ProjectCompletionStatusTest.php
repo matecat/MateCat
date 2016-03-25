@@ -6,7 +6,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
     function setup() {
         $this->test_data = new StdClass();
-        parent::setup();
+        // parent::setup();
     }
 
     private function prepareUserAndApiKey() {
@@ -28,6 +28,17 @@ class ProjectCompletionStatusTest extends IntegrationTest {
     }
 
     private function setValidProjectWithAllTranslatedSegments() {
+        $this->createProject();
+        $this->setAllSegmentsTranslated();
+    }
+
+    private function setAllSegmentsTranslated() {
+        $this->test_data->chunks = integrationSetSegmentsTranslated(
+            $this->test_data->project->id_project
+        );
+    }
+
+    private function createProject() {
         $this->prepareUserAndApiKey();
 
         Factory_OwnerFeature::create( array(
@@ -36,18 +47,107 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         ) );
 
         $this->submitProjectWithApiKeys();
-
-        $this->test_data->chunks = integrationSetSegmentsTranslated(
-                $this->test_data->project->id_project
-        );
     }
 
-    function testsCallOnValidProject() {
+    function test_is_not_complete_when_segments_are_translated() {
         $this->setValidProjectWithAllTranslatedSegments();
+
         $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
 
+        $expected_jobs = array();
+        $jobs = $project->getJobs();
+
+        $expected = array(
+                'project_status' => array(
+                        'revise'   => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password,
+                                'completed' => false,
+                                'completed_at' => null
+                            )
+                        ),
+                        'translate' => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password,
+                                'completed' => false,
+                                'completed_at' => null
+                            )
+                        ),
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
+                )
+        );
+
+        $test          = new CurlTest();
+        $test->path    = '/api/v2/project-completion-status/' .
+                $this->test_data->project->id_project;
+        $test->method  = 'GET';
+        $test->headers = $this->test_data->headers;
+        $response      = $test->getResponse();
+
+        $this->assertEquals( json_encode( $expected ), $response[ 'body' ] );
+
+    }
+
+    function test_is_not_complete_by_default() {
+        $this->createProject();
+        $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
+
+        $expected_jobs = array();
+        $jobs = $project->getJobs();
+
+        $expected = array(
+                'project_status' => array(
+                        'revise'   => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password,
+                                'completed' => false,
+                                'completed_at' => null
+                            )
+                        ),
+                        'translate' => array(
+                            array(
+                                'id' => $jobs[0]->id,
+                                'password' => $jobs[0]->password,
+                                'completed' => false,
+                                'completed_at' => null
+                            )
+                        ),
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
+                )
+        );
+
+        $test          = new CurlTest();
+        $test->path    = '/api/v2/project-completion-status/' .
+                $this->test_data->project->id_project;
+        $test->method  = 'GET';
+        $test->headers = $this->test_data->headers;
+        $response      = $test->getResponse();
+
+        $this->assertEquals( json_encode( $expected ), $response[ 'body' ] );
+
+    }
+
+    function test_is_complete_when_review_and_translate_are_complete() {
+        $this->setValidProjectWithAllTranslatedSegments();
+
+        $project = Projects_ProjectDao::findById( $this->test_data->project->id_project );
+
+        sleep(1);
         foreach ( $this->test_data->chunks as $chunk ) {
             integrationSetChunkAsComplete( array(
+                    'referer' => 'http://example.org/translate/foo/bar',
+                    'params' => array(
+                            'id_job'   => $chunk->id,
+                            'password' => $chunk->password
+                    )
+            ) );
+            integrationSetChunkAsComplete( array(
+                    'referer' => 'http://example.org/revise/foo/bar',
                     'params' => array(
                             'id_job'   => $chunk->id,
                             'password' => $chunk->password
@@ -56,20 +156,35 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         }
 
         $project       = Projects_ProjectDao::findById( $this->test_data->project->id_project );
-        $expected_jobs = array();
+        $expected_jobs = array('translate' => array(), 'revise' => array() );
 
-        foreach ( $project->getJobs() as $job ) {
-            $expected_jobs[] = array(
+
+        foreach ( $project->getChunks() as $job ) {
+            $translate = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                    $job, array('is_review' => false));
+            $revise = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                    $job, array('is_review' => true));
+
+            $expected_jobs['translate'][] = array(
                     'id'           => $job->id,
                     'password'     => $job->password,
-                    'download_url' => "http://" . $GLOBALS[ 'TEST_URL_BASE' ] . "/?action=downloadFile&id_job=$job->id&password=$job->password"
+                    'completed'    => true,
+                    'completed_at' => Utils::api_timestamp( $translate['create_date'] )
+            );
+
+            $expected_jobs['revise'][] = array(
+                    'id'           => $job->id,
+                    'password'     => $job->password,
+                    'completed'    => true,
+                    'completed_at' => Utils::api_timestamp( $revise['create_date'] )
             );
         }
 
         $expected = array(
                 'project_status' => array(
+                        'revise'      => $expected_jobs['revise'],
+                        'translate'  => $expected_jobs['translate'],
                         'id'        => $this->test_data->project->id_project,
-                        'jobs'      => $expected_jobs,
                         'completed' => true,
                 )
         );
@@ -85,7 +200,7 @@ class ProjectCompletionStatusTest extends IntegrationTest {
 
     }
 
-    function testReturnsNonCompletedProject() {
+    function test_returns_uncomplete_splitted_job_correctly() {
         $this->setValidProjectWithAllTranslatedSegments();
 
         // get project chunks
@@ -121,11 +236,24 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $first_chunk  = $chunks[ 0 ];
         $second_chunk = $chunks[ 1 ];
 
+        sleep(1);
+
+        // set chunk completed for translate page
         integrationSetChunkAsComplete( array(
-                'params' => array(
-                        'id_job'   => $first_chunk->id,
-                        'password' => $first_chunk->password
-                )
+            'referer' => 'http://example.org/translate/rest-of-path',
+            'params' => array(
+                'id_job'   => $first_chunk->id,
+                'password' => $first_chunk->password
+            )
+        ) );
+
+        // set chunk completed for revise page
+        integrationSetChunkAsComplete( array(
+            'referer' => 'http://example.org/revise/rest-of-path',
+            'params' => array(
+                'id_job'   => $first_chunk->id,
+                'password' => $first_chunk->password
+            )
         ) );
 
         $test          = new CurlTest();
@@ -135,16 +263,44 @@ class ProjectCompletionStatusTest extends IntegrationTest {
         $test->headers = $this->test_data->headers;
 
         $response = $test->getResponse();
+
+        $first_translate = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                $first_chunk, array('is_review' => false));
+        $first_revise  = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+                $first_chunk, array('is_review' => true));
+
         $expected = array(
                 'project_status' => array(
-                        'id'        => $this->test_data->project->id_project,
-                        'completed' => false,
-                        'chunks'    => array(
+                        'revise'    => array(
+                                array(
+                                        'id'       => $first_chunk->id,
+                                        'password' => $first_chunk->password,
+                                        'completed' => true,
+                                        'completed_at' => Utils::api_timestamp( $first_revise['create_date'])
+                                ),
                                 array(
                                         'id'       => $second_chunk->id,
-                                        'password' => $second_chunk->password
+                                        'password' => $second_chunk->password,
+                                        'completed' => false,
+                                        'completed_at' => null
                                 )
-                        )
+                        ),
+                        'translate'    => array(
+                                array(
+                                        'id'       => $first_chunk->id,
+                                        'password' => $first_chunk->password,
+                                        'completed' => true,
+                                        'completed_at' => Utils::api_timestamp( $first_translate['create_date'])
+                                ),
+                                array(
+                                        'id'       => $second_chunk->id,
+                                        'password' => $second_chunk->password,
+                                        'completed' => false,
+                                        'completed_at' => null
+                                )
+                        ),
+                        'id'        => $this->test_data->project->id_project,
+                        'completed' => false,
                 )
         );
 

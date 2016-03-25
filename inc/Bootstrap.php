@@ -27,6 +27,9 @@ class Bootstrap {
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];
 
+
+
+
         $this->_setIncludePath();
         spl_autoload_register( 'Bootstrap::loadClass' );
         require_once 'Predis/autoload.php';
@@ -129,7 +132,11 @@ class Bootstrap {
             }
         }
 
+
+        WorkerClient::init();
+
     }
+
 
     public static function fatalErrorHandler() {
 
@@ -246,7 +253,10 @@ class Bootstrap {
                 self::$_ROOT . "/lib/Utils",
                 self::$_ROOT . "/lib/Utils/Predis/src",
                 self::$_ROOT . "/lib/Model",
+                self::$_ROOT . "/lib/View",
                 self::$_ROOT . "/lib/Decorator",
+                self::$_ROOT . "/lib/Plugins",
+
         );
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
@@ -312,7 +322,10 @@ class Bootstrap {
         }
 
         if ( ! empty( INIT::$PLUGIN_LOAD_PATHS )) {
-            set_include_path( get_include_path() . PATH_SEPARATOR . implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS ));
+            set_include_path( get_include_path() .
+                    PATH_SEPARATOR .
+                    implode(PATH_SEPARATOR, INIT::$PLUGIN_LOAD_PATHS )
+            );
         }
 
     }

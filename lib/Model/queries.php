@@ -825,7 +825,21 @@ function getFirstSegmentId( $jid, $password ) {
     return $results;
 }
 
-function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
+/**
+ * @param        $jid
+ * @param        $password
+ * @param int    $step
+ * @param        $ref_segment
+ * @param string $where
+ *
+ * @return array
+ * @throws Exception
+ */
+function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
+
+    if ( $options['optional_fields'] ) {
+        $optional_fields = implode(', ', $options['optional_fields']);
+    }
 
     $queryAfter = "
                     SELECT segments.id AS __sid
@@ -916,6 +930,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 s.internal_id,
                 IF (st.status='NEW',NULL,st.translation) AS translation,
                 UNIX_TIMESTAMP(st.translation_date) AS version,
+                st.locked AS original_target_provied,
                 st.status,
                 COALESCE(time_to_edit, 0) AS time_to_edit,
                 s.xliff_ext_prec_tags,
@@ -932,6 +947,9 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                           AND id_job =  j.id
                 ) repetitions_in_chunk
                 ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
+
+                $optional_fields
+
                 FROM jobs j
                 JOIN projects p ON p.id = j.id_project
                 JOIN files_job fj ON fj.id_job = j.id
@@ -1122,7 +1140,12 @@ function addTranslation( array $_Translation ) {
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = {$_Translation['translation']},
                 translation_date = {$_Translation['translation_date']},
-                warning = " . $_Translation[ 'warning' ];
+                warning = {$_Translation[ 'warning' ]}" ;
+
+    if ( array_key_exists('version_number', $_Translation) ) {
+        $query .= "\n, version_number = {$_Translation['version_number']}";
+    }
+
 
     if ( isset( $_Translation[ 'autopropagated_from' ] ) ) {
         $query .= " , autopropagated_from = NULL";
@@ -1157,7 +1180,7 @@ function addTranslation( array $_Translation ) {
  * @throws Exception
  * @return int
  */
-function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTranslated = false ) {
+function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project, $propagateToTranslated = false ) {
 
     $db = Database::obtain();
 
@@ -1192,25 +1215,34 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
         }
     }
 
+    if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
+        $sum_sql = "SUM(segments.raw_word_count)";
+    } else {
+        $sum_sql = "SUM(eq_word_count)";
+    }
+
     //if the new status to set is TRANSLATED,
     // sum the equivalent words of segments equals to me with the status different from MINE
     $queryTotals = "
-           SELECT SUM(eq_word_count) as total,COUNT(id_segment)as countSeg, status
+           SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
+
            FROM segment_translations
+              INNER JOIN  segments
+              ON segments.id = segment_translations.id_segment
+
            WHERE id_job = {$params['id_job']}
-           AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+           AND segment_translations.segment_hash = '" . $params[ 'segment_hash' ] . "'
            AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
            AND id_segment != $_idSegment
            AND status != '{$params['status']}'
            GROUP BY status
-           -- WITH ROLLUP
     ";
 
 
     try {
         $totals = $db->fetch_array($queryTotals);
     } catch( PDOException $e ) {
-        throw new Exception( "Error in counting total equivalent words for propagation: " . $e->getCode() . ": " . $e->getMessage()
+        throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
                 . "\n" . $queryTotals . "\n" . var_export( $params, true ),
                 -$e->getCode() );
     }
@@ -1227,9 +1259,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
         $andStatus
         AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
         AND id_segment != $_idSegment
-    ";
-
-//    Log::doLog( $TranslationPropagate );
+    ";;
 
     try {
         $db->query($TranslationPropagate);
@@ -2566,184 +2596,19 @@ function getCurrentJobsStatus( $pid ) {
     return $results;
 }
 
-// tm analysis threaded
+function setSegmentTranslationError( $sid, $jid ) {
 
-function getNextSegmentAndLock() {
-
-    //get link
-    $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-
-    //start locking
-    $db->query( "SET autocommit=0" );
-    $db->query( "START TRANSACTION" );
-    //query
-
-    //lock row
-    $rnd = mt_rand( 0, 15 ); //rand num should be ( child_num / myMemory_sec_response_time )
-    $q3  = "select id_segment, id_job, pid from matecat_analysis.segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
-    //end transaction
-
-    $res = $db->query_first( $q3 );
-
-    //if nothing useful
-    if ( empty( $res ) ) {
-        //empty result
-        $db->query( "ROLLBACK" );
-        $res = null;
-    } else {
-
-        //DELETE
-        $query = "DELETE FROM matecat_analysis.segment_translations_analysis_queue WHERE id_segment = %u AND id_job = %u";
-        $query = sprintf( $query, $res[ 'id_segment' ], $res[ 'id_job' ] );
-
-        try {
-            $db->query($query);
-            if ($db->affected_rows == 0) {
-                $db->query("ROLLBACK");
-                $res = null;
-            }
-            else {
-                $db->query("COMMIT");
-            }
-        }
-        catch(PDOException $e) {
-            Log::doLog( $e->getMessage() );
-            $db->query( "ROLLBACK" );
-            //return error code
-            $res = null;
-        }
-    }
-
-    //release locks and end transaction
-    $db->query( "SET autocommit=1" );
-
-    $db->useDb( INIT::$DB_DATABASE );
-
-    //return stuff
-    return $res;
-}
-
-function resetLockSegment() {
-    $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-    try {
-        $db->query("UPDATE matecat_analysis.segment_translations_analysis_queue SET locked = 0 WHERE locked = 1");
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return -1;
-    }
-    return 0;
-}
-
-function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
-    //set memcache
+    $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an incostistent state
+    $where                        = " id_segment=$sid and id_job=$jid ";
 
     $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-    if ( $mode == "delete" ) {
-        $q = "delete from matecat_analysis.segment_translations_analysis_queue where id_segment=$id_segment and id_job=$id_job";
-    } else {
-        $db->query( "SET autocommit=0" );
-        $db->query( "START TRANSACTION" );
-        $q = "update matecat_analysis.segment_translations_analysis_queue set locked=0 where id_segment=$id_segment and id_job=$id_job";
-        $db->query( "COMMIT" );
-        $db->query( "SET autocommit=1" );
-    }
     try {
-        $db->query($q);
-        $db->useDb( INIT::$DB_DATABASE );
-    } catch( PDOException $e ) {
-        $db->useDb( INIT::$DB_DATABASE );
-        Log::doLog( $e->getMessage() );
-        return -1;
-    }
-
-    return 0;
-}
-
-function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
-    $query = "select s.id as sid ,s.segment ,raw_word_count,
-		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
-		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid, p.pretranslate_100
-			from segments s
-			inner join segment_translations st on st.id_segment=s.id
-			inner join jobs j on j.id=st.id_job
-			inner join projects p on p.id=j.id_project
-			where
-			p.status_analysis='FAST_OK' and
-			st.id_segment=$id_segment and st.id_job=$id_job
-			and st.locked = 0
-			limit 1";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->query_first($query);
+        $affectedRows = $db->update('segment_translations', $data, $where);
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
-    return $results;
-}
-
-/**
- * @deprecated
- *
- * @param $currentPid
- *
- * @return int
- */
-function getNumSegmentsInQueue( $currentPid ) {
-    $query = "select count(*) as num_segments from matecat_analysis.segment_translations_analysis_queue where pid < $currentPid ";
-
-    $db = Database::obtain();
-    $db->useDb( 'matecat_analysis' );
-    try {
-        $results = $db->query_first($query);
-        $db->useDb( INIT::$DB_DATABASE );
-    } catch( PDOException $e ) {
-        $db->useDb( INIT::$DB_DATABASE );
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    $num_segments = 0;
-    if ( (int)$results[ 'num_segments' ] > 0 ) {
-        $num_segments = (int)$results[ 'num_segments' ];
-    }
-
-    return $num_segments;
-}
-
-/**
- * @deprecated Not Used Anywhere
- *
- * @return array|bool
- */
-function getNextSegmentForTMVolumeAnalysys() {
-    $query = "SELECT s.id AS sid ,s.segment ,raw_word_count,
-		st.match_type, j.source, j.target, j.id AS jid, j.id_translator,
-		p.id_engine_mt,p.id AS pid
-			FROM segments s
-			INNER JOIN segment_translations st ON st.id_segment=s.id
-			INNER JOIN jobs j ON j.id=st.id_job
-			INNER JOIN projects p ON p.id=j.id_project
-
-			WHERE
-			st.tm_analysis_status='UNDONE' AND
-			p.status_analysis='FAST_OK' AND
-			s.raw_word_count>0   AND
-			locked=0
-			ORDER BY s.id
-			LIMIT 1";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
+    return $affectedRows;
 }
 
 /**

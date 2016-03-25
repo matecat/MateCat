@@ -9,16 +9,16 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         );
     }
 
-    public static function createFromChunk( $chunk, $params ) {
+    public static function createFromChunk( $chunk, array $params ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare("INSERT INTO chunk_completion_events " .
             " ( " .
             " id_project, id_job, password, job_first_segment, job_last_segment, " .
-            " source, create_date, remote_ip_address, uid " .
+            " source, create_date, remote_ip_address, uid, is_review " .
             " ) VALUES ( " .
             " :id_project, :id_job, :password, :job_first_segment, :job_last_segment, " .
-            " :source, :create_date, :remote_ip_address, :uid " .
+            " :source, :create_date, :remote_ip_address, :uid, :is_review " .
             " ); ");
 
         $validSources = self::validSources() ;
@@ -31,36 +31,55 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             'source'            => $validSources[ $params['source'] ],
             'create_date'       => date('Y-m-d H:i:s'),
             'remote_ip_address' => $params['remote_ip_address'],
-            'uid'               => $params['uid']
+            'uid'               => $params['uid'],
+            'is_review'         => $params['is_review']
         ));
     }
 
-    public static function isChunkCompleted( Chunks_ChunkStruct $chunk ) {
-        // find the latest translation date for this chunk
-        // if no date is returned then the chunk cannot be completed.
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-        $latestTranslation =  $dao->lastTranslationByJobOrChunk( $chunk );
+    /**
+     *
+     * Returns true or false if the chunk is completed. Requires 'is_review' to be passed
+     * as a param.
+     *
+     * A chunk is completed when there is at least one completion event which is more recent
+     * than a record un updates table.
+     *
+     * @param $chunk chunk to examinate
+     * @param $params list of params for query: is_review
+     *
+     * @return true|false
+     *
+     */
 
-        if ( $latestTranslation === false ) return false;
+    public static function lastCompletionRecord( Chunks_ChunkStruct $chunk, array $params = array() ) {
+        $params = Utils::ensure_keys($params, array('is_review'));
+        $is_review = $params['is_review'] || false;
+
+        $sql = "SELECT events.uid, events.create_date, events.is_review, events.id_job, updates.password " .
+            " FROM chunk_completion_events events " .
+            " LEFT JOIN chunk_completion_updates updates on events.id_job = updates.id_job " .
+            " AND  events.password = updates.password and events.is_review = updates.is_review " .
+            " WHERE events.create_date IS NOT NULL  " .
+            " AND ( events.create_date > updates.last_translation_at OR updates.last_translation_at IS NULL ) " .
+            " AND events.is_review = :is_review " .
+            " AND events.id_job = :id_job AND events.password = :password " .
+            " GROUP BY id_job, password, is_review, create_date" ;
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM chunk_completion_events " .
-            " WHERE id_job = :id_job AND password = :password " .
-            " AND job_first_segment = :job_first_segment " .
-            " AND job_last_segment = :job_last_segment " .
-            " AND create_date >= :latest_translation_at " );
-
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkCompletionEventStruct');
-
+        $stmt = $conn->prepare( $sql );
         $stmt->execute( array(
-            'id_job' => $chunk->id,
-            'password' => $chunk->password,
-            'job_first_segment' => $chunk->job_first_segment,
-            'job_last_segment' => $chunk->job_last_segment,
-            'latest_translation_at' => $latestTranslation->translation_date
-        ));
+                        'id_job'    => $chunk->id,
+                        'password'  => $chunk->password,
+                        'is_review' => $is_review
+                )
+        );
 
-        $fetched = $stmt->fetch();
+        // TODO: change this returned object to be a Struct
+        return $stmt->fetch();
+    }
+
+    public function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
+        $fetched = self::lastCompletionRecord( $chunk, $params);
         return $fetched != false ;
     }
 
@@ -69,9 +88,9 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         return $uncompletedChunksByProjectId == false;
     }
 
-    public static function isCompleted( $obj ) {
+    public static function isCompleted( $obj, array $params = array() ) {
         if ( $obj instanceof Chunks_ChunkStruct ) {
-            return self::isChunkCompleted( $obj );
+            return self::isChunkCompleted( $obj, $params );
         } elseif ($obj instanceof Projects_ProjectStruct) {
             return self::isProjectCompleted( $obj ) ;
         } else {
@@ -79,6 +98,5 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         }
     }
 
-    protected function _buildResult( $array_result ) {
-    }
+    protected function _buildResult( $array_result ) { }
 }

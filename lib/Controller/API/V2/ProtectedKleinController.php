@@ -1,9 +1,15 @@
 <?php
+namespace API\V2  ;
 
-class API_V2_ProtectedKleinController extends API_V2_KleinController {
+class ProtectedKleinController extends KleinController {
     protected $api_key ;
     protected $api_secret ;
     protected $api_record ;
+
+    /**
+     * @var \Klein\Request
+     */
+    protected $request;
 
     private function validateAuth() {
         $headers = $this->request->headers();
@@ -12,18 +18,25 @@ class API_V2_ProtectedKleinController extends API_V2_KleinController {
         $this->api_secret = $headers['x-matecat-secret'];
 
         if ( ! $this->validKeys() ) {
-            $this->response->code(403);
-            $this->response->json(array('error' => 'Authentication failed'));
+            throw new AuthenticationError();
         }
 
         $this->validateRequest();
     }
 
     private function validKeys() {
-      $this->api_record = ApiKeys_ApiKeyDao::findByKey( $this->api_key ) ;
+        if ( $this->api_key && $this->api_secret ) {
+            $this->api_record = \ApiKeys_ApiKeyDao::findByKey( $this->api_key ) ;
 
-      return $this->api_record &&
-        $this->api_record->validSecret( $this->api_secret );
+            return $this->api_record &&
+                $this->api_record->validSecret( $this->api_secret );
+        }
+        else {
+            // TODO: Check a cookie to know if the request is coming from
+            // MateCat itself.
+        }
+
+        return true;
     }
 
     public function respond($method) {

@@ -3,6 +3,25 @@
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
     public static function getChunks() {
+
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return Jobs_JobStruct
+     */
+    public static function getByIdAndPassword( $id_job, $password ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+                "SELECT * FROM jobs WHERE " .
+                " id = :id_job AND password = :password "
+        );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
+        $stmt->execute( array( 'id_job' => $id_job, 'password' => $password ) );
+
+        return $stmt->fetch();
     }
 
     public static function getByProjectId( $id_project ) {
@@ -30,6 +49,20 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute( array( $id_project ) );
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * @param $id_job
+     *
+     * @return Jobs_JobStruct
+     */
+    public static function getById( $id_job ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ?");
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
+        $stmt->execute( array( $id_job ) );
+
+        return $stmt->fetch();
     }
 
     protected function _buildResult( $array_result ) {

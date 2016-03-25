@@ -479,18 +479,21 @@ function runDownload() {
     }
 }
 
+/**
+ * Returns the translation status evaluating the job stats
+ */
+
 function translationStatus(stats) {
     var t = 'approved';
     var app = parseFloat(stats.APPROVED);
     var tra = parseFloat(stats.TRANSLATED);
     var dra = parseFloat(stats.DRAFT);
     var rej = parseFloat(stats.REJECTED);
-    if (tra)
-    t = 'translated';
-    if (dra)
-    t = 'draft';
-    if (rej)
-    t = 'draft';
+
+    if (tra) t = 'translated';
+    if (dra) t = 'draft';
+    if (rej) t = 'draft';
+
     if( !tra && !dra && !rej && !app ){
         t = 'draft';
     }
@@ -540,6 +543,31 @@ function insertHtmlAfterSelection(html) {
         range.pasteHTML(html);
     }
 }
+
+(function(undefined) {
+    SegmentActivator = {};
+    SegmentActivator.registry = [];
+    SegmentActivator.activate = function( sid ) {
+        if ( typeof sid === 'undefined' ) {
+            console.debug( 'sid is undefined', sid);
+            return ;
+        }
+
+        for (var i = 0; i < this.registry.length ; ++i) {
+            var callback = this.registry[i];
+             callback( sid );
+        }
+    };
+})();
+
+// This activation function is only valid if the editarea is present
+// in ReviewImproved the editara class is not present so we need to
+// register a different activation function.
+// The function is defined in review_improved module.
+SegmentActivator.registry.push(function( sid ) {
+    var el = $("#segment-" + sid + "-target").find(".editarea");
+    $(el).click();
+});
 
 function ParsedHash( hash ) {
     var split ;
@@ -604,7 +632,7 @@ function ParsedHash( hash ) {
     this.onlyActionRemoved = function( hash ) {
         var current = new ParsedHash( hash );
         var diff = this.toString().split( current.toString() );
-        return diff[1] == actionSep + MBC.const.commentAction ;
+        return MBC.enabled() && (diff[1] == actionSep + MBC.const.commentAction) ;
     }
 
     this.hashCleanupRequired = function() {
@@ -690,6 +718,34 @@ function goodbye(e) {
     }
 
 }
+
+function trackChangesHTML(source, target) {
+    var diff   = UI.dmp.diff_main( source, target );
+    UI.dmp.diff_cleanupSemantic( diff )
+
+    var diffTxt = '';
+
+    $.each(diff, function (index) {
+        if(this[0] == -1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="deleted"/>' );
+            $( newElem ).text( this[1] );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else if(this[0] == 1) {
+            var rootElem = $( document.createElement( 'div' ) );
+            var newElem = $.parseHTML( '<span class="added"/>' );
+            $( newElem ).text( this[1] );
+            rootElem.append( newElem );
+            diffTxt += $( rootElem ).html();
+        } else {
+            diffTxt += this[1];
+        }
+    });
+    return diffTxt ;
+}
+
+
 
 $.fn.isOnScreen = function() {
 
@@ -897,4 +953,22 @@ function isTranslated(section) {
         section.hasClass('status-new') ||
         section.hasClass('status-draft')
     );
+}
+
+function template( name, data ) {
+    return $( MateCat.Templates[ name ]( data ) );
+}
+
+function eventFromReact(e) {
+    return e.target.hasAttribute('data-reactid');
+}
+
+function hackSnapEngage( on ) {
+    var button = $( document ).find( '#SnapABug_Button' );
+    if ( on ) {
+        button.data( 'mbc-zindex', button.css( 'z-index' ) );
+        button.css( 'z-index', -1 );
+    } else {
+        button.css( 'z-index', button.data( 'mbc-zindex' ) );
+    }
 }

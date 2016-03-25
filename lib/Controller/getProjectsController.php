@@ -126,11 +126,27 @@ class getProjectsController extends ajaxController {
             throw new Exception('User not Logged');
         }
 
-        $projects = ManageUtils::queryProjects( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
+        $projects = ManageUtils::queryProjects( $start, $this->step,
+            $this->search_in_pname,
+            $this->search_source, $this->search_target, $this->search_status,
+            $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
 
-//        Log::doLog( $projects );
+        $projnum = getProjectsNumber( $start, $this->step,
+            $this->search_in_pname, $this->search_source,
+            $this->search_target, $this->search_status,
+            $this->search_onlycompleted, $this->filter_enabled );
 
-        $projnum = getProjectsNumber( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled );
+        /**
+         * pass projects in a filter to find associated reivew_password if needed.
+         * Review password may be needed or not depending on the project. Some
+         * projects may need a separate review password, others not. Even thought
+         * the feature is disable for the given project, the password. Given this
+         * recordset is paginated, it may be feasible to seek for a revision password
+         * for each of them in a separate query.
+         */
+
+        $projects = Features::filter('filter_manage_projects_loaded',
+            $_SESSION['cid'], $projects);
 
         $this->result[ 'data' ]     = json_encode( $projects );
         $this->result[ 'page' ]     = $this->page;

@@ -71,6 +71,64 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
+
+        var resetTextArea = _.debounce( function () {
+            console.debug( 'resetting') ;
+            var $this = $(this);
+            var maxHeight = $this.data('maxheight');
+            var minHeight = $this.data('minheight');
+
+            var borderTopWidth = parseFloat( $this.css( "borderTopWidth" ) );
+            var borderBottomWidth = parseFloat( $this.css( "borderBottomWidth" ) );
+            var borders = borderTopWidth + borderBottomWidth;
+            var scrollHeightWithBorders = this.scrollHeight + borders;
+
+            while ( scrollHeightWithBorders > $this.outerHeight() && $this.height() < maxHeight ) {
+                $this.height( $this.height() + 10 );
+            }
+            ;
+
+            while ( scrollHeightWithBorders <= $this.outerHeight() && $this.height() > minHeight ) {
+                $this.height( $this.height() - 10 );
+            }
+
+            if ( $this.height() >= maxHeight ) {
+                $this.css( "overflow-y", "auto" );
+            } else {
+                $this.css( "overflow-y", "hidden" );
+            }
+        }, 100 );
+
+        $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
+        $( document ).on( 'paste', '.mc-resizable-textarea', function () {
+            setTimeout( function ( el ) {
+                resetTextArea.call( el );
+            }, 100, this );
+        } );
+
+        $(document).on('segment:status:change', function(e, segment, options) {
+            var staus = options.status ;
+            var byStatus = options.byStatus ;
+
+            UI.setContribution( segment.id, status, byStatus );
+            UI.setContributionMT( segment.id, status, byStatus );
+
+            var next = UI.getNextSegment( segment.el, 'untranslated' );
+
+            if ( ! next ) {
+                $(window).trigger({
+                    type: "allTranslated"
+                });
+            }
+
+            // TODO: not sure this is still useful
+            $(window).trigger({
+                type: "statusChanged",
+                segment: segment.el,
+                status: status
+            });
+        });
+
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
@@ -285,8 +343,6 @@ $.extend(UI, {
                 console.log('CONTROLLO: ', $('#uploadTMX').text());
                 operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
                 UI.checkTMKey($('#addtm-tr-key').val(), operation);
-//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
-
             }
 
         // end addtmx
@@ -309,7 +365,6 @@ $.extend(UI, {
 			$(this).addClass('active');
 			$('.popup-settings .tab').hide();
 			$('#' + $(this).attr('data-tab')).show();
-//			console.log($(this).attr('data-tab'));
 		}).on('click', '.popup-settings .submenu li a', function(e) {
 			e.preventDefault();
 		}).on('click', '#settings-shortcuts .list .combination .keystroke', function() {
@@ -349,22 +404,13 @@ $.extend(UI, {
 
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-//				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				saveSelection();
 			}
-//			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-//			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-//			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-//			console.log('d: ', UI.editarea.html());
-//			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
-//			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-//			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-//			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -411,19 +457,11 @@ $.extend(UI, {
 						(n == '39')? '8594' :
 						(n == '40')? '8595' : n;
 				console.log('symbol: ', symbol);
-//				pref = ($.inArray(n, [37, 38, 39, 40]))? '#' : '';
 				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + symbol) + '</span>' + '+');
 				console.log(s.html());
 			}
 			if($('span', s).length > 2) {
-//				console.log('numero span: ', $('span', s).length);
 				UI.writeNewShortcut(c, s, this);
-
-//				$(this).html(s.html().substring(0, s.html().length - 1)).removeClass('changing').addClass('modified').blur();
-//				$(s).remove();
-//				$('.msg', c).remove();
-//				$('#settings-shortcuts.modifying').removeClass('modifying');
-//				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
 			}
 		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
@@ -481,18 +519,11 @@ $.extend(UI, {
                 }, 600);
             }
         });
-//		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
 			goodbye(e);
 		};
 
-
-// no more used:
-		$("header .filter").click(function(e) {
-			e.preventDefault();
-			UI.body.toggleClass('filtering');
-		});
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
 		});
@@ -527,9 +558,6 @@ $.extend(UI, {
 			$(".stats").toggle();
 		});
 
-//		$(window).on('sourceCopied', function(event) {
-//		});
-
 		$("#outer").on('click', 'a.sid', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -538,12 +566,13 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();
 		}).on('click', 'section:not(.readonly) a.status', function() {
-//			console.log('status');
-			var segment = $(this).parents("section");
-			var statusMenu = $("ul.statusmenu", segment);
+			var section = $(this).closest("section");
+			var statusMenu = $("ul.statusmenu", section);
 
-			UI.createStatusMenu(statusMenu);
+			UI.createStatusMenu(statusMenu, section );
+
 			statusMenu.show();
+
 			$('html').bind("click.outOfStatusMenu", function() {
 				$("ul.statusmenu").hide();
 				$('html').unbind('click.outOfStatusMenu');
@@ -584,21 +613,6 @@ $.extend(UI, {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
             UI.copyGlossaryItemInEditarea($(this));
-/*
-// not used anymore?
-		}).on('blur', '.graysmall .translation', function(e) {
-			e.preventDefault();
-			UI.closeInplaceEditor($(this));
-		}).on('click', '.graysmall .edit-buttons .cancel', function(e) {
-			e.preventDefault();
-			UI.closeInplaceEditor($(this).parents('.graysmall').find('.translation'));
-		}).on('click', '.graysmall .edit-buttons .save', function(e) {
-			e.preventDefault();
-			console.log('save');
-			ed = $(this).parents('.graysmall').find('.translation');
-			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
-			UI.closeInplaceEditor(ed);
-*/
 		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
@@ -625,34 +639,54 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-        $('#outer').click(function(e) {
-            var container = $(UI.currentSegment);
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                && container.has(e.target).length === 0 // ... nor a descendant of the container
-                && !$(e.target).hasClass('translated') // has not clicked on a translated button
-                && !$(e.target).hasClass('next-untranslated') // has not clicked on a next untranslated button
-                && !$(e.target).hasClass('trash') // has not clicked on a delete suggestion icon
-                )
-            {
-                UI.closeSegment(UI.currentSegment, 1);
-            }
 
+        // This is where we decide if a segment is to close or not.
+        // Beware that closeSegment is also called on openSegment
+        // ( other segments are closed when a new one is opened ).
+        //
+        $('#outer').click(function(e) {
+
+             var close = function() {
+                UI.setEditingSegment( null );
+                UI.closeSegment(UI.currentSegment, 1);
+            };
+
+            if ( eventFromReact(e) ) return;
+            if ( $(e.target).closest('section .sid').length ) close()  ;
+            if ( $(e.target).closest('section .segment-side-buttons').length ) close();
+
+            if ( !$(e.target).closest('section').length ) close();
         });
 
 		$('html').click(function() {
 			$(".menucolor").hide();
-        }).on('click', 'section .sid, section .mbc-comment-link', function(e){
-            UI.closeSegment(UI.currentSegment, 1);
+        // }).on('click', 'section .sid, section .segment-side-buttons', function(e){
+        //     // TODO: investigate the neeed for '.segment-side-buttons'
+        //     if ( ! eventFromReact(e) ) {
+        //         UI.closeSegment(UI.currentSegment, 1);
+        //     }
         }).on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('click', '#quality-report', function(e){
             var win = window.open( $('#quality-report' ).data('url') , '_self');
             win.focus();
         }).on('keydown', function(e) {
-            if((e.which == '27')&&(UI.body.hasClass('editing'))) {
-                // close the current segment
-                UI.closeSegment(UI.currentSegment, 1);
-            };
+
+            var esc = 27 ;
+
+            // ESC should close the current segment only if `article` is not
+            // resized to let space to the tools on the sidebar.
+
+            var handleEscPressed = function() {
+                if ( UI.body.hasClass('editing') &&
+                    !UI.body.hasClass('side-tools-opened') ) {
+                        UI.setEditingSegment( null );
+                        UI.closeSegment(UI.currentSegment, 1);
+                    }
+            }
+
+            if ( e.which == esc ) handleEscPressed() ;
+
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();
@@ -707,20 +741,8 @@ $.extend(UI, {
             if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     UI.showEditToolbar();
-//                    if(!UI.isFirefox) UI.showEditToolbar();
                 }
             }
-             /*
-                        if(!UI.editarea.find('.locked.selected').length) {
-                            if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                                if(!UI.isFirefox) UI.showEditToolbar();
-                            }
-                        } else {
-                            console.log('A tag is selected');
-                            console.log(UI.editarea.find('.locked.selected')[0]);
-                            setCursorPosition(UI.editarea.find('.locked.selected')[0]);
-                        }
-            */
 		}).on('mousedown', '.editarea', function(e) {
             if(e.which == 3) {
                 e.preventDefault();
@@ -735,64 +757,10 @@ $.extend(UI, {
 			UI.formatSelection('capitalize');
 		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
-        }).on('mousedown', '.editarea', function(e) { //mousedowneditarea
-//            console.log('MOUSEDOWN');
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
-		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
-            if (typeof operation == 'undefined')
-				operation = 'clicking';
-//            console.log('operation: ', operation);
-//            console.log('action: ', action);
-            UI.saveInUndoStack('click');
-//            if(typeof UI.currentSegment != 'undefined') return true;
-            this.onclickEditarea = new Date();
-			UI.notYetOpened = false;
-			UI.closeTagAutocompletePanel();
-            UI.removeHighlightCorrespondingTags();
-
-            if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
-				if (operation == 'moving') {
-					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
-						UI.segmentToOpen = segment;
-						UI.blockOpenSegment = true;
-
-						console.log('ctrl+down troppo vicini');
-					} else {
-						UI.blockOpenSegment = false;
-					}
-
-					UI.recentMoving = true;
-					clearTimeout(UI.recentMovingTimeout);
-					UI.recentMovingTimeout = setTimeout(function() {
-						UI.recentMoving = false;
-					}, 1000);
-
-				} else {
-					UI.blockOpenSegment = false;
-				}
-				UI.lastOperation = operation;
-
-				UI.openSegment(this, operation);
-				if (action == 'openConcordance')
-					UI.openConcordance();
-
-				if (operation != 'moving') {
-                    segment = $('#segment-' + $(this).data('sid'));
-                    if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                        UI.scrollSegment($('#segment-' + $(this).data('sid')));
-                    }
-                }
-			}
-
-            if (UI.editarea != '') {
-                UI.lockTags(UI.editarea);
-                UI.checkTagProximity();
-            }
-
-            if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
-		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
+		}).on('click', '.editarea', UI.editAreaClick
+        ).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
@@ -887,64 +855,12 @@ $.extend(UI, {
                 }
             }
 		}).on('keydown', '.editor .editarea', function(e) {
-//			console.log('keydown: ', UI.editarea.html());
-/*
-			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
-			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
-				if (event.which == 88) { // ctrl+x
-					if ($('.selected', $(this)).length) {console.log('VEDIAMO');
-						event.preventDefault();
-						UI.tagSelection = getSelectionHtml();
-						$('.selected', $(this)).remove();
-					}
-				}
-			}
-*/
-
-//			console.log(e.which);
 
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
-//                console.log(window.getSelection().getRangeAt(0).endContainer.previousElementSibling);
-//                console.log('1: ', window.getSelection());
-//                console.log('2: ', $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling));
-//                for(var key in window.getSelection()) {
-//                    console.log('key: ' + key + '\n' + 'value: "' + range.startContainer[key] + '"');
-//                }
-/*
-                d=window.getSelection()+'';
-//                d=(d.isCollapsed||d.length==0)?document.title:d;
-                console.log('2: ', d);
-                */
-/*
-                dd=window.getSelection()+'';
-                dd=(dd.length==0)? document.title : dd;
-                console.log(dd.getRangeAt(0).endContainer.previousElementSibling);
-                */
-                console.log(UI.editarea.html());
                 var rangeObject = getRangeObject(window.getSelection());
-                console.log('startOffset dell elemento: ', rangeObject.startOffset);
-                console.log('classe del precedente elemento: ', $(rangeObject.endContainer.previousElementSibling).attr('class'));
-
-
-                                for(var key in rangeObject.endContainer) {
-                                    console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
-                                }
-
-/*
-                if(($(rangeObject.endContainer.previousElementSibling).hasClass('locked'))&&(rangeObject.startOffset < 1)) {
-                    console.log('eccolo');
-                    e.preventDefault();
-                    console.log('quanti sono?: ', $(rangeObject.endContainer.previousElementSibling).length);
-                    $(rangeObject.endContainer.previousElementSibling).remove();
+                for(var key in rangeObject.endContainer) {
+                    console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
                 }
-*/
-/*
-                if($(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).hasClass('locked')) {
-                    console.log('eccolo');
-                    e.preventDefault();
-                    $(window.getSelection().getRangeAt(0).endContainer.previousElementSibling).remove();
-                }
-*/
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
@@ -955,17 +871,13 @@ $.extend(UI, {
 					UI.currentSegmentQA();
 				} else {
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-//                    console.log('numTagsBefore: ', numTagsBefore);
                     var numSpacesBefore = $('.space-marker', UI.editarea).length;
-//                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
-//					console.log('a: ', UI.editarea.html());
 					saveSelection();
 
 					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
-//					console.log('c: ', UI.editarea.html());
 
                     sbIndex = 0;
                     var translation = $.parseHTML(UI.editarea.html());
@@ -985,29 +897,18 @@ $.extend(UI, {
 
 					// insideTag management
 					if ((e.which == 8)&&(isInsideTag)) {
-//							console.log('AA: ', UI.editarea.html());
 						parentTag.remove();
 						e.preventDefault();
-//							console.log('BB: ', UI.editarea.html());
 					}
 
-//					console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
-//						if ((e.which == 46)&&(isInsideTag)) {
-//							console.log('inside tag');
-//						}
-//						console.log(e.which + ' - ' + isInsideTag);
                         saveSelection();
                         // detect if selection ph is inside a monad tag
-  //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
                         if($('.monad .rangySelectionBoundary', UI.editarea).length) {
-    //                        console.log($('.monad:has(.rangySelectionBoundary)', UI.editarea));
                             $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
                             // move selboundary after the
                         }
-  //                      console.log('CC: ', UI.editarea.html());
                         restoreSelection();
-//							console.log('DD: ', UI.editarea.html());
 						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 						var numSpacesAfter = $('.space-marker', UI.editarea).length;
 //                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
@@ -1057,26 +958,13 @@ $.extend(UI, {
                     UI.checkTagProximity();
                 }, 10);
 
-//                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
 					r = range.startContainer.innerText;
-//                    r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
                         e.preventDefault();
 
-                        /*
-                                                console.log('1: ', UI.editarea.html());
-                                                $('.rangySelectionBoundary', UI.editarea).remove();
-                                                saveSelection();
-                                                if($('span .rangySelectionBoundary', UI.editarea).length) {
-                                                    $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
-                                                }
-                                                console.log('2: ', UI.editarea.html());
-                                                restoreSelection();
-                        */
 
                         saveSelection();
-//                        console.log(UI.editarea.html());
                         rr = document.createRange();
                         referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
                         rr.setStartBefore(referenceNode);
@@ -1085,35 +973,8 @@ $.extend(UI, {
 
 					}
 				} else { // there's nothing selected
-//                    console.log('nothing selected when left is pressed');
-/*
-                    saveSelection();
-                    sbIndex = 0;
-                    translation = $.parseHTML(UI.editarea.html());
-                    $.each(translation, function(index) {
-                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
-                    });
-//                    console.log('$(translation[sbIndex-1]).prop("tagName"): ', $(translation[sbIndex-1]).prop("tagName"));
-//                    console.log('$(translation[sbIndex-2]).prop("tagName"): ', $(translation[sbIndex-2]).prop("tagName"));
-                    if(($(translation[sbIndex-1]).prop("tagName") == 'SPAN')&&($(translation[sbIndex-2]).prop("tagName") == 'BR')) {
-                        console.log('agire');
-                        console.log(UI.editarea.html());
-                        ph = $('.rangySelectionBoundary', UI.editarea);
-                        console.log(ph);
-                        console.log(ph.prev());
-                        prev = ph.prev();
-                        prev.before('<span class="toDestroy" style="width: 0px; float: left;">&nbsp;</span>');
-//                        prev.before(ph);
-                        console.log(UI.editarea.html());
-                        restoreSelection();
-
-//                        $('.toDestroy', UI.editarea).remove();
-
-                    }
-*/
                 }
 				UI.closeTagAutocompletePanel();
-//				UI.jumpTag('start');
 			}
 
 			if (e.which == 38) { // top arrow
@@ -1143,7 +1004,6 @@ $.extend(UI, {
 			if (e.which == 39) { // right arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
-//                console.log('range when pressing right arrow key: ', range);
                 setTimeout(function() {
                     UI.checkTagProximity();
                 }, 10);
@@ -1184,8 +1044,6 @@ $.extend(UI, {
                 setTimeout(function() {
                     UI.checkTagProximity();
                 }, 10);
-//                console.log($(':focus'));
-                //              return false;
 			}
 
             if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
@@ -1205,7 +1063,6 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-//                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
@@ -1225,12 +1082,6 @@ $.extend(UI, {
 			}
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
-			console.log('input in editarea');
-//			DA SPOSTARE IN DROP E PASTE
-//			if (UI.body.hasClass('searchActive')) {
-//				console.log('on input');
-//				UI.resetSearch();
-//			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			if (UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
@@ -1243,21 +1094,11 @@ $.extend(UI, {
             if(!UI.editarea.find('.locked').length) {
                 UI.currentSegment.removeClass('hasTags');
             }
-/*
-			if (!UI.body.hasClass('searchActive'))
-				setTimeout(function() {
-					UI.lockTags(UI.editarea);
-				}, 10);
-*/
 			UI.registerQACheck();
                 if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which = '32')) ) {
                 } else {
                     UI.lockTags(UI.editarea);
                 }
-
-
-//            UI.lockTags(UI.editarea);
-
         }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
@@ -1273,9 +1114,6 @@ $.extend(UI, {
 				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }
 
-//		}).on('contextmenu', '.source', function(e) {
-			// temporarily disabled
-//            if(UI.viewConcordanceInContextMenu||UI.viewSpellCheckInContextMenu) e.preventDefault();
 		}).on('mousedown', '.source', function(e) {
 			if (e.button == 2) { // right click
 				// temporarily disabled
@@ -1283,8 +1121,6 @@ $.extend(UI, {
 			}
 			return true;
 		}).on('dragstart', '.editor .editarea .locked', function() {
-//			console.log('dragstart tag: ', $(this));
-//			$(this).addClass('dragged');
 			var selection = window.getSelection();
 			var range = selection.getRangeAt(0);
 			if (range.startContainer.data != range.endContainer.data)
@@ -1292,11 +1128,7 @@ $.extend(UI, {
 
 			UI.draggingInsideEditarea = true;
 			UI.tagToDelete = $(this);
-//		}).on('drop', '.editor .editarea .locked', function() {
-//			console.log('dropped tag: ', $(this));
 		}).on('drag', '.editarea .locked, .source .locked', function() {
-//			console.log('a tag is dragged');
-//			console.log('e: ', $(this).text());
 			UI.draggingTagIsOpening = ($(this).text().match(/^<\//gi))? false : true;
 			UI.draggingTagText = $(this).text();
 		}).on('drop', '.editor .editarea', function(e) {
@@ -1310,8 +1142,6 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-//			UI.saveInUndoStack('drop');
-//			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
 				var strChunk = UI.editarea.html().replace(/(^.*?)&nbsp;(<span contenteditable\="false" class\="locked).*?$/gi, '$1');
@@ -1359,7 +1189,6 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
-//            console.log('clicking on translated button');
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
             UI.hideEditToolbar();
@@ -1389,22 +1218,18 @@ $.extend(UI, {
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
-//					$('#' + $(this).attr('data-segmentid') + '-close').click();
                 }
 
 			}
 			UI.checkHeaviness();
 			if ( UI.blockButtons ) {
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-//					console.log('segment is already loaded');
 				} else {
-//					console.log('segment is not loaded');
 
 					if (!UI.noMoreSegmentsAfter) {
 						UI.reloadWarning();
 					}
 				}
- //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			if(!UI.offline) UI.blockButtons = true;
@@ -1422,29 +1247,12 @@ $.extend(UI, {
                 $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
 
-//			UI.markTags();
-/*
-            console.log('ID DEL PRECEDENTE: ', $(this).attr('data-segmentid'));
-            console.log($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-            console.log('prima: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
-*/
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-//            console.log('dopo: ', $('#' + $(this).attr('data-segmentid') + ' .editarea').html());
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-//            console.log('l');
 
-        }).on('click', 'a.approved', function() {
-/*
-			UI.setStatusButtons(this);
-			$(".editarea", UI.nextUntranslatedSegment).click();
-
-			UI.changeStatus(this, 'approved', 0);
-			UI.changeStatusStop = new Date();
-			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-*/
-		}).on('click', 'a.d, a.a, a.r, a.f', function() {
+		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
 			$("ul.statusmenu", segment).toggle();
@@ -1457,8 +1265,11 @@ $.extend(UI, {
 			UI.changeStatus(this, 'rejected', 1);
 		}).on('click', 'a.f', function() {
 			UI.changeStatus(this, 'draft', 1);
+        }).on('click', 'a.fx', function() {
+			UI.changeStatus(this, 'fixed', 1);
+        }).on('click', 'a.rb', function() {
+			UI.changeStatus(this, 'rebutted', 1);
 		}).on('click', '.editor .outersource .copy', function(e) {
-//        }).on('click', 'a.copysource', function(e) {
 			e.preventDefault();
 			UI.copySource();
 		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
@@ -1467,11 +1278,8 @@ $.extend(UI, {
             e.preventDefault();
 			if(UI.body.hasClass('hideMatches')) UI.switchFooter();
 
-//            UI.currentSegment.trigger('showMatchesLocal');
-//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
         }).on('showMatchesLocal', '.editor', function(e) {
             UI.currentSegment.find('.footer').addClass('showMatches');
-//            if(UI.body.hasClass('hideMatches')) $(this).parents('.submenu').find('.footerSwitcher').click();
         }).on('click', '.tab-switcher-tm', function(e) {
 			e.preventDefault();
 			$('.editor .submenu .active').removeClass('active');
@@ -1577,27 +1385,6 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
- /*
-        }).on('mousedown', function(e) {
-
-            console.log('mousedown');
-            console.log('prima: ', UI.editarea.is(":focus"));
-            saveSelection();
-            $('.editor .rangySelectionBoundary').addClass('focusOut');
-            hasFocusBefore = UI.editarea.is(":focus");
-            setTimeout(function() {
-                hasFocusAfter = UI.editarea.is(":focus");
-                if(hasFocusBefore && !hasFocusAfter) {
-                    console.log('blurred from editarea');
-                } else if(!hasFocusBefore && hasFocusAfter) {
-                    console.log('focused in editarea');
-                    restoreSelection();
-                } else {
-                    $('.editor .rangySelectionBoundary.focusOut').remove();
-
-                }
-            }, 50);
-            */
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 
@@ -1612,18 +1399,6 @@ $.extend(UI, {
 			handlepaste(this, ev);
             UI.lockTags(UI.editarea);
 
-            /*
-			$(window).trigger({
-				type: "pastedInEditarea",
-				segment: segment
-			});
-
-			setTimeout(function() {
-				UI.saveInUndoStack('paste');
-			}, 100);
-            UI.lockTags(UI.editarea);
-			UI.currentSegmentQA();
- */
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
@@ -1632,57 +1407,29 @@ $.extend(UI, {
 			e.preventDefault();
 			tab = $(this).parents('.concordances');
 			container = $('.overflow', $(tab));
-//			console.log($(container).height());
 			if($(tab).hasClass('extended')) {
 				UI.setExtendedConcordances(false);
-
-/*
-				$(tab).removeClass('extended')
-//				console.log(container.height());
-				$(container).removeAttr('style');
-//				console.log($(container).height());
-				$(this).text('More');
-*/
 			} else {
 				UI.setExtendedConcordances(true);
-
-//				$(container).css('height', $(tab).height() + 'px');
-//				$(tab).addClass('extended');
-//				$(this).text('Less');
-//				UI.custom.extended_concordance = true;
-//				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
-        }).on('keyup', '.editor .editarea', function(e) {
-			if ( e.which == 13 ){
-//				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-
-                //replace all divs with a br and remove all br without a class
-//                var divs = $( this ).find( 'div' );
-//                if( divs.length ){
-//					divs.each(function(){
-//						$(this).find( 'br:not([class])' ).remove();
-//						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
-//					});
-//                } else {
-//                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-//                }
-			}
 		}).on('click', '.tagMode .crunched', function(e) {
             e.preventDefault();
             UI.setCrunchedTagMode();
-//            UI.currentSegment.attr('data-tagMode', 'crunched');
         }).on('click', '.tagMode .extended', function(e) {
             e.preventDefault();
             UI.setExtendedTagMode();
-//            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
+
         if(!$('#segment-' + this.startSegmentId).length) {
             if($('#segment-' + this.startSegmentId + '-1').length) {
-                this.startSegmentId = this.startSegmentId + '-1';
+                if ( typeof this.startSegmentId != 'undefined' ) {
+                    this.startSegmentId = this.startSegmentId + '-1';
+                }
             };
         }
+
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
 
@@ -1866,11 +1613,8 @@ $.extend(UI, {
         $('#replace-target').on('focus', function() {
             if(!$('#enable-replace').prop('checked')) {
                 $('label[for=enable-replace]').trigger('click');
-//                $('#replace-target').trigger('click');
                 $('#replace-target').focus();
             }
-//            console.log('aaa');
-//            console.log($('#enable-replace').prop('checked'));
         });
         $('#replace-target').on('input', function() {
             if($(this).val() != '') {
@@ -1893,7 +1637,16 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
-	}
+    }
 });
 
+if ( config.isReview ) {
+    $(document).on('ready', function() {
+        window.quality_report_btn_component = ReactDOM.render(
+            React.createElement( Review_QualityReportButton, {
+                vote                : config.overall_quality_class,
+                quality_report_href : config.quality_report_href
+            }), $('#quality-report-button')[0] );
 
+    });
+}

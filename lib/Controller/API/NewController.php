@@ -58,6 +58,7 @@ class NewController extends ajaxController {
 
     private $owner = "";
     private $current_user = "";
+    private $metadata = array();
 
     const MAX_NUM_KEYS = 5;
 
@@ -102,7 +103,11 @@ class NewController extends ajaxController {
                 ),
                 'owner_email'       => array(
                         'filter' => FILTER_VALIDATE_EMAIL
+                ),
+                'metadata' => array(
+                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 )
+
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -167,6 +172,16 @@ class NewController extends ajaxController {
                 return -5;
             }
         }
+
+        try {
+            $this->validateMetadataParam($__postInput['metadata']);
+        } catch ( Exception $ex ) {
+            $this->api_output[ 'message' ] = 'Error evaluating metadata param';
+            Log::doLog( $ex->getMessage() );
+
+            return -1;
+        }
+
 
         try {
             $this->validateEngines();
@@ -312,7 +327,6 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
-
     public function doAction() {
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
@@ -340,6 +354,7 @@ class NewController extends ajaxController {
         }
 
         $arFiles = array();
+
         foreach ( $stdResult as $input_name => $input_value ) {
             $arFiles[] = $input_value->name;
         }
@@ -398,6 +413,9 @@ class NewController extends ajaxController {
                 $conversionHandler->setStopOnFileException( false );
 
                 $fileObjects = $conversionHandler->extractZipFile();
+
+                \Log::doLog( 'fileObjets', $fileObjects );
+
                 //call convertFileWrapper and start conversions for each file
 
                 if ( $conversionHandler->uploadError ) {
@@ -588,8 +606,10 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
+        $projectStructure[ 'metadata' ]         = $this->metadata ;
 
         if ( $this->current_user != null ) {
+            $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
         }
 
@@ -604,7 +624,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = array_values( $projectStructure[ 'result' ][ 'errors' ] );
 
         } else {
-
             //everything ok
             $this->api_output[ 'status' ]       = 'OK';
             $this->api_output[ 'message' ]      = 'Success';
@@ -613,13 +632,12 @@ class NewController extends ajaxController {
 
             $this->api_output[ 'new_keys' ] = $this->new_keys;
 
-            $this->api_output[ 'analyze_url' ] = INIT::$HTTPHOST . "/analyze/" . // TODO: move this to a URL builder function
-                    $projectStructure[ 'project_name' ] . "/" .
-                    $projectStructure[ 'result' ][ 'id_project' ] . "-" .
-                    $projectStructure[ 'result' ][ 'ppassword' ];
+            $this->api_output[ 'analyze_url' ] = $projectStructure[ 'result' ][ 'analyze_url' ];
         }
 
     }
+
+
 
     private function validateAuthHeader() {
         if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
@@ -649,6 +667,26 @@ class NewController extends ajaxController {
 
         return $elem->toArray();
 
+    }
+
+    /**
+     * Expects the metadata param to be a json formatted string and tries to convert it
+     * in array.
+     * Json string is expected to be flat key value, this is enforced padding 1 to json
+     * conversion depth param.
+     *
+     * @param $json_string
+     */
+    private function validateMetadataParam($json_string) {
+        if (!empty($json_string)) {
+            if ( strlen($json_string) > 2048 ) {
+                throw new Exception('metadata string is too long');
+            }
+            $depth = 2 ; // only converts key value structures
+            $assoc = TRUE;
+            $json_string = html_entity_decode($json_string);
+            $this->metadata = json_decode( $json_string, $assoc, $depth );
+        }
     }
 
     private static function parseTmKeyInput( $tmKeyString ) {

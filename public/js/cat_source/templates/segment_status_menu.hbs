@@ -1,0 +1,14 @@
+<li class="arrow"><span class="arrow-mcolor"></span></li>
+
+<li><a class="f" data-sid="segment-{{id_segment}}" title="set {{ statusLabelLC 'draft' }} as status">{{ statusLabel 'draft' }} </a></li>
+<li><a class="d" data-sid="segment-{{id_segment}}" title="set {{ statusLabelLC 'translated' }} as status">{{ statusLabel 'translated' }}</a></li>
+
+{{#if show_revision_statuses }}
+  <li><a class="a" data-sid="segment-{{id_segment}}" title="set {{ statusLabelLC 'approved' }} as status">{{ statusLabel 'approved' }}</a></li>
+  <li><a class="r" data-sid="segment-{{id_segment}}" title="set {{ statusLabelLC 'rejected' }} as status">{{ statusLabel 'rejected' }}</a></li>
+{{/if}}
+
+{{#if show_post_revision_statuses }}
+  <li><a class="fx" data-sid="segment-{{id_segment}}" title="set {{ statusLabelLC 'fixed'}} as status">{{ statusLabel 'fixed' }}</a></li>
+  <li><a class="rb" data-sid="segment-{{id_segment}}" title="set {{ statusLabelLC 'rebutted' }} as status">{{ statusLabel 'rebutted' }}</a></li>
+{{/if}}

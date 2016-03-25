@@ -6,10 +6,24 @@ Review = {
     enabled : function() {
         return config.enableReview && config.isReview ;
     },
+    type : config.reviewType
 };
 
+$.extend( UI, {
+    clenaupTextFromPleaceholders : function(text) {
+        text = text
+            .replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+        return text;
+    }
+});
+
 if ( Review.enabled() )
-(function(Review, window) {
+(function(Review, $, undefined) {
+
     var alertNotTranslatedYet = function( sid ) {
         APP.confirm({
             name: 'confirmNotYetTranslated',
@@ -30,9 +44,113 @@ if ( Review.enabled() )
             return false ;
         },
     });
-})(Review, window);
 
-if ( Review.enabled() ) {
+    $.extend(UI, {
+
+        trackChanges: function (editarea) {
+            var source = UI.currentSegment.find('.original-translation').text();
+            source = UI.clenaupTextFromPleaceholders( source );
+
+            var target = $(editarea).text().replace(/(<\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?>)/gi,"");
+            var diffHTML = trackChangesHTML( source, target );
+
+            $('.editor .sub-editor.review .track-changes p').html( diffHTML );
+        },
+
+        setReviewErrorData: function (d) {
+            $.each(d, function (index) {
+
+                if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Language Quality") $('.editor .error-type input[name=t4][value=' + this.value + ']').prop('checked', true);
+                if(this.type == "Style") $('.editor .error-type input[name=t5][value=' + this.value + ']').prop('checked', true);
+
+            });
+
+        },
+
+        openNextTranslated: function (sid) {
+            console.log('openNextTranslated');
+            sid = sid || UI.currentSegmentId;
+            el = $('#segment-' + sid);
+
+            var translatedList = [];
+            var approvedList = [];
+
+            if(el.nextAll('.status-translated').length) { // find in next segments in the current file
+                translatedList = el.nextAll('.status-translated');
+                if( translatedList.length ) {
+                    translatedList.first().find('.editarea').click();
+                }
+
+            } else {
+                file = el.parents('article');
+                file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
+
+                    var translatedList = $(this).find('.status-translated');
+
+                    if( translatedList.length ) {
+                        translatedList.first().find('.editarea').click();
+                    } else {
+                        UI.reloadWarning();
+                    }
+
+                    return false;
+
+                });
+                // else
+                if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
+                    translatedList = $('section.status-translated');
+
+                    if( translatedList.length ) {
+                        if((translatedList.first().is(UI.currentSegment))) {
+                            UI.scrollSegment(translatedList.first());
+                        } else {
+                            translatedList.first().find('.editarea').click();
+                        }
+                    }
+
+                } else { // find in not loaded segments
+
+                    APP.doRequest({
+                        data: {
+                            action: 'getNextReviseSegment',
+                            id_job: config.job_id,
+                            password: config.password,
+                            id_segment: sid
+                        },
+                        error: function() {
+                        },
+                        success: function(d) {
+                            if( d.nextId == null ) return false;
+
+                            if( $(".modal[data-type='confirm']").length ) {
+                                $(window).on('statusChanged', function(e) {
+                                    UI.renderAfterConfirm(d.nextId);
+                                });
+                            } else {
+                                UI.renderAfterConfirm(d.nextId);
+                            }
+
+                        }
+                    });
+                }
+            }
+        }
+
+
+
+    });
+})(Review, jQuery);
+
+/**
+ * Events
+ *
+ * Only bind events for specific review type
+ */
+
+if ( Review.enabled() && Review.type == 'simple' ) {
 
     UI.SegmentFooter.registerTab({
         code                : 'review',
@@ -93,10 +211,6 @@ if ( Review.enabled() ) {
                 "vote":"Excellent"
             }
         ];
-        // end temp
-//        $('#statistics .statistics-core').append('<li id="stat-quality">Overall quality: <span class="quality">Fail</span> <a href="#" class="details">(Details)</a></li>');
-//        UI.createStatQualityPanel();
-//        UI.populateStatQualityPanel(config.stat_quality);
     }).on('buttonsCreation', 'section', function() {
         var div = $('<ul>' + UI.segmentButtons + '</ul>');
 
@@ -109,7 +223,6 @@ if ( Review.enabled() ) {
 
         $('.editor .submenu .active').removeClass('active');
         $(this).addClass('active');
-//        console.log($('.editor .sub-editor'));
         $('.editor .sub-editor.open').removeClass('open');
         if($(this).hasClass('untouched')) {
             $(this).removeClass('untouched');
@@ -119,10 +232,6 @@ if ( Review.enabled() ) {
         } else {
             $('.editor .sub-editor.review').addClass('open');
         }
-/*
-        $('.editor .sub-editor').hide();
-        $('.editor .sub-editor.review').show();
-*/
     }).on('input', '.editor .editarea', function() {
         UI.trackChanges(this);
     }).on('afterFormatSelection', '.editor .editarea', function() {
@@ -137,44 +246,30 @@ if ( Review.enabled() ) {
         UI.hideEditToolbar();
         UI.currentSegment.removeClass('modified');
 
-        /*
-                var a = UI.currentSegment.find('.original-translation').text() + '"';
-                var b = $(editarea).text() + '"';
-                console.log('a: "', htmlEncode(a));
-                console.log('b: "', htmlEncode(b));
-                console.log('a = b: ', a == b);
-                console.log('numero di modifiche: ', $('.editor .track-changes p span').length);
+        var noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
 
-                if(UI.currentSegment.find('.original-translation').text() == $(editarea).text()) console.log('sono uguali');
-         */
-        noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
-        if((noneSelected)&&($('.editor .track-changes p span').length)) {
+        //
+        if ( ( noneSelected ) && ( $('.editor .track-changes p span').length) ) {
+
             $('.editor .tab-switcher-review').click();
             $('.sub-editor.review .error-type').addClass('error');
-        } else {
-            original = UI.currentSegment.find('.original-translation').text();
-            $('.sub-editor.review .error-type').removeClass('error');
-//            console.log('a: ', UI.currentSegmentId);
-            UI.changeStatus(this, 'approved', 0);
-            sid = UI.currentSegmentId;
-            err = $('.sub-editor.review .error-type');
-            err_typing = $(err).find('input[name=t1]:checked').val();
-            err_translation = $(err).find('input[name=t2]:checked').val();
-            err_terminology = $(err).find('input[name=t3]:checked').val();
-            err_language = $(err).find('input[name=t4]:checked').val();
-            err_style = $(err).find('input[name=t5]:checked').val();
-//            console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
-            UI.openNextTranslated();
-            // temp fix
-/*
-            setTimeout(function() {
-                UI.tempDisablingReadonlyAlert = false;
-            }, 3000);
-*/
-//            console.log(UI.nextUntranslatedSegmentIdByServer);
-//            UI.gotoNextSegment();
 
-//            APP.alert('This will save the translation in the new db field.<br />Feature under construction');
+        } else {
+
+            $('.sub-editor.review .error-type').removeClass('error');
+
+            UI.changeStatus(this, 'approved', 0);  // this does < setTranslation
+
+            var original = UI.currentSegment.find('.original-translation').text();
+            var sid = UI.currentSegmentId;
+            var err = $('.sub-editor.review .error-type');
+            var err_typing = $(err).find('input[name=t1]:checked').val();
+            var err_translation = $(err).find('input[name=t2]:checked').val();
+            var err_terminology = $(err).find('input[name=t3]:checked').val();
+            var err_language = $(err).find('input[name=t4]:checked').val();
+            var err_style = $(err).find('input[name=t5]:checked').val();
+
+            UI.openNextTranslated();
 
             var data = {
                 action: 'setRevision',
@@ -192,48 +287,9 @@ if ( Review.enabled() ) {
             UI.setRevision( data );
 
         }
-//        if(!((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked'))||(UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')))) console.log('sono tutti none');
     }).on('click', '.sub-editor.review .error-type input[type=radio]', function(e) {
         $('.sub-editor.review .error-type').removeClass('error');
-/*
-    }).on('click', '#stat-quality .details', function(e) {
-        e.preventDefault();
-//        UI.openStatQualityPanel();
-    }).on('click', '.popup-stat-quality h1 .btn-ok, .outer-stat-quality', function(e) {
-        e.preventDefault();
-        $( ".popup-stat-quality").removeClass('open').hide("slide", { direction: "right" }, 400);
-        $(".outer-stat-quality").hide();
-        $('body').removeClass('side-popup');
-*/
     }).on('setCurrentSegment_success', function(e, d, id_segment) {
-
-        // temp
-/*
-        d.error_data = [
-            {
-                "type":"Typing",
-                "value": 1
-            },
-            {
-                "type":"Translation",
-                "value": 2
-            },
-            {
-                "type":"Terminology",
-                "value": 0
-            },
-            {
-                "type":"Language Quality",
-                "value": 0
-            },
-            {
-                "type":"Style",
-                "value": 0
-            }
-        ];
-        d.original = UI.editarea.text();
-        */
-        // end temp
         xEditarea = $('#segment-' + id_segment + '-editarea');
         xSegment = $('#segment-' + id_segment);
         if(d.original == '') d.original = xEditarea.text();
@@ -243,41 +299,22 @@ if ( Review.enabled() ) {
     });
 
     $.extend(UI, {
-
         setRevision: function( data ){
-
             APP.doRequest({
-//                data: reqData,
-
                 data: data,
-
-//                context: [reqArguments, segment, status],
                 error: function() {
-                    //UI.failedConnection( this[0], 'setRevision' );
                     UI.failedConnection( data, 'setRevision' );
                 },
                 success: function(d) {
-//                    console.log('d: ', d);
-                    $('#quality-report').attr('data-vote', d.data.overall_quality_class);
-                    // temp
-//                    d.stat_quality = config.stat_quality;
-//                    d.stat_quality[0].found = 2;
-                    //end temp
-//                    UI.populateStatQualityPanel(d.stat_quality);
+                    window.quality_report_btn_component.setState({
+                        vote: d.data.overall_quality_class
+                    });
                 }
             });
         },
         trackChanges: function (editarea) {
-/*
-            console.log('11111: ', $(editarea).text());
-            console.log('22222: ', htmlEncode($(editarea).text()));
-            console.log('a: ', UI.currentSegment.find('.original-translation').text());
-            console.log('b: ', $(editarea).html());
-            console.log('c: ', $(editarea).text());
-            var c = $(editarea).text();
-            console.log('d: ', c.replace(/(<([^>]+)>)/ig,""));
-*/
-            var diff = UI.dmp.diff_main(UI.currentSegment.find('.original-translation').text()
+            var diff = UI.dmp.diff_main(UI.currentSegment
+                .find('.original-translation').text()
                     .replace( config.lfPlaceholderRegex, "\n" )
                     .replace( config.crPlaceholderRegex, "\r" )
                     .replace( config.crlfPlaceholderRegex, "\r\n" )
@@ -309,30 +346,9 @@ if ( Review.enabled() ) {
                 $('.editor .sub-editor.review .track-changes p').html(diffTxt);
             });
         },
-/*
-        createStatQualityPanel: function () {
-            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
-        },
-        populateStatQualityPanel: function (d) { // no more used
-            tbody = $('#popup-stat-quality .slide-panel-body tbody');
-            tbody.empty();
-            $.each(d, function (index) {
-                $(tbody).append('<tr data-vote="' + this.vote.trim() + '"><td>' + this.type + '</td><td>' + this.allowed + '</td><td>' + this.found + '</td><td>' + this.vote + '</td></tr>')
-            });
-//            UI.body.append('<div id="popup-stat-quality">' + $('#tpl-review-stat-quality').html() + '</div>');
-        },
-        openStatQualityPanel: function() { // no more used
-            $('body').addClass('side-popup');
-            $(".popup-stat-quality").addClass('open').show("slide", { direction: "right" }, 400);
-//            $("#SnapABug_Button").hide();
-            $(".outer-stat-quality").show();
-//            $.cookie('tmpanel-open', 1, { path: '/' });
-        },
-*/
+
         setReviewErrorData: function (d) {
             $.each(d, function (index) {
-//                console.log(this.type + ' - ' + this.value);
-//                console.log('.editor .error-type input[name=t1][value=' + this.value + ']');
                 if(this.type == "Typing") $('.editor .error-type input[name=t1][value=' + this.value + ']').prop('checked', true);
                 if(this.type == "Translation") $('.editor .error-type input[name=t2][value=' + this.value + ']').prop('checked', true);
                 if(this.type == "Terminology") $('.editor .error-type input[name=t3][value=' + this.value + ']').prop('checked', true);
@@ -342,27 +358,7 @@ if ( Review.enabled() ) {
             });
 
         },
-/*
-        gotoNextUntranslated: function () {
-            UI.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            UI.nextSegmentId = UI.nextUntranslatedSegmentIdByServer;
-            //console.log('nextUntranslatedSegmentIdByServer: ', nextUntranslatedSegmentIdByServer);
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentIdByServer)) {
-//                console.log('b: ', UI.currentSegmentId);
-                UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
-//                console.log('c: ', UI.currentSegmentId);
 
-            } else {
-                UI.reloadWarning();
-            }
-
-        },
-*/
-/*
-        closeNotYetTranslated: function () {
-            return false;
-        },
-*/
         renderAfterConfirm: function (nextId) {
             this.render({
                 firstLoad: false,
@@ -370,98 +366,5 @@ if ( Review.enabled() ) {
             });
         },
 
-        openNextTranslated: function (sid) {
-            console.log('openNextTranslated');
-            sid = sid || UI.currentSegmentId;
-            el = $('#segment-' + sid);
-//            console.log(el.nextAll('.status-translated, .status-approved'));
-
-            var translatedList = [];
-            var approvedList = [];
-// console.log('QUANTI? ', el.nextAll('.status-translated, .status-approved').length);
-            // find in current UI
-
-            if(el.nextAll('.status-translated').length) { // find in next segments in the current file
-                translatedList = el.nextAll('.status-translated');
-//                approvedList   = el.nextAll('.status-approved');
-                console.log('translatedList: ', translatedList);
-//                console.log('approvedList: ', approvedList);
-                if( translatedList.length ) {
-                    translatedList.first().find('.editarea').click();
-                } else {
-//                    approvedList.first().find('.editarea').click();
-                    // chiudi segmento: BELLA, HO FINITO!
-
-//                    UI.reloadWarning();
-//                    approvedList.first().find('.editarea').click();
-                }
-
-            } else {
-                file = el.parents('article');
-                file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
-
-                    var translatedList = $(this).find('.status-translated');
-//                    var approvedList   = $(this).find('.status-approved');
-
-                    if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
-                    } else {
-                        UI.reloadWarning();
-//                        approvedList.first().find('.editarea').click();
-                    }
-
-                    return false;
-
-                });
-                // else
-                if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
-console.log('AAA');
-                    translatedList = $('section.status-translated');
-//                    approvedList   = $('section.status-approved');
-
-                    if( translatedList.length ) {
-                        if((translatedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(translatedList.first());
-                        } else {
-                            translatedList.first().find('.editarea').click();
-                        }
-/*
-                    } else {
-                        if((approvedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(approvedList.first());
-                        } else {
-                            approvedList.first().find('.editarea').click();
-                        }
-*/
-                    }
-
-                } else { // find in not loaded segments
-                    console.log('ask for getNextReviseSegment');
-//                    console.log('got to ask to server next translated segment id, and then reload to that segment');
-                    APP.doRequest({
-                        data: {
-                            action: 'getNextReviseSegment',
-                            id_job: config.job_id,
-                            password: config.password,
-                            id_segment: sid
-                        },
-                        error: function() {
-                        },
-                        success: function(d) {
-                            if( d.nextId == null ) return false;
-                            if($(".modal[data-type='confirm']").length) {
-                                $(window).on('statusChanged', function(e) {
-                                    UI.renderAfterConfirm(d.nextId);
-                                });
-                            } else {
-                                UI.renderAfterConfirm(d.nextId);
-                            }
-
-                        }
-                    });
-                }
-            }
-        }
-
-    })
+    });
 }

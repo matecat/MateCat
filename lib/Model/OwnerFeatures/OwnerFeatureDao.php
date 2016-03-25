@@ -13,10 +13,30 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
             " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled );"
         );
 
-        $values = array_diff_key( $obj->toArray(), array('id' => null) );
+        Log::doLog( $obj->attributes() );
+
+        $values = array_diff_key( $obj->attributes(), array('id' => null) );
 
         $stmt->execute( $values );
         return $this->getById( $conn->lastInsertId() );
+    }
+
+    /**
+     * @param $id_customer
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct[]
+     */
+    public static function getByIdCustomer( $id_customer ) {
+        $conn = Database::obtain()->getConnection();
+
+        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
+            " INNER JOIN users ON users.uid = owner_features.uid " .
+            " WHERE users.email = :id_customer " .
+            " AND owner_features.enabled "
+        );
+        $stmt->execute( array( 'id_customer' => $id_customer) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
+        return $stmt->fetchAll();
     }
 
     public static function getById( $id ) {
@@ -28,6 +48,12 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param $feature_code
+     * @param $email
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct
+     */
     public static function getByOwnerEmailAndCode( $feature_code, $email ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM owner_features " .

@@ -20,25 +20,10 @@ package {['zsh', 'tmux', 'git-core', 'vim']:
   ensure  => installed
 }
 
-class {'nodejs':
-  version => 'v0.12.4',
-} -> file {'/usr/bin/node':
-  ensure => 'link',
-  target => '/usr/local/node/node-default/bin/node'
-} -> file {'/usr/bin/npm':
-  ensure => 'link',
-  target => '/usr/local/node/node-default/bin/npm'
-} ->
-package {'grunt-cli':
-  provider => npm
-} -> file {'/usr/bin/grunt':
-  ensure => 'link',
-  target => '/usr/local/node/node-default/bin/grunt'
-}
-
 # runtime required packages
 
 class {'matecat::php': }
+class {'matecat::nodejs': }
 
 file { '.env': 
   path    => '/vagrant/inc/.env',
@@ -120,7 +105,7 @@ class { '::mysql::server':
   override_options        => $override_options
 }
 
-exec { 'cat lib/Model/matecat.sql lib/Model/comments.sql > /var/tmp/matecat-schema.sql':
+exec { 'cat lib/Model/matecat.sql > /var/tmp/matecat-schema.sql':
   path    => '/bin',
   cwd     => '/vagrant', 
   creates => '/vagrant/lib/Model/matecat-schema.sql'

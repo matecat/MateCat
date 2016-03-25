@@ -1,5 +1,6 @@
 (function($, UI) {
 
+
     var Segment = function(el) {
         this.el = $(el) ;
         this.raw = el ;
