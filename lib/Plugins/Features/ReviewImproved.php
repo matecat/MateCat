@@ -124,8 +124,17 @@ class ReviewImproved extends BaseFeature {
      */
     public function postJobSplitted(\ArrayObject $projectStructure) {
         $id_job = $projectStructure['array_jobs']['job_list'][0] ;
-        \LQA\ChunkReviewDao::deleteByJobId( $id_job );
+        ChunkReviewDao::deleteByJobId( $id_job );
+
         $this->createQaChunkReviewRecord( $id_job, $projectStructure );
+        $id_project = $projectStructure['id_project'];
+
+        $reviews = ChunkReviewDao::findByIdJob( $id_job );
+        foreach( $reviews as $review ) {
+            $model = new ChunkReviewModel($review);
+            $model->recountAndUpdatePassFailResult();
+        }
+
     }
 
     /**
@@ -135,8 +144,9 @@ class ReviewImproved extends BaseFeature {
      */
     public function postJobMerged( $projectStructure ) {
         $id_job = $projectStructure['job_to_merge'] ;
+        $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
 
-        $old_reviews = \LQA\ChunkReviewDao::findByIdJob( $id_job );
+        ChunkReviewDao::deleteByJobId( $id_job );
 
         $score = 0;
         $reviewed_words_count = 0 ;
@@ -146,10 +156,8 @@ class ReviewImproved extends BaseFeature {
             $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
         }
 
-        \LQA\ChunkReviewDao::deleteByJobId( $id_job );
-
         $this->createQaChunkReviewRecord( $id_job, $projectStructure );
-        $new_reviews = \LQA\ChunkReviewDao::findByIdJob( $id_job );
+        $new_reviews = ChunkReviewDao::findByIdJob( $id_job );
         $new_reviews[0]->score = $score;
         $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
@@ -200,17 +208,14 @@ class ReviewImproved extends BaseFeature {
      */
     private function createQaChunkReviewRecord( $id_job, $projectStructure ) {
         $id_project = $projectStructure['id_project'];
-
         $chunks = Chunks_ChunkDao::getByJobIdProjectAndIdJob( $id_project, $id_job ) ;
 
         foreach( $chunks as $chunk ) {
-
             $data = array(
                 'id_project' => $id_project,
                 'id_job'     => $chunk->id,
                 'password'   => $chunk->password
             );
-
             \LQA\ChunkReviewDao::createRecord( $data );
         }
     }

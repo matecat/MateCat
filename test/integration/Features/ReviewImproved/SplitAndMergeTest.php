@@ -29,6 +29,77 @@ class SplitAndMergeTest extends IntegrationTest {
         );
     }
 
+    /**
+     * In this test we want to check the when a job is splitted
+     * the record that holds the review data is update with current
+     * review data for the newly created chunks.
+     *
+     *
+     * @throws Exception
+     */
+
+    function test_split_preserves_review_data() {
+        $project = $this->createProject();
+        $project = Projects_ProjectDao::findById( $project->id_project );
+
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $this->assertEquals(1, count( $review_chunks ) );
+
+        $chunks = $project->getChunks();
+        $segments = $chunks[0]->getSegments();
+        $this->assertEquals(3, count( $segments ));
+
+        foreach( $segments as $key => $segment ) {
+            integrationSetTranslation( array(
+                    'id_segment'  => $segment->id ,
+                    'id_job'      => $chunks[0]->id,
+                    'password'    => $chunks[0]->password,
+                    'status'      => 'translated',
+                    'translation' => 'This is translated!',
+                    'propagate'   => false
+            ) ) ;
+
+            $issue_result = $this->makeIssueOnChunk($chunks[0], array(
+                'segment_index' => $key
+            ));
+        }
+
+        /**
+         * At this point we have one issue on each segment. We want to test
+         * that when a split is done, each new chunk preserves the review
+         * information ( score, reviewed_words_count, is_pass ).
+         */
+
+        $review_data = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                $chunks[0]->id, $chunks[0]->password
+        );
+
+        $this->assertEquals(3, $review_data->score );
+
+        splitJob(array(
+                'id_job'       => $chunks[0]->id,
+                'id_project'   => $project->id,
+                'project_pass' => $project->password,
+                'job_pass'     => $chunks[0]->password,
+                'num_split'    => 2,
+                'split_values' => array(10, 11)
+        ));
+
+        $chunks = $project->getChunks();
+        $this->assertEquals(2, count($chunks));
+
+        $first_chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                $chunks[0]->id, $chunks[0]->password
+        );
+        $last_chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
+                $chunks[1]->id, $chunks[1]->password
+        );
+
+        $this->assertEquals(2, $first_chunk_review->score);
+        $this->assertEquals(1, $last_chunk_review->score);
+    }
+
+
     function test_merge_preserves_review_data() {
         $project = $this->createProject();
         $project = Projects_ProjectDao::findById( $project->id_project );
@@ -106,9 +177,10 @@ class SplitAndMergeTest extends IntegrationTest {
         $categories = $project->getLqaModel()->getCategories();
         $severities = $categories[0]->getJsonSeverities();
 
-        $options = array_merge(array(
-            'severity' => 'Minor'
-        ), $options);
+        $options = array_merge( array(
+                'severity'      => 'Minor',
+                'segment_index' => 0
+        ), $options );
 
         // register some issue generate review data in each chunk
         $issue_data = array(
@@ -126,7 +198,7 @@ class SplitAndMergeTest extends IntegrationTest {
         $id_job = $chunk->id;
         $password = $chunk->password;
         $segments = $chunk->getSegments();
-        $id_segment = $segments[0]->id;
+        $id_segment = $segments[ $options['segment_index'] ]->id;
 
         $issue_request = new CurlTest(array(
                 'path' => "/api/v2/jobs/$id_job/$password/segments/$id_segment/translation-issues",
