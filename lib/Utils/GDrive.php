@@ -1,5 +1,8 @@
 <?php
 
+use OauthClient ;
+use Google_Service_Drive ;
+
 class GDrive {
 
     const SESSION_ACTUAL_SOURCE_LANG = 'actualSourceLang';
@@ -65,6 +68,22 @@ class GDrive {
                     return $fileId;
                 }
             }
+        }
+
+        return null;
+    }
+
+    public static function getService ( $session ) {
+        if( isset( $session[ 'uid' ] ) && !empty( $session[ 'uid' ] ) ) {
+            $dao = new \Users_UserDao( \Database::obtain() );
+            $user = $dao->getByUid( $session[ 'uid' ] );
+            $token = $user->oauth_access_token ;
+
+            $oauthClient = OauthClient::getInstance()->getClient();
+            $oauthClient->setAccessToken( $token );
+            $gdriveService = new Google_Service_Drive( $oauthClient );
+
+            return $gdriveService;
         }
 
         return null;

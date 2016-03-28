@@ -5,8 +5,6 @@ namespace Webhooks\GDrive  ;
 use Bootstrap ; 
 use Log;
 use API\V2\KleinController ;
-use OauthClient ; 
-use Google_Service_Drive ; 
 use Google_Http_Request ;
 use Utils ;
 use INIT ; 
@@ -19,7 +17,6 @@ class OpenController extends KleinController {
     private $target_lang = 'fr-FR';
     private $seg_rule = null;
 
-    private $oauthClient = null;
     private $gdriveService = null;
 
     private $guid = null;
@@ -39,14 +36,7 @@ class OpenController extends KleinController {
     private function doAuth() {
         Bootstrap::sessionStart(); 
 
-        $dao = new \Users_UserDao( \Database::obtain() ); 
-        $user = $dao->getByUid( $_SESSION['uid'] ); 
-
-        $token = $user->oauth_access_token ;
-
-        $this->oauthClient = OauthClient::getInstance()->getClient();
-        $this->oauthClient->setAccessToken( $token );
-        $this->gdriveService = new Google_Service_Drive( $this->oauthClient );
+        $this->gdriveService = GDrive::getService( $_SESSION );
     }
 
     private function doImport() {

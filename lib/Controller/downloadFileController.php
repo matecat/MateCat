@@ -385,13 +385,7 @@ class downloadFileController extends downloadController {
 
         parent::sessionStart();
 
-        $dao = new \Users_UserDao( \Database::obtain() );
-        $user = $dao->getByUid( $_SESSION['uid'] );
-        $token = $user->oauth_access_token ;
-
-        $client = OauthClient::getInstance()->getClient();
-        $client->setAccessToken( $token );
-        $service = new Google_Service_Drive( $client );
+        $service = GDrive::getService( $_SESSION );
 
         $gdriveFile = $service->files->get($fileId);
         // $mimeType = 'application/vnd.google-apps.presentation';
