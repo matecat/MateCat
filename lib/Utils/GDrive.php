@@ -2,6 +2,7 @@
 
 use OauthClient ;
 use Google_Service_Drive ;
+use Google_Service_Drive_DriveFile ;
 
 class GDrive {
 
@@ -56,11 +57,17 @@ class GDrive {
         return null;
     }
 
-    public static function findFileIdByName ( $fileName, $session ) {
+    public static function sessionHasFiles ( $session ) {
         if( isset( $session[ self::SESSION_FILE_LIST ] )
-                && is_array( $session[ self::SESSION_FILE_LIST ] )
-                && count( $session[ self::SESSION_FILE_LIST ] ) > 0 ) {
+                && !empty( $session[ self::SESSION_FILE_LIST ] ) ) {
+            return true;
+        }
 
+        return false;
+    }
+
+    public static function findFileIdByName ( $fileName, $session ) {
+        if( self::sessionHasFiles( $session ) ) {
             $fileList = $session[ self::SESSION_FILE_LIST ];
 
             foreach ( $fileList as $fileId => $file ) {
@@ -84,6 +91,19 @@ class GDrive {
             $gdriveService = new Google_Service_Drive( $oauthClient );
 
             return $gdriveService;
+        }
+
+        return null;
+    }
+
+    public static function copyFile ( $service, $originFileId, $copyTitle ) {
+        $copiedFile = new Google_Service_Drive_DriveFile();
+        $copiedFile->setTitle( $copyTitle );
+
+        try {
+            return $service->files->copy( $originFileId, $copiedFile );
+        } catch (Exception $e) {
+            print "An error occurred: " . $e->getMessage();
         }
 
         return null;
