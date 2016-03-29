@@ -39,6 +39,11 @@ class CommentMailWorker extends AbstractWorker {
 
     public function process( AbstractElement $queueElement, Context $queueContext ) {
 
+        /**
+         * @var $queueElement QueueElement
+         */
+        $this->_checkForReQueueEnd( $queueElement );
+
         $mail = new PHPMailer();
 
         $mail->IsSMTP();
