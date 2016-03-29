@@ -191,7 +191,7 @@ class getSegmentsController extends ajaxController {
         $options = array();
 
         if ( $feature ) {
-            $options['optional_fields'] = 'st.version_number';
+            $options['optional_fields'] = array('st.version_number');
         }
 
         return $options;
