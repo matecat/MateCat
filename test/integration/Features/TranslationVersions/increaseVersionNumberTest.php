@@ -1,8 +1,10 @@
 <?php
 
 class increaseVersionNumberTest extends IntegrationTest {
+    private $test_data=array();
 
-    function setUp() {
+    function setUp(){
+        $this->test_data=new stdClass();
         $this->test_data->user = Factory_User::create();
 
         $feature = Factory_OwnerFeature::create( array(

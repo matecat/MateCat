@@ -4,7 +4,9 @@ use \LQA\ChunkReviewDao ;
 
 class CreateRecordInQaJobReviewsTest extends IntegrationTest {
 
+    private $test_data=array();
     function setUp() {
+        $this->test_data=new stdClass();
         $this->test_data->user = Factory_User::create();
 
         $feature = Factory_OwnerFeature::create( array(
