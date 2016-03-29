@@ -9,6 +9,8 @@
 namespace Features\ReviewImproved;
 
 
+use LQA\ChunkReviewDao;
+
 class ChunkReviewModel
 {
     /**
@@ -64,6 +66,22 @@ class ChunkReviewModel
 
     public function subtractScore( $score ) {
         $this->chunk_review->score -= $score;
+        $this->updatePassFailResult();
+    }
+
+    /**
+     * This method invokes the recount of reviewed_words_count and
+     * score for the chunk and updates the passfail result.
+     */
+    public function recountAndUpdatePassFailResult() {
+        $chunk = $this->chunk_review->getChunk();
+
+        $this->chunk_review->score =
+                ChunkReviewDao::getScoreForChunk( $chunk );
+
+        $this->chunk_review->reviewed_words_count =
+                ChunkReviewDao::getReviewedWordsCountForChunk( $chunk );
+
         $this->updatePassFailResult();
     }
 

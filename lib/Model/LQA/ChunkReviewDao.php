@@ -17,6 +17,20 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_job
+     * @return \LQA\ChunkReviewStruct[]
+     */
+    public static function findByIdJob( $id_job ) {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+                " WHERE id_job = :id_job ";
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
+        $stmt->execute(array('id_job' => $id_job ));
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param $id
      * @return \LQA\ChunkReviewStruct
      */
@@ -31,14 +45,22 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
+
+
+    /**
+     * @param \Chunks_ChunkStruct $chunk
+     *
+     * @return int
+     */
     public static function getScoreForChunk( \Chunks_ChunkStruct $chunk ) {
         $sql = "select sum(penalty_points) from qa_entries e
             join segment_translations st
-
             on st.version_number = e.translation_version
             and st.id_segment = e.id_segment
             join jobs on jobs.id = st.id_job
             WHERE jobs.id = :id_job AND jobs.password = :password
+            AND st.id_segment
+              BETWEEN jobs.job_first_segment AND jobs.job_last_segment
              ";
 
         $conn = \Database::obtain()->getConnection();
@@ -49,6 +71,35 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $score = $count[0] == null ? 0 : $count[0];
         return $score ;
     }
+
+    /**
+     * @param \Chunks_ChunkStruct $chunk
+     *
+     * @return int
+     */
+    public static function getReviewedWordsCountForChunk( \Chunks_ChunkStruct $chunk ) {
+        $sql = "select sum(segments.raw_word_count) from segment_translations st
+            JOIN segments ON segments.id = st.id_segment
+            JOIN jobs on jobs.id = st.id_job
+            WHERE jobs.id = :id_job AND jobs.password = :password
+            AND st.status IN (:statuses)
+            AND st.id_segment
+              BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+             ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(array(
+                'id_job' => $chunk->id ,
+                'password' => $chunk->password,
+                'statuses' => \Constants_TranslationStatus::$REVISION_STATUSES
+        ));
+        $count =  $stmt->fetch();
+
+        $score = $count[0] == null ? 0 : $count[0];
+        return $score ;
+    }
+
 
 
     /**
@@ -122,17 +173,6 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         );
         return $stmt->fetch() ;
 
-    }
-
-    public static function updateRecord( ChunkReviewStruct $chunk_review ) {
-        $sql = "UPDATE qa_chunk_reviews set score = :score WHERE id = :id ";
-
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        return $stmt->execute( array(
-                'score' => $chunk_review->score,
-                'id' => $chunk_review->id )
-        );
     }
 
     /**
