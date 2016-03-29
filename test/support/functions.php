@@ -1,7 +1,7 @@
 <?php
 
 function setTestConfigFile() {
-    copyFile('config.ini', 'config.development.ini');
+    //copyFile('config.ini', 'config.development.ini');
     copyFile('config.test.ini', 'config.ini');
 }
 
@@ -25,7 +25,7 @@ function firstSegmentOfChunk( Chunks_ChunkStruct $chunk ) {
 }
 
 function restoreDevelopmentConfigFile() {
-    copyFile('config.ini', 'config.test.ini');
+    //copyFile('config.ini', 'config.test.ini');
     copyFile('config.development.ini', 'config.ini');
 }
 
@@ -33,8 +33,12 @@ function test_file_path( $file ) {
   return realpath(TEST_DIR . '/support/files/' . $file );
 }
 
+/**
+ * Performs a test schema reset
+ * @throws Exception
+ */
 function prepareTestDatabase() {
-  $dev_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.ini', true);
+  $dev_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.development.ini', true);
   $test_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.test.ini', true);
 
   // TODO: move this TEST_URL_BASE config somewhere else
@@ -46,7 +50,7 @@ function prepareTestDatabase() {
       $GLOBALS['TEST_URL_BASE'] = 'localhost';
   }
 
-  if ( $dev_ini['ENV'] != 'development') {
+  if ( $dev_ini['ENV'] != 'development' ) {
       throw new Exception('Source config must be development');
   }
 
@@ -54,17 +58,12 @@ function prepareTestDatabase() {
       throw new Exception('Destination config must be test');
   }
 
-  if (
-      $dev_ini['development']['DB_DATABASE'] == $test_ini['test']['DB_DATABASE']
-  ) {
-      throw new Exception("Development database and test database cannot have the same name");
-  }
-
-  $testDatabase = new SchemaCopy($test_ini['test']);
-  $devDatabase = new SchemaCopy($dev_ini['development']);
+  $testDatabase = new SchemaCopy( $test_ini['test'] );
+  $devDatabase = new SchemaCopy( $dev_ini[ 'development' ] );
 
   prepareTestSchema($testDatabase, $devDatabase);
   loadSeedData($testDatabase);
+
 }
 
 function loadSeedData( $database ) {
@@ -251,17 +250,15 @@ function integrationSetTranslation($options) {
 }
 
 function sig_handler($signo) {
-     switch ($signo) {
+
+    echo "\n\033[41m" . str_pad( "Caught signal \033[1m$signo", 39, " ", STR_PAD_BOTH ). "\033[0m\n";
+    switch ($signo) {
+         case SIGHUP:
          case SIGTERM:
-             // handle shutdown tasks
+         case SIGINT:
+         // handle shutdown tasks
              restoreDevelopmentConfigFile();
              exit;
-             break;
-         case SIGHUP:
-             restoreDevelopmentConfigFile();
-             break;
-         case SIGUSR1:
-             restoreDevelopmentConfigFile();
              break;
          default:
              // handle all other signals
@@ -271,5 +268,6 @@ function sig_handler($signo) {
 function setupSignalHandler() {
     pcntl_signal(SIGTERM, "sig_handler");
     pcntl_signal(SIGHUP,  "sig_handler");
-    pcntl_signal(SIGUSR1, "sig_handler");
+    pcntl_signal(SIGINT, "sig_handler");
+    echo "\033[0;30;42m" . str_pad( "Signal handler installed.", 35, " ", STR_PAD_BOTH ). "\033[0m\n";
 }
