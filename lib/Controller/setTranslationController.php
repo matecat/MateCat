@@ -463,8 +463,13 @@ class setTranslationController extends ajaxController {
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
 
-        //redundant because the update is made only where status = old status
-        if ( $this->status != $old_translation[ 'status' ] ) {
+        /*
+         * Seems redundant because the update inside the Word_Count object is made only where received_status != old_status
+         *
+         * But for ICE matches, we need perform the counter update even if TRANSLATED == TRANSLATED
+         * because the ICE matches are already set translated by default
+         */
+        if ( $this->status != $old_translation[ 'status' ] || $old_translation[ 'match_type' ] == 'ICE' ) {
 
             $old_status = $this->statusOrDefault( $old_translation );
             $old_count = $this->getOldCount( $segment, $old_translation );
@@ -482,7 +487,7 @@ class setTranslationController extends ajaxController {
             foreach ( $propagationTotal as $__pos => $old_value ) {
                 $counter->setOldStatus( $old_value[ 'status' ] );
                 $counter->setNewStatus( $this->status );
-                $newValues[] = $counter->getUpdatedValues( $old_value[ 'countSeg' ]*$old_count );
+                $newValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
             }
 
             try {
