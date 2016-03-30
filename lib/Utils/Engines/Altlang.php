@@ -6,7 +6,7 @@
  * @author egomez-prompsit egomez@prompsit.com
  * Date: 29/07/15
  * Time: 12.17
- * 
+ *
  */
 
 class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineInterface {
@@ -32,22 +32,7 @@ class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineIn
      * @throws Exception
      */
     protected function _fixLangCode( $lang ) {
-            
-        $lang = str_replace ("-" , "_" , $lang );
-
-        if($lang == "es_MX")
-        {
-            $lang = "es_LA";
-        }
-        
-        $acceptedLangs = array("es_ES", "es_LA", "en_US", "en_GB", "fr_FR", "fr_CA", "pt_PT", "pt_BR");               
-        
-        if( !in_array( $lang, $acceptedLangs ) ){
-            throw new Exception( "Language Not Supported", -1 );
-        }
-
         return $lang;
-
     }
 
     /**
@@ -57,33 +42,33 @@ class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineIn
      */
     protected function _decode( $rawValue ){
 
-        $all_args =  func_get_args();	
+        $all_args =  func_get_args();
 
         if( is_string( $rawValue ) ) {
-	  $original = json_decode( $all_args[1]["data"] , true );
-	  $decoded = json_decode( $rawValue, true ); 
-	  
-          $decoded = array(
-                        'data' => array(
-                                "translations" => array(
-                                        array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ "text" ] ) )                                        
-                                )
-                        )
-                );        
-        } else {          
-          $decoded = $rawValue; // already decoded in case of error
+            $original = json_decode( $all_args[1]["data"] , true );
+            $decoded = json_decode( $rawValue, true );
+
+            $decoded = array(
+                    'data' => array(
+                            "translations" => array(
+                                    array( 'translatedText' =>  $this->_resetSpecialStrings( $decoded[ "text" ] ) )
+                            )
+                    )
+            );
+        } else {
+            $decoded = $rawValue; // already decoded in case of error
         }
-        
+
         $mt_result = new Engines_Results_MT( $decoded );
 
         if ( $mt_result->error->code < 0 ) {
             $mt_result = $mt_result->get_as_array();
             $mt_result['error'] = (array)$mt_result['error'];
             return $mt_result;
-        }        
+        }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches(
-		$this->_preserveSpecialStrings( $original["text"]),
+                $this->_preserveSpecialStrings( $original["text"]),
                 $mt_result->translatedText,
                 100 - $this->getPenalty() . "%",
                 "MT-" . $this->getName(),
@@ -98,29 +83,20 @@ class Engines_Altlang extends Engines_AbstractEngine implements Engines_EngineIn
 
     public function get( $_config ) {
 
-        try {
-            $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-            $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-        } catch ( Exception $e ){
-            return array(
-                    'error' => array( "message" => $e->getMessage(), 'code' => $e->getCode() )
-            );
-        }
-
         $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
-        
+
         $param_data = json_encode(array(
-        "mtsystem" => "apertium", 
-        "context" => "altlang",
-        "src" => $_config[ 'source' ], 
-        "trg" => $_config[ 'target' ], 
-        "text" => $_config[ 'segment' ]
-	));
+                "mtsystem" => "apertium",
+                "context" => "altlang",
+                "src" => $_config[ 'source' ],
+                "trg" => $_config[ 'target' ],
+                "text" => $_config[ 'segment' ]
+        ));
 
         $parameters = array();
         if (  $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
-        }        
+        }
         $parameters['func'] = "translate";
         $parameters['data'] = $param_data;
 
