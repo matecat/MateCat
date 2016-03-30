@@ -10,6 +10,7 @@ use Utils ;
 use INIT ; 
 use ConversionHandler ; 
 use GDrive;
+use Constants;
 
 class OpenController extends KleinController {
 
@@ -158,9 +159,9 @@ class OpenController extends KleinController {
     }
 
     private function correctSourceTargetLang() {
-        if ( isset ( $_COOKIE[ GDrive::COOKIE_SOURCE_LANG ] ) ) {
-            if( $_COOKIE[ GDrive::COOKIE_SOURCE_LANG ] != GDrive::EMPTY_VAL ) {
-                $sourceLangHistory   = $_COOKIE[ GDrive::COOKIE_SOURCE_LANG ];
+        if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
+            if( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] != Constants::EMPTY_VAL ) {
+                $sourceLangHistory   = $_COOKIE[ Constants::COOKIE_SOURCE_LANG ];
                 $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
                 
                 if(count( $sourceLangAr ) > 0) {
@@ -168,12 +169,12 @@ class OpenController extends KleinController {
                 }
             }
         } else {
-            setcookie( GDrive::COOKIE_SOURCE_LANG, GDrive::EMPTY_VAL, time() + ( 86400 * 365 ) );
+            setcookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
         }
         
-        if ( isset ( $_COOKIE[ GDrive::COOKIE_TARGET_LANG ] ) ) {
-            if( $_COOKIE[ GDrive::COOKIE_TARGET_LANG ] != GDrive::EMPTY_VAL ) {
-                $targetLangHistory   = $_COOKIE[ GDrive::COOKIE_TARGET_LANG ];
+        if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
+            if( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] != Constants::EMPTY_VAL ) {
+                $targetLangHistory   = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
                 $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
                 
                 if(count( $targetLangAr ) > 0) {
@@ -181,10 +182,10 @@ class OpenController extends KleinController {
                 }
             }
         } else {
-            setcookie( GDrive::COOKIE_TARGET_LANG, GDrive::EMPTY_VAL, time() + ( 86400 * 365 ) );
+            setcookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
         }
         
-        $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
+        $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
     }
     
     private function doRedirect() {

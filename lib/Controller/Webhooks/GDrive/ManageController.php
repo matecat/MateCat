@@ -9,6 +9,7 @@ use INIT ;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use GDrive;
+use Constants;
 
 class ManageController extends KleinController {   
     public function listImportedFiles() {
@@ -51,7 +52,7 @@ class ManageController extends KleinController {
     }
     
     private function getCacheFileDir( $file, $lang = '' ){
-        $sourceLang = $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ];
+        $sourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
         
         if( $lang !== '' ) {
             $sourceLang = $lang;
@@ -77,7 +78,7 @@ class ManageController extends KleinController {
     }
     
     public function changeSourceLanguage() {
-        $originalSourceLang = $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ];
+        $originalSourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
 
         $newSourceLang = $this->request->sourceLanguage;
         
@@ -114,19 +115,19 @@ class ManageController extends KleinController {
         }
 
         if( $success ) {
-            $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
+            $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
 
-            $ckSourceLang = filter_input(INPUT_COOKIE, GDrive::COOKIE_SOURCE_LANG);
+            $ckSourceLang = filter_input(INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG);
 
-            if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === GDrive::EMPTY_VAL ) {
+            if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === Constants::EMPTY_VAL ) {
                 $ckSourceLang = '';
             }
 
             $newCookieVal = $newSourceLang . '||' . $ckSourceLang;
 
-            setcookie( GDrive::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/' );
+            setcookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/' );
         } else {
-            $_SESSION[ GDrive::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
+            $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
         }
         
         $response = array(

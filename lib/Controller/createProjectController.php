@@ -159,12 +159,12 @@ class createProjectController extends ajaxController {
             $this->project_name = $default_project_name;
         }
 
-        $sourceLangHistory = $_COOKIE[ \GDrive::COOKIE_SOURCE_LANG ];
-        $targetLangHistory = $_COOKIE[ \GDrive::COOKIE_TARGET_LANG ];
+        $sourceLangHistory = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
+        $targetLangHistory = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
 
         // SET SOURCE COOKIE
 
-        if ( $sourceLangHistory == \GDrive::EMPTY_VAL ) {
+        if ( $sourceLangHistory == \Constants::EMPTY_VAL ) {
             $sourceLangHistory = "";
         }
         $sourceLangAr = explode( '||', urldecode( $sourceLangHistory ) );
@@ -173,7 +173,7 @@ class createProjectController extends ajaxController {
             unset( $sourceLangAr[ $key ] );
         }
         array_unshift( $sourceLangAr, $this->source_language );
-        if ( $sourceLangAr == \GDrive::EMPTY_VAL ) {
+        if ( $sourceLangAr == \Constants::EMPTY_VAL ) {
             $sourceLangAr = "";
         }
         $newCookieVal = "";
@@ -192,11 +192,11 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( \GDrive::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ) );
+        setcookie( \Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ) );
 
         // SET TARGET COOKIE
 
-        if ( $targetLangHistory == \GDrive::EMPTY_VAL ) {
+        if ( $targetLangHistory == \Constants::EMPTY_VAL ) {
             $targetLangHistory = "";
         }
         $targetLangAr = explode( '||', urldecode( $targetLangHistory ) );
@@ -205,7 +205,7 @@ class createProjectController extends ajaxController {
             unset( $targetLangAr[ $key ] );
         }
         array_unshift( $targetLangAr, $this->target_language );
-        if ( $targetLangAr == \GDrive::EMPTY_VAL ) {
+        if ( $targetLangAr == \Constants::EMPTY_VAL ) {
             $targetLangAr = "";
         }
         $newCookieVal = "";
@@ -224,7 +224,7 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( \GDrive::COOKIE_TARGET_LANG, $newCookieVal, time() + ( 86400 * 365 ) );
+        setcookie( \Constants::COOKIE_TARGET_LANG, $newCookieVal, time() + ( 86400 * 365 ) );
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 

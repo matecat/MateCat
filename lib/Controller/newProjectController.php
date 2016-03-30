@@ -50,18 +50,18 @@ class newProjectController extends viewController {
             $this->guid = $_COOKIE[ 'upload_session' ];
         }
 
-        if ( isset ( $_COOKIE[ \GDrive::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ \GDrive::COOKIE_SOURCE_LANG ] == \GDrive::EMPTY_VAL ) {
+        if ( isset ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] == \Constants::EMPTY_VAL ) {
             $this->noSourceLangHistory = true;
         } else {
 
-            if ( !isset( $_COOKIE[ \GDrive::COOKIE_SOURCE_LANG ] ) ) {
-                setcookie( \GDrive::COOKIE_SOURCE_LANG, \GDrive::EMPTY_VAL, time() + ( 86400 * 365 ) );
+            if ( !isset( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) ) {
+                setcookie( \Constants::COOKIE_SOURCE_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
                 $this->noSourceLangHistory = true;
             } else {
 
-                if ( $_COOKIE[ \GDrive::COOKIE_SOURCE_LANG ] != \GDrive::EMPTY_VAL ) {
+                if ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] != \Constants::EMPTY_VAL ) {
                     $this->noSourceLangHistory = false;
-                    $this->sourceLangHistory   = $_COOKIE[ \GDrive::COOKIE_SOURCE_LANG ];
+                    $this->sourceLangHistory   = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
                     $this->sourceLangAr        = explode( '||', urldecode( $this->sourceLangHistory ) );
                     $tmpSourceAr               = array();
                     $tmpSourceArAs             = array();
@@ -87,16 +87,16 @@ class newProjectController extends viewController {
             }
         }
 
-        if ( isset( $_COOKIE[ \GDrive::COOKIE_TARGET_LANG ] ) and $_COOKIE[ \GDrive::COOKIE_TARGET_LANG ] == \GDrive::EMPTY_VAL ) {
+        if ( isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] == \Constants::EMPTY_VAL ) {
             $this->noTargetLangHistory = true;
         } else {
-            if ( !isset( $_COOKIE[ \GDrive::COOKIE_TARGET_LANG ] ) ) {
-                setcookie( \GDrive::COOKIE_TARGET_LANG, \GDrive::EMPTY_VAL, time() + ( 86400 * 365 ) );
+            if ( !isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) ) {
+                setcookie( \Constants::COOKIE_TARGET_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
                 $this->noTargetLangHistory = true;
             } else {
-                if ( $_COOKIE[ \GDrive::COOKIE_TARGET_LANG ] != \GDrive::EMPTY_VAL ) {
+                if ( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] != \Constants::EMPTY_VAL ) {
                     $this->noTargetLangHistory = false;
-                    $this->targetLangHistory   = $_COOKIE[ \GDrive::COOKIE_TARGET_LANG ];
+                    $this->targetLangHistory   = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
                     $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
 
                     $tmpTargetAr   = array();

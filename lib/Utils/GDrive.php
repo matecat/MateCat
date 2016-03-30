@@ -6,15 +6,9 @@ use Google_Service_Drive_DriveFile ;
 
 class GDrive {
 
-    const SESSION_ACTUAL_SOURCE_LANG = 'actualSourceLang';
     const SESSION_FILE_LIST = 'gdriveFileList';
     const SESSION_FILE_NAME = 'fileName';
     const SESSION_FILE_HASH = 'fileHash';
-
-    const COOKIE_SOURCE_LANG = 'sourceLang';
-    const COOKIE_TARGET_LANG = 'targetLang';
-
-    const EMPTY_VAL = '_EMPTY_';
 
     const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
