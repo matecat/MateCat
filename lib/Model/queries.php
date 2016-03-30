@@ -316,6 +316,20 @@ function getUserData( $id ) {
     return $results;
 }
 
+function getLanguageStats() {
+
+    $db = Database::obtain();
+
+    $query = "select source,target, date,total_post_editing_effort,job_count
+from language_stats
+  where date=(select max(date) from language_stats)";
+
+    $results = $db->fetch_array( $query );
+
+    return $results;
+}
+
+
 function randomString( $maxlength = 15 ) {
     //allowed alphabet
     $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
