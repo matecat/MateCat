@@ -175,11 +175,14 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
             Log::doLog( "took " . ( time() - $start ) / 60 . " seconds" );
             echo "took " . ( time() - $start ) / 60 . " seconds\n";
 
-            Log::doLog( "sleeping for 1 month" );
-            echo "sleeping for 1 month\n";
+            Log::doLog( "Everything completed. I can die." );
+            echo "Everything completed. I can die.\n";
+
+            //for the moment, this daemon is single-loop-execution
+            $this->RUNNING = false;
 
             if ( $this->RUNNING ) {
-                sleep( self::$sleeptime );
+                sleep( self::$sleepTime );
             }
 
         } while ( $this->RUNNING );
@@ -189,6 +192,13 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
         // TODO: Implement cleanShutDown() method.
     }
 
+    /**
+     * Every cycle reload and update Daemon configuration.
+     * @return void
+     */
+    protected function _updateConfiguration() {
+        // TODO: Implement _updateConfiguration() method.
+    }
 }
 
 $jpe = JobPEEAndTimeToEditRunner::getInstance();
@@ -196,4 +206,3 @@ $jpe = JobPEEAndTimeToEditRunner::getInstance();
  * @var $jpe JobPEEAndTimeToEditRunner
  */
 $jpe->main( null );
-usleep( 1 );

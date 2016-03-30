@@ -10,6 +10,9 @@ class CategoryStruct extends \DataAccess_AbstractDaoSilentStruct implements \Dat
     public $id_parent ;
     public $label ;
 
+    /**
+     * @return mixed
+     */
     public function getJsonSeverities() {
         return json_decode( $this->severities, true );
     }

@@ -35,7 +35,7 @@ class setTranslationController extends ajaxController {
     protected $project ;
 
     /**
-     * @var SegmentTranslationVersionHandler
+     * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
      */
     private $VersionsHandler ;
 
@@ -335,7 +335,6 @@ class setTranslationController extends ajaxController {
         // TODO: move this into a feature callback
         $this->evaluateVersionSave( $_Translation, $old_translation );
 
-
         /**
          * when the status of the translation changes, the auto propagation flag
          * must be removed
@@ -345,6 +344,11 @@ class setTranslationController extends ajaxController {
             $this->status == Constants_TranslationStatus::STATUS_APPROVED ) {
             $_Translation[ 'autopropagated_from' ] = 'NULL';
         }
+
+        $this->feature_set->run('preAddSegmentTranslation', array(
+            'new_translation' => $_Translation,
+            'old_translation' => $old_translation
+        ));
 
         /**
          * Translation is inserted here.
@@ -428,12 +432,14 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
             try {
-                $this->VersionsHandler->savePropagation( array(
-                    'propagation'             => $TPropagation,
-                    'propagate_to_translated' => $doPropagation, // TODO: remove, this is no longer needed.
-                    'old_translation'         => $old_translation,
-                    'job_data'                => $this->jobData
-                ));
+                if ( $this->VersionsHandler != null ) {
+                    $this->VersionsHandler->savePropagation( array(
+                            'propagation'             => $TPropagation,
+                            'propagate_to_translated' => $doPropagation, // TODO: remove, this is no longer needed.
+                            'old_translation'         => $old_translation,
+                            'job_data'                => $this->jobData
+                    ));
+                }
 
                 $propagationTotal = propagateTranslation(
                     $TPropagation,
@@ -522,7 +528,7 @@ class setTranslationController extends ajaxController {
         $this->result[ 'data' ]       = "OK";
         $this->result[ 'version' ]    = date_create( $_Translation[ 'translation_date' ] )->getTimestamp();
 
-        $this->result[ 'translation' ] = $this->getTranslationObject($_Translation);
+        $this->result[ 'translation' ] = $this->getTranslationObject( $_Translation );
 
         /* FIXME: added for code compatibility with front-end. Remove. */
         $_warn   = $check->getWarnings();
@@ -681,16 +687,22 @@ class setTranslationController extends ajaxController {
     }
 
     private function initVersionHandler() {
-        $this->VersionsHandler = new SegmentTranslationVersionHandler(
-            $this->id_job,
-            $this->id_segment,
-            $this->uid,
-            $this->jobData['id_project'],
-            $this->isRevision()
-        );
+        if ($this->project->isFeatureEnabled('translation_versions')) {
+            $this->VersionsHandler = new \Features\TranslationVersions\SegmentTranslationVersionHandler(
+                    $this->id_job,
+                    $this->id_segment,
+                    $this->uid,
+                    $this->jobData['id_project'],
+                    $this->isRevision()
+            );
+        }
     }
 
     private function evaluateVersionSave( &$_Translation, &$old_translation ) {
+        if ( $this->VersionsHandler == null ) {
+            return;
+        }
+
         /**
          * Translation version handler: save old translation.
          * TODO: move this in an model observer for segment translation.
@@ -698,11 +710,13 @@ class setTranslationController extends ajaxController {
          */
 
         $version_saved = $this->VersionsHandler->saveVersion( $_Translation, $old_translation );
+
         if ( $version_saved ) {
             $_Translation['version_number'] = $old_translation['version_number'] + 1;
         } else {
             $_Translation['version_number'] = $old_translation['version_number'];
         }
+
         if ( $_Translation['version_number'] == null ) {
             $_Translation['version_number'] = 0 ;
         }

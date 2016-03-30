@@ -14,6 +14,16 @@ function copyFile( $source, $destination) {
     }
 }
 
+/**
+ * @param Chunks_ChunkStruct $chunk
+ *
+ * @return Segments_SegmentStruct
+ */
+function firstSegmentOfChunk( Chunks_ChunkStruct $chunk ) {
+    $segments = $chunk->getSegments();
+    return $segments[0];
+}
+
 function restoreDevelopmentConfigFile() {
     copyFile('config.ini', 'config.test.ini');
     copyFile('config.development.ini', 'config.ini');
@@ -221,7 +231,7 @@ function integrationSetTranslation($options) {
   );
 
   $test = new CurlTest();
-  $test->params = array_merge( $default, $options);
+  $test->params = array_merge( $default, $options );
   $test->method = 'POST';
   $test->path = '?action=setTranslation';
   $response =  $test->getResponse();
