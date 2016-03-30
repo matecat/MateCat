@@ -73,7 +73,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
     public function getByProjectID( $id_project ) {
         $conn = $this->con->getConnection();
         $stmt = $conn->prepare("SELECT * FROM " .
-            "jobs WHERE id_project = ?");
+            "jobs WHERE id_project = ? ORDER BY job_first_segment ");
 
         $stmt->execute(array( $id_project ));
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');

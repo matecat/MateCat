@@ -16,16 +16,17 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $pretranslate_100 ;
     public $id_qa_model ;
 
+    /**
+     * @param $feature_code
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct
+     */
     public function getOwnerFeature( $feature_code ) {
         $ret = OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
             $feature_code, $this->id_customer
         );
 
         return $ret ;
-
-        // return OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
-        //     $feature_code, $this->id_customer
-        // );
     }
 
     /**

@@ -617,7 +617,8 @@ class catController extends viewController {
         $this->template->hideMatchesClass = ( self::isRevision() ? '' : ' hideMatches' );
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->editLogClass         = $this->getEditLogClass();
+        //FIXME: temporarily disabled
+        $this->template->editLogClass         = ""; //$this->getEditLogClass();
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
         $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;

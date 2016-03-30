@@ -43,7 +43,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct|Users_UserStruct[]
      * @throws Exception
      */
-    public function read( Users_UserStruct $obj ) {
+    public function read( DataAccess_IDaoStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();

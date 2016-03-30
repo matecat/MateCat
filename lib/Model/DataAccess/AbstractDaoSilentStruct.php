@@ -152,7 +152,7 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
                 $this->validator = new $validator_name($this);
             }
         } catch ( \Exception $e ) {
-            \Log::doLog("Exception class not found $validator_name");
+            \Log::doLog("Class not found $validator_name");
         }
     }
 

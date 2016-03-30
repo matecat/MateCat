@@ -18,13 +18,7 @@ class SegmentTranslationObserver implements \SplObserver {
         $model = new ReviewImproved\SegmentTranslationModel( $segment_translation_model );
         $model->addOrSubtractCachedReviewedWordsCount();
 
+        // we need to recount score globally because of autopropagation.
         $model->recountScore();
-
-
     }
-
-
-
-
-
 }

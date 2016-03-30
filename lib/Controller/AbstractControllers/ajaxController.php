@@ -42,6 +42,7 @@ abstract class ajaxController extends controller {
 			$output = INIT::$CONFIG_VERSION_ERR_MESSAGE;
 			$this->result     = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
 			$this->api_output = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
+            \Log::doLog("Error: " . INIT::$CONFIG_VERSION_ERR_MESSAGE);
 			$this->finalize();
 			exit;
 		}

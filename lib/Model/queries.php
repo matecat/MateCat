@@ -841,7 +841,12 @@ function getFirstSegmentId( $jid, $password ) {
  * @return array
  * @throws Exception
  */
-function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
+function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
+
+    if ( $options['optional_fields'] ) {
+        $optional_fields = ', ';
+        $optional_fields .= implode(', ', $options['optional_fields']);
+    }
 
     $queryAfter = "
                     SELECT segments.id AS __sid
@@ -939,7 +944,6 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 s.xliff_ext_succ_tags,
                 st.serialized_errors_list,
                 st.warning,
-                st.version_number,
                 sts.source_chunk_lengths,
                 sts.target_chunk_lengths,
                 IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
@@ -950,6 +954,9 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                           AND id_job =  j.id
                 ) repetitions_in_chunk
                 ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
+
+                $optional_fields
+
                 FROM jobs j
                 JOIN projects p ON p.id = j.id_project
                 JOIN files_job fj ON fj.id_job = j.id
@@ -1140,8 +1147,12 @@ function addTranslation( array $_Translation ) {
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = {$_Translation['translation']},
                 translation_date = {$_Translation['translation_date']},
-                warning = {$_Translation[ 'warning' ]},
-                version_number = {$_Translation['version_number']};" ;
+                warning = {$_Translation[ 'warning' ]}" ;
+
+    if ( array_key_exists('version_number', $_Translation) ) {
+        $query .= "\n, version_number = {$_Translation['version_number']}";
+    }
+
 
     if ( isset( $_Translation[ 'autopropagated_from' ] ) ) {
         $query .= " , autopropagated_from = NULL";

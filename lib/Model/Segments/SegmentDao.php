@@ -41,12 +41,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     function getByChunkId( $id_job, $password ) {
         $conn = $this->con->getConnection();
 
-        $query = " SELECT segments.* FROM segments " .
-                " INNER JOIN files_job fj USING (id_file) " .
-                " INNER JOIN jobs ON jobs.id = fj.id_job " .
-                " INNER JOIN files f ON f.id = fj.id_file " .
-                " WHERE jobs.id = :id_job AND jobs.password = :password" .
-                " AND segments.id_file = f.id ";
+        $query = "SELECT segments.* FROM segments
+                 INNER JOIN files_job fj USING (id_file)
+                 INNER JOIN jobs ON jobs.id = fj.id_job
+                 AND jobs.id = :id_job AND jobs.password = :password
+                 INNER JOIN files f ON f.id = fj.id_file
+                 WHERE jobs.id = :id_job AND jobs.password = :password
+                 AND segments.id_file = f.id
+                 AND segments.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+                 ";
 
         $stmt = $conn->prepare( $query );
 

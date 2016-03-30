@@ -140,7 +140,7 @@ class Features {
     public static function loadRoutes( \Klein\Klein $klein ) {
         list( $null, $prefix, $class_name) = explode('/', $_SERVER['REQUEST_URI']);
 
-        if ( $prefix  == 'plugins' ) {
+        if ( $prefix  == 'features' ) {
             $cls = '\\Features\\' .  Utils::underscoreToCamelCase( $class_name );
 
             if ( class_exists( $cls ) ) {
