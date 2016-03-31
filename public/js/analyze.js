@@ -222,7 +222,7 @@ UI = {
 				split_values: ar
 			},
 			success: function(d) {
-                var pretranslated = ( null == d.data.eq_word_count );
+
 				var total = $('.popup-split .wordsum .total-w').attr('data-val');
 				var prog = 0;
                 var val;
@@ -241,11 +241,11 @@ UI = {
 
                         } else {
 
-                          if ( pretranslated ) {
+                          if ( config.split_based_on_raw_word_count ) {
                             val = parseInt( d.data.chunks[key].raw_word_count );
                           }
                           else {
-                            val = parseInt( d.data.chunks[key].eq_word_count ); //this is d.data.chunks[ index ]
+                            val = parseInt( d.data.chunks[key].eq_word_count );
                           }
 
                         }
