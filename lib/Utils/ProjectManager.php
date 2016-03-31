@@ -13,6 +13,8 @@ include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use FeatureSet ;
 
+use GDrive;
+
 class ProjectManager {
 
     /**
@@ -47,6 +49,8 @@ class ProjectManager {
      * @var Projects_ProjectStruct
      */
     protected $project ;
+
+    protected $gdriveService;
 
     const TRANSLATED_USER = 'translated_user';
 
@@ -416,6 +420,10 @@ class ProjectManager {
             }
         }
 
+        if ( GDrive::sessionHasFiles( $_SESSION ) ) {
+            $this->gdriveService = GDrive::getService( $_SESSION );
+        }
+
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
@@ -462,16 +470,24 @@ class ProjectManager {
 
                     $file_insert_params = array();
 
-                    if ( array_key_exists( 'google_drive_file_id', $_SESSION ) ) {
+                    $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
+
+                    if($gdriveFileId != null) {
+                        $fileTitle = substr( $originalFileName, 0, -5 );
+
+                        $translatedFileTitle = $fileTitle . ' - '
+                                . $this->projectStructure[ 'target_language' ][ 0 ];
+
+                        $copiedFile = GDrive::copyFile( $this->gdriveService,
+                                $gdriveFileId,
+                                $translatedFileTitle );
+
                         $file_insert_params = array(
-                            'remote_id' => $_SESSION['google_drive_file_id']
+                            'remote_id' => $gdriveFileId,
+                            'translation_remote_id' => $copiedFile->id
                         );
-                        unset( $_SESSION['google_drive_file_id'] );
-                        // ensure this session var is set only once
-                        // XXX: DANGER XXX
-                        // if this variable is not unset property and remains in session
-                        // it may be assigned to the wrong files with possibly destructive
-                        // consequences.
+
+                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
                     }
 
                     \Log::doLog('--------------------------------------------------- 1'); 

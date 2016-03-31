@@ -183,7 +183,7 @@ route(
     'Webhooks\GDrive\ManageController', 'changeSourceLanguage'
 ); 
 route(
-    '/webhooks/gdrive/delete/[:file]', 'GET',
+    '/webhooks/gdrive/delete/[:fileId]', 'GET',
     'Webhooks\GDrive\ManageController', 'deleteImportedFile'
 );
 route(

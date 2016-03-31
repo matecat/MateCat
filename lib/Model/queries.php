@@ -1852,6 +1852,10 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
         $data[ 'remote_id'] = $params['remote_id'];
     }
 
+    if ( array_key_exists('translation_remote_id', $params)) {
+        $data[ 'translation_remote_id'] = $params['translation_remote_id'];
+    }
+
     $db = Database::obtain();
 
     try {

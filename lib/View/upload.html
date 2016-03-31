@@ -63,7 +63,7 @@
             ownerIsMe: true,
             isAnonymousUser: ${isAnonymousUser},
             blueimp_dataType: 'json', 
-            pre_uploaded_files : '${pre_uploaded_files|string:false}'
+            isGDrive : ${isGDrive|false}
         };
     </script>
 
@@ -292,8 +292,8 @@ Connect your TAUS DQF account to measure productivity.
 
 <div class="cl"></div>
 
-<div tal:condition="not: use_pre_uploaded_files" metal:use-macro="upload_partials.html/upload_files"/>
-<div tal:condition="true: use_pre_uploaded_files" metal:use-macro="upload_partials.html/pre_uploaded_files"/>
+<div tal:condition="not: isGDrive" metal:use-macro="upload_partials.html/upload_files"/>
+<div tal:condition="true: isGDrive" metal:use-macro="upload_partials.html/gdrive_files"/>
 
 <button class="btn load-gdrive">Load from Google Drive</button>
 

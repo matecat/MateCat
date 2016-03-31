@@ -1,6 +1,15 @@
 <?php
 
+use OauthClient ;
+use Google_Service_Drive ;
+use Google_Service_Drive_DriveFile ;
+
 class GDrive {
+
+    const SESSION_FILE_LIST = 'gdriveFileList';
+    const SESSION_FILE_NAME = 'fileName';
+    const SESSION_FILE_HASH = 'fileHash';
+
     const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
     const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -39,6 +48,58 @@ class GDrive {
                 return '.xlsx';
         }
         
+        return null;
+    }
+
+    public static function sessionHasFiles ( $session ) {
+        if( isset( $session[ self::SESSION_FILE_LIST ] )
+                && !empty( $session[ self::SESSION_FILE_LIST ] ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function findFileIdByName ( $fileName, $session ) {
+        if( self::sessionHasFiles( $session ) ) {
+            $fileList = $session[ self::SESSION_FILE_LIST ];
+
+            foreach ( $fileList as $fileId => $file ) {
+                if( $file[ self::SESSION_FILE_NAME ] === $fileName ) {
+                    return $fileId;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static function getService ( $session ) {
+        if( isset( $session[ 'uid' ] ) && !empty( $session[ 'uid' ] ) ) {
+            $dao = new \Users_UserDao( \Database::obtain() );
+            $user = $dao->getByUid( $session[ 'uid' ] );
+            $token = $user->oauth_access_token ;
+
+            $oauthClient = OauthClient::getInstance()->getClient();
+            $oauthClient->setAccessToken( $token );
+            $gdriveService = new Google_Service_Drive( $oauthClient );
+
+            return $gdriveService;
+        }
+
+        return null;
+    }
+
+    public static function copyFile ( $service, $originFileId, $copyTitle ) {
+        $copiedFile = new Google_Service_Drive_DriveFile();
+        $copiedFile->setTitle( $copyTitle );
+
+        try {
+            return $service->files->copy( $originFileId, $copiedFile );
+        } catch (Exception $e) {
+            print "An error occurred: " . $e->getMessage();
+        }
+
         return null;
     }
 }

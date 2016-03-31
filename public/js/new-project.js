@@ -75,7 +75,7 @@ $(document).ready(function() {
             }
 	});
         
-        if ( config.pre_uploaded_files && config.pre_uploaded_files !== false ) {
+        if ( config.isGDrive && config.isGDrive !== false ) {
             APP.tryListGDriveFiles();
         }
 
@@ -103,12 +103,7 @@ $(document).ready(function() {
 
         tm_data = UI.extractTMdataFromTable();
 
-        if ( config.pre_uploaded_files && config.pre_uploaded_files !== 'false') {
-            var filename = config.pre_uploaded_files ; 
-        }
-        else {
-            var filename = files.substr(7) ; 
-        }
+        var filename = files.substr(7) ;
 
 		APP.doRequest({
 			data: {

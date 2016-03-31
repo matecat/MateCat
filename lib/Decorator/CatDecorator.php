@@ -77,13 +77,13 @@ class CatDecorator {
 
       if ( $this->isDownloadable() ) {
           if($isGDriveProject) {
-            $label = 'SEND TO GOOGLE DRIVE';
+            $label = 'SAVE TRANSLATION TO GOOGLE DRIVE';
           } else {
             $label = 'DOWNLOAD TRANSLATION';
           }
       } else {
           if($isGDriveProject) {
-            $label = 'SEND PREVIEW TO GOOGLE DRIVE';
+            $label = 'SAVE PREVIEW TO GOOGLE DRIVE';
           } else {
             $label = 'PREVIEW';
           }
