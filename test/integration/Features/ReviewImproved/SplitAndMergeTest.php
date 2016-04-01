@@ -12,6 +12,8 @@ use LQA\ChunkReviewDao;
 class SplitAndMergeTest extends IntegrationTest {
 
     function setUp() {
+
+        $this->test_data = new StdClass();
         $this->test_data->user = Factory_User::create();
 
         $feature = Factory_OwnerFeature::create( array(

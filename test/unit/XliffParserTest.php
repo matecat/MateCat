@@ -2,7 +2,7 @@
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
-class Xliff_ParserTest extends AbstractTest {
+class XliffParserTest extends AbstractTest {
 
     function setUp() {
 
