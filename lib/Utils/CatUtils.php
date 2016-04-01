@@ -72,6 +72,11 @@ class CatUtils {
         return $dosString;
     }
 
+    /**
+     * @param $segment
+     * @return mixed
+     * @deprecated
+     */
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
         $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
