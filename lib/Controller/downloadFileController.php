@@ -11,6 +11,7 @@ class downloadFileController extends downloadController {
     protected $jobInfo;
     protected $forceXliff;
     protected $downloadToken;
+    protected $gdriveService;
 
     const FILES_CHUNK_SIZE = 3;
 
@@ -309,36 +310,45 @@ class downloadFileController extends downloadController {
         else {
 
             try {
+                $this->startGDriveService();
 
-                $output_content = $this->getOutputContentsWithZipFiles( $output_content );
+                $jobHasRemoteFiles = \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
 
-                if ( count( $output_content ) > 1 ) {
+                if( $jobHasRemoteFiles ) {
 
-                    //cast $output_content elements to ZipContentObject
-                    foreach ( $output_content as $key => $__output_content_elem ) {
-                        $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
+                    foreach( $output_content as $id_file => $output_file ) {
+                        $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
+
+                        $this->updateFileOnGDrive( $remoteFile->remote_id, $output_file[ 'document_content' ] ) ;
                     }
-
-                    if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                        if ( $this->forceXliff ) {
-                            $this->_filename = $this->id_job . ".zip";
-                        } else {
-                            $this->_filename = $pathinfo[ 'basename' ] . ".zip";
-                        }
-                    }
-
-                    $this->content = self::composeZip( $output_content ); //add zip archive content here;
-
                 } else {
+                    $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
-                    # TODO: this is a good point to test transmission back
-                    $output_content = array_pop( $output_content );
+                    if ( count( $output_content ) > 1 ) {
 
-                    if($remote_id != null) {
-                        $this->updateFileOnGDrive($remote_id, $output_content) ;
+                        //cast $output_content elements to ZipContentObject
+                        foreach ( $output_content as $key => $__output_content_elem ) {
+                            $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
+                        }
+
+                        if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                            if ( $this->forceXliff ) {
+                                $this->_filename = $this->id_job . ".zip";
+                            } else {
+                                $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                            }
+                        }
+
+                        $this->content = self::composeZip( $output_content ); //add zip archive content here;
+
+                    } else {
+
+                        # TODO: this is a good point to test transmission back
+                        $output_content = array_pop( $output_content );
+
+                        //always an array with 1 element, pop it, Ex: array( array() )
+                        $this->setContent( $output_content );
                     }
-                    //always an array with 1 element, pop it, Ex: array( array() )
-                    $this->setContent( $output_content );
                 }
             }
             catch ( Exception $e ){
@@ -380,44 +390,24 @@ class downloadFileController extends downloadController {
 
     }
 
-    private function updateFileOnGDrive($fileId, ZipContentObject $content) {
-
-
+    private function startGDriveService() {
         parent::sessionStart();
+        $this->gdriveService = GDrive::getService( $_SESSION );
+    }
 
-        $service = GDrive::getService( $_SESSION );
-
-        $gdriveFile = $service->files->get($fileId);
-        // $mimeType = 'application/vnd.google-apps.presentation';
+    private function updateFileOnGDrive( $remoteId, $content ) {
+        $gdriveFile = $this->gdriveService->files->get( $remoteId );
         $mimeType = \GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
         $gdriveFile->setMimeType( $mimeType );
 
         $additionalParams = array(
             'mimeType' => $mimeType,
-            'data' => $content->getContent(),
-            'uploadType' => 'media'
+            'data' => $content,
+            'uploadType' => 'media',
+            'newRevision' => FALSE
         );
 
-        $jobFiles = Files_FileDao::getByJobId( $this->id_job );
-        if(count($jobFiles) > 0){
-            $dbFile = $jobFiles[0];
-
-            if( $dbFile != null && property_exists($dbFile, 'translation_remote_id') && $dbFile->translation_remote_id != null ) {
-                $gdriveFile = $service->files->get( $dbFile->translation_remote_id );
-                $additionalParams['newRevision'] = FALSE;
-                $upload = $service->files->update( $dbFile->translation_remote_id, $gdriveFile, $additionalParams );
-            } else {
-                $dbJob = Jobs_JobDao::getById( $this->id_job );
-
-                $newGDriveFile = new Google_Service_Drive_DriveFile();
-                $newGDriveFile->setTitle($gdriveFile->title . ' - ' . $dbJob->target);
-                $additionalParams['convert'] = TRUE;
-                $upload = $service->files->insert( $newGDriveFile, $additionalParams );
-
-                Files_FileDao::updateField($dbFile, 'translation_remote_id', $upload->id);
-            }
-            // Log::doLog( $upload );
-        }
+        $upload = $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
     }
 
     protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {

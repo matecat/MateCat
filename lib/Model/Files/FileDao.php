@@ -58,6 +58,19 @@ class Files_FileDao extends DataAccess_AbstractDao {
         ));
     }
 
+    /**
+     * @param $id
+     *
+     * @return Files_FileStruct
+     */
+    public static function getById( $id ) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * FROM files where id = :id ");
+        $stmt->execute( array( 'id' => $id ) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
+        return $stmt->fetch();
+    }
+
     function _buildResult( $array_result ) {
         return null;
     }
