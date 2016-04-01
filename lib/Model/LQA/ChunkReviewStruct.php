@@ -16,6 +16,14 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $reviewed_words_count ;
 
     /**
+     * Sets default values for an empty struct
+     */
+    public function setDefaults() {
+        if ( $this->review_password == null ) {
+            $this->review_password = \CatUtils::generate_password( 12 );
+        }
+    }
+    /**
      * @return \Chunks_ChunkStruct
      */
     public function getChunk() {
