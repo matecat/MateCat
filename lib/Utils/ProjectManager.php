@@ -52,6 +52,8 @@ class ProjectManager {
 
     protected $gdriveService;
 
+    protected $isGDriveProject = false;
+
     const TRANSLATED_USER = 'translated_user';
 
     public function __construct( ArrayObject $projectStructure = null ) {
@@ -422,6 +424,7 @@ class ProjectManager {
 
         if ( GDrive::sessionHasFiles( $_SESSION ) ) {
             $this->gdriveService = GDrive::getService( $_SESSION );
+            $this->isGDriveProject = true;
         }
 
         //now, upload dir contains only hash-links
@@ -473,18 +476,8 @@ class ProjectManager {
                     $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
 
                     if($gdriveFileId != null) {
-                        $fileTitle = substr( $originalFileName, 0, -5 );
-
-                        $translatedFileTitle = $fileTitle . ' - '
-                                . $this->projectStructure[ 'target_language' ][ 0 ];
-
-                        $copiedFile = GDrive::copyFile( $this->gdriveService,
-                                $gdriveFileId,
-                                $translatedFileTitle );
-
                         $file_insert_params = array(
-                            'remote_id' => $gdriveFileId,
-                            'translation_remote_id' => $copiedFile->id
+                            'remote_id' => $gdriveFileId
                         );
 
                         unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
@@ -1094,6 +1087,10 @@ class ProjectManager {
                     $this->insertSegmentNotesForFile();
                 }
                 insertFilesJob( $jid, $fid );
+
+                if( $this->isGDriveProject ) {
+                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService );
+                }
             }
         }
 

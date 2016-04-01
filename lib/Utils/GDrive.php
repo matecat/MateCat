@@ -3,6 +3,7 @@
 use OauthClient ;
 use Google_Service_Drive ;
 use Google_Service_Drive_DriveFile ;
+use RemoteFiles_RemoteFileDao ;
 
 class GDrive {
 
@@ -101,6 +102,19 @@ class GDrive {
         }
 
         return null;
+    }
+
+    public static function insertRemoteFile ( $id_file, $id_job, $service ) {
+        $file = Files_FileDao::getById( $id_file );
+        $job = Jobs_JobDao::getById( $id_job );
+
+        $fileTitle = substr( $file->filename, 0, -5 );
+
+        $translatedFileTitle = $fileTitle . ' - ' . $job->target;
+
+        $copiedFile = self::copyFile( $service, $file->remote_id, $translatedFileTitle );
+
+        RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id );
     }
 }
 
