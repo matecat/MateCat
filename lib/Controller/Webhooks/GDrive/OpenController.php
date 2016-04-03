@@ -11,6 +11,7 @@ use INIT ;
 use ConversionHandler ; 
 use GDrive;
 use Constants;
+use Exception;
 
 class OpenController extends KleinController {
 
@@ -74,55 +75,59 @@ class OpenController extends KleinController {
     }
 
     private function importFile( $fileId ) {
-        $file = $this->gdriveService->files->get( $fileId );
-        $mime = GDrive::officeMimeFromGoogle( $file->mimeType );
-        $links = $file->getExportLinks() ;
+        try {
+            $file = $this->gdriveService->files->get( $fileId );
+            $mime = GDrive::officeMimeFromGoogle( $file->mimeType );
+            $links = $file->getExportLinks() ;
 
-        $downloadUrl = '';
+            $downloadUrl = '';
 
-        if($links != null) {
-            $downloadUrl = $links[ $mime ];
-        } else {
-            $downloadUrl = $file->getDownloadUrl();
-        }
-
-        if ($downloadUrl) {
-
-            $fileName = $file->getTitle();
-            $file_extension = GDrive::officeExtensionFromMime( $file->mimeType );
-
-            if ( substr( $fileName, -5 ) !== $file_extension ) {
-                $fileName .= $file_extension;
+            if($links != null) {
+                $downloadUrl = $links[ $mime ];
+            } else {
+                $downloadUrl = $file->getDownloadUrl();
             }
 
-            $request = new \Google_Http_Request( $downloadUrl, 'GET', null, null );
-            $httpRequest = $this->gdriveService
-                    ->getClient()
-                    ->getAuth()
-                    ->authenticatedRequest( $request );
+            if ($downloadUrl) {
 
-            if ( $httpRequest->getResponseHttpCode() == 200 ) {
-                $body = $httpRequest->getResponseBody();
-                $directory = Utils::uploadDirFromSessionCookie( $this->guid );
-                mkdir( $directory, 0755, true );
+                $fileName = $file->getTitle();
+                $file_extension = GDrive::officeExtensionFromMime( $file->mimeType );
 
-                $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
-                $saved = file_put_contents( $filePath, $httpRequest->getResponseBody() );
+                if ( substr( $fileName, -5 ) !== $file_extension ) {
+                    $fileName .= $file_extension;
+                }
 
-                if ( $saved !== FALSE ) {
-                    $fileHash = sha1_file( $filePath );
+                $request = new \Google_Http_Request( $downloadUrl, 'GET', null, null );
+                $httpRequest = $this->gdriveService
+                        ->getClient()
+                        ->getAuth()
+                        ->authenticatedRequest( $request );
 
-                    $this->addFileToSession( $fileId, $fileName, $fileHash );
+                if ( $httpRequest->getResponseHttpCode() == 200 ) {
+                    $body = $httpRequest->getResponseBody();
+                    $directory = Utils::uploadDirFromSessionCookie( $this->guid );
+                    mkdir( $directory, 0755, true );
 
-                    $this->doConversion( $fileName );
+                    $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
+                    $saved = file_put_contents( $filePath, $httpRequest->getResponseBody() );
+
+                    if ( $saved !== FALSE ) {
+                        $fileHash = sha1_file( $filePath );
+
+                        $this->addFileToSession( $fileId, $fileName, $fileHash );
+
+                        $this->doConversion( $fileName );
+                    } else {
+                        throw new Exception( 'Error when saving file.' );
+                    }
                 } else {
-                    throw new Exception( 'Error when saving file.' );
+                    throw new Exception( 'Error when downloading file.' );
                 }
             } else {
-                throw new Exception( 'Error when downloading file.' );
+                throw new Exception( 'Unable to get the file URL.' );
             }
-        } else {
-            throw new Exception( 'Unable to get the file URL.' );
+        } catch (Exception $e) {
+            die( "You don't have permission to access the file or the file is not found." );
         }
     }
 
