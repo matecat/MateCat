@@ -4,17 +4,10 @@
     var scope = [ 'https://www.googleapis.com/auth/drive.readonly' ];
 
     var pickerApiLoaded = false;
-    var oauthToken;
-    var oauthEmail;
 
     function onAuthApiLoad() {
         if( !oauthToken ) {
-            window.gapi.auth.authorize ({
-                'client_id': clientId,
-                'scope': scope,
-                'immediate': false,
-                'authuser': oauthEmail
-            }, handleAuthResult );
+            $(".login-google").show();
         }
     }
 
@@ -81,12 +74,6 @@
             } else {
                 gapi.load( 'auth', { 'callback': onAuthApiLoad } );
                 gapi.load( 'picker', { 'callback': onPickerApiLoad } );
-            }
-        });
-
-        $.getJSON('/webhooks/gdrive/getEmail', function ( response ) {
-            if( response && response.hasOwnProperty('email') ) {
-                oauthEmail = response.email;
             }
         });
     });
