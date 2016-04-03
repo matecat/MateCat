@@ -116,5 +116,19 @@ class GDrive {
 
         RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id );
     }
+
+    public static function getUserToken( $session ) {
+        $dao = new \Users_UserDao( \Database::obtain() );
+        $user = $dao->getByUid( $session[ 'uid' ] );
+
+        if($user != null) {
+            $oauthToken = json_decode( $user->oauth_access_token, TRUE );
+            $accessToken = $oauthToken[ 'access_token' ];
+
+            return $accessToken;
+        }
+
+        return null;
+    }
 }
 

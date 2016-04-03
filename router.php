@@ -186,9 +186,5 @@ route(
     '/webhooks/gdrive/delete/[:fileId]', 'GET',
     'Webhooks\GDrive\ManageController', 'deleteImportedFile'
 );
-route(
-    '/webhooks/gdrive/getEmail', 'GET',
-    'Webhooks\GDrive\ManageController', 'getUserEmail'
-);
 
 $klein->dispatch();
