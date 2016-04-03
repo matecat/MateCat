@@ -26,12 +26,17 @@ class OpenController extends KleinController {
 
         $this->doAuth();
 
-        $this->correctSourceTargetLang();
+        if( $this->gdriveService != null ) {
+            $this->correctSourceTargetLang();
 
-        $this->doImport();
+            $this->doImport();
 
-        $this->doRedirect();
+            $this->doRedirect();
+        } else {
+            $_SESSION[ 'incomingUrl' ] = $this->request->uri();
 
+            $this->response->redirect( '/login' );
+        }
     }
 
     private function doAuth() {
