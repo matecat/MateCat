@@ -350,7 +350,7 @@ class newProjectController extends viewController {
 
         $isGDrive= false;
 
-        if($gdrive === 1) {
+        if($gdrive === 1 && GDrive::sessionHasFiles( $_SESSION )) {
             $isGDrive = true;
         } else {
             unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );

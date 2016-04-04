@@ -322,7 +322,9 @@
 
         <div class="download-chrome">
             <a href="#" class="close"></a>
-            Your downloaded file will appear on the bar below in a few seconds.<br/>
+            <span tal:condition="not: isGDriveProject">Your downloaded file will appear on the bar below in a few seconds.</span>
+            <span tal:condition="true: isGDriveProject">Your translated files will appear on your Google Drive.</span>
+            <br/>
             <img src="${basepath}public/img/arrowdown.png" width="18px" /> 
         </div>
 

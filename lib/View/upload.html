@@ -295,8 +295,6 @@ Connect your TAUS DQF account to measure productivity.
 <div tal:condition="not: isGDrive" metal:use-macro="upload_partials.html/upload_files"/>
 <div tal:condition="true: isGDrive" metal:use-macro="upload_partials.html/gdrive_files"/>
 
-<button class="btn load-gdrive">Load from Google Drive</button>
-
 <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
     <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>
 

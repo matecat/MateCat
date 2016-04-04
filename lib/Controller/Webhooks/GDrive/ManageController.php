@@ -156,7 +156,27 @@ class ManageController extends KleinController {
         $fileId = $this->request->fileId;
         
         $success = false;
-        
+
+        if( $fileId === 'all' ) {
+            foreach( $_SESSION[ GDrive::SESSION_FILE_LIST ] as $singleFileId => $file ) {
+                $this->deleteSingleFile( $singleFileId );
+            }
+
+            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
+
+            $success = true;
+        } else {
+            $success = $this->deleteSingleFile( $fileId );
+        }
+
+        $this->response->json( array(
+            "success" => $success
+        ));
+    }
+
+    private function deleteSingleFile( $fileId ) {
+        $success = false;
+
         if( isset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] ) ) {
             $file = $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ];
             
@@ -170,10 +190,8 @@ class ManageController extends KleinController {
             
             $success = true;
         }
-        
-        $this->response->json( array(
-            "success" => $success
-        ));
+
+        return  $success;
     }
 
     protected function afterConstruct() {
