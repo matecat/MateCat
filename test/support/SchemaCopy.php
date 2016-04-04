@@ -5,7 +5,7 @@ class SchemaCopy {
   public $dbConn ;
 
   function getDbConn($config) {
-    $string = "mysql:host={$config['DB_SERVER']};dbname={$config['DB_DATABASE']}";
+    $string = "mysql:host={$config['DB_SERVER']};dbname={$config['DB_DATABASE']};charset=UTF8";
 
     if ($this->dbConn == null ) {
       $this->dbConn = new PDO($string, $config['DB_USER'], $config['DB_PASS']);
@@ -16,7 +16,7 @@ class SchemaCopy {
   }
 
   function getConn($config) {
-    $string = "mysql:host={$config['DB_SERVER']}";
+    $string = "mysql:host={$config['DB_SERVER']};charset=UTF8";
 
     if ($this->conn == null ) {
       $this->conn = new PDO($string, $config['DB_USER'], $config['DB_PASS']);
@@ -71,7 +71,6 @@ class SchemaCopy {
   }
 
   function execSql($sql) {
-    $conn = $this->getDbConn($this->config);
-    $conn->query( $sql );
+    $this->getDbConn($this->config)->query( $sql );
   }
 }

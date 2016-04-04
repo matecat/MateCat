@@ -16,14 +16,6 @@ class AbstractModelSubject implements SplSubject {
         // TODO:
     }
 
-    public function attachNamed($name, SplObserver $observer) {
-        if ( !array_key_exists($name) ) {
-            $this->named_obsevers[$name] = array();
-        }
-
-        array_push( $this->named_obsevers[$name], $observer );
-    }
-
     public function notify() {
         foreach($this->observers as $k => $v) {
             $v->update($this);

@@ -1,8 +1,10 @@
 <?php
 
 class setTranslationWithVerioningDisabledTest extends IntegrationTest {
+    private $test_data=array();
 
     function setUp() {
+        $this->test_data=new stdClass();
         $this->test_data->user = Factory_User::create();
 
         // Feature TRANSLATION_VERSIONS is not set for this test

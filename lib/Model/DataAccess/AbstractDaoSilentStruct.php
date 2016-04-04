@@ -138,7 +138,7 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
     /**
      * Try to set the validator for this struct automatically.
      */
-    private function tryValidator() {
+    protected function tryValidator() {
         // try to set a validator for this struct it one exists
         $current_class = get_class( $this );
 

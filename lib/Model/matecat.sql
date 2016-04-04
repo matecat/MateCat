@@ -175,6 +175,7 @@ CREATE TABLE `jobs` (
   `revision_stats_style_maj` int(11) NOT NULL DEFAULT '0',
   `dqf_key` varchar(255) DEFAULT NULL,
   `avg_post_editing_effort` float DEFAULT '0',
+  `total_raw_wc` bigint(20) DEFAULT 1,
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,

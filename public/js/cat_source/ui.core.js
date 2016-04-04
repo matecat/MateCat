@@ -2769,7 +2769,8 @@ console.log('eccolo: ', typeof token);
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setTranslation');
         if (typeof d.pee_error_level != 'undefined') {
-            $('#edit_log_link' ).removeClass( "edit_1 edit_2 edit_3" ). addClass( UI.pee_error_level_map[d.pee_error_level] );
+            //TODO: we must check the quality fo th Revision Algorithm For now commented
+            //$('#edit_log_link' ).removeClass( "edit_1 edit_2 edit_3" ). addClass( UI.pee_error_level_map[d.pee_error_level] );
             UI.body.addClass('peeError');
         }
 		if (d.data == 'OK') {
