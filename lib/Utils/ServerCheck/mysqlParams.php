@@ -14,7 +14,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
             throw new DomainException( 'Unknown property ' . $name );
         }
     }
-
     protected $auto_increment_increment = null;
     protected $auto_increment_offset = null;
     protected $autocommit = null;
@@ -22,9 +21,15 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $back_log = null;
     protected $basedir = null;
     protected $big_tables = null;
+    protected $bind_address = null;
     protected $binlog_cache_size = null;
+    protected $binlog_checksum = null;
     protected $binlog_direct_non_transactional_updates = null;
     protected $binlog_format = null;
+    protected $binlog_max_flush_queue_time = null;
+    protected $binlog_order_commits = null;
+    protected $binlog_row_image = null;
+    protected $binlog_rows_query_log_events = null;
     protected $binlog_stmt_cache_size = null;
     protected $bulk_insert_buffer_size = null;
     protected $character_set_client = null;
@@ -41,20 +46,26 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $completion_type = null;
     protected $concurrent_insert = null;
     protected $connect_timeout = null;
+    protected $core_file = null;
     protected $datadir = null;
     protected $date_format = null;
     protected $datetime_format = null;
     protected $default_storage_engine = null;
+    protected $default_tmp_storage_engine = null;
     protected $default_week_format = null;
     protected $delay_key_write = null;
     protected $delayed_insert_limit = null;
     protected $delayed_insert_timeout = null;
     protected $delayed_queue_size = null;
+    protected $disconnect_on_expired_password = null;
     protected $div_precision_increment = null;
-    protected $engine_condition_pushdown = null;
+    protected $end_markers_in_json = null;
+    protected $enforce_gtid_consistency = null;
+    protected $eq_range_index_dive_limit = null;
     protected $error_count = null;
     protected $event_scheduler = null;
     protected $expire_logs_days = null;
+    protected $explicit_defaults_for_timestamp = null;
     protected $external_user = null;
     protected $flush = null;
     protected $flush_time = null;
@@ -67,82 +78,144 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $general_log = null;
     protected $general_log_file = null;
     protected $group_concat_max_len = null;
+    protected $gtid_executed = null;
+    protected $gtid_mode = null;
+    protected $gtid_next = null;
+    protected $gtid_owned = null;
+    protected $gtid_purged = null;
     protected $have_compress = null;
     protected $have_crypt = null;
-    protected $have_csv = null;
     protected $have_dynamic_loading = null;
     protected $have_geometry = null;
-    protected $have_innodb = null;
-    protected $have_ndbcluster = null;
     protected $have_openssl = null;
-    protected $have_partitioning = null;
     protected $have_profiling = null;
     protected $have_query_cache = null;
     protected $have_rtree_keys = null;
     protected $have_ssl = null;
     protected $have_symlink = null;
+    protected $host_cache_size = null;
     protected $hostname = null;
     protected $identity = null;
     protected $ignore_builtin_innodb = null;
+    protected $ignore_db_dirs = null;
     protected $init_connect = null;
     protected $init_file = null;
     protected $init_slave = null;
     protected $innodb_adaptive_flushing = null;
+    protected $innodb_adaptive_flushing_lwm = null;
     protected $innodb_adaptive_hash_index = null;
+    protected $innodb_adaptive_max_sleep_delay = null;
     protected $innodb_additional_mem_pool_size = null;
+    protected $innodb_api_bk_commit_interval = null;
+    protected $innodb_api_disable_rowlock = null;
+    protected $innodb_api_enable_binlog = null;
+    protected $innodb_api_enable_mdl = null;
+    protected $innodb_api_trx_level = null;
     protected $innodb_autoextend_increment = null;
     protected $innodb_autoinc_lock_mode = null;
+    protected $innodb_buffer_pool_dump_at_shutdown = null;
+    protected $innodb_buffer_pool_dump_now = null;
+    protected $innodb_buffer_pool_filename = null;
     protected $innodb_buffer_pool_instances = null;
+    protected $innodb_buffer_pool_load_abort = null;
+    protected $innodb_buffer_pool_load_at_startup = null;
+    protected $innodb_buffer_pool_load_now = null;
     protected $innodb_buffer_pool_size = null;
+    protected $innodb_change_buffer_max_size = null;
     protected $innodb_change_buffering = null;
+    protected $innodb_checksum_algorithm = null;
     protected $innodb_checksums = null;
+    protected $innodb_cmp_per_index_enabled = null;
     protected $innodb_commit_concurrency = null;
+    protected $innodb_compression_failure_threshold_pct = null;
+    protected $innodb_compression_level = null;
+    protected $innodb_compression_pad_pct_max = null;
     protected $innodb_concurrency_tickets = null;
     protected $innodb_data_file_path = null;
     protected $innodb_data_home_dir = null;
+    protected $innodb_disable_sort_file_cache = null;
     protected $innodb_doublewrite = null;
     protected $innodb_fast_shutdown = null;
     protected $innodb_file_format = null;
     protected $innodb_file_format_check = null;
     protected $innodb_file_format_max = null;
     protected $innodb_file_per_table = null;
+    protected $innodb_flush_log_at_timeout = null;
     protected $innodb_flush_log_at_trx_commit = null;
     protected $innodb_flush_method = null;
+    protected $innodb_flush_neighbors = null;
+    protected $innodb_flushing_avg_loops = null;
     protected $innodb_force_load_corrupted = null;
     protected $innodb_force_recovery = null;
+    protected $innodb_ft_aux_table = null;
+    protected $innodb_ft_cache_size = null;
+    protected $innodb_ft_enable_diag_print = null;
+    protected $innodb_ft_enable_stopword = null;
+    protected $innodb_ft_max_token_size = null;
+    protected $innodb_ft_min_token_size = null;
+    protected $innodb_ft_num_word_optimize = null;
+    protected $innodb_ft_result_cache_limit = null;
+    protected $innodb_ft_server_stopword_table = null;
+    protected $innodb_ft_sort_pll_degree = null;
+    protected $innodb_ft_total_cache_size = null;
+    protected $innodb_ft_user_stopword_table = null;
     protected $innodb_io_capacity = null;
+    protected $innodb_io_capacity_max = null;
     protected $innodb_large_prefix = null;
     protected $innodb_lock_wait_timeout = null;
     protected $innodb_locks_unsafe_for_binlog = null;
     protected $innodb_log_buffer_size = null;
+    protected $innodb_log_compressed_pages = null;
     protected $innodb_log_file_size = null;
     protected $innodb_log_files_in_group = null;
     protected $innodb_log_group_home_dir = null;
+    protected $innodb_lru_scan_depth = null;
     protected $innodb_max_dirty_pages_pct = null;
+    protected $innodb_max_dirty_pages_pct_lwm = null;
     protected $innodb_max_purge_lag = null;
+    protected $innodb_max_purge_lag_delay = null;
     protected $innodb_mirrored_log_groups = null;
+    protected $innodb_monitor_disable = null;
+    protected $innodb_monitor_enable = null;
+    protected $innodb_monitor_reset = null;
+    protected $innodb_monitor_reset_all = null;
     protected $innodb_old_blocks_pct = null;
     protected $innodb_old_blocks_time = null;
+    protected $innodb_online_alter_log_max_size = null;
     protected $innodb_open_files = null;
+    protected $innodb_optimize_fulltext_only = null;
+    protected $innodb_page_size = null;
     protected $innodb_print_all_deadlocks = null;
     protected $innodb_purge_batch_size = null;
     protected $innodb_purge_threads = null;
     protected $innodb_random_read_ahead = null;
     protected $innodb_read_ahead_threshold = null;
     protected $innodb_read_io_threads = null;
+    protected $innodb_read_only = null;
     protected $innodb_replication_delay = null;
     protected $innodb_rollback_on_timeout = null;
     protected $innodb_rollback_segments = null;
+    protected $innodb_sort_buffer_size = null;
     protected $innodb_spin_wait_delay = null;
+    protected $innodb_stats_auto_recalc = null;
     protected $innodb_stats_method = null;
     protected $innodb_stats_on_metadata = null;
+    protected $innodb_stats_persistent = null;
+    protected $innodb_stats_persistent_sample_pages = null;
     protected $innodb_stats_sample_pages = null;
+    protected $innodb_stats_transient_sample_pages = null;
+    protected $innodb_status_output = null;
+    protected $innodb_status_output_locks = null;
     protected $innodb_strict_mode = null;
     protected $innodb_support_xa = null;
+    protected $innodb_sync_array_size = null;
     protected $innodb_sync_spin_loops = null;
     protected $innodb_table_locks = null;
     protected $innodb_thread_concurrency = null;
     protected $innodb_thread_sleep_delay = null;
+    protected $innodb_undo_directory = null;
+    protected $innodb_undo_logs = null;
+    protected $innodb_undo_tablespaces = null;
     protected $innodb_use_native_aio = null;
     protected $innodb_use_sys_malloc = null;
     protected $innodb_version = null;
@@ -166,19 +239,25 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $local_infile = null;
     protected $lock_wait_timeout = null;
     protected $locked_in_memory = null;
-    protected $log = null;
     protected $log_bin = null;
+    protected $log_bin_basename = null;
+    protected $log_bin_index = null;
     protected $log_bin_trust_function_creators = null;
+    protected $log_bin_use_v1_row_events = null;
     protected $log_error = null;
     protected $log_output = null;
     protected $log_queries_not_using_indexes = null;
     protected $log_slave_updates = null;
-    protected $log_slow_queries = null;
+    protected $log_slow_admin_statements = null;
+    protected $log_slow_slave_statements = null;
+    protected $log_throttle_queries_not_using_indexes = null;
     protected $log_warnings = null;
     protected $long_query_time = null;
     protected $low_priority_updates = null;
     protected $lower_case_file_system = null;
     protected $lower_case_table_names = null;
+    protected $master_info_repository = null;
+    protected $master_verify_checksum = null;
     protected $max_allowed_packet = null;
     protected $max_binlog_cache_size = null;
     protected $max_binlog_size = null;
@@ -191,7 +270,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $max_insert_delayed_threads = null;
     protected $max_join_size = null;
     protected $max_length_for_sort_data = null;
-    protected $max_long_data_size = null;
     protected $max_prepared_stmt_count = null;
     protected $max_relay_log_size = null;
     protected $max_seeks_for_key = null;
@@ -201,6 +279,7 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $max_user_connections = null;
     protected $max_write_lock_count = null;
     protected $metadata_locks_cache_size = null;
+    protected $metadata_locks_hash_instances = null;
     protected $min_examined_row_limit = null;
     protected $multi_range_count = null;
     protected $myisam_data_pointer_size = null;
@@ -223,9 +302,21 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $optimizer_prune_level = null;
     protected $optimizer_search_depth = null;
     protected $optimizer_switch = null;
+    protected $optimizer_trace = null;
+    protected $optimizer_trace_features = null;
+    protected $optimizer_trace_limit = null;
+    protected $optimizer_trace_max_mem_size = null;
+    protected $optimizer_trace_offset = null;
     protected $performance_schema = null;
+    protected $performance_schema_accounts_size = null;
+    protected $performance_schema_digests_size = null;
+    protected $performance_schema_events_stages_history_long_size = null;
+    protected $performance_schema_events_stages_history_size = null;
+    protected $performance_schema_events_statements_history_long_size = null;
+    protected $performance_schema_events_statements_history_size = null;
     protected $performance_schema_events_waits_history_long_size = null;
     protected $performance_schema_events_waits_history_size = null;
+    protected $performance_schema_hosts_size = null;
     protected $performance_schema_max_cond_classes = null;
     protected $performance_schema_max_cond_instances = null;
     protected $performance_schema_max_file_classes = null;
@@ -235,10 +326,18 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $performance_schema_max_mutex_instances = null;
     protected $performance_schema_max_rwlock_classes = null;
     protected $performance_schema_max_rwlock_instances = null;
+    protected $performance_schema_max_socket_classes = null;
+    protected $performance_schema_max_socket_instances = null;
+    protected $performance_schema_max_stage_classes = null;
+    protected $performance_schema_max_statement_classes = null;
     protected $performance_schema_max_table_handles = null;
     protected $performance_schema_max_table_instances = null;
     protected $performance_schema_max_thread_classes = null;
     protected $performance_schema_max_thread_instances = null;
+    protected $performance_schema_session_connect_attrs_size = null;
+    protected $performance_schema_setup_actors_size = null;
+    protected $performance_schema_setup_objects_size = null;
+    protected $performance_schema_users_size = null;
     protected $pid_file = null;
     protected $plugin_dir = null;
     protected $port = null;
@@ -263,8 +362,10 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $read_only = null;
     protected $read_rnd_buffer_size = null;
     protected $relay_log = null;
+    protected $relay_log_basename = null;
     protected $relay_log_index = null;
     protected $relay_log_info_file = null;
+    protected $relay_log_info_repository = null;
     protected $relay_log_purge = null;
     protected $relay_log_recovery = null;
     protected $relay_log_space_limit = null;
@@ -272,20 +373,29 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $report_password = null;
     protected $report_port = null;
     protected $report_user = null;
-    protected $rpl_recovery_rank = null;
+    protected $rpl_stop_slave_timeout = null;
     protected $secure_auth = null;
     protected $secure_file_priv = null;
     protected $server_id = null;
+    protected $server_id_bits = null;
+    protected $server_uuid = null;
     protected $skip_external_locking = null;
     protected $skip_name_resolve = null;
     protected $skip_networking = null;
     protected $skip_show_database = null;
+    protected $slave_allow_batching = null;
+    protected $slave_checkpoint_group = null;
+    protected $slave_checkpoint_period = null;
     protected $slave_compressed_protocol = null;
     protected $slave_exec_mode = null;
     protected $slave_load_tmpdir = null;
     protected $slave_max_allowed_packet = null;
     protected $slave_net_timeout = null;
+    protected $slave_parallel_workers = null;
+    protected $slave_pending_jobs_size_max = null;
+    protected $slave_rows_search_algorithms = null;
     protected $slave_skip_errors = null;
+    protected $slave_sql_verify_checksum = null;
     protected $slave_transaction_retries = null;
     protected $slave_type_conversions = null;
     protected $slow_launch_time = null;
@@ -295,12 +405,9 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $sort_buffer_size = null;
     protected $sql_auto_is_null = null;
     protected $sql_big_selects = null;
-    protected $sql_big_tables = null;
     protected $sql_buffer_result = null;
     protected $sql_log_bin = null;
     protected $sql_log_off = null;
-    protected $sql_low_priority_updates = null;
-    protected $sql_max_join_size = null;
     protected $sql_mode = null;
     protected $sql_notes = null;
     protected $sql_quote_show_create = null;
@@ -312,6 +419,8 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $ssl_capath = null;
     protected $ssl_cert = null;
     protected $ssl_cipher = null;
+    protected $ssl_crl = null;
+    protected $ssl_crlpath = null;
     protected $ssl_key = null;
     protected $storage_engine = null;
     protected $stored_program_cache = null;
@@ -323,6 +432,7 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $system_time_zone = null;
     protected $table_definition_cache = null;
     protected $table_open_cache = null;
+    protected $table_open_cache_instances = null;
     protected $thread_cache_size = null;
     protected $thread_concurrency = null;
     protected $thread_handling = null;
@@ -334,8 +444,10 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $tmp_table_size = null;
     protected $tmpdir = null;
     protected $transaction_alloc_block_size = null;
+    protected $transaction_allow_batching = null;
     protected $transaction_prealloc_size = null;
     protected $tx_isolation = null;
+    protected $tx_read_only = null;
     protected $unique_checks = null;
     protected $updatable_views_with_limit = null;
     protected $version = null;
@@ -397,8 +509,22 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getBindAddress() {
+        return $this->bind_address;
+    }
+
+    /**
+     * @return null
+     */
     public function getBinlogCacheSize() {
         return $this->binlog_cache_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getBinlogChecksum() {
+        return $this->binlog_checksum;
     }
 
     /**
@@ -413,6 +539,34 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getBinlogFormat() {
         return $this->binlog_format;
+    }
+
+    /**
+     * @return null
+     */
+    public function getBinlogMaxFlushQueueTime() {
+        return $this->binlog_max_flush_queue_time;
+    }
+
+    /**
+     * @return null
+     */
+    public function getBinlogOrderCommits() {
+        return $this->binlog_order_commits;
+    }
+
+    /**
+     * @return null
+     */
+    public function getBinlogRowImage() {
+        return $this->binlog_row_image;
+    }
+
+    /**
+     * @return null
+     */
+    public function getBinlogRowsQueryLogEvents() {
+        return $this->binlog_rows_query_log_events;
     }
 
     /**
@@ -530,6 +684,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getCoreFile() {
+        return $this->core_file;
+    }
+
+    /**
+     * @return null
+     */
     public function getDatadir() {
         return $this->datadir;
     }
@@ -553,6 +714,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getDefaultStorageEngine() {
         return $this->default_storage_engine;
+    }
+
+    /**
+     * @return null
+     */
+    public function getDefaultTmpStorageEngine() {
+        return $this->default_tmp_storage_engine;
     }
 
     /**
@@ -593,6 +761,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getDisconnectOnExpiredPassword() {
+        return $this->disconnect_on_expired_password;
+    }
+
+    /**
+     * @return null
+     */
     public function getDivPrecisionIncrement() {
         return $this->div_precision_increment;
     }
@@ -600,8 +775,22 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getEngineConditionPushdown() {
-        return $this->engine_condition_pushdown;
+    public function getEndMarkersInJson() {
+        return $this->end_markers_in_json;
+    }
+
+    /**
+     * @return null
+     */
+    public function getEnforceGtidConsistency() {
+        return $this->enforce_gtid_consistency;
+    }
+
+    /**
+     * @return null
+     */
+    public function getEqRangeIndexDiveLimit() {
+        return $this->eq_range_index_dive_limit;
     }
 
     /**
@@ -623,6 +812,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getExpireLogsDays() {
         return $this->expire_logs_days;
+    }
+
+    /**
+     * @return null
+     */
+    public function getExplicitDefaultsForTimestamp() {
+        return $this->explicit_defaults_for_timestamp;
     }
 
     /**
@@ -712,6 +908,41 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getGtidExecuted() {
+        return $this->gtid_executed;
+    }
+
+    /**
+     * @return null
+     */
+    public function getGtidMode() {
+        return $this->gtid_mode;
+    }
+
+    /**
+     * @return null
+     */
+    public function getGtidNext() {
+        return $this->gtid_next;
+    }
+
+    /**
+     * @return null
+     */
+    public function getGtidOwned() {
+        return $this->gtid_owned;
+    }
+
+    /**
+     * @return null
+     */
+    public function getGtidPurged() {
+        return $this->gtid_purged;
+    }
+
+    /**
+     * @return null
+     */
     public function getHaveCompress() {
         return $this->have_compress;
     }
@@ -721,13 +952,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getHaveCrypt() {
         return $this->have_crypt;
-    }
-
-    /**
-     * @return null
-     */
-    public function getHaveCsv() {
-        return $this->have_csv;
     }
 
     /**
@@ -747,29 +971,8 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getHaveInnodb() {
-        return $this->have_innodb;
-    }
-
-    /**
-     * @return null
-     */
-    public function getHaveNdbcluster() {
-        return $this->have_ndbcluster;
-    }
-
-    /**
-     * @return null
-     */
     public function getHaveOpenssl() {
         return $this->have_openssl;
-    }
-
-    /**
-     * @return null
-     */
-    public function getHavePartitioning() {
-        return $this->have_partitioning;
     }
 
     /**
@@ -810,6 +1013,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getHostCacheSize() {
+        return $this->host_cache_size;
+    }
+
+    /**
+     * @return null
+     */
     public function getHostname() {
         return $this->hostname;
     }
@@ -826,6 +1036,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getIgnoreBuiltinInnodb() {
         return $this->ignore_builtin_innodb;
+    }
+
+    /**
+     * @return null
+     */
+    public function getIgnoreDbDirs() {
+        return $this->ignore_db_dirs;
     }
 
     /**
@@ -859,6 +1076,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbAdaptiveFlushingLwm() {
+        return $this->innodb_adaptive_flushing_lwm;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbAdaptiveHashIndex() {
         return $this->innodb_adaptive_hash_index;
     }
@@ -866,8 +1090,50 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbAdaptiveMaxSleepDelay() {
+        return $this->innodb_adaptive_max_sleep_delay;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbAdditionalMemPoolSize() {
         return $this->innodb_additional_mem_pool_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbApiBkCommitInterval() {
+        return $this->innodb_api_bk_commit_interval;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbApiDisableRowlock() {
+        return $this->innodb_api_disable_rowlock;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbApiEnableBinlog() {
+        return $this->innodb_api_enable_binlog;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbApiEnableMdl() {
+        return $this->innodb_api_enable_mdl;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbApiTrxLevel() {
+        return $this->innodb_api_trx_level;
     }
 
     /**
@@ -887,8 +1153,50 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbBufferPoolDumpAtShutdown() {
+        return $this->innodb_buffer_pool_dump_at_shutdown;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbBufferPoolDumpNow() {
+        return $this->innodb_buffer_pool_dump_now;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbBufferPoolFilename() {
+        return $this->innodb_buffer_pool_filename;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbBufferPoolInstances() {
         return $this->innodb_buffer_pool_instances;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbBufferPoolLoadAbort() {
+        return $this->innodb_buffer_pool_load_abort;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbBufferPoolLoadAtStartup() {
+        return $this->innodb_buffer_pool_load_at_startup;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbBufferPoolLoadNow() {
+        return $this->innodb_buffer_pool_load_now;
     }
 
     /**
@@ -901,8 +1209,22 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbChangeBufferMaxSize() {
+        return $this->innodb_change_buffer_max_size;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbChangeBuffering() {
         return $this->innodb_change_buffering;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbChecksumAlgorithm() {
+        return $this->innodb_checksum_algorithm;
     }
 
     /**
@@ -915,8 +1237,36 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbCmpPerIndexEnabled() {
+        return $this->innodb_cmp_per_index_enabled;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbCommitConcurrency() {
         return $this->innodb_commit_concurrency;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbCompressionFailureThresholdPct() {
+        return $this->innodb_compression_failure_threshold_pct;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbCompressionLevel() {
+        return $this->innodb_compression_level;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbCompressionPadPctMax() {
+        return $this->innodb_compression_pad_pct_max;
     }
 
     /**
@@ -938,6 +1288,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getInnodbDataHomeDir() {
         return $this->innodb_data_home_dir;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbDisableSortFileCache() {
+        return $this->innodb_disable_sort_file_cache;
     }
 
     /**
@@ -985,6 +1342,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbFlushLogAtTimeout() {
+        return $this->innodb_flush_log_at_timeout;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbFlushLogAtTrxCommit() {
         return $this->innodb_flush_log_at_trx_commit;
     }
@@ -994,6 +1358,20 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getInnodbFlushMethod() {
         return $this->innodb_flush_method;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFlushNeighbors() {
+        return $this->innodb_flush_neighbors;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFlushingAvgLoops() {
+        return $this->innodb_flushing_avg_loops;
     }
 
     /**
@@ -1013,8 +1391,99 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbFtAuxTable() {
+        return $this->innodb_ft_aux_table;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtCacheSize() {
+        return $this->innodb_ft_cache_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtEnableDiagPrint() {
+        return $this->innodb_ft_enable_diag_print;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtEnableStopword() {
+        return $this->innodb_ft_enable_stopword;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtMaxTokenSize() {
+        return $this->innodb_ft_max_token_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtMinTokenSize() {
+        return $this->innodb_ft_min_token_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtNumWordOptimize() {
+        return $this->innodb_ft_num_word_optimize;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtResultCacheLimit() {
+        return $this->innodb_ft_result_cache_limit;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtServerStopwordTable() {
+        return $this->innodb_ft_server_stopword_table;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtSortPllDegree() {
+        return $this->innodb_ft_sort_pll_degree;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtTotalCacheSize() {
+        return $this->innodb_ft_total_cache_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbFtUserStopwordTable() {
+        return $this->innodb_ft_user_stopword_table;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbIoCapacity() {
         return $this->innodb_io_capacity;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbIoCapacityMax() {
+        return $this->innodb_io_capacity_max;
     }
 
     /**
@@ -1048,6 +1517,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbLogCompressedPages() {
+        return $this->innodb_log_compressed_pages;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbLogFileSize() {
         return $this->innodb_log_file_size;
     }
@@ -1069,8 +1545,22 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbLruScanDepth() {
+        return $this->innodb_lru_scan_depth;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbMaxDirtyPagesPct() {
         return $this->innodb_max_dirty_pages_pct;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbMaxDirtyPagesPctLwm() {
+        return $this->innodb_max_dirty_pages_pct_lwm;
     }
 
     /**
@@ -1083,8 +1573,43 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbMaxPurgeLagDelay() {
+        return $this->innodb_max_purge_lag_delay;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbMirroredLogGroups() {
         return $this->innodb_mirrored_log_groups;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbMonitorDisable() {
+        return $this->innodb_monitor_disable;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbMonitorEnable() {
+        return $this->innodb_monitor_enable;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbMonitorReset() {
+        return $this->innodb_monitor_reset;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbMonitorResetAll() {
+        return $this->innodb_monitor_reset_all;
     }
 
     /**
@@ -1104,8 +1629,29 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbOnlineAlterLogMaxSize() {
+        return $this->innodb_online_alter_log_max_size;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbOpenFiles() {
         return $this->innodb_open_files;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbOptimizeFulltextOnly() {
+        return $this->innodb_optimize_fulltext_only;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbPageSize() {
+        return $this->innodb_page_size;
     }
 
     /**
@@ -1153,6 +1699,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbReadOnly() {
+        return $this->innodb_read_only;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbReplicationDelay() {
         return $this->innodb_replication_delay;
     }
@@ -1174,8 +1727,22 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbSortBufferSize() {
+        return $this->innodb_sort_buffer_size;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbSpinWaitDelay() {
         return $this->innodb_spin_wait_delay;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbStatsAutoRecalc() {
+        return $this->innodb_stats_auto_recalc;
     }
 
     /**
@@ -1195,8 +1762,43 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getInnodbStatsPersistent() {
+        return $this->innodb_stats_persistent;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbStatsPersistentSamplePages() {
+        return $this->innodb_stats_persistent_sample_pages;
+    }
+
+    /**
+     * @return null
+     */
     public function getInnodbStatsSamplePages() {
         return $this->innodb_stats_sample_pages;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbStatsTransientSamplePages() {
+        return $this->innodb_stats_transient_sample_pages;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbStatusOutput() {
+        return $this->innodb_status_output;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbStatusOutputLocks() {
+        return $this->innodb_status_output_locks;
     }
 
     /**
@@ -1211,6 +1813,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getInnodbSupportXa() {
         return $this->innodb_support_xa;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbSyncArraySize() {
+        return $this->innodb_sync_array_size;
     }
 
     /**
@@ -1239,6 +1848,27 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getInnodbThreadSleepDelay() {
         return $this->innodb_thread_sleep_delay;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbUndoDirectory() {
+        return $this->innodb_undo_directory;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbUndoLogs() {
+        return $this->innodb_undo_logs;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnodbUndoTablespaces() {
+        return $this->innodb_undo_tablespaces;
     }
 
     /**
@@ -1405,13 +2035,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getLog() {
-        return $this->log;
-    }
-
-    /**
-     * @return null
-     */
     public function getLogBin() {
         return $this->log_bin;
     }
@@ -1419,8 +2042,29 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getLogBinBasename() {
+        return $this->log_bin_basename;
+    }
+
+    /**
+     * @return null
+     */
+    public function getLogBinIndex() {
+        return $this->log_bin_index;
+    }
+
+    /**
+     * @return null
+     */
     public function getLogBinTrustFunctionCreators() {
         return $this->log_bin_trust_function_creators;
+    }
+
+    /**
+     * @return null
+     */
+    public function getLogBinUseV1RowEvents() {
+        return $this->log_bin_use_v1_row_events;
     }
 
     /**
@@ -1454,8 +2098,22 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getLogSlowQueries() {
-        return $this->log_slow_queries;
+    public function getLogSlowAdminStatements() {
+        return $this->log_slow_admin_statements;
+    }
+
+    /**
+     * @return null
+     */
+    public function getLogSlowSlaveStatements() {
+        return $this->log_slow_slave_statements;
+    }
+
+    /**
+     * @return null
+     */
+    public function getLogThrottleQueriesNotUsingIndexes() {
+        return $this->log_throttle_queries_not_using_indexes;
     }
 
     /**
@@ -1491,6 +2149,20 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getLowerCaseTableNames() {
         return $this->lower_case_table_names;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMasterInfoRepository() {
+        return $this->master_info_repository;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMasterVerifyChecksum() {
+        return $this->master_verify_checksum;
     }
 
     /**
@@ -1580,13 +2252,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getMaxLongDataSize() {
-        return $this->max_long_data_size;
-    }
-
-    /**
-     * @return null
-     */
     public function getMaxPreparedStmtCount() {
         return $this->max_prepared_stmt_count;
     }
@@ -1645,6 +2310,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getMetadataLocksCacheSize() {
         return $this->metadata_locks_cache_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getMetadataLocksHashInstances() {
+        return $this->metadata_locks_hash_instances;
     }
 
     /**
@@ -1804,8 +2476,85 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getOptimizerTrace() {
+        return $this->optimizer_trace;
+    }
+
+    /**
+     * @return null
+     */
+    public function getOptimizerTraceFeatures() {
+        return $this->optimizer_trace_features;
+    }
+
+    /**
+     * @return null
+     */
+    public function getOptimizerTraceLimit() {
+        return $this->optimizer_trace_limit;
+    }
+
+    /**
+     * @return null
+     */
+    public function getOptimizerTraceMaxMemSize() {
+        return $this->optimizer_trace_max_mem_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getOptimizerTraceOffset() {
+        return $this->optimizer_trace_offset;
+    }
+
+    /**
+     * @return null
+     */
     public function getPerformanceSchema() {
         return $this->performance_schema;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaAccountsSize() {
+        return $this->performance_schema_accounts_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaDigestsSize() {
+        return $this->performance_schema_digests_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaEventsStagesHistoryLongSize() {
+        return $this->performance_schema_events_stages_history_long_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaEventsStagesHistorySize() {
+        return $this->performance_schema_events_stages_history_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaEventsStatementsHistoryLongSize() {
+        return $this->performance_schema_events_statements_history_long_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaEventsStatementsHistorySize() {
+        return $this->performance_schema_events_statements_history_size;
     }
 
     /**
@@ -1820,6 +2569,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getPerformanceSchemaEventsWaitsHistorySize() {
         return $this->performance_schema_events_waits_history_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaHostsSize() {
+        return $this->performance_schema_hosts_size;
     }
 
     /**
@@ -1888,6 +2644,34 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getPerformanceSchemaMaxSocketClasses() {
+        return $this->performance_schema_max_socket_classes;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaMaxSocketInstances() {
+        return $this->performance_schema_max_socket_instances;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaMaxStageClasses() {
+        return $this->performance_schema_max_stage_classes;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaMaxStatementClasses() {
+        return $this->performance_schema_max_statement_classes;
+    }
+
+    /**
+     * @return null
+     */
     public function getPerformanceSchemaMaxTableHandles() {
         return $this->performance_schema_max_table_handles;
     }
@@ -1911,6 +2695,34 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getPerformanceSchemaMaxThreadInstances() {
         return $this->performance_schema_max_thread_instances;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaSessionConnectAttrsSize() {
+        return $this->performance_schema_session_connect_attrs_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaSetupActorsSize() {
+        return $this->performance_schema_setup_actors_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaSetupObjectsSize() {
+        return $this->performance_schema_setup_objects_size;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPerformanceSchemaUsersSize() {
+        return $this->performance_schema_users_size;
     }
 
     /**
@@ -1953,13 +2765,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getProfilingHistorySize() {
         return $this->profiling_history_size;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getProperty() {
-        return $this->property;
     }
 
     /**
@@ -2091,6 +2896,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getRelayLogBasename() {
+        return $this->relay_log_basename;
+    }
+
+    /**
+     * @return null
+     */
     public function getRelayLogIndex() {
         return $this->relay_log_index;
     }
@@ -2100,6 +2912,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getRelayLogInfoFile() {
         return $this->relay_log_info_file;
+    }
+
+    /**
+     * @return null
+     */
+    public function getRelayLogInfoRepository() {
+        return $this->relay_log_info_repository;
     }
 
     /**
@@ -2154,8 +2973,8 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getRplRecoveryRank() {
-        return $this->rpl_recovery_rank;
+    public function getRplStopSlaveTimeout() {
+        return $this->rpl_stop_slave_timeout;
     }
 
     /**
@@ -2177,6 +2996,20 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getServerId() {
         return $this->server_id;
+    }
+
+    /**
+     * @return null
+     */
+    public function getServerIdBits() {
+        return $this->server_id_bits;
+    }
+
+    /**
+     * @return null
+     */
+    public function getServerUuid() {
+        return $this->server_uuid;
     }
 
     /**
@@ -2205,6 +3038,27 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getSkipShowDatabase() {
         return $this->skip_show_database;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSlaveAllowBatching() {
+        return $this->slave_allow_batching;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSlaveCheckpointGroup() {
+        return $this->slave_checkpoint_group;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSlaveCheckpointPeriod() {
+        return $this->slave_checkpoint_period;
     }
 
     /**
@@ -2245,8 +3099,36 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getSlaveParallelWorkers() {
+        return $this->slave_parallel_workers;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSlavePendingJobsSizeMax() {
+        return $this->slave_pending_jobs_size_max;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSlaveRowsSearchAlgorithms() {
+        return $this->slave_rows_search_algorithms;
+    }
+
+    /**
+     * @return null
+     */
     public function getSlaveSkipErrors() {
         return $this->slave_skip_errors;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSlaveSqlVerifyChecksum() {
+        return $this->slave_sql_verify_checksum;
     }
 
     /**
@@ -2315,13 +3197,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
-    public function getSqlBigTables() {
-        return $this->sql_big_tables;
-    }
-
-    /**
-     * @return null
-     */
     public function getSqlBufferResult() {
         return $this->sql_buffer_result;
     }
@@ -2338,20 +3213,6 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getSqlLogOff() {
         return $this->sql_log_off;
-    }
-
-    /**
-     * @return null
-     */
-    public function getSqlLowPriorityUpdates() {
-        return $this->sql_low_priority_updates;
-    }
-
-    /**
-     * @return null
-     */
-    public function getSqlMaxJoinSize() {
-        return $this->sql_max_join_size;
     }
 
     /**
@@ -2434,6 +3295,20 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getSslCrl() {
+        return $this->ssl_crl;
+    }
+
+    /**
+     * @return null
+     */
+    public function getSslCrlpath() {
+        return $this->ssl_crlpath;
+    }
+
+    /**
+     * @return null
+     */
     public function getSslKey() {
         return $this->ssl_key;
     }
@@ -2506,6 +3381,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getTableOpenCache() {
         return $this->table_open_cache;
+    }
+
+    /**
+     * @return null
+     */
+    public function getTableOpenCacheInstances() {
+        return $this->table_open_cache_instances;
     }
 
     /**
@@ -2588,6 +3470,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     /**
      * @return null
      */
+    public function getTransactionAllowBatching() {
+        return $this->transaction_allow_batching;
+    }
+
+    /**
+     * @return null
+     */
     public function getTransactionPreallocSize() {
         return $this->transaction_prealloc_size;
     }
@@ -2597,6 +3486,13 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
      */
     public function getTxIsolation() {
         return $this->tx_isolation;
+    }
+
+    /**
+     * @return null
+     */
+    public function getTxReadOnly() {
+        return $this->tx_read_only;
     }
 
     /**
