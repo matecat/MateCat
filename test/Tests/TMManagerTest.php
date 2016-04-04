@@ -14,7 +14,7 @@ class TMManagerTest extends AbstractTest {
     public function setUp() {
 
         \INIT::$DEBUG = false;
-        $this->_TMInstance = TaskManager::getInstance( null, __DIR__ . DIRECTORY_SEPARATOR . 'tm_config.ini' );
+        $this->_TMInstance = TaskManager::getInstance( null, __DIR__ . DIRECTORY_SEPARATOR );
 
         $this->_redisClient = new \RedisHandler();
         $this->_redisClient->getConnection()->set( RedisKeys::VOLUME_ANALYSIS_PID, 1224 );

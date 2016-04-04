@@ -342,10 +342,11 @@ abstract class DataAccess_AbstractDao {
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
      *
-     * @param $struct The struct to update
-     * @param array $mask a mask to provide to limit the update to the specified fields.
+     * @param       $struct
+     * @param array $options
+     *
+     * @return bool
      */
-
     public static function updateStruct( $struct, $options=array() ) {
         $struct->ensureValid();
 
