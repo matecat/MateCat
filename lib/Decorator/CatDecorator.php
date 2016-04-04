@@ -94,7 +94,7 @@ class CatDecorator {
           }
       } else {
           if($isGDriveProject) {
-            $label = 'SAVE PREVIEW TO GOOGLE DRIVE';
+            $label = 'PREVIEW ON GOOGLE DRIVE';
           } else {
             $label = 'PREVIEW';
           }

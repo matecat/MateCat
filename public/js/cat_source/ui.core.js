@@ -1715,7 +1715,7 @@ UI = {
             }
         } else {
             if(isGDriveFile){
-                label = 'SAVE PREVIEW TO GOOGLE DRIVE';
+                label = 'PREVIEW ON GOOGLE DRIVE';
             } else {
                 label = 'PREVIEW';
             }
