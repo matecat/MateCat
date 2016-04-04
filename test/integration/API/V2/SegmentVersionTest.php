@@ -7,9 +7,11 @@ require 'lib/Controller/API/V2/JobPasswordValidator.php';
 
 class SegmentVersionTest extends IntegrationTest {
 
-    private $test_data;
+    private $test_data = array();
 
     function setup() {
+        
+        $this->test_data = new stdClass();
         $this->test_data->user = Factory_User::create();
 
         $feature = Factory_OwnerFeature::create( array(

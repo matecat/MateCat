@@ -1219,7 +1219,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
     if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
         $sum_sql = "SUM(segments.raw_word_count)";
     } else {
-        $sum_sql = "SUM(eq_word_count)";
+        $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
     }
 
     //if the new status to set is TRANSLATED,
@@ -1228,8 +1228,10 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
            SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
 
            FROM segment_translations
+              -- JOIN for raw_word_count and ICE matches
               INNER JOIN  segments
               ON segments.id = segment_translations.id_segment
+              -- JOIN for raw_word_count and ICE matches
 
            WHERE id_job = {$params['id_job']}
            AND segment_translations.segment_hash = '" . $params[ 'segment_hash' ] . "'
