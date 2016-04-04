@@ -13,6 +13,11 @@ class downloadFileController extends downloadController {
     protected $downloadToken;
     protected $gdriveService;
 
+    /**
+     * @var Google_Service_Drive_DriveFile
+     */
+    protected $remoteFiles = array() ;
+
     const FILES_CHUNK_SIZE = 3;
 
     public function __construct() {
@@ -310,17 +315,12 @@ class downloadFileController extends downloadController {
         else {
 
             try {
-                $this->startGDriveService();
 
-                $jobHasRemoteFiles = \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+                if ( $this->anyRemoteFile() ) {
 
-                if( $jobHasRemoteFiles ) {
+                    $this->updateRemoteFiles( $output_content );
+                    $this->outputResultForRemoteFiles();
 
-                    foreach( $output_content as $id_file => $output_file ) {
-                        $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
-
-                        $this->updateFileOnGDrive( $remoteFile->remote_id, $output_file[ 'document_content' ] ) ;
-                    }
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
@@ -379,6 +379,23 @@ class downloadFileController extends downloadController {
     }
 
     /**
+     * Initializes remoteFiles property reading entries from database
+     *
+     * @return int
+     */
+    private function anyRemoteFile()  {
+        return \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+    }
+
+
+    private function outputResultForRemoteFiles() {
+        if ( count($this->remoteFiles ) > 1 ) {
+            echo json_decode( array('redirect' => null ));
+        } else {
+            echo json_encode( array('redirect' => $this->remoteFiles[0]['alternateLink'] ));
+        }
+    }
+    /**
      * @param ZipContentObject $output_content
      *
      * @throws Exception
@@ -395,8 +412,21 @@ class downloadFileController extends downloadController {
         $this->gdriveService = GDrive::getService( $_SESSION );
     }
 
+
+
+    private function updateRemoteFiles($output_content) {
+        $this->startGDriveService();
+
+        foreach( $output_content as $id_file => $output_file ) {
+            $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
+            $this->updateFileOnGDrive( $remoteFile->remote_id, $output_file[ 'document_content' ] ) ;
+        }
+    }
+
     private function updateFileOnGDrive( $remoteId, $content ) {
         $gdriveFile = $this->gdriveService->files->get( $remoteId );
+        array_push( $this->remoteFiles, $gdriveFile );
+
         $mimeType = \GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
         $gdriveFile->setMimeType( $mimeType );
 

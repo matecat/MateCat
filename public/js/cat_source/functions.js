@@ -475,8 +475,46 @@ function runDownload() {
             msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
         });
     } else {
-        UI.continueDownload();
+        if ( config.isGDriveProject ) {
+            continueDownloadWithGoogleDrive();
+        }
+        else  {
+            UI.continueDownload();
+        }
+
     }
+}
+
+function continueDownloadWithGoogleDrive() {
+    var downloadURL = sprintf( '%s?action=downloadFile&id_job=%s&password=%s',
+        config.basepath,
+        config.id_job,
+        config.password
+    );
+
+    // TODO: this should be relative to the current USER, find a
+    // way to generate this at runtime.
+    var recent = 'https://drive.google.com/drive/u/0/recent';
+
+    $.getJSON( downloadURL ).done( function(data) {
+        var url ;
+
+        if (data.redirect == null) {
+            url = recent ;
+        } else {
+            url = data.redirect ;
+        }
+
+        var win = window.googleDriveWindow ;
+        if ( typeof win == 'undefined' || win.opener == null ) {
+            window.googleDriveWindow = window.open( url );
+        }
+        else {
+            window.googleDriveWindow.location.href = url ;
+            window.googleDriveWindow.focus();
+        }
+    });
+
 }
 
 /**
