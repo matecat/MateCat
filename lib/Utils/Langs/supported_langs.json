@@ -57,7 +57,7 @@
             }],
             "isocode":"an",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"an-ES"
         }
     ,
@@ -1093,7 +1093,7 @@
                 "en":"Occitan Aran"
             }],
             "isocode":"oc",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"oc-ES"
         }
