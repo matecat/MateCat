@@ -52,8 +52,13 @@ class OpenController extends KleinController {
 
         \Log::doLog( $state );
 
-        $this->guid = Utils::create_guid();
-        setcookie( "upload_session", $this->guid, time() + 86400, '/' );
+        if( GDrive::sessionHasFiles( $_SESSION )) {
+            $this->guid = $_SESSION[ "upload_session" ];
+        } else {
+            $this->guid = Utils::create_guid();
+            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
+            $_SESSION[ "upload_session" ] = $this->guid;
+        }
 
         $listOfIds = array();
 
@@ -106,7 +111,10 @@ class OpenController extends KleinController {
                 if ( $httpRequest->getResponseHttpCode() == 200 ) {
                     $body = $httpRequest->getResponseBody();
                     $directory = Utils::uploadDirFromSessionCookie( $this->guid );
-                    mkdir( $directory, 0755, true );
+
+                    if( !is_dir( $directory ) ) {
+                        mkdir( $directory, 0755, true );
+                    }
 
                     $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
                     $saved = file_put_contents( $filePath, $httpRequest->getResponseBody() );

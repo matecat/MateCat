@@ -35,7 +35,12 @@ class newProjectController extends viewController {
         $this->project_name      = $__postInput[ "project_name" ];
         $this->private_tm_key = $__postInput[ "private_tm_key" ];
 
-        $this->guid            = Utils::create_guid();
+        if( \GDrive::sessionHasFiles( $_SESSION ) ) {
+            $this->guid = $_SESSION[ "upload_session" ];
+        } else {
+            $this->guid = Utils::create_guid();
+        }
+
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
