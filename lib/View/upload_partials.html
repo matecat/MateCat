@@ -5,6 +5,12 @@
             <tbody class="files files-gdrive" data-toggle="modal-gallery" data-target="#modal-gallery">
             </tbody>
         </table>
+        <div class="btncontinue continue-gdrive">
+            <span class="btn load-gdrive">Add from Google Drive</span>
+            <span id="clear-all-gdrive" class="btn fileinput-button cancel-btn clear-gdrive">
+                <span>Clear all</span>
+            </span>
+        </div>
     </div>
         
 </div> 
@@ -17,8 +23,8 @@
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your file here<br/>
-                <span tal:condition="true:isUploadTMXAllowed" class="min">You may also import your own translation memories (TMX)</span><br/>
-                or</p>
+                <span tal:condition="true:isUploadTMXAllowed" class="min">(including TMX)</span><br/>
+            </p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your XLIFF here<br/>
@@ -40,6 +46,9 @@
                                         <span>Add files...</span>
                                         <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
                                     </span>
+                                    <span class="btn-success min">or</span>
+                                    <span class="btn-success btn load-gdrive">Add from Google Drive</span>
+
                         <!--
                                         <button type="submit" class="btn btn-primary start">
                                             <i class="icon-upload icon-white"></i>
