@@ -82,6 +82,8 @@ APP.tryListGDriveFiles = function() {
                 )
                 .appendTo('.files-gdrive');
             });
+        } else {
+            window.open('/', '_self');
         }
     });
 };
