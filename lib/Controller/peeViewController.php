@@ -21,7 +21,7 @@ class peeViewController extends viewController {
 
 
         for ($i = 0; $i <= $this->languageStats.length+1; $i++) {
-            $curr=array( "source"=>$this->languageStats[$i]['source'], "target"=>$this->languageStats[$i]['target'], "pee"=>(($this->languageStats[$i]['total_post_editing_effort'])/($this->languageStats[$i]['job_count'])));
+            $curr=array( "source"=>$this->languageStats[$i]['source'], "target"=>$this->languageStats[$i]['target'], "pee"=>(($this->languageStats[$i]['total_post_editing_effort'])/($this->languageStats[$i]['job_count'])), "totalwordPEE"=>$this->languageStats[$i]['total_word_count']);
             array_push($this->dataLangStats,$curr);
         }
 
