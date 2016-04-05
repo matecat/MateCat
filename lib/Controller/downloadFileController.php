@@ -389,13 +389,16 @@ class downloadFileController extends downloadController {
 
 
     private function outputResultForRemoteFiles() {
+        $response = array('urls' => array() );
 
-        if ( count($this->remoteFiles ) > 1 ) {
-            echo json_encode( array('redirect' => null ));
-        } else {
-            echo json_encode( array('redirect' => $this->remoteFiles[0]['alternateLink'] ));
+        foreach ( $this->remoteFiles as $localId => $file ) {
+            $response[ 'urls' ][] = array(
+                    'localId'       => $localId,
+                    'alternateLink' => $file[ 'alternateLink' ]
+            );
         }
 
+        echo json_encode( $response );
     }
     /**
      * @param ZipContentObject $output_content
@@ -421,14 +424,14 @@ class downloadFileController extends downloadController {
 
         foreach( $output_content as $id_file => $output_file ) {
             $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
-            $this->updateFileOnGDrive( $remoteFile->remote_id, $output_file[ 'document_content' ] ) ;
+            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );
+
+            $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $output_file[ 'document_content' ] ) ;
+            $this->remoteFiles[ $remoteFile->id ] = $gdriveFile ;
         }
     }
 
-    private function updateFileOnGDrive( $remoteId, $content ) {
-        $gdriveFile = $this->gdriveService->files->get( $remoteId );
-        array_push( $this->remoteFiles, $gdriveFile );
-
+    private function updateFileOnGDrive( $remoteId, $gdriveFile, $content ) {
         $mimeType = \GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
         $gdriveFile->setMimeType( $mimeType );
 
