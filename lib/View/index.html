@@ -325,7 +325,8 @@
             <span tal:condition="not: isGDriveProject">Your downloaded file will appear on the bar below in a few seconds.</span>
             <span tal:condition="true: isGDriveProject">Your translated files will appear on your Google Drive.</span>
             <br/>
-            <img src="${basepath}public/img/arrowdown.png" width="18px" /> 
+            <img tal:condition="not: isGDriveProject" src="${basepath}public/img/arrowdown.png" width="18px" />
+            <img tal:condition="true: isGDriveProject" src="${basepath}public/img/logo-drive-16.png" width="16px" />
         </div>
 
         <div class="blacked" ></div>
