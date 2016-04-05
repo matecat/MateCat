@@ -15,8 +15,8 @@ use Exception;
 
 class OpenController extends KleinController {
 
-    private $source_lang = 'en-US';
-    private $target_lang = 'fr-FR';
+    private $source_lang = Constants::DEFAULT_SOURCE_LANG;
+    private $target_lang = Constants::DEFAULT_TARGET_LANG;
     private $seg_rule = null;
 
     private $gdriveService = null;

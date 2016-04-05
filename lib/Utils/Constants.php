@@ -10,4 +10,7 @@ class Constants {
     const COOKIE_TARGET_LANG = 'targetLang';
 
     const EMPTY_VAL = '_EMPTY_';
+
+    const DEFAULT_SOURCE_LANG = 'en-US';
+    const DEFAULT_TARGET_LANG = 'fr-FR';
 }
