@@ -1908,26 +1908,73 @@ UI = {
 		location.href = $('#point2seg').attr('href');
 	},
 
+
+    disableDownloadButtonForDownloadStart : function() {
+        var button = $('#downloadProject' ) ;
+        var labelDownloading = 'DOWNLOADING';
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
+            labelDownloading = 'SAVING';
+        }
+        button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
+    },
+
+    reEnableDownloadButton : function() {
+        var button = $('#downloadProject' ) ;
+        button.removeClass('disabled')
+            .val( button.data('oldValue') )
+            .removeData('oldValue');
+    },
+
+    downloadFileURL : function() {
+        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s',
+            config.basepath,
+            config.id_job,
+            config.password
+        );
+    },
+
+    continueDownloadWithGoogleDrive : function () {
+        // TODO: this should be relative to the current USER, find a
+        // way to generate this at runtime.
+        var recent = 'https://drive.google.com/drive/u/0/recent';
+
+        UI.disableDownloadButtonForDownloadStart();
+
+        $.getJSON( UI.downloadFileURL() ).done( function(data) {
+            var url ;
+
+            if (data.redirect == null) {
+                url = recent ;
+            } else {
+                url = data.redirect ;
+            }
+
+            var win = window.googleDriveWindow ;
+            if ( typeof win == 'undefined' || win.opener == null ) {
+                window.googleDriveWindow = window.open( url );
+            }
+            else {
+                window.googleDriveWindow.location.href = url ;
+                window.googleDriveWindow.focus();
+            }
+        }).always(function() {
+            UI.reEnableDownloadButton() ;
+        });
+    },
+
     continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
-            var labelDownloading = 'DOWNLOADING';
-
-            if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
-                labelDownloading = 'SAVING';
-            }
-
-            //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val(labelDownloading);
+            UI.disableDownloadButtonForDownloadStart();
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
                 id:'iframeDownload',
                 src: ''
             });
-console.log('iFrameDownload: ', iFrameDownload);
+
             //append iFrame to the DOM
             $("body").append( iFrameDownload );
 
@@ -1942,7 +1989,7 @@ console.log('iFrameDownload: ', iFrameDownload);
 
                     //check for cookie
                     var token = $.cookie( downloadToken );
-console.log('eccolo: ', typeof token);
+
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( typeof token != 'undefined' ) {
@@ -1959,7 +2006,8 @@ console.log('eccolo: ', typeof token);
                         if(parseInt(tokenData.code) < 0) {
                             UI.showMessage({msg: tokenData.message})
                         }
-                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                        UI.reEnableDownloadButton();
+
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();

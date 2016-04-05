@@ -389,11 +389,13 @@ class downloadFileController extends downloadController {
 
 
     private function outputResultForRemoteFiles() {
+
         if ( count($this->remoteFiles ) > 1 ) {
-            echo json_decode( array('redirect' => null ));
+            echo json_encode( array('redirect' => null ));
         } else {
             echo json_encode( array('redirect' => $this->remoteFiles[0]['alternateLink'] ));
         }
+
     }
     /**
      * @param ZipContentObject $output_content
