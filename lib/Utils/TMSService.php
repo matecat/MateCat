@@ -392,15 +392,23 @@ class TMSService {
             srclang="' . $sourceLang . '"/>
     <body>' );
 
+        /*
+         * This is a feature for Xbench compatibility
+         * in case of mt and tm ( OmegaT set this flg to false )
+         */
+        $hideUnconfirmedRows = true;
+
         switch ( $this->output_type ) {
 
             case 'translation':
                 $result = getTranslationsForTMXExport( $jid, $jPassword );
                 break;
             case 'mt' :
+                $hideUnconfirmedRows = false;
                 $result = getMTForTMXExport( $jid, $jPassword );
                 break;
             case 'tm' :
+                $hideUnconfirmedRows = false;
                 $result = getTMForTMXExport( $jid, $jPassword );
                 break;
             default:
@@ -444,10 +452,25 @@ class TMSService {
         '.$chunkPropString.'
         <tuv xml:lang="' . $sourceLang . '">
             <seg>' . htmlspecialchars( $row[ 'segment' ] ) . '</seg>
-        </tuv>
+        </tuv>';
+
+            //if segment is confirmed or we want show all segments
+            if( array_search( $row[ 'status' ],
+                            array(
+                                    Constants_TranslationStatus::STATUS_TRANSLATED,
+                                    Constants_TranslationStatus::STATUS_APPROVED,
+                                    Constants_TranslationStatus::STATUS_FIXED
+                            )
+                    ) !== false || !$hideUnconfirmedRows ){
+
+                $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
             <seg>' . htmlspecialchars( $row[ 'translation' ] ) . '</seg>
-        </tuv>
+        </tuv>';
+
+            }
+
+            $tmx .= '
     </tu>
 ';
 

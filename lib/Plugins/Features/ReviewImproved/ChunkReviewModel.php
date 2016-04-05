@@ -98,7 +98,7 @@ class ChunkReviewModel
 
         $this->chunk_review->is_pass = ( $score_per_mille <= $lqa_model->getLimit() ) ;
 
-        \LQA\ChunkReviewDao::updateStruct( $this->chunk_review, array(
+        ChunkReviewDao::updateStruct( $this->chunk_review, array(
             'fields' => array('reviewed_words_count', 'is_pass', 'score'))
         );
     }

@@ -48,13 +48,13 @@ class AjaxPasswordCheck {
      * );
      * </pre>
      *
-     * @param array    $jobData
+     * @param array|Jobs_JobStruct    $jobData
      * @param string   $password
      * @param null|int $segmentID
      *
      * @return bool
      */
-    public function grantJobAccessByJobData( array $jobData, $password, $segmentID = null ){
+    public function grantJobAccessByJobData( $jobData, $password, $segmentID = null ){
         $this->jobData = $jobData;
 
         //array of jobs permitted because of job split
