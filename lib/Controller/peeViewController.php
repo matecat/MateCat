@@ -1,12 +1,14 @@
 <?php
 
+//namespace Features\ReviewImproved\Controller;
+
+
 header( "Cache-Control: no-store, no-cache, must-revalidate" );  // HTTP/1.1
 header( "Cache-Control: post-check=0, pre-check=0", false );
 header( "Pragma: no-cache" );
 
-class peeViewController extends viewController {
 
-    private $incomingUrl;
+class peeViewController extends viewController{
 
     public function __construct() {
         parent::__construct();
@@ -33,5 +35,6 @@ class peeViewController extends viewController {
         $this->template->dataLangStats   = json_encode($this->dataLangStats);
 
     }
+
 
 }

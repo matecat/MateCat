@@ -55,7 +55,8 @@ RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^features/(.*)$ router.php [QSA,L]
 
-RewriteRule ^utils/pee$ index.php?action=peeView [L]
+RewriteRule ^utils/pee$ router.php [L]
+
 
 
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
