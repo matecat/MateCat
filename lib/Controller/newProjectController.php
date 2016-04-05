@@ -343,6 +343,8 @@ class newProjectController extends viewController {
         $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
         $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
         $this->template->accessToken = GDrive::getUserToken( $_SESSION );
+
+        $this->template->currentTargetLang = $this->getCurrentTargetLang();
     }
 
     private function isGDrive() {
@@ -357,6 +359,23 @@ class newProjectController extends viewController {
         }
 
         return $isGDrive;
+    }
+
+    private function getCurrentTargetLang() {
+        if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
+            $ckTargetLang = filter_input( INPUT_COOKIE, Constants::COOKIE_TARGET_LANG );
+
+            if( $ckTargetLang != Constants::EMPTY_VAL ) {
+                $targetLangHistory   = $ckTargetLang;
+                $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
+
+                if(count( $targetLangAr ) > 0) {
+                    return $targetLangAr[0];
+                }
+            }
+        }
+
+        return Constants::DEFAULT_TARGET_LANG;
     }
 
 }

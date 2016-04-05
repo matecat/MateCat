@@ -88,7 +88,9 @@ $(document).ready(function() {
 		if( UI.checkTMXLangFailure() ){
 			UI.delTMXLangFailure();
 		}
-	});
+
+                APP.changeTargetLang( $(this).val() );
+        });
 
 	$("input.uploadbtn").click(function(e) {
         
@@ -391,4 +393,14 @@ clearNotCompletedUploads = function() {
         type: 'POST',
         dataType: 'json'
     });
+};
+
+APP.changeTargetLang = function( lang ) {
+    if( localStorage.getItem( 'currentTargetLang' ) != lang ) {
+        localStorage.setItem( 'currentTargetLang', lang );
+    }
+};
+
+APP.displayCurrentTargetLang = function() {
+    $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
 };
