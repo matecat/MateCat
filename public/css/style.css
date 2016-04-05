@@ -584,7 +584,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 /*done & draft*/
-.translated, .approved
+.translated ,.approved, input.gdrive-download
 {
     background: #09beec;
     border:1px solid #848689;
@@ -612,7 +612,7 @@ article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 .buttons li:hover p{display:block;}
 
-.translated{color:#fff !important}
+.translated, input.gdrive-download{color:#fff !important}
 
 article .translated, article .approved {
 	text-transform: uppercase;
@@ -639,6 +639,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
 
 
 .translated:hover,
+input.gdrive-download:hover,
 .next-untranslated:hover
 {
     background: #12b4df;
@@ -646,7 +647,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
 .draft:hover{background:#eee;}
 
 
-.translated:active, .draft:active, .btn:active, .copysource:active{
+.translated:active, .draft:active, .btn:active, .copysource:active, input.gdrive-download:active {
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
 
@@ -2680,7 +2681,7 @@ section.modified.editor .status
 	.number{left:-52px;}
 	.editarea, .source{ /* word-break: break-all */}
 	.projectbar ul {margin-left:5px}
-	.Translated, .draft, .approved{padding:7px 6px;}
+	.Translated, .draft, .approved, .gdrive-download {padding:7px 6px;}
 	.meter {	width:10%;}
 	.con-input{width:63%;}
 	.con-input{width:62% !important;}

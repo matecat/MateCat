@@ -63,6 +63,9 @@ APP = {
             $( '#sign-in' ).trigger( 'click' );
         } );
 
+        if( config.isGDriveProject && config.isGDriveProject !== 'false' ) {
+            $('#downloadProject').addClass('gdrive-download');
+        }
     },
     alert: function ( options ) {
         //FIXME
