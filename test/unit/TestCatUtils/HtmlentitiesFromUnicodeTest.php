@@ -1,13 +1,23 @@
 <?php
 
 /**
- * Created by PhpStorm.
+ * @group regression
+ * @covers CatUtils::htmlentitiesFromUnicode
+ * this battery of tests sends one character, that is chosen between a range of particular symbols
+ * that have their representation in unicode that starts with an hexadecimal value included in "F0" and "F7",
+ * in input as $source_segment to CatUtils::htmlentitiesFromUnicode method and
+ * verifies that the output is a numeric value understandable by the utf-8 representation
+ * concatenated with "&#" at the start and ";" at the end and that it matches with the value in $expected_segment.
  * User: dinies
  * Date: 31/03/16
  * Time: 16.36
  */
 class HtmlentitiesFromUnicodeTest extends AbstractTest{
 
+    /**
+     * @group regression
+     * @covers CatUtils::htmlentitiesFromUnicode
+     */
     public function testhtmlentitiesFromUnicode1(){
 
         $source_segment = <<<'LAB'
@@ -21,7 +31,11 @@ LAB;
         $this->assertEquals($expected_segment,$segment);
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::htmlentitiesFromUnicode
+     * original_segment=  <g 𐎆 𐏉</g>
+     */
     public function testhtmlentitiesFromUnicode2(){
         //"<g 𐎆 𐏉</g>" real imput string
         $source_segment = <<<'LAB'
@@ -35,6 +49,11 @@ LAB;
         $this->assertEquals($expected_segment,$segment);
     }
 
+    /**
+     * @group regression
+     * @covers CatUtils::htmlentitiesFromUnicode
+     * original_segment= <g id="1">ψ</g>😴<g 😆id="2">🛠λ</g>
+     */
     public function testhtmlentitiesFromUnicode3(){
 //<g id="1">ψ</g>😴<g 😆id="2">🛠λ</g> initial string in input
         $source_segment = <<<'LAB'
@@ -48,8 +67,10 @@ LAB;
         $this->assertEquals($expected_segment,$segment);
     }
 
-
-
+    /**
+     * @group regression
+     * @covers CatUtils::htmlentitiesFromUnicode
+     */
     public function testhtmlentitiesFromUnicode4(){
         $source_array=array();
         $source_alfa="😴";
@@ -64,7 +85,11 @@ LAB;
         $this->assertEquals($expected_segment,CatUtils::htmlentitiesFromUnicode($source_array));
     }
 
-    public function testhtmlentitiesFromUnicode5(){
+    /**
+     * @group regression
+     * @covers CatUtils::htmlentitiesFromUnicode
+     */
+    public function testhtmlentitiesFromUnicode_artificial_feeding_of_parameters(){
         $source_array_1=array();
         $source_array_2=array();
 
