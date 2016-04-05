@@ -36,7 +36,9 @@ abstract class downloadController extends controller {
 
             $isGDriveProject = \Projects_ProjectDao::isGDriveProject($project->id);
 
-            if( !$isGDriveProject ) {
+            $forceXliff = intval( filter_input( INPUT_GET, 'forceXliff' ) );
+
+            if( !$isGDriveProject || $forceXliff === 1 ) {
                 $buffer = ob_get_contents();
                 ob_get_clean();
                 ob_start("ob_gzhandler");  // compress page before sending

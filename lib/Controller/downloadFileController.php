@@ -316,7 +316,7 @@ class downloadFileController extends downloadController {
 
             try {
 
-                if ( $this->anyRemoteFile() ) {
+                if ( $this->anyRemoteFile() && !$this->forceXliff ) {
 
                     $this->updateRemoteFiles( $output_content );
                     $this->outputResultForRemoteFiles();
