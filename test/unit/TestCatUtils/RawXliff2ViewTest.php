@@ -1,12 +1,20 @@
 <?php
 
 /**
- * Created by PhpStorm.
+ * @group regression
+ * @covers CatUtils::rawXliff2view
+ * this battery of tests sends one string in input as $source_segment to CatUtils::rawXliff2view method and
+ * verifies that the output is equal to the $expected_segment.
  * User: dinies
  * Date: 30/03/16
  * Time: 18.05
  */
 class RawXliff2ViewTest extends AbstractTest{
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view1()
     {
         $source_segment = <<<LAB
@@ -18,6 +26,11 @@ LAB;
 
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view2()
     {
         $source_segment = <<<LAB
@@ -28,6 +41,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view3()
     {
         $source_segment = <<<LAB
@@ -38,6 +56,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view4()
     {
         
@@ -49,7 +72,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
-    
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view5()
     {
         $source_segment = <<<LAB
@@ -60,7 +87,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
-    
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view6()
     {
         $source_segment = <<<LAB
@@ -71,7 +102,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
-    
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view7()
     {
         $source_segment = <<<LAB
@@ -82,7 +117,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
-    
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view8()
     {
         $source_segment = <<<LAB
@@ -93,7 +132,11 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
-    
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view9()
     {
         $source_segment = <<<LAB
@@ -104,6 +147,11 @@ In certain embodiments, the value of &lt;g id="2"&gt;E &lt;/g&gt;may vary or be 
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
+
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view10()
     {
         $source_segment = <<<LAB
@@ -115,7 +163,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view11()
     {
         $source_segment = <<<LAB
@@ -127,7 +178,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view12()
     {
         $source_segment = <<<LAB
@@ -139,7 +193,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view13()
     {
         $source_segment = <<<LAB
@@ -151,7 +208,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view14()
     {
         $source_segment = <<<LAB
@@ -163,7 +223,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view15()
     {
         $source_segment = <<<LAB
@@ -175,7 +238,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view16()
     {
         $source_segment = <<<LAB
@@ -187,7 +253,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view17()
     {
         $source_segment = <<<LAB
@@ -199,7 +268,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view18()
     {
         $source_segment = <<<LAB
@@ -211,7 +283,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-    
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view19()
     {
         $source_segment = <<<LAB
@@ -228,7 +303,10 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-
+    /**
+     * @group regression
+     * @covers CatUtils::rawXliff2view
+     */
     public function testliff2view20()
     {
         $source_segment = <<<LAB
@@ -242,8 +320,8 @@ LAB;
 
 
     /**
-     * viene da
-     * @see CatUtils::rawXliff2View
+     * @group regression
+     * @covers CatUtils::rawXliff2view
      */
     public function testliff2view21()
     {

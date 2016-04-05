@@ -51,6 +51,11 @@ class CatUtils {
         }
 
         $usec = $ms % 1000;
+
+        if( !is_int( $ms ) ) {
+            throw new InvalidArgumentException("Wrong DataType provided: " . var_export( $ms, true ) . "\n Expected integer.");
+        }
+
         $ms = floor($ms / 1000);
 
         $seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
