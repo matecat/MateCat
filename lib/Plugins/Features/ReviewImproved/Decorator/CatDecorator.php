@@ -41,7 +41,7 @@ class CatDecorator extends \AbstractDecorator {
         if ( $this->controller->isRevision() ) {
             // TODO: complete this with the actual URL
             $this->template->quality_report_href =
-                    "/features/review_improved/quality_report/" .
+                    \INIT::$BASEURL . "features/review_improved/quality_report/" .
                     "{$this->controller->getJob()->id}/" .
                     "{$this->controller->getJob()->password}";
         }
