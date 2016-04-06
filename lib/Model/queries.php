@@ -320,7 +320,7 @@ function getLanguageStats() {
 
     $db = Database::obtain();
 
-    $query = "select source,target, date,total_post_editing_effort,job_count, total_word_count
+    $query = "select source,target, date,total_post_editing_effort,job_count, total_word_count, pee_sigma
 from language_stats
   where date=(select max(date) from language_stats)";
 
