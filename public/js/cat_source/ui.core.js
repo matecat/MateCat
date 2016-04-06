@@ -86,7 +86,7 @@ UI = {
 	cacheObjects: function( editarea_or_segment ) {
         if ( editarea_or_segment instanceof UI.Segment ) {
             var segment = editarea_or_segment ;
-            this.editarea = segment.el.find('.editarea');
+            this.editarea = segment.el.find( UI.targetContainerSelector() );
         }
         else {
             this.editarea = $(editarea);
@@ -96,7 +96,7 @@ UI = {
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
                                                       // seems to be the previous current segment
 
-		this.lastOpenedEditarea = $('.editarea', this.currentSegment);
+		this.lastOpenedEditarea = $( UI.targetContainerSelector(), this.currentSegment);
 
 		this.currentSegmentId    = segment.id ;
         this.lastOpenedSegmentId = segment.id ;
