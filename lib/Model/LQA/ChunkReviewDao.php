@@ -22,7 +22,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      */
     public static function findByIdJob( $id_job ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE id_job = :id_job ";
+                " WHERE id_job = :id_job ORDER BY id";
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
@@ -140,12 +140,12 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @return ChunkReviewStruct
+     * @return ChunkReviewStruct[]
      */
 
     public static function findByProjectId( $id_project ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
-            " WHERE id_project = :id_project ";
+            " WHERE id_project = :id_project ORDER BY id ";
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
@@ -183,7 +183,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $struct = new \LQA\ChunkReviewStruct( $data );
 
         $struct->ensureValid();
-        $struct->review_password = CatUtils::generate_password( 12 );
+        $struct->setDefaults();
+
         $attrs = $struct->attributes(array(
             'id_project', 'id_job', 'password', 'review_password'
         ));

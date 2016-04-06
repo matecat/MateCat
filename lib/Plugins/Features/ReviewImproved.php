@@ -124,9 +124,14 @@ class ReviewImproved extends BaseFeature {
      */
     public function postJobSplitted(\ArrayObject $projectStructure) {
         $id_job = $projectStructure['array_jobs']['job_list'][0] ;
+        $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
+        $first_password = $old_reviews[0]->review_password ;
+
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure );
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure, array(
+            'first_record_password' => $first_password
+        ));
         $id_project = $projectStructure['id_project'];
 
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
@@ -143,25 +148,28 @@ class ReviewImproved extends BaseFeature {
      * Deletes the previously created record and creates the new records matching the new chunks.
      */
     public function postJobMerged( $projectStructure ) {
-        $id_job = $projectStructure['job_to_merge'] ;
-        $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
+        $id_job               = $projectStructure[ 'job_to_merge' ];
+        $old_reviews          = ChunkReviewDao::findByIdJob( $id_job );
+        $first_password       = $old_reviews[ 0 ]->review_password;
+        $score                = 0;
+        $reviewed_words_count = 0;
 
         ChunkReviewDao::deleteByJobId( $id_job );
-
-        $score = 0;
-        $reviewed_words_count = 0 ;
 
         foreach($old_reviews as $row ) {
             $score = $score + $row->score;
             $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
         }
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure );
+        $this->createQaChunkReviewRecord( $id_job, $projectStructure, array(
+            'first_record_password' => $first_password
+        ));
+
         $new_reviews = ChunkReviewDao::findByIdJob( $id_job );
         $new_reviews[0]->score = $score;
         $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
-        $model = new ChunkReviewModel( $new_reviews[0]);
+        $model = new ChunkReviewModel( $new_reviews[0] );
         $model->updatePassFailResult();
 
     }
@@ -206,16 +214,21 @@ class ReviewImproved extends BaseFeature {
      * @param $array_jobs The jobs array coming from the project_structure
      *
      */
-    private function createQaChunkReviewRecord( $id_job, $projectStructure ) {
+    private function createQaChunkReviewRecord( $id_job, $projectStructure, $options=array() ) {
         $id_project = $projectStructure['id_project'];
         $chunks = Chunks_ChunkDao::getByJobIdProjectAndIdJob( $id_project, $id_job ) ;
 
-        foreach( $chunks as $chunk ) {
+        foreach( $chunks as $k => $chunk ) {
             $data = array(
                 'id_project' => $id_project,
                 'id_job'     => $chunk->id,
                 'password'   => $chunk->password
             );
+
+            if ( $k == 0 && array_key_exists('first_record_password', $options) != null ) {
+                $data['review_password'] = $options['first_record_password'];
+            }
+
             \LQA\ChunkReviewDao::createRecord( $data );
         }
     }
