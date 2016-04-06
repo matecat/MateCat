@@ -2,7 +2,7 @@
 	Component: ui.tags
  */
 
-$('html').on('copySourceToTarget', 'section', function() {
+$('html').on('copySourceToTarget', 'section', function( el ) {
     UI.lockTags(UI.editarea);
 });
 
@@ -169,7 +169,7 @@ $.extend(UI, {
 
             var segment = $(this).parents('section');
 
-            if ( UI.hasSourceOrTargetTags() ) {
+            if ( UI.hasSourceOrTargetTags( segment ) ) {
                 segment.addClass( 'hasTagsToggle' );
             } else {
                 segment.removeClass( 'hasTagsToggle' );
@@ -618,19 +618,16 @@ $.extend(UI, {
             console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
         }
  */
-//        console.log('data: ', range.endContainer);
 		if(typeof range.endContainer.data != 'undefined') {
             if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
-//			console.log('da saltare');
                 setCursorAfterNode(range, range.endContainer.nextElementSibling);
             }
         }
 
 	},
 
-    hasSourceOrTargetTags: function () {
-
-        return ( UI.editarea.find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
+    hasSourceOrTargetTags: function ( segment ) {
+        return ( $(segment).find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
     },
 
     hasMissingTargetTags: function () {
