@@ -168,6 +168,23 @@ class MainPanel extends React.Component {
 
         }
 
+        var controlsForSampling;
+
+        if ( window.config.isReview ) {
+            controlsForSampling = <div>
+                <div className="block">
+                    <label htmlFor="data-sample-checkbox">Data sample</label>
+                    <input type="checkbox"
+                        id="data-sample-checkbox"
+                        onClick={this.samplingEnabledClick.bind(this)}
+                        checked={this.state.samplingEnabled} />
+                </div>
+
+                {currentSampleSettings}
+
+
+            </div>;
+        }
 
         return <div className="advanced-filter-searchbox searchbox">
             <form>
@@ -180,17 +197,7 @@ class MainPanel extends React.Component {
                     </select>
                 </div>
 
-                <div className="block">
-                    <label htmlFor="data-sample-checkbox">Data sample</label>
-                    <input type="checkbox"
-                        id="data-sample-checkbox"
-                        onClick={this.samplingEnabledClick.bind(this)}
-                        checked={this.state.samplingEnabled} />
-                </div>
-
-                {currentSampleSettings}
-
-                
+                {controlsForSampling}
 
                 <div className="block right">
                     <input id="clear-filter"
@@ -201,9 +208,10 @@ class MainPanel extends React.Component {
 
                     <input onClick={this.submitClick.bind(this)} id="exec-filter"
                         type="submit"
-                            className={classnames({ btn: true, disabled: !submitEnabled})}
-                            value="FILTER" />
+                        className={classnames({ btn: true, disabled: !submitEnabled})}
+                        value="FILTER" />
                 </div>
+
             </form>
 
             {filteringInfo}
