@@ -52,7 +52,7 @@ class CatUtils {
 
         $usec = $ms % 1000;
 
-        if( !is_int( $ms ) ) {
+        if ( !is_numeric( $ms ) && !is_int( $ms ) ) {
             throw new InvalidArgumentException("Wrong DataType provided: " . var_export( $ms, true ) . "\n Expected integer.");
         }
 
