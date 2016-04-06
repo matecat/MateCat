@@ -651,7 +651,9 @@ $.extend(UI, {
                 UI.closeSegment(UI.currentSegment, 1);
             };
 
+            if ( $(e.target).parents('body') ) return ; // detatched from DOM
             if ( eventFromReact(e) ) return;
+
             if ( $(e.target).closest('section .sid').length ) close()  ;
             if ( $(e.target).closest('section .segment-side-buttons').length ) close();
 
