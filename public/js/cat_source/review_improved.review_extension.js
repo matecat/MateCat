@@ -139,12 +139,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             return translation ;
         },
-        evalCurrentSegmentTranslationAndSourceTags : function() {
-            var sourceTags = $('.source', this.currentSegment).html()
-                .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
-            this.sourceTags = sourceTags || [];
-            this.currentSegmentTranslation = $('.errorTaggingArea').text();
-        },
         getSegmentMarkup : function() {
             var segmentData = arguments[0];
             var data = UI.getSegmentTemplateData.apply( this, arguments ) ;

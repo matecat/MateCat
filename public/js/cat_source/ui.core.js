@@ -77,11 +77,11 @@ UI = {
 		this.createButtons(segment);
 		this.createHeader();
 	},
-    evalCurrentSegmentTranslationAndSourceTags : function() {
-        var sourceTags = $('.source', this.currentSegment).html()
-        .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
+        var sourceTags = $('.source', segment).html()
+            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = this.editarea.text();
+        this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
 	cacheObjects: function( editarea_or_segment ) {
         if ( editarea_or_segment instanceof UI.Segment ) {
@@ -104,7 +104,7 @@ UI = {
 		this.currentFile         = segment.el.parent();
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
 
-        this.evalCurrentSegmentTranslationAndSourceTags();
+        this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
 
         $(window).trigger('cachedSegmentObjects');
     },
