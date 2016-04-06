@@ -86,7 +86,7 @@ UI = {
 	cacheObjects: function( editarea_or_segment ) {
         if ( editarea_or_segment instanceof UI.Segment ) {
             var segment = editarea_or_segment ;
-            this.editarea = segment.el.find( UI.targetContainerSelector() );
+            this.editarea = segment.el.find( '.editarea' );
         }
         else {
             this.editarea = $(editarea);
