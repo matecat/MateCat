@@ -212,6 +212,11 @@ section {
             margin: 0 0 0 10px;
         }
 
+        .button-default {
+            border:1px solid #848689;
+            background: #d0d1d1 ;
+        }
+
         .status-rebutted {
             background: $rejected-color ;
             border:1px solid #848689;
