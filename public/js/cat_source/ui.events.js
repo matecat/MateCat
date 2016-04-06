@@ -1086,7 +1086,7 @@ $.extend(UI, {
 				UI.currentSegment.removeClass( 'hasTagsToggle' );
 			}
 
-			if ( UI.hasMissingTargetTags() ) {
+			if ( UI.hasMissingTargetTags( e.target.closest('section') ) ) {
 				UI.currentSegment.addClass( 'hasTagsAutofill' );
 			} else {
 				UI.currentSegment.removeClass( 'hasTagsAutofill' );
