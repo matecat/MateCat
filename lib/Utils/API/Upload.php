@@ -268,6 +268,13 @@ class Upload {
 
         $fileNameChunks = explode( ".", $fileUp->name );
 
+        foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
+            foreach ( $value as $typeSupported => $value2 ) {
+                if ( preg_match( '/(\.|\/)' . $typeSupported . '$/i', $fileUp->type ) ) {
+                    return true;
+                }
+            }
+        }
         //first Check the extension
         if ( !array_key_exists( strtolower( $fileNameChunks[ count( $fileNameChunks ) - 1 ] ), $this->acceptedExtensions ) ) {
             return false;
