@@ -805,7 +805,6 @@ $.extend(UI, {
         }).on('keypress', '.editor .editarea', function(e) {
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
-//				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
@@ -820,28 +819,17 @@ $.extend(UI, {
 			}
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
-//					console.log('ecco');
-//					console.log('prima del replace: ', UI.editarea.html());
-                    // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-
                     tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
                     UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
 
-//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
-//                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
-//                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
-
-//					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
-//						console.log('dopo del replace: ', UI.editarea.html());
 					}
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
             if (!UI.body.hasClass('searchActive')) {
-                console.log('vediamo: ', e.which);
+
                 if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
                 } else {
                     setTimeout(function() {
