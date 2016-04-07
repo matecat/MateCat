@@ -2263,7 +2263,7 @@ console.log('eccolo: ', typeof token);
         this.setTranslationTail.push(item);
     },
     updateToSetTranslationTail: function (item) {
-        $('#segment-' + id_segment).addClass('setTranslationPending');
+        $('#segment-' + item.id_segment).addClass('setTranslationPending');
 
         $.each( UI.setTranslationTail, function (index) {
             if( this.id_segment == item.id_segment ) {
