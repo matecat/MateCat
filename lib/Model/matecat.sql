@@ -1,4 +1,4 @@
-CREATE DATABASE matecat;
+CREATE DATABASE IF NOT EXISTS matecat;
 USE matecat;
 
 CREATE TABLE `api_keys` (

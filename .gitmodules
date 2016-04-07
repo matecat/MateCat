@@ -22,3 +22,6 @@
 [submodule "tools/puppet/modules/puppet-nodejs"]
 	path = support_scripts/puppet/modules/nodejs
 	url = git://github.com/willdurand/puppet-nodejs.git
+[submodule "support_scripts/puppet/modules/activemq"]
+	path = support_scripts/puppet/modules/activemq
+	url = git@github.com:maestrodev/puppet-activemq.git
