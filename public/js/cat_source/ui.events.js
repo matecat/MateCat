@@ -775,31 +775,8 @@ $.extend(UI, {
 			UI.preOpenConcordance();
 
         }).on('keyup', '.editor .editarea', 'return', function(e) {
-            console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
-
- //           if(!UI.defaultBRmanagement) {
-                console.log( 'Enter key is disabled!' );
-                e.preventDefault();
-                return false;
- //           };
-
-//            if(!UI.defaultBRmanagement) {
-//                range = window.getSelection().getRangeAt(0);
-////                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
-////                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-////                console.log('qua');
-////                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
-//
-////                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-////                setCursorAfterNode(range, node);
-//                saveSelection();
-//                $('.returnTempPlaceholder', UI.editarea).remove();
-//                restoreSelection();
-//            } else {
-////                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-//            }
-
+            e.preventDefault();
+            return false;
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
         }).on('keypress', '.editor .editarea', function(e) {
