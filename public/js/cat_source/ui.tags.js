@@ -167,7 +167,7 @@ $.extend(UI, {
 
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-            var segment = $(this).parents('section');
+            var segment = $(this).closest('section');
 
             UI.evalCurrentSegmentTranslationAndSourceTags( segment );
 
@@ -622,6 +622,7 @@ $.extend(UI, {
     },
 
     hasMissingTargetTags: function ( segment ) {
+        if ( segment.length == 0 ) return ;
 
         var sourceTags = $( '.source', segment ).html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
