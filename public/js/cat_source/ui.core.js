@@ -1991,9 +1991,6 @@ console.log('eccolo: ', typeof token);
 		}
 	},
 	fillWarnings: function(segment, warnings) {
-		//console.log( 'fillWarnings' );
-		//console.log( warnings);
-
 		//add Warnings to current Segment
 		var parentTag = segment.find('p.warnings').parent();
 		var actualWarnings = segment.find('p.warnings');
@@ -2001,8 +1998,6 @@ console.log('eccolo: ', typeof token);
 		$.each(warnings, function(key, value) {
 
             var warningMessage = '<p class="warnings">' + value.debug;
-			//console.log(warnings[key]);
-
 
             if(value.tip != "") {
                 warningMessage += '<span class="tip">' + value.tip + '</span>' ;
@@ -2020,17 +2015,9 @@ console.log('eccolo: ', typeof token);
 	 * @returns {undefined}
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails, global) {
-		if(global) {
-//			$.each(warningDetails, function(key, value) {
-//				console.log()
-//				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
-//					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
-//				}
-//			});
-		} else {
-			UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
+		if ( !global ) {
+            UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
 		}
-
 	},
 
 	compareArrays: function(i1, i2) {
@@ -2196,23 +2183,6 @@ console.log('eccolo: ', typeof token);
                         $('.editor .editarea .order-error').removeClass('order-error');
 						return;
 					}
-/*
-                    escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
-                    escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-                    escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-                    escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
-                    escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
-
-
-                    if (UI.editarea.text().trim() != escapedSegment ){
-                        console.log('ecco qua');
-
-//                        console.log( UI.editarea.text().trim() );
-//                        console.log( UI.checkSegmentsArray[d.token].trim() );
-//                        console.log( escapedSegment  );
-                        return;
-                    }
-*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
