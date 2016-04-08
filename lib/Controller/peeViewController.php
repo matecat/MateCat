@@ -1,14 +1,12 @@
 <?php
 
-//namespace Features\ReviewImproved\Controller;
+class peeViewController extends viewController {
 
-
-header( "Cache-Control: no-store, no-cache, must-revalidate" );  // HTTP/1.1
-header( "Cache-Control: post-check=0, pre-check=0", false );
-header( "Pragma: no-cache" );
-
-
-class peeViewController extends viewController{
+    /**
+     * Data field filled to display in the template
+     * @var array
+     */
+    protected $dataLangStats = array();
 
     public function __construct() {
         parent::__construct();
@@ -18,22 +16,30 @@ class peeViewController extends viewController{
 
     public function doAction() {
 
-        $this->dataLangStats=array();
-        $this->languageStats = getLanguageStats();
+        $this->dataLangStats[] = array(
+                "source"       => null,
+                "target"       => null,
+                "pee"          => 0,
+                "totalwordPEE" => null,
+                "peeSigma"     => 0
+        );
 
+        $languageStats = getLanguageStats();
 
-        for ($i = 0; $i <= $this->languageStats.length+1; $i++) {
-            $curr=array( "source"=>$this->languageStats[$i]['source'], "target"=>$this->languageStats[$i]['target'], "pee"=>(($this->languageStats[$i]['total_post_editing_effort'])/($this->languageStats[$i]['job_count'])), "totalwordPEE"=>$this->languageStats[$i]['total_word_count'],"peeSigma"=>$this->languageStats[$i]['pee_sigma']);
-            array_push($this->dataLangStats,$curr);
+        foreach ( $languageStats as $k => $value ) {
+            $this->dataLangStats[] = array(
+                    "source"       => $value[ 'source' ],
+                    "target"       => $value[ 'target' ],
+                    "pee"          => ( ( $value[ 'total_post_editing_effort' ] ) / ( $value[ 'job_count' ] ) ),
+                    "totalwordPEE" => $value[ 'total_word_count' ],
+                    "peeSigma"     => $value[ 'pee_sigma' ]
+            );
         }
-
-
 
     }
 
     public function setTemplateVars() {
-        $this->template->dataLangStats   = json_encode($this->dataLangStats);
-
+        $this->template->dataLangStats = json_encode( $this->dataLangStats );
     }
 
 
