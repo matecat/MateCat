@@ -51,6 +51,11 @@ class CatUtils {
         }
 
         $usec = $ms % 1000;
+
+        if ( !is_numeric( $ms ) && !is_int( $ms ) ) {
+            throw new InvalidArgumentException("Wrong DataType provided: " . var_export( $ms, true ) . "\n Expected integer.");
+        }
+
         $ms = floor($ms / 1000);
 
         $seconds = str_pad($ms % 60, 2, "0", STR_PAD_LEFT);
@@ -72,6 +77,11 @@ class CatUtils {
         return $dosString;
     }
 
+    /**
+     * @param $segment
+     * @return mixed
+     * @deprecated
+     */
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
         $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);

@@ -212,6 +212,11 @@ section {
             margin: 0 0 0 10px;
         }
 
+        .button-default {
+            border:1px solid #848689;
+            background: #d0d1d1 ;
+        }
+
         .status-rebutted {
             background: $rejected-color ;
             border:1px solid #848689;
@@ -560,9 +565,7 @@ padding-top: 0px;
 
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
-body.rtl-target.tagModes .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
-body.tagModes .locked.endTag
 {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */

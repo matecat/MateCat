@@ -12,6 +12,8 @@ use LQA\ChunkReviewDao;
 class SplitAndMergeTest extends IntegrationTest {
 
     function setUp() {
+
+        $this->test_data = new StdClass();
         $this->test_data->user = Factory_User::create();
 
         $feature = Factory_OwnerFeature::create( array(
@@ -27,6 +29,40 @@ class SplitAndMergeTest extends IntegrationTest {
                 "X-MATECAT-KEY: {$this->test_data->api_key->api_key}",
                 "X-MATECAT-SECRET: {$this->test_data->api_key->api_secret}"
         );
+    }
+
+    function test_split_and_merge_keep_first_chunk_review_password() {
+        $project = $this->createProject();
+        $project = Projects_ProjectDao::findById( $project->id_project );
+
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $original_password = $review_chunks[0]->review_password ;
+
+        $chunks = $project->getChunks();
+        splitJob(array(
+                'id_job'       => $chunks[0]->id,
+                'id_project'   => $project->id,
+                'project_pass' => $project->password,
+                'job_pass'     => $chunks[0]->password,
+                'num_split'    => 2,
+                'split_values' => array(10, 11)
+        ));
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $new_password = $review_chunks[0]->review_password ;
+
+        $this->assertEquals($original_password, $new_password, 'password changed after split');
+
+        mergeJob(array(
+                'id_job'       => $chunks[0]->id,
+                'id_project'   => $project->id,
+                'project_pass' => $project->password,
+        ));
+
+        $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
+        $new_password = $review_chunks[0]->review_password ;
+
+        $this->assertEquals($original_password, $new_password, 'password changed after merge');
+
     }
 
     /**

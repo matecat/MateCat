@@ -88,6 +88,11 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         return data ;
     }
 
+    $(document).on('click', 'section .goToNextToReview', function(e) {
+        e.preventDefault();
+        UI.gotoNextSegment();
+    });
+
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
         var segment = new UI.Segment( $(e.target).closest('section'));
         var selection = document.getSelection();
@@ -113,14 +118,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             ctrl : ( (UI.isMac) ? 'CMD' : 'CTRL'),
         };
 
-        var buttonHTML = MateCat.Templates['review_improved/approve_button']( buttonData ) ;
+        var buttonsHTML = MateCat.Templates['review_improved/segment_buttons']( buttonData ) ;
 
         var data = {
             versions : versions.findObjects({ id_segment : segment.id }),
             revertingVersion : revertingVersion
         };
 
-        container.append(buttonHTML);
+        container.append(buttonsHTML);
     }
 
     $.extend( ReviewImproved, {

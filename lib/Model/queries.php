@@ -316,6 +316,20 @@ function getUserData( $id ) {
     return $results;
 }
 
+function getLanguageStats() {
+
+    $db = Database::obtain();
+
+    $query = "select source,target, date,total_post_editing_effort,job_count, total_word_count, pee_sigma
+from language_stats
+  where date=(select max(date) from language_stats)";
+
+    $results = $db->fetch_array( $query );
+
+    return $results;
+}
+
+
 function randomString( $maxlength = 15 ) {
     //allowed alphabet
     $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -839,7 +853,8 @@ function getFirstSegmentId( $jid, $password ) {
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
 
     if ( $options['optional_fields'] ) {
-        $optional_fields = implode(', ', $options['optional_fields']);
+        $optional_fields = ', ';
+        $optional_fields .= implode(', ', $options['optional_fields']);
     }
 
     $queryAfter = "

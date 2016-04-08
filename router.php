@@ -147,6 +147,12 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance->respond('index');
 });
 
+$klein->respond('GET', '/utils/pee', function() {
+    $reflect  = new ReflectionClass('peeViewController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->doAction();
+    $instance->finalize();
+});
 
 /**
  * Define additional routes here
