@@ -1,4 +1,8 @@
-        "This file is @generated automatically"
+{
+  "_readme": [
+    "This file locks the dependencies of your project to a known state",
+    "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+    "Thie file is @generated automatically"
     ],
     "hash": "247f6a0721e6a8e36c7aeb4e7c9a2473",
     "content-hash": "46b4c803f4d160cefbd4b8a58754509d",
