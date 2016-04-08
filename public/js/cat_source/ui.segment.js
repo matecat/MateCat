@@ -78,7 +78,7 @@
                 decoded_text            : decoded_source,
                 editarea_classes_string : editarea_classes.join(' '),
                 lang                    : config.target_lang.toLowerCase(),
-                tagLockCustomizable     : $('#tpl-taglock-customize').html(),
+                tagLockCustomizable     : ( segment.segment.match( /\&lt;.*?\&gt;/gi ) ? $('#tpl-taglock-customize').html() : null ),
                 tagModesEnabled         : UI.tagModesEnabled,
                 decoded_translation     : decoded_translation  ,
                 status_change_title     : status_change_title ,
