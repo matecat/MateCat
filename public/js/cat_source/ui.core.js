@@ -86,16 +86,16 @@ UI = {
 		this.createButtons(segment);
 		this.createHeader();
 	},
-    evalCurrentSegmentTranslationAndSourceTags : function() {
-        var sourceTags = $('.source', this.currentSegment).html()
-        .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
+        var sourceTags = $('.source', segment).html()
+            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = this.editarea.text();
+        this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
 	cacheObjects: function( editarea_or_segment ) {
         if ( editarea_or_segment instanceof UI.Segment ) {
             var segment = editarea_or_segment ;
-            this.editarea = segment.el.find('.editarea');
+            this.editarea = segment.el.find( '.editarea' );
         }
         else {
             this.editarea = $(editarea);
@@ -105,7 +105,7 @@ UI = {
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
                                                       // seems to be the previous current segment
 
-		this.lastOpenedEditarea = $('.editarea', this.currentSegment);
+		this.lastOpenedEditarea = $( UI.targetContainerSelector(), this.currentSegment);
 
 		this.currentSegmentId    = segment.id ;
         this.lastOpenedSegmentId = segment.id ;
@@ -113,7 +113,7 @@ UI = {
 		this.currentFile         = segment.el.parent();
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
 
-        this.evalCurrentSegmentTranslationAndSourceTags();
+        this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
 
         $(window).trigger('cachedSegmentObjects');
     },
@@ -535,7 +535,7 @@ UI = {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
 		$.each(config.firstSegmentOfFiles, function() {
-			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name + '</a></li>';
+			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
 		});
 
 		menu += '    </ul>' +

@@ -8,6 +8,7 @@
  */
 
 abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDaoObjectStruct {
+
     protected $validator;
     protected $cached_results = array();
 
@@ -54,26 +55,17 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
     }
 
     public function __get( $name ) {
-        if (!property_exists( $this, $name )) {
+        if ( !property_exists( $this, $name ) ) {
             throw new DomainException( 'Trying to get an undefined property ' . $name );
         }
+
+        return $this->$name;
     }
 
     public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            // TODO: write to logs once we'll be able to have
-            // distinct log levels. Should go in DEBUG level.
-            // Log::doLog("DEBUG: Unknown property $name");
+        if ( property_exists( $this, $name ) ) {
+            $this->$name = $value;
         }
-    }
-
-    /**
-     *
-     * @deprecation use `attributes` method instead
-     */
-    public function toArray(){
-        Log::doLog('DEPRECATED, use `attributes()` method instead');
-        return $this->attributes();
     }
 
     public function setTimestamp($attribute, $timestamp) {
@@ -81,30 +73,12 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
     }
 
     /**
-     * Returns an array of the public attributes of the struct.
-     * If $mask is provided, the resulting array will include
-     * only the specified keys.
-     *
-     * This method is useful in conjunction with PDO execute, where only
-     * a subset of the attributes may be required to be bound to the query.
-     *
-     * @param $mask a mask for the keys to return
-     * @return Array
+     * @param $mask array
+     * @return array
+     * @see toArray
      */
-    public function attributes( $mask=null ) {
-
-        $refclass = new ReflectionClass( $this );
-        $attrs = array();
-        $publicProperties = $refclass->getProperties(ReflectionProperty::IS_PUBLIC) ;
-        foreach( $publicProperties as $property ) {
-            if ( !empty($mask) ) {
-                if (! in_array( $property->getName(), $mask)) {
-                    continue;
-                }
-            }
-            $attrs[$property->getName()] = $property->getValue($this);
-        }
-        return $attrs;
+    public function attributes( $mask = null ) {
+        return $this->toArray( $mask );
     }
 
     /**

@@ -380,6 +380,12 @@ class QA {
      */
     protected $warningList = array();
 
+    protected function _getTipValue( $errorID ){
+        if( array_key_exists( $errorID, $this->_tipMap ) ){
+            return $this->_tipMap[ $errorID ];
+        }
+    }
+
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -404,21 +410,21 @@ class QA {
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => self::ERR_TAG_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_TAG_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_TAG_MISMATCH )
                 ) );
                 break;
             case self::ERR_TAG_ID:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => self::ERR_TAG_ID,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
-                        'tip'     => $this->_tipMap [ self::ERR_TAG_ID ]
+                        'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ) );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( array(
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
-                        'tip'     => $this->_tipMap [ $errCode ]
+                        'tip'     => $this->_getTipValue( $errCode )
                 ) );
                 break;
 
@@ -432,7 +438,7 @@ class QA {
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_SPACE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_SPACE_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH )
                 ) );
                 break;
 
@@ -450,7 +456,7 @@ class QA {
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_SYMBOL_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_SYMBOL_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_SYMBOL_MISMATCH )
                 ) );
                 break;
 
@@ -458,7 +464,7 @@ class QA {
                 $this->exceptionList[ self::INFO ][] = errObject::get( array(
                         'outcome' => self::ERR_NEWLINE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
-                        'tip'     => $this->_tipMap [ self::ERR_NEWLINE_MISMATCH ]
+                        'tip'     => $this->_getTipValue( self::ERR_NEWLINE_MISMATCH )
                 ) );
                 break;
 
@@ -467,7 +473,7 @@ class QA {
                 $this->exceptionList[ self::WARNING ][] = errObject::get( array(
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
-                        'tip'     => $this->_tipMap [ $errCode ]
+                        'tip'     => $this->_getTipValue( $errCode )
                 ) );
                 break;
         }

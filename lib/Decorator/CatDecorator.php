@@ -129,6 +129,6 @@ class CatDecorator {
 
     private function setQualityReportHref() {
         $this->template->quality_report_href =
-                "{$this->template->basepath}revise-summary/{$this->job->id}-{$this->job->password}";
+                INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
     }
 }

@@ -69,4 +69,33 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * For now this is used by tests
+     *
+     * TODO Upgrade Project manager class with this method
+     *
+     * @param Jobs_JobStruct $jobStruct
+     *
+     * @return Jobs_JobStruct
+     */
+    public static function createFromStruct( Jobs_JobStruct $jobStruct ){
+
+        $conn = Database::obtain()->getConnection();
+
+        $jobStructToArray = $jobStruct->toArray();
+        $columns = array_keys( $jobStructToArray );
+        $values = array_values( $jobStructToArray );
+
+        $stmt = $conn->prepare( 'INSERT INTO `jobs` ( ' . implode( ',', $columns ) . ' ) VALUES ( ' . implode( ',' , array_fill( 0, count( $values ), '?' ) ) . ' )' );
+
+        foreach( $values as $k => $v ){
+            $stmt->bindValue( $k +1, $v ); //Columns/Parameters are 1-based
+        }
+
+        $stmt->execute();
+
+        return static::getById( $conn->lastInsertId() );
+
+    }
+
 }

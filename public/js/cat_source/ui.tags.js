@@ -2,7 +2,7 @@
 	Component: ui.tags
  */
 
-$('html').on('copySourceToTarget', 'section', function() {
+$('html').on('copySourceToTarget', 'section', function( el ) {
     UI.lockTags(UI.editarea);
 });
 
@@ -56,7 +56,7 @@ $.extend(UI, {
 			$(this).replaceWith($(this).html());
 		});
 	},
-	enableTagMark: function() {//console.log('enable tag mark');
+	enableTagMark: function() {
 		this.taglockEnabled = true;
 		this.body.removeClass('tagmarkDisabled');
 		saveSelection();
@@ -169,13 +169,15 @@ $.extend(UI, {
 
             var segment = $(this).parents('section');
 
-            if ( UI.hasSourceOrTargetTags() ) {
+            UI.evalCurrentSegmentTranslationAndSourceTags( segment );
+
+            if ( UI.hasSourceOrTargetTags( segment ) ) {
                 segment.addClass( 'hasTagsToggle' );
             } else {
                 segment.removeClass( 'hasTagsToggle' );
             }
 
-            if ( UI.hasMissingTargetTags() ) {
+            if ( UI.hasMissingTargetTags( segment ) ) {
                 segment.addClass( 'hasTagsAutofill' );
             } else {
                 segment.removeClass( 'hasTagsAutofill' );
@@ -608,41 +610,26 @@ $.extend(UI, {
 		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range) {
-/*
-        console.log('RANGE IN JUMPTAG: ', range.endContainer);
-        console.log('range.endContainer.data.length: ', range.endContainer.data.length);
-        console.log('range.endOffset: ', range.endOffset);
-        console.log('range.endContainer.nextElementSibling.className: ', range.endContainer.nextElementSibling.className);
-
-        for(var key in range.endContainer) {
-            console.log('key: ' + key + '\n' + 'value: "' + range.endContainer[key] + '"');
-        }
- */
-//        console.log('data: ', range.endContainer);
 		if(typeof range.endContainer.data != 'undefined') {
             if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) {
-//			console.log('da saltare');
                 setCursorAfterNode(range, range.endContainer.nextElementSibling);
             }
         }
-
 	},
 
-    hasSourceOrTargetTags: function () {
-
-        return ( UI.editarea.find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
+    hasSourceOrTargetTags: function ( segment ) {
+        return ( $(segment).find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
     },
 
-    hasMissingTargetTags: function () {
+    hasMissingTargetTags: function ( segment ) {
 
-        var sourceTags = $( '.source', UI.currentSegment ).html()
+        var sourceTags = $( '.source', segment ).html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
-        var targetTags = $( '.target', UI.currentSegment ).html()
+        var targetTags = $( '.target', segment ).html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
         return ( $( sourceTags ).not( targetTags ).length > 0 )
-
 
     }
 

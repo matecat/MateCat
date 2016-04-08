@@ -17,6 +17,8 @@ class exportTMXController extends downloadController {
 
     protected $errors;
 
+    public $jobInfo;
+
     public function __construct() {
         $filterArgs = array(
                 'jid'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -59,6 +61,7 @@ class exportTMXController extends downloadController {
      * @return mixed
      */
     function doAction() {
+
         if ( count( $this->errors ) > 0 ) {
             return null;
         }
@@ -66,7 +69,7 @@ class exportTMXController extends downloadController {
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = getJobData( $this->jobID, $this->jobPass );
+        $jobData = $this->jobInfo = new Jobs_JobStruct( getJobData( $this->jobID, $this->jobPass ) );
 
         $pCheck = new AjaxPasswordCheck();
 

@@ -316,6 +316,20 @@ function getUserData( $id ) {
     return $results;
 }
 
+function getLanguageStats() {
+
+    $db = Database::obtain();
+
+    $query = "select source,target, date,total_post_editing_effort,job_count, total_word_count, pee_sigma
+from language_stats
+  where date=(select max(date) from language_stats)";
+
+    $results = $db->fetch_array( $query );
+
+    return $results;
+}
+
+
 function randomString( $maxlength = 15 ) {
     //allowed alphabet
     $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -447,6 +461,7 @@ function getJobData( $id_job, $password = null ) {
         'id_translator',
         'tm_keys',
         'status_owner AS status',
+        'status_owner',
         'password',
         'job_first_segment',
         'job_last_segment',
@@ -649,7 +664,7 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
         JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
             WHERE segment_translations.id_job = " . (int)$jid . "
-            AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '" . Constants_TranslationStatus::STATUS_APPROVED . "')
+            -- AND segment_translations.status in ( '" . Constants_TranslationStatus::STATUS_TRANSLATED . "', '" . Constants_TranslationStatus::STATUS_APPROVED . "')
             AND show_in_cattool = 1
 ";
 

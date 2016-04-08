@@ -651,7 +651,9 @@ $.extend(UI, {
                 UI.closeSegment(UI.currentSegment, 1);
             };
 
+            if ( $(e.target).parents('body') ) return ; // detatched from DOM
             if ( eventFromReact(e) ) return;
+
             if ( $(e.target).closest('section .sid').length ) close()  ;
             if ( $(e.target).closest('section .segment-side-buttons').length ) close();
 
@@ -787,19 +789,7 @@ $.extend(UI, {
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
-/*
-            UI.defaultBRmanagement = false;
-            if(!$('br', UI.editarea).length) {
-                UI.defaultBRmanagement = true;
-            } else {
-                saveSelection();
-                $('.rangySelectionBoundary', UI.editarea).after('<span class="returnTempPlaceholder" contenteditable="false"></span>');
-                restoreSelection();
-                e.preventDefault();
-            }
-*/
         }).on('keypress', '.editor .editarea', function(e) {
-//			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -1084,13 +1074,13 @@ $.extend(UI, {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
 
-			if ( UI.hasSourceOrTargetTags() ) {
+			if ( UI.hasSourceOrTargetTags( e.target ) ) {
 				UI.currentSegment.addClass( 'hasTagsToggle' );
 			} else {
 				UI.currentSegment.removeClass( 'hasTagsToggle' );
 			}
 
-			if ( UI.hasMissingTargetTags() ) {
+			if ( UI.hasMissingTargetTags( e.target.closest('section') ) ) {
 				UI.currentSegment.addClass( 'hasTagsAutofill' );
 			} else {
 				UI.currentSegment.removeClass( 'hasTagsAutofill' );
