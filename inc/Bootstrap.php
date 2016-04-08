@@ -293,6 +293,21 @@ class Bootstrap {
      */
     public static function getEnvConfig() {
 
+        /**
+         *
+         * General server environment settings to define the the usage of hard links rather than copy php method
+         * must be one of these:
+         *
+         * - production
+         * - development
+         * - test
+         *
+         * @see EnvWrap
+         *
+         */
+        INIT::$ENV = self::$CONFIG['ENV'];
+
+        //load environment specific parameters
         if( getenv( 'ENV' ) !== false ){
             self::$CONFIG['ENV'] = getenv( 'ENV' );
         }

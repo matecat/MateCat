@@ -108,7 +108,8 @@ class convertFileController extends ajaxController {
         }
     }
 
-    private function handleZip( $conversionHandler ) {
+    private function handleZip( ConversionHandler $conversionHandler ) {
+        
       // this makes the conversionhandler accumulate eventual errors on files and continue
       $conversionHandler->setStopOnFileException( false );
 
