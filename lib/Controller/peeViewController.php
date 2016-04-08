@@ -16,15 +16,19 @@ class peeViewController extends viewController {
 
     public function doAction() {
 
-        $this->dataLangStats[] = array(
-                "source"       => null,
-                "target"       => null,
-                "pee"          => 0,
-                "totalwordPEE" => null,
-                "peeSigma"     => 0
-        );
-
         $languageStats = getLanguageStats();
+
+        if( !empty( $languageStats ) ){
+            $this->dataLangStats = array();
+        } else {
+            $this->dataLangStats[] = array(
+                    "source"       => null,
+                    "target"       => null,
+                    "pee"          => 0,
+                    "totalwordPEE" => null,
+                    "peeSigma"     => 0
+            );
+        }
 
         foreach ( $languageStats as $k => $value ) {
             $this->dataLangStats[] = array(
