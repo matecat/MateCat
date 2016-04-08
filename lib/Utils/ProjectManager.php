@@ -1089,7 +1089,7 @@ class ProjectManager {
                 insertFilesJob( $jid, $fid );
 
                 if( $this->isGDriveProject ) {
-                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService );
+                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService, $_SESSION );
                 }
             }
         }

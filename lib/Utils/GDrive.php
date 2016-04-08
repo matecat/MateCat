@@ -4,6 +4,8 @@ use OauthClient ;
 use Google_Service_Drive ;
 use Google_Service_Drive_DriveFile ;
 use RemoteFiles_RemoteFileDao ;
+use Google_Service_Drive_Permission ;
+use Exception ;
 
 class GDrive {
 
@@ -105,7 +107,7 @@ class GDrive {
         return null;
     }
 
-    public static function insertRemoteFile ( $id_file, $id_job, $service ) {
+    public static function insertRemoteFile ( $id_file, $id_job, $service, $session ) {
         $file = Files_FileDao::getById( $id_file );
         $job = Jobs_JobDao::getById( $id_job );
 
@@ -116,6 +118,8 @@ class GDrive {
         $copiedFile = self::copyFile( $service, $file->remote_id, $translatedFileTitle );
 
         RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id );
+
+        self::grantFileAccessByUrl( $session, $service, $copiedFile->id );
     }
 
     public static function getUserToken( $session ) {
@@ -127,6 +131,36 @@ class GDrive {
             $accessToken = $oauthToken[ 'access_token' ];
 
             return $accessToken;
+        }
+
+        return null;
+    }
+
+    /**
+     * Method to insert a new permission in a Google Drive file to grant anyone to access it by
+     * its URL.
+     *
+     * @param   Array                           $session
+     * @param   Google_Service_Drive            $service
+     * @param   String                          $fileId
+     * @return  Google_Service_Drive_Permission
+     */
+    public static function grantFileAccessByUrl ( $session, $service, $fileId ) {
+        $dao = new \Users_UserDao( \Database::obtain() );
+        $user = $dao->getByUid( $session[ 'uid' ] );
+
+        if($user != null) {
+            $urlPermission = new Google_Service_Drive_Permission();
+            $urlPermission->setValue( $user->email );
+            $urlPermission->setType( 'anyone' );
+            $urlPermission->setRole( 'reader' );
+            $urlPermission->setWithLink( true );
+
+            try {
+                return $service->permissions->insert( $fileId, $urlPermission );
+            } catch (Exception $e) {
+                print "An error occurred: " . $e->getMessage();
+            }
         }
 
         return null;
