@@ -83,6 +83,7 @@ class GDrive {
 
             $oauthClient = OauthClient::getInstance()->getClient();
             $oauthClient->setAccessToken( $token );
+            $oauthClient->setAccessType( "offline" );
             $gdriveService = new Google_Service_Drive( $oauthClient );
 
             return $gdriveService;

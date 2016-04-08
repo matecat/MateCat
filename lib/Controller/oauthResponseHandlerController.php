@@ -20,6 +20,7 @@ class oauthResponseHandlerController extends viewController{
 		$this->user_logged = true;
 
 		$this->client = OauthClient::getInstance()->getClient();
+                $this->client->setAccessType( "offline" );
 
 		$plus = new Google_Service_Oauth2($this->client);
 
