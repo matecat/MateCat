@@ -151,11 +151,6 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
 /**
  * Define additional routes here
  */
-// TODO: remove this from there, it's not being used
-
-route( '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'PATCH',
-    'API\V2\TranslationController', 'update'
-);
 
 route( '/api/v2/jobs/[:id_job]/[:password]/segments-filter', 'GET',
         'Features\SegmentFilter\Controller\API\FilterController', 'index'
