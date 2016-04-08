@@ -1918,11 +1918,14 @@ UI = {
 	},
 
 
-    disableDownloadButtonForDownloadStart : function() {
+    disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
         var button = $('#downloadProject' ) ;
         var labelDownloading = 'DOWNLOADING';
         if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
             labelDownloading = 'SAVING';
+        }
+        if( typeof openOriginalFiles !== 'undefined' && openOriginalFiles === 1 ) {
+            labelDownloading = 'OPENING';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
     },
@@ -1934,24 +1937,29 @@ UI = {
             .removeData('oldValue');
     },
 
-    downloadFileURL : function() {
-        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s',
+    downloadFileURL : function( openOriginalFiles ) {
+        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
             config.basepath,
             config.id_job,
-            config.password
+            config.password,
+            openOriginalFiles
         );
     },
 
-    continueDownloadWithGoogleDrive : function () {
+    continueDownloadWithGoogleDrive : function ( openOriginalFiles ) {
         if ( $('#downloadProject').hasClass('disabled') ) {
             return ;
+        }
+
+        if (typeof openOriginalFiles === 'undefined') {
+            openOriginalFiles = 0;
         }
 
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
         UI.showDownloadCornerTip();
-        UI.disableDownloadButtonForDownloadStart();
+        UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
             window.googleDriveWindows = {};
@@ -1973,7 +1981,7 @@ UI = {
             });
         }
 
-        $.getJSON( UI.downloadFileURL() )
+        $.getJSON( UI.downloadFileURL( openOriginalFiles ) )
             .done( driveUpdateDone )
             .always(function() {
                 UI.reEnableDownloadButton() ;

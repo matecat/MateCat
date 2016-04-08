@@ -707,6 +707,8 @@ $.extend(UI, {
 
                 //console.log( $( e.currentTarget ).attr( 'href' ) );
             }
+        }).on('click', '#previewDropdown .originalsGDrive a', function(e) {
+            UI.continueDownloadWithGoogleDrive( 1 );
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();

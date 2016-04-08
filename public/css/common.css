@@ -3610,6 +3610,10 @@ text-align: left;
     content: "\e603";
 }
 
+.icon-gdrive:before {
+    content: url(../img/logo-drive-16-gray.png);
+}
+
 
 
 

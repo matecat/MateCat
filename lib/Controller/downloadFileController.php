@@ -12,6 +12,7 @@ class downloadFileController extends downloadController {
     protected $forceXliff;
     protected $downloadToken;
     protected $gdriveService;
+    protected $openOriginalFiles;
 
     /**
      * @var Google_Service_Drive_DriveFile
@@ -38,7 +39,8 @@ class downloadFileController extends downloadController {
                 'downloadToken' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
-                'forceXliff'    => array()
+                'forceXliff'    => array(),
+                'original'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
         );
 
         $__postInput = filter_var_array( $_REQUEST, $filterArgs );
@@ -55,6 +57,7 @@ class downloadFileController extends downloadController {
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
+        $this->openOriginalFiles = ( isset( $__postInput[ 'original' ] ) && !empty( $__postInput[ 'original' ] ) && $__postInput[ 'original' ] == 1 );
 
         if ( empty( $this->id_job ) ) {
             $this->id_job = "Unknown";
@@ -317,10 +320,14 @@ class downloadFileController extends downloadController {
             try {
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
+                    $this->startGDriveService();
 
-                    $this->updateRemoteFiles( $output_content );
-                    $this->outputResultForRemoteFiles();
-
+                    if( $this->openOriginalFiles ) {
+                        $this->outputResultForOriginalFiles();
+                    } else {
+                        $this->updateRemoteFiles( $output_content );
+                        $this->outputResultForRemoteFiles();
+                    }
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
@@ -387,6 +394,22 @@ class downloadFileController extends downloadController {
         return \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
     }
 
+    private function outputResultForOriginalFiles() {
+        $files = \Files_FileDao::getByJobId( $this->id_job );
+
+        $response = array('urls' => array() );
+
+        foreach ( $files as $file ) {
+            $gdriveFile = $this->gdriveService->files->get( $file->remote_id );
+
+            $response[ 'urls' ][] = array(
+                    'localId'       => $file->id,
+                    'alternateLink' => $gdriveFile[ 'alternateLink' ]
+            );
+        }
+
+        echo json_encode( $response );
+    }
 
     private function outputResultForRemoteFiles() {
         $response = array('urls' => array() );
@@ -420,8 +443,6 @@ class downloadFileController extends downloadController {
 
 
     private function updateRemoteFiles($output_content) {
-        $this->startGDriveService();
-
         foreach( $output_content as $id_file => $output_file ) {
             $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
             $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );

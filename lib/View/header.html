@@ -59,6 +59,12 @@
                             </a>
                         </li>
 
+                        <li tal:condition="true:isGDriveProject" class="originalsGDrive">
+                            <a title="ORIGINALS ON GOOGLE DRIVE" alt="ORIGINALS ON GOOGLE DRIVE" href="javascript:void(0)" >
+                                <span class="icon-gdrive"></span>ORIGINALS ON GOOGLE DRIVE
+                            </a>
+                        </li>
+
                         <li tal:condition="php: uses_matecat_filters == true || INIT::$DEPRECATE_LEGACY_XLIFFS == false">
                             <a class="sdlxliff" title="Export XLIFF" alt="Export XLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank" >
                                 <span class="icon-download"></span>EXPORT XLIFF
