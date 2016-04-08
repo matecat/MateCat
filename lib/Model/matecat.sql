@@ -112,12 +112,22 @@ CREATE TABLE `files` (
   `xliff_file` longblob,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   `original_file` longblob,
-  `remote_id` text,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `remote_files` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_file` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `remote_id` varchar(255) NOT NULL,
+  `is_original` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `id_file` (`id_file`) USING BTREE,
+  KEY `id_job` (`id_job`) USING BTREE
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,

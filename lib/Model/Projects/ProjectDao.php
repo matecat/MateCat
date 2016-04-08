@@ -131,16 +131,21 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     static function isGDriveProject( $id_project ) {
         $conn = Database::obtain()->getConnection();
 
-        $sql = " SELECT * FROM files " .
-               "  WHERE id_project = :id_project " .
-               "  LIMIT 1 ";
+        $sql =  "  SELECT count(f.id) "
+                . "  FROM files f "
+                . " INNER JOIN remote_files r "
+                . "    ON f.id = r.id_file "
+                . " WHERE f.id_project = :id_project "
+                . "   AND r.is_original = 1 ";
         $stmt = $conn->prepare( $sql );
         $stmt->execute( array( 'id_project' => $id_project ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
+        $stmt->setFetchMode( PDO::FETCH_NUM );
 
-        $file = $stmt->fetch();
+        $result = $stmt->fetch();
 
-        if($file->remote_id != null) {
+        $countFiles = $result[ 0 ];
+
+        if($countFiles > 0) {
             return true;
         }
 

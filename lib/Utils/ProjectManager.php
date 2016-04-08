@@ -15,6 +15,8 @@ use FeatureSet ;
 
 use GDrive;
 
+use RemoteFiles_RemoteFileDao;
+
 class ProjectManager {
 
     /**
@@ -475,18 +477,16 @@ class ProjectManager {
 
                     $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
 
-                    if($gdriveFileId != null) {
-                        $file_insert_params = array(
-                            'remote_id' => $gdriveFileId
-                        );
-
-                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
-                    }
-
                     \Log::doLog('--------------------------------------------------- 1'); 
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                     $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
                         $fileDateSha1Path, $file_insert_params  );
+
+                    if($gdriveFileId != null) {
+                        RemoteFiles_RemoteFileDao::insert( $fid, 0, $gdriveFileId, 1 );
+
+                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
+                    }
 
                     \Log::doLog('--------------------------------------------------- 2');
                     //move the file in the right directory from the packages to the file dirstorage/conversion_errors/{E0ECD8B2-7CB8-DCD3-3138-EF076C03F3B3}/test.pptx
