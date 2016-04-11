@@ -78,7 +78,7 @@ class INIT {
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static $AUTHCOOKIENAME = 'matecat_login_v2';
+    public static $AUTHCOOKIENAME = 'matecat_login_v3';
     public static $SUPPORT_MAIL = 'the owner of this MateCat instance';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
