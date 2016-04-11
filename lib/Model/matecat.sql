@@ -373,7 +373,7 @@ CREATE TABLE `remote_files` (
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
