@@ -11,7 +11,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -29,7 +29,7 @@ CREATE TABLE `chunk_completion_events` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_updates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -50,7 +50,7 @@ CREATE TABLE `chunk_completion_updates` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -68,7 +68,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -117,17 +117,6 @@ CREATE TABLE `files` (
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
-
-CREATE TABLE `remote_files` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_file` bigint(20) NOT NULL,
-  `id_job` bigint(20) NOT NULL,
-  `remote_id` varchar(255) NOT NULL,
-  `is_original` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `id_file` (`id_file`) USING BTREE,
-  KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
@@ -185,7 +174,7 @@ CREATE TABLE `jobs` (
   `revision_stats_style_maj` int(11) NOT NULL DEFAULT '0',
   `dqf_key` varchar(255) DEFAULT NULL,
   `avg_post_editing_effort` float DEFAULT '0',
-  `total_raw_wc` bigint(20) DEFAULT 1,
+  `total_raw_wc` bigint(20) DEFAULT '1',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
@@ -209,6 +198,7 @@ CREATE TABLE `language_stats` (
   `total_post_editing_effort` float(255,0) DEFAULT NULL,
   `total_time_to_edit` float(255,0) DEFAULT NULL,
   `job_count` int(255) DEFAULT NULL,
+  `pee_sigma` int(11) DEFAULT '0',
   PRIMARY KEY (`date`,`source`,`target`),
   KEY `source_idx` (`source`),
   KEY `target_idx` (`target`),
@@ -259,7 +249,7 @@ CREATE TABLE `owner_features` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
@@ -276,7 +266,7 @@ CREATE TABLE `project_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -310,7 +300,7 @@ CREATE TABLE `qa_categories` (
   `severities` text COMMENT 'json field',
   PRIMARY KEY (`id`),
   KEY `id_model` (`id_model`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_chunk_reviews` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -328,7 +318,7 @@ CREATE TABLE `qa_chunk_reviews` (
   KEY `id_project` (`id_project`),
   KEY `review_password` (`review_password`),
   KEY `id_job` (`id_job`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entries` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -350,7 +340,7 @@ CREATE TABLE `qa_entries` (
   `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entry_comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -362,7 +352,7 @@ CREATE TABLE `qa_entry_comments` (
   PRIMARY KEY (`id`),
   KEY `id_qa_entry` (`id_qa_entry`),
   KEY `create_date` (`create_date`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_models` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -372,13 +362,14 @@ CREATE TABLE `qa_models` (
   `pass_type` varchar(255) DEFAULT NULL,
   `pass_options` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `remote_files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_file` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
   `remote_id` varchar(255) NOT NULL,
+  `is_original` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE
@@ -391,7 +382,7 @@ CREATE TABLE `segment_notes` (
   `note` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_revisions` (
   `id_job` bigint(20) NOT NULL,
@@ -418,7 +409,7 @@ CREATE TABLE `segment_translation_versions` (
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `creation_date` (`creation_date`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
@@ -565,23 +556,26 @@ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '2015091810165
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150921114813', '2016-02-18 14:28:29', '2016-02-18 14:28:29');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150922152051', '2016-02-18 14:28:39', '2016-02-18 14:28:39');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151001131124', '2016-02-18 14:28:45', '2016-02-18 14:28:45');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151120150352', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151123141623', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151126093945', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151204140144', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151219181543', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151229103454', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160108101432', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160115143225', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160116085841', '2016-02-20 09:55:27', '2016-02-20 09:55:27');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160120143540', '2016-02-23 13:13:09', '2016-02-23 13:13:09');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151120150352', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151123141623', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151126093945', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151204140144', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151219181543', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151229103454', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160108101432', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160115143225', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160116085841', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160120143540', '2016-04-11 16:52:51', '2016-04-11 16:52:51');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-02-18 14:28:45', '2016-02-18 14:28:45');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-02-23 13:34:57', '2016-02-23 13:34:57');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160301134214', '2016-03-01 13:48:39', '2016-03-01 13:48:39');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160311094715', '2016-03-11 13:54:40', '2016-03-11 13:54:40');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160318130527', '2016-04-04 09:18:25', '2016-04-04 09:18:25');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160331142550', '2016-04-04 09:18:25', '2016-04-04 09:18:25');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160331210238', '2016-04-04T09:18:25+00:00', '2016-04-04T09:18:25+00:00');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160301134214', '2016-03-02 15:38:52', '2016-03-02 15:38:52');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160311094715', '2016-03-14 11:05:09', '2016-03-14 11:05:09');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160318130527', '2016-04-11 16:52:51', '2016-04-11 16:52:51');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160329131606', '2016-04-09 00:27:03', '2016-04-09 00:27:03');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160331142550', '2016-04-11 16:52:51', '2016-04-11 16:52:51');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160331210238', '2016-04-11 16:52:51', '2016-04-11 16:52:51');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160406102209', '2016-04-11 11:30:55', '2016-04-11 11:30:55');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160408162842', '2016-04-11T16:52:51+02:00', '2016-04-11T16:52:51+02:00');
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
 CREATE TABLE conversions_log (
