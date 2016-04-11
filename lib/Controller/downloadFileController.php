@@ -109,7 +109,6 @@ class downloadFileController extends downloadController {
                     $mime_type        = $file[ 'mime_type' ];
                     $fileID           = $file[ 'id_file' ];
                     $current_filename = $file[ 'filename' ];
-                    $remote_id        = $file[ 'remote_id' ];
 
                     //get path for the output file converted to know it's right extension
                     $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
@@ -395,7 +394,7 @@ class downloadFileController extends downloadController {
     }
 
     private function outputResultForOriginalFiles() {
-        $files = \Files_FileDao::getByJobId( $this->id_job );
+        $files = \RemoteFiles_RemoteFileDao::getOriginalsByJobId( $this->id_job );
 
         $response = array('urls' => array() );
 

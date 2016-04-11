@@ -10,7 +10,6 @@ class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
   public $sha1_original_file ;
   public $original_file ;
   public $segmentation_rule;
-  public $remote_id;
 
 
 }

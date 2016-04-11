@@ -11,7 +11,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -29,7 +29,7 @@ CREATE TABLE `chunk_completion_events` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_updates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -68,7 +68,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -112,7 +112,6 @@ CREATE TABLE `files` (
   `xliff_file` longblob,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   `original_file` longblob,
-  `remote_id` text,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
@@ -267,7 +266,7 @@ CREATE TABLE `project_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -370,6 +369,7 @@ CREATE TABLE `remote_files` (
   `id_file` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
   `remote_id` varchar(255) NOT NULL,
+  `is_original` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE
@@ -575,6 +575,7 @@ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '2016012014354
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160318130527', '2016-04-04 09:18:25', '2016-04-04 09:18:25');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160331142550', '2016-04-04 09:18:25', '2016-04-04 09:18:25');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160331210238', '2016-04-04T09:18:25+00:00', '2016-04-04T09:18:25+00:00');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160408162842', '2016-04-11T16:52:51+02:00', '2016-04-11T16:52:51+02:00');
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

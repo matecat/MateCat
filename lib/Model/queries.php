@@ -1865,10 +1865,6 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
     $data[ 'mime_type' ]          = $mime_type;
     $data[ 'sha1_original_file' ] = $fileDateSha1Path;
 
-    if ( array_key_exists('remote_id', $params)) {
-        $data[ 'remote_id'] = $params['remote_id'];
-    }
-
     $db = Database::obtain();
 
     try {

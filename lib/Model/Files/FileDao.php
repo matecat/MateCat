@@ -36,8 +36,14 @@ class Files_FileDao extends DataAccess_AbstractDao {
     public static function getByRemoteId( $remote_id ) {
       $conn = Database::obtain()->getConnection();
       $stmt = $conn->prepare(
-        "SELECT * FROM files " .
-        " WHERE remote_id = :remote_id "
+        "  SELECT f.* "
+        . "  FROM files f "
+        . " INNER JOIN remote_files r "
+        . "    ON f.id = r.id_file "
+        . " WHERE r.remote_id = :remote_id "
+        . "   AND r.is_original = 1 "
+        . " ORDER BY f.id DESC "
+        . " LIMIT 1 "
       );
 
       $stmt->execute( array( 'remote_id' => $remote_id ) );

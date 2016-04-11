@@ -109,13 +109,16 @@ class GDrive {
 
     public static function insertRemoteFile ( $id_file, $id_job, $service, $session ) {
         $file = Files_FileDao::getById( $id_file );
+        $listRemoteFiles = RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
+        $remoteFile = $listRemoteFiles[0];
+
         $job = Jobs_JobDao::getById( $id_job );
 
         $fileTitle = substr( $file->filename, 0, -5 );
 
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
-        $copiedFile = self::copyFile( $service, $file->remote_id, $translatedFileTitle );
+        $copiedFile = self::copyFile( $service, $remoteFile->remote_id, $translatedFileTitle );
 
         RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id );
 
