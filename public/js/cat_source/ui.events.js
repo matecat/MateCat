@@ -506,8 +506,13 @@ $.extend(UI, {
             if(!$('.editor .rangySelectionBoundary.focusOut').length) {
                 if(!UI.isSafari) saveSelection();
             }
+
             $('.editor .rangySelectionBoundary').addClass('focusOut');
-            if($('.editor .search-source .rangySelectionBoundary.focusOut, .editor .search-target .rangySelectionBoundary.focusOut').length) $('.editor .search-source .rangySelectionBoundary.focusOut, .editor .search-target .rangySelectionBoundary.focusOut').remove();
+
+            $(
+                '.editor .search-source .rangySelectionBoundary.focusOut,' +
+                '.editor .search-target .rangySelectionBoundary.focusOut'
+            ).remove();
 
             if ( UI.editarea != '') {
                 hasFocusBefore = UI.editarea.is(":focus");
@@ -762,37 +767,13 @@ $.extend(UI, {
 			UI.preOpenConcordance();
 
         }).on('keyup', '.editor .editarea', 'return', function(e) {
-            console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
-
- //           if(!UI.defaultBRmanagement) {
-                console.log( 'Enter key is disabled!' );
-                e.preventDefault();
-                return false;
- //           };
-
-//            if(!UI.defaultBRmanagement) {
-//                range = window.getSelection().getRangeAt(0);
-////                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
-////                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-////                console.log('qua');
-////                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
-//
-////                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-////                setCursorAfterNode(range, node);
-//                saveSelection();
-//                $('.returnTempPlaceholder', UI.editarea).remove();
-//                restoreSelection();
-//            } else {
-////                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-//            }
-
+            e.preventDefault();
+            return false;
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
         }).on('keypress', '.editor .editarea', function(e) {
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
-//				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
@@ -807,28 +788,17 @@ $.extend(UI, {
 			}
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
-//					console.log('ecco');
-//					console.log('prima del replace: ', UI.editarea.html());
-                    // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-
                     tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
                     UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
 
-//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
-//                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
-//                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
-
-//					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
-//						console.log('dopo del replace: ', UI.editarea.html());
 					}
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
             if (!UI.body.hasClass('searchActive')) {
-                console.log('vediamo: ', e.which);
+
                 if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
                 } else {
                     setTimeout(function() {

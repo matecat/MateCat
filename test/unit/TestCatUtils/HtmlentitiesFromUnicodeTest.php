@@ -27,7 +27,7 @@ LAB;
 &#66375;
 LAB;
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $source_segment );
-        
+
         $this->assertEquals($expected_segment,$segment);
     }
 

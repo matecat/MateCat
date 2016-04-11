@@ -87,6 +87,8 @@ UI = {
 		this.createHeader();
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
+        if ( segment.length == 0 ) return ;
+
         var sourceTags = $('.source', segment).html()
             .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
         this.sourceTags = sourceTags || [];
@@ -286,9 +288,7 @@ UI = {
             this.deActivateSegment(byButton, segment);
             this.removeGlossaryMarksFormSource();
 
-            this.lastOpenedEditarea.attr('contenteditable', 'false');
-
-            // this.body.removeClass('editing');
+            segment.find('.editarea').attr('contenteditable', 'false');
 
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
@@ -1270,7 +1270,7 @@ UI = {
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
-		$('p.warnings', segment).remove();
+		$('p.warnings', segment).empty();
 	},
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -2084,9 +2084,6 @@ UI = {
 		}
 	},
 	fillWarnings: function(segment, warnings) {
-		//console.log( 'fillWarnings' );
-		//console.log( warnings);
-
 		//add Warnings to current Segment
 		var parentTag = segment.find('p.warnings').parent();
 		var actualWarnings = segment.find('p.warnings');
@@ -2094,8 +2091,6 @@ UI = {
 		$.each(warnings, function(key, value) {
 
             var warningMessage = '<p class="warnings">' + value.debug;
-			//console.log(warnings[key]);
-
 
             if(value.tip != "") {
                 warningMessage += '<span class="tip">' + value.tip + '</span>' ;
@@ -2113,17 +2108,9 @@ UI = {
 	 * @returns {undefined}
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails, global) {
-		if(global) {
-//			$.each(warningDetails, function(key, value) {
-//				console.log()
-//				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
-//					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
-//				}
-//			});
-		} else {
-			UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
+		if ( !global ) {
+            UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
 		}
-
 	},
 
 	compareArrays: function(i1, i2) {
@@ -2289,23 +2276,6 @@ UI = {
                         $('.editor .editarea .order-error').removeClass('order-error');
 						return;
 					}
-/*
-                    escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
-                    escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-                    escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-                    escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
-                    escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
-
-
-                    if (UI.editarea.text().trim() != escapedSegment ){
-                        console.log('ecco qua');
-
-//                        console.log( UI.editarea.text().trim() );
-//                        console.log( UI.checkSegmentsArray[d.token].trim() );
-//                        console.log( escapedSegment  );
-                        return;
-                    }
-*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
@@ -2386,7 +2356,7 @@ UI = {
         this.setTranslationTail.push(item);
     },
     updateToSetTranslationTail: function (item) {
-        $('#segment-' + id_segment).addClass('setTranslationPending');
+        $('#segment-' + item.id_segment).addClass('setTranslationPending');
 
         $.each( UI.setTranslationTail, function (index) {
             if( this.id_segment == item.id_segment ) {

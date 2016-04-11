@@ -63,7 +63,7 @@ LAB;
      */
     public function testliff2view4()
     {
-        
+
         $source_segment = <<<LAB
 <g id="1">併症や </g><g id="2">QOL</g><g id="3"> 低下の観点から外科切除は行わない傾向に</g><g id="1">胃悪性リンパ腫の治療は，これまで外科的切除が積極 的に行われてきたが，最近では胃温存療法が外科的切除 に劣らない治療成績を示し</g><g id="2">1)</g><g id="3">，外科的切除に伴う術後合</g><g id="2">考</g><g id="3">   </g><g id="4">察</g><g id="1">Antecolic gastrojejunostomy with a braun anastomosi</g><g id="2">8)</g><g id="3">.</g>
 LAB;

@@ -45,15 +45,15 @@ class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
                 continue;
             }
 
-            $sql .= "\nINSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES (" .
-              " '${record['version']}', '${record['start_time']}', '${record['end_time']}');";
+            $sql .= "\nINSERT INTO `phinxlog` ( version ) VALUES ( '${record['version']}' );";
         }
 
         if ( $direction == 'up' ) {
-            $sql .= "\nINSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES (" .
-                    " '$this->version', '" . date('c') ."', '" . date('c') . "');";
+            $sql .= "\nINSERT INTO `phinxlog` ( version ) VALUES ( '$this->version' );";
         }
 
+        $sql .= "\n";
+        
         $sql .= $seedLoader->getConversionLogSchema();
 
         file_put_contents( INIT::$ROOT . '/lib/Model/matecat.sql', $sql );
