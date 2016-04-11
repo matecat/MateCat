@@ -1289,6 +1289,10 @@ float: none!important;
 
     }
 
+.popup .btnsplit .btn-cancel {
+    margin: 0;
+}
+
     .popup .btn-cancel, .btn-grey, .slide-panel .btn-cancel, .btn-grey
     {
 	    color: #333;

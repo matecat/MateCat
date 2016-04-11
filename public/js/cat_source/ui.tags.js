@@ -631,7 +631,10 @@ $.extend(UI, {
     },
 
     hasMissingTargetTags: function ( segment ) {
+<<<<<<< HEAD
         if ( segment.length == 0 ) return ;
+=======
+>>>>>>> develop
 
         var sourceTags = $( '.source', segment ).html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );

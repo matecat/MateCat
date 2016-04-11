@@ -147,6 +147,12 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance->respond('index');
 });
 
+$klein->respond('GET', '/utils/pee', function() {
+    $reflect  = new ReflectionClass('peeViewController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->doAction();
+    $instance->finalize();
+});
 
 $klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', function() {
     $reflect  = new ReflectionClass('API\V2\JobMergeController');
