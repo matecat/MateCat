@@ -277,9 +277,7 @@ UI = {
             this.deActivateSegment(byButton, segment);
             this.removeGlossaryMarksFormSource();
 
-            this.lastOpenedEditarea.attr('contenteditable', 'false');
-
-            // this.body.removeClass('editing');
+            segment.find('.editarea').attr('contenteditable', 'false');
 
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
