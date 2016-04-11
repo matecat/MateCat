@@ -1009,7 +1009,10 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
         AND id_job = %u
         AND id_segment != %u
         AND password = '%s'
-        AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+        AND segment_translations.status IN( 
+          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' , 
+          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' 
+        )
     ";
 
     $query = sprintf( $isPropagationToAlreadyTranslatedAvailable, $sid, $jid, $sid, $db->escape( $jpassword ) );
@@ -1048,7 +1051,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 				WHERE segment_hash = (
 					SELECT segment_hash FROM segments WHERE id = %u
 				)
-				AND segment_translations.status IN( '$st_translated' ) -- , '$st_approved' )
+				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
 				AND id_job = %u
 				AND id_segment != %u
 				GROUP BY translation, CONCAT( id_job, '-', password )
@@ -1075,7 +1078,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 				FROM segment_translations
 				JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
 				WHERE id_job = %u
-				AND segment_translations.status IN( '$st_translated' ) -- , '$st_approved' )
+				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
 				HAVING translations_available > 1
 		";
