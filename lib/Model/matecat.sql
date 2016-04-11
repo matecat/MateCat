@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS matecat;
+CREATE DATABASE matecat;
 USE matecat;
 
 CREATE TABLE `api_keys` (
@@ -540,25 +540,26 @@ CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
 # Grants for 'matecat'@'%'
 GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat`.* TO 'matecat'@'%';
 
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150918101657', '2015-11-11 18:11:05', '2015-11-11 18:11:05');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150921114813', '2015-11-11 18:11:05', '2015-11-11 18:11:05');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20150922152051', '2015-11-11 18:11:05', '2015-11-11 18:11:05');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151001131124', '2015-11-11 18:11:05', '2015-11-11 18:11:05');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151120150352', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151123141623', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151126093945', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151204140144', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151219181543', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20151229103454', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160108101432', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160115143225', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160116085841', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-03-25 19:03:47', '2016-03-25 19:03:47');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160301134214', '2016-03-29 13:26:06', '0000-00-00 00:00:00');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160311094715', '2016-03-29 13:26:35', '0000-00-00 00:00:00');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160329131606', '2016-03-29 15:30:15', '2016-03-29 15:30:21');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160406102209', '2016-04-08T11:49:42+02:00', '2016-04-08T11:49:42+02:00');
+INSERT INTO `phinxlog` ( version ) VALUES ( '20150918101657' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20150921114813' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20150922152051' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151001131124' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151120150352' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151123141623' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151126093945' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151204140144' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151219181543' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20151229103454' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160108101432' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160115143225' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160116085841' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160121170252' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160124101801' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160301134214' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160311094715' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160329131606' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160406102209' );
+
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
 CREATE TABLE conversions_log (
