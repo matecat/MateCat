@@ -148,6 +148,15 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
 });
 
 
+$klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', function() {
+    $reflect  = new ReflectionClass('API\V2\JobMergeController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('merge');
+});
+
+
+
+
 /**
  * Define additional routes here
  */

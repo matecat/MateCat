@@ -198,6 +198,7 @@ CREATE TABLE `language_stats` (
   `total_post_editing_effort` float(255,0) DEFAULT NULL,
   `total_time_to_edit` float(255,0) DEFAULT NULL,
   `job_count` int(255) DEFAULT NULL,
+  `pee_sigma` int(11) DEFAULT '0',
   PRIMARY KEY (`date`,`source`,`target`),
   KEY `source_idx` (`source`),
   KEY `target_idx` (`target`),
@@ -555,7 +556,9 @@ INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '2016011608584
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160121170252', '2016-02-18 14:28:45', '2016-02-18 14:28:45');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160124101801', '2016-03-02 15:08:54', '2016-03-02 15:08:54');
 INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160301134214', '2016-03-02 15:38:52', '2016-03-02 15:38:52');
-INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160311094715', '2016-03-14T11:05:09+01:00', '2016-03-14T11:05:09+01:00');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160311094715', '2016-03-14 11:05:09', '2016-03-14 11:05:09');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160329131606', '2016-04-09 00:27:03', '2016-04-09 00:27:03');
+INSERT INTO `phinxlog` ( version, start_time, end_time ) VALUES ( '20160406102209', '2016-04-09T00:27:03+02:00', '2016-04-09T00:27:03+02:00');
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
 CREATE TABLE conversions_log (

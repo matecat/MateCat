@@ -4,7 +4,7 @@ class CurlTest {
   public $path;
   public $headers;
   public $method;
-  public $params = array();
+  public $params ;
   public $files = array();
 
   public $enable_xdebug = true ;
@@ -20,12 +20,18 @@ class CurlTest {
   private $result ;
 
   function __construct( $options=array() ) {
+    // TODO change this and implement
+    $this->params = array();
+
     $this->path    = @$options['path'];
     $this->headers = @$options['headers'];
-    $this->params  = @$options['params'];
     $this->files   = @$options['files'];
     $this->method  = @$options['method'];
     $this->referer = @$options['referer'];
+
+    if ( array_key_exists('params', $options )) {
+      $this->params  = $options['params']  ;
+    }
   }
 
   function run() {
