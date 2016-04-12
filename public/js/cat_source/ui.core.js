@@ -1922,10 +1922,10 @@ UI = {
         var button = $('#downloadProject' ) ;
         var labelDownloading = 'DOWNLOADING';
         if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
-            labelDownloading = 'SAVING';
+            labelDownloading = 'SAVING...';
         }
         if( typeof openOriginalFiles !== 'undefined' && openOriginalFiles === 1 ) {
-            labelDownloading = 'OPENING';
+            labelDownloading = 'OPENING...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
     },
@@ -1958,7 +1958,9 @@ UI = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        UI.showDownloadCornerTip();
+        if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+            UI.showDownloadCornerTip();
+        }
         UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {

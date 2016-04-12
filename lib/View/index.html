@@ -320,13 +320,11 @@
 
 
 
-        <div class="download-chrome">
+        <div class="download-chrome" tal:condition="not: isGDriveProject">
             <a href="#" class="close"></a>
-            <span tal:condition="not: isGDriveProject">Your downloaded file will appear on the bar below in a few seconds.</span>
-            <span tal:condition="true: isGDriveProject">Your files will be open on your Google Drive.</span>
+            <span>Your downloaded file will appear on the bar below in a few seconds.</span>
             <br/>
-            <img tal:condition="not: isGDriveProject" src="${basepath}public/img/arrowdown.png" width="18px" />
-            <img tal:condition="true: isGDriveProject" src="${basepath}public/img/logo-drive-16.png" width="16px" />
+            <img src="${basepath}public/img/arrowdown.png" width="18px" />
         </div>
 
         <div class="blacked" ></div>
