@@ -1985,9 +1985,10 @@ UI = {
                 winName = 'window' + item.localId ;
                 console.log(winName);
 
-                window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
-                window.googleDriveWindows[ winName ].focus();  // XXX: this is currently not having any effect in Chrome
 
+                if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
+                    window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                }
             });
         }
 
