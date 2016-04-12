@@ -4,8 +4,7 @@ export default React.createClass({
 
     getInitialState : function() {
         return {
-            category : null, 
-            severity : '',
+            selections : {},
             submitDisabled : true,
         }; 
     },
@@ -19,12 +18,19 @@ export default React.createClass({
 
     severitySelected : function( category, event ) {
         var severity = $(ReactDOM.findDOMNode( event.target )).val() ;
+        var selections = _.clone( this.state.selections );
+
+        if ( severity == '' ) {
+            delete( selections[ category.id ] );
+        } else {
+            selections[ category.id ] = severity ;
+        }
 
         this.setState({
-            category : category, 
-            severity : severity,
-            submitDisabled : severity == ''
-        }); 
+            selections : selections ,
+            submitDisabled : Object.keys( selections ).length == 0 
+        });
+
     },
 
     buttonClasses : function() {
@@ -44,16 +50,18 @@ export default React.createClass({
 
         var message = $('textarea', ReactDOM.findDOMNode( this )).val();
 
-        ReviewImproved.submitIssue(this.props.sid, {
-            'id_category'         : this.state.category.id,
-            'severity'            : this.state.severity,
-            'target_text'         : this.props.selection.selected_string, 
-            'start_node'          : this.props.selection.start_node, 
-            'start_offset'        : this.props.selection.start_offset, 
-            'end_node'            : this.props.selection.end_node,
-            'end_offset'          : this.props.selection.end_offset, 
-            'comment'             : message,
-        },
+        ReviewImproved.submitIssue(this.props.sid, _.map( this.state.selections, function(item,key) { 
+            return { 
+                'id_category'         : key,
+                'severity'            : item, 
+                'target_text'         : this.props.selection.selected_string, 
+                'start_node'          : this.props.selection.start_node, 
+                'start_offset'        : this.props.selection.start_offset, 
+                'end_node'            : this.props.selection.end_node,
+                'end_offset'          : this.props.selection.end_offset, 
+                'comment'             : message,
+            };
+        }.bind(this) ),
         { done : this.props.submitIssueCallback }
         ); 
     },
@@ -65,8 +73,8 @@ export default React.createClass({
         this.issueCategories().forEach(function(category, i) {
             var selectedValue = "";
 
-            if ( this.state.category && this.state.category.id == category.id ) {
-                selectedValue = this.state.severity ;
+            if ( this.state.selections[ category.id ] ) { 
+                selectedValue = this.state.selections[ category.id ] ;
             }
 
             var k = 'category-selector-' + i ;
@@ -92,8 +100,8 @@ export default React.createClass({
                     var kk = 'category-selector-' + key ;
                     var selectedValue = "";
 
-                    if ( this.state.category && this.state.category.id == category.id ) {
-                        selectedValue = this.state.severity ;
+                    if ( this.state.selections[ category.id ] ) { 
+                        selectedValue = this.state.selections[ category.id ] ;
                     }
 
                     categoryComponents.push(
