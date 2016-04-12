@@ -12,12 +12,16 @@ class CatDecorator {
      */
     private $jobStatsStruct;
 
+    private $isGDriveProject ;
+
     public function __construct( catController $controller, PHPTAL $template ) {
 
         $this->controller     = $controller;
         $this->template       = $template;
         $this->job            = $this->controller->getJob();
         $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
+
+        $this->isGDriveProject = $controller->isCurrentProjectGDrive();
     }
 
     public function decorate() {
@@ -39,7 +43,6 @@ class CatDecorator {
 
         $this->template->segmentFilterEnabled = false;
 
-
         $this->template->status_labels = json_encode( $this->getStatusLabels() );
 
         if ( $this->controller->isRevision() ) {
@@ -51,6 +54,15 @@ class CatDecorator {
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->project_type        = null;
 
+        $this->template->remoteFilesInJob = array();
+
+        if ( $this->isGDriveProject ) {
+            $files = array_map(function( $item ) {
+                return $item->attributes(array('id'));
+            }, RemoteFiles_RemoteFileDao::getByJobId( $this->job->id ) );
+
+            $this->template->remoteFilesInJob = $files ;
+        }
 
     }
 
@@ -82,18 +94,16 @@ class CatDecorator {
     }
 
   private function getHeaderMainButtonLabel() {
-      $isGDriveProject = $this->controller->isCurrentProjectGDrive();
-
       $label = '';
 
       if ( $this->jobStatsStruct->isDownloadable() ) {
-          if($isGDriveProject) {
+          if($this->isGDriveProject) {
             $label = 'SAVE TRANSLATION TO GOOGLE DRIVE';
           } else {
             $label = 'DOWNLOAD TRANSLATION';
           }
       } else {
-          if($isGDriveProject) {
+          if($this->isGDriveProject) {
             $label = 'PREVIEW ON GOOGLE DRIVE';
           } else {
             $label = 'PREVIEW';

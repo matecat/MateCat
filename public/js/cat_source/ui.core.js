@@ -1967,19 +1967,27 @@ UI = {
             window.googleDriveWindows = {};
         }
 
+        var winName ;
+
+        $.each( config.remoteFilesInJob, function( index, item ) {
+            winName = 'window' + item.id ;
+            console.log(winName);
+
+            if ( typeof window.googleDriveWindows[ winName ] == 'undefined' || window.googleDriveWindows[ winName ].opener == null ) {
+                window.googleDriveWindows[ winName ] = window.open( config.basepath + 'public/static/loading-google-drive-file.html' );
+            }
+        });
+        
         var driveUpdateDone = function(data) {
             var winName ;
 
             $.each( data.urls, function(index, item) {
                 winName = 'window' + item.localId ;
+                console.log(winName);
 
-                if ( typeof window.googleDriveWindows[ winName ] == 'undefined' || window.googleDriveWindows[ winName ].opener == null ) {
-                    window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
-                }
-                else {
-                    window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
-                    window.googleDriveWindows[ winName ].focus();  // XXX: this is currently not having any effect in Chrome
-                }
+                window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                window.googleDriveWindows[ winName ].focus();  // XXX: this is currently not having any effect in Chrome
+
             });
         }
 
