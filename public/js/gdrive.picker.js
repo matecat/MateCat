@@ -7,7 +7,12 @@
 
     function onAuthApiLoad() {
         if( !oauthToken ) {
-            $(".login-google").show();
+            if( isToOpenPickerAfterLogin() ) {
+                setOpenPickerAfterLogin( 'false' );
+            } else {
+                $(".login-google").show();
+                setOpenPickerAfterLogin( 'true' );
+            }
         }
     }
 
@@ -25,6 +30,10 @@
 
     function createPicker() {
         if ( pickerApiLoaded && oauthToken ) {
+            if( isToOpenPickerAfterLogin() ) {
+                setOpenPickerAfterLogin( 'false' );
+            }
+
             var picker = new google.picker.PickerBuilder().
                 addView(google.picker.ViewId.DOCUMENTS).
                 addView(google.picker.ViewId.PRESENTATIONS).
@@ -66,15 +75,31 @@
             window.open('/webhooks/gdrive/open?state=' + encodedJson, '_self');
         }
     }
-    
+
+    function setOpenPickerAfterLogin( openPicker ) {
+        localStorage[ 'openPicker' ] = openPicker;
+    }
+
+    function isToOpenPickerAfterLogin() {
+        return ( localStorage[ 'openPicker' ] === 'true' );
+    }
+
+    function loadPicker() {
+        if ( pickerApiLoaded && oauthToken ) {
+            createPicker();
+        } else {
+            gapi.load( 'auth', { 'callback': onAuthApiLoad } );
+            gapi.load( 'picker', { 'callback': onPickerApiLoad } );
+        }
+    }
+
     $( document ).ready( function () {
         $('.load-gdrive').click( function () {
-            if ( pickerApiLoaded && oauthToken ) {
-                createPicker();
-            } else {
-                gapi.load( 'auth', { 'callback': onAuthApiLoad } );
-                gapi.load( 'picker', { 'callback': onPickerApiLoad } );
-            }
+            loadPicker();
         });
+
+        if( isToOpenPickerAfterLogin() ) {
+            loadPicker();
+        }
     });
 })();
