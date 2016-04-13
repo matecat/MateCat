@@ -9,7 +9,8 @@
  * Date: 05/04/16
  * Time: 11.53
  */
-class RestoreXliffTagsTest extends AbstractTest {
+class RestoreXliffTagsTest extends AbstractTest
+{
 
 
     /**
@@ -26,12 +27,12 @@ LAB;
 <g id="1">3.2.128 M127 - C</g><g id="2">HAMBRANLE DE FENETRE LUMINEUX </g><g id="3">- </g><g id="4">NEGOZIO </g><g id="5">"</g><g id="6">SUN SCREEN</g><g id="7">"</g>
 LAB;
 
-        $reflected_class=new CatUtils();
-        $reflector=new ReflectionClass($reflected_class);
-        $method=$reflector->getMethod('restore_xliff_tags');
+        $reflected_class = new CatUtils();
+        $reflector = new ReflectionClass($reflected_class);
+        $method = $reflector->getMethod('restore_xliff_tags');
         $method->setAccessible(true);
 
-        self::assertEquals($expected_segment, $method->invoke($reflected_class,$source_segment));
+        self::assertEquals($expected_segment, $method->invoke($reflected_class, $source_segment));
     }
 
 
@@ -49,12 +50,12 @@ LAB;
 <g id="1">&#1048766;</g><g id="2"> </g><g id="3">d'une toile d'occultazione en fibre de verre enduite et / ou composito PVC, de 330g / m² à 630 g / m²,</g>
 LAB;
 
-        $reflected_class=new CatUtils();
-        $reflector=new ReflectionClass($reflected_class);
-        $method=$reflector->getMethod('restore_xliff_tags');
+        $reflected_class = new CatUtils();
+        $reflector = new ReflectionClass($reflected_class);
+        $method = $reflector->getMethod('restore_xliff_tags');
         $method->setAccessible(true);
 
-        self::assertEquals($expected_segment, $method->invoke($reflected_class,$source_segment));
+        self::assertEquals($expected_segment, $method->invoke($reflected_class, $source_segment));
     }
 
 
@@ -62,7 +63,6 @@ LAB;
      * @group regression
      * @covers CatUtils::restore_xliff_tags
      * original_input_segment= <g id="1">3.2.122 M121 - B</g><g id="2">Loc atea panelak kabinete atea A </g><g id="3">- </g><g id="4">Margoak eta</g>
-
      */
     public function test_restore_xliff_tags_target_language_basque_with_tags()
     {
@@ -73,20 +73,18 @@ LAB;
 <g id="1">3.2.122 M121 - B</g><g id="2">Loc atea panelak kabinete atea A </g><g id="3">- </g><g id="4">Margoak eta</g>
 LAB;
 
-        $reflected_class=new CatUtils();
-        $reflector=new ReflectionClass($reflected_class);
-        $method=$reflector->getMethod('restore_xliff_tags');
+        $reflected_class = new CatUtils();
+        $reflector = new ReflectionClass($reflected_class);
+        $method = $reflector->getMethod('restore_xliff_tags');
         $method->setAccessible(true);
 
-        self::assertEquals($expected_segment, $method->invoke($reflected_class,$source_segment));
+        self::assertEquals($expected_segment, $method->invoke($reflected_class, $source_segment));
     }
 
     /**
      * @group regression
      * @covers CatUtils::restore_xliff_tags
      * original_input_segment= <g id="1">􀂾</g><g id="2"> </g><g id="3">音響音響以下の手順は弱め。</g>
-
-
      */
     public function test_restore_xliff_tags_target_language_japanese_with_special_char()
     {
@@ -97,12 +95,12 @@ LAB;
 <g id="1">&#1048766;</g><g id="2"> </g><g id="3">音響音響以下の手順は弱め。</g>
 LAB;
 
-        $reflected_class=new CatUtils();
-        $reflector=new ReflectionClass($reflected_class);
-        $method=$reflector->getMethod('restore_xliff_tags');
+        $reflected_class = new CatUtils();
+        $reflector = new ReflectionClass($reflected_class);
+        $method = $reflector->getMethod('restore_xliff_tags');
         $method->setAccessible(true);
 
-        self::assertEquals($expected_segment, $method->invoke($reflected_class,$source_segment));
+        self::assertEquals($expected_segment, $method->invoke($reflected_class, $source_segment));
     }
 
 
