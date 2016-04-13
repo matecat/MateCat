@@ -34,7 +34,7 @@ class peeViewController extends viewController {
             $this->dataLangStats[] = array(
                     "source"       => $value[ 'source' ],
                     "target"       => $value[ 'target' ],
-                    "pee"          => ( ( $value[ 'total_post_editing_effort' ] ) / ( $value[ 'job_count' ] ) ),
+                    "pee"          => round( ( $value[ 'total_post_editing_effort' ] ) / ( $value[ 'job_count' ] ), 2 ),
                     "totalwordPEE" => $value[ 'total_word_count' ],
                     "peeSigma"     => $value[ 'pee_sigma' ]
             );
