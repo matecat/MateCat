@@ -55,7 +55,10 @@ class EditLog_EditLogModel {
         }
 
         //TODO: portare dentro il codice
+        $proj = getProject( $this->jobData[ 'id_project' ] );
+
         try {
+
             $tmp = $this->getEditLogData();
 
             $this->data       = $tmp[ 0 ];
@@ -70,7 +73,6 @@ class EditLog_EditLogModel {
 
             $this->stats = $tmp[ 1 ];
 
-            $proj                 = getProject( $this->jobData[ 'id_project' ] );
             $this->project_status = $proj[ 0 ];
 
             $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
@@ -86,6 +88,12 @@ class EditLog_EditLogModel {
         } catch ( Exception $exn ) {
             if ( $exn->getCode() == -1 ) {
                 $this->jobEmpty = true;
+                //set JobData anyway to fill the template for the goBack button
+                $this->data[] = array(
+                        'proj_name'  => $proj[ 0 ][ 'name' ],
+                        'job_source' => $this->jobData[ 'source' ],
+                        'job_target' => $this->jobData[ 'target' ]
+                );
             }
         }
     }
