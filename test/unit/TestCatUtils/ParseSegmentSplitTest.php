@@ -11,7 +11,8 @@
  * Date: 05/04/16
  * Time: 11.20
  */
-class ParseSegmentSplitTest extends AbstractTest{
+class ParseSegmentSplitTest extends AbstractTest
+{
 
     /**
      * @group regression
@@ -22,13 +23,13 @@ class ParseSegmentSplitTest extends AbstractTest{
         $source_segment = <<<'LAB'
 <g id="1">&#1048766;</g><g id="2"> </g><g id="3">Gâche à mortaiser;</g>
 LAB;
-        $separator= " ";
+        $separator = " ";
         $expected_segment = <<<'LAB'
 <g id="1">&#1048766;</g><g id="2"> </g><g id="3">Gâche à mortaiser;</g>
 LAB;
         $chunk_positions = array();
 
-        self::assertEquals(array( $expected_segment , $chunk_positions) , CatUtils::parseSegmentSplit($source_segment,$separator));
+        self::assertEquals(array($expected_segment, $chunk_positions), CatUtils::parseSegmentSplit($source_segment, $separator));
     }
 
 
@@ -42,13 +43,13 @@ LAB;
         $source_segment = <<<'LAB'
 <g id="1">&#1048766;</g><g id="2"> </g><bx id="3"/>Porte d'accès au bureau [1-1-13] d'entrée depuis le haut de l'escalier (P118 et P119)
 LAB;
-        $separator= " ";
+        $separator = " ";
         $expected_segment = <<<'LAB'
 <g id="1">&#1048766;</g><g id="2"> </g><bx id="3"/>Porte d'accès au bureau [1-1-13] d'entrée depuis le haut de l'escalier (P118 et P119)
 LAB;
         $chunk_positions = array();
 
-        self::assertEquals(array( $expected_segment , $chunk_positions) , CatUtils::parseSegmentSplit($source_segment,$separator));
+        self::assertEquals(array($expected_segment, $chunk_positions), CatUtils::parseSegmentSplit($source_segment, $separator));
     }
 
 
@@ -63,14 +64,14 @@ LAB;
 <g id="1">3.2.124   123 - E</g><g id="2">NSE
 MBLE A   PPUI W	C ET NICCHIA DE S	OUTIEN DU RA    NGEMENT LUMINEUX</g>
 LAB;
-        $separator= " ";
+        $separator = " ";
         $expected_segment = <<<'LAB'
 <g id="1">3.2.124   123 - E</g><g id="2">NSE
 MBLE A   PPUI W	C ET NICCHIA DE S	OUTIEN DU RA    NGEMENT LUMINEUX</g>
 LAB;
         $chunk_positions = array();
 
-        self::assertEquals(array( $expected_segment , $chunk_positions) , CatUtils::parseSegmentSplit($source_segment,$separator));
+        self::assertEquals(array($expected_segment, $chunk_positions), CatUtils::parseSegmentSplit($source_segment, $separator));
     }
 
 

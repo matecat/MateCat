@@ -9,7 +9,8 @@
  * Date: 30/03/16
  * Time: 17.25
  */
-class View2rawxliffTest extends AbstractTest{
+class View2rawxliffTest extends AbstractTest
+{
 
     /**
      * @group regression
@@ -102,6 +103,7 @@ LAB;
 LAB;
         self::assertEquals($expected_segment, CatUtils::view2rawxliff($source_segment));
     }
+
     /**
      * @group regression
      * @covers CatUtils::view2rawxliff

@@ -457,6 +457,35 @@ class ServerCheck_mysqlParams extends ServerCheck_params {
     protected $wait_timeout = null;
     protected $warning_count = null;
 
+    protected $avoid_temporal_upgrade = null;
+    protected $binlog_error_action = null;
+    protected $binlog_gtid_simple_recovery = null;
+
+    /**
+     * @return null
+     */
+    public function getBinlogGtidSimpleRecovery()
+    {
+        return $this->binlog_gtid_simple_recovery;
+    }
+
+    /**
+     * @return null
+     */
+    public function getBinlogErrorAction()
+    {
+        return $this->binlog_error_action;
+    }
+
+
+    /**
+     * @return null
+     */
+    public function getAvoidTemporalUpgrade()
+    {
+        return $this->avoid_temporal_upgrade;
+    }
+
     /**
      * @return null
      */
