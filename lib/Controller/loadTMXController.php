@@ -37,6 +37,7 @@ class loadTMXController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
+        parent::checkLogin();
 
         $filterArgs = array(
                 'name'   => array(
@@ -97,6 +98,24 @@ class loadTMXController extends ajaxController {
 
                     $this->TMService->setName( $fileInfo->name );
                     $this->TMService->addTmxInMyMemory();
+
+                    /*
+                     * Update a memory key with the name of th TMX if the key name is empty
+                     */
+                    $mkDao                   = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                    $searchMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
+                    $key                     = new TmKeyManagement_TmKeyStruct();
+                    $key->key                = $this->tm_key;
+
+                    $searchMemoryKey->uid    = $this->uid;
+                    $searchMemoryKey->tm_key = $key;
+                    $userMemoryKey           = $mkDao->read( $searchMemoryKey );
+
+                    if ( empty( $userMemoryKey[0]->name ) ) {
+                        $userMemoryKey[0]->tm_key->name = $fileInfo->name;
+                        $mkDao->updateList( $userMemoryKey );
+                    }
+
                 }
 
 
