@@ -631,7 +631,6 @@ $.extend(UI, {
     },
 
     hasMissingTargetTags: function ( segment ) {
-
         if ( segment.length == 0 ) return ;
 
         var sourceTags = $( '.source', segment ).html()
