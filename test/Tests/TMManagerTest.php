@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use TaskRunner\TaskManager, Analysis\Queue\RedisKeys, Analysis\Queue\QueuesList;
 

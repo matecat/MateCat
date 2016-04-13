@@ -104,6 +104,37 @@ $.extend(UI, {
 		});
 	},
 
+
+    transformTextForLockTags : function( tx ) {
+        var brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+        var brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+
+        tx = tx.replace(/<span/gi, "<pl")
+            .replace(/<\/span/gi, "</pl")
+            .replace(/&lt;/gi, "<")
+            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+            .replace(/</gi, "&lt;")
+            .replace(/\&lt;pl/gi, "<span")
+            .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;div\>/gi, "<div>")
+            .replace(/\&lt;\/div\>/gi, "</div>")
+            .replace(/\&lt;br\>/gi, "<br>")
+            .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
+            .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
+
+            if (UI.isFirefox) {
+                tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+            } else {
+                tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+            }
+
+            tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
+            tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+
+        return tx;
+    },
+
+
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
 			return false;
@@ -134,40 +165,18 @@ $.extend(UI, {
 
         $(area).first().each(function() {
             saveSelection();
-            var tx = $(this).html();
-            brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-            brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
-            tx = tx.replace(/<span/gi, "<pl")
-            .replace(/<\/span/gi, "</pl")
-            .replace(/&lt;/gi, "<")
-            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
-            .replace(/</gi, "&lt;")
-            .replace(/\&lt;pl/gi, "<span")
-            .replace(/\&lt;\/pl/gi, "</span")
-            .replace(/\&lt;div\>/gi, "<div>")
-            .replace(/\&lt;\/div\>/gi, "</div>")
-            .replace(/\&lt;br\>/gi, "<br>")
-            .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
-            .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
-            if (UI.isFirefox) {
-                tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-            } else {
-                tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-            }
-
-            tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
-            tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+            var html = $(this).html() ;
+            var tx = UI.transformTextForLockTags( html ) ;
+            $(this).html(tx);
 
             var prevNumTags = $('span.locked', this).length;
-
-            $(this).html(tx);
 
             restoreSelection();
 
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-            var segment = $(this).parents('section');
+            var segment = $(this).closest('section');
 
             UI.evalCurrentSegmentTranslationAndSourceTags( segment );
 
@@ -622,6 +631,7 @@ $.extend(UI, {
     },
 
     hasMissingTargetTags: function ( segment ) {
+        if ( segment.length == 0 ) return ;
 
         var sourceTags = $( '.source', segment ).html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );

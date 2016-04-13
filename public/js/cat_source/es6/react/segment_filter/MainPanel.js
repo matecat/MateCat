@@ -89,6 +89,9 @@ class MainPanel extends React.Component {
     }
 
     samplingSizeChanged(e) {
+        var value = parseInt( e.target.value );
+        if ( value > 100 || value < 1 ) return false ;
+
         this.setState({
             samplingSize : e.target.value,
         });
@@ -128,14 +131,14 @@ class MainPanel extends React.Component {
                     <a className="search-settings"
                         onClick={this.toggleSettings.bind(this)}>Settings</a>
                     <div className={searchSettingsClass}>
-                        Select the sample size
-                        <select value={this.state.samplingSize}
-                        onChange={this.samplingSizeChanged.bind(this)}
-                            className="advanced-sample-size">
-                            <option value="5">5%</option>
-                            <option value="10">10%</option>
-                            <option value="20">20%</option>
-                        </select>
+
+                        <div>
+                            Select the sample size
+                            <input type="number" value={this.state.samplingSize} style={{width: '3em'}}
+                                onChange={this.samplingSizeChanged.bind(this)}
+                                className="advanced-sample-size" />
+                        </div>
+
                         <h4>Sample criteria</h4>
 
                         <div className="block">
